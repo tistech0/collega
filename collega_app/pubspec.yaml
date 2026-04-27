@@ -1,0 +1,61 @@
+name: collega_app
+description: "AppMédecine — révision médicale personnalisée par collège et par rang"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Navigation
+  go_router: ^14.6.3
+
+  # Local storage (offline-first)
+  drift: ^2.21.0
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.4
+  path: ^1.9.0
+
+  # HTTP client
+  dio: ^5.7.0
+
+  # Design system
+  shadcn_ui: ^0.19.0
+
+  # Animations
+  flutter_animate: ^4.5.0
+
+  # Secure storage (JWT tokens — Keychain iOS)
+  flutter_secure_storage: ^9.2.2
+
+  # In-app purchases (RevenueCat)
+  purchases_flutter: ^10.0.1
+
+  # File picker (import PDF)
+  file_picker: ^8.1.6
+
+  # Icons
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+  # Code generation
+  drift_dev: ^2.21.0
+  build_runner: ^2.4.13
+  riverpod_generator: ^2.6.5
+  custom_lint: ^0.7.5
+  riverpod_lint: ^2.6.5
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,22 @@
+# Environnement
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Build
+dist/
+*.egg-info/
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Alembic
+# (versions/ est versionné)
+
+# IDE
+.idea/
+.vscode/
