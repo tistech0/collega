@@ -42,6 +42,7 @@ class GenerationJob(Base):
     arq_job_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     card_count: Mapped[int] = mapped_column(Integer, default=0)
     hash_shared: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    pdf_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     page_texts_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(

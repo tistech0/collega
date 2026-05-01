@@ -1,3 +1,4 @@
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,8 +18,32 @@ class Settings(BaseSettings):
     admin_username: str = "admin"
     admin_password: str = "change-me"
 
+    # Interface testeur Phase 0 — HTTP Basic Auth (credentials distincts de l'admin)
+    tester_username: str = "tester"
+    tester_password: str = "change-me"
+
+    # Webhook RevenueCat — secret partagé (FR46)
+    revenuecat_webhook_secret: str = ""
+
     # Stockage temporaire PDF (chemin configurable, nettoyé par cleanup_worker Story 1.3)
     pdf_storage_path: str = "/tmp/collega_pdfs"
+
+    @model_validator(mode="after")
+    def _require_webhook_secret(self) -> "Settings":
+        if not self.revenuecat_webhook_secret:
+            raise ValueError("revenuecat_webhook_secret must be set (non-empty)")
+        return self
+
+    @model_validator(mode="after")
+    def _require_distinct_tester_credentials(self) -> "Settings":
+        if (
+            self.tester_username == self.admin_username
+            and self.tester_password == self.admin_password
+        ):
+            raise ValueError(
+                "tester_username/tester_password must differ from admin credentials"
+            )
+        return self
 
 
 settings = Settings()

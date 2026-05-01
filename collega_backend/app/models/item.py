@@ -10,6 +10,7 @@ from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.college import College
+    from app.models.flash_card import FlashCard
 
 
 class Item(Base):
@@ -47,3 +48,6 @@ class Item(Base):
     )
 
     college: Mapped["College"] = relationship("College", back_populates="items")
+    flash_cards: Mapped[list["FlashCard"]] = relationship(
+        "FlashCard", back_populates="item", cascade="all, delete-orphan"
+    )

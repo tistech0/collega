@@ -48,6 +48,21 @@ services:
     networks:
       - collega_net
 
+  worker:
+    build: .
+    command: arq app.workers.settings.WORKER_SETTINGS
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - collega_net
+
   caddy:
     image: caddy:2-alpine
     ports:

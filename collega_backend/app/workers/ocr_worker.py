@@ -56,7 +56,7 @@ async def process_college_ocr(
             return {"error": "job_not_found"}
 
         try:
-            result = await _run_ocr(db, college, job, pdf_path)
+            result = await _run_ocr(db, college, job, pdf_path, ctx)
             return result
         except Exception as exc:  # noqa: BLE001
             logger.exception("OCR failed for college %s: %s", college_id, exc)
@@ -72,6 +72,7 @@ async def _run_ocr(
     college: College,
     job: GenerationJob,
     pdf_path: str,
+    ctx: dict | None = None,
 ) -> dict:
     # 1. Charger les textes déjà accumulés (reprise après interruption)
     previous_texts: list[str] = []
@@ -162,6 +163,19 @@ async def _run_ocr(
     await db.commit()
 
     logger.info("OCR complete for college %s — %d items created", college.id, len(detected_items))
+
+    if ctx and "redis" in ctx:
+        try:
+            await ctx["redis"].enqueue_job(
+                "generate_college_cards",
+                str(college.id),
+                str(job.id),
+                pdf_path,
+            )
+            logger.info("Generation job enqueued for college %s job %s", college.id, job.id)
+        except Exception as exc:
+            logger.error("Failed to enqueue generation job for college %s: %s", college.id, exc)
+
     return {
         "college_id": str(college.id),
         "job_id": str(job.id),

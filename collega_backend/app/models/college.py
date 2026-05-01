@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 if TYPE_CHECKING:
+    from app.models.flash_card import FlashCard
     from app.models.generation_job import GenerationJob
     from app.models.item import Item
     from app.models.user import User
@@ -60,4 +61,7 @@ class College(Base):
     )
     generation_jobs: Mapped[list["GenerationJob"]] = relationship(
         "GenerationJob", back_populates="college", cascade="all, delete-orphan"
+    )
+    flash_cards: Mapped[list["FlashCard"]] = relationship(
+        "FlashCard", back_populates="college", cascade="all, delete-orphan"
     )

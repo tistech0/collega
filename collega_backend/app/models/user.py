@@ -10,6 +10,7 @@ from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.college import College
+    from app.models.flash_card import FlashCard
     from app.models.generation_job import GenerationJob
 
 
@@ -36,4 +37,7 @@ class User(Base):
     )
     generation_jobs: Mapped[list["GenerationJob"]] = relationship(
         "GenerationJob", back_populates="user", cascade="all, delete-orphan"
+    )
+    flash_cards: Mapped[list["FlashCard"]] = relationship(
+        "FlashCard", back_populates="user", cascade="all, delete-orphan"
     )

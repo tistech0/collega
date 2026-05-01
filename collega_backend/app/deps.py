@@ -7,8 +7,9 @@ from app.core.config import settings
 from app.core.database import get_db
 
 _http_basic = HTTPBasic()
+_http_basic_tester = HTTPBasic()
 
-__all__ = ["get_db", "get_admin_user"]
+__all__ = ["get_db", "get_admin_user", "get_tester_user"]
 
 
 async def get_admin_user(
@@ -33,3 +34,28 @@ async def get_admin_user(
             headers={"WWW-Authenticate": "Basic"},
         )
     return True
+
+
+async def get_tester_user(
+    credentials: HTTPBasicCredentials = Depends(_http_basic_tester),
+) -> str:
+    """Protège toutes les routes /v1/tester/ par HTTP Basic Auth.
+
+    Retourne le tester_id (username) pour l'utiliser comme identifiant de feedback.
+    Credentials distincts des credentials admin.
+    """
+    correct_username = secrets.compare_digest(
+        credentials.username.encode("utf-8"),
+        settings.tester_username.encode("utf-8"),
+    )
+    correct_password = secrets.compare_digest(
+        credentials.password.encode("utf-8"),
+        settings.tester_password.encode("utf-8"),
+    )
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
