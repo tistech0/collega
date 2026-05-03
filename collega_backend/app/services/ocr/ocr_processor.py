@@ -7,6 +7,9 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+# Type alias pour la lisibilité
+PageTables = list[list[list[str]]]  # list[table], table = list[row], row = list[cell]
+
 
 @dataclass
 class OcrPageResult:
@@ -15,6 +18,7 @@ class OcrPageResult:
     confidence_score: float
     method: str  # "pdfplumber" | "pytesseract" | "empty"
     word_confidences: list[float] = field(default_factory=list)
+    tables: PageTables = field(default_factory=list)  # tableaux extraits par pdfplumber
 
 
 class OcrProcessor:
@@ -59,6 +63,16 @@ class OcrProcessor:
             page = pdf.pages[page_num]
             text = page.extract_text() or ""
             words = page.extract_words() or []
+            raw_tables = page.extract_tables() or []
+
+        # Normaliser les cellules None → ""
+        tables: PageTables = [
+            [
+                [cell if cell is not None else "" for cell in row]
+                for row in table
+            ]
+            for table in raw_tables
+        ]
 
         score = self._pdfplumber_confidence(text, words)
         return OcrPageResult(
@@ -66,6 +80,7 @@ class OcrProcessor:
             text=text,
             confidence_score=score,
             method="pdfplumber",
+            tables=tables,
         )
 
     def _extract_with_pytesseract(
@@ -106,6 +121,7 @@ class OcrProcessor:
             if word_confidences
             else 0.0
         )
+        # pytesseract ne fournit pas de tables structurées — tables reste vide
         return OcrPageResult(
             page_num=page_num,
             text=text,

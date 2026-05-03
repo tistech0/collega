@@ -1,8 +1,8 @@
 """Worker ARQ pour le traitement OCR des PDFs de collèges médicaux.
 
 Exécuté en tâche de fond par ARQ. Reprend depuis la dernière page en cas
-d'interruption (NFR11). Les textes OCR accumulés sont stockés dans
-generation_jobs.page_texts_json pour garantir une détection d'items correcte
+d'interruption (NFR11). Les textes OCR, scores et tables accumulés sont stockés
+dans generation_jobs.page_texts_json pour garantir une détection d'items correcte
 sur le document complet, même en cas de reprise partielle.
 """
 from __future__ import annotations
@@ -20,12 +20,13 @@ from app.models.college import College, CollegeStatus
 from app.models.generation_job import GenerationJob
 from app.models.item import Item
 from app.services.ocr.confidence_scorer import ConfidenceScorer
-from app.services.ocr.item_detector import ItemDetector
+from app.services.ocr.item_detector import DetectedItem, ItemDetector
 from app.services.ocr.ocr_processor import OcrProcessor
 
 logger = logging.getLogger(__name__)
 
 _ocr_processor = OcrProcessor()
+_RANG_PRIORITY: dict[str, int] = {"A": 0, "B": 1, "C": 2}  # A > B > C
 _confidence_scorer = ConfidenceScorer()
 _item_detector = ItemDetector()
 
@@ -74,16 +75,19 @@ async def _run_ocr(
     pdf_path: str,
     ctx: dict | None = None,
 ) -> dict:
-    # 1. Charger les textes déjà accumulés (reprise après interruption)
+    # 1. Charger les données déjà accumulées (reprise après interruption)
     previous_texts: list[str] = []
     previous_scores: list[float] = []
+    previous_tables: list[list[list[list[str]]]] = []
+
     if job.page_texts_json:
         stored = json.loads(job.page_texts_json)
         previous_texts = stored.get("texts", [])
         previous_scores = stored.get("scores", [])
+        previous_tables = stored.get("tables", [])
 
-    # La reprise est déterminée par les textes déjà stockés, pas par ocr_page_progress
-    # Cela garantit que la détection d'items opère toujours sur le document complet
+    # La reprise est déterminée par les données déjà stockées, pas par ocr_page_progress.
+    # Cela garantit que la détection d'items opère toujours sur le document complet.
     start_page = len(previous_texts)
 
     # 2. Compter les pages totales (opération bloquante — exécutée dans thread pool)
@@ -113,6 +117,7 @@ async def _run_ocr(
     # 3. Boucle OCR page par page (opérations bloquantes dans thread pool)
     page_texts: list[str] = list(previous_texts)
     page_scores: list[float] = list(previous_scores)
+    page_tables: list[list[list[list[str]]]] = list(previous_tables)
 
     for page_num in range(start_page, total_pages):
         page_result = await asyncio.to_thread(
@@ -120,28 +125,69 @@ async def _run_ocr(
         )
         page_texts.append(page_result.text)
         page_scores.append(page_result.confidence_score)
+        page_tables.append(page_result.tables)
 
-        # Persiste la progression + les textes pour permettre une reprise correcte (NFR11)
+        # Persiste la progression + données pour permettre une reprise correcte (NFR11)
         college.ocr_page_progress = page_num + 1
-        job.page_texts_json = json.dumps({"texts": page_texts, "scores": page_scores})
+        job.page_texts_json = json.dumps({
+            "texts": page_texts,
+            "scores": page_scores,
+            "tables": page_tables,
+        })
         await db.commit()
 
         logger.debug(
-            "OCR page %d/%d done (score=%.2f)",
+            "OCR page %d/%d done (score=%.2f, tables=%d)",
             page_num + 1,
             total_pages,
             page_result.confidence_score,
+            len(page_result.tables),
         )
 
     # 4. Supprimer les items existants avant réinsertion (gestion des retries ARQ)
     await db.execute(delete(Item).where(Item.college_id == college.id))
 
-    # 5. Détecter les items ECNi sur le document complet (toutes les pages, y compris les reprises)
-    detected_items = _item_detector.detect_items(page_texts, page_scores)
+    # 5. Détecter les items ECNi sur le document complet
+    # Le detector utilise les tables pdfplumber pour extraire les rangs A/B/C
+    # depuis le tableau "Rang | Rubrique | Intitulé" de chaque page d'en-tête d'item.
+    detected_items = _item_detector.detect_items(page_texts, page_scores, page_tables)
     logger.info("Detected %d items in college %s", len(detected_items), college.id)
 
+    # Dédupliquer par item_number (edge case : même item_number sur deux sections du PDF)
+    # Stratégie : garder l'occurrence avec le plus de contenu texte ; en cas d'égalité,
+    # préférer le rang de plus haute priorité (A > B > C).
+    deduped: dict[int, DetectedItem] = {}
+    for det in detected_items:
+        if det.item_number not in deduped:
+            deduped[det.item_number] = det
+        else:
+            prev = deduped[det.item_number]
+            # Préférer l'occurrence avec le plus de contenu
+            if len(det.ocr_text) > len(prev.ocr_text):
+                deduped[det.item_number] = det
+            elif _RANG_PRIORITY.get(det.rang, 99) < _RANG_PRIORITY.get(prev.rang, 99):
+                # Même quantité de contenu mais rang meilleur — mettre à jour le rang
+                deduped[det.item_number] = DetectedItem(
+                    item_number=prev.item_number,
+                    rang=det.rang,
+                    chapter_title=prev.chapter_title,
+                    ocr_text=prev.ocr_text,
+                    start_page=prev.start_page,
+                    end_page=prev.end_page,
+                    ocr_confidence_score=prev.ocr_confidence_score,
+                )
+
+    final_items = list(deduped.values())
+    if len(final_items) < len(detected_items):
+        logger.info(
+            "Dedup: %d → %d items (removed %d duplicates)",
+            len(detected_items),
+            len(final_items),
+            len(detected_items) - len(final_items),
+        )
+
     # 6. Insérer les items en base
-    for detected in detected_items:
+    for detected in final_items:
         item_score = detected.ocr_confidence_score
         item = Item(
             college_id=college.id,
@@ -162,7 +208,7 @@ async def _run_ocr(
     job.status = "ocr_complete"
     await db.commit()
 
-    logger.info("OCR complete for college %s — %d items created", college.id, len(detected_items))
+    logger.info("OCR complete for college %s — %d items created", college.id, len(final_items))
 
     if ctx and "redis" in ctx:
         try:
@@ -179,6 +225,6 @@ async def _run_ocr(
     return {
         "college_id": str(college.id),
         "job_id": str(job.id),
-        "item_count": len(detected_items),
+        "item_count": len(final_items),
         "total_pages": total_pages,
     }

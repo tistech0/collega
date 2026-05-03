@@ -32,6 +32,9 @@ from app.schemas.admin import (
     ConfigData,
     ConfigResponseWrapped,
     ConfigUpdateRequest,
+    CreateCollegeData,
+    CreateCollegeRequest,
+    CreateCollegeResponseWrapped,
     ItemOcrData,
     PertinenceByRang,
     PertinenceStats,
@@ -48,6 +51,32 @@ router = APIRouter(tags=["admin"])
 
 _PDF_MAGIC = b"%PDF-"
 _CHUNK_SIZE = 1024 * 1024  # 1 MB — évite de charger l'intégralité du fichier en mémoire
+
+
+@router.post("/colleges", response_model=CreateCollegeResponseWrapped, status_code=201)
+async def create_college(
+    body: CreateCollegeRequest,
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> CreateCollegeResponseWrapped:
+    """Crée un nouveau collège pour un utilisateur existant."""
+    user = await db.get(User, uuid.UUID(body.user_id))
+    if user is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "USER_NOT_FOUND", "message": f"User {body.user_id} not found"},
+        )
+    college = College(user_id=user.id, college_ref_id=body.college_ref_id)
+    db.add(college)
+    await db.commit()
+    await db.refresh(college)
+    return CreateCollegeResponseWrapped(
+        data=CreateCollegeData(
+            college_id=str(college.id),
+            user_id=str(college.user_id),
+            college_ref_id=college.college_ref_id,
+        )
+    )
 
 
 @router.post(

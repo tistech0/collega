@@ -4,6 +4,23 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 
+# ── College creation ─────────────────────────────────────────────────────────
+
+class CreateCollegeRequest(BaseModel):
+    user_id: str
+    college_ref_id: int = Field(..., ge=1)
+
+
+class CreateCollegeData(BaseModel):
+    college_id: str
+    user_id: str
+    college_ref_id: int
+
+
+class CreateCollegeResponseWrapped(BaseModel):
+    data: CreateCollegeData
+
+
 # ── Story 1.2 — existant ──────────────────────────────────────────────────────
 
 class ProcessCollegeResponse(BaseModel):

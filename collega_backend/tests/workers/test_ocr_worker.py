@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import types
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
@@ -39,19 +39,20 @@ def make_job(page_texts_json: str | None = None):
     )
 
 
-def make_page_result(page_num: int, score: float = 0.85) -> OcrPageResult:
+def make_page_result(page_num: int, score: float = 0.85, tables=None) -> OcrPageResult:
     return OcrPageResult(
         page_num=page_num,
-        text=f"Item {page_num + 1} - Rang A\nContenu de la page {page_num}.",
+        text=f"Item {page_num + 1}\nTitre item {page_num + 1}.\nRang Rubrique Intitulé\nA Def Connaître...",
         confidence_score=score,
         method="pdfplumber",
+        tables=tables or [],
     )
 
 
-def make_detected_item(item_number: int, score: float = 0.85) -> DetectedItem:
+def make_detected_item(item_number: int, score: float = 0.85, rang: str = "A") -> DetectedItem:
     return DetectedItem(
         item_number=item_number,
-        rang="A",
+        rang=rang,
         chapter_title="Cardiologie",
         ocr_text=f"Contenu item {item_number}",
         start_page=0,
@@ -80,10 +81,7 @@ class TestRunOcr:
         db.commit = AsyncMock()
         db.add = MagicMock()
 
-        college = make_college(progress=0)
-        job = make_job()
-
-        result = await _run_ocr(db, college, job, "/fake/path.pdf")
+        result = await _run_ocr(db, make_college(), make_job(), "/fake/path.pdf")
 
         assert result["item_count"] == 2
         assert result["total_pages"] == 3
@@ -91,10 +89,33 @@ class TestRunOcr:
 
     @patch("app.workers.ocr_worker._item_detector")
     @patch("app.workers.ocr_worker._ocr_processor")
+    async def test_page_tables_passed_to_detector(self, mock_processor, mock_detector):
+        """Les tables extraites par OcrProcessor sont transmises à detect_items."""
+        fake_table = [["Rang", "Rubrique"], ["A", "Def"]]
+        mock_processor.count_pages.return_value = 2
+        mock_processor.process_page.side_effect = [
+            make_page_result(0, tables=[fake_table]),
+            make_page_result(1, tables=[]),
+        ]
+        mock_detector.detect_items.return_value = [make_detected_item(1)]
+
+        db = AsyncMock()
+        db.commit = AsyncMock()
+        db.add = MagicMock()
+
+        await _run_ocr(db, make_college(), make_job(), "/fake/path.pdf")
+
+        # detect_items doit être appelé avec page_tables contenant les tables des 2 pages
+        call_kwargs = mock_detector.detect_items.call_args
+        page_tables_arg = call_kwargs[0][2]  # 3ème arg positionnel
+        assert page_tables_arg[0] == [fake_table]
+        assert page_tables_arg[1] == []
+
+    @patch("app.workers.ocr_worker._item_detector")
+    @patch("app.workers.ocr_worker._ocr_processor")
     async def test_resumes_from_stored_page_texts(self, mock_processor, mock_detector):
-        """AC#3 — reprise depuis page_texts_json (NFR11), ne retraite pas les pages déjà stockées."""
+        """AC#3 — reprise depuis page_texts_json, ne retraite pas les pages déjà stockées."""
         mock_processor.count_pages.return_value = 10
-        # Reprise depuis la page 5 — seulement 5 pages restantes (5 à 9)
         mock_processor.process_page.side_effect = [make_page_result(i) for i in range(5, 10)]
         mock_detector.detect_items.return_value = [make_detected_item(1)]
 
@@ -102,26 +123,44 @@ class TestRunOcr:
         db.commit = AsyncMock()
         db.add = MagicMock()
 
-        college = make_college(progress=5)
-        # Simuler 5 pages déjà stockées dans page_texts_json
         previous_data = {
-            "texts": [f"Item {i} - Rang A\nContenu page {i}" for i in range(5)],
+            "texts": [f"Item {i}\nContenu page {i}" for i in range(5)],
             "scores": [0.85] * 5,
+            "tables": [[] for _ in range(5)],
         }
         job = make_job(page_texts_json=json.dumps(previous_data))
 
-        await _run_ocr(db, college, job, "/fake/path.pdf")
+        await _run_ocr(db, make_college(progress=5), job, "/fake/path.pdf")
 
-        # Seulement 5 appels (pages 5 à 9)
+        # Seulement 5 appels (pages 5 à 9), pas de retraitement des pages 0–4
         assert mock_processor.process_page.call_count == 5
-        # Vérifie que la première page traitée est la page 5
-        first_call_args = mock_processor.process_page.call_args_list[0]
-        assert first_call_args[0][1] == 5  # page_num = 5
+        assert mock_processor.process_page.call_args_list[0][0][1] == 5
+
+    @patch("app.workers.ocr_worker._item_detector")
+    @patch("app.workers.ocr_worker._ocr_processor")
+    async def test_resumes_without_tables_in_stored_json(self, mock_processor, mock_detector):
+        """Reprise depuis un ancien job_texts_json sans clé 'tables' — compatibilité."""
+        mock_processor.count_pages.return_value = 3
+        mock_processor.process_page.side_effect = [make_page_result(i) for i in range(1, 3)]
+        mock_detector.detect_items.return_value = []
+
+        db = AsyncMock()
+        db.commit = AsyncMock()
+        db.add = MagicMock()
+
+        # Ancien format sans "tables"
+        previous_data = {"texts": ["contenu page 0"], "scores": [0.9]}
+        job = make_job(page_texts_json=json.dumps(previous_data))
+
+        await _run_ocr(db, make_college(progress=1), job, "/fake/path.pdf")
+
+        # Doit traiter seulement les pages 1 et 2
+        assert mock_processor.process_page.call_count == 2
 
     @patch("app.workers.ocr_worker._item_detector")
     @patch("app.workers.ocr_worker._ocr_processor")
     async def test_progress_persisted_after_each_page(self, mock_processor, mock_detector):
-        """AC#3 — ocr_page_progress est persisté après chaque page (reprise fine)."""
+        """AC#3 — ocr_page_progress est persisté après chaque page."""
         mock_processor.count_pages.return_value = 3
         mock_processor.process_page.side_effect = [make_page_result(i) for i in range(3)]
         mock_detector.detect_items.return_value = []
@@ -142,9 +181,10 @@ class TestRunOcr:
 
         await _run_ocr(db, college, job, "/fake/path.pdf")
 
-        # Au moins 3 commits de progression (un par page)
         page_progresses = [p for p in progress_snapshots if 1 <= p <= 3]
-        assert len(page_progresses) >= 3, f"Expected at least 3 page-progress commits, got {progress_snapshots}"
+        assert len(page_progresses) >= 3, (
+            f"Expected ≥3 page-progress commits, got {progress_snapshots}"
+        )
 
     @patch("app.workers.ocr_worker._item_detector")
     @patch("app.workers.ocr_worker._ocr_processor")
@@ -169,35 +209,29 @@ class TestRunOcr:
     @patch("app.workers.ocr_worker._item_detector")
     @patch("app.workers.ocr_worker._ocr_processor")
     async def test_low_confidence_items_still_created(self, mock_processor, mock_detector):
-        """AC#2 — les items avec score < 0.7 sont créés quand même (low_confidence=True)."""
+        """AC#2 — les items avec score < 0.7 sont créés avec low_confidence=True."""
         mock_processor.count_pages.return_value = 1
         mock_processor.process_page.return_value = make_page_result(0, score=0.5)
-        mock_detector.detect_items.return_value = [
-            make_detected_item(1, score=0.5)
-        ]
+        mock_detector.detect_items.return_value = [make_detected_item(1, score=0.5)]
 
         added_items = []
         db = AsyncMock()
         db.commit = AsyncMock()
         db.add = MagicMock(side_effect=lambda item: added_items.append(item))
 
-        college = make_college()
-        job = make_job()
+        result = await _run_ocr(db, make_college(), make_job(), "/fake/path.pdf")
 
-        result = await _run_ocr(db, college, job, "/fake/path.pdf")
-
-        # L'item est bien créé malgré le faible score
         assert result["item_count"] == 1
         from app.models.item import Item
-        created_items = [i for i in added_items if isinstance(i, Item)]
-        assert len(created_items) == 1
-        assert created_items[0].low_confidence is True
-        assert created_items[0].ocr_confidence_score == pytest.approx(0.5, abs=0.001)
+        created = [i for i in added_items if isinstance(i, Item)]
+        assert len(created) == 1
+        assert created[0].low_confidence is True
+        assert created[0].ocr_confidence_score == pytest.approx(0.5, abs=0.001)
 
     @patch("app.workers.ocr_worker._item_detector")
     @patch("app.workers.ocr_worker._ocr_processor")
     async def test_empty_pdf_sets_failed_status(self, mock_processor, mock_detector):
-        """PDF vide (0 pages) → statut failed, pas ocr_complete silencieux."""
+        """PDF vide (0 pages) → statut failed."""
         mock_processor.count_pages.return_value = 0
 
         db = AsyncMock()
@@ -217,7 +251,7 @@ class TestRunOcr:
     @patch("app.workers.ocr_worker._item_detector")
     @patch("app.workers.ocr_worker._ocr_processor")
     async def test_retry_deletes_existing_items_before_reinsert(self, mock_processor, mock_detector):
-        """Worker retry — les items existants sont supprimés avant réinsertion (pas de doublons)."""
+        """Worker retry — les items existants sont supprimés avant réinsertion."""
         mock_processor.count_pages.return_value = 1
         mock_processor.process_page.return_value = make_page_result(0)
         mock_detector.detect_items.return_value = [make_detected_item(1)]
@@ -226,18 +260,14 @@ class TestRunOcr:
         db.commit = AsyncMock()
         db.add = MagicMock()
 
-        college = make_college()
-        job = make_job()
+        await _run_ocr(db, make_college(), make_job(), "/fake/path.pdf")
 
-        await _run_ocr(db, college, job, "/fake/path.pdf")
-
-        # db.execute doit avoir été appelé (pour le DELETE Item)
         db.execute.assert_called()
 
     @patch("app.workers.ocr_worker._item_detector")
     @patch("app.workers.ocr_worker._ocr_processor")
     async def test_page_texts_cleared_after_completion(self, mock_processor, mock_detector):
-        """page_texts_json est remis à None après completion — données intermédiaires nettoyées."""
+        """page_texts_json est remis à None après completion."""
         mock_processor.count_pages.return_value = 1
         mock_processor.process_page.return_value = make_page_result(0)
         mock_detector.detect_items.return_value = []
@@ -246,9 +276,41 @@ class TestRunOcr:
         db.commit = AsyncMock()
         db.add = MagicMock()
 
-        college = make_college()
         job = make_job()
-
-        await _run_ocr(db, college, job, "/fake/path.pdf")
+        await _run_ocr(db, make_college(), job, "/fake/path.pdf")
 
         assert job.page_texts_json is None
+
+    @patch("app.workers.ocr_worker._item_detector")
+    @patch("app.workers.ocr_worker._ocr_processor")
+    async def test_dedup_keeps_item_with_most_content(self, mock_processor, mock_detector):
+        """Deux occurrences du même item_number → garde celle avec le plus de texte."""
+        mock_processor.count_pages.return_value = 1
+        mock_processor.process_page.return_value = make_page_result(0)
+        mock_detector.detect_items.return_value = [
+            make_detected_item(42, rang="A"),
+            DetectedItem(
+                item_number=42,
+                rang="B",
+                chapter_title="",
+                ocr_text="A" * 500,  # plus de contenu
+                start_page=1,
+                end_page=2,
+                ocr_confidence_score=0.9,
+            ),
+        ]
+
+        added_items = []
+        db = AsyncMock()
+        db.commit = AsyncMock()
+        db.add = MagicMock(side_effect=lambda item: added_items.append(item))
+
+        result = await _run_ocr(db, make_college(), make_job(), "/fake/path.pdf")
+
+        # Un seul item après dédup
+        assert result["item_count"] == 1
+        from app.models.item import Item
+        created = [i for i in added_items if isinstance(i, Item)]
+        assert len(created) == 1
+        # La seconde occurrence a plus de contenu → gardée (rang B)
+        assert created[0].rang == "B"

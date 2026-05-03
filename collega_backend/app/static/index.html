@@ -115,6 +115,8 @@
       <div id="progress-bar"><div id="progress-fill" style="width:0%"></div></div>
     </div>
     <div id="already-evaluated" class="already-evaluated" style="display:none"></div>
+    <div id="cards-loader" class="loader" style="display:none">Chargement…</div>
+    <div id="cards-empty" class="empty-state" style="display:none"><h3>Aucune fiche</h3><p>Ce collège n'a pas encore de fiches générées.</p></div>
     <div class="flash-card-box" id="flash-card-box" onclick="revealVerse()">
       <span id="rang-badge" class="badge"></span>
       <span id="low-conf-badge" class="low-conf-badge" style="display:none">⚠ Qualité OCR faible</span>
@@ -295,7 +297,9 @@
     });
 
     if (allCards.length === 0) {
-      document.getElementById("flash-card-box").innerHTML = '<div class="empty-state"><h3>Aucune fiche</h3><p>Ce collège n\'a pas encore de fiches générées.</p></div>';
+      document.getElementById("cards-loader").style.display = "none";
+      document.getElementById("flash-card-box").style.display = "none";
+      document.getElementById("cards-empty").style.display = "block";
       return;
     }
 
@@ -307,9 +311,14 @@
 
   function renderCard(card) {
     if (!card) {
-      document.getElementById("flash-card-box").innerHTML = '<div class="loader">Chargement…</div>';
+      document.getElementById("cards-loader").style.display = "block";
+      document.getElementById("flash-card-box").style.display = "none";
+      document.getElementById("cards-empty").style.display = "none";
       return;
     }
+    document.getElementById("cards-loader").style.display = "none";
+    document.getElementById("cards-empty").style.display = "none";
+    document.getElementById("flash-card-box").style.display = "";
 
     const total = allCards.length;
     const evaluated = allCards.filter(c => c.feedback !== null).length;
