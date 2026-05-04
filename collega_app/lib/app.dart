@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:collega_app/core/router/app_router.dart';
 import 'package:collega_app/core/theme/app_theme.dart';
@@ -8,9 +9,9 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+    return ShadApp.router(
       title: 'AppMédecine',
-      theme: buildAppTheme(),
+      theme: buildShadTheme(),
       routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
     );

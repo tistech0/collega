@@ -29,6 +29,7 @@ dependencies:
 
   # Design system
   shadcn_ui: ^0.19.0
+  google_fonts: ^6.2.1
 
   # Animations
   flutter_animate: ^4.5.0
