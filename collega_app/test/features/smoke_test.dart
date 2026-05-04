@@ -6,6 +6,7 @@ import 'package:collega_app/app.dart';
 void main() {
   testWidgets('App se construit sans exception', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: App()));
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 }
