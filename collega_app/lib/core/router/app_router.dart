@@ -1,44 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 
-import 'package:collega_app/features/demo/presentation/demo_screen.dart';
+import 'package:collega_app/features/auth/auth_providers.dart';
+import 'package:collega_app/features/auth/presentation/auth_login_screen.dart';
+import 'package:collega_app/features/auth/presentation/auth_register_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_drill_screen.dart';
+import 'package:collega_app/features/demo/presentation/demo_screen.dart';
 import 'package:collega_app/shared/widgets/bottom_nav_bar.dart';
 
-final appRouter = GoRouter(
-  initialLocation: '/demo',
-  redirect: (context, state) {
-    if (state.fullPath == null || state.fullPath == '/') return '/demo';
-    return null;
-  },
-  routes: [
-    GoRoute(path: '/demo', builder: (ctx, s) => const DemoScreen()),
-    GoRoute(path: '/demo/drill', builder: (ctx, s) => const DemoDrillScreen()),
-    GoRoute(path: '/auth/register', builder: (ctx, s) => const _AuthRegisterStub()),
-    ShellRoute(
-      builder: (context, state, child) => _AppShell(child: child),
-      routes: [
-        GoRoute(
-          path: '/home',
-          builder: (ctx, s) => const _HomeStub(),
-        ),
-        GoRoute(
-          path: '/colleges',
-          builder: (ctx, s) => const _CollegesStub(),
-        ),
-        GoRoute(
-          path: '/search',
-          builder: (ctx, s) => const _SearchStub(),
-        ),
-        GoRoute(
-          path: '/profile',
-          builder: (ctx, s) => const _ProfileStub(),
-        ),
-      ],
-    ),
-  ],
-);
+final routerProvider = Provider<GoRouter>((ref) {
+  final authAsync = ref.watch(authProvider);
+
+  return GoRouter(
+    initialLocation: '/demo',
+    redirect: (context, state) {
+      if (authAsync.isLoading) return null;
+
+      final isAuth = authAsync.valueOrNull?.isAuthenticated ?? false;
+
+      if (state.fullPath == null || state.fullPath == '/') return '/demo';
+
+      final isProtected = state.matchedLocation.startsWith('/home') ||
+          state.matchedLocation.startsWith('/colleges') ||
+          state.matchedLocation.startsWith('/search') ||
+          state.matchedLocation.startsWith('/profile');
+
+      if (!isAuth && isProtected) return '/demo';
+
+      final isAuthRoute = state.matchedLocation.startsWith('/auth');
+      if (isAuth && isAuthRoute) return '/home';
+
+      return null;
+    },
+    routes: [
+      GoRoute(path: '/demo', builder: (ctx, s) => const DemoScreen()),
+      GoRoute(path: '/demo/drill', builder: (ctx, s) => const DemoDrillScreen()),
+      GoRoute(path: '/auth/register', builder: (ctx, s) => const AuthRegisterScreen()),
+      GoRoute(path: '/auth/login', builder: (ctx, s) => const AuthLoginScreen()),
+      ShellRoute(
+        builder: (context, state, child) => _AppShell(child: child),
+        routes: [
+          GoRoute(path: '/home', builder: (ctx, s) => const _HomeStub()),
+          GoRoute(path: '/colleges', builder: (ctx, s) => const _CollegesStub()),
+          GoRoute(path: '/search', builder: (ctx, s) => const _SearchStub()),
+          GoRoute(path: '/profile', builder: (ctx, s) => const _ProfileStub()),
+        ],
+      ),
+    ],
+  );
+});
 
 class _AppShell extends StatelessWidget {
   const _AppShell({required this.child});
@@ -62,28 +73,6 @@ class _AppShell extends StatelessWidget {
           const paths = ['/home', '/colleges', '/search', '/profile'];
           context.go(paths[i]);
         },
-      ),
-    );
-  }
-}
-
-class _AuthRegisterStub extends StatelessWidget {
-  const _AuthRegisterStub();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Inscription'),
-            ShadButton.ghost(
-              onPressed: () => context.go('/demo'),
-              child: const Text('Retour à la démo'),
-            ),
-          ],
-        ),
       ),
     );
   }

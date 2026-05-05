@@ -1,15 +1,18 @@
 import secrets
+import uuid
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, Header, HTTPException
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.security import JWTError, decode_token
 
 _http_basic = HTTPBasic()
 _http_basic_tester = HTTPBasic(auto_error=False)
 
-__all__ = ["get_db", "get_admin_user", "get_tester_user"]
+__all__ = ["get_db", "get_admin_user", "get_tester_user", "get_current_user"]
 
 
 async def get_admin_user(
@@ -59,3 +62,47 @@ async def get_tester_user(
     if not (correct_username and correct_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     return credentials.username
+
+
+async def get_current_user(
+    authorization: str | None = Header(None),
+    db: AsyncSession = Depends(get_db),
+):
+    """Extrait et valide le Bearer token, retourne l'utilisateur."""
+    from app.models.user import User
+
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "UNAUTHORIZED", "message": "Token requis"},
+        )
+    token = authorization.removeprefix("Bearer ")
+    try:
+        payload = decode_token(token)
+        if payload.get("type") != "access":
+            raise JWTError("Not an access token")
+    except JWTError:
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "TOKEN_EXPIRED", "message": "Token invalide ou expiré"},
+        )
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "UNAUTHORIZED", "message": "Token invalide"},
+        )
+    try:
+        user_uuid = uuid.UUID(user_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "UNAUTHORIZED", "message": "Token invalide"},
+        )
+    user = await db.get(User, user_uuid)
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "USER_NOT_FOUND", "message": "Utilisateur introuvable"},
+        )
+    return user

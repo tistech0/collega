@@ -8,9 +8,14 @@ import 'package:collega_app/core/theme/app_theme.dart';
 
 Widget _appWithRouter() {
   return ProviderScope(
-    child: ShadApp.router(
-      theme: buildShadTheme(),
-      routerConfig: appRouter,
+    child: Consumer(
+      builder: (context, ref, _) {
+        final router = ref.watch(routerProvider);
+        return ShadApp.router(
+          theme: buildShadTheme(),
+          routerConfig: router,
+        );
+      },
     ),
   );
 }
