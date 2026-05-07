@@ -12,7 +12,7 @@ from app.core.security import JWTError, decode_token
 _http_basic = HTTPBasic()
 _http_basic_tester = HTTPBasic(auto_error=False)
 
-__all__ = ["get_db", "get_admin_user", "get_tester_user", "get_current_user"]
+__all__ = ["get_db", "get_admin_user", "get_tester_user", "get_current_user", "require_subscription"]
 
 
 async def get_admin_user(
@@ -104,5 +104,15 @@ async def get_current_user(
         raise HTTPException(
             status_code=401,
             detail={"code": "USER_NOT_FOUND", "message": "Utilisateur introuvable"},
+        )
+    return user
+
+
+async def require_subscription(user=Depends(get_current_user)):
+    """Guard FR42 : vérifie is_subscribed OR is_beta avant tout appel Claude."""
+    if not (user.is_subscribed or user.is_beta):
+        raise HTTPException(
+            status_code=403,
+            detail={"code": "SUBSCRIPTION_REQUIRED", "message": "Abonnement actif requis"},
         )
     return user

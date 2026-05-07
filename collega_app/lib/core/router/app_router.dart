@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/auth/presentation/auth_login_screen.dart';
 import 'package:collega_app/features/auth/presentation/auth_register_screen.dart';
+import 'package:collega_app/features/auth/presentation/paywall_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_drill_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_screen.dart';
 import 'package:collega_app/shared/widgets/bottom_nav_bar.dart';
@@ -18,6 +19,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (authAsync.isLoading) return null;
 
       final isAuth = authAsync.valueOrNull?.isAuthenticated ?? false;
+      final hasAccess = authAsync.valueOrNull?.hasAccess ?? false;
 
       if (state.fullPath == null || state.fullPath == '/') return '/demo';
 
@@ -26,7 +28,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           state.matchedLocation.startsWith('/search') ||
           state.matchedLocation.startsWith('/profile');
 
-      if (!isAuth && isProtected) return '/demo';
+      if (!isAuth && (isProtected || state.matchedLocation == '/paywall')) return '/demo';
+
+      if (isAuth && !hasAccess && isProtected) return '/paywall';
+
+      if (isAuth && hasAccess && state.matchedLocation == '/paywall') return '/home';
 
       final isAuthRoute = state.matchedLocation.startsWith('/auth');
       if (isAuth && isAuthRoute) return '/home';
@@ -38,6 +44,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/demo/drill', builder: (ctx, s) => const DemoDrillScreen()),
       GoRoute(path: '/auth/register', builder: (ctx, s) => const AuthRegisterScreen()),
       GoRoute(path: '/auth/login', builder: (ctx, s) => const AuthLoginScreen()),
+      GoRoute(path: '/paywall', builder: (ctx, s) => const PaywallScreen()),
       ShellRoute(
         builder: (context, state, child) => _AppShell(child: child),
         routes: [

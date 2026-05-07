@@ -80,6 +80,66 @@ class AuthRepository {
     ]);
   }
 
+  Future<AuthState> refreshFromMe() async {
+    try {
+      final accessToken = await _storage.read(key: _kAccessToken);
+      if (accessToken == null) return const AuthState();
+
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/v1/auth/me',
+        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+      );
+      final data = response.data!['data'] as Map<String, dynamic>;
+      final isSubscribed = data['is_subscribed'] as bool;
+      final isBeta = data['is_beta'] as bool;
+
+      await Future.wait([
+        _storage.write(key: _kIsSubscribed, value: isSubscribed.toString()),
+        _storage.write(key: _kIsBeta, value: isBeta.toString()),
+      ]);
+
+      final userId = await _storage.read(key: _kUserId) ?? '';
+      final email = await _storage.read(key: _kUserEmail) ?? '';
+
+      return AuthState(
+        user: AuthUser(id: userId, email: email, isBeta: isBeta, isSubscribed: isSubscribed),
+      );
+    } on DioException catch (e) {
+      AppLogger.error('refreshFromMe failed', tag: 'AuthRepository', error: e);
+      return const AuthState(errorMessage: 'Impossible de synchroniser le statut');
+    }
+  }
+
+  Future<AuthState> refreshSubscriptionStatus() async {
+    try {
+      final accessToken = await _storage.read(key: _kAccessToken);
+      if (accessToken == null) return const AuthState();
+
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/v1/auth/refresh-subscription',
+        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+      );
+      final data = response.data!['data'] as Map<String, dynamic>;
+      final isSubscribed = data['is_subscribed'] as bool;
+      final isBeta = data['is_beta'] as bool;
+
+      final userId = await _storage.read(key: _kUserId) ?? '';
+      final email = await _storage.read(key: _kUserEmail) ?? '';
+
+      await Future.wait([
+        _storage.write(key: _kIsSubscribed, value: isSubscribed.toString()),
+        _storage.write(key: _kIsBeta, value: isBeta.toString()),
+      ]);
+
+      return AuthState(
+        user: AuthUser(id: userId, email: email, isBeta: isBeta, isSubscribed: isSubscribed),
+      );
+    } on DioException catch (e) {
+      AppLogger.error('refreshSubscriptionStatus failed', tag: 'AuthRepository', error: e);
+      return const AuthState(errorMessage: 'Impossible de synchroniser le statut');
+    }
+  }
+
   Future<AuthState> _handleTokenResponse(
     Map<String, dynamic> data,
     String email,

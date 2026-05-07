@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -121,3 +122,22 @@ async def get_me(current_user: User = Depends(get_current_user)):
             "is_subscribed": current_user.is_subscribed,
         }
     }
+
+
+@router.post("/refresh-subscription")
+async def refresh_subscription(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Attend que le webhook RevenueCat ait mis à jour is_subscribed (max 10 s, 5 × 2 s)."""
+    if current_user.is_subscribed or current_user.is_beta:
+        return {"data": {"is_subscribed": current_user.is_subscribed, "is_beta": current_user.is_beta}}
+
+    for _ in range(5):
+        await asyncio.sleep(2)
+        db.expire(current_user)
+        await db.refresh(current_user)
+        if current_user.is_subscribed:
+            break
+
+    return {"data": {"is_subscribed": current_user.is_subscribed, "is_beta": current_user.is_beta}}

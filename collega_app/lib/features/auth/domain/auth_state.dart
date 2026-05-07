@@ -27,6 +27,8 @@ class AuthState {
 
   bool get isAuthenticated => user != null;
 
+  bool get hasAccess => user != null && (user!.isSubscribed || user!.isBeta);
+
   AuthState copyWith({
     AuthUser? user,
     String? errorMessage,

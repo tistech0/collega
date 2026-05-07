@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/utils/logger.dart';
@@ -28,6 +29,9 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     if (result.errorMessage != null) {
       AppLogger.warning('Register error: ${result.errorMessage}', tag: 'AuthNotifier');
     }
+    if (result.user != null) {
+      _rcLogIn(result.user!.id);
+    }
   }
 
   Future<void> login(String email, String password) async {
@@ -37,12 +41,50 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     if (result.errorMessage != null) {
       AppLogger.warning('Login error: ${result.errorMessage}', tag: 'AuthNotifier');
     }
+    if (result.user != null) {
+      _rcLogIn(result.user!.id);
+    }
   }
 
   Future<void> logout() async {
     state = const AsyncLoading();
     await ref.read(authRepositoryProvider).logout();
+    _rcLogOut();
     state = const AsyncData(AuthState());
+  }
+
+  Future<void> refreshSubscription() async {
+    final current = state.valueOrNull;
+    if (current?.user == null) return;
+    try {
+      final response = await ref.read(authRepositoryProvider).refreshSubscriptionStatus();
+      if (response.user != null) {
+        state = AsyncData(response);
+      }
+    } catch (e) {
+      AppLogger.error('Failed to refresh subscription', tag: 'AuthNotifier', error: e);
+    }
+  }
+
+  // Fire-and-forget — non-bloquant par design (achat possible même si logIn échoue)
+  void _rcLogIn(String userId) {
+    () async {
+      try {
+        await Purchases.logIn(userId);
+      } catch (e) {
+        AppLogger.warning('RevenueCat logIn failed', tag: 'AuthNotifier', error: e);
+      }
+    }();
+  }
+
+  void _rcLogOut() {
+    () async {
+      try {
+        await Purchases.logOut();
+      } catch (e) {
+        AppLogger.warning('RevenueCat logOut failed', tag: 'AuthNotifier', error: e);
+      }
+    }();
   }
 }
 

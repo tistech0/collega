@@ -40,6 +40,9 @@ dependencies:
   # In-app purchases (RevenueCat)
   purchases_flutter: ^10.0.1
 
+  # URL Launcher (deep links iOS abonnements)
+  url_launcher: ^6.3.0
+
   # File picker (import PDF)
   file_picker: ^8.1.6
 
