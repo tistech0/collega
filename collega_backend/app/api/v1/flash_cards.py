@@ -1,0 +1,112 @@
+"""Endpoints de feedback, suppression et régénération de fiches — FR19, FR20, FR21."""
+from __future__ import annotations
+
+import logging
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_db
+from app.core.limiter import limiter
+from app.deps import require_subscription
+from app.models.flash_card import FlashCard
+from app.models.item import Item
+from app.schemas.college import (
+    FlashCardData,
+    FlashCardFeedbackRequest,
+    FlashCardRegenerateRequest,
+    FlashCardResponseWrapped,
+)
+from app.services.generation.claude_client import ClaudeClient
+
+logger = logging.getLogger(__name__)
+router = APIRouter(tags=["flash-cards"])
+
+
+async def _get_card_for_user(
+    card_id: uuid.UUID,
+    current_user,
+    db: AsyncSession,
+) -> FlashCard:
+    card = await db.get(FlashCard, card_id)
+    if card is None or card.user_id != current_user.id:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "CARD_NOT_FOUND", "message": "Fiche introuvable"},
+        )
+    return card
+
+
+@router.post("/flash-cards/{card_id}/feedback")
+async def submit_feedback(
+    card_id: uuid.UUID,
+    body: FlashCardFeedbackRequest,
+    current_user=Depends(require_subscription),
+    db: AsyncSession = Depends(get_db),
+):
+    card = await _get_card_for_user(card_id, current_user, db)
+    card.user_feedback = body.feedback
+    await db.commit()
+    return {"data": {"id": str(card.id), "feedback": card.user_feedback}}
+
+
+@router.delete("/flash-cards/{card_id}", status_code=204)
+async def delete_card(
+    card_id: uuid.UUID,
+    current_user=Depends(require_subscription),
+    db: AsyncSession = Depends(get_db),
+):
+    card = await _get_card_for_user(card_id, current_user, db)
+    await db.delete(card)
+    await db.commit()
+
+
+@router.post("/flash-cards/{card_id}/regenerate", response_model=FlashCardResponseWrapped)
+@limiter.limit("10/hour")
+async def regenerate_card(
+    request: Request,
+    card_id: uuid.UUID,
+    body: FlashCardRegenerateRequest,
+    current_user=Depends(require_subscription),
+    db: AsyncSession = Depends(get_db),
+) -> FlashCardResponseWrapped:
+    card = await _get_card_for_user(card_id, current_user, db)
+
+    item = await db.get(Item, card.item_id)
+    if item is None:
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "ITEM_NOT_FOUND", "message": "Item source introuvable"},
+        )
+
+    claude = ClaudeClient()
+    new_card_data = await claude.regenerate_single_card(card, item, body.user_note)
+    if new_card_data is None:
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "REGENERATION_FAILED", "message": "Régénération échouée"},
+        )
+
+    # P1: card_type n'est PAS modifié — anti-pattern spec ("NE PAS modifier card_type")
+    card.recto = new_card_data.recto
+    card.verso = new_card_data.verso
+    card.user_feedback = None
+    await db.commit()
+    await db.refresh(card)
+
+    # P5: réponse construite depuis card après refresh, pas depuis new_card_data
+    return FlashCardResponseWrapped(
+        data=FlashCardData(
+            id=str(card.id),
+            item_id=str(card.item_id),
+            college_id=str(card.college_id),
+            card_type=card.card_type,
+            rang=card.rang,
+            recto=card.recto,
+            verso=card.verso,
+            ocr_confidence_score=card.ocr_confidence_score,
+            low_confidence=card.low_confidence,
+            user_feedback=card.user_feedback,
+        )
+    )

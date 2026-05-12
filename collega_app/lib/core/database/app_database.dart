@@ -2,21 +2,46 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-// Tables Drift ajoutées progressivement dans les stories suivantes
-// Story 1.1 : base de données initialisée, sans tables (génération de code en Story 2.1+)
-// Story 2.1+ : ajout de @DriftDatabase(tables: [...]) et build_runner
+import 'tables/college_import_table.dart';
+import 'tables/flash_cards_table.dart';
+import 'tables/items_table.dart';
 
-class AppDatabase {
-  static AppDatabase? _instance;
+part 'app_database.g.dart';
 
-  AppDatabase._();
+@DriftDatabase(tables: [CollegeImports, Items, FlashCards])
+class AppDatabase extends _$AppDatabase {
+  AppDatabase() : super(_openConnection());
 
-  static AppDatabase get instance => _instance ??= AppDatabase._();
+  AppDatabase.forTesting(super.executor);
 
-  static LazyDatabase openConnection() {
+  @override
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            // P3: collegeImports était absent de la migration v1→v2
+            await m.createTable(collegeImports);
+            await m.createTable(items);
+            await m.createTable(flashCards);
+          }
+          // P2: uniquement si la table existe déjà sans userFeedback (from=2)
+          // Si from<2, m.createTable(flashCards) a déjà créé la colonne (schéma actuel)
+          if (from >= 2 && from < 3) {
+            await m.addColumn(flashCards, flashCards.userFeedback);
+          }
+        },
+      );
+
+  static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
       final dbFolder = await getApplicationDocumentsDirectory();
       final file = File(p.join(dbFolder.path, 'collega.sqlite'));
@@ -24,3 +49,9 @@ class AppDatabase {
     });
   }
 }
+
+final databaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase();
+  ref.onDispose(() async => db.close());
+  return db;
+});

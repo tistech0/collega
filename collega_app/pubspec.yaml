@@ -46,6 +46,9 @@ dependencies:
   # File picker (import PDF)
   file_picker: ^8.1.6
 
+  # Push notifications (APNs iOS)
+  flutter_apns_only: ^1.0.0
+
   # Icons
   cupertino_icons: ^1.0.8
 

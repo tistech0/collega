@@ -1,0 +1,9 @@
+{
+    email lesur.matthis@gmail.com
+}
+
+# Remplacer par ton domaine ou DDNS (ex: collega.mondomaine.fr)
+# Si IP locale uniquement, supprimer ce bloc et laisser l'api accessible sur :8000
+api.collega.mondomaine.fr {
+    reverse_proxy api:8000
+}

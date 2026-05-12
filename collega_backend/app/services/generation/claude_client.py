@@ -34,6 +34,28 @@ Génère entre 2 et 5 flashcards classiques et 0 à 3 fiches définition selon l
 """
 
 
+REGENERATION_PROMPT = """
+Tu es un expert en fiches de révision médicale ECNi.
+La fiche suivante a été jugée non pertinente par un étudiant.
+
+Fiche originale :
+- Type : {card_type}
+- Recto : {recto}
+- Verso : {verso}
+- Item : {item_number} (Rang {rang})
+
+Feedback de l'étudiant : {user_note}
+
+Texte OCR source :
+{ocr_text}
+
+Régénère UNE fiche améliorée du même type (classique ou définition) en tenant compte du feedback.
+
+Réponds UNIQUEMENT avec un objet JSON valide, sans markdown :
+{{"type": "{card_type}", "recto": "Question améliorée ?", "verso": "Réponse améliorée"}}
+"""
+
+
 @dataclass
 class FlashCardData:
     card_type: str
@@ -91,3 +113,63 @@ class ClaudeClient:
                 cards.append(FlashCardData(card_type=card_type, recto=recto, verso=verso))
 
         return cards
+
+    async def regenerate_single_card(
+        self,
+        card,
+        item,
+        user_note: str | None,
+    ) -> "FlashCardData | None":
+        """Régénère une seule fiche avec le feedback utilisateur en contexte."""
+        from app.schemas.college import FlashCardData as FlashCardDataSchema
+
+        if not item.ocr_text:
+            logger.warning(
+                "Item %s has no ocr_text — cannot regenerate card %s", item.id, card.id
+            )
+            return None
+
+        safe_ocr_text = item.ocr_text.replace("{", "{{").replace("}", "}}")
+        safe_note = (user_note or "Aucun commentaire spécifique").replace("{", "{{").replace("}", "}}")
+
+        prompt = REGENERATION_PROMPT.format(
+            card_type=card.card_type,
+            recto=card.recto.replace("{", "{{").replace("}", "}}"),
+            verso=card.verso.replace("{", "{{").replace("}", "}}"),
+            item_number=item.item_number,
+            rang=item.rang,
+            user_note=safe_note,
+            ocr_text=safe_ocr_text,
+        )
+
+        try:
+            response = await self._client.messages.create(
+                model="claude-sonnet-4-6",
+                max_tokens=500,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            raw = response.content[0].text.strip()
+            if raw.startswith("```"):
+                raw = re.sub(r"^```[a-z]*\n?", "", raw)
+                raw = re.sub(r"\n?```$", "", raw)
+                raw = raw.strip()
+            data = json.loads(raw)
+        except (anthropic.APIError, json.JSONDecodeError, KeyError, IndexError) as exc:
+            logger.error("Failed to regenerate card %s: %s", card.id, exc)
+            return None
+
+        recto = data.get("recto", "").strip()
+        verso = data.get("verso", "").strip()
+        if not recto or not verso:
+            return None
+        return FlashCardDataSchema(
+            id=str(card.id),
+            item_id=str(card.item_id),
+            college_id=str(card.college_id),
+            card_type=data.get("type", card.card_type),
+            rang=card.rang,
+            recto=recto,
+            verso=verso,
+            ocr_confidence_score=card.ocr_confidence_score,
+            low_confidence=card.low_confidence,
+        )

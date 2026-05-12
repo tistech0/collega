@@ -33,6 +33,34 @@ async def generate_college_cards(
             result = await card_generator.generate_for_college(
                 db, uuid.UUID(college_id), uuid.UUID(job_id), pdf_path
             )
+
+            # Envoyer notification push (erreur APNs ne fait PAS échouer le job)
+            try:
+                from sqlalchemy import select
+
+                from app.models.college import College
+                from app.models.user import User
+                from app.services.notifications.apns_service import get_notification_service
+
+                # P16: lire user_id depuis l'ORM avant d'ouvrir une nouvelle session
+                user_id_for_notif = job.user_id
+
+                async with async_session_factory() as notif_db:
+                    user_result = await notif_db.execute(
+                        select(User).where(User.id == user_id_for_notif)
+                    )
+                    user = user_result.scalar_one_or_none()
+                    college_result = await notif_db.execute(
+                        select(College).where(College.id == uuid.UUID(college_id))
+                    )
+                    college = college_result.scalar_one_or_none()
+                    if user and college:
+                        await get_notification_service().send_generation_complete(
+                            user.apns_token, college.college_ref_id
+                        )
+            except Exception as notif_exc:
+                logger.warning("Notification push ignorée (non-bloquant) : %s", notif_exc)
+
             return result
         except Exception as exc:
             logger.exception("Generation failed for college %s: %s", college_id, exc)

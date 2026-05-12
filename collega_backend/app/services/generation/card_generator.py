@@ -3,12 +3,15 @@ from __future__ import annotations
 import logging
 import uuid
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
+from app.models.college import College
 from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
 from app.models.item import Item
+from app.models.user import User
 from app.services.generation.claude_client import ClaudeClient
 from app.services.generation.hash_sharing import SHA256SimilarityChecker
 
@@ -47,6 +50,7 @@ class CardGenerator:
                 job.hash_shared = True
                 job.card_count = count
                 job.status = "generation_complete"
+                # hash_shared → pas d'incrément compteurs (AC #1)
                 await db.commit()
                 logger.info(
                     "Hash-sharing: copied %d cards for college %s from job %s",
@@ -89,6 +93,33 @@ class CardGenerator:
 
         job.card_count = card_count
         job.status = "generation_complete"
+
+        # Incrémenter les compteurs si c'est un reimport non-hash-share
+        prev_complete_result = await db.execute(
+            select(GenerationJob)
+            .where(GenerationJob.college_id == college_id)
+            .where(GenerationJob.id != job_id)
+            .where(GenerationJob.status == "generation_complete")
+            .limit(1)
+        )
+        is_reimport = prev_complete_result.scalar_one_or_none() is not None
+
+        if is_reimport and not job.hash_shared:
+            # P7: incréments atomiques via UPDATE conditionnel — pas de race condition
+            await db.execute(
+                sa_update(College)
+                .where(College.id == college_id)
+                .where(College.reload_count < settings.reload_count_max)
+                .values(reload_count=College.reload_count + 1)
+            )
+            await db.execute(
+                sa_update(User)
+                .where(User.id == job.user_id)
+                .where(User.monthly_reloads < settings.monthly_reloads_max)
+                .values(monthly_reloads=User.monthly_reloads + 1)
+            )
+            logger.info("Reimport counted for college %s", college_id)
+
         await db.commit()
 
         logger.info(

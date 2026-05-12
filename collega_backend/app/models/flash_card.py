@@ -19,6 +19,10 @@ class FlashCard(Base):
     __table_args__ = (
         CheckConstraint("card_type IN ('classique', 'definition')", name="ck_flash_cards_card_type"),
         CheckConstraint("rang IN ('A', 'B', 'C')", name="ck_flash_cards_rang"),
+        CheckConstraint(
+            "user_feedback IN ('positive', 'negative')",
+            name="ck_flash_cards_user_feedback",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -39,6 +43,7 @@ class FlashCard(Base):
     verso: Mapped[str] = mapped_column(Text, nullable=False)
     ocr_confidence_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     low_confidence: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    user_feedback: Mapped[str | None] = mapped_column(String(20), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

@@ -28,6 +28,13 @@ class Settings(BaseSettings):
     # Stockage temporaire PDF (chemin configurable, nettoyé par cleanup_worker Story 1.3)
     pdf_storage_path: str = "/tmp/collega_pdfs"
 
+    # APNs — token-based auth (fichier .p8 Apple Developer)
+    apns_key_path: str = ""
+    apns_key_id: str = ""
+    apns_team_id: str = ""
+    apns_bundle_id: str = "com.lesurmatthis.collega"
+    apns_use_sandbox: bool = True
+
     @model_validator(mode="after")
     def _require_webhook_secret(self) -> "Settings":
         if not self.revenuecat_webhook_secret:

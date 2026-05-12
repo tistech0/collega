@@ -1,0 +1,82 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_apns_only/flutter_apns_only.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import 'package:collega_app/core/network/api_providers.dart';
+import 'package:collega_app/core/router/app_router.dart';
+import 'package:collega_app/core/utils/logger.dart';
+
+class NotificationsService {
+  NotificationsService({required this.dio, required this.router});
+
+  final Dio dio;
+  final GoRouter router;
+
+  ApnsPushConnectorOnly? _connector;
+
+  Future<void> requestPermissionsAndRegister() async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return;
+    if (_connector != null) return; // déjà initialisé
+
+    _connector = ApnsPushConnectorOnly();
+    _connector!.configureApns(
+      onLaunch: _onNotificationTap,
+      onResume: _onNotificationTap,
+      onMessage: (message) async {
+        AppLogger.info('Notification reçue (foreground)', tag: 'NotificationsService');
+      },
+    );
+
+    await _connector!.requestNotificationPermissions();
+
+    _connector!.token.addListener(() {
+      final token = _connector!.token.value;
+      if (token != null) _registerToken(token);
+    });
+  }
+
+  Future<void> _onNotificationTap(ApnsRemoteMessage message) async {
+    final collegeRefId = message.payload['college_ref_id'];
+    if (collegeRefId == null) return;
+    try {
+      router.go('/colleges/$collegeRefId');
+    } catch (e) {
+      AppLogger.error('Navigation depuis notification échouée', tag: 'NotificationsService', error: e);
+    }
+  }
+
+  // P10: reset pour permettre la ré-initialisation après logout/login
+  void reset() {
+    _connector = null;
+  }
+
+  Future<void> _registerToken(String token) async {
+    try {
+      await dio.post<void>(
+        '/v1/notifications/apns-token',
+        data: {'token': token},
+      );
+      AppLogger.info('APNs token enregistré', tag: 'NotificationsService');
+    } on DioException catch (e) {
+      // P12: distinguer le 401 (JWT expiré) des autres erreurs réseau
+      if (e.response?.statusCode == 401) {
+        AppLogger.warning(
+          'APNs token non enregistré — JWT expiré, réessaiera au prochain refresh',
+          tag: 'NotificationsService',
+        );
+      } else {
+        AppLogger.error('Échec enregistrement token APNs', tag: 'NotificationsService', error: e);
+      }
+    } catch (e) {
+      AppLogger.error('Échec enregistrement token APNs', tag: 'NotificationsService', error: e);
+    }
+  }
+}
+
+final notificationsServiceProvider = Provider<NotificationsService>((ref) {
+  final dio = ref.read(apiClientProvider).dio;
+  final router = ref.read(routerProvider);
+  return NotificationsService(dio: dio, router: router);
+});

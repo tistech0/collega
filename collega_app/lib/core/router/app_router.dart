@@ -6,6 +6,11 @@ import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/auth/presentation/auth_login_screen.dart';
 import 'package:collega_app/features/auth/presentation/auth_register_screen.dart';
 import 'package:collega_app/features/auth/presentation/paywall_screen.dart';
+import 'package:collega_app/features/colleges/presentation/college_detail_screen.dart';
+import 'package:collega_app/features/colleges/presentation/college_import_screen.dart';
+import 'package:collega_app/features/colleges/presentation/colleges_screen.dart';
+import 'package:collega_app/features/colleges/presentation/import_progress_screen.dart';
+import 'package:collega_app/features/colleges/presentation/item_detail_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_drill_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_screen.dart';
 import 'package:collega_app/shared/widgets/bottom_nav_bar.dart';
@@ -45,11 +50,43 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/auth/register', builder: (ctx, s) => const AuthRegisterScreen()),
       GoRoute(path: '/auth/login', builder: (ctx, s) => const AuthLoginScreen()),
       GoRoute(path: '/paywall', builder: (ctx, s) => const PaywallScreen()),
+      GoRoute(
+        path: '/colleges/:ref_id/import',
+        builder: (ctx, s) => CollegeImportScreen(
+          refId: int.parse(s.pathParameters['ref_id']!),
+        ),
+      ),
+      GoRoute(
+        path: '/colleges/:ref_id/import/progress',
+        builder: (ctx, s) {
+          final extra = s.extra as Map<String, dynamic>?;
+          if (extra == null) {
+            return const Scaffold(body: Center(child: Text('Navigation invalide')));
+          }
+          return ImportProgressScreen(
+            collegeId: extra['collegeId'] as String,
+            refId: extra['refId'] as int,
+          );
+        },
+      ),
       ShellRoute(
         builder: (context, state, child) => _AppShell(child: child),
         routes: [
           GoRoute(path: '/home', builder: (ctx, s) => const _HomeStub()),
-          GoRoute(path: '/colleges', builder: (ctx, s) => const _CollegesStub()),
+          GoRoute(path: '/colleges', builder: (ctx, s) => const CollegesScreen()),
+          GoRoute(
+            path: '/colleges/:ref_id',
+            builder: (ctx, s) => CollegeDetailScreen(
+              refId: int.parse(s.pathParameters['ref_id']!),
+            ),
+          ),
+          GoRoute(
+            path: '/colleges/:ref_id/items/:item_id',
+            builder: (ctx, s) => ItemDetailScreen(
+              refId: int.parse(s.pathParameters['ref_id']!),
+              itemId: s.pathParameters['item_id']!,
+            ),
+          ),
           GoRoute(path: '/search', builder: (ctx, s) => const _SearchStub()),
           GoRoute(path: '/profile', builder: (ctx, s) => const _ProfileStub()),
         ],
@@ -91,15 +128,6 @@ class _HomeStub extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(child: Text('Accueil'));
-  }
-}
-
-class _CollegesStub extends StatelessWidget {
-  const _CollegesStub();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Collèges'));
   }
 }
 

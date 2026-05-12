@@ -25,6 +25,10 @@ class User(Base):
     is_beta: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_subscribed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     monthly_reloads: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    monthly_reloads_reset_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
     apns_token: Mapped[str | None] = mapped_column(String(512), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -1,0 +1,87 @@
+services:
+  migrate:
+    image: tistech0/collega-backend:latest
+    command: alembic upgrade head
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - collega_net
+    restart: "no"
+
+  api:
+    image: tistech0/collega-backend:latest
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+    volumes:
+      - pdf_storage:/tmp/collega_pdfs
+    ports:
+      - "430:8000"
+    env_file: .env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - collega_net
+    restart: unless-stopped
+
+  worker:
+    image: tistech0/collega-backend:latest
+    command: arq app.workers.settings.WORKER_SETTINGS
+    volumes:
+      - pdf_storage:/tmp/collega_pdfs
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - collega_net
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - /mnt/user/appdata/collega/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: collega
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - collega_net
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - /mnt/user/appdata/collega/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - collega_net
+    restart: unless-stopped
+
+volumes:
+  pdf_storage:
+    driver: local
+    driver_opts:
+      type: none
+      device: /mnt/user/appdata/collega/pdfs
+      o: bind
+
+networks:
+  collega_net:
+    driver: bridge

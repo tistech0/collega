@@ -1,7 +1,7 @@
 import asyncio
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +13,7 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
+from app.core.limiter import limiter
 from app.deps import get_current_user, get_db
 from app.models.user import User
 from app.schemas.auth import LoginRequest, RefreshRequest, RegisterRequest, TokenResponse
@@ -20,39 +21,17 @@ from app.schemas.auth import LoginRequest, RefreshRequest, RegisterRequest, Toke
 router = APIRouter(tags=["auth"])
 
 
-@router.post("/register", status_code=201)
-async def register(body: RegisterRequest, db: AsyncSession = Depends(get_db)):
-    if len(body.password.strip()) < 8:
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "INVALID_PASSWORD", "message": "Le mot de passe doit contenir au moins 8 caractères"},
-        )
-    result = await db.execute(select(User).where(User.email == body.email))
-    if result.scalar_one_or_none() is not None:
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "EMAIL_ALREADY_EXISTS", "message": "Cet email est déjà utilisé"},
-        )
-
-    user = User(
-        email=body.email,
-        hashed_password=hash_password(body.password),
+@router.post("/register", status_code=200)
+async def register(body: RegisterRequest):
+    raise HTTPException(
+        status_code=403,
+        detail={"code": "REGISTRATION_DISABLED", "message": "Les inscriptions sont fermées."},
     )
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
-
-    token_response = TokenResponse(
-        access_token=create_access_token(str(user.id)),
-        refresh_token=create_refresh_token(str(user.id)),
-        is_beta=user.is_beta,
-        is_subscribed=user.is_subscribed,
-    )
-    return {"data": token_response.model_dump()}
 
 
 @router.post("/login")
-async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
 
