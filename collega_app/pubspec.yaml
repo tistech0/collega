@@ -18,6 +18,9 @@ dependencies:
   # Navigation
   go_router: ^14.6.3
 
+  # Utilities
+  collection: ^1.18.0
+
   # Local storage (offline-first)
   drift: ^2.21.0
   sqlite3_flutter_libs: ^0.5.24

@@ -9,17 +9,19 @@ import 'package:path_provider/path_provider.dart';
 import 'tables/college_import_table.dart';
 import 'tables/flash_cards_table.dart';
 import 'tables/items_table.dart';
+import 'tables/planning_configs_table.dart';
+import 'tables/planning_sessions_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [CollegeImports, Items, FlashCards])
+@DriftDatabase(tables: [CollegeImports, Items, FlashCards, PlanningConfigs, PlanningSessions])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -37,6 +39,15 @@ class AppDatabase extends _$AppDatabase {
           // Si from<2, m.createTable(flashCards) a déjà créé la colonne (schéma actuel)
           if (from >= 2 && from < 3) {
             await m.addColumn(flashCards, flashCards.userFeedback);
+          }
+          if (from < 4) {
+            await m.addColumn(flashCards, flashCards.drillLevel);
+            await m.addColumn(flashCards, flashCards.nextReviewAt);
+            await m.addColumn(flashCards, flashCards.reviewCount);
+          }
+          if (from < 5) {
+            await m.createTable(planningConfigs);
+            await m.createTable(planningSessions);
           }
         },
       );

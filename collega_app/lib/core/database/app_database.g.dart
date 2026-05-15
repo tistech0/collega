@@ -865,6 +865,28 @@ class $FlashCardsTable extends FlashCards
   late final GeneratedColumn<String> userFeedback = GeneratedColumn<String>(
       'user_feedback', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _drillLevelMeta =
+      const VerificationMeta('drillLevel');
+  @override
+  late final GeneratedColumn<String> drillLevel = GeneratedColumn<String>(
+      'drill_level', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('new'));
+  static const VerificationMeta _nextReviewAtMeta =
+      const VerificationMeta('nextReviewAt');
+  @override
+  late final GeneratedColumn<int> nextReviewAt = GeneratedColumn<int>(
+      'next_review_at', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _reviewCountMeta =
+      const VerificationMeta('reviewCount');
+  @override
+  late final GeneratedColumn<int> reviewCount = GeneratedColumn<int>(
+      'review_count', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -876,7 +898,10 @@ class $FlashCardsTable extends FlashCards
         verso,
         ocrConfidenceScore,
         lowConfidence,
-        userFeedback
+        userFeedback,
+        drillLevel,
+        nextReviewAt,
+        reviewCount
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -947,6 +972,24 @@ class $FlashCardsTable extends FlashCards
           userFeedback.isAcceptableOrUnknown(
               data['user_feedback']!, _userFeedbackMeta));
     }
+    if (data.containsKey('drill_level')) {
+      context.handle(
+          _drillLevelMeta,
+          drillLevel.isAcceptableOrUnknown(
+              data['drill_level']!, _drillLevelMeta));
+    }
+    if (data.containsKey('next_review_at')) {
+      context.handle(
+          _nextReviewAtMeta,
+          nextReviewAt.isAcceptableOrUnknown(
+              data['next_review_at']!, _nextReviewAtMeta));
+    }
+    if (data.containsKey('review_count')) {
+      context.handle(
+          _reviewCountMeta,
+          reviewCount.isAcceptableOrUnknown(
+              data['review_count']!, _reviewCountMeta));
+    }
     return context;
   }
 
@@ -976,6 +1019,12 @@ class $FlashCardsTable extends FlashCards
           .read(DriftSqlType.bool, data['${effectivePrefix}low_confidence'])!,
       userFeedback: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}user_feedback']),
+      drillLevel: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}drill_level'])!,
+      nextReviewAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}next_review_at']),
+      reviewCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}review_count'])!,
     );
   }
 
@@ -996,6 +1045,9 @@ class FlashCard extends DataClass implements Insertable<FlashCard> {
   final double ocrConfidenceScore;
   final bool lowConfidence;
   final String? userFeedback;
+  final String drillLevel;
+  final int? nextReviewAt;
+  final int reviewCount;
   const FlashCard(
       {required this.id,
       required this.itemId,
@@ -1006,7 +1058,10 @@ class FlashCard extends DataClass implements Insertable<FlashCard> {
       required this.verso,
       required this.ocrConfidenceScore,
       required this.lowConfidence,
-      this.userFeedback});
+      this.userFeedback,
+      required this.drillLevel,
+      this.nextReviewAt,
+      required this.reviewCount});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1022,6 +1077,11 @@ class FlashCard extends DataClass implements Insertable<FlashCard> {
     if (!nullToAbsent || userFeedback != null) {
       map['user_feedback'] = Variable<String>(userFeedback);
     }
+    map['drill_level'] = Variable<String>(drillLevel);
+    if (!nullToAbsent || nextReviewAt != null) {
+      map['next_review_at'] = Variable<int>(nextReviewAt);
+    }
+    map['review_count'] = Variable<int>(reviewCount);
     return map;
   }
 
@@ -1039,6 +1099,11 @@ class FlashCard extends DataClass implements Insertable<FlashCard> {
       userFeedback: userFeedback == null && nullToAbsent
           ? const Value.absent()
           : Value(userFeedback),
+      drillLevel: Value(drillLevel),
+      nextReviewAt: nextReviewAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextReviewAt),
+      reviewCount: Value(reviewCount),
     );
   }
 
@@ -1057,6 +1122,9 @@ class FlashCard extends DataClass implements Insertable<FlashCard> {
           serializer.fromJson<double>(json['ocrConfidenceScore']),
       lowConfidence: serializer.fromJson<bool>(json['lowConfidence']),
       userFeedback: serializer.fromJson<String?>(json['userFeedback']),
+      drillLevel: serializer.fromJson<String>(json['drillLevel']),
+      nextReviewAt: serializer.fromJson<int?>(json['nextReviewAt']),
+      reviewCount: serializer.fromJson<int>(json['reviewCount']),
     );
   }
   @override
@@ -1073,6 +1141,9 @@ class FlashCard extends DataClass implements Insertable<FlashCard> {
       'ocrConfidenceScore': serializer.toJson<double>(ocrConfidenceScore),
       'lowConfidence': serializer.toJson<bool>(lowConfidence),
       'userFeedback': serializer.toJson<String?>(userFeedback),
+      'drillLevel': serializer.toJson<String>(drillLevel),
+      'nextReviewAt': serializer.toJson<int?>(nextReviewAt),
+      'reviewCount': serializer.toJson<int>(reviewCount),
     };
   }
 
@@ -1086,7 +1157,10 @@ class FlashCard extends DataClass implements Insertable<FlashCard> {
           String? verso,
           double? ocrConfidenceScore,
           bool? lowConfidence,
-          Value<String?> userFeedback = const Value.absent()}) =>
+          Value<String?> userFeedback = const Value.absent(),
+          String? drillLevel,
+          Value<int?> nextReviewAt = const Value.absent(),
+          int? reviewCount}) =>
       FlashCard(
         id: id ?? this.id,
         itemId: itemId ?? this.itemId,
@@ -1099,6 +1173,10 @@ class FlashCard extends DataClass implements Insertable<FlashCard> {
         lowConfidence: lowConfidence ?? this.lowConfidence,
         userFeedback:
             userFeedback.present ? userFeedback.value : this.userFeedback,
+        drillLevel: drillLevel ?? this.drillLevel,
+        nextReviewAt:
+            nextReviewAt.present ? nextReviewAt.value : this.nextReviewAt,
+        reviewCount: reviewCount ?? this.reviewCount,
       );
   FlashCard copyWithCompanion(FlashCardsCompanion data) {
     return FlashCard(
@@ -1118,6 +1196,13 @@ class FlashCard extends DataClass implements Insertable<FlashCard> {
       userFeedback: data.userFeedback.present
           ? data.userFeedback.value
           : this.userFeedback,
+      drillLevel:
+          data.drillLevel.present ? data.drillLevel.value : this.drillLevel,
+      nextReviewAt: data.nextReviewAt.present
+          ? data.nextReviewAt.value
+          : this.nextReviewAt,
+      reviewCount:
+          data.reviewCount.present ? data.reviewCount.value : this.reviewCount,
     );
   }
 
@@ -1133,14 +1218,29 @@ class FlashCard extends DataClass implements Insertable<FlashCard> {
           ..write('verso: $verso, ')
           ..write('ocrConfidenceScore: $ocrConfidenceScore, ')
           ..write('lowConfidence: $lowConfidence, ')
-          ..write('userFeedback: $userFeedback')
+          ..write('userFeedback: $userFeedback, ')
+          ..write('drillLevel: $drillLevel, ')
+          ..write('nextReviewAt: $nextReviewAt, ')
+          ..write('reviewCount: $reviewCount')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, itemId, collegeId, cardType, rang, recto,
-      verso, ocrConfidenceScore, lowConfidence, userFeedback);
+  int get hashCode => Object.hash(
+      id,
+      itemId,
+      collegeId,
+      cardType,
+      rang,
+      recto,
+      verso,
+      ocrConfidenceScore,
+      lowConfidence,
+      userFeedback,
+      drillLevel,
+      nextReviewAt,
+      reviewCount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1154,7 +1254,10 @@ class FlashCard extends DataClass implements Insertable<FlashCard> {
           other.verso == this.verso &&
           other.ocrConfidenceScore == this.ocrConfidenceScore &&
           other.lowConfidence == this.lowConfidence &&
-          other.userFeedback == this.userFeedback);
+          other.userFeedback == this.userFeedback &&
+          other.drillLevel == this.drillLevel &&
+          other.nextReviewAt == this.nextReviewAt &&
+          other.reviewCount == this.reviewCount);
 }
 
 class FlashCardsCompanion extends UpdateCompanion<FlashCard> {
@@ -1168,6 +1271,9 @@ class FlashCardsCompanion extends UpdateCompanion<FlashCard> {
   final Value<double> ocrConfidenceScore;
   final Value<bool> lowConfidence;
   final Value<String?> userFeedback;
+  final Value<String> drillLevel;
+  final Value<int?> nextReviewAt;
+  final Value<int> reviewCount;
   final Value<int> rowid;
   const FlashCardsCompanion({
     this.id = const Value.absent(),
@@ -1180,6 +1286,9 @@ class FlashCardsCompanion extends UpdateCompanion<FlashCard> {
     this.ocrConfidenceScore = const Value.absent(),
     this.lowConfidence = const Value.absent(),
     this.userFeedback = const Value.absent(),
+    this.drillLevel = const Value.absent(),
+    this.nextReviewAt = const Value.absent(),
+    this.reviewCount = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   FlashCardsCompanion.insert({
@@ -1193,6 +1302,9 @@ class FlashCardsCompanion extends UpdateCompanion<FlashCard> {
     this.ocrConfidenceScore = const Value.absent(),
     this.lowConfidence = const Value.absent(),
     this.userFeedback = const Value.absent(),
+    this.drillLevel = const Value.absent(),
+    this.nextReviewAt = const Value.absent(),
+    this.reviewCount = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         itemId = Value(itemId),
@@ -1212,6 +1324,9 @@ class FlashCardsCompanion extends UpdateCompanion<FlashCard> {
     Expression<double>? ocrConfidenceScore,
     Expression<bool>? lowConfidence,
     Expression<String>? userFeedback,
+    Expression<String>? drillLevel,
+    Expression<int>? nextReviewAt,
+    Expression<int>? reviewCount,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1226,6 +1341,9 @@ class FlashCardsCompanion extends UpdateCompanion<FlashCard> {
         'ocr_confidence_score': ocrConfidenceScore,
       if (lowConfidence != null) 'low_confidence': lowConfidence,
       if (userFeedback != null) 'user_feedback': userFeedback,
+      if (drillLevel != null) 'drill_level': drillLevel,
+      if (nextReviewAt != null) 'next_review_at': nextReviewAt,
+      if (reviewCount != null) 'review_count': reviewCount,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1241,6 +1359,9 @@ class FlashCardsCompanion extends UpdateCompanion<FlashCard> {
       Value<double>? ocrConfidenceScore,
       Value<bool>? lowConfidence,
       Value<String?>? userFeedback,
+      Value<String>? drillLevel,
+      Value<int?>? nextReviewAt,
+      Value<int>? reviewCount,
       Value<int>? rowid}) {
     return FlashCardsCompanion(
       id: id ?? this.id,
@@ -1253,6 +1374,9 @@ class FlashCardsCompanion extends UpdateCompanion<FlashCard> {
       ocrConfidenceScore: ocrConfidenceScore ?? this.ocrConfidenceScore,
       lowConfidence: lowConfidence ?? this.lowConfidence,
       userFeedback: userFeedback ?? this.userFeedback,
+      drillLevel: drillLevel ?? this.drillLevel,
+      nextReviewAt: nextReviewAt ?? this.nextReviewAt,
+      reviewCount: reviewCount ?? this.reviewCount,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1290,6 +1414,15 @@ class FlashCardsCompanion extends UpdateCompanion<FlashCard> {
     if (userFeedback.present) {
       map['user_feedback'] = Variable<String>(userFeedback.value);
     }
+    if (drillLevel.present) {
+      map['drill_level'] = Variable<String>(drillLevel.value);
+    }
+    if (nextReviewAt.present) {
+      map['next_review_at'] = Variable<int>(nextReviewAt.value);
+    }
+    if (reviewCount.present) {
+      map['review_count'] = Variable<int>(reviewCount.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1309,6 +1442,776 @@ class FlashCardsCompanion extends UpdateCompanion<FlashCard> {
           ..write('ocrConfidenceScore: $ocrConfidenceScore, ')
           ..write('lowConfidence: $lowConfidence, ')
           ..write('userFeedback: $userFeedback, ')
+          ..write('drillLevel: $drillLevel, ')
+          ..write('nextReviewAt: $nextReviewAt, ')
+          ..write('reviewCount: $reviewCount, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PlanningConfigsTable extends PlanningConfigs
+    with TableInfo<$PlanningConfigsTable, PlanningConfigRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlanningConfigsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _collegeIdsMeta =
+      const VerificationMeta('collegeIds');
+  @override
+  late final GeneratedColumn<String> collegeIds = GeneratedColumn<String>(
+      'college_ids', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _itemIdsMeta =
+      const VerificationMeta('itemIds');
+  @override
+  late final GeneratedColumn<String> itemIds = GeneratedColumn<String>(
+      'item_ids', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _startDateEpochDayMeta =
+      const VerificationMeta('startDateEpochDay');
+  @override
+  late final GeneratedColumn<int> startDateEpochDay = GeneratedColumn<int>(
+      'start_date_epoch_day', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _endDateEpochDayMeta =
+      const VerificationMeta('endDateEpochDay');
+  @override
+  late final GeneratedColumn<int> endDateEpochDay = GeneratedColumn<int>(
+      'end_date_epoch_day', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _dailyMinutesMeta =
+      const VerificationMeta('dailyMinutes');
+  @override
+  late final GeneratedColumn<int> dailyMinutes = GeneratedColumn<int>(
+      'daily_minutes', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMsMeta =
+      const VerificationMeta('createdAtMs');
+  @override
+  late final GeneratedColumn<int> createdAtMs = GeneratedColumn<int>(
+      'created_at_ms', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        collegeIds,
+        itemIds,
+        startDateEpochDay,
+        endDateEpochDay,
+        dailyMinutes,
+        createdAtMs
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'planning_configs';
+  @override
+  VerificationContext validateIntegrity(Insertable<PlanningConfigRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('college_ids')) {
+      context.handle(
+          _collegeIdsMeta,
+          collegeIds.isAcceptableOrUnknown(
+              data['college_ids']!, _collegeIdsMeta));
+    } else if (isInserting) {
+      context.missing(_collegeIdsMeta);
+    }
+    if (data.containsKey('item_ids')) {
+      context.handle(_itemIdsMeta,
+          itemIds.isAcceptableOrUnknown(data['item_ids']!, _itemIdsMeta));
+    }
+    if (data.containsKey('start_date_epoch_day')) {
+      context.handle(
+          _startDateEpochDayMeta,
+          startDateEpochDay.isAcceptableOrUnknown(
+              data['start_date_epoch_day']!, _startDateEpochDayMeta));
+    } else if (isInserting) {
+      context.missing(_startDateEpochDayMeta);
+    }
+    if (data.containsKey('end_date_epoch_day')) {
+      context.handle(
+          _endDateEpochDayMeta,
+          endDateEpochDay.isAcceptableOrUnknown(
+              data['end_date_epoch_day']!, _endDateEpochDayMeta));
+    } else if (isInserting) {
+      context.missing(_endDateEpochDayMeta);
+    }
+    if (data.containsKey('daily_minutes')) {
+      context.handle(
+          _dailyMinutesMeta,
+          dailyMinutes.isAcceptableOrUnknown(
+              data['daily_minutes']!, _dailyMinutesMeta));
+    } else if (isInserting) {
+      context.missing(_dailyMinutesMeta);
+    }
+    if (data.containsKey('created_at_ms')) {
+      context.handle(
+          _createdAtMsMeta,
+          createdAtMs.isAcceptableOrUnknown(
+              data['created_at_ms']!, _createdAtMsMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PlanningConfigRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlanningConfigRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      collegeIds: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}college_ids'])!,
+      itemIds: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}item_ids']),
+      startDateEpochDay: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}start_date_epoch_day'])!,
+      endDateEpochDay: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}end_date_epoch_day'])!,
+      dailyMinutes: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}daily_minutes'])!,
+      createdAtMs: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at_ms'])!,
+    );
+  }
+
+  @override
+  $PlanningConfigsTable createAlias(String alias) {
+    return $PlanningConfigsTable(attachedDatabase, alias);
+  }
+}
+
+class PlanningConfigRow extends DataClass
+    implements Insertable<PlanningConfigRow> {
+  final String id;
+  final String collegeIds;
+  final String? itemIds;
+  final int startDateEpochDay;
+  final int endDateEpochDay;
+  final int dailyMinutes;
+  final int createdAtMs;
+  const PlanningConfigRow(
+      {required this.id,
+      required this.collegeIds,
+      this.itemIds,
+      required this.startDateEpochDay,
+      required this.endDateEpochDay,
+      required this.dailyMinutes,
+      required this.createdAtMs});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['college_ids'] = Variable<String>(collegeIds);
+    if (!nullToAbsent || itemIds != null) {
+      map['item_ids'] = Variable<String>(itemIds);
+    }
+    map['start_date_epoch_day'] = Variable<int>(startDateEpochDay);
+    map['end_date_epoch_day'] = Variable<int>(endDateEpochDay);
+    map['daily_minutes'] = Variable<int>(dailyMinutes);
+    map['created_at_ms'] = Variable<int>(createdAtMs);
+    return map;
+  }
+
+  PlanningConfigsCompanion toCompanion(bool nullToAbsent) {
+    return PlanningConfigsCompanion(
+      id: Value(id),
+      collegeIds: Value(collegeIds),
+      itemIds: itemIds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(itemIds),
+      startDateEpochDay: Value(startDateEpochDay),
+      endDateEpochDay: Value(endDateEpochDay),
+      dailyMinutes: Value(dailyMinutes),
+      createdAtMs: Value(createdAtMs),
+    );
+  }
+
+  factory PlanningConfigRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlanningConfigRow(
+      id: serializer.fromJson<String>(json['id']),
+      collegeIds: serializer.fromJson<String>(json['collegeIds']),
+      itemIds: serializer.fromJson<String?>(json['itemIds']),
+      startDateEpochDay: serializer.fromJson<int>(json['startDateEpochDay']),
+      endDateEpochDay: serializer.fromJson<int>(json['endDateEpochDay']),
+      dailyMinutes: serializer.fromJson<int>(json['dailyMinutes']),
+      createdAtMs: serializer.fromJson<int>(json['createdAtMs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'collegeIds': serializer.toJson<String>(collegeIds),
+      'itemIds': serializer.toJson<String?>(itemIds),
+      'startDateEpochDay': serializer.toJson<int>(startDateEpochDay),
+      'endDateEpochDay': serializer.toJson<int>(endDateEpochDay),
+      'dailyMinutes': serializer.toJson<int>(dailyMinutes),
+      'createdAtMs': serializer.toJson<int>(createdAtMs),
+    };
+  }
+
+  PlanningConfigRow copyWith(
+          {String? id,
+          String? collegeIds,
+          Value<String?> itemIds = const Value.absent(),
+          int? startDateEpochDay,
+          int? endDateEpochDay,
+          int? dailyMinutes,
+          int? createdAtMs}) =>
+      PlanningConfigRow(
+        id: id ?? this.id,
+        collegeIds: collegeIds ?? this.collegeIds,
+        itemIds: itemIds.present ? itemIds.value : this.itemIds,
+        startDateEpochDay: startDateEpochDay ?? this.startDateEpochDay,
+        endDateEpochDay: endDateEpochDay ?? this.endDateEpochDay,
+        dailyMinutes: dailyMinutes ?? this.dailyMinutes,
+        createdAtMs: createdAtMs ?? this.createdAtMs,
+      );
+  PlanningConfigRow copyWithCompanion(PlanningConfigsCompanion data) {
+    return PlanningConfigRow(
+      id: data.id.present ? data.id.value : this.id,
+      collegeIds:
+          data.collegeIds.present ? data.collegeIds.value : this.collegeIds,
+      itemIds: data.itemIds.present ? data.itemIds.value : this.itemIds,
+      startDateEpochDay: data.startDateEpochDay.present
+          ? data.startDateEpochDay.value
+          : this.startDateEpochDay,
+      endDateEpochDay: data.endDateEpochDay.present
+          ? data.endDateEpochDay.value
+          : this.endDateEpochDay,
+      dailyMinutes: data.dailyMinutes.present
+          ? data.dailyMinutes.value
+          : this.dailyMinutes,
+      createdAtMs:
+          data.createdAtMs.present ? data.createdAtMs.value : this.createdAtMs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanningConfigRow(')
+          ..write('id: $id, ')
+          ..write('collegeIds: $collegeIds, ')
+          ..write('itemIds: $itemIds, ')
+          ..write('startDateEpochDay: $startDateEpochDay, ')
+          ..write('endDateEpochDay: $endDateEpochDay, ')
+          ..write('dailyMinutes: $dailyMinutes, ')
+          ..write('createdAtMs: $createdAtMs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, collegeIds, itemIds, startDateEpochDay,
+      endDateEpochDay, dailyMinutes, createdAtMs);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlanningConfigRow &&
+          other.id == this.id &&
+          other.collegeIds == this.collegeIds &&
+          other.itemIds == this.itemIds &&
+          other.startDateEpochDay == this.startDateEpochDay &&
+          other.endDateEpochDay == this.endDateEpochDay &&
+          other.dailyMinutes == this.dailyMinutes &&
+          other.createdAtMs == this.createdAtMs);
+}
+
+class PlanningConfigsCompanion extends UpdateCompanion<PlanningConfigRow> {
+  final Value<String> id;
+  final Value<String> collegeIds;
+  final Value<String?> itemIds;
+  final Value<int> startDateEpochDay;
+  final Value<int> endDateEpochDay;
+  final Value<int> dailyMinutes;
+  final Value<int> createdAtMs;
+  final Value<int> rowid;
+  const PlanningConfigsCompanion({
+    this.id = const Value.absent(),
+    this.collegeIds = const Value.absent(),
+    this.itemIds = const Value.absent(),
+    this.startDateEpochDay = const Value.absent(),
+    this.endDateEpochDay = const Value.absent(),
+    this.dailyMinutes = const Value.absent(),
+    this.createdAtMs = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PlanningConfigsCompanion.insert({
+    required String id,
+    required String collegeIds,
+    this.itemIds = const Value.absent(),
+    required int startDateEpochDay,
+    required int endDateEpochDay,
+    required int dailyMinutes,
+    required int createdAtMs,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        collegeIds = Value(collegeIds),
+        startDateEpochDay = Value(startDateEpochDay),
+        endDateEpochDay = Value(endDateEpochDay),
+        dailyMinutes = Value(dailyMinutes),
+        createdAtMs = Value(createdAtMs);
+  static Insertable<PlanningConfigRow> custom({
+    Expression<String>? id,
+    Expression<String>? collegeIds,
+    Expression<String>? itemIds,
+    Expression<int>? startDateEpochDay,
+    Expression<int>? endDateEpochDay,
+    Expression<int>? dailyMinutes,
+    Expression<int>? createdAtMs,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (collegeIds != null) 'college_ids': collegeIds,
+      if (itemIds != null) 'item_ids': itemIds,
+      if (startDateEpochDay != null) 'start_date_epoch_day': startDateEpochDay,
+      if (endDateEpochDay != null) 'end_date_epoch_day': endDateEpochDay,
+      if (dailyMinutes != null) 'daily_minutes': dailyMinutes,
+      if (createdAtMs != null) 'created_at_ms': createdAtMs,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PlanningConfigsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? collegeIds,
+      Value<String?>? itemIds,
+      Value<int>? startDateEpochDay,
+      Value<int>? endDateEpochDay,
+      Value<int>? dailyMinutes,
+      Value<int>? createdAtMs,
+      Value<int>? rowid}) {
+    return PlanningConfigsCompanion(
+      id: id ?? this.id,
+      collegeIds: collegeIds ?? this.collegeIds,
+      itemIds: itemIds ?? this.itemIds,
+      startDateEpochDay: startDateEpochDay ?? this.startDateEpochDay,
+      endDateEpochDay: endDateEpochDay ?? this.endDateEpochDay,
+      dailyMinutes: dailyMinutes ?? this.dailyMinutes,
+      createdAtMs: createdAtMs ?? this.createdAtMs,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (collegeIds.present) {
+      map['college_ids'] = Variable<String>(collegeIds.value);
+    }
+    if (itemIds.present) {
+      map['item_ids'] = Variable<String>(itemIds.value);
+    }
+    if (startDateEpochDay.present) {
+      map['start_date_epoch_day'] = Variable<int>(startDateEpochDay.value);
+    }
+    if (endDateEpochDay.present) {
+      map['end_date_epoch_day'] = Variable<int>(endDateEpochDay.value);
+    }
+    if (dailyMinutes.present) {
+      map['daily_minutes'] = Variable<int>(dailyMinutes.value);
+    }
+    if (createdAtMs.present) {
+      map['created_at_ms'] = Variable<int>(createdAtMs.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanningConfigsCompanion(')
+          ..write('id: $id, ')
+          ..write('collegeIds: $collegeIds, ')
+          ..write('itemIds: $itemIds, ')
+          ..write('startDateEpochDay: $startDateEpochDay, ')
+          ..write('endDateEpochDay: $endDateEpochDay, ')
+          ..write('dailyMinutes: $dailyMinutes, ')
+          ..write('createdAtMs: $createdAtMs, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PlanningSessionsTable extends PlanningSessions
+    with TableInfo<$PlanningSessionsTable, PlanningSessionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlanningSessionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _planningConfigIdMeta =
+      const VerificationMeta('planningConfigId');
+  @override
+  late final GeneratedColumn<String> planningConfigId = GeneratedColumn<String>(
+      'planning_config_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _sessionDateEpochDayMeta =
+      const VerificationMeta('sessionDateEpochDay');
+  @override
+  late final GeneratedColumn<int> sessionDateEpochDay = GeneratedColumn<int>(
+      'session_date_epoch_day', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _collegeIdMeta =
+      const VerificationMeta('collegeId');
+  @override
+  late final GeneratedColumn<String> collegeId = GeneratedColumn<String>(
+      'college_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _maxCardsMeta =
+      const VerificationMeta('maxCards');
+  @override
+  late final GeneratedColumn<int> maxCards = GeneratedColumn<int>(
+      'max_cards', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('pending'));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, planningConfigId, sessionDateEpochDay, collegeId, maxCards, status];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'planning_sessions';
+  @override
+  VerificationContext validateIntegrity(Insertable<PlanningSessionRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('planning_config_id')) {
+      context.handle(
+          _planningConfigIdMeta,
+          planningConfigId.isAcceptableOrUnknown(
+              data['planning_config_id']!, _planningConfigIdMeta));
+    } else if (isInserting) {
+      context.missing(_planningConfigIdMeta);
+    }
+    if (data.containsKey('session_date_epoch_day')) {
+      context.handle(
+          _sessionDateEpochDayMeta,
+          sessionDateEpochDay.isAcceptableOrUnknown(
+              data['session_date_epoch_day']!, _sessionDateEpochDayMeta));
+    } else if (isInserting) {
+      context.missing(_sessionDateEpochDayMeta);
+    }
+    if (data.containsKey('college_id')) {
+      context.handle(_collegeIdMeta,
+          collegeId.isAcceptableOrUnknown(data['college_id']!, _collegeIdMeta));
+    } else if (isInserting) {
+      context.missing(_collegeIdMeta);
+    }
+    if (data.containsKey('max_cards')) {
+      context.handle(_maxCardsMeta,
+          maxCards.isAcceptableOrUnknown(data['max_cards']!, _maxCardsMeta));
+    } else if (isInserting) {
+      context.missing(_maxCardsMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PlanningSessionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlanningSessionRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      planningConfigId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}planning_config_id'])!,
+      sessionDateEpochDay: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}session_date_epoch_day'])!,
+      collegeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}college_id'])!,
+      maxCards: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}max_cards'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+    );
+  }
+
+  @override
+  $PlanningSessionsTable createAlias(String alias) {
+    return $PlanningSessionsTable(attachedDatabase, alias);
+  }
+}
+
+class PlanningSessionRow extends DataClass
+    implements Insertable<PlanningSessionRow> {
+  final String id;
+  final String planningConfigId;
+  final int sessionDateEpochDay;
+  final String collegeId;
+  final int maxCards;
+  final String status;
+  const PlanningSessionRow(
+      {required this.id,
+      required this.planningConfigId,
+      required this.sessionDateEpochDay,
+      required this.collegeId,
+      required this.maxCards,
+      required this.status});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['planning_config_id'] = Variable<String>(planningConfigId);
+    map['session_date_epoch_day'] = Variable<int>(sessionDateEpochDay);
+    map['college_id'] = Variable<String>(collegeId);
+    map['max_cards'] = Variable<int>(maxCards);
+    map['status'] = Variable<String>(status);
+    return map;
+  }
+
+  PlanningSessionsCompanion toCompanion(bool nullToAbsent) {
+    return PlanningSessionsCompanion(
+      id: Value(id),
+      planningConfigId: Value(planningConfigId),
+      sessionDateEpochDay: Value(sessionDateEpochDay),
+      collegeId: Value(collegeId),
+      maxCards: Value(maxCards),
+      status: Value(status),
+    );
+  }
+
+  factory PlanningSessionRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlanningSessionRow(
+      id: serializer.fromJson<String>(json['id']),
+      planningConfigId: serializer.fromJson<String>(json['planningConfigId']),
+      sessionDateEpochDay:
+          serializer.fromJson<int>(json['sessionDateEpochDay']),
+      collegeId: serializer.fromJson<String>(json['collegeId']),
+      maxCards: serializer.fromJson<int>(json['maxCards']),
+      status: serializer.fromJson<String>(json['status']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'planningConfigId': serializer.toJson<String>(planningConfigId),
+      'sessionDateEpochDay': serializer.toJson<int>(sessionDateEpochDay),
+      'collegeId': serializer.toJson<String>(collegeId),
+      'maxCards': serializer.toJson<int>(maxCards),
+      'status': serializer.toJson<String>(status),
+    };
+  }
+
+  PlanningSessionRow copyWith(
+          {String? id,
+          String? planningConfigId,
+          int? sessionDateEpochDay,
+          String? collegeId,
+          int? maxCards,
+          String? status}) =>
+      PlanningSessionRow(
+        id: id ?? this.id,
+        planningConfigId: planningConfigId ?? this.planningConfigId,
+        sessionDateEpochDay: sessionDateEpochDay ?? this.sessionDateEpochDay,
+        collegeId: collegeId ?? this.collegeId,
+        maxCards: maxCards ?? this.maxCards,
+        status: status ?? this.status,
+      );
+  PlanningSessionRow copyWithCompanion(PlanningSessionsCompanion data) {
+    return PlanningSessionRow(
+      id: data.id.present ? data.id.value : this.id,
+      planningConfigId: data.planningConfigId.present
+          ? data.planningConfigId.value
+          : this.planningConfigId,
+      sessionDateEpochDay: data.sessionDateEpochDay.present
+          ? data.sessionDateEpochDay.value
+          : this.sessionDateEpochDay,
+      collegeId: data.collegeId.present ? data.collegeId.value : this.collegeId,
+      maxCards: data.maxCards.present ? data.maxCards.value : this.maxCards,
+      status: data.status.present ? data.status.value : this.status,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanningSessionRow(')
+          ..write('id: $id, ')
+          ..write('planningConfigId: $planningConfigId, ')
+          ..write('sessionDateEpochDay: $sessionDateEpochDay, ')
+          ..write('collegeId: $collegeId, ')
+          ..write('maxCards: $maxCards, ')
+          ..write('status: $status')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, planningConfigId, sessionDateEpochDay, collegeId, maxCards, status);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlanningSessionRow &&
+          other.id == this.id &&
+          other.planningConfigId == this.planningConfigId &&
+          other.sessionDateEpochDay == this.sessionDateEpochDay &&
+          other.collegeId == this.collegeId &&
+          other.maxCards == this.maxCards &&
+          other.status == this.status);
+}
+
+class PlanningSessionsCompanion extends UpdateCompanion<PlanningSessionRow> {
+  final Value<String> id;
+  final Value<String> planningConfigId;
+  final Value<int> sessionDateEpochDay;
+  final Value<String> collegeId;
+  final Value<int> maxCards;
+  final Value<String> status;
+  final Value<int> rowid;
+  const PlanningSessionsCompanion({
+    this.id = const Value.absent(),
+    this.planningConfigId = const Value.absent(),
+    this.sessionDateEpochDay = const Value.absent(),
+    this.collegeId = const Value.absent(),
+    this.maxCards = const Value.absent(),
+    this.status = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PlanningSessionsCompanion.insert({
+    required String id,
+    required String planningConfigId,
+    required int sessionDateEpochDay,
+    required String collegeId,
+    required int maxCards,
+    this.status = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        planningConfigId = Value(planningConfigId),
+        sessionDateEpochDay = Value(sessionDateEpochDay),
+        collegeId = Value(collegeId),
+        maxCards = Value(maxCards);
+  static Insertable<PlanningSessionRow> custom({
+    Expression<String>? id,
+    Expression<String>? planningConfigId,
+    Expression<int>? sessionDateEpochDay,
+    Expression<String>? collegeId,
+    Expression<int>? maxCards,
+    Expression<String>? status,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (planningConfigId != null) 'planning_config_id': planningConfigId,
+      if (sessionDateEpochDay != null)
+        'session_date_epoch_day': sessionDateEpochDay,
+      if (collegeId != null) 'college_id': collegeId,
+      if (maxCards != null) 'max_cards': maxCards,
+      if (status != null) 'status': status,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PlanningSessionsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? planningConfigId,
+      Value<int>? sessionDateEpochDay,
+      Value<String>? collegeId,
+      Value<int>? maxCards,
+      Value<String>? status,
+      Value<int>? rowid}) {
+    return PlanningSessionsCompanion(
+      id: id ?? this.id,
+      planningConfigId: planningConfigId ?? this.planningConfigId,
+      sessionDateEpochDay: sessionDateEpochDay ?? this.sessionDateEpochDay,
+      collegeId: collegeId ?? this.collegeId,
+      maxCards: maxCards ?? this.maxCards,
+      status: status ?? this.status,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (planningConfigId.present) {
+      map['planning_config_id'] = Variable<String>(planningConfigId.value);
+    }
+    if (sessionDateEpochDay.present) {
+      map['session_date_epoch_day'] = Variable<int>(sessionDateEpochDay.value);
+    }
+    if (collegeId.present) {
+      map['college_id'] = Variable<String>(collegeId.value);
+    }
+    if (maxCards.present) {
+      map['max_cards'] = Variable<int>(maxCards.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanningSessionsCompanion(')
+          ..write('id: $id, ')
+          ..write('planningConfigId: $planningConfigId, ')
+          ..write('sessionDateEpochDay: $sessionDateEpochDay, ')
+          ..write('collegeId: $collegeId, ')
+          ..write('maxCards: $maxCards, ')
+          ..write('status: $status, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1321,12 +2224,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CollegeImportsTable collegeImports = $CollegeImportsTable(this);
   late final $ItemsTable items = $ItemsTable(this);
   late final $FlashCardsTable flashCards = $FlashCardsTable(this);
+  late final $PlanningConfigsTable planningConfigs =
+      $PlanningConfigsTable(this);
+  late final $PlanningSessionsTable planningSessions =
+      $PlanningSessionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [collegeImports, items, flashCards];
+      [collegeImports, items, flashCards, planningConfigs, planningSessions];
 }
 
 typedef $$CollegeImportsTableCreateCompanionBuilder = CollegeImportsCompanion
@@ -1742,6 +2649,9 @@ typedef $$FlashCardsTableCreateCompanionBuilder = FlashCardsCompanion Function({
   Value<double> ocrConfidenceScore,
   Value<bool> lowConfidence,
   Value<String?> userFeedback,
+  Value<String> drillLevel,
+  Value<int?> nextReviewAt,
+  Value<int> reviewCount,
   Value<int> rowid,
 });
 typedef $$FlashCardsTableUpdateCompanionBuilder = FlashCardsCompanion Function({
@@ -1755,6 +2665,9 @@ typedef $$FlashCardsTableUpdateCompanionBuilder = FlashCardsCompanion Function({
   Value<double> ocrConfidenceScore,
   Value<bool> lowConfidence,
   Value<String?> userFeedback,
+  Value<String> drillLevel,
+  Value<int?> nextReviewAt,
+  Value<int> reviewCount,
   Value<int> rowid,
 });
 
@@ -1797,6 +2710,15 @@ class $$FlashCardsTableFilterComposer
 
   ColumnFilters<String> get userFeedback => $composableBuilder(
       column: $table.userFeedback, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get drillLevel => $composableBuilder(
+      column: $table.drillLevel, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get nextReviewAt => $composableBuilder(
+      column: $table.nextReviewAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get reviewCount => $composableBuilder(
+      column: $table.reviewCount, builder: (column) => ColumnFilters(column));
 }
 
 class $$FlashCardsTableOrderingComposer
@@ -1840,6 +2762,16 @@ class $$FlashCardsTableOrderingComposer
   ColumnOrderings<String> get userFeedback => $composableBuilder(
       column: $table.userFeedback,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get drillLevel => $composableBuilder(
+      column: $table.drillLevel, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get nextReviewAt => $composableBuilder(
+      column: $table.nextReviewAt,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get reviewCount => $composableBuilder(
+      column: $table.reviewCount, builder: (column) => ColumnOrderings(column));
 }
 
 class $$FlashCardsTableAnnotationComposer
@@ -1880,6 +2812,15 @@ class $$FlashCardsTableAnnotationComposer
 
   GeneratedColumn<String> get userFeedback => $composableBuilder(
       column: $table.userFeedback, builder: (column) => column);
+
+  GeneratedColumn<String> get drillLevel => $composableBuilder(
+      column: $table.drillLevel, builder: (column) => column);
+
+  GeneratedColumn<int> get nextReviewAt => $composableBuilder(
+      column: $table.nextReviewAt, builder: (column) => column);
+
+  GeneratedColumn<int> get reviewCount => $composableBuilder(
+      column: $table.reviewCount, builder: (column) => column);
 }
 
 class $$FlashCardsTableTableManager extends RootTableManager<
@@ -1915,6 +2856,9 @@ class $$FlashCardsTableTableManager extends RootTableManager<
             Value<double> ocrConfidenceScore = const Value.absent(),
             Value<bool> lowConfidence = const Value.absent(),
             Value<String?> userFeedback = const Value.absent(),
+            Value<String> drillLevel = const Value.absent(),
+            Value<int?> nextReviewAt = const Value.absent(),
+            Value<int> reviewCount = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               FlashCardsCompanion(
@@ -1928,6 +2872,9 @@ class $$FlashCardsTableTableManager extends RootTableManager<
             ocrConfidenceScore: ocrConfidenceScore,
             lowConfidence: lowConfidence,
             userFeedback: userFeedback,
+            drillLevel: drillLevel,
+            nextReviewAt: nextReviewAt,
+            reviewCount: reviewCount,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -1941,6 +2888,9 @@ class $$FlashCardsTableTableManager extends RootTableManager<
             Value<double> ocrConfidenceScore = const Value.absent(),
             Value<bool> lowConfidence = const Value.absent(),
             Value<String?> userFeedback = const Value.absent(),
+            Value<String> drillLevel = const Value.absent(),
+            Value<int?> nextReviewAt = const Value.absent(),
+            Value<int> reviewCount = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               FlashCardsCompanion.insert(
@@ -1954,6 +2904,9 @@ class $$FlashCardsTableTableManager extends RootTableManager<
             ocrConfidenceScore: ocrConfidenceScore,
             lowConfidence: lowConfidence,
             userFeedback: userFeedback,
+            drillLevel: drillLevel,
+            nextReviewAt: nextReviewAt,
+            reviewCount: reviewCount,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -1975,6 +2928,408 @@ typedef $$FlashCardsTableProcessedTableManager = ProcessedTableManager<
     (FlashCard, BaseReferences<_$AppDatabase, $FlashCardsTable, FlashCard>),
     FlashCard,
     PrefetchHooks Function()>;
+typedef $$PlanningConfigsTableCreateCompanionBuilder = PlanningConfigsCompanion
+    Function({
+  required String id,
+  required String collegeIds,
+  Value<String?> itemIds,
+  required int startDateEpochDay,
+  required int endDateEpochDay,
+  required int dailyMinutes,
+  required int createdAtMs,
+  Value<int> rowid,
+});
+typedef $$PlanningConfigsTableUpdateCompanionBuilder = PlanningConfigsCompanion
+    Function({
+  Value<String> id,
+  Value<String> collegeIds,
+  Value<String?> itemIds,
+  Value<int> startDateEpochDay,
+  Value<int> endDateEpochDay,
+  Value<int> dailyMinutes,
+  Value<int> createdAtMs,
+  Value<int> rowid,
+});
+
+class $$PlanningConfigsTableFilterComposer
+    extends Composer<_$AppDatabase, $PlanningConfigsTable> {
+  $$PlanningConfigsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get collegeIds => $composableBuilder(
+      column: $table.collegeIds, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get itemIds => $composableBuilder(
+      column: $table.itemIds, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get startDateEpochDay => $composableBuilder(
+      column: $table.startDateEpochDay,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get endDateEpochDay => $composableBuilder(
+      column: $table.endDateEpochDay,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get dailyMinutes => $composableBuilder(
+      column: $table.dailyMinutes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAtMs => $composableBuilder(
+      column: $table.createdAtMs, builder: (column) => ColumnFilters(column));
+}
+
+class $$PlanningConfigsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlanningConfigsTable> {
+  $$PlanningConfigsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get collegeIds => $composableBuilder(
+      column: $table.collegeIds, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get itemIds => $composableBuilder(
+      column: $table.itemIds, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get startDateEpochDay => $composableBuilder(
+      column: $table.startDateEpochDay,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get endDateEpochDay => $composableBuilder(
+      column: $table.endDateEpochDay,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get dailyMinutes => $composableBuilder(
+      column: $table.dailyMinutes,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAtMs => $composableBuilder(
+      column: $table.createdAtMs, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PlanningConfigsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlanningConfigsTable> {
+  $$PlanningConfigsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get collegeIds => $composableBuilder(
+      column: $table.collegeIds, builder: (column) => column);
+
+  GeneratedColumn<String> get itemIds =>
+      $composableBuilder(column: $table.itemIds, builder: (column) => column);
+
+  GeneratedColumn<int> get startDateEpochDay => $composableBuilder(
+      column: $table.startDateEpochDay, builder: (column) => column);
+
+  GeneratedColumn<int> get endDateEpochDay => $composableBuilder(
+      column: $table.endDateEpochDay, builder: (column) => column);
+
+  GeneratedColumn<int> get dailyMinutes => $composableBuilder(
+      column: $table.dailyMinutes, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAtMs => $composableBuilder(
+      column: $table.createdAtMs, builder: (column) => column);
+}
+
+class $$PlanningConfigsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PlanningConfigsTable,
+    PlanningConfigRow,
+    $$PlanningConfigsTableFilterComposer,
+    $$PlanningConfigsTableOrderingComposer,
+    $$PlanningConfigsTableAnnotationComposer,
+    $$PlanningConfigsTableCreateCompanionBuilder,
+    $$PlanningConfigsTableUpdateCompanionBuilder,
+    (
+      PlanningConfigRow,
+      BaseReferences<_$AppDatabase, $PlanningConfigsTable, PlanningConfigRow>
+    ),
+    PlanningConfigRow,
+    PrefetchHooks Function()> {
+  $$PlanningConfigsTableTableManager(
+      _$AppDatabase db, $PlanningConfigsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlanningConfigsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PlanningConfigsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PlanningConfigsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> collegeIds = const Value.absent(),
+            Value<String?> itemIds = const Value.absent(),
+            Value<int> startDateEpochDay = const Value.absent(),
+            Value<int> endDateEpochDay = const Value.absent(),
+            Value<int> dailyMinutes = const Value.absent(),
+            Value<int> createdAtMs = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PlanningConfigsCompanion(
+            id: id,
+            collegeIds: collegeIds,
+            itemIds: itemIds,
+            startDateEpochDay: startDateEpochDay,
+            endDateEpochDay: endDateEpochDay,
+            dailyMinutes: dailyMinutes,
+            createdAtMs: createdAtMs,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String collegeIds,
+            Value<String?> itemIds = const Value.absent(),
+            required int startDateEpochDay,
+            required int endDateEpochDay,
+            required int dailyMinutes,
+            required int createdAtMs,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PlanningConfigsCompanion.insert(
+            id: id,
+            collegeIds: collegeIds,
+            itemIds: itemIds,
+            startDateEpochDay: startDateEpochDay,
+            endDateEpochDay: endDateEpochDay,
+            dailyMinutes: dailyMinutes,
+            createdAtMs: createdAtMs,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PlanningConfigsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PlanningConfigsTable,
+    PlanningConfigRow,
+    $$PlanningConfigsTableFilterComposer,
+    $$PlanningConfigsTableOrderingComposer,
+    $$PlanningConfigsTableAnnotationComposer,
+    $$PlanningConfigsTableCreateCompanionBuilder,
+    $$PlanningConfigsTableUpdateCompanionBuilder,
+    (
+      PlanningConfigRow,
+      BaseReferences<_$AppDatabase, $PlanningConfigsTable, PlanningConfigRow>
+    ),
+    PlanningConfigRow,
+    PrefetchHooks Function()>;
+typedef $$PlanningSessionsTableCreateCompanionBuilder
+    = PlanningSessionsCompanion Function({
+  required String id,
+  required String planningConfigId,
+  required int sessionDateEpochDay,
+  required String collegeId,
+  required int maxCards,
+  Value<String> status,
+  Value<int> rowid,
+});
+typedef $$PlanningSessionsTableUpdateCompanionBuilder
+    = PlanningSessionsCompanion Function({
+  Value<String> id,
+  Value<String> planningConfigId,
+  Value<int> sessionDateEpochDay,
+  Value<String> collegeId,
+  Value<int> maxCards,
+  Value<String> status,
+  Value<int> rowid,
+});
+
+class $$PlanningSessionsTableFilterComposer
+    extends Composer<_$AppDatabase, $PlanningSessionsTable> {
+  $$PlanningSessionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get planningConfigId => $composableBuilder(
+      column: $table.planningConfigId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sessionDateEpochDay => $composableBuilder(
+      column: $table.sessionDateEpochDay,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get collegeId => $composableBuilder(
+      column: $table.collegeId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get maxCards => $composableBuilder(
+      column: $table.maxCards, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+}
+
+class $$PlanningSessionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlanningSessionsTable> {
+  $$PlanningSessionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get planningConfigId => $composableBuilder(
+      column: $table.planningConfigId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sessionDateEpochDay => $composableBuilder(
+      column: $table.sessionDateEpochDay,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get collegeId => $composableBuilder(
+      column: $table.collegeId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get maxCards => $composableBuilder(
+      column: $table.maxCards, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PlanningSessionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlanningSessionsTable> {
+  $$PlanningSessionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get planningConfigId => $composableBuilder(
+      column: $table.planningConfigId, builder: (column) => column);
+
+  GeneratedColumn<int> get sessionDateEpochDay => $composableBuilder(
+      column: $table.sessionDateEpochDay, builder: (column) => column);
+
+  GeneratedColumn<String> get collegeId =>
+      $composableBuilder(column: $table.collegeId, builder: (column) => column);
+
+  GeneratedColumn<int> get maxCards =>
+      $composableBuilder(column: $table.maxCards, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+}
+
+class $$PlanningSessionsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PlanningSessionsTable,
+    PlanningSessionRow,
+    $$PlanningSessionsTableFilterComposer,
+    $$PlanningSessionsTableOrderingComposer,
+    $$PlanningSessionsTableAnnotationComposer,
+    $$PlanningSessionsTableCreateCompanionBuilder,
+    $$PlanningSessionsTableUpdateCompanionBuilder,
+    (
+      PlanningSessionRow,
+      BaseReferences<_$AppDatabase, $PlanningSessionsTable, PlanningSessionRow>
+    ),
+    PlanningSessionRow,
+    PrefetchHooks Function()> {
+  $$PlanningSessionsTableTableManager(
+      _$AppDatabase db, $PlanningSessionsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlanningSessionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PlanningSessionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PlanningSessionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> planningConfigId = const Value.absent(),
+            Value<int> sessionDateEpochDay = const Value.absent(),
+            Value<String> collegeId = const Value.absent(),
+            Value<int> maxCards = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PlanningSessionsCompanion(
+            id: id,
+            planningConfigId: planningConfigId,
+            sessionDateEpochDay: sessionDateEpochDay,
+            collegeId: collegeId,
+            maxCards: maxCards,
+            status: status,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String planningConfigId,
+            required int sessionDateEpochDay,
+            required String collegeId,
+            required int maxCards,
+            Value<String> status = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PlanningSessionsCompanion.insert(
+            id: id,
+            planningConfigId: planningConfigId,
+            sessionDateEpochDay: sessionDateEpochDay,
+            collegeId: collegeId,
+            maxCards: maxCards,
+            status: status,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PlanningSessionsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PlanningSessionsTable,
+    PlanningSessionRow,
+    $$PlanningSessionsTableFilterComposer,
+    $$PlanningSessionsTableOrderingComposer,
+    $$PlanningSessionsTableAnnotationComposer,
+    $$PlanningSessionsTableCreateCompanionBuilder,
+    $$PlanningSessionsTableUpdateCompanionBuilder,
+    (
+      PlanningSessionRow,
+      BaseReferences<_$AppDatabase, $PlanningSessionsTable, PlanningSessionRow>
+    ),
+    PlanningSessionRow,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1985,4 +3340,8 @@ class $AppDatabaseManager {
       $$ItemsTableTableManager(_db, _db.items);
   $$FlashCardsTableTableManager get flashCards =>
       $$FlashCardsTableTableManager(_db, _db.flashCards);
+  $$PlanningConfigsTableTableManager get planningConfigs =>
+      $$PlanningConfigsTableTableManager(_db, _db.planningConfigs);
+  $$PlanningSessionsTableTableManager get planningSessions =>
+      $$PlanningSessionsTableTableManager(_db, _db.planningSessions);
 }

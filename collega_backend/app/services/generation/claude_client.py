@@ -70,6 +70,21 @@ class ClaudeClient:
             max_retries=3,
         )
 
+    async def ask_json(self, prompt: str) -> dict:
+        message = await self._client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=256,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        if not message.content or message.content[0].type != "text":
+            raise ValueError("Unexpected Claude response structure")
+        text = message.content[0].text
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        if start == -1 or end <= start:
+            raise ValueError(f"No JSON object in Claude response: {text!r}")
+        return json.loads(text[start:end])
+
     async def generate_cards_for_item(self, item) -> list[FlashCardData]:
         if not item.ocr_text:
             logger.warning("Item %s has no ocr_text — skipping Claude call", item.id)

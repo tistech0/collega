@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import 'package:go_router/go_router.dart';
+
 import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
 import 'package:collega_app/features/colleges/presentation/widgets/ocr_confidence_badge.dart';
+import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 
 class ItemDetailScreen extends ConsumerWidget {
   const ItemDetailScreen({
@@ -75,7 +78,15 @@ class ItemDetailScreen extends ConsumerWidget {
                   SizedBox(width: 8),
                 ],
               ),
-              bottomNavigationBar: DrillLaunchBar(cardCount: cards.length),
+              bottomNavigationBar: DrillLaunchBar(
+                cardCount: cards.length,
+                collegeId: collegeId,
+                itemId: itemId,
+                itemName: currentItem != null
+                    ? 'Item ${currentItem.itemNumber}'
+                        '${currentItem.chapterTitle != null ? ' · ${currentItem.chapterTitle}' : ''}'
+                    : null,
+              ),
               body: _ItemDetailBody(
                 cards: cards,
                 collegeId: collegeId,
@@ -427,9 +438,18 @@ class _FlashcardStrip extends StatelessWidget {
 }
 
 class DrillLaunchBar extends StatelessWidget {
-  const DrillLaunchBar({super.key, required this.cardCount});
+  const DrillLaunchBar({
+    super.key,
+    required this.cardCount,
+    required this.collegeId,
+    required this.itemId,
+    this.itemName,
+  });
 
   final int cardCount;
+  final String collegeId;
+  final String itemId;
+  final String? itemName;
 
   @override
   Widget build(BuildContext context) {
@@ -442,7 +462,16 @@ class DrillLaunchBar extends StatelessWidget {
         8,
       ),
       child: ShadButton(
-        onPressed: null,
+        onPressed: cardCount == 0
+            ? null
+            : () => context.push(
+                  '/drill',
+                  extra: DrillSessionParams(
+                    collegeId: collegeId,
+                    itemId: itemId,
+                    itemName: itemName,
+                  ),
+                ),
         width: double.infinity,
         child: Text('Lancer le drill · $cardCount fiches'),
       ),

@@ -51,6 +51,7 @@ class FlashCardModel {
     required this.ocrConfidenceScore,
     required this.lowConfidence,
     this.userFeedback,
+    this.drillLevel = 'new',
   });
 
   final String id;
@@ -63,6 +64,7 @@ class FlashCardModel {
   final double ocrConfidenceScore;
   final bool lowConfidence;
   final String? userFeedback;
+  final String drillLevel;
 
   factory FlashCardModel.fromJson(Map<String, dynamic> json) => FlashCardModel(
         id: json['id'] as String,
@@ -90,6 +92,7 @@ class FlashCardModel {
     double? ocrConfidenceScore,
     bool? lowConfidence,
     Object? userFeedback = _absent,
+    String? drillLevel,
   }) =>
       FlashCardModel(
         id: id ?? this.id,
@@ -102,6 +105,7 @@ class FlashCardModel {
         ocrConfidenceScore: ocrConfidenceScore ?? this.ocrConfidenceScore,
         lowConfidence: lowConfidence ?? this.lowConfidence,
         userFeedback: identical(userFeedback, _absent) ? this.userFeedback : userFeedback as String?,
+        drillLevel: drillLevel ?? this.drillLevel,
       );
 }
 

@@ -13,6 +13,11 @@ class FlashCards extends Table {
   BoolColumn get lowConfidence =>
       boolean().withDefault(const Constant(false))();
   TextColumn get userFeedback => text().nullable()();
+  TextColumn get drillLevel =>
+      text().withDefault(const Constant('new'))();
+  IntColumn get nextReviewAt => integer().nullable()();
+  IntColumn get reviewCount =>
+      integer().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};

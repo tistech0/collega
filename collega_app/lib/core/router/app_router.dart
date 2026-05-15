@@ -13,6 +13,10 @@ import 'package:collega_app/features/colleges/presentation/import_progress_scree
 import 'package:collega_app/features/colleges/presentation/item_detail_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_drill_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_screen.dart';
+import 'package:collega_app/features/home/presentation/home_screen.dart';
+import 'package:collega_app/features/drill/domain/drill_session_state.dart';
+import 'package:collega_app/features/drill/presentation/drill_screen.dart';
+import 'package:collega_app/features/planning/presentation/planning_config_screen.dart';
 import 'package:collega_app/shared/widgets/bottom_nav_bar.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -31,7 +35,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isProtected = state.matchedLocation.startsWith('/home') ||
           state.matchedLocation.startsWith('/colleges') ||
           state.matchedLocation.startsWith('/search') ||
-          state.matchedLocation.startsWith('/profile');
+          state.matchedLocation.startsWith('/profile') ||
+          state.matchedLocation.startsWith('/drill') ||
+          state.matchedLocation.startsWith('/planning');
 
       if (!isAuth && (isProtected || state.matchedLocation == '/paywall')) return '/demo';
 
@@ -45,8 +51,25 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/planning/config',
+        builder: (ctx, s) => const PlanningConfigScreen(),
+      ),
       GoRoute(path: '/demo', builder: (ctx, s) => const DemoScreen()),
       GoRoute(path: '/demo/drill', builder: (ctx, s) => const DemoDrillScreen()),
+      GoRoute(
+        path: '/drill',
+        builder: (ctx, s) {
+          final extra = s.extra;
+          if (extra is! DrillSessionParams) {
+            return Scaffold(
+              appBar: AppBar(),
+              body: const Center(child: Text('Paramètres manquants')),
+            );
+          }
+          return DrillScreen(params: extra);
+        },
+      ),
       GoRoute(path: '/auth/register', builder: (ctx, s) => const AuthRegisterScreen()),
       GoRoute(path: '/auth/login', builder: (ctx, s) => const AuthLoginScreen()),
       GoRoute(path: '/paywall', builder: (ctx, s) => const PaywallScreen()),
@@ -72,7 +95,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) => _AppShell(child: child),
         routes: [
-          GoRoute(path: '/home', builder: (ctx, s) => const _HomeStub()),
+          GoRoute(path: '/home', builder: (ctx, s) => const HomeScreen()),
           GoRoute(path: '/colleges', builder: (ctx, s) => const CollegesScreen()),
           GoRoute(
             path: '/colleges/:ref_id',
@@ -119,15 +142,6 @@ class _AppShell extends StatelessWidget {
         },
       ),
     );
-  }
-}
-
-class _HomeStub extends StatelessWidget {
-  const _HomeStub();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Accueil'));
   }
 }
 
