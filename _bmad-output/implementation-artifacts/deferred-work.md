@@ -1,5 +1,14 @@
 # Deferred Work
 
+## Deferred from: code review of 5-1-recherche-full-text-resultats-contextuels (2026-05-16)
+
+- W1 — Rate limit keyed sur IP (slowapi default) et non sur `user_id` — un NAT partagé peut déclencher un 429 collectif ; un abonné avec multi-IP peut contourner la limite. [`search.py`]
+- W2 — `to_tsvector` recalculé pour `ts_rank` (pas de colonne tsvector stockée) — vecteur de texte matérialisé 2× par ligne (WHERE + ts_rank) ; envisager une colonne générée stockée pour optimiser. [`full_text_search.py`]
+- W3 — `require_subscription` évalué après `get_db` — slot de connexion DB acquis pour chaque requête 403 non-abonné ; pattern pré-existant sur tous les endpoints subscribed. [`search.py`]
+- W4 — Champ `rank` (float, score de pertinence interne) exposé dans la réponse API sans Pydantic response model — à filtrer avec un schéma `SearchResultResponse`. [`search.py`]
+- W5 — Tiebreaker non-déterministe dans `DISTINCT ON` quand deux flashcards ont le même `ts_rank` pour un même `item_id` — ajouter `fc.id` comme clé de tri secondaire stable. [`full_text_search.py`]
+- W6 — Couleur highlight `Color(0xFFB7F2C8)` hardcodée en dehors de `AppColors` — extraire en `AppColors.searchHighlight` pour cohérence avec le dark mode futur. [`search_result_tile.dart`]
+
 ## Deferred from: code review of 4-5-progression-college-rang-rappels (2026-05-16)
 
 - D1 — Clock skew ARQ à la frontière d'heure — `datetime.now(timezone.utc).hour` peut capturer la mauvaise heure en cas de dérive cron ; pas de guard de déduplication ni de fenêtre de tolérance. [`daily_reminder_worker.py:15`]

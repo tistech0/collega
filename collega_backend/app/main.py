@@ -14,6 +14,7 @@ from app.api.v1.drill import router as drill_router
 from app.api.v1.flash_cards import router as flash_cards_router
 from app.api.v1.health import router as health_router
 from app.api.v1.notifications import router as notifications_router
+from app.api.v1.search import router as search_router
 from app.api.v1.tester import router as tester_router
 from app.core.database import engine
 from app.core.limiter import limiter
@@ -41,6 +42,7 @@ app.include_router(colleges_router, prefix="/v1")
 app.include_router(flash_cards_router, prefix="/v1")
 app.include_router(drill_router, prefix="/v1")
 app.include_router(notifications_router, prefix="/v1")
+app.include_router(search_router, prefix="/v1")
 app.include_router(admin_router, prefix="/v1/admin")
 app.include_router(billing_router, prefix="/v1/webhooks")
 app.include_router(tester_router, prefix="/v1/tester")
