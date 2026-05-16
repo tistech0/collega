@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:collega_app/core/theme/app_theme.dart';
+import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
+import 'package:collega_app/features/colleges/domain/drill_stats.dart';
 
 class CollegeProgressTile extends StatelessWidget {
   const CollegeProgressTile({
@@ -20,20 +23,30 @@ class CollegeProgressTile extends StatelessWidget {
       label:
           '${entry.catalog.name}, ${entry.isImported ? "importé" : "non importé"}',
       child: entry.isImported
-          ? _ImportedTile(entry: entry, onTap: onTap)
+          ? _ImportedTile(
+              entry: entry,
+              collegeId: entry.userStatus!.collegeId,
+              onTap: onTap,
+            )
           : _NotImportedTile(entry: entry, onTap: onTap),
     );
   }
 }
 
-class _ImportedTile extends StatelessWidget {
-  const _ImportedTile({required this.entry, this.onTap});
+class _ImportedTile extends ConsumerWidget {
+  const _ImportedTile({
+    required this.entry,
+    required this.collegeId,
+    this.onTap,
+  });
   final CollegeListEntry entry;
+  final String collegeId;
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final status = entry.userStatus!;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final statsAsync = ref.watch(collegeDrillStatsProvider(collegeId));
+    final stats = statsAsync.valueOrNull ?? const DrillStats();
     return ShadCard(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       child: InkWell(
@@ -82,10 +95,10 @@ class _ImportedTile extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             _ProgressBar(
-              mastered: status.cardCountA,
-              well: status.cardCountB,
-              toReview: status.cardCountC,
-              notSeen: status.totalCards > 0 ? 0 : 1,
+              mastered: stats.maitrise,
+              well: stats.bien,
+              toReview: stats.aRevoir,
+              notSeen: stats.total == 0 ? 1 : stats.notSeen,
             ),
           ],
         ),

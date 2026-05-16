@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
+import 'package:collega_app/features/colleges/domain/drill_stats.dart';
 
 class CollegeDetailRepository {
   const CollegeDetailRepository({required this.dio, required this.db});
@@ -60,6 +61,28 @@ class CollegeDetailRepository {
           ),
         )
         .toList();
+  }
+
+  Future<Map<String, DrillStats>> getDrillStatsByItem(String collegeId) async {
+    final cards = await (db.select(db.flashCards)
+          ..where((t) => t.collegeId.equals(collegeId)))
+        .get();
+    final map = <String, Map<String, int>>{};
+    for (final c in cards) {
+      map.putIfAbsent(c.itemId, () => {});
+      map[c.itemId]![c.drillLevel] = (map[c.itemId]![c.drillLevel] ?? 0) + 1;
+    }
+    return map.map(
+      (itemId, counts) => MapEntry(
+        itemId,
+        DrillStats(
+          maitrise: counts['maitrise'] ?? 0,
+          bien: counts['bien'] ?? 0,
+          aRevoir: counts['a_revoir'] ?? 0,
+          notSeen: counts['new'] ?? 0,
+        ),
+      ),
+    );
   }
 
   Future<List<FlashCardModel>> getCards(

@@ -12,6 +12,9 @@ class NotificationService(ABC):
         self, apns_token: str | None, college_ref_id: int
     ) -> None: ...
 
+    @abstractmethod
+    async def send_daily_reminder(self, apns_token: str | None) -> None: ...
+
 
 class NullNotificationService(NotificationService):
     async def send_generation_complete(
@@ -21,6 +24,9 @@ class NullNotificationService(NotificationService):
             "NullNotificationService: génération complète collège %s (APNs non configuré)",
             college_ref_id,
         )
+
+    async def send_daily_reminder(self, apns_token: str | None) -> None:
+        logger.debug("NullNotificationService: rappel quotidien ignoré")
 
 
 class APNsNotificationService(NotificationService):
@@ -69,6 +75,28 @@ class APNsNotificationService(NotificationService):
             logger.warning(
                 "Push APNs échoué pour collège %s : %s", college_ref_id, result.description
             )
+
+    async def send_daily_reminder(self, apns_token: str | None) -> None:
+        if not apns_token:
+            return
+        from aioapns import NotificationRequest, PushType
+
+        request = NotificationRequest(
+            device_token=apns_token,
+            message={
+                "aps": {
+                    "alert": {
+                        "title": "AppMédecine",
+                        "body": "C'est l'heure de réviser !",
+                    },
+                    "sound": "default",
+                },
+            },
+            push_type=PushType.ALERT,
+        )
+        result = await self._apns.send_notification(request)
+        if not result.is_successful:
+            logger.warning("Rappel push échoué : %s", result.description)
 
 
 _service_instance: NotificationService | None = None

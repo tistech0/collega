@@ -10,6 +10,10 @@ class ItemModel {
     required this.cardCountA,
     required this.cardCountB,
     required this.cardCountC,
+    this.drillMaitrise = 0,
+    this.drillBien = 0,
+    this.drillARevoir = 0,
+    this.drillNotSeen = 0,
   });
 
   final String id;
@@ -22,8 +26,15 @@ class ItemModel {
   final int cardCountA;
   final int cardCountB;
   final int cardCountC;
+  final int drillMaitrise;
+  final int drillBien;
+  final int drillARevoir;
+  final int drillNotSeen;
 
   int get totalCards => cardCountA + cardCountB + cardCountC;
+  int get drillTotal => drillMaitrise + drillBien + drillARevoir + drillNotSeen;
+  int get drillMasteryPercent =>
+      drillTotal == 0 ? 0 : ((drillMaitrise / drillTotal) * 100).round();
 
   factory ItemModel.fromJson(Map<String, dynamic> json) => ItemModel(
         id: json['id'] as String,

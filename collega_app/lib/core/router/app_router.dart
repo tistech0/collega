@@ -17,6 +17,7 @@ import 'package:collega_app/features/home/presentation/home_screen.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/presentation/drill_screen.dart';
 import 'package:collega_app/features/planning/presentation/planning_config_screen.dart';
+import 'package:collega_app/features/profile/presentation/profile_screen.dart';
 import 'package:collega_app/shared/widgets/bottom_nav_bar.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -111,7 +112,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(path: '/search', builder: (ctx, s) => const _SearchStub()),
-          GoRoute(path: '/profile', builder: (ctx, s) => const _ProfileStub()),
+          GoRoute(path: '/profile', builder: (ctx, s) => const ProfileScreen()),
         ],
       ),
     ],
@@ -154,11 +155,3 @@ class _SearchStub extends StatelessWidget {
   }
 }
 
-class _ProfileStub extends StatelessWidget {
-  const _ProfileStub();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Profil'));
-  }
-}

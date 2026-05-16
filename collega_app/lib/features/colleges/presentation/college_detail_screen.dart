@@ -259,10 +259,14 @@ class _LoadedBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final filteredItems = state.filteredItems;
-    final status = entry.userStatus!;
-    final totalA = status.cardCountA;
-    final totalB = status.cardCountB;
-    final totalC = status.cardCountC;
+
+    final totalMaitrise = filteredItems.fold(0, (s, i) => s + i.drillMaitrise);
+    final totalBien = filteredItems.fold(0, (s, i) => s + i.drillBien);
+    final totalARevoir = filteredItems.fold(0, (s, i) => s + i.drillARevoir);
+    final totalNotSeen = filteredItems.fold(0, (s, i) => s + i.drillNotSeen);
+    final totalCards = totalMaitrise + totalBien + totalARevoir + totalNotSeen;
+    final masteryPct =
+        totalCards == 0 ? 0 : ((totalMaitrise / totalCards) * 100).round();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,13 +284,14 @@ class _LoadedBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 ItemProgressBar(
-                  countA: totalA,
-                  countB: totalB,
-                  countC: totalC,
+                  countARevoir: totalARevoir,
+                  countBien: totalBien,
+                  countMaitrise: totalMaitrise,
+                  countNotSeen: totalNotSeen,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${totalA + totalB + totalC} fiches · Rang A: $totalA, B: $totalB, C: $totalC',
+                  '$masteryPct% maîtrisé · $totalCards fiches',
                   style: AppTypography.bodyMedium(),
                 ),
               ],
@@ -453,14 +458,11 @@ class _ItemTile extends StatelessWidget {
             ],
             const SizedBox(height: 8),
             ItemProgressBar(
-              countA: item.cardCountA,
-              countB: item.cardCountB,
-              countC: item.cardCountC,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              '${item.totalCards} fiches',
-              style: AppTypography.bodyMedium(),
+              countARevoir: item.drillARevoir,
+              countBien: item.drillBien,
+              countMaitrise: item.drillMaitrise,
+              countNotSeen: item.drillNotSeen,
+              showCounts: true,
             ),
           ],
         ),

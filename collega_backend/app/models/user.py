@@ -30,6 +30,7 @@ class User(Base):
         nullable=True,
     )
     apns_token: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    reminder_hour_utc: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

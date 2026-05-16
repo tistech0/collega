@@ -52,6 +52,29 @@ class NotificationsService {
     _connector = null;
   }
 
+  Future<void> setReminder(int hourUtc) async {
+    try {
+      await dio.post<void>(
+        '/v1/notifications/reminder',
+        data: {'hour_utc': hourUtc},
+      );
+      AppLogger.info('Rappel configuré à ${hourUtc}h UTC', tag: 'NotificationsService');
+    } on DioException catch (e) {
+      AppLogger.error('Échec setReminder', tag: 'NotificationsService', error: e);
+      rethrow;
+    }
+  }
+
+  Future<void> clearReminder() async {
+    try {
+      await dio.delete<void>('/v1/notifications/reminder');
+      AppLogger.info('Rappel désactivé', tag: 'NotificationsService');
+    } on DioException catch (e) {
+      AppLogger.error('Échec clearReminder', tag: 'NotificationsService', error: e);
+      rethrow;
+    }
+  }
+
   Future<void> _registerToken(String token) async {
     try {
       await dio.post<void>(

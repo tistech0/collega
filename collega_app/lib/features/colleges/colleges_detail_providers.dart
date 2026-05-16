@@ -8,6 +8,7 @@ import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/colleges/data/college_detail_repository.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
+import 'package:collega_app/features/colleges/domain/drill_stats.dart';
 
 final collegeDetailRepositoryProvider = Provider<CollegeDetailRepository>(
   (ref) => CollegeDetailRepository(
@@ -26,18 +27,45 @@ class CollegeDetailNotifier
   @override
   Future<CollegeDetailState> build(String collegeId) async {
     final repo = ref.read(collegeDetailRepositoryProvider);
+    List<ItemModel> items;
     try {
-      final items = await repo.getItems(collegeId);
+      items = await repo.getItems(collegeId);
       if (items.isEmpty) return const CollegeDetailEmpty();
       unawaited(repo.syncItemsToDrift(collegeId, items).catchError((Object e) {
         AppLogger.error('syncItemsToDrift failed', tag: 'CollegeDetailNotifier', error: e);
       }));
-      return CollegeDetailLoaded(items: items);
     } on DioException {
-      final items = await repo.getItemsFromDrift(collegeId);
+      items = await repo.getItemsFromDrift(collegeId);
       if (items.isEmpty) return const CollegeDetailEmpty();
+    }
+    Map<String, DrillStats> drillByItem;
+    try {
+      drillByItem = await repo.getDrillStatsByItem(collegeId);
+    } catch (e) {
+      AppLogger.error('getDrillStatsByItem failed', tag: 'CollegeDetailNotifier', error: e);
       return CollegeDetailLoaded(items: items);
     }
+    items = items.map((item) {
+      final drill = drillByItem[item.id];
+      if (drill == null) return item;
+      return ItemModel(
+        id: item.id,
+        collegeId: item.collegeId,
+        itemNumber: item.itemNumber,
+        rang: item.rang,
+        chapterTitle: item.chapterTitle,
+        ocrConfidenceScore: item.ocrConfidenceScore,
+        lowConfidence: item.lowConfidence,
+        cardCountA: item.cardCountA,
+        cardCountB: item.cardCountB,
+        cardCountC: item.cardCountC,
+        drillMaitrise: drill.maitrise,
+        drillBien: drill.bien,
+        drillARevoir: drill.aRevoir,
+        drillNotSeen: drill.notSeen,
+      );
+    }).toList();
+    return CollegeDetailLoaded(items: items);
   }
 
   void filterByRang(String? rang) {

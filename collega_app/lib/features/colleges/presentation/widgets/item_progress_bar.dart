@@ -5,48 +5,92 @@ import 'package:collega_app/core/theme/app_theme.dart';
 class ItemProgressBar extends StatelessWidget {
   const ItemProgressBar({
     super.key,
-    required this.countA,
-    required this.countB,
-    required this.countC,
+    required this.countARevoir,
+    required this.countBien,
+    required this.countMaitrise,
+    this.countNotSeen = 0,
+    this.showCounts = false,
   });
 
-  final int countA;
-  final int countB;
-  final int countC;
+  final int countARevoir;
+  final int countBien;
+  final int countMaitrise;
+  final int countNotSeen;
+  final bool showCounts;
 
   @override
   Widget build(BuildContext context) {
-    final total = countA + countB + countC;
-    if (total == 0) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(3),
-        child: Container(height: 4, color: Colors.grey.shade300),
-      );
-    }
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(3),
-      child: SizedBox(
-        height: 4,
-        child: Row(
+    final total = countARevoir + countBien + countMaitrise + countNotSeen;
+    final bar = total == 0
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: Container(height: 4, color: Colors.grey.shade300),
+          )
+        : ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: SizedBox(
+              height: 4,
+              child: Row(
+                children: [
+                  if (countMaitrise > 0)
+                    Flexible(
+                      flex: countMaitrise,
+                      child: Container(color: AppColors.primary),
+                    ),
+                  if (countBien > 0)
+                    Flexible(
+                      flex: countBien,
+                      child: Container(color: AppColors.secondary),
+                    ),
+                  if (countARevoir > 0)
+                    Flexible(
+                      flex: countARevoir,
+                      child: Container(color: AppColors.error),
+                    ),
+                  if (countNotSeen > 0)
+                    Flexible(
+                      flex: countNotSeen,
+                      child: Container(color: Colors.grey.shade300),
+                    ),
+                ],
+              ),
+            ),
+          );
+
+    if (!showCounts) return bar;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        bar,
+        const SizedBox(height: 4),
+        Wrap(
+          spacing: 8,
           children: [
-            if (countA > 0)
-              Flexible(
-                flex: countA,
-                child: Container(color: AppColors.primary),
+            if (countARevoir > 0)
+              Text(
+                'À revoir: $countARevoir',
+                style: Theme.of(context).textTheme.labelSmall,
               ),
-            if (countB > 0)
-              Flexible(
-                flex: countB,
-                child: Container(color: AppColors.secondary),
+            if (countBien > 0)
+              Text(
+                'Bien: $countBien',
+                style: Theme.of(context).textTheme.labelSmall,
               ),
-            if (countC > 0)
-              Flexible(
-                flex: countC,
-                child: Container(color: AppColors.warning),
+            if (countMaitrise > 0)
+              Text(
+                'Maîtrisé: $countMaitrise',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            if (countNotSeen > 0)
+              Text(
+                'Non vues: $countNotSeen',
+                style: Theme.of(context).textTheme.labelSmall,
               ),
           ],
         ),
-      ),
+      ],
     );
   }
 }
