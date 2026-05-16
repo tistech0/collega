@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mes Collèges</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed-variant": "#005227","background": "#faf9f6","secondary": "#39675a","primary": "#005127","primary-container": "#1b6b3a","surface-dim": "#dadad7","surface-container-low": "#f4f4f0","surface": "#faf9f6","tertiary-fixed": "#b5f0c6","on-primary-container": "#9ae9ab","on-background": "#1a1c1a","secondary-fixed-dim": "#a0d1c1","on-primary-fixed": "#00210c","primary-fixed-dim": "#8ad89c","on-surface-variant": "#404940","tertiary-container": "#326847","on-secondary-fixed-variant": "#204f43","surface-container": "#eeeeea","on-error-container": "#93000a","on-tertiary-fixed-variant": "#185032","surface-bright": "#faf9f6","outline": "#707a6f","on-secondary-fixed": "#002019","on-tertiary": "#ffffff","error": "#ba1a1a","tertiary-fixed-dim": "#9ad4ab","tertiary": "#175031","surface-container-highest": "#e2e3df","on-secondary-container": "#3f6d60","on-tertiary-container": "#aae5bb","error-container": "#ffdad6","on-tertiary-fixed": "#00210f","surface-tint": "#1c6c3b","on-secondary": "#ffffff","secondary-fixed": "#bbeddc","surface-container-high": "#e8e8e5","inverse-primary": "#8ad89c","surface-variant": "#e2e3df","on-primary": "#ffffff","secondary-container": "#bbeddc","inverse-on-surface": "#f1f1ed","surface-container-lowest": "#ffffff","primary-fixed": "#a5f4b6","outline-variant": "#bfc9bd","on-surface": "#1a1c1a","on-error": "#ffffff","inverse-surface": "#2f312f"
+              },
+              "borderRadius": {"DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px","clinical": "12px"},
+              "spacing": {"sm": "8px","gutter": "16px","margin": "24px","base": "8px","xs": "4px","md": "16px","xl": "32px","lg": "24px"},
+              "fontFamily": {"title": ["Inter"],"display": ["Inter"],"body": ["Inter"],"headline": ["Inter"],"label": ["Inter"]},
+              "fontSize": {
+                      "title": ["16px", {"lineHeight": "24px","fontWeight": "600"}],
+                      "display": ["28px", {"lineHeight": "34px","letterSpacing": "-0.02em","fontWeight": "700"}],
+                      "body": ["16px", {"lineHeight": "24px","fontWeight": "400"}],
+                      "headline": ["22px", {"lineHeight": "28px","letterSpacing": "-0.01em","fontWeight": "600"}],
+                      "label": ["14px", {"lineHeight": "20px","fontWeight": "500"}]
+              }
+            }
+          }
+        }
+      </script>
+<style>
+    body { min-height: max(884px, 100dvh); }
+</style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-[#F8FAF9] text-[#1B6B3A] font-title tracking-tight border-b border-[#E5E7EB] shadow-[0_4px_20px_-10px_rgba(0,0,0,0.02)] sticky top-0 z-40">
+<div class="flex justify-between items-center w-full px-6 py-3 max-w-7xl mx-auto">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">person</span>
+</div>
+</div>
+<h1 class="text-lg font-bold text-[#1B6B3A]">Mes Collèges</h1>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors text-slate-500">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-gutter md:px-margin py-lg space-y-xl">
+<!-- Filter Chips -->
+<section class="flex flex-wrap gap-sm">
+<button class="px-md py-sm rounded-clinical bg-primary-container text-on-primary border border-primary-container font-label transition-colors">Tous</button>
+<button class="px-md py-sm rounded-clinical bg-surface text-on-surface border border-outline-variant hover:bg-surface-container-low font-label transition-colors">Importés</button>
+<button class="px-md py-sm rounded-clinical bg-surface text-on-surface border border-outline-variant hover:bg-surface-container-low font-label transition-colors">Non-importés</button>
+</section>
+<!-- Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-margin">
+<!-- Card 1: Cardiologie (Importé) -->
+<article class="bg-surface rounded-clinical border border-outline-variant shadow-[0_4px_20px_-10px_rgba(0,0,0,0.02)] p-margin flex flex-col gap-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<div>
+<h2 class="font-title text-on-background">Cardiologie</h2>
+<p class="font-label text-on-surface-variant">Collège des Enseignants</p>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label text-xs uppercase tracking-wider">Importé</span>
+</div>
+<div class="space-y-sm mt-sm">
+<div class="flex justify-between font-label text-sm mb-1">
+<span class="text-on-surface-variant">Progression</span>
+<span class="text-primary-container font-semibold">85%</span>
+</div>
+<div class="h-2 w-full bg-surface-dim rounded-full overflow-hidden flex">
+<div class="h-full bg-[#1B6B3A]" style="width: 60%;" title="Maîtrisé"></div>
+<div class="h-full bg-[#3D6B5E]" style="width: 20%;" title="Bien"></div>
+<div class="h-full bg-[#BA1A1A]" style="width: 5%;" title="À revoir"></div>
+<div class="h-full bg-[#E5E7EB] flex-1" title="Non vues"></div>
+</div>
+<div class="flex gap-3 mt-2">
+<div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-[#1B6B3A]"></div><span class="text-[10px] text-[#1B6B3A] uppercase font-bold">Maîtrisé</span></div>
+<div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-[#3D6B5E]"></div><span class="text-[10px] text-[#3D6B5E] uppercase font-bold">Bien</span></div>
+<div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-[#BA1A1A]"></div><span class="text-[10px] text-[#BA1A1A] uppercase font-bold">À revoir</span></div>
+<div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-[#E5E7EB]"></div><span class="text-[10px] text-slate-400 uppercase font-bold">Non vues</span></div>
+</div>
+</div>
+<div class="flex items-center justify-between gap-sm mt-auto pt-sm">
+<button class="flex-1 px-md py-sm rounded-clinical border border-tertiary text-tertiary font-label hover:bg-tertiary-fixed-dim/20 transition-colors flex justify-center items-center gap-xs">
+<span class="material-symbols-outlined text-sm">sync</span>Mettre à jour
+</button>
+<button class="w-10 h-10 rounded-clinical text-error hover:bg-error-container/50 flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</article>
+<!-- Card 2: Neurologie (Importé) -->
+<article class="bg-surface rounded-clinical border border-outline-variant shadow-[0_4px_20px_-10px_rgba(0,0,0,0.02)] p-margin flex flex-col gap-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div>
+<h2 class="font-title text-on-background">Neurologie</h2>
+<p class="font-label text-on-surface-variant">CEN</p>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label text-xs uppercase tracking-wider">Importé</span>
+</div>
+<div class="space-y-sm mt-sm">
+<div class="flex justify-between font-label text-sm mb-1">
+<span class="text-on-surface-variant">Progression</span>
+<span class="text-primary-container font-semibold">30%</span>
+</div>
+<div class="h-2 w-full bg-surface-dim rounded-full overflow-hidden flex">
+<div class="h-full bg-[#1B6B3A]" style="width: 20%;" title="Maîtrisé"></div>
+<div class="h-full bg-[#3D6B5E]" style="width: 10%;" title="Bien"></div>
+<div class="h-full bg-[#BA1A1A]" style="width: 10%;" title="À revoir"></div>
+<div class="h-full bg-[#E5E7EB] flex-1" title="Non vues"></div>
+</div>
+<div class="flex gap-3 mt-2">
+<div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-[#1B6B3A]"></div><span class="text-[10px] text-[#1B6B3A] uppercase font-bold">Maîtrisé</span></div>
+<div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-[#3D6B5E]"></div><span class="text-[10px] text-[#3D6B5E] uppercase font-bold">Bien</span></div>
+<div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-[#BA1A1A]"></div><span class="text-[10px] text-[#BA1A1A] uppercase font-bold">À revoir</span></div>
+<div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-[#E5E7EB]"></div><span class="text-[10px] text-slate-400 uppercase font-bold">Non vues</span></div>
+</div>
+</div>
+<div class="flex items-center justify-between gap-sm mt-auto pt-sm">
+<button class="flex-1 px-md py-sm rounded-clinical border border-tertiary text-tertiary font-label hover:bg-tertiary-fixed-dim/20 transition-colors flex justify-center items-center gap-xs">
+<span class="material-symbols-outlined text-sm">sync</span>Mettre à jour
+</button>
+<button class="w-10 h-10 rounded-clinical text-error hover:bg-error-container/50 flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</article>
+<!-- Card 3: Pneumologie (Non-importé) -->
+<article class="bg-surface rounded-clinical border border-outline-variant shadow-[0_4px_20px_-10px_rgba(0,0,0,0.02)] p-margin flex flex-col gap-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pulmonology</span>
+</div>
+<div>
+<h2 class="font-title text-on-background">Pneumologie</h2>
+<p class="font-label text-on-surface-variant">CEP</p>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label text-xs uppercase tracking-wider">Non-importé</span>
+</div>
+<div class="flex-1 flex flex-col justify-center py-md">
+<p class="font-body text-sm text-on-surface-variant text-center">Module disponible pour l'import. Sélectionnez les thèmes à réviser.</p>
+</div>
+<div class="mt-auto pt-sm">
+<button class="w-full px-md py-sm rounded-clinical bg-primary-container text-on-primary font-label hover:bg-primary transition-colors flex justify-center items-center gap-xs">
+<span class="material-symbols-outlined text-sm">download</span>Charger ce collège
+</button>
+</div>
+</article>
+<!-- Card 4: Hépato-gastro-entérologie (Non-importé) -->
+<article class="bg-surface rounded-clinical border border-outline-variant shadow-[0_4px_20px_-10px_rgba(0,0,0,0.02)] p-margin flex flex-col gap-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">gastroenterology</span>
+</div>
+<div>
+<h2 class="font-title text-on-background leading-tight">Hépato-gastro-<br/>entérologie</h2>
+<p class="font-label text-on-surface-variant">CDU-HGE</p>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label text-xs uppercase tracking-wider">Non-importé</span>
+</div>
+<div class="flex-1 flex flex-col justify-center py-md">
+<p class="font-body text-sm text-on-surface-variant text-center">Module disponible pour l'import. Sélectionnez les thèmes à réviser.</p>
+</div>
+<div class="mt-auto pt-sm">
+<button class="w-full px-md py-sm rounded-clinical bg-primary-container text-on-primary font-label hover:bg-primary transition-colors flex justify-center items-center gap-xs">
+<span class="material-symbols-outlined text-sm">download</span>Charger ce collège
+</button>
+</div>
+</article>
+</div>
+</main>
+<!-- Bottom Nav -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-white shadow-[0_-1px_3px_0_rgba(0,0,0,0.02)] md:hidden">
+<button class="flex flex-col items-center justify-center text-slate-500 px-3 py-1 hover:text-[#1B6B3A] hover:bg-slate-50 rounded-xl active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="font-inter text-[10px] font-medium mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#1B6B3A] bg-emerald-50/50 rounded-xl px-3 py-1 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="font-inter text-[10px] font-medium mt-1">Colleges</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-500 px-3 py-1 hover:text-[#1B6B3A] hover:bg-slate-50 rounded-xl active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[24px]">search</span>
+<span class="font-inter text-[10px] font-medium mt-1">Search</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-500 px-3 py-1 hover:text-[#1B6B3A] hover:bg-slate-50 rounded-xl active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="font-inter text-[10px] font-medium mt-1">Profile</span>
+</button>
+</nav>
+</body></html>

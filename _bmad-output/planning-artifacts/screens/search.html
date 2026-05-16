@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Recherche - AppMédecine</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a","secondary-container": "#bbeddc","secondary": "#39675a","inverse-surface": "#2f312f","primary-fixed-dim": "#8ad89c","primary-container": "#1b6b3a","surface-container-lowest": "#ffffff","on-primary-fixed": "#00210c","on-secondary-fixed-variant": "#204f43","tertiary": "#175031","surface-bright": "#faf9f6","on-tertiary": "#ffffff","secondary-fixed": "#bbeddc","error-container": "#ffdad6","surface-variant": "#e2e3df","outline": "#707a6f","on-secondary": "#ffffff","primary-fixed": "#a5f4b6","surface": "#faf9f6","on-background": "#1a1c1a","on-tertiary-container": "#aae5bb","tertiary-fixed-dim": "#9ad4ab","tertiary-fixed": "#b5f0c6","primary": "#005127","on-primary-fixed-variant": "#005227","error": "#ba1a1a","secondary-fixed-dim": "#a0d1c1","surface-container-low": "#f4f4f0","outline-variant": "#bfc9bd","on-secondary-fixed": "#002019","on-primary-container": "#9ae9ab","inverse-on-surface": "#f1f1ed","on-tertiary-fixed-variant": "#185032","inverse-primary": "#8ad89c","tertiary-container": "#326847","on-tertiary-fixed": "#00210f","surface-container-highest": "#e2e3df","on-secondary-container": "#3f6d60","on-primary": "#ffffff","surface-tint": "#1c6c3b","on-surface": "#1a1c1a","surface-container": "#eeeeea","on-surface-variant": "#404940","background": "#faf9f6","surface-container-high": "#e8e8e5","surface-dim": "#dadad7","on-error": "#ffffff"
+            },
+            "borderRadius": {"DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px"},
+            "spacing": {"margin": "24px","sm": "8px","md": "16px","base": "8px","lg": "24px","xl": "32px","gutter": "16px","xs": "4px"},
+            "fontFamily": {"display": ["Inter"],"headline": ["Inter"],"body": ["Inter"],"title": ["Inter"],"label": ["Inter"]},
+            "fontSize": {
+                    "display": ["28px",{"lineHeight": "34px","letterSpacing": "-0.02em","fontWeight": "700"}],
+                    "headline": ["22px",{"lineHeight": "28px","letterSpacing": "-0.01em","fontWeight": "600"}],
+                    "body": ["16px",{"lineHeight": "24px","fontWeight": "400"}],
+                    "title": ["16px",{"lineHeight": "24px","fontWeight": "600"}],
+                    "label": ["14px",{"lineHeight": "20px","fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { min-height: max(884px, 100dvh); }
+        mark { background-color: #bbeddc; color: #005127; border-radius: 2px; padding: 0 2px; }
+</style>
+</head>
+<body class="bg-background min-h-screen flex flex-col font-body text-body text-on-surface antialiased">
+
+<!-- TopAppBar -->
+<header class="bg-white shadow-sm border-b border-slate-200 fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 h-16">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-title text-title font-bold overflow-hidden">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+    </div>
+    <h1 class="font-inter text-base font-semibold tracking-tight text-lg font-black text-[#1B6B3A]">AppMédecine</h1>
+  </div>
+  <button class="text-slate-500 hover:bg-slate-50 transition-colors active:opacity-70 p-2 rounded-full flex items-center justify-center">
+    <span class="material-symbols-outlined">notifications</span>
+  </button>
+</header>
+
+<!-- Main -->
+<main class="flex-1 pt-[88px] pb-[100px] px-margin max-w-2xl mx-auto w-full flex flex-col gap-lg">
+
+  <!-- Search Bar -->
+  <section>
+    <div class="relative group">
+      <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-primary transition-colors">search</span>
+      <input
+        class="w-full bg-surface-container-lowest border border-primary rounded-xl py-3 pl-12 pr-12 font-body text-body text-on-background focus:ring-2 focus:ring-primary-fixed-dim focus:border-primary focus:outline-none transition-all shadow-sm"
+        type="text"
+        value="BNP"
+        autocomplete="off"
+      />
+      <button class="absolute right-md top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section class="flex flex-col gap-md">
+    <div class="flex items-center justify-between px-xs">
+      <span class="font-label text-label text-on-surface-variant">2 items trouvés</span>
+      <button class="font-label text-label text-primary hover:underline underline-offset-2">Filtrer</button>
+    </div>
+
+    <!-- Result Card 1 — Rang A -->
+    <article class="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg flex flex-col gap-md shadow-[0_4px_24px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_32px_rgba(27,107,58,0.08)] transition-all cursor-pointer group">
+      <div class="flex items-start justify-between gap-md">
+        <div class="flex flex-col gap-xs flex-1">
+          <div class="flex items-center gap-sm flex-wrap">
+            <span class="font-title text-title text-on-surface group-hover:text-primary transition-colors">Insuffisance Cardiaque</span>
+            <span class="bg-[#1B6B3A] text-white rounded-full px-2 py-[2px] font-label text-[11px] font-bold tracking-wide uppercase shrink-0">Rang A</span>
+          </div>
+          <span class="font-label text-label text-on-surface-variant">Item 232 · Cardiologie</span>
+        </div>
+        <span class="material-symbols-outlined text-outline text-[20px] shrink-0 group-hover:text-primary transition-colors">chevron_right</span>
+      </div>
+
+      <!-- Contextual passage with BNP highlighted -->
+      <div class="bg-surface-container rounded-lg p-md border-l-4 border-primary-container">
+        <p class="font-body text-body text-on-surface-variant leading-relaxed text-[14px]">
+          Le dosage du <mark>BNP</mark> (Brain Natriuretic Peptide) ou du NT-pro<mark>BNP</mark> est essentiel dans le bilan diagnostique de l'insuffisance cardiaque. Un taux de <mark>BNP</mark> &gt; 100 pg/mL oriente vers une origine cardiaque de la dyspnée.
+        </p>
+      </div>
+
+      <button class="self-start bg-[#1B6B3A] text-white font-label text-label px-md py-sm rounded-lg hover:opacity-90 active:scale-[0.98] transition-all shadow-sm flex items-center gap-xs">
+        <span class="material-symbols-outlined text-[16px]">menu_book</span>
+        Réviser l'item
+      </button>
+    </article>
+
+    <!-- Result Card 2 — Rang B -->
+    <article class="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg flex flex-col gap-md shadow-[0_4px_24px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_32px_rgba(27,107,58,0.08)] transition-all cursor-pointer group">
+      <div class="flex items-start justify-between gap-md">
+        <div class="flex flex-col gap-xs flex-1">
+          <div class="flex items-center gap-sm flex-wrap">
+            <span class="font-title text-title text-on-surface group-hover:text-primary transition-colors">Dyspnée</span>
+            <span class="bg-secondary text-white rounded-full px-2 py-[2px] font-label text-[11px] font-bold tracking-wide uppercase shrink-0">Rang B</span>
+          </div>
+          <span class="font-label text-label text-on-surface-variant">Item 201 · Sémiologie</span>
+        </div>
+        <span class="material-symbols-outlined text-outline text-[20px] shrink-0 group-hover:text-primary transition-colors">chevron_right</span>
+      </div>
+
+      <!-- Contextual passage -->
+      <div class="bg-surface-container rounded-lg p-md border-l-4 border-secondary-container">
+        <p class="font-body text-body text-on-surface-variant leading-relaxed text-[14px]">
+          Devant une dyspnée aiguë, le dosage du <mark>BNP</mark> permet d'orienter rapidement vers une insuffisance cardiaque décompensée et de guider la prise en charge thérapeutique en urgence.
+        </p>
+      </div>
+    </article>
+  </section>
+
+</main>
+
+<!-- Bottom Nav -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-white border-t border-slate-200 shadow-[0_-1px_3px_0_rgba(0,0,0,0.02)] md:hidden">
+  <a class="flex flex-col items-center justify-center text-slate-500 px-3 py-1 hover:text-[#1B6B3A] active:scale-95 transition-transform duration-150" href="#">
+    <span class="material-symbols-outlined mb-1">home</span>
+    <span class="font-inter text-[10px] font-medium">Home</span>
+  </a>
+  <a class="flex flex-col items-center justify-center text-slate-500 px-3 py-1 hover:text-[#1B6B3A] active:scale-95 transition-transform duration-150" href="#">
+    <span class="material-symbols-outlined mb-1">school</span>
+    <span class="font-inter text-[10px] font-medium">Colleges</span>
+  </a>
+  <a class="flex flex-col items-center justify-center text-[#1B6B3A] bg-emerald-50/50 rounded-xl px-3 py-1 active:scale-95 transition-transform duration-150" href="#">
+    <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">search</span>
+    <span class="font-inter text-[10px] font-medium">Search</span>
+  </a>
+  <a class="flex flex-col items-center justify-center text-slate-500 px-3 py-1 hover:text-[#1B6B3A] active:scale-95 transition-transform duration-150" href="#">
+    <span class="material-symbols-outlined mb-1">person</span>
+    <span class="font-inter text-[10px] font-medium">Profile</span>
+  </a>
+</nav>
+
+</body></html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AppMédecine - Accueil</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration (Theme & Design Tokens) -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#bbeddc",
+                        "secondary": "#39675a",
+                        "inverse-surface": "#2f312f",
+                        "primary-fixed-dim": "#8ad89c",
+                        "primary-container": "#1b6b3a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#00210c",
+                        "on-secondary-fixed-variant": "#204f43",
+                        "tertiary": "#175031",
+                        "surface-bright": "#faf9f6",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#bbeddc",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e2e3df",
+                        "outline": "#707a6f",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#a5f4b6",
+                        "surface": "#faf9f6",
+                        "on-background": "#1a1c1a",
+                        "on-tertiary-container": "#aae5bb",
+                        "tertiary-fixed-dim": "#9ad4ab",
+                        "tertiary-fixed": "#b5f0c6",
+                        "primary": "#005127",
+                        "on-primary-fixed-variant": "#005227",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#a0d1c1",
+                        "surface-container-low": "#f4f4f0",
+                        "outline-variant": "#bfc9bd",
+                        "on-secondary-fixed": "#002019",
+                        "on-primary-container": "#9ae9ab",
+                        "inverse-on-surface": "#f1f1ed",
+                        "on-tertiary-fixed-variant": "#185032",
+                        "inverse-primary": "#8ad89c",
+                        "tertiary-container": "#326847",
+                        "on-tertiary-fixed": "#00210f",
+                        "surface-container-highest": "#e2e3df",
+                        "on-secondary-container": "#3f6d60",
+                        "on-primary": "#ffffff",
+                        "surface-tint": "#1c6c3b",
+                        "on-surface": "#1a1c1a",
+                        "surface-container": "#eeeeea",
+                        "on-surface-variant": "#404940",
+                        "background": "#faf9f6",
+                        "surface-container-high": "#e8e8e5",
+                        "surface-dim": "#dadad7",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin": "24px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "base": "8px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "gutter": "16px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "display": ["Inter", "sans-serif"],
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "title": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "display": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body text-body antialiased min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 h-16 bg-white shadow-sm transition-colors md:px-lg">
+<!-- Leading: Avatar -->
+<div class="flex items-center">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-container-low cursor-pointer hover:opacity-80 transition-opacity">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsNr9NJXKBefiZHWQ_qiW5WjG4LHA6un2E6tqjEWcOc2jYn4dC6-nbeCV1pj9o7xj09L2dpvhqbdvRKEAJ8437XxW_s0tHxgE6YCNAnKXevfJVTLhnCmNSdS-oAwUeecIhhU--5Txi97sdrAPnj16e-HmnHanyPS94IBJy9PUR6fRec2PEz2anem6dYBjQhphy0RE8kXf3Ron5J7gpX7ysdAK-aVjbf1VDBEKf7RjLa17BvLJFVHqFJIylUgfm3dbupxFwGMAOfpk"/>
+</div>
+</div>
+<!-- Center: Headline -->
+<div class="text-lg font-black text-[#1B6B3A] tracking-tight">AppMédecine</div>
+<!-- Trailing: Icon -->
+<div class="flex items-center text-[#1B6B3A] hover:bg-slate-50 p-2 rounded-full cursor-pointer transition-colors active:opacity-70">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</div>
+</header>
+<!-- Main Content -->
+<main class="pt-24 pb-24 px-4 md:px-lg max-w-4xl mx-auto flex flex-col gap-xl">
+<!-- Greeting -->
+<section class="flex flex-col gap-xs">
+<h1 class="font-display text-display text-on-background">Bonjour, Dr. Martin</h1>
+<p class="font-body text-body text-on-surface-variant">Prêt pour votre session de révision du jour ?</p>
+</section>
+<!-- Search Bar -->
+<section>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-3 pl-12 pr-4 font-body text-body text-on-background focus:ring-2 focus:ring-primary-fixed-dim focus:border-primary focus:outline-none transition-all placeholder:text-outline shadow-sm hover:shadow-md" placeholder="Rechercher un item, un signe, une dose..." type="text"/>
+</div>
+</section>
+<!-- Hero Card: Session du jour -->
+<section>
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-margin shadow-sm flex flex-col gap-md relative overflow-hidden group">
+<div class="absolute -top-12 -right-12 w-48 h-48 bg-secondary-fixed opacity-30 rounded-full blur-3xl -z-0 pointer-events-none transition-transform group-hover:scale-110 duration-700"></div>
+<div class="relative z-10 flex flex-col gap-md">
+<!-- Header row: titre + bouton Modifier inline -->
+<div class="flex justify-between items-center w-full">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">menu_book</span>
+<h2 class="font-headline text-headline text-on-background">Session du jour</h2>
+</div>
+<button class="text-primary font-label text-label flex items-center gap-xs hover:bg-emerald-50 px-2 py-1 rounded-md transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+Modifier
+</button>
+</div>
+<div class="flex flex-wrap items-center gap-sm">
+<span class="font-title text-title text-on-background">Cardiologie</span>
+<span class="bg-[#1B6B3A] text-white rounded-full px-2 py-[2px] font-label text-[11px] font-bold tracking-wide uppercase">Rang A</span>
+</div>
+<div class="flex items-center gap-lg text-on-surface-variant font-label text-label">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>24 fiches
+</div>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">schedule</span>~15 min
+</div>
+</div>
+<div class="flex items-center gap-margin pt-sm mt-sm border-t border-surface-container-high">
+<button class="bg-[#1B6B3A] text-white font-title text-title px-lg py-sm rounded-lg hover:opacity-90 active:scale-[0.98] transition-all w-full sm:w-auto text-center shadow-sm">Commencer</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Derniers collèges vus -->
+<section class="flex flex-col gap-md">
+<h3 class="font-title text-title text-on-surface-variant px-sm">Derniers collèges vus</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col gap-md shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-sm">
+<div class="bg-secondary-container text-on-secondary-container p-2 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+</div>
+<span class="font-title text-title text-on-background">Neurologie</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+</div>
+<div class="flex flex-col gap-xs mt-sm">
+<div class="flex justify-between font-label text-[12px] text-on-surface-variant">
+<span>Progression</span><span class="font-bold text-primary">68%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-[#1B6B3A] rounded-full w-[68%]"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col gap-md shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-sm">
+<div class="bg-surface-variant text-on-surface-variant p-2 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">water_drop</span>
+</div>
+<span class="font-title text-title text-on-background">Néphrologie</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+</div>
+<div class="flex flex-col gap-xs mt-sm">
+<div class="flex justify-between font-label text-[12px] text-on-surface-variant">
+<span>Progression</span><span class="font-bold text-outline">32%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-outline rounded-full w-[32%]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Nav -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-white shadow-[0_-1px_3px_0_rgba(0,0,0,0.02)] md:hidden">
+<button class="flex flex-col items-center justify-center text-[#1B6B3A] bg-emerald-50/50 rounded-xl px-3 py-1 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-inter text-[10px] font-medium mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-500 px-3 py-1 hover:text-[#1B6B3A] hover:bg-slate-50 rounded-xl active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[24px]">school</span>
+<span class="font-inter text-[10px] font-medium mt-1">Colleges</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-500 px-3 py-1 hover:text-[#1B6B3A] hover:bg-slate-50 rounded-xl active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[24px]">search</span>
+<span class="font-inter text-[10px] font-medium mt-1">Search</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-500 px-3 py-1 hover:text-[#1B6B3A] hover:bg-slate-50 rounded-xl active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="font-inter text-[10px] font-medium mt-1">Profile</span>
+</button>
+</nav>
+</body></html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Personnaliser la session - AppMédecine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e8e8e5","surface-variant": "#e2e3df","on-primary": "#ffffff","inverse-primary": "#8ad89c","outline-variant": "#bfc9bd","on-surface": "#1a1c1a","on-error": "#ffffff","inverse-surface": "#2f312f","inverse-on-surface": "#f1f1ed","secondary-container": "#bbeddc","surface-container-lowest": "#ffffff","primary-fixed": "#a5f4b6","on-tertiary-container": "#aae5bb","error-container": "#ffdad6","surface-tint": "#1c6c3b","on-tertiary-fixed": "#00210f","surface-container-highest": "#e2e3df","on-secondary-container": "#3f6d60","secondary-fixed": "#bbeddc","on-secondary": "#ffffff","on-error-container": "#93000a","surface-bright": "#faf9f6","on-tertiary-fixed-variant": "#185032","primary-fixed-dim": "#8ad89c","on-surface-variant": "#404940","surface-container": "#eeeeea","tertiary-container": "#326847","on-secondary-fixed-variant": "#204f43","tertiary-fixed-dim": "#9ad4ab","tertiary": "#175031","on-secondary-fixed": "#002019","outline": "#707a6f","on-tertiary": "#ffffff","error": "#ba1a1a","surface-dim": "#dadad7","surface-container-low": "#f4f4f0","surface": "#faf9f6","primary-container": "#1b6b3a","background": "#faf9f6","on-primary-fixed-variant": "#005227","secondary": "#39675a","primary": "#005127","on-background": "#1a1c1a","secondary-fixed-dim": "#a0d1c1","on-primary-fixed": "#00210c","tertiary-fixed": "#b5f0c6","on-primary-container": "#9ae9ab"
+                    },
+                    "borderRadius": {"DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px"},
+                    "spacing": {"xs": "4px","md": "16px","xl": "32px","lg": "24px","sm": "8px","gutter": "16px","margin": "24px","base": "8px"},
+                    "fontFamily": {"label": ["Inter"],"headline": ["Inter"],"body": ["Inter"],"title": ["Inter"],"display": ["Inter"]},
+                    "fontSize": {
+                        "label": ["14px", {"lineHeight": "20px","fontWeight": "500"}],
+                        "headline": ["22px", {"lineHeight": "28px","letterSpacing": "-0.01em","fontWeight": "600"}],
+                        "body": ["16px", {"lineHeight": "24px","fontWeight": "400"}],
+                        "title": ["16px", {"lineHeight": "24px","fontWeight": "600"}],
+                        "display": ["28px", {"lineHeight": "34px","letterSpacing": "-0.02em","fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body { min-height: max(884px, 100dvh); }
+</style>
+</head>
+<body class="bg-surface-container-high h-screen w-screen overflow-hidden flex items-end justify-center relative font-body text-body text-on-surface">
+<!-- Dimmed Background -->
+<div class="absolute inset-0 bg-on-surface/40 z-0"></div>
+<!-- Bottom Sheet Modal -->
+<div class="bg-surface w-full max-w-md h-[751px] rounded-t-xl z-10 flex flex-col shadow-[0_-8px_30px_0_rgba(0,0,0,0.12)]">
+<!-- Header -->
+<div class="flex items-center justify-between px-margin py-md border-b border-surface-variant bg-surface rounded-t-xl shrink-0">
+<h2 class="font-headline text-headline text-on-surface">Personnaliser la session</h2>
+<button class="text-on-surface-variant hover:text-on-surface p-sm rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto px-margin py-lg space-y-xl">
+<!-- Section: Collège -->
+<section>
+<h3 class="font-title text-title text-on-surface mb-sm">Collège</h3>
+<div class="bg-surface-container-lowest border border-surface-variant rounded-lg overflow-hidden flex flex-col">
+<button class="flex items-center justify-between p-md border-b border-surface-variant bg-primary-container/10 text-primary-container">
+<span class="font-label text-label">Cardiologie</span>
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+<button class="flex items-center justify-between p-md border-b border-surface-variant hover:bg-surface-container-low text-on-surface-variant transition-colors">
+<span class="font-label text-label">Neurologie</span>
+</button>
+<button class="flex items-center justify-between p-md hover:bg-surface-container-low text-on-surface-variant transition-colors">
+<span class="font-label text-label">Pneumologie</span>
+</button>
+</div>
+</section>
+<!-- Section: Rangs -->
+<section>
+<div class="flex items-center justify-between mb-sm">
+<h3 class="font-title text-title text-on-surface">Rangs</h3>
+<span class="font-body text-body text-on-surface-variant text-[12px]">Sélection multiple</span>
+</div>
+<div class="flex gap-sm">
+<button class="flex-1 py-sm px-md rounded-full bg-primary-container text-on-primary font-label text-label flex items-center justify-center gap-xs shadow-[0_2px_4px_0_rgba(0,0,0,0.05)] border border-primary-container">Rang A</button>
+<button class="flex-1 py-sm px-md rounded-full bg-secondary text-on-primary font-label text-label flex items-center justify-center gap-xs shadow-[0_2px_4px_0_rgba(0,0,0,0.05)] border border-secondary">Rang B</button>
+<button class="flex-1 py-sm px-md rounded-full bg-surface-variant text-on-surface-variant font-label text-label flex items-center justify-center gap-xs border border-outline-variant hover:bg-surface-container-highest transition-colors">Rang C</button>
+</div>
+</section>
+<!-- Section: Nombre de fiches -->
+<section>
+<h3 class="font-title text-title text-on-surface mb-sm">Nombre de fiches</h3>
+<div class="bg-surface-container-lowest border border-surface-variant rounded-lg p-md flex items-center justify-between shadow-[0_2px_8px_0_rgba(0,0,0,0.02)]">
+<span class="font-body text-body text-on-surface-variant">Quantité</span>
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="font-title text-title w-8 text-center">24</span>
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section: Statut des fiches -->
+<section>
+<h3 class="font-title text-title text-on-surface mb-sm">Statut des fiches</h3>
+<div class="flex flex-wrap gap-sm">
+<button class="py-sm px-md rounded-full bg-surface-container-high text-on-surface font-label text-label border border-outline">Toutes</button>
+<button class="py-sm px-md rounded-full bg-surface-container-lowest text-on-surface-variant font-label text-label border border-outline-variant hover:bg-surface-container-low transition-colors">À revoir</button>
+<button class="py-sm px-md rounded-full bg-surface-container-lowest text-on-surface-variant font-label text-label border border-outline-variant hover:bg-surface-container-low transition-colors">Non vues</button>
+</div>
+</section>
+<div class="h-xl"></div>
+</div>
+<!-- Sticky Bottom Bar -->
+<div class="p-margin border-t border-surface-variant bg-surface shrink-0">
+<button class="w-full py-md bg-primary-container text-on-primary font-title text-title rounded-lg shadow-[0_4px_12px_0_rgba(27,107,58,0.2)] hover:bg-primary-container/90 transition-colors flex items-center justify-center gap-sm">
+Enregistrer la session
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</body></html>

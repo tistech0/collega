@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Item Detail - AppMédecine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#dadad7","surface-variant": "#e2e3df","outline": "#707a6f","error": "#ba1a1a","primary": "#005127","on-error": "#ffffff","inverse-primary": "#8ad89c","surface-container-low": "#f4f4f0","surface-container": "#eeeeea","surface-bright": "#faf9f6","on-secondary-container": "#3f6d60","primary-fixed-dim": "#8ad89c","on-primary-fixed-variant": "#005227","surface-container-lowest": "#ffffff","surface-container-high": "#e8e8e5","secondary": "#39675a","on-secondary": "#ffffff","secondary-fixed": "#bbeddc","tertiary-fixed-dim": "#9ad4ab","secondary-container": "#bbeddc","on-secondary-fixed": "#002019","background": "#faf9f6","on-tertiary": "#ffffff","primary-fixed": "#a5f4b6","inverse-surface": "#2f312f","on-surface-variant": "#404940","secondary-fixed-dim": "#a0d1c1","inverse-on-surface": "#f1f1ed","primary-container": "#1b6b3a","on-error-container": "#93000a","on-primary-fixed": "#00210c","on-primary-container": "#9ae9ab","on-surface": "#1a1c1a","surface": "#faf9f6","on-tertiary-container": "#aae5bb","on-tertiary-fixed": "#00210f","on-primary": "#ffffff","surface-container-highest": "#e2e3df","tertiary-fixed": "#b5f0c6","error-container": "#ffdad6","on-tertiary-fixed-variant": "#185032","on-background": "#1a1c1a","on-secondary-fixed-variant": "#204f43","tertiary-container": "#326847","tertiary": "#175031","outline-variant": "#bfc9bd","surface-tint": "#1c6c3b"
+                    },
+                    "borderRadius": {"DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px"},
+                    "spacing": {"xs": "4px","lg": "24px","xl": "32px","md": "16px","base": "8px","sm": "8px","margin": "24px","gutter": "16px"},
+                    "fontFamily": {"headline": ["Inter"],"display": ["Inter"],"body": ["Inter"],"title": ["Inter"],"label": ["Inter"]},
+                    "fontSize": {
+                        "headline": ["22px", {"lineHeight": "28px","letterSpacing": "-0.01em","fontWeight": "600"}],
+                        "display": ["28px", {"lineHeight": "34px","letterSpacing": "-0.02em","fontWeight": "700"}],
+                        "body": ["16px", {"lineHeight": "24px","fontWeight": "400"}],
+                        "title": ["16px", {"lineHeight": "24px","fontWeight": "600"}],
+                        "label": ["14px", {"lineHeight": "20px","fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #faf9f6; min-height: max(884px, 100dvh); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased pb-[150px] md:pb-[100px]">
+<!-- Header -->
+<header class="fixed top-0 left-0 w-full z-40 bg-surface-container-lowest h-16 flex items-center justify-between px-4 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)]">
+<button class="p-2 -ml-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-title text-title text-on-surface truncate px-4 flex-1 text-center">Item 232 · Insuffisance Cardiaque</h1>
+<button class="p-2 -mr-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</header>
+<!-- Sticky Tab Bar (Rangs) -->
+<div class="fixed top-16 left-0 w-full z-30 bg-surface/90 backdrop-blur-sm px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar shadow-[0_4px_6px_-1px_rgba(0,0,0,0.02)]">
+<button class="px-4 py-1.5 rounded-full bg-primary-container text-on-primary-container font-label text-label whitespace-nowrap shadow-sm border border-transparent">Rang A</button>
+<button class="px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label text-label whitespace-nowrap border border-transparent">Rang B</button>
+<button class="px-4 py-1.5 rounded-full bg-surface-container text-on-surface-variant font-label text-label whitespace-nowrap border border-outline-variant/30">Rang C</button>
+</div>
+<!-- Main Content -->
+<main class="pt-[120px] px-4 md:px-margin max-w-3xl mx-auto space-y-md">
+<!-- Section Définition (ouverte) -->
+<section class="bg-surface-container-lowest border border-outline-variant/50 rounded-lg overflow-hidden shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)]">
+<div class="p-4 flex justify-between items-center cursor-pointer bg-surface-bright border-b border-outline-variant/30">
+<h2 class="font-title text-title text-on-surface">Définition</h2>
+<span class="material-symbols-outlined text-on-surface-variant">expand_less</span>
+</div>
+<div class="p-4 bg-surface-container-lowest">
+<ul class="list-disc pl-5 space-y-3 font-body text-body text-on-surface-variant">
+<li>Syndrome clinique complexe résultant d'une anomalie structurelle ou fonctionnelle du remplissage ventriculaire ou de l'éjection du sang.</li>
+<li>Incapacité du cœur à assurer un débit sanguin suffisant pour répondre aux besoins métaboliques des tissus.</li>
+<li>Peut être aiguë (décompensation) ou chronique, touchant le cœur gauche, droit ou global.</li>
+</ul>
+</div>
+</section>
+<!-- Section Diagnostic (fermée) -->
+<section class="bg-surface-container-lowest border border-outline-variant/50 rounded-lg overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] transition-shadow">
+<div class="p-4 flex justify-between items-center cursor-pointer bg-surface-bright">
+<h2 class="font-title text-title text-on-surface">Diagnostic</h2>
+<span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+</div>
+</section>
+<!-- Section Traitement (fermée) -->
+<section class="bg-surface-container-lowest border border-outline-variant/50 rounded-lg overflow-hidden shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] transition-shadow">
+<div class="p-4 flex justify-between items-center cursor-pointer bg-surface-bright">
+<h2 class="font-title text-title text-on-surface">Traitement</h2>
+<span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+</div>
+</section>
+<!-- Aperçu fiches -->
+<div class="pt-xl pb-md -mx-4 px-4 md:mx-0 md:px-0">
+<h3 class="font-title text-title text-on-surface mb-md">Aperçu des fiches (24)</h3>
+<div class="flex overflow-x-auto no-scrollbar gap-sm snap-x pb-2">
+<div class="min-w-[160px] h-[110px] bg-surface-container-lowest border border-outline-variant/50 rounded-lg p-3 flex flex-col justify-between snap-start shadow-[0_2px_4px_rgba(0,0,0,0.02)] relative overflow-hidden shrink-0">
+<div class="absolute left-0 top-0 w-1 h-full bg-primary-container"></div>
+<div class="pl-2">
+<span class="font-label text-label text-on-surface-variant text-[11px] uppercase tracking-wider">Fiche 1</span>
+<p class="font-body text-body text-on-surface text-sm mt-1 line-clamp-3 leading-snug">Citez les principaux signes fonctionnels de l'insuffisance cardiaque gauche.</p>
+</div>
+</div>
+<div class="min-w-[160px] h-[110px] bg-surface-container-lowest border border-outline-variant/50 rounded-lg p-3 flex flex-col justify-between snap-start shadow-[0_2px_4px_rgba(0,0,0,0.02)] relative overflow-hidden shrink-0">
+<div class="absolute left-0 top-0 w-1 h-full bg-secondary-container"></div>
+<div class="pl-2">
+<span class="font-label text-label text-on-surface-variant text-[11px] uppercase tracking-wider">Fiche 2</span>
+<p class="font-body text-body text-on-surface text-sm mt-1 line-clamp-3 leading-snug">Quels sont les critères échographiques d'une dysfonction systolique ?</p>
+</div>
+</div>
+<div class="min-w-[160px] h-[110px] bg-surface-container-lowest border border-outline-variant/50 rounded-lg p-3 flex flex-col justify-between snap-start shadow-[0_2px_4px_rgba(0,0,0,0.02)] relative overflow-hidden shrink-0">
+<div class="absolute left-0 top-0 w-1 h-full bg-primary-container"></div>
+<div class="pl-2">
+<span class="font-label text-label text-on-surface-variant text-[11px] uppercase tracking-wider">Fiche 3</span>
+<p class="font-body text-body text-on-surface text-sm mt-1 line-clamp-3 leading-snug">Classes thérapeutiques de 1ère intention dans l'IC à FEVG altérée ?</p>
+</div>
+</div>
+<div class="min-w-[40px] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant/50">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky bottom CTA -->
+<div class="fixed bottom-[60px] md:bottom-0 left-0 w-full z-40 bg-surface/95 backdrop-blur-md px-4 py-4 shadow-[0_-8px_20px_-10px_rgba(0,0,0,0.1)]">
+<div class="max-w-3xl mx-auto">
+<button class="w-full bg-primary text-on-primary font-title text-title py-3.5 rounded-lg flex justify-center items-center gap-2 shadow-md hover:bg-primary/90 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+Lancer le drill · 24 fiches
+</button>
+</div>
+</div>
+<!-- Bottom Nav -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-white py-3 px-2 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+<button class="flex flex-col items-center justify-center text-slate-500 px-4 py-1 hover:text-[#1B6B3A] active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined mb-1 text-[22px]">home</span>
+<span class="text-[11px] font-medium font-['Inter']">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-emerald-100 text-emerald-900 rounded-lg px-4 py-1 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined mb-1 text-[22px]" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="text-[11px] font-medium font-['Inter']">Colleges</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-500 px-4 py-1 hover:text-[#1B6B3A] active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined mb-1 text-[22px]">search</span>
+<span class="text-[11px] font-medium font-['Inter']">Search</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-500 px-4 py-1 hover:text-[#1B6B3A] active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined mb-1 text-[22px]">person</span>
+<span class="text-[11px] font-medium font-['Inter']">Profile</span>
+</button>
+</nav>
+</body></html>

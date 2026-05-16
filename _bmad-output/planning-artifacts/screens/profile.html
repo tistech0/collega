@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profil Utilisateur - AppMédecine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ba1a1a","on-surface": "#1a1c1a","on-tertiary-fixed": "#00210f","surface-container-low": "#f4f4f0","on-primary-fixed": "#00210c","error-container": "#ffdad6","tertiary-fixed": "#b5f0c6","surface-container-high": "#e8e8e5","primary-fixed-dim": "#8ad89c","surface-variant": "#e2e3df","surface-container-lowest": "#ffffff","primary-fixed": "#a5f4b6","inverse-on-surface": "#f1f1ed","on-tertiary-fixed-variant": "#185032","on-tertiary-container": "#aae5bb","on-secondary-fixed-variant": "#204f43","surface-tint": "#1c6c3b","on-primary": "#ffffff","tertiary-fixed-dim": "#9ad4ab","surface-bright": "#faf9f6","on-secondary-container": "#3f6d60","on-error-container": "#93000a","tertiary": "#175031","surface": "#faf9f6","on-background": "#1a1c1a","on-secondary-fixed": "#002019","secondary-fixed": "#bbeddc","surface-container": "#eeeeea","on-secondary": "#ffffff","secondary": "#39675a","surface-container-highest": "#e2e3df","surface-dim": "#dadad7","on-tertiary": "#ffffff","background": "#faf9f6","primary": "#005127","outline-variant": "#bfc9bd","on-surface-variant": "#404940","inverse-surface": "#2f312f","secondary-container": "#bbeddc","on-primary-container": "#9ae9ab","on-primary-fixed-variant": "#005227","secondary-fixed-dim": "#a0d1c1","tertiary-container": "#326847","on-error": "#ffffff","inverse-primary": "#8ad89c","primary-container": "#1b6b3a","outline": "#707a6f"
+                    },
+                    "borderRadius": {"DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px"},
+                    "spacing": {"sm": "8px","md": "16px","base": "8px","xs": "4px","xl": "32px","lg": "24px","margin": "24px","gutter": "16px"},
+                    "fontFamily": {"label": ["Inter"],"title": ["Inter"],"headline": ["Inter"],"body": ["Inter"],"display": ["Inter"]},
+                    "fontSize": {
+                        "label": ["14px", {"lineHeight": "20px","fontWeight": "500"}],
+                        "title": ["16px", {"lineHeight": "24px","fontWeight": "600"}],
+                        "headline": ["22px", {"lineHeight": "28px","letterSpacing": "-0.01em","fontWeight": "600"}],
+                        "body": ["16px", {"lineHeight": "24px","fontWeight": "400"}],
+                        "display": ["28px", {"lineHeight": "34px","letterSpacing": "-0.02em","fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        body { min-height: max(884px, 100dvh); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen pb-24 md:pb-0">
+<!-- Header -->
+<header class="fixed top-0 z-50 flex items-center justify-between px-4 h-16 w-full bg-[#F8FAF9] border-b border-gray-200 md:hidden">
+<h1 class="font-['Inter'] font-semibold text-lg tracking-tight text-[#1B6B3A] absolute left-1/2 -translate-x-1/2">Profil Utilisateur</h1>
+</header>
+<main class="pt-20 md:pt-12 px-4 max-w-2xl mx-auto flex flex-col gap-xl">
+<!-- Identité -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0_4px_12px_rgba(0,0,0,0.02)]">
+<h2 class="font-title text-title text-primary mb-md">Identité</h2>
+<div class="flex flex-col gap-md">
+<div class="flex justify-between items-center py-2 border-b border-surface-variant">
+<span class="font-body text-body text-on-surface-variant">Prénom</span>
+<span class="font-label text-label text-on-surface">Martin</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-surface-variant">
+<span class="font-body text-body text-on-surface-variant">Année</span>
+<span class="font-label text-label text-on-surface">5e année</span>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="font-body text-body text-on-surface-variant">Faculté</span>
+<span class="font-label text-label text-on-surface">Faculté de Médecine Paris VI</span>
+</div>
+</div>
+</section>
+<!-- Abonnement & Quota -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0_4px_12px_rgba(0,0,0,0.02)]">
+<div class="flex justify-between items-center mb-md">
+<h2 class="font-title text-title text-primary">Abonnement &amp; Quota</h2>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-label text-xs bg-primary-container text-on-primary-container">Actif</span>
+</div>
+<div class="bg-error-container text-on-error-container p-sm rounded-lg flex items-start gap-sm mb-md">
+<span class="material-symbols-outlined text-[20px] mt-0.5">warning</span>
+<p class="font-label text-[13px]">Résiliation en cours — accès jusqu'au 31 mai</p>
+</div>
+<div class="mb-sm">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label text-label text-on-surface">2 imports utilisés sur 3 ce mois</span>
+</div>
+<div class="h-2 w-full bg-primary-fixed rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 66.66%;"></div>
+</div>
+</div>
+<p class="font-body text-[13px] text-outline mt-sm">Votre quota se renouvelle automatiquement le 1er de chaque mois.</p>
+</section>
+<!-- Préférences de Révision -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0_4px_12px_rgba(0,0,0,0.02)]">
+<h2 class="font-title text-title text-primary mb-md">Préférences de Révision</h2>
+<div class="mb-lg">
+<p class="font-body text-body text-on-surface-variant mb-sm">Rangs actifs</p>
+<div class="flex flex-wrap gap-sm">
+<button class="px-4 py-1.5 rounded-full font-label text-label bg-primary text-on-primary shadow-sm">Rang A</button>
+<button class="px-4 py-1.5 rounded-full font-label text-label bg-secondary text-on-secondary shadow-sm">Rang B</button>
+<button class="px-4 py-1.5 rounded-full font-label text-label bg-surface-variant text-on-surface-variant border border-outline-variant">Rang C</button>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<p class="font-body text-body text-on-surface-variant">Fiches max par session</p>
+<div class="flex items-center bg-surface-container-low border border-outline-variant rounded-lg p-1">
+<button class="w-8 h-8 flex items-center justify-center text-on-surface hover:bg-surface-variant rounded-md transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="w-12 text-center font-title text-title text-on-surface">20</span>
+<button class="w-8 h-8 flex items-center justify-center text-on-surface hover:bg-surface-variant rounded-md transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Notifications -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0_4px_12px_rgba(0,0,0,0.02)]">
+<div class="flex justify-between items-center">
+<span class="font-body text-body text-on-surface">Notifications de rappel</span>
+<button aria-pressed="true" class="w-12 h-6 bg-primary rounded-full relative flex items-center px-1 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<span class="w-4 h-4 bg-white rounded-full shadow-sm transform translate-x-6 transition-transform"></span>
+</button>
+</div>
+</section>
+<!-- App -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.02)] overflow-hidden">
+<div class="flex flex-col">
+<div class="flex justify-between items-center p-md border-b border-surface-variant">
+<span class="font-body text-body text-on-surface">Version 1.0.0</span>
+</div>
+<button class="flex justify-between items-center p-md border-b border-surface-variant hover:bg-surface-container-low transition-colors text-left w-full">
+<span class="font-body text-body text-on-surface">CGU &amp; Politique de confidentialité</span>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<button class="flex justify-between items-center p-md hover:bg-error-container/20 transition-colors text-left w-full">
+<span class="font-title text-title text-error">Se déconnecter</span>
+<span class="material-symbols-outlined text-error">logout</span>
+</button>
+</div>
+</section>
+</main>
+<!-- Bottom Nav -->
+<nav class="fixed bottom-0 w-full flex justify-around items-center bg-white pb-safe pt-2 border-t border-gray-100 shadow-[0_-1px_3px_rgba(0,0,0,0.02)] z-50 md:hidden">
+<a class="flex flex-col items-center justify-center text-gray-500 px-5 py-1.5 hover:text-[#1B6B3A] transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-['Inter'] text-[11px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-gray-500 px-5 py-1.5 hover:text-[#1B6B3A] transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">school</span>
+<span class="font-['Inter'] text-[11px] font-medium">Colleges</span>
+</a>
+<a class="flex flex-col items-center justify-center text-gray-500 px-5 py-1.5 hover:text-[#1B6B3A] transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">search</span>
+<span class="font-['Inter'] text-[11px] font-medium">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#B7F2C8] text-[#1B6B3A] rounded-2xl px-5 py-1.5 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-['Inter'] text-[11px] font-medium">Profile</span>
+</a>
+</nav>
+</body></html>

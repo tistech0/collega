@@ -1,0 +1,109 @@
+# generated: 2026-04-27
+# last_updated: 2026-04-27
+# project: appMedecine
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-04-27
+last_updated: 2026-05-16 # updated: 4-5 done
+project: appMedecine
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+
+  # ─────────────────────────────────────────────────────────
+  # Epic 1 : Infrastructure, Pipeline & Validation Phase 0
+  # FRs couverts : FR43–FR50
+  # ─────────────────────────────────────────────────────────
+  epic-1: in-progress
+  1-1-infrastructure-homelab-squelettes-projets: done          # [Technical Foundation]
+  1-2-pipeline-ocr-backend: done
+  1-3-pipeline-generation-fiches-claude: done
+  1-4-interface-admin-web-phase-0: done
+  1-5-interface-testeur-web-phase-0: done
+  epic-1-retrospective: optional
+
+  # ─────────────────────────────────────────────────────────
+  # Epic 2 : Découverte, Authentification & Abonnement
+  # FRs couverts : FR1–FR6, FR41, FR42
+  # ─────────────────────────────────────────────────────────
+  epic-2: in-progress
+  2-1-theme-design-system-flutter: done                        # [Technical Foundation]
+  2-2-demo-interactive-college-fictif: done
+  2-3-inscription-authentification: done
+  2-4-abonnement-in-app-purchase-paywall: done
+  epic-2-retrospective: optional
+
+  # ─────────────────────────────────────────────────────────
+  # Epic 3 : Import PDF, OCR & Génération de Fiches
+  # FRs couverts : FR7–FR23
+  # ─────────────────────────────────────────────────────────
+  epic-3: in-progress
+  3-1-liste-colleges-navigation: done
+  3-2-import-pdf-progression-ocr-temps-reel: done
+  3-3-affichage-fiches-generees-score-confiance-ocr: done
+  3-4-hash-sharing-limites-reimport: done
+  3-5-feedback-fiches-regeneration-notification-push: done
+  epic-3-retrospective: optional
+
+  # ─────────────────────────────────────────────────────────
+  # Epic 4 : Mode Drill, Planning & Révision Offline
+  # FRs couverts : FR24–FR35
+  # ─────────────────────────────────────────────────────────
+  epic-4: in-progress
+  4-1-composants-flashcard-drillevaluationbar: done             # [Technical Foundation]
+  4-2-mode-drill-session-revision: done
+  4-3-ecran-accueil-sessionherocard: done
+  4-4-planning-algorithmique-personnalisation: done
+  4-5-progression-college-rang-rappels: done
+  epic-4-retrospective: optional
+
+  # ─────────────────────────────────────────────────────────
+  # Epic 5 : Recherche Full-Text & Mode Stage
+  # FRs couverts : FR36–FR38
+  # ─────────────────────────────────────────────────────────
+  epic-5: backlog
+  5-1-recherche-full-text-resultats-contextuels: backlog
+  5-2-lancement-session-depuis-resultat-recherche: backlog
+  epic-5-retrospective: optional
+
+  # ─────────────────────────────────────────────────────────
+  # Epic 6 : Profil, Compte & Conformité RGPD
+  # FRs couverts : FR39–FR40 (FR41/FR42 → Story 2.4)
+  # ─────────────────────────────────────────────────────────
+  epic-6: backlog
+  6-1-ecran-profil-preferences: backlog
+  6-2-suppression-compte-conformite-rgpd: backlog
+  epic-6-retrospective: optional

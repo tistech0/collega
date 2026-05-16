@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Import en cours - AppMédecine</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e8e8e5","surface-variant": "#e2e3df","on-primary": "#ffffff","inverse-primary": "#8ad89c","outline-variant": "#bfc9bd","on-surface": "#1a1c1a","on-error": "#ffffff","inverse-surface": "#2f312f","inverse-on-surface": "#f1f1ed","secondary-container": "#bbeddc","surface-container-lowest": "#ffffff","primary-fixed": "#a5f4b6","on-tertiary-container": "#aae5bb","error-container": "#ffdad6","surface-tint": "#1c6c3b","on-tertiary-fixed": "#00210f","surface-container-highest": "#e2e3df","on-secondary-container": "#3f6d60","secondary-fixed": "#bbeddc","on-secondary": "#ffffff","on-error-container": "#93000a","surface-bright": "#faf9f6","on-tertiary-fixed-variant": "#185032","primary-fixed-dim": "#8ad89c","on-surface-variant": "#404940","surface-container": "#eeeeea","tertiary-container": "#326847","on-secondary-fixed-variant": "#204f43","tertiary-fixed-dim": "#9ad4ab","tertiary": "#175031","on-secondary-fixed": "#002019","outline": "#707a6f","on-tertiary": "#ffffff","error": "#ba1a1a","surface-dim": "#dadad7","surface-container-low": "#f4f4f0","surface": "#faf9f6","primary-container": "#1b6b3a","background": "#faf9f6","on-primary-fixed-variant": "#005227","secondary": "#39675a","primary": "#005127","on-background": "#1a1c1a","secondary-fixed-dim": "#a0d1c1","on-primary-fixed": "#00210c","tertiary-fixed": "#b5f0c6","on-primary-container": "#9ae9ab"
+                    },
+                    "borderRadius": {"DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px"},
+                    "spacing": {"xs": "4px","md": "16px","xl": "32px","lg": "24px","sm": "8px","gutter": "16px","margin": "24px","base": "8px"},
+                    "fontFamily": {"label": ["Inter"],"headline": ["Inter"],"body": ["Inter"],"title": ["Inter"],"display": ["Inter"]},
+                    "fontSize": {
+                        "label": ["14px", {"lineHeight": "20px","fontWeight": "500"}],
+                        "headline": ["22px", {"lineHeight": "28px","letterSpacing": "-0.01em","fontWeight": "600"}],
+                        "body": ["16px", {"lineHeight": "24px","fontWeight": "400"}],
+                        "title": ["16px", {"lineHeight": "24px","fontWeight": "600"}],
+                        "display": ["28px", {"lineHeight": "34px","letterSpacing": "-0.02em","fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { min-height: max(884px, 100dvh); }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body">
+<!-- Header -->
+<header class="flex items-center px-4 h-16 border-b border-surface-variant bg-surface sticky top-0 z-10">
+<button aria-label="Retour" class="p-2 -ml-2 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="ml-2 font-headline text-headline text-on-background">Import en cours</h1>
+</header>
+<main class="flex-1 overflow-y-auto flex flex-col">
+<div class="px-margin py-margin flex flex-col gap-xl max-w-2xl mx-auto w-full">
+<!-- File Info Card -->
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant shadow-[0_4px_4px_-2px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row sm:items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-error-container text-error flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">picture_as_pdf</span>
+</div>
+<div class="flex-1 min-w-0">
+<h2 class="font-title text-title text-on-surface truncate">Cardiologie_CNEC_2024.pdf</h2>
+<p class="font-label text-label text-on-surface-variant">48 Mo</p>
+</div>
+<div class="inline-flex items-center self-start sm:self-center px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant font-label text-label border border-outline-variant">
+<span class="material-symbols-outlined text-[16px] mr-2">sync</span>Traitement en cours...
+</div>
+</div>
+<!-- Progress Stepper -->
+<div class="flex flex-col pt-sm">
+<!-- Step 1: Done -->
+<div class="relative flex gap-md">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</div>
+<div class="w-[2px] h-full bg-primary-container absolute top-8 bottom-[-8px] left-[15px]"></div>
+</div>
+<div class="pb-xl pt-1">
+<p class="font-title text-title text-on-background">PDF reçu et validé</p>
+</div>
+</div>
+<!-- Step 2: Done -->
+<div class="relative flex gap-md">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</div>
+<div class="w-[2px] h-full bg-surface-variant absolute top-8 bottom-[-8px] left-[15px]"></div>
+</div>
+<div class="pb-xl pt-1">
+<p class="font-title text-title text-on-background">Extraction du texte (OCR)</p>
+</div>
+</div>
+<!-- Step 3: In progress -->
+<div class="relative flex gap-md">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full border-2 border-primary-container bg-surface flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-[18px] text-primary-container">sync</span>
+</div>
+<div class="w-[2px] h-full bg-surface-variant absolute top-8 bottom-[-8px] left-[15px]"></div>
+</div>
+<div class="pb-xl pt-1">
+<p class="font-title text-title text-on-background">Génération des fiches par Claude</p>
+<p class="font-label text-label text-on-surface-variant mt-1">~45 minutes restantes</p>
+</div>
+</div>
+<!-- Step 4: Pending -->
+<div class="relative flex gap-md">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant bg-surface flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-[18px] text-outline-variant">hourglass_empty</span>
+</div>
+</div>
+<div class="pt-1">
+<p class="font-title text-title text-outline-variant">Classement par item et rang</p>
+</div>
+</div>
+</div>
+<!-- Info Banner -->
+<div class="bg-primary-fixed rounded-lg p-md flex items-start gap-md mt-sm border border-outline-variant">
+<span class="material-symbols-outlined text-on-primary-fixed-variant shrink-0">info</span>
+<p class="font-label text-label text-on-primary-fixed-variant">Vous pouvez fermer l'application. L'importation continuera en arrière-plan et vous serez notifié une fois terminée.</p>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="p-margin border-t border-surface-variant bg-surface max-w-2xl mx-auto w-full">
+<button class="w-full py-3 px-4 rounded-lg border-2 border-primary-container text-primary-container font-label text-label hover:bg-surface-container-high transition-colors flex justify-center items-center gap-2">
+Fermer et continuer
+</button>
+</footer>
+</body></html>

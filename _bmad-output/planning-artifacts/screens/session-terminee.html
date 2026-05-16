@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Session Terminée - AppMédecine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#dadad7","surface-variant": "#e2e3df","outline": "#707a6f","error": "#ba1a1a","primary": "#005127","on-error": "#ffffff","inverse-primary": "#8ad89c","surface-container-low": "#f4f4f0","surface-container": "#eeeeea","surface-bright": "#faf9f6","on-secondary-container": "#3f6d60","primary-fixed-dim": "#8ad89c","on-primary-fixed-variant": "#005227","surface-container-lowest": "#ffffff","surface-container-high": "#e8e8e5","secondary": "#39675a","on-secondary": "#ffffff","secondary-fixed": "#bbeddc","tertiary-fixed-dim": "#9ad4ab","secondary-container": "#bbeddc","on-secondary-fixed": "#002019","background": "#faf9f6","on-tertiary": "#ffffff","primary-fixed": "#a5f4b6","inverse-surface": "#2f312f","on-surface-variant": "#404940","secondary-fixed-dim": "#a0d1c1","inverse-on-surface": "#f1f1ed","primary-container": "#1b6b3a","on-error-container": "#93000a","on-primary-fixed": "#00210c","on-primary-container": "#9ae9ab","on-surface": "#1a1c1a","surface": "#faf9f6","on-tertiary-container": "#aae5bb","on-tertiary-fixed": "#00210f","on-primary": "#ffffff","surface-container-highest": "#e2e3df","tertiary-fixed": "#b5f0c6","error-container": "#ffdad6","on-tertiary-fixed-variant": "#185032","on-background": "#1a1c1a","on-secondary-fixed-variant": "#204f43","tertiary-container": "#326847","tertiary": "#175031","outline-variant": "#bfc9bd","surface-tint": "#1c6c3b"
+                    },
+                    "borderRadius": {"DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px"},
+                    "spacing": {"xs": "4px","lg": "24px","xl": "32px","md": "16px","base": "8px","sm": "8px","margin": "24px","gutter": "16px"},
+                    "fontFamily": {"headline": ["Inter"],"display": ["Inter"],"body": ["Inter"],"title": ["Inter"],"label": ["Inter"]},
+                    "fontSize": {
+                        "headline": ["22px", {"lineHeight": "28px","letterSpacing": "-0.01em","fontWeight": "600"}],
+                        "display": ["28px", {"lineHeight": "34px","letterSpacing": "-0.02em","fontWeight": "700"}],
+                        "body": ["16px", {"lineHeight": "24px","fontWeight": "400"}],
+                        "title": ["16px", {"lineHeight": "24px","fontWeight": "600"}],
+                        "label": ["14px", {"lineHeight": "20px","fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { min-height: max(884px, 100dvh); }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex items-center justify-center p-4">
+<main class="w-full max-w-2xl bg-surface-container-lowest rounded-xl border border-surface-variant shadow-[0_4px_24px_rgba(0,0,0,0.02)] p-6 md:p-8 flex flex-col items-center">
+<!-- Success -->
+<div class="text-center mb-8 flex flex-col items-center">
+<div class="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center mb-4">
+<span class="material-symbols-outlined filled text-[32px] text-primary">task_alt</span>
+</div>
+<h1 class="font-display text-display text-on-surface mb-2">Session terminée !</h1>
+<p class="font-body text-body text-on-surface-variant">Cardiologie - Item 232 : Insuffisance Cardiaque</p>
+</div>
+<!-- Mastery Circle -->
+<div class="relative flex items-center justify-center w-32 h-32 mb-8">
+<svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+<path class="text-surface-container-high stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3"></path>
+<path class="text-primary stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="85, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute flex flex-col items-center justify-center">
+<span class="font-display text-[32px] leading-none font-bold text-on-surface">85%</span>
+<span class="font-label text-label text-on-surface-variant">Maîtrise</span>
+</div>
+</div>
+<!-- Stats Bento -->
+<div class="w-full grid grid-cols-3 gap-4 mb-8">
+<div class="bg-primary-fixed-dim/20 rounded-lg p-4 flex flex-col items-center text-center border border-primary-fixed/30">
+<span class="font-display text-[24px] font-bold text-primary mb-1">15</span>
+<span class="font-label text-label text-on-surface-variant flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary"></span> Maîtrisé</span>
+</div>
+<div class="bg-secondary-fixed/20 rounded-lg p-4 flex flex-col items-center text-center border border-secondary-fixed/30">
+<span class="font-display text-[24px] font-bold text-secondary mb-1">6</span>
+<span class="font-label text-label text-on-surface-variant flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary"></span> Bien</span>
+</div>
+<div class="bg-error-container/30 rounded-lg p-4 flex flex-col items-center text-center border border-error-container/50">
+<span class="font-display text-[24px] font-bold text-error mb-1">3</span>
+<span class="font-label text-label text-on-surface-variant flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-error"></span> À revoir</span>
+</div>
+</div>
+<!-- Analysis Tags -->
+<div class="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+<div class="bg-surface-container-low rounded-lg p-4 border border-surface-variant">
+<div class="flex items-center gap-2 mb-3 text-primary">
+<span class="material-symbols-outlined text-[20px]">trending_up</span>
+<h3 class="font-title text-title">Points forts</h3>
+</div>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-highest rounded-full font-label text-[12px] text-on-surface-variant border border-outline-variant">Traitement médicamenteux</span>
+<span class="px-3 py-1 bg-surface-container-highest rounded-full font-label text-[12px] text-on-surface-variant border border-outline-variant">Physiopathologie</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-4 border border-surface-variant">
+<div class="flex items-center gap-2 mb-3 text-error">
+<span class="material-symbols-outlined text-[20px]">trending_down</span>
+<h3 class="font-title text-title">À consolider</h3>
+</div>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-highest rounded-full font-label text-[12px] text-on-surface-variant border border-outline-variant">Complications</span>
+<span class="px-3 py-1 bg-surface-container-highest rounded-full font-label text-[12px] text-on-surface-variant border border-outline-variant">Signes cliniques rares</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="w-full flex flex-col sm:flex-row gap-4 justify-center">
+<button class="flex items-center justify-center gap-2 bg-primary text-on-primary font-title text-title px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">replay</span>
+Recommencer les erreurs
+</button>
+<button class="flex items-center justify-center gap-2 bg-transparent text-primary border border-outline font-title text-title px-6 py-3 rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">home</span>
+Retour à l'accueil
+</button>
+</div>
+</main>
+</body></html>
