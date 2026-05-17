@@ -5,6 +5,7 @@ import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/home/domain/home_session_config.dart';
 import 'package:collega_app/features/planning/planning_providers.dart';
+import 'package:collega_app/features/profile/profile_providers.dart';
 
 // ─── HomeState ────────────────────────────────────────────────────────────────
 
@@ -53,6 +54,8 @@ class HomeSessionConfigNotifier extends Notifier<HomeSessionConfig?> {
   void applyDefault(HomeSessionConfig config) {
     state ??= config;
   }
+
+  void reset() => state = null;
 }
 
 final homeSessionConfigProvider =
@@ -84,10 +87,13 @@ class HomeNotifier extends AsyncNotifier<HomeState> {
     final defaultCollegeId = defaultCollege.userStatus?.collegeId;
     if (defaultCollegeId == null) return const HomeEmpty();
 
+    final revisionPrefs = await ref.read(revisionPrefsProvider.future);
     ref.read(homeSessionConfigProvider.notifier).applyDefault(
           HomeSessionConfig(
             collegeId: defaultCollegeId,
             collegeName: defaultCollege.catalog.name,
+            rangs: revisionPrefs.defaultRangs,
+            maxCards: revisionPrefs.defaultMaxCards,
           ),
         );
 

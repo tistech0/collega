@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-27
-last_updated: 2026-05-16 # updated: 5-2 done
+last_updated: 2026-05-17 # updated: 6-1 done
 project: appMedecine
 project_key: NOKEY
 tracking_system: file-system
@@ -103,7 +103,7 @@ development_status:
   # Epic 6 : Profil, Compte & Conformité RGPD
   # FRs couverts : FR39–FR40 (FR41/FR42 → Story 2.4)
   # ─────────────────────────────────────────────────────────
-  epic-6: backlog
-  6-1-ecran-profil-preferences: backlog
+  epic-6: in-progress
+  6-1-ecran-profil-preferences: done
   6-2-suppression-compte-conformite-rgpd: backlog
   epic-6-retrospective: optional

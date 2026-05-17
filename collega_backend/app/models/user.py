@@ -24,6 +24,9 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
     is_beta: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_subscribed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    first_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    year_group: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    faculty: Mapped[str | None] = mapped_column(String(150), nullable=True)
     monthly_reloads: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     monthly_reloads_reset_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),

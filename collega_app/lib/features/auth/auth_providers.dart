@@ -53,6 +53,26 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     state = const AsyncData(AuthState());
   }
 
+  Future<String?> updateProfile({
+    String? firstName,
+    String? yearGroup,
+    String? faculty,
+  }) async {
+    final result = await ref.read(authRepositoryProvider).updateProfile(
+      firstName: firstName,
+      yearGroup: yearGroup,
+      faculty: faculty,
+    );
+    if (result.user != null) {
+      state = AsyncData(result);
+      return null;
+    } else if (result.errorMessage != null) {
+      AppLogger.warning('updateProfile error: ${result.errorMessage}', tag: 'AuthNotifier');
+      return result.errorMessage;
+    }
+    return null;
+  }
+
   Future<void> refreshSubscription() async {
     final current = state.valueOrNull;
     if (current?.user == null) return;

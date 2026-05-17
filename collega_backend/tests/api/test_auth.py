@@ -1,24 +1,41 @@
-"""Tests POST /v1/auth/register, /login, /refresh."""
+"""Tests POST /v1/auth/register, /login, /refresh, GET /me, PATCH /profile."""
 from __future__ import annotations
 
 import types
 import uuid
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from httpx import AsyncClient
 
 from app.core.security import create_access_token, create_refresh_token, hash_password
+from app.deps import get_current_user
+from app.main import app
 
 
-def make_user(email="test@example.com", is_beta=False, is_subscribed=False, user_id=None):
+def make_user(
+    email="test@example.com",
+    is_beta=False,
+    is_subscribed=False,
+    user_id=None,
+    first_name=None,
+    year_group=None,
+    faculty=None,
+    monthly_reloads=0,
+    with_password=True,
+):
     uid = user_id or uuid.uuid4()
+    hashed = hash_password("password123") if with_password else "not-used"
     return types.SimpleNamespace(
         id=uid,
         email=email,
-        hashed_password=hash_password("password123"),
+        hashed_password=hashed,
         is_beta=is_beta,
         is_subscribed=is_subscribed,
+        first_name=first_name,
+        year_group=year_group,
+        faculty=faculty,
+        monthly_reloads=monthly_reloads,
     )
 
 
@@ -182,3 +199,90 @@ class TestGetCurrentUser:
         )
         assert resp.status_code == 200
         assert resp.json()["data"]["is_beta"] is True
+
+
+class TestGetMe:
+    async def test_get_me_returns_profile_fields(self, client: AsyncClient, mock_db):
+        user = make_user(
+            first_name="Marie",
+            year_group="4e année",
+            faculty="Paris 6",
+            monthly_reloads=2,
+            with_password=False,
+        )
+        app.dependency_overrides[get_current_user] = lambda: user
+        try:
+            with patch("app.api.v1.auth.settings") as mock_settings:
+                mock_settings.monthly_reloads_max = 3
+                resp = await client.get("/v1/auth/me")
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        assert resp.status_code == 200
+        data = resp.json()["data"]
+        assert data["first_name"] == "Marie"
+        assert data["year_group"] == "4e année"
+        assert data["faculty"] == "Paris 6"
+        assert data["monthly_reloads"] == 2
+        assert data["monthly_reloads_max"] == 3
+
+    async def test_get_me_null_profile_fields(self, client: AsyncClient, mock_db):
+        user = make_user(with_password=False)
+        app.dependency_overrides[get_current_user] = lambda: user
+        try:
+            with patch("app.api.v1.auth.settings") as mock_settings:
+                mock_settings.monthly_reloads_max = 3
+                resp = await client.get("/v1/auth/me")
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        assert resp.status_code == 200
+        data = resp.json()["data"]
+        assert data["first_name"] is None
+        assert data["year_group"] is None
+        assert data["faculty"] is None
+
+    async def test_get_me_unauthorized(self, client: AsyncClient, mock_db):
+        resp = await client.get("/v1/auth/me")
+        assert resp.status_code == 401
+
+
+class TestUpdateProfile:
+    async def test_patch_profile_updates_fields(self, client: AsyncClient, mock_db):
+        user = make_user(with_password=False)
+        app.dependency_overrides[get_current_user] = lambda: user
+        mock_db.commit = AsyncMock()
+        try:
+            resp = await client.patch(
+                "/v1/auth/profile",
+                json={"first_name": "Jean", "year_group": "3e année", "faculty": "Lyon"},
+            )
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        assert resp.status_code == 200
+        data = resp.json()["data"]
+        assert data["first_name"] == "Jean"
+        assert data["year_group"] == "3e année"
+        assert data["faculty"] == "Lyon"
+
+    async def test_patch_profile_strips_whitespace(self, client: AsyncClient, mock_db):
+        user = make_user(with_password=False)
+        app.dependency_overrides[get_current_user] = lambda: user
+        mock_db.commit = AsyncMock()
+        try:
+            resp = await client.patch(
+                "/v1/auth/profile",
+                json={"first_name": "  Alice  ", "year_group": ""},
+            )
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        assert resp.status_code == 200
+        data = resp.json()["data"]
+        assert data["first_name"] == "Alice"
+        assert data["year_group"] is None
+
+    async def test_patch_profile_unauthorized(self, client: AsyncClient, mock_db):
+        resp = await client.patch("/v1/auth/profile", json={"first_name": "Test"})
+        assert resp.status_code == 401

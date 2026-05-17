@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -11,13 +12,21 @@ import 'package:collega_app/core/router/app_router.dart';
 import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
+import 'package:collega_app/features/profile/data/revision_prefs_repository.dart';
+import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/presentation/profile_screen.dart';
+import 'package:collega_app/features/profile/profile_providers.dart';
 
-const _testUser = AuthUser(
+final _testUser = AuthUser(
   id: 'user-1',
   email: 'test@example.com',
   isBeta: false,
   isSubscribed: true,
+  firstName: 'Marie',
+  yearGroup: '4e année',
+  faculty: 'Paris 6',
+  monthlyReloads: 2,
+  monthlyMax: 3,
 );
 
 class _FakeAuthNotifier extends AuthNotifier {
@@ -31,6 +40,13 @@ class _FakeAuthNotifier extends AuthNotifier {
   Future<void> logout() async {
     state = const AsyncData(AuthState());
   }
+
+  @override
+  Future<String?> updateProfile({
+    String? firstName,
+    String? yearGroup,
+    String? faculty,
+  }) async => null;
 }
 
 class _FakeNotificationsService extends NotificationsService {
@@ -52,14 +68,36 @@ class _FakeNotificationsService extends NotificationsService {
   Future<void> requestPermissionsAndRegister() async {}
 }
 
+class _FakeRevisionPrefsNotifier extends RevisionPrefsNotifier {
+  @override
+  Future<RevisionPrefs> build() async => const RevisionPrefs();
+
+  @override
+  Future<void> save(RevisionPrefs prefs) async {}
+}
+
+class _FakeRevisionPrefsRepository extends RevisionPrefsRepository {
+  _FakeRevisionPrefsRepository() : super(storage: const FlutterSecureStorage());
+
+  @override
+  Future<RevisionPrefs> load() async => const RevisionPrefs();
+
+  @override
+  Future<void> save(RevisionPrefs prefs) async {}
+}
+
 Widget _buildScreen({AuthState? authState}) {
   return ProviderScope(
     overrides: [
       authProvider.overrideWith(() => _FakeAuthNotifier(
-            authState ?? const AuthState(user: _testUser),
+            authState ?? AuthState(user: _testUser),
           )),
       notificationsServiceProvider.overrideWith(
         (ref) => _FakeNotificationsService(),
+      ),
+      revisionPrefsProvider.overrideWith(_FakeRevisionPrefsNotifier.new),
+      revisionPrefsRepositoryProvider.overrideWithValue(
+        _FakeRevisionPrefsRepository(),
       ),
       routerProvider.overrideWithValue(GoRouter(routes: [
         GoRoute(path: '/', builder: (_, __) => const SizedBox()),
@@ -103,14 +141,14 @@ void main() {
     });
 
     testWidgets('affiche badge Inactif si non abonné', (tester) async {
-      const notSubscribedUser = AuthUser(
+      final notSubscribedUser = AuthUser(
         id: 'user-2',
         email: 'free@example.com',
         isBeta: false,
         isSubscribed: false,
       );
       await tester.pumpWidget(
-        _buildScreen(authState: const AuthState(user: notSubscribedUser)),
+        _buildScreen(authState: AuthState(user: notSubscribedUser)),
       );
       await tester.pumpAndSettle();
 
@@ -121,14 +159,62 @@ void main() {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('Rappel quotidien'), findsOneWidget);
+      expect(find.text('Rappel quotidien', skipOffstage: false), findsOneWidget);
     });
 
     testWidgets('affiche le bouton Se déconnecter', (tester) async {
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('Se déconnecter'), findsOneWidget);
+      expect(find.text('Se déconnecter', skipOffstage: false), findsOneWidget);
+    });
+
+    testWidgets('_IdentityCard affiche le prénom', (tester) async {
+      await tester.pumpWidget(_buildScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Marie'), findsOneWidget);
+    });
+
+    testWidgets('_IdentityCard passe en mode édition sur tap du bouton Modifier',
+        (tester) async {
+      await tester.pumpWidget(_buildScreen());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Modifier'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TextField), findsWidgets);
+    });
+
+    testWidgets('_SubscriptionCard affiche la barre de quota', (tester) async {
+      await tester.pumpWidget(_buildScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    });
+
+    testWidgets('_RevisionPrefsCard affiche les chips A/B/C', (tester) async {
+      await tester.pumpWidget(_buildScreen());
+      await tester.pumpAndSettle();
+
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('B'), findsOneWidget);
+      expect(find.text('C'), findsOneWidget);
+    });
+
+    testWidgets('_AppCard affiche les liens CGU et politique', (tester) async {
+      await tester.pumpWidget(_buildScreen());
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text("Conditions générales d'utilisation", skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Politique de confidentialité', skipOffstage: false),
+        findsOneWidget,
+      );
     });
   });
 }

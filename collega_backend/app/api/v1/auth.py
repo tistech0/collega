@@ -16,7 +16,8 @@ from app.core.security import (
 from app.core.limiter import limiter
 from app.deps import get_current_user, get_db
 from app.models.user import User
-from app.schemas.auth import LoginRequest, RefreshRequest, RegisterRequest, TokenResponse
+from app.core.config import settings
+from app.schemas.auth import LoginRequest, ProfileUpdateRequest, RefreshRequest, RegisterRequest, TokenResponse
 
 router = APIRouter(tags=["auth"])
 
@@ -99,6 +100,34 @@ async def get_me(current_user: User = Depends(get_current_user)):
             "email": current_user.email,
             "is_beta": current_user.is_beta,
             "is_subscribed": current_user.is_subscribed,
+            "first_name": current_user.first_name,
+            "year_group": current_user.year_group,
+            "faculty": current_user.faculty,
+            "monthly_reloads": current_user.monthly_reloads,
+            "monthly_reloads_max": settings.monthly_reloads_max,
+        }
+    }
+
+
+@router.patch("/profile")
+async def update_profile(
+    body: ProfileUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if body.first_name is not None:
+        current_user.first_name = body.first_name.strip() or None
+    if body.year_group is not None:
+        current_user.year_group = body.year_group.strip() or None
+    if body.faculty is not None:
+        current_user.faculty = body.faculty.strip() or None
+    await db.commit()
+    await db.refresh(current_user)
+    return {
+        "data": {
+            "first_name": current_user.first_name,
+            "year_group": current_user.year_group,
+            "faculty": current_user.faculty,
         }
     }
 

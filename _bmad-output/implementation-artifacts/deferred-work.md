@@ -1,5 +1,11 @@
 # Deferred Work
 
+## Deferred from: code review of 6-1-ecran-profil-preferences (2026-05-17)
+
+- W1 — Corps de réponse PATCH /profile ignoré côté Flutter — risque mineur de désynchronisation serveur/client (normalisations client et serveur sont équivalentes en pratique) [`auth_repository.dart`]
+- W2 — `getSubscriptionInfo` broad `catch(_)` — masque les erreurs d'initialisation SDK RevenueCat (comportement intentionnel de dégradation gracieuse) [`revenuecat_service.dart`]
+- W3 — `_subInfo` dans `_SubscriptionCardState` non rafraîchi si l'abonnement change en cours de session — cas limite rare [`profile_screen.dart`]
+
 ## Deferred from: code review of 5-2-lancement-session-depuis-resultat-recherche (2026-05-16)
 
 - V1 — Duplicate "Retour à l'accueil" dans les deux branches `if/else fromSearch` — refactor avec bouton conditionnel "Nouvelle recherche" uniquement [`drill_screen.dart:356-372`]

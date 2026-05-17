@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:collega_app/core/notifications/notifications_service.dart';
 import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
+import 'package:collega_app/features/auth/data/revenuecat_service.dart';
+import 'package:collega_app/features/auth/paywall_providers.dart';
+import 'package:collega_app/features/home/home_providers.dart';
+import 'package:collega_app/features/profile/domain/revision_prefs.dart';
+import 'package:collega_app/features/profile/profile_providers.dart';
+
+// TODO: Remplacer par les URLs réelles avant déploiement
+const _kCguUrl = 'https://appmedecine.fr/cgu';
+const _kPrivacyUrl = 'https://appmedecine.fr/politique-confidentialite';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -29,6 +39,8 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             _SubscriptionCard(user: user),
             const SizedBox(height: 16),
+            const _RevisionPrefsCard(),
+            const SizedBox(height: 16),
             const _NotifCard(),
             const SizedBox(height: 16),
             _AppCard(
@@ -43,23 +55,157 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
-class _IdentityCard extends StatelessWidget {
+// ─── IdentityCard ─────────────────────────────────────────────────────────────
+
+class _IdentityCard extends ConsumerStatefulWidget {
   const _IdentityCard({required this.user});
   final AuthUser user;
 
   @override
+  ConsumerState<_IdentityCard> createState() => _IdentityCardState();
+}
+
+class _IdentityCardState extends ConsumerState<_IdentityCard> {
+  bool _editing = false;
+  bool _saving = false;
+  late final TextEditingController _firstNameCtrl;
+  late final TextEditingController _yearGroupCtrl;
+  late final TextEditingController _facultyCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _firstNameCtrl = TextEditingController(text: widget.user.firstName ?? '');
+    _yearGroupCtrl = TextEditingController(text: widget.user.yearGroup ?? '');
+    _facultyCtrl = TextEditingController(text: widget.user.faculty ?? '');
+  }
+
+  @override
+  void didUpdateWidget(_IdentityCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_editing) {
+      if (widget.user.firstName != oldWidget.user.firstName) {
+        _firstNameCtrl.text = widget.user.firstName ?? '';
+      }
+      if (widget.user.yearGroup != oldWidget.user.yearGroup) {
+        _yearGroupCtrl.text = widget.user.yearGroup ?? '';
+      }
+      if (widget.user.faculty != oldWidget.user.faculty) {
+        _facultyCtrl.text = widget.user.faculty ?? '';
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _firstNameCtrl.dispose();
+    _yearGroupCtrl.dispose();
+    _facultyCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (_firstNameCtrl.text.trim().isEmpty) {
+      ShadToaster.of(context).show(
+        const ShadToast.destructive(
+          title: Text('Champ requis'),
+          description: Text('Le prénom est obligatoire.'),
+        ),
+      );
+      return;
+    }
+    setState(() => _saving = true);
+    String? error;
+    try {
+      error = await ref.read(authProvider.notifier).updateProfile(
+            firstName: _firstNameCtrl.text.trim(),
+            yearGroup: _yearGroupCtrl.text.trim(),
+            faculty: _facultyCtrl.text.trim(),
+          );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+    if (!mounted) return;
+    if (error != null) {
+      ShadToaster.of(context).show(
+        ShadToast.destructive(
+          title: const Text('Erreur de sauvegarde'),
+          description: Text(error),
+        ),
+      );
+    } else {
+      setState(() => _editing = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final user = widget.user;
     return ShadCard(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Compte', style: AppTypography.titleMedium()),
+          Row(
+            children: [
+              Expanded(child: Text('Compte', style: AppTypography.titleMedium())),
+              if (user.isBeta) ShadBadge.secondary(child: const Text('Bêta')),
+            ],
+          ),
           const SizedBox(height: 8),
           Text(user.email, style: AppTypography.bodyMedium()),
-          if (user.isBeta) ...[
-            const SizedBox(height: 4),
-            ShadBadge.secondary(child: const Text('Bêta')),
+          const SizedBox(height: 12),
+          if (_editing) ...[
+            TextField(
+              controller: _firstNameCtrl,
+              decoration: const InputDecoration(labelText: 'Prénom *'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _yearGroupCtrl,
+              decoration: const InputDecoration(labelText: 'Année (facultatif)'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _facultyCtrl,
+              decoration: const InputDecoration(labelText: 'Faculté (facultatif)'),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                ShadButton(
+                  onPressed: _saving ? null : _save,
+                  child: _saving
+                      ? const SizedBox(
+                          width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Sauvegarder'),
+                ),
+                const SizedBox(width: 8),
+                ShadButton.outline(
+                  onPressed: () => setState(() => _editing = false),
+                  child: const Text('Annuler'),
+                ),
+              ],
+            ),
+          ] else ...[
+            _ProfileRow(
+              label: 'Prénom',
+              value: user.firstName ?? '—',
+            ),
+            if (user.yearGroup != null) ...[
+              const SizedBox(height: 4),
+              _ProfileRow(label: 'Année', value: user.yearGroup!),
+            ],
+            if (user.faculty != null) ...[
+              const SizedBox(height: 4),
+              _ProfileRow(label: 'Faculté', value: user.faculty!),
+            ],
+            const SizedBox(height: 12),
+            ShadButton.outline(
+              size: ShadButtonSize.sm,
+              onPressed: () => setState(() => _editing = true),
+              child: const Text('Modifier'),
+            ),
           ],
         ],
       ),
@@ -67,27 +213,216 @@ class _IdentityCard extends StatelessWidget {
   }
 }
 
-class _SubscriptionCard extends StatelessWidget {
+class _ProfileRow extends StatelessWidget {
+  const _ProfileRow({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text('$label : ', style: AppTypography.labelMedium()),
+        Text(value, style: AppTypography.bodyMedium()),
+      ],
+    );
+  }
+}
+
+// ─── SubscriptionCard ─────────────────────────────────────────────────────────
+
+class _SubscriptionCard extends ConsumerStatefulWidget {
   const _SubscriptionCard({required this.user});
   final AuthUser user;
 
   @override
+  ConsumerState<_SubscriptionCard> createState() => _SubscriptionCardState();
+}
+
+class _SubscriptionCardState extends ConsumerState<_SubscriptionCard> {
+  RevenueCatSubscriptionInfo? _subInfo;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSubInfo();
+  }
+
+  Future<void> _loadSubInfo() async {
+    final info = await ref.read(revenueCatServiceProvider).getSubscriptionInfo();
+    if (!mounted) return;
+    setState(() => _subInfo = info);
+  }
+
+  String _formatDate(DateTime dt) {
+    return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final user = widget.user;
+    final willNotRenew = user.isSubscribed && _subInfo?.willRenew == false;
+    final expirationDate = _subInfo?.expirationDate;
+
     return ShadCard(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Text('Abonnement', style: AppTypography.titleMedium()),
+          Row(
+            children: [
+              Expanded(child: Text('Abonnement', style: AppTypography.titleMedium())),
+              user.isSubscribed
+                  ? ShadBadge(child: const Text('Actif'))
+                  : ShadBadge.secondary(child: const Text('Inactif')),
+            ],
           ),
-          user.isSubscribed
-              ? ShadBadge(child: const Text('Actif'))
-              : ShadBadge.destructive(child: const Text('Inactif')),
+          if (willNotRenew && expirationDate != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'Résiliation en cours — accès jusqu\'au ${_formatDate(expirationDate)}',
+                style: AppTypography.bodyMedium(),
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          LinearProgressIndicator(
+            value: user.monthlyMax > 0
+                ? (user.monthlyReloads / user.monthlyMax).clamp(0.0, 1.0)
+                : 0.0,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${user.monthlyReloads}/${user.monthlyMax} reimports utilisés ce mois',
+            style: AppTypography.bodyMedium(),
+          ),
+          if (user.isSubscribed && expirationDate != null && !willNotRenew) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Renouvellement le ${_formatDate(expirationDate)}',
+              style: AppTypography.bodyMedium(),
+            ),
+          ],
+          const SizedBox(height: 12),
+          ShadButton.outline(
+            onPressed: () {
+              ref.read(revenueCatServiceProvider).openSubscriptionManagement();
+            },
+            child: const Text('Gérer mon abonnement'),
+          ),
         ],
       ),
     );
   }
 }
+
+// ─── RevisionPrefsCard ────────────────────────────────────────────────────────
+
+class _RevisionPrefsCard extends ConsumerWidget {
+  const _RevisionPrefsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final prefsAsync = ref.watch(revisionPrefsProvider);
+    return ShadCard(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Préférences de révision', style: AppTypography.titleMedium()),
+          const SizedBox(height: 12),
+          prefsAsync.when(
+            loading: () => const CircularProgressIndicator(),
+            error: (_, __) => const Text('Erreur de chargement'),
+            data: (prefs) => _RevisionPrefsContent(prefs: prefs),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RevisionPrefsContent extends ConsumerWidget {
+  const _RevisionPrefsContent({required this.prefs});
+  final RevisionPrefs prefs;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selected = prefs.defaultRangs ?? [];
+
+    void updateRangs(String rang, bool on) {
+      final newList = on
+          ? (selected.contains(rang) ? selected : [...selected, rang])
+          : selected.where((r) => r != rang).toList();
+      final updated = prefs.copyWith(
+        defaultRangs: newList.isEmpty ? null : newList,
+      );
+      ref.read(revisionPrefsProvider.notifier).save(updated);
+      ref.read(homeSessionConfigProvider.notifier).reset();
+      ref.invalidate(homeProvider);
+    }
+
+    void updateMaxCards(int value) {
+      ref.read(revisionPrefsProvider.notifier).save(
+            prefs.copyWith(defaultMaxCards: value < 0 ? 0 : value),
+          );
+      ref.read(homeSessionConfigProvider.notifier).reset();
+      ref.invalidate(homeProvider);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Rangs par défaut', style: AppTypography.labelMedium()),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: ['A', 'B', 'C'].map((r) {
+            final isSelected = selected.contains(r);
+            return FilterChip(
+              label: Text(r),
+              selected: isSelected,
+              onSelected: (on) => updateRangs(r, on),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 12),
+        Text('Fiches max par session', style: AppTypography.labelMedium()),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.remove),
+              onPressed: prefs.defaultMaxCards > 0
+                  ? () => updateMaxCards(prefs.defaultMaxCards - 1)
+                  : null,
+            ),
+            SizedBox(
+              width: 64,
+              child: Text(
+                prefs.defaultMaxCards == 0 ? 'Toutes' : '${prefs.defaultMaxCards}',
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyMedium(),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => updateMaxCards(prefs.defaultMaxCards + 1),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ─── NotifCard (copié de Story 4.5, inchangé) ─────────────────────────────────
 
 class _NotifCard extends ConsumerStatefulWidget {
   const _NotifCard();
@@ -180,6 +515,12 @@ class _NotifCardState extends ConsumerState<_NotifCard> {
   }
 }
 
+// ─── AppCard ──────────────────────────────────────────────────────────────────
+
+Future<void> _launchUrl(String url) async {
+  await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
+}
+
 class _AppCard extends StatelessWidget {
   const _AppCard({required this.onLogout});
   final Future<void> Function() onLogout;
@@ -194,7 +535,23 @@ class _AppCard extends StatelessWidget {
           Text('Application', style: AppTypography.titleMedium()),
           const SizedBox(height: 4),
           Text('Version 1.0.0', style: AppTypography.bodyMedium()),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          ShadButton.link(
+            onPressed: () => _launchUrl(_kCguUrl),
+            child: const Text("Conditions générales d'utilisation"),
+          ),
+          ShadButton.link(
+            onPressed: () => _launchUrl(_kPrivacyUrl),
+            child: const Text('Politique de confidentialité'),
+          ),
+          const SizedBox(height: 8),
+          ShadButton.outline(
+            onPressed: () {
+              // TODO Story 6.2 : implémenter flux suppression compte
+            },
+            child: const Text('Supprimer mon compte'),
+          ),
+          const SizedBox(height: 8),
           ShadButton.destructive(
             onPressed: onLogout,
             child: const Row(
