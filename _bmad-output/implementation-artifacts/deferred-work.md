@@ -1,5 +1,16 @@
 # Deferred Work
 
+## Deferred from: code review of 5-2-lancement-session-depuis-resultat-recherche (2026-05-16)
+
+- V1 — Duplicate "Retour à l'accueil" dans les deux branches `if/else fromSearch` — refactor avec bouton conditionnel "Nouvelle recherche" uniquement [`drill_screen.dart:356-372`]
+- V2 — `fromSearch` dans `DrillSessionParams` (domain) est un concern de navigation/UI — violation SoC potentielle ; envisager un wrapper navigation ou paramètre de route [`drill_session_state.dart`]
+- V3 — Cartes Rang B/C sans feedback visuel (ripple/ink) sur le `GestureDetector` — UX enhancement [`search_result_tile.dart`]
+- V4 — Collège non importé → `ItemDetailScreen` spinner infini sans message d'erreur ni back button — pre-existing [`item_detail_screen.dart`]
+- V5 — `_collegeName` fallback `'Collège #X'` si `collegeRefId` absent du catalogue statique — pre-existing [`search_result_tile.dart`]
+- V6 — `result.rang == 'A'` comparaison case-sensitive sans normalisation — pre-existing (contrainte DB uppercase, risque insert raw) [`search_result_tile.dart`]
+- V7 — Item sans fiches Rang A → session complète immédiatement avec 0% maîtrise, "Nouvelle recherche" affiché sur un drill vide — pre-existing [`drill_providers.dart`]
+- V8 — `/colleges/:ref_id/items/:item_id` dans ShellRoute + `context.push` depuis search : comportement GoRouter non testé (double nav bar potentielle) — pre-existing [`app_router.dart`]
+
 ## Deferred from: code review of 5-1-recherche-full-text-resultats-contextuels (2026-05-16)
 
 - W1 — Rate limit keyed sur IP (slowapi default) et non sur `user_id` — un NAT partagé peut déclencher un 429 collectif ; un abonné avec multi-IP peut contourner la limite. [`search.py`]

@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
@@ -67,6 +68,26 @@ Widget _wrap(List<FlashCardModel> cards) => ProviderScope(
       ),
     );
 
+Widget _wrapWithRouter(List<FlashCardModel> cards, DrillSessionParams params) {
+  final router = GoRouter(routes: [
+    GoRoute(
+      path: '/',
+      builder: (_, __) => DrillScreen(params: params),
+    ),
+    GoRoute(path: '/search', builder: (_, __) => const Scaffold(body: Text('Search'))),
+    GoRoute(path: '/home', builder: (_, __) => const Scaffold(body: Text('Home'))),
+  ]);
+  return ProviderScope(
+    overrides: [
+      drillRepositoryProvider.overrideWithValue(_FakeDrillRepository(cards)),
+    ],
+    child: ShadApp.router(
+      theme: buildShadTheme(),
+      routerConfig: router,
+    ),
+  );
+}
+
 void main() {
   group('DrillScreen', () {
     testWidgets('affiche header + progressbar + flashcard (vue active)',
@@ -105,6 +126,66 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Session terminée'), findsOneWidget);
+    });
+  });
+
+  group('DrillEndScreen — fromSearch', () {
+    const fromSearchParams = DrillSessionParams(
+      collegeId: 'c1',
+      itemId: 'i1',
+      fromSearch: true,
+    );
+
+    Future<void> completeSession(WidgetTester tester) async {
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(DrillScreen)),
+      );
+      final notifier =
+          container.read(drillSessionProvider(fromSearchParams).notifier);
+      notifier.flip();
+      await notifier.evaluate(DrillEvaluationResult.maitrise);
+      notifier.advanceToNext();
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('affiche "Nouvelle recherche" et "Retour à l\'accueil"',
+        (tester) async {
+      await tester.pumpWidget(
+          _wrapWithRouter(_makeCards(1), fromSearchParams));
+      await completeSession(tester);
+
+      expect(find.text('Nouvelle recherche'), findsOneWidget);
+      expect(find.text("Retour à l'accueil"), findsOneWidget);
+    });
+
+    testWidgets('tap "Nouvelle recherche" navigue vers /search', (tester) async {
+      await tester.pumpWidget(
+          _wrapWithRouter(_makeCards(1), fromSearchParams));
+      await completeSession(tester);
+
+      await tester.tap(find.text('Nouvelle recherche'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Search'), findsOneWidget);
+    });
+
+    testWidgets('fromSearch:false → pas de "Nouvelle recherche"',
+        (tester) async {
+      await tester.pumpWidget(_wrap(_makeCards(1)));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(DrillScreen)),
+      );
+      final notifier = container.read(drillSessionProvider(_params).notifier);
+      notifier.flip();
+      await notifier.evaluate(DrillEvaluationResult.maitrise);
+      notifier.advanceToNext();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nouvelle recherche'), findsNothing);
     });
   });
 }

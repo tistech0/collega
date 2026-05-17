@@ -13,6 +13,7 @@ class DrillSessionParams {
     this.rangs,
     this.onlyARevoir = false,
     this.maxCards = 0,
+    this.fromSearch = false,
   });
 
   final String collegeId;
@@ -21,6 +22,7 @@ class DrillSessionParams {
   final List<String>? rangs;
   final bool onlyARevoir;
   final int maxCards;
+  final bool fromSearch;
 
   @override
   bool operator ==(Object other) =>
@@ -30,11 +32,12 @@ class DrillSessionParams {
       other.itemName == itemName &&
       const ListEquality<String>().equals(other.rangs, rangs) &&
       other.onlyARevoir == onlyARevoir &&
-      other.maxCards == maxCards;
+      other.maxCards == maxCards &&
+      other.fromSearch == fromSearch;
 
   @override
   int get hashCode => Object.hash(
-      collegeId, itemId, itemName, Object.hashAll(rangs ?? []), onlyARevoir, maxCards);
+      collegeId, itemId, itemName, Object.hashAll(rangs ?? []), onlyARevoir, maxCards, fromSearch);
 }
 
 @immutable

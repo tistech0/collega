@@ -34,6 +34,12 @@ Widget _wrap(Widget child) {
     GoRoute(
         path: '/drill',
         builder: (_, __) => const Scaffold(body: Text('Drill'))),
+    GoRoute(
+        path: '/colleges/:ref_id/items/:item_id',
+        builder: (_, __) => const Scaffold(body: Text('ItemDetail'))),
+    GoRoute(
+        path: '/search',
+        builder: (_, __) => const Scaffold(body: Text('Search'))),
   ]);
   return ProviderScope(
     child: ShadApp.router(
@@ -119,6 +125,32 @@ void main() {
       await tester.pumpWidget(_wrap(SearchResultTile(result: _makeResult(rang: 'C'))));
       await tester.pump(Duration.zero);
       expect(find.text("Réviser l'item"), findsNothing);
+    });
+
+    testWidgets('Rang A — CTA "Réviser l\'item" navigue vers DrillScreen', (tester) async {
+      await tester.pumpWidget(_wrap(SearchResultTile(result: _makeResult(rang: 'A', itemNumber: 232, collegeRefId: 1))));
+      await tester.pump(Duration.zero);
+      expect(find.text("Réviser l'item"), findsOneWidget);
+      await tester.tap(find.text("Réviser l'item"));
+      await tester.pumpAndSettle();
+      expect(find.text('Drill'), findsOneWidget);
+    });
+
+    testWidgets('Rang B — tap ouvre ItemDetailScreen', (tester) async {
+      await tester.pumpWidget(_wrap(SearchResultTile(result: _makeResult(rang: 'B'))));
+      await tester.pump(Duration.zero);
+      expect(find.text("Réviser l'item"), findsNothing);
+      await tester.tap(find.byType(SearchResultTile));
+      await tester.pumpAndSettle();
+      expect(find.text('ItemDetail'), findsOneWidget);
+    });
+
+    testWidgets('Rang C — tap ouvre ItemDetailScreen', (tester) async {
+      await tester.pumpWidget(_wrap(SearchResultTile(result: _makeResult(rang: 'C'))));
+      await tester.pump(Duration.zero);
+      await tester.tap(find.byType(SearchResultTile));
+      await tester.pumpAndSettle();
+      expect(find.text('ItemDetail'), findsOneWidget);
     });
 
     testWidgets('affiche provenance "Item N · Nom Collège"', (tester) async {

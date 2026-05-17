@@ -1,6 +1,6 @@
 # Story 5.2 : Lancement Session depuis un Résultat de Recherche
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -41,12 +41,12 @@ afin de réviser à chaud le cas clinique que je viens de voir sans quitter le c
 
 ## Tasks / Subtasks
 
-- [ ] **T1 — `DrillSessionParams` : ajouter le champ `fromSearch`** (AC: #3)
-  - [ ] Fichier : `collega_app/lib/features/drill/domain/drill_session_state.dart`
-  - [ ] Ajouter `final bool fromSearch;` avec valeur par défaut `false`
-  - [ ] Mettre à jour le constructeur : `this.fromSearch = false`
-  - [ ] Mettre à jour `operator ==` : ajouter `other.fromSearch == fromSearch`
-  - [ ] Mettre à jour `hashCode` : ajouter `fromSearch` dans `Object.hash(...)`
+- [x] **T1 — `DrillSessionParams` : ajouter le champ `fromSearch`** (AC: #3)
+  - [x] Fichier : `collega_app/lib/features/drill/domain/drill_session_state.dart`
+  - [x] Ajouter `final bool fromSearch;` avec valeur par défaut `false`
+  - [x] Mettre à jour le constructeur : `this.fromSearch = false`
+  - [x] Mettre à jour `operator ==` : ajouter `other.fromSearch == fromSearch`
+  - [x] Mettre à jour `hashCode` : ajouter `fromSearch` dans `Object.hash(...)`
   - [ ] Code exact de la diff :
     ```dart
     // AVANT (ligne ~9) :
@@ -90,10 +90,10 @@ afin de réviser à chaud le cas clinique que je viens de voir sans quitter le c
     // Object.hash(collegeId, itemId, itemName, Object.hashAll(rangs ?? []), onlyARevoir, maxCards, fromSearch)
     ```
 
-- [ ] **T2 — `SearchResultTile` : DrillHeader contextuel + tap Rang B/C** (AC: #1, #2)
-  - [ ] Fichier : `collega_app/lib/features/search/widgets/search_result_tile.dart`
-  - [ ] **Rang A** : Mettre à jour `DrillSessionParams` pour passer `fromSearch: true` et `itemName: 'Item ${result.itemNumber} · $_collegeName'`
-  - [ ] **Rang B/C** : Rendre la carte tappable → `context.push('/colleges/${result.collegeRefId}/items/${result.itemId}')`
+- [x] **T2 — `SearchResultTile` : DrillHeader contextuel + tap Rang B/C** (AC: #1, #2)
+  - [x] Fichier : `collega_app/lib/features/search/widgets/search_result_tile.dart`
+  - [x] **Rang A** : Mettre à jour `DrillSessionParams` pour passer `fromSearch: true` et `itemName: 'Item ${result.itemNumber} · $_collegeName'`
+  - [x] **Rang B/C** : Rendre la carte tappable → `context.push('/colleges/${result.collegeRefId}/items/${result.itemId}')`
   - [ ] Code exact du `build` après modification :
     ```dart
     @override
@@ -175,11 +175,11 @@ afin de réviser à chaud le cas clinique que je viens de voir sans quitter le c
     }
     ```
 
-- [ ] **T3 — `DrillScreen._DrillEndScreen` : CTAs conditionnels selon `fromSearch`** (AC: #3)
-  - [ ] Fichier : `collega_app/lib/features/drill/presentation/drill_screen.dart`
-  - [ ] Ajouter `params: DrillSessionParams` à `_DrillEndScreen` (field + constructeur)
-  - [ ] Mettre à jour l'appel dans `DrillScreen.build` pour passer `params: params`
-  - [ ] Dans `_DrillEndScreen.build`, remplacer le `ShadButton.outline('Retour à l'accueil')` par une section conditionnelle :
+- [x] **T3 — `DrillScreen._DrillEndScreen` : CTAs conditionnels selon `fromSearch`** (AC: #3)
+  - [x] Fichier : `collega_app/lib/features/drill/presentation/drill_screen.dart`
+  - [x] Ajouter `params: DrillSessionParams` à `_DrillEndScreen` (field + constructeur)
+  - [x] Mettre à jour l'appel dans `DrillScreen.build` pour passer `params: params`
+  - [x] Dans `_DrillEndScreen.build`, remplacer le `ShadButton.outline('Retour à l'accueil')` par une section conditionnelle :
     ```dart
     // Section CTAs en bas — remplacer le bouton actuel "Retour à l'accueil" par :
     if (params.fromSearch) ...[
@@ -204,8 +204,8 @@ afin de réviser à chaud le cas clinique que je viens de voir sans quitter le c
       ),
     ],
     ```
-  - [ ] **IMPORTANT** : Le `ShadButton.outline` existant "Retour à l'accueil" (ligne ~351) est remplacé, pas dupliqué
-  - [ ] Mettre à jour la déclaration de `_DrillEndScreen` :
+  - [x] **IMPORTANT** : Le `ShadButton.outline` existant "Retour à l'accueil" (ligne ~351) est remplacé, pas dupliqué
+  - [x] Mettre à jour la déclaration de `_DrillEndScreen` :
     ```dart
     class _DrillEndScreen extends ConsumerWidget {
       const _DrillEndScreen({
@@ -217,7 +217,7 @@ afin de réviser à chaud le cas clinique que je viens de voir sans quitter le c
       final DrillSessionNotifier notifier;
       final DrillSessionParams params;  // ← nouveau
     ```
-  - [ ] Mettre à jour l'appel dans `DrillScreen.build` :
+  - [x] Mettre à jour l'appel dans `DrillScreen.build` :
     ```dart
     // AVANT :
     ? _DrillEndScreen(session: session, notifier: notifier)
@@ -225,9 +225,9 @@ afin de réviser à chaud le cas clinique que je viens de voir sans quitter le c
     ? _DrillEndScreen(session: session, notifier: notifier, params: params)
     ```
 
-- [ ] **T4 — Tests Flutter** (AC: #1, #2, #3)
-  - [ ] Fichier : `collega_app/test/features/search/search_result_test.dart`
-  - [ ] Mettre à jour `_wrap()` pour ajouter la route item detail :
+- [x] **T4 — Tests Flutter** (AC: #1, #2, #3)
+  - [x] Fichier : `collega_app/test/features/search/search_result_test.dart`
+  - [x] Mettre à jour `_wrap()` pour ajouter la route item detail :
     ```dart
     Widget _wrap(Widget child) {
       final router = GoRouter(routes: [
@@ -247,7 +247,7 @@ afin de réviser à chaud le cas clinique que je viens de voir sans quitter le c
       );
     }
     ```
-  - [ ] Ajouter dans le groupe `'SearchResultTile'` :
+  - [x] Ajouter dans le groupe `'SearchResultTile'` :
     ```dart
     testWidgets('Rang A — DrillSessionParams contient fromSearch:true et itemName contextuel', (tester) async {
       await tester.pumpWidget(_wrap(SearchResultTile(result: _makeResult(rang: 'A', itemNumber: 232, collegeRefId: 1))));
@@ -274,11 +274,27 @@ afin de réviser à chaud le cas clinique que je viens de voir sans quitter le c
     });
     ```
 
-- [ ] **T5 — Vérification non-régression**
-  - [ ] `flutter analyze` → 0 erreur nouvelle
-  - [ ] `flutter test test/features/search/` → tous les tests passent
-  - [ ] Vérifier que les tests existants Rang A/B/C sont toujours verts (ils testent l'absence/présence du CTA, ils restent valides)
-  - [ ] Vérifier mentalement que les drills lancés depuis `HomeScreen` (`fromSearch: false` par défaut) ne sont pas affectés
+- [x] **T5 — Vérification non-régression**
+  - [x] `flutter analyze` → 0 erreur nouvelle (2 warnings pré-existants dans colleges_detail_providers.dart non modifié)
+  - [x] `flutter test test/features/search/search_result_test.dart` → 10/10 tests passent
+  - [x] Vérifier que les tests existants Rang A/B/C sont toujours verts (ils testent l'absence/présence du CTA, ils restent valides)
+  - [x] Vérifier mentalement que les drills lancés depuis `HomeScreen` (`fromSearch: false` par défaut) ne sont pas affectés
+
+### Review Findings
+
+- [x] [Review][Patch] D1 — Hiérarchie boutons cassée quand `fromSearch && todaySession != null` : déplacer "Session terminée ✓" après "Nouvelle recherche" dans le bloc `fromSearch` [`drill_screen.dart:349`]
+- [x] [Review][Dismiss] D2 — "Session terminée ✓" marque la session planifiée depuis un drill de recherche — comportement accepté (option 1) [`drill_screen.dart:339-351`]
+- [x] [Review][Patch] P1 — Test Rang A ne vérifie ni `fromSearch:true` ni `itemName` contextuel — renommé + tap + assertion navigation vers DrillScreen [`search_result_test.dart:127-131`]
+- [x] [Review][Patch] P2 — Aucun widget test pour `_DrillEndScreen` avec `fromSearch:true` : 3 tests ajoutés dans `drill_screen_test.dart` + route `/search` ajoutée dans `_wrap()` [`search_result_test.dart`]
+- [x] [Review][Patch] P3 — `find.byType(GestureDetector).first` fragile : remplacé par `find.byType(SearchResultTile)` [`search_result_test.dart:137,145`]
+- [x] [Review][Defer] V1 — Duplicate "Retour à l'accueil" dans les deux branches `if/else fromSearch` — refactor possible avec une logique conditionnelle sur le bouton de recherche uniquement [`drill_screen.dart:356-372`] — deferred, pre-existing style
+- [x] [Review][Defer] V2 — `fromSearch` dans `DrillSessionParams` (domain) est un concern de navigation/UI — violation SoC potentielle [`drill_session_state.dart`] — deferred, architectural
+- [x] [Review][Defer] V3 — Cartes Rang B/C sans feedback visuel (pas de ripple/ink) sur le `GestureDetector` [`search_result_tile.dart`] — deferred, UX enhancement
+- [x] [Review][Defer] V4 — Collège non importé → `ItemDetailScreen` spinner infini sans message d'erreur ni back button [`item_detail_screen.dart`] — deferred, pre-existing
+- [x] [Review][Defer] V5 — `_collegeName` fallback `'Collège #X'` si `collegeRefId` absent du catalogue statique [`search_result_tile.dart`] — deferred, pre-existing
+- [x] [Review][Defer] V6 — `result.rang == 'A'` comparaison case-sensitive sans normalisation [`search_result_tile.dart`] — deferred, pre-existing
+- [x] [Review][Defer] V7 — Item sans fiches Rang A → session complète immédiatement avec 0% maîtrise, "Nouvelle recherche" affiché sur un drill vide [`drill_providers.dart`] — deferred, pre-existing
+- [x] [Review][Defer] V8 — `/colleges/:ref_id/items/:item_id` dans ShellRoute + `context.push` depuis search : comportement GoRouter non testé (double nav bar potentielle) [`app_router.dart`] — deferred, pre-existing
 
 ---
 
@@ -434,3 +450,31 @@ expect(find.text('ItemDetail'), findsOneWidget);
 - `ItemDetailScreen` + `DrillLaunchBar` : `collega_app/lib/features/colleges/presentation/item_detail_screen.dart`
 - Route `/colleges/:ref_id/items/:item_id` : `collega_app/lib/core/router/app_router.dart` L.108–114
 - Tests search : `collega_app/test/features/search/search_result_test.dart`
+
+---
+
+## Dev Agent Record
+
+### Completion Notes
+
+Story 5.2 implémentée sans nouveau fichier ni modification backend.
+
+- **T1** : `DrillSessionParams` étendu avec `fromSearch` (default `false`), `operator==` et `hashCode` mis à jour. Tous les appels existants (HomeScreen, ItemDetailScreen, DemoDrillScreen) restent inchangés grâce à la valeur par défaut.
+- **T2** : `SearchResultTile.build` refactoré : la carte Rang A conserve le CTA "Réviser l'item" avec `fromSearch: true` et `itemName` au format contextuel "Item N · Nom Collège" ; les cartes Rang B/C sont enveloppées dans un `GestureDetector` qui navigue vers `ItemDetailScreen`.
+- **T3** : `_DrillEndScreen` reçoit `params: DrillSessionParams`. L'écran de fin affiche conditionnellement "Nouvelle recherche" (primary) + "Retour à l'accueil" (outline) si `fromSearch == true`, sinon uniquement "Retour à l'accueil".
+- **T4** : `_wrap()` mis à jour avec la route `/colleges/:ref_id/items/:item_id`. 3 nouveaux tests ajoutés (Rang A fromSearch, Rang B/C tap navigation). 10/10 tests passent.
+- **T5** : `flutter analyze` → 0 nouvelle erreur. `flutter test search_result_test.dart` → 10/10 vert.
+
+### File List
+
+- `collega_app/lib/features/drill/domain/drill_session_state.dart`
+- `collega_app/lib/features/search/widgets/search_result_tile.dart`
+- `collega_app/lib/features/drill/presentation/drill_screen.dart`
+- `collega_app/test/features/search/search_result_test.dart`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+
+---
+
+## Change Log
+
+- 2026-05-16 : Implémentation Story 5.2 — ajout `fromSearch` dans DrillSessionParams, tap Rang B/C vers ItemDetailScreen, CTAs conditionnels dans DrillEndScreen, 3 nouveaux tests Flutter.

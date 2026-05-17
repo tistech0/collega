@@ -33,7 +33,7 @@ class SearchResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final Widget card = Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         border: Border(left: BorderSide(color: _borderColor, width: 3)),
@@ -85,8 +85,9 @@ class SearchResultTile extends StatelessWidget {
                   extra: DrillSessionParams(
                     collegeId: result.collegeId,
                     itemId: result.itemId,
-                    itemName: result.chapterTitle ?? 'Item ${result.itemNumber}',
+                    itemName: 'Item ${result.itemNumber} · $_collegeName',
                     rangs: const ['A'],
+                    fromSearch: true,
                   ),
                 ),
                 child: const Text("Réviser l'item"),
@@ -96,6 +97,16 @@ class SearchResultTile extends StatelessWidget {
         ),
       ),
     );
+
+    if (result.rang != 'A') {
+      return GestureDetector(
+        onTap: () => context.push(
+          '/colleges/${result.collegeRefId}/items/${result.itemId}',
+        ),
+        child: card,
+      );
+    }
+    return card;
   }
 }
 

@@ -28,7 +28,7 @@ class DrillScreen extends ConsumerWidget {
           loading: () => const LinearProgressIndicator(),
           error: (e, _) => Center(child: Text(e.toString())),
           data: (session) => session.isComplete
-              ? _DrillEndScreen(session: session, notifier: notifier)
+              ? _DrillEndScreen(session: session, notifier: notifier, params: params)
               : _DrillActiveView(
                   session: session,
                   notifier: notifier,
@@ -274,10 +274,12 @@ class _DrillEndScreen extends ConsumerWidget {
   const _DrillEndScreen({
     required this.session,
     required this.notifier,
+    required this.params,
   });
 
   final DrillSessionState session;
   final DrillSessionNotifier notifier;
+  final DrillSessionParams params;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -334,25 +336,53 @@ class _DrillEndScreen extends ConsumerWidget {
             width: double.infinity,
             child: const Text('Recommencer les erreurs'),
           ),
-          if (todaySession != null) ...[
+          if (params.fromSearch) ...[
+            const SizedBox(height: 8),
+            ShadButton(
+              onPressed: () => context.go('/search'),
+              width: double.infinity,
+              child: const Text('Nouvelle recherche'),
+            ),
+            if (todaySession != null) ...[
+              const SizedBox(height: 8),
+              ShadButton.outline(
+                onPressed: () async {
+                  await ref
+                      .read(planningProvider.notifier)
+                      .markTodayCompleted();
+                  if (context.mounted) context.go('/home');
+                },
+                width: double.infinity,
+                child: const Text('Session terminée ✓'),
+              ),
+            ],
             const SizedBox(height: 8),
             ShadButton.outline(
-              onPressed: () async {
-                await ref
-                    .read(planningProvider.notifier)
-                    .markTodayCompleted();
-                if (context.mounted) context.go('/home');
-              },
+              onPressed: () => context.go('/home'),
               width: double.infinity,
-              child: const Text('Session terminée ✓'),
+              child: const Text("Retour à l'accueil"),
+            ),
+          ] else ...[
+            if (todaySession != null) ...[
+              const SizedBox(height: 8),
+              ShadButton.outline(
+                onPressed: () async {
+                  await ref
+                      .read(planningProvider.notifier)
+                      .markTodayCompleted();
+                  if (context.mounted) context.go('/home');
+                },
+                width: double.infinity,
+                child: const Text('Session terminée ✓'),
+              ),
+            ],
+            const SizedBox(height: 8),
+            ShadButton.outline(
+              onPressed: () => context.go('/home'),
+              width: double.infinity,
+              child: const Text("Retour à l'accueil"),
             ),
           ],
-          const SizedBox(height: 8),
-          ShadButton.outline(
-            onPressed: () => context.go('/home'),
-            width: double.infinity,
-            child: const Text('Retour à l\'accueil'),
-          ),
         ],
       ),
     );
