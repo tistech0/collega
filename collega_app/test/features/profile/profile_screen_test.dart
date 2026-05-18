@@ -47,6 +47,9 @@ class _FakeAuthNotifier extends AuthNotifier {
     String? yearGroup,
     String? faculty,
   }) async => null;
+
+  @override
+  Future<String?> deleteAccount() async => null;
 }
 
 class _FakeNotificationsService extends NotificationsService {
@@ -215,6 +218,62 @@ void main() {
         find.text('Politique de confidentialité', skipOffstage: false),
         findsOneWidget,
       );
+    });
+
+    testWidgets('affiche le bouton Supprimer mon compte', (tester) async {
+      await tester.pumpWidget(_buildScreen());
+      await tester.pumpAndSettle();
+      expect(find.text('Supprimer mon compte', skipOffstage: false), findsOneWidget);
+    });
+
+    testWidgets('dialog de confirmation au tap sur Supprimer mon compte', (tester) async {
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(_buildScreen());
+      await tester.pumpAndSettle();
+      final btn = find.text('Supprimer mon compte', skipOffstage: false);
+      await tester.ensureVisible(btn);
+      await tester.pumpAndSettle();
+      await tester.tap(btn);
+      await tester.pumpAndSettle();
+      expect(find.text('Supprimer mon compte ?'), findsOneWidget);
+      expect(find.textContaining('Cette action est irréversible', skipOffstage: false), findsOneWidget);
+      expect(find.text('Annuler'), findsOneWidget);
+      expect(find.text('Supprimer définitivement'), findsOneWidget);
+    });
+
+    testWidgets('Annuler ferme le dialog', (tester) async {
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(_buildScreen());
+      await tester.pumpAndSettle();
+      final btn = find.text('Supprimer mon compte', skipOffstage: false);
+      await tester.ensureVisible(btn);
+      await tester.pumpAndSettle();
+      await tester.tap(btn);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Annuler'));
+      await tester.pumpAndSettle();
+      expect(find.text('Supprimer mon compte ?'), findsNothing);
+    });
+
+    testWidgets('affiche message abonnement si isSubscribed', (tester) async {
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(_buildScreen(authState: AuthState(user: _testUser)));
+      await tester.pumpAndSettle();
+      final btn = find.text('Supprimer mon compte', skipOffstage: false);
+      await tester.ensureVisible(btn);
+      await tester.pumpAndSettle();
+      await tester.tap(btn);
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Réglages iOS', skipOffstage: false), findsOneWidget);
     });
   });
 }

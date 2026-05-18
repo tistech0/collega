@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/auth/data/auth_repository.dart';
@@ -70,6 +71,20 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       AppLogger.warning('updateProfile error: ${result.errorMessage}', tag: 'AuthNotifier');
       return result.errorMessage;
     }
+    return null;
+  }
+
+  Future<String?> deleteAccount() async {
+    final result = await ref.read(authRepositoryProvider).deleteAccount();
+    if (result.errorMessage != null) {
+      return result.errorMessage;
+    }
+    try {
+      await ref.read(databaseProvider).deleteEverything();
+    } catch (_) {
+      // Le compte est supprimé côté serveur — on réinitialise l'état quoi qu'il arrive
+    }
+    state = const AsyncData(AuthState());
     return null;
   }
 

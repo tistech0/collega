@@ -247,6 +247,26 @@ class TestGetMe:
         assert resp.status_code == 401
 
 
+class TestDeleteAccount:
+    async def test_delete_account_success(self, client: AsyncClient, mock_db):
+        user = make_user(with_password=False)
+        mock_db.get = AsyncMock(return_value=user)
+        mock_db.delete = AsyncMock()
+        mock_db.commit = AsyncMock()
+        token = create_access_token(str(user.id))
+        response = await client.delete(
+            "/v1/auth/account",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == 200
+        mock_db.delete.assert_awaited_once_with(user)
+        mock_db.commit.assert_awaited_once()
+
+    async def test_delete_account_unauthorized(self, client: AsyncClient, mock_db):
+        response = await client.delete("/v1/auth/account")
+        assert response.status_code == 401
+
+
 class TestUpdateProfile:
     async def test_patch_profile_updates_fields(self, client: AsyncClient, mock_db):
         user = make_user(with_password=False)

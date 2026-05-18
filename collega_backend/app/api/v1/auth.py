@@ -132,6 +132,18 @@ async def update_profile(
     }
 
 
+@router.delete("/account", status_code=200)
+@limiter.limit("3/minute")
+async def delete_account(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await db.delete(current_user)
+    await db.commit()
+    return {"data": {"message": "Account deleted"}}
+
+
 @router.post("/refresh-subscription")
 async def refresh_subscription(
     current_user: User = Depends(get_current_user),

@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-27
-last_updated: 2026-05-17 # updated: 6-1 done
+last_updated: 2026-05-18 # updated: 6-2 done
 project: appMedecine
 project_key: NOKEY
 tracking_system: file-system
@@ -105,5 +105,5 @@ development_status:
   # ─────────────────────────────────────────────────────────
   epic-6: in-progress
   6-1-ecran-profil-preferences: done
-  6-2-suppression-compte-conformite-rgpd: backlog
+  6-2-suppression-compte-conformite-rgpd: done
   epic-6-retrospective: optional

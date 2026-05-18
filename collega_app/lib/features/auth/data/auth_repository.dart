@@ -230,6 +230,23 @@ class AuthRepository {
     }
   }
 
+  Future<AuthState> deleteAccount() async {
+    try {
+      final accessToken = await _storage.read(key: _kAccessToken);
+      if (accessToken == null) return const AuthState();
+      await _dio.delete<Map<String, dynamic>>(
+        '/v1/auth/account',
+        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+      );
+      await logout();
+      return const AuthState();
+    } on DioException catch (e) {
+      return AuthState(errorMessage: _extractError(e));
+    } catch (_) {
+      return AuthState(errorMessage: 'Erreur lors de la suppression du compte');
+    }
+  }
+
   Future<AuthState> _handleTokenResponse(
     Map<String, dynamic> data,
     String email,

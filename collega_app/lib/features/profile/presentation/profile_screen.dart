@@ -47,6 +47,7 @@ class ProfileScreen extends ConsumerWidget {
               onLogout: () async {
                 await ref.read(authProvider.notifier).logout();
               },
+              isSubscribed: user.isSubscribed,
             ),
           ],
         ),
@@ -521,9 +522,65 @@ Future<void> _launchUrl(String url) async {
   await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
 }
 
-class _AppCard extends StatelessWidget {
-  const _AppCard({required this.onLogout});
+class _AppCard extends ConsumerStatefulWidget {
+  const _AppCard({required this.onLogout, required this.isSubscribed});
   final Future<void> Function() onLogout;
+  final bool isSubscribed;
+
+  @override
+  ConsumerState<_AppCard> createState() => _AppCardState();
+}
+
+class _AppCardState extends ConsumerState<_AppCard> {
+  bool _deleting = false;
+
+  Future<void> _handleDeleteAccount() async {
+    final description = widget.isSubscribed
+        ? "Cette action est irréversible. Toutes tes fiches et données seront supprimées définitivement.\n\nSi tu as un abonnement actif, pense à l'annuler depuis les Réglages iOS pour éviter d'être débité."
+        : "Cette action est irréversible. Toutes tes fiches et données seront supprimées définitivement.";
+
+    final confirmed = await showShadDialog<bool>(
+      context: context,
+      builder: (ctx) => ShadDialog.alert(
+        title: const Text('Supprimer mon compte ?'),
+        description: Text(description),
+        actionsAxis: Axis.vertical,
+        actions: [
+          ShadButton.destructive(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Supprimer définitivement'),
+          ),
+          ShadButton.outline(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Annuler'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _deleting = true);
+    final error = await ref.read(authProvider.notifier).deleteAccount();
+    if (!mounted) return;
+    setState(() => _deleting = false);
+
+    if (error != null) {
+      ShadToaster.of(context).show(
+        ShadToast.destructive(
+          title: const Text('Erreur'),
+          description: Text(error),
+        ),
+      );
+    } else {
+      if (!mounted) return;
+      ShadToaster.of(context).show(
+        const ShadToast(
+          title: Text('Ton compte a été supprimé'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -546,14 +603,18 @@ class _AppCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ShadButton.outline(
-            onPressed: () {
-              // TODO Story 6.2 : implémenter flux suppression compte
-            },
-            child: const Text('Supprimer mon compte'),
+            onPressed: _deleting ? null : _handleDeleteAccount,
+            child: _deleting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Supprimer mon compte'),
           ),
           const SizedBox(height: 8),
           ShadButton.destructive(
-            onPressed: onLogout,
+            onPressed: widget.onLogout,
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [

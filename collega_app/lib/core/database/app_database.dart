@@ -52,6 +52,16 @@ class AppDatabase extends _$AppDatabase {
         },
       );
 
+  Future<void> deleteEverything() async {
+    await transaction(() async {
+      await delete(collegeImports).go();
+      await delete(items).go();
+      await delete(flashCards).go();
+      await delete(planningConfigs).go();
+      await delete(planningSessions).go();
+    });
+  }
+
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
       final dbFolder = await getApplicationDocumentsDirectory();

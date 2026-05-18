@@ -1,5 +1,15 @@
 # Deferred Work
 
+## Deferred from: code review of 6-2-suppression-compte-conformite-rgpd (2026-05-18)
+
+- DEF1 — Tests backend fragiles : `mock_db.get` intercepte `get_current_user` indirectement ; un changement d'implémentation pourrait casser silencieusement l'auth dans les tests [`test_auth.py`]
+- DEF2 — Absence de test pour le chemin d'erreur AC4 : aucun test ne vérifie que `ShadToast.destructive` s'affiche et que l'écran reste ouvert en cas d'erreur réseau [`profile_screen_test.dart`]
+- DEF3 — Absence de test pour le toast de succès AC2 : aucun test ne vérifie l'affichage de "Ton compte a été supprimé" [`profile_screen_test.dart`]
+- DEF4 — JWT toujours valide après suppression : le token d'accès reste exploitable jusqu'à son expiry naturelle (limitation JWT stateless pré-existante)
+- DEF5 — Absence de `RevenueCat.logOut()` lors de la suppression : la session RC anonyme reste liée à l'ancien user ID [`auth_providers.dart`]
+- DEF6 — HTTP 200 au lieu de 204 sur `DELETE /account` : convention REST mineure, aucun impact fonctionnel [`auth.py`]
+- DEF7 — Flag `isSubscribed` potentiellement obsolète dans le dialog : valeur figée à la construction du widget, pas relue au moment de l'ouverture [`profile_screen.dart`]
+
 ## Deferred from: code review of 6-1-ecran-profil-preferences (2026-05-17)
 
 - W1 — Corps de réponse PATCH /profile ignoré côté Flutter — risque mineur de désynchronisation serveur/client (normalisations client et serveur sont équivalentes en pratique) [`auth_repository.dart`]
