@@ -1,5 +1,11 @@
 # Deferred Work
 
+## Deferred from: code review of 7-1-corrections-ux-flashcard-router (2026-05-19)
+
+- Pas de test transition `AsyncLoading → Data` couvrant AC4 (« pas de flash visuel `/demo` si authentifié »). Le `_FakeAuthNotifier.build()` retourne immédiatement, donc le scénario loading→data réel n'est jamais exécuté — une régression sur `if (authAsync.isLoading) return null;` (app_router.dart L.30) passera silencieusement. Ajout d'un test avec `Completer<AuthState>` recommandé en hardening [`collega_app/test/core/router/app_router_test.dart:14-17`]
+- Pas de test pour la branche `state.fullPath == null || state.fullPath == '/'` du redirect (app_router.dart L.42-44). Cette branche a été touchée par Story 6.2 (logique `isAuth ? (hasAccess ? '/home' : '/paywall') : '/demo'`) mais hors périmètre Story 7.1. À couvrir dans une future story router/auth [`collega_app/lib/core/router/app_router.dart:42-44`]
+- Pas de test explicite de non-régression `_handleDefinitionSubmit` (flow `setSemanticFeedback` + `flip()` après toggle bidirectionnel). Completion Notes du Dev Agent Record affirme cette vérification mais sans test couvrant explicitement le cas définition (cardType + submit + flip true). Comportement trivial à analyser mais non testé [`collega_app/test/features/drill/drill_session_notifier_test.dart`]
+
 ## Deferred from: code review of 6-2-suppression-compte-conformite-rgpd (2026-05-18)
 
 - DEF1 — Tests backend fragiles : `mock_db.get` intercepte `get_current_user` indirectement ; un changement d'implémentation pourrait casser silencieusement l'auth dans les tests [`test_auth.py`]

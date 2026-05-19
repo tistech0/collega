@@ -33,6 +33,7 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
   late final AnimationController _flipController;
   late final Animation<double> _rotateAnim;
   DrillEvaluationResult? _localExitResult;
+  bool _flipPending = false;
 
   @override
   void initState() {
@@ -53,8 +54,12 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
     super.didUpdateWidget(oldWidget);
     if (widget.card != oldWidget.card) {
       _flipController.value = 0.0;
+      _flipPending = false;
       if (_localExitResult != null) setState(() => _localExitResult = null);
       return;
+    }
+    if (widget.isFlipped != oldWidget.isFlipped) {
+      _flipPending = false;
     }
     if (widget.isFlipped && !oldWidget.isFlipped) {
       _flipController.forward();
@@ -73,9 +78,12 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
   }
 
   void _handleTap() {
-    if (widget.isFlipped || _localExitResult != null || _flipController.value > 0.0) return;
-    _flipController.forward();
-    widget.onFlip?.call();
+    if (widget.onFlip == null) return;
+    if (_localExitResult != null) return;
+    if (_flipPending) return;
+    if (_flipController.isAnimating) return;
+    _flipPending = true;
+    widget.onFlip!.call();
   }
 
   Color _rangBadgeColor(String rang) {
@@ -143,7 +151,7 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
   Widget build(BuildContext context) {
     Widget card = Semantics(
       label: 'Flashcard Rang ${widget.card.rang} — ${widget.card.recto}',
-      hint: 'Tapoter pour retourner',
+      hint: widget.onFlip == null ? null : 'Tapoter pour retourner',
       child: GestureDetector(
         onTap: _handleTap,
         behavior: HitTestBehavior.opaque,

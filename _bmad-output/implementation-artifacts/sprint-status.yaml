@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-27
-last_updated: 2026-05-19 # MVP retro 2026-05-19 — epics 1→6 done, Epic 7 ouvert
+last_updated: 2026-05-19 # Story 7.1 review terminée → done
 project: appMedecine
 project_key: NOKEY
 tracking_system: file-system
@@ -121,7 +121,7 @@ development_status:
   # Périmètre : R1-R5 + A1-A10 (sauf A7/A8 fermés) + dette infra pré-prod
   # ─────────────────────────────────────────────────────────
   epic-7: in-progress
-  7-1-corrections-ux-flashcard-router: review
+  7-1-corrections-ux-flashcard-router: done
   7-2-hardening-async-backend: backlog
   7-3-hardening-rgpd-safe-delete-config: backlog
   7-4-chronometre-apns-singleton-docs: backlog

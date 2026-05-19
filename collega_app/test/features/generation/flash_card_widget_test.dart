@@ -4,6 +4,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
+import 'package:collega_app/features/drill/domain/drill_state.dart';
 import 'package:collega_app/features/generation/widgets/flash_card_widget.dart';
 
 FlashCardModel _makeCard({
@@ -125,6 +126,74 @@ void main() {
 
       expect(find.text('Question test'), findsOneWidget);
       expect(find.text('Rang B'), findsOneWidget);
+    });
+
+    // ─── Story 7.1 — R2 + R4 ───────────────────────────────────────────────
+
+    testWidgets('AC1: tap sans onFlip ne déclenche pas le flip visuel',
+        (tester) async {
+      // R4 — si onFlip est null (def card recto), _handleTap doit early-return
+      // sans démarrer l'animation locale.
+      await tester.pumpWidget(_wrap(
+        FlashCardWidget(
+          card: _makeCard(cardType: 'definition'),
+          isFlipped: false,
+          // onFlip omis volontairement → null
+        ),
+      ));
+      await tester.pump(Duration.zero);
+
+      // Recto visible avant tap
+      expect(find.text('Question test'), findsOneWidget);
+      expect(find.text('Réponse test'), findsNothing);
+
+      await tester.tap(find.byType(FlashCardWidget));
+      await tester.pump(const Duration(milliseconds: 400)); // > 300ms anim
+
+      // Recto toujours visible — pas de flip déclenché
+      expect(find.text('Question test'), findsOneWidget);
+      expect(find.text('Réponse test'), findsNothing);
+    });
+
+    testWidgets('AC2: tap re-flip d\'une carte déjà retournée appelle onFlip',
+        (tester) async {
+      // R2 — sur une carte verso, un tap doit re-déclencher onFlip
+      // (le parent toggle isFlipped → didUpdateWidget reverse l'anim).
+      var flipCount = 0;
+      await tester.pumpWidget(_wrap(
+        FlashCardWidget(
+          card: _makeCard(),
+          isFlipped: true, // carte déjà retournée
+          onFlip: () => flipCount++,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(FlashCardWidget));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(flipCount, 1);
+    });
+
+    testWidgets('AC2: tap après exitResult ne déclenche pas onFlip',
+        (tester) async {
+      // R2 — une fois l'évaluation cliquée (exitResult != null), la carte
+      // glisse hors écran et les taps ne doivent plus déclencher de flip.
+      var flipCount = 0;
+      await tester.pumpWidget(_wrap(
+        FlashCardWidget(
+          card: _makeCard(),
+          isFlipped: true,
+          exitResult: DrillEvaluationResult.maitrise,
+          onFlip: () => flipCount++,
+        ),
+      ));
+      await tester.pump(Duration.zero);
+
+      await tester.tap(find.byType(FlashCardWidget), warnIfMissed: false);
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(flipCount, 0);
     });
   });
 }

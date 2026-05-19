@@ -43,7 +43,8 @@ class DrillSessionNotifier
   void flip() {
     final s = state.value;
     if (s == null) return;
-    state = AsyncValue.data(s.copyWith(isFlipped: true));
+    if (s.exitResult != null) return;
+    state = AsyncValue.data(s.copyWith(isFlipped: !s.isFlipped));
   }
 
   void setSemanticFeedback(SemanticFeedback feedback) {

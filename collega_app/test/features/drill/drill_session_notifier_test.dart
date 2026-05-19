@@ -166,6 +166,69 @@ void main() {
       expect(s.isComplete, true);
     });
 
+    // ─── Story 7.1 — R2 (flip toggle) ────────────────────────────────────
+
+    test('flip() — toggle bidirectionnel tant que pas d\'évaluation',
+        () async {
+      final cards = _makeCards(1);
+      final container = _makeContainer(cards);
+      addTearDown(container.dispose);
+
+      await container.read(drillSessionProvider(_params).future);
+      final notifier =
+          container.read(drillSessionProvider(_params).notifier);
+
+      notifier.flip();
+      expect(container.read(drillSessionProvider(_params)).value!.isFlipped,
+          true);
+
+      notifier.flip(); // re-flip vers recto
+      expect(container.read(drillSessionProvider(_params)).value!.isFlipped,
+          false);
+
+      notifier.flip();
+      expect(container.read(drillSessionProvider(_params)).value!.isFlipped,
+          true);
+    });
+
+    test('flip() — désactivé après évaluation (exitResult != null)',
+        () async {
+      final cards = _makeCards(1);
+      final container = _makeContainer(cards);
+      addTearDown(container.dispose);
+
+      await container.read(drillSessionProvider(_params).future);
+      final notifier =
+          container.read(drillSessionProvider(_params).notifier);
+
+      notifier.flip();
+      await notifier.evaluate(DrillEvaluationResult.maitrise);
+
+      // Après evaluate, isFlipped reste true (préservé) et exitResult != null.
+      expect(
+        container.read(drillSessionProvider(_params)).value!.isFlipped,
+        true,
+        reason: 'isFlipped doit être préservé après evaluate()',
+      );
+      expect(
+        container.read(drillSessionProvider(_params)).value!.exitResult,
+        DrillEvaluationResult.maitrise,
+      );
+
+      notifier.flip();
+
+      // flip() doit être un no-op : isFlipped reste true, exitResult reste set.
+      expect(
+        container.read(drillSessionProvider(_params)).value!.isFlipped,
+        true,
+        reason: 'flip() doit être no-op tant que exitResult != null',
+      );
+      expect(
+        container.read(drillSessionProvider(_params)).value!.exitResult,
+        DrillEvaluationResult.maitrise,
+      );
+    });
+
     test('restartWithErrors() — queue = indices des cartes à revoir', () async {
       final cards = _makeCards(3);
       final container = _makeContainer(cards);

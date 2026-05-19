@@ -32,7 +32,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuth = authAsync.valueOrNull?.isAuthenticated ?? false;
       final hasAccess = authAsync.valueOrNull?.hasAccess ?? false;
 
-      if (state.fullPath == null || state.fullPath == '/') return '/demo';
+      // R3 (Story 7.1) : un user authentifié ne doit jamais voir l'écran démo
+      final isDemoRoute = state.matchedLocation == '/demo' ||
+          state.matchedLocation.startsWith('/demo/');
+      if (isAuth && isDemoRoute) {
+        return hasAccess ? '/home' : '/paywall';
+      }
+
+      if (state.fullPath == null || state.fullPath == '/') {
+        return isAuth ? (hasAccess ? '/home' : '/paywall') : '/demo';
+      }
 
       final isProtected = state.matchedLocation.startsWith('/home') ||
           state.matchedLocation.startsWith('/colleges') ||

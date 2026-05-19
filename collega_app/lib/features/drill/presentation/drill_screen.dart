@@ -99,6 +99,11 @@ class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
 
     final isDefinitionFront =
         card.cardType == 'definition' && !session.isFlipped;
+    // R2 (Story 7.1) : autorise le re-flip recto→verso sur carte définition
+    // une fois la réponse soumise (semanticFeedback != null), pour éviter le
+    // dead-end UX où l'utilisateur cache le verso sans pouvoir y revenir.
+    final flipDisabled =
+        isDefinitionFront && session.semanticFeedback == null;
 
     return Column(
       children: [
@@ -164,7 +169,7 @@ class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
               card: card,
               isFlipped: session.isFlipped,
               exitResult: session.exitResult,
-              onFlip: isDefinitionFront ? null : notifier.flip,
+              onFlip: flipDisabled ? null : notifier.flip,
               onExitComplete: notifier.advanceToNext,
             ),
           ),
@@ -173,7 +178,7 @@ class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
         if (session.semanticFeedback != null)
           _SemanticFeedbackBanner(feedback: session.semanticFeedback!),
         // Definition input (recto uniquement, avant retournement)
-        if (isDefinitionFront)
+        if (isDefinitionFront) ...[
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.screenMargin,
@@ -189,15 +194,29 @@ class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
                 ),
                 const SizedBox(width: 8),
                 ShadButton(
-                  onPressed: () {
-                    _handleDefinitionSubmit(card.id, _answerController.text);
-                    _answerController.clear();
-                  },
+                  onPressed: session.semanticFeedback != null
+                      ? null
+                      : () {
+                          _handleDefinitionSubmit(card.id, _answerController.text);
+                          _answerController.clear();
+                        },
                   child: const Text('Évaluer'),
                 ),
               ],
             ),
           ),
+          if (session.semanticFeedback == null)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenMargin,
+              ),
+              child: Text(
+                'Soumets ta définition pour voir la réponse',
+                style: AppTypography.labelMedium()
+                    .copyWith(color: AppColors.secondary),
+              ),
+            ),
+        ],
         // Evaluation bar
         DrillEvaluationBar(
           isVisible: session.isFlipped,
