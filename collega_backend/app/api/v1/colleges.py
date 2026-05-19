@@ -49,7 +49,7 @@ def _next_month_reset(now: datetime) -> datetime:
 
 _PDF_MAGIC = b"%PDF-"
 _CHUNK_SIZE = 1024 * 1024  # 1 MB
-_MAX_PDF_SIZE = 50 * 1024 * 1024  # 50 MB
+_MAX_PDF_SIZE = 500 * 1024 * 1024  # 500 MB
 _SSE_MAX_DURATION = 3 * 3600  # 3h
 
 
@@ -253,7 +253,7 @@ async def import_college_pdf(
                 if total_size > _MAX_PDF_SIZE:
                     raise HTTPException(
                         status_code=413,
-                        detail={"code": "FILE_TOO_LARGE", "message": "Le PDF ne doit pas dépasser 50 MB"},
+                        detail={"code": "FILE_TOO_LARGE", "message": "Le PDF ne doit pas dépasser 500 MB"},
                     )
                 f.write(chunk)
     except HTTPException:

@@ -52,7 +52,8 @@ class CollegeImportRepository {
         data: formData,
         options: Options(
           contentType: 'multipart/form-data',
-          receiveTimeout: const Duration(minutes: 5),
+          sendTimeout: const Duration(minutes: 20),
+          receiveTimeout: const Duration(minutes: 20),
         ),
       );
       return ImportStartResponse.fromJson(

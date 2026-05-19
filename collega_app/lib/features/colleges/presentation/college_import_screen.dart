@@ -35,6 +35,8 @@ class _CollegeImportScreenState extends ConsumerState<CollegeImportScreen> {
     });
   }
 
+  static const int _maxPdfSizeBytes = 500 * 1024 * 1024; // 500 MB
+
   Future<void> _pickAndImport() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -43,6 +45,19 @@ class _CollegeImportScreenState extends ConsumerState<CollegeImportScreen> {
     if (result == null || result.files.single.path == null) return;
 
     final file = File(result.files.single.path!);
+    final sizeBytes = await file.length();
+    if (sizeBytes > _maxPdfSizeBytes) {
+      if (!mounted) return;
+      final sizeMb = (sizeBytes / (1024 * 1024)).toStringAsFixed(0);
+      ShadToaster.of(context).show(
+        ShadToast.destructive(
+          title: const Text('PDF trop volumineux'),
+          description: Text('Le fichier fait ${sizeMb} MB. Maximum : 500 MB.'),
+        ),
+      );
+      return;
+    }
+
     await ref.read(collegeImportProvider.notifier).startImport(widget.refId, file);
   }
 
