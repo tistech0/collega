@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
@@ -14,10 +16,29 @@ final authRepositoryProvider = Provider<AuthRepository>(
   ),
 );
 
+/// Timeout appliqué aux étapes locales du wipe (RC, Drift) — au-delà, on
+/// considère l'étape comme échouée et on continue vers le state reset, pour
+/// éviter qu'un SDK qui hang ne piège l'utilisateur dans un spinner infini.
+const Duration _kLocalWipeStepTimeout = Duration(seconds: 5);
+
 class AuthNotifier extends AsyncNotifier<AuthState> {
+  /// Guard de réentrance pour `deleteAccount` — un double-tap sur le bouton
+  /// « Supprimer définitivement » ne déclenche qu'UN seul DELETE serveur ;
+  /// les appels concurrents attendent le même résultat.
+  Completer<String?>? _deleteInFlight;
+
+  /// Riverpod 2.6 ne fournit pas de `ref.mounted` sur les AsyncNotifiers ;
+  /// on suit la disposition manuellement via `ref.onDispose` pour éviter de
+  /// muter `state` après que le provider ait été détruit (StateError).
+  bool _disposed = false;
+
   @override
   Future<AuthState> build() async {
+    ref.onDispose(() {
+      _disposed = true;
+    });
     ref.listen(forceLogoutSignalProvider, (_, __) {
+      if (_disposed) return;
       state = const AsyncData(AuthState());
     });
     return ref.read(authRepositoryProvider).loadStoredUser();
@@ -74,17 +95,89 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     return null;
   }
 
+  /// Supprime le compte (backend) puis exécute le wipe local **dans l'ordre** :
+  ///   1. `Purchases.logOut()` — RevenueCat (best-effort, try/catch + timeout)
+  ///   2. `AppDatabase.deleteEverything()` — Drift (best-effort, try/catch + timeout)
+  ///   3. `AuthRepository.logout()` — vide `flutter_secure_storage` (best-effort, try/catch)
+  ///   4. `state = AsyncData(AuthState())` — TOUJOURS exécuté en dernier
+  ///
+  /// Si le DELETE serveur échoue, **rien** n'est wipé localement et le message
+  /// d'erreur est retourné (toast destructive côté UI, session intacte).
+  ///
+  /// Réentrance : un appel concurrent (double-tap rapide sur « Supprimer
+  /// définitivement ») attend le même résultat que le premier appel — pas de
+  /// second DELETE serveur, pas de toast trompeur « Session expirée ».
   Future<String?> deleteAccount() async {
+    final inFlight = _deleteInFlight;
+    if (inFlight != null) {
+      return inFlight.future;
+    }
+    final completer = Completer<String?>();
+    _deleteInFlight = completer;
+    try {
+      final result = await _performDeleteAccount();
+      completer.complete(result);
+      return result;
+    } catch (e, stack) {
+      completer.completeError(e, stack);
+      rethrow;
+    } finally {
+      _deleteInFlight = null;
+    }
+  }
+
+  Future<String?> _performDeleteAccount() async {
     final result = await ref.read(authRepositoryProvider).deleteAccount();
     if (result.errorMessage != null) {
+      AppLogger.warning(
+        'deleteAccount: server DELETE refused — session may be force-logged by '
+        'interceptor depending on status (${result.errorMessage})',
+        tag: 'AuthNotifier',
+      );
       return result.errorMessage;
     }
+
+    // Serveur OK → wipe local séquentiel, best-effort sur chaque étape, avec
+    // timeout pour éviter qu'un SDK qui hang ne bloque indéfiniment l'UI.
+    // RC d'abord car le SDK peut lire le user_id Apple persisté avant qu'on
+    // vide le storage.
     try {
-      await ref.read(databaseProvider).deleteEverything();
-    } catch (_) {
-      // Le compte est supprimé côté serveur — on réinitialise l'état quoi qu'il arrive
+      await Purchases.logOut().timeout(_kLocalWipeStepTimeout);
+    } on TimeoutException catch (e) {
+      AppLogger.warning('RevenueCat logOut timed out during deleteAccount',
+          tag: 'AuthNotifier', error: e);
+    } catch (e) {
+      AppLogger.warning('RevenueCat logOut failed during deleteAccount',
+          tag: 'AuthNotifier', error: e);
     }
-    state = const AsyncData(AuthState());
+
+    try {
+      await ref
+          .read(databaseProvider)
+          .deleteEverything()
+          .timeout(_kLocalWipeStepTimeout);
+    } on TimeoutException catch (e) {
+      AppLogger.warning('Drift deleteEverything timed out during deleteAccount',
+          tag: 'AuthNotifier', error: e);
+    } catch (e) {
+      AppLogger.warning('Drift deleteEverything failed during deleteAccount',
+          tag: 'AuthNotifier', error: e);
+    }
+
+    try {
+      await ref.read(authRepositoryProvider).logout();
+    } catch (e) {
+      AppLogger.warning('secureStorage wipe failed during deleteAccount',
+          tag: 'AuthNotifier', error: e);
+    }
+
+    // Toujours exécuté, même si une étape locale a échoué : le serveur a déjà
+    // supprimé le compte, on doit sortir de la session pour éviter une boucle
+    // 401. Guard `_disposed` : si le provider a été détruit pendant les awaits,
+    // on évite un `StateError("...has been disposed")`.
+    if (!_disposed) {
+      state = const AsyncData(AuthState());
+    }
     return null;
   }
 

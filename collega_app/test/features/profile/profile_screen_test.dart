@@ -30,8 +30,11 @@ final _testUser = AuthUser(
 );
 
 class _FakeAuthNotifier extends AuthNotifier {
-  _FakeAuthNotifier(this._authState);
+  _FakeAuthNotifier(this._authState, {this.deleteError});
   final AuthState _authState;
+  // Si non-null, `deleteAccount` retourne ce message → simulé chemin d'erreur
+  // (Story 7.3 T10 — toast destructive + session intacte).
+  final String? deleteError;
 
   @override
   Future<AuthState> build() async => _authState;
@@ -49,7 +52,7 @@ class _FakeAuthNotifier extends AuthNotifier {
   }) async => null;
 
   @override
-  Future<String?> deleteAccount() async => null;
+  Future<String?> deleteAccount() async => deleteError;
 }
 
 class _FakeNotificationsService extends NotificationsService {
@@ -89,11 +92,12 @@ class _FakeRevisionPrefsRepository extends RevisionPrefsRepository {
   Future<void> save(RevisionPrefs prefs) async {}
 }
 
-Widget _buildScreen({AuthState? authState}) {
+Widget _buildScreen({AuthState? authState, String? deleteError}) {
   return ProviderScope(
     overrides: [
       authProvider.overrideWith(() => _FakeAuthNotifier(
             authState ?? AuthState(user: _testUser),
+            deleteError: deleteError,
           )),
       notificationsServiceProvider.overrideWith(
         (ref) => _FakeNotificationsService(),
@@ -259,6 +263,30 @@ void main() {
       await tester.tap(find.text('Annuler'));
       await tester.pumpAndSettle();
       expect(find.text('Supprimer mon compte ?'), findsNothing);
+    });
+
+    testWidgets(
+        'chemin erreur DELETE → toast destructive, session intacte (Story 7.3 T10)',
+        (tester) async {
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(_buildScreen(deleteError: 'Erreur réseau'));
+      await tester.pumpAndSettle();
+      final btn = find.text('Supprimer mon compte', skipOffstage: false);
+      await tester.ensureVisible(btn);
+      await tester.pumpAndSettle();
+      await tester.tap(btn);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Supprimer définitivement'));
+      await tester.pumpAndSettle();
+
+      // Toast destructive affiché
+      expect(find.text('Erreur'), findsOneWidget);
+      expect(find.text('Erreur réseau'), findsOneWidget);
+      // Toast succès NON affiché — session intacte
+      expect(find.text('Ton compte a été supprimé'), findsNothing);
     });
 
     testWidgets('affiche message abonnement si isSubscribed', (tester) async {

@@ -1,0 +1,222 @@
+"""Tests des validators de `app.core.config.Settings` — Story 7.3 T2.
+
+Le validator `_validate_production_secrets` :
+- raise `ValueError` (→ ValidationError) en mode `production` si secrets faibles
+- log `WARNING` en mode `development` sans raise
+"""
+
+import logging
+
+import pytest
+from pydantic import ValidationError
+
+from app.core.config import Settings
+
+
+def _base_settings_kwargs(**overrides):
+    """Minimum valid settings, override per test."""
+    base = dict(
+        database_url="postgresql+asyncpg://test/test",
+        redis_url="redis://test:6379/0",
+        secret_key="a" * 32,
+        claude_api_key="sk-ant-test1234567890",
+        admin_password="strongpw",
+        tester_password="testerpw",
+        revenuecat_webhook_secret="real-secret",
+    )
+    base.update(overrides)
+    return base
+
+
+def _make_settings(**kwargs) -> Settings:
+    # `_env_file=None` désactive la lecture du `.env` local (sinon ENVIRONMENT
+    # ou autres variables pourraient polluer le test selon la machine dev).
+    return Settings(_env_file=None, **kwargs)
+
+
+class TestValidatorsProductionMode:
+    def test_valid_production_settings_pass(self):
+        s = _make_settings(environment="production", **_base_settings_kwargs())
+        assert s.environment == "production"
+
+    def test_short_secret_key_raises(self):
+        with pytest.raises(ValidationError, match="SECRET_KEY"):
+            _make_settings(environment="production", **_base_settings_kwargs(secret_key="short"))
+
+    def test_default_secret_key_raises(self):
+        with pytest.raises(ValidationError, match="SECRET_KEY"):
+            _make_settings(
+                environment="production",
+                **_base_settings_kwargs(
+                    secret_key="change-me-in-production-use-at-least-32-chars"
+                ),
+            )
+
+    def test_empty_claude_key_raises(self):
+        with pytest.raises(ValidationError, match="CLAUDE_API_KEY"):
+            _make_settings(environment="production", **_base_settings_kwargs(claude_api_key=""))
+
+    def test_malformed_claude_key_raises(self):
+        with pytest.raises(ValidationError, match="CLAUDE_API_KEY"):
+            _make_settings(
+                environment="production",
+                **_base_settings_kwargs(claude_api_key="not-a-real-key"),
+            )
+
+    def test_default_admin_password_raises(self):
+        with pytest.raises(ValidationError, match="ADMIN_PASSWORD"):
+            _make_settings(
+                environment="production", **_base_settings_kwargs(admin_password="change-me")
+            )
+
+    def test_default_tester_password_raises(self):
+        with pytest.raises(ValidationError, match="TESTER_PASSWORD"):
+            _make_settings(
+                environment="production",
+                **_base_settings_kwargs(tester_password="change-me-in-production"),
+            )
+
+    def test_default_webhook_secret_raises(self):
+        with pytest.raises(ValidationError, match="REVENUECAT_WEBHOOK_SECRET"):
+            _make_settings(
+                environment="production",
+                **_base_settings_kwargs(revenuecat_webhook_secret="change-me-in-production"),
+            )
+
+    def test_multiple_issues_listed_in_message(self):
+        with pytest.raises(ValidationError) as exc_info:
+            _make_settings(
+                environment="production",
+                **_base_settings_kwargs(secret_key="short", admin_password="change-me"),
+            )
+        msg = str(exc_info.value)
+        assert "SECRET_KEY" in msg and "ADMIN_PASSWORD" in msg
+
+
+class TestValidatorsDevelopmentMode:
+    def test_weak_secrets_log_warning_no_raise(self, caplog):
+        with caplog.at_level(logging.WARNING, logger="app.core.config"):
+            _make_settings(
+                environment="development",
+                **_base_settings_kwargs(secret_key="short", admin_password="change-me"),
+            )
+        assert "DEV mode" in caplog.text
+        assert "SECRET_KEY" in caplog.text
+        assert "ADMIN_PASSWORD" in caplog.text
+
+    def test_default_environment_is_development(self):
+        # Pas d'`environment` passé → default Pydantic "development".
+        s = _make_settings(**_base_settings_kwargs(secret_key="short"))
+        assert s.environment == "development"
+
+    def test_valid_dev_settings_no_warning(self, caplog):
+        with caplog.at_level(logging.WARNING, logger="app.core.config"):
+            _make_settings(environment="development", **_base_settings_kwargs())
+        # Aucune violation détectée → pas de warning DEV mode
+        assert "DEV mode" not in caplog.text
+
+
+class TestEnvironmentNormalization:
+    """Story 7.3 review — P1+P7 : `ENVIRONMENT` strip + warn sur valeur inconnue."""
+
+    def test_production_with_trailing_whitespace_is_strict(self):
+        # `ENVIRONMENT=" production "` (espaces dans .env) doit être traité
+        # comme prod et bloquer les secrets faibles. Avant le patch : silently
+        # traité comme dev → secrets faibles tolérés en prod réelle.
+        with pytest.raises(ValidationError, match="SECRET_KEY"):
+            _make_settings(
+                environment=" production ",
+                **_base_settings_kwargs(secret_key="short"),
+            )
+
+    def test_uppercase_production_is_strict(self):
+        with pytest.raises(ValidationError, match="ADMIN_PASSWORD"):
+            _make_settings(
+                environment="PRODUCTION",
+                **_base_settings_kwargs(admin_password="change-me"),
+            )
+
+    def test_unknown_environment_logs_warning(self, caplog):
+        # `ENVIRONMENT=prod` (typo) ne doit PAS être traité silencieusement
+        # comme dev — un warning est émis pour signaler le fail-open.
+        with caplog.at_level(logging.WARNING, logger="app.core.config"):
+            _make_settings(environment="prod", **_base_settings_kwargs())
+        assert "Unknown ENVIRONMENT" in caplog.text
+        assert "'prod'" in caplog.text
+
+    def test_known_environments_no_unknown_warning(self, caplog):
+        # `development` et `production` (valides) ne déclenchent pas le warning
+        # "Unknown ENVIRONMENT" — seulement les autres valeurs le font.
+        with caplog.at_level(logging.WARNING, logger="app.core.config"):
+            _make_settings(environment="development", **_base_settings_kwargs())
+            _make_settings(environment="production", **_base_settings_kwargs())
+        assert "Unknown ENVIRONMENT" not in caplog.text
+
+
+class TestStripAndStrictness:
+    """Story 7.3 review — P2+P3+P5+P6 : strip whitespace + listes fermées."""
+
+    def test_admin_password_with_trailing_space_rejected(self):
+        # `ADMIN_PASSWORD="change-me-in-production "` (espace traînant) ne doit
+        # PAS échapper au validator. Avant : égalité stricte → bypass possible.
+        with pytest.raises(ValidationError, match="ADMIN_PASSWORD"):
+            _make_settings(
+                environment="production",
+                **_base_settings_kwargs(admin_password="change-me-in-production "),
+            )
+
+    def test_admin_password_whitespace_only_rejected(self):
+        # `ADMIN_PASSWORD=" "` (un espace seul) ne doit pas passer pour un vrai
+        # secret en prod.
+        with pytest.raises(ValidationError, match="ADMIN_PASSWORD"):
+            _make_settings(
+                environment="production",
+                **_base_settings_kwargs(admin_password=" "),
+            )
+
+    def test_legit_secret_with_change_me_prefix_passes(self):
+        # Avant le patch : `startswith("change-me")` rejetait à tort un secret
+        # légitime préfixé `change-me-…`. La liste fermée corrige ce
+        # false-positive.
+        secret = "change-me-foo-" + "x" * 32  # 47 chars, pas dans la liste
+        s = _make_settings(environment="production", **_base_settings_kwargs(secret_key=secret))
+        assert s.secret_key == secret
+
+    def test_legit_secret_containing_in_production_passes(self):
+        # Avant le patch : `"in-production" in self.secret_key.lower()` rejetait
+        # un secret de 32+ chars contenant cette substring. La liste fermée
+        # corrige.
+        secret = "my-real-secret-for-use-in-production-environment"  # 48 chars
+        s = _make_settings(environment="production", **_base_settings_kwargs(secret_key=secret))
+        assert s.secret_key == secret
+
+    def test_claude_api_key_prefix_only_rejected(self):
+        # Avant le patch : `startswith("sk-ant-")` acceptait `"sk-ant-"` (7 chars
+        # nu) en prod. Désormais une longueur minimale est requise.
+        with pytest.raises(ValidationError, match="CLAUDE_API_KEY"):
+            _make_settings(
+                environment="production",
+                **_base_settings_kwargs(claude_api_key="sk-ant-"),
+            )
+
+    def test_secret_key_short_and_placeholder_reports_both(self):
+        # Avant le patch : `if/elif` ne reportait qu'une seule violation à la
+        # fois. Désormais deux contrôles indépendants → l'opérateur voit les
+        # deux problèmes d'un coup.
+        with pytest.raises(ValidationError) as exc_info:
+            _make_settings(
+                environment="production",
+                **_base_settings_kwargs(secret_key="change-me"),  # placeholder + len 9 < 32
+            )
+        msg = str(exc_info.value)
+        assert "must be ≥ 32 chars" in msg
+        assert "default placeholder" in msg
+
+    def test_webhook_secret_change_me_short_form_rejected(self):
+        # Avant le patch : seul `"change-me-in-production"` (forme longue) était
+        # détecté. `"change-me"` (forme courte) passait silencieusement.
+        with pytest.raises(ValidationError, match="REVENUECAT_WEBHOOK_SECRET"):
+            _make_settings(
+                environment="production",
+                **_base_settings_kwargs(revenuecat_webhook_secret="change-me"),
+            )

@@ -230,20 +230,37 @@ class AuthRepository {
     }
   }
 
+  /// Supprime le compte côté backend. **Ne touche PAS** au storage / DB locaux ;
+  /// l'orchestration locale est faite par [AuthNotifier.deleteAccount].
+  ///
+  /// Retours :
+  /// - `AuthState()` (vide, sans errorMessage) → succès serveur (200) → wipe local autorisé
+  /// - `AuthState(errorMessage: ...)` → échec → l'appelant DOIT bloquer le wipe local
   Future<AuthState> deleteAccount() async {
     try {
       final accessToken = await _storage.read(key: _kAccessToken);
-      if (accessToken == null) return const AuthState();
-      await _dio.delete<Map<String, dynamic>>(
+      if (accessToken == null) {
+        return const AuthState(
+          errorMessage: 'Session expirée — reconnecte-toi avant de supprimer ton compte',
+        );
+      }
+      // Pas de type-arg `<Map<String, dynamic>>` : la réponse n'est pas lue,
+      // et un body 2xx non-JSON (proxy/CDN renvoyant HTML, body vide) ne doit
+      // pas faire échouer le cast Response.data → on évite un état zombie
+      // (compte supprimé serveur mais wipe local bloqué). Voir review
+      // findings 7.3. Sur les statuts d'erreur, la responseType par défaut
+      // (JSON) est préservée pour que `_extractError` lise `detail.message`.
+      await _dio.delete<dynamic>(
         '/v1/auth/account',
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
-      await logout();
       return const AuthState();
     } on DioException catch (e) {
+      AppLogger.warning('deleteAccount DioException: ${e.type}', tag: 'AuthRepository');
       return AuthState(errorMessage: _extractError(e));
-    } catch (_) {
-      return AuthState(errorMessage: 'Erreur lors de la suppression du compte');
+    } catch (e) {
+      AppLogger.error('deleteAccount unexpected error', tag: 'AuthRepository', error: e);
+      return const AuthState(errorMessage: 'Erreur lors de la suppression du compte');
     }
   }
 

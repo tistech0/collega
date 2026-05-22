@@ -1,5 +1,11 @@
 # Deferred Work
 
+## Deferred from: code review of 7-3-hardening-rgpd-safe-delete-config (2026-05-22)
+
+- Logger possiblement non configuré au moment de `Settings()` (instanciation module-level avant que uvicorn monte ses handlers) — warning dev peut être avalé silencieusement [`collega_backend/app/core/config.py:105`]
+- `ShadToaster.of(context)` peut throw si force-logout déclenche un redirect `/demo` pendant l'`await deleteAccount` — pattern UI pré-existant, hors scope hardening 7.3 [`collega_app/lib/features/profile/presentation/profile_screen.dart:569,577`]
+- Commentaires sécurité `docker-compose.prod.yml` non enforceables par CI — un futur dev peut ajouter `ports:` sur `db`/`redis` malgré le commentaire ; à coupler avec un step CI grep quand un pipeline sera monté [`collega_backend/docker-compose.prod.yml`]
+
 ## Deferred from: code review of 7-2-hardening-async-backend (2026-05-22)
 
 - Migration 012 sans `IF NOT EXISTS` — convention Alembic acceptable via cycle up/down, idempotence stricte non garantie en cas de re-stamp manuel [`collega_backend/alembic/versions/012_atomic_quota_and_unique_processing.py`]

@@ -46,6 +46,8 @@ services:
 
   db:
     image: postgres:16-alpine
+    # NE PAS ajouter "ports:" — accès interne uniquement via le network collega_net.
+    # L'API se connecte via DATABASE_URL=postgresql+asyncpg://postgres:...@db:5432/collega.
     volumes:
       - /mnt/user/appdata/collega/postgres:/var/lib/postgresql/data
     environment:
@@ -63,6 +65,8 @@ services:
 
   redis:
     image: redis:7-alpine
+    # NE PAS ajouter "ports:" — accès interne uniquement via le network collega_net.
+    # L'API/worker se connectent via REDIS_URL=redis://redis:6379/0.
     volumes:
       - /mnt/user/appdata/collega/redis:/data
     healthcheck:
