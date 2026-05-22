@@ -9,8 +9,11 @@ import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/drill_providers.dart';
 import 'package:collega_app/features/drill/widgets/drill_evaluation_bar.dart';
+import 'package:collega_app/features/drill/widgets/timer_ring.dart';
 import 'package:collega_app/features/generation/widgets/flash_card_widget.dart';
 import 'package:collega_app/features/planning/planning_providers.dart';
+import 'package:collega_app/features/profile/domain/revision_prefs.dart';
+import 'package:collega_app/features/profile/profile_providers.dart';
 
 class DrillScreen extends ConsumerWidget {
   const DrillScreen({super.key, required this.params});
@@ -58,6 +61,11 @@ class _DrillActiveView extends ConsumerStatefulWidget {
 class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
   final _answerController = TextEditingController();
 
+  /// État pause local à la session drill (Story 7.4 AC4). Volontairement
+  /// non persisté dans `RevisionPrefs` ni `DrillSessionState` — la session
+  /// suivante repart avec le timer actif comme défini en prefs.
+  bool _timerPaused = false;
+
   @override
   void dispose() {
     _answerController.dispose();
@@ -102,8 +110,17 @@ class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
     // R2 (Story 7.1) : autorise le re-flip recto→verso sur carte définition
     // une fois la réponse soumise (semanticFeedback != null), pour éviter le
     // dead-end UX où l'utilisateur cache le verso sans pouvoir y revenir.
-    final flipDisabled =
-        isDefinitionFront && session.semanticFeedback == null;
+    // Story 7.4 AC3 : timer expiré → flip autorisé même sans réponse soumise.
+    final flipDisabled = isDefinitionFront &&
+        session.semanticFeedback == null &&
+        !session.timerExpired;
+
+    final prefs = ref.watch(revisionPrefsProvider).valueOrNull ??
+        const RevisionPrefs();
+    final timerEnabled =
+        prefs.timerEnabled && prefs.timerDurationSeconds > 0;
+    final showTimerRing =
+        timerEnabled && !session.isFlipped && session.exitResult == null;
 
     return Column(
       children: [
@@ -137,6 +154,21 @@ class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
+              if (timerEnabled) ...[
+                const SizedBox(width: 4),
+                Semantics(
+                  label: _timerPaused
+                      ? 'Reprendre le chronomètre'
+                      : 'Mettre le chronomètre en pause',
+                  child: IconButton(
+                    icon: Icon(
+                      _timerPaused ? Icons.timer_off : Icons.timer,
+                    ),
+                    onPressed: () =>
+                        setState(() => _timerPaused = !_timerPaused),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -165,12 +197,35 @@ class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
           child: Padding(
             padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.screenMargin),
-            child: FlashCardWidget(
-              card: card,
-              isFlipped: session.isFlipped,
-              exitResult: session.exitResult,
-              onFlip: flipDisabled ? null : notifier.flip,
-              onExitComplete: notifier.advanceToNext,
+            child: Stack(
+              children: [
+                FlashCardWidget(
+                  card: card,
+                  isFlipped: session.isFlipped,
+                  exitResult: session.exitResult,
+                  onFlip: flipDisabled ? null : notifier.flip,
+                  onExitComplete: notifier.advanceToNext,
+                ),
+                if (showTimerRing)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: TimerRing(
+                      durationSeconds: prefs.timerDurationSeconds,
+                      cardId: card.id,
+                      isPaused: _timerPaused,
+                      onExpired: () {
+                        notifier.handleTimerExpiry();
+                        if (!mounted) return;
+                        ShadToaster.of(context).show(
+                          const ShadToast(
+                            title: Text('Temps écoulé'),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
             ),
           ),
         ),

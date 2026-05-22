@@ -47,6 +47,24 @@ class DrillSessionNotifier
     state = AsyncValue.data(s.copyWith(isFlipped: !s.isFlipped));
   }
 
+  /// Force le passage au verso suite à l'expiration du chronomètre (Story 7.4).
+  ///
+  /// - Idempotent : un second appel ne change pas l'état.
+  /// - Ignoré si la carte est déjà retournée manuellement (`isFlipped == true`).
+  /// - Aucun appel backend (pas d'`evaluateSemantic` ni d'`updateCardDrillLevel`)
+  ///   — l'utilisatrice évalue manuellement après lecture du verso.
+  void handleTimerExpiry() {
+    final s = state.value;
+    if (s == null) return;
+    if (s.exitResult != null) return;
+    if (s.isFlipped) return;
+    if (s.timerExpired) return;
+    state = AsyncValue.data(s.copyWith(
+      isFlipped: true,
+      timerExpired: true,
+    ));
+  }
+
   void setSemanticFeedback(SemanticFeedback feedback) {
     final s = state.value;
     if (s == null) return;
@@ -102,6 +120,7 @@ class DrillSessionNotifier
       exitResult: null,
       semanticFeedback: null,
       isComplete: isComplete,
+      timerExpired: false,
     ));
   }
 

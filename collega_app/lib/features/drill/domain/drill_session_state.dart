@@ -60,6 +60,7 @@ class DrillSessionState {
     this.exitResult,
     this.semanticFeedback,
     this.isComplete = false,
+    this.timerExpired = false,
   });
 
   final List<FlashCardModel> cards;
@@ -71,6 +72,7 @@ class DrillSessionState {
   final DrillEvaluationResult? exitResult;
   final SemanticFeedback? semanticFeedback;
   final bool isComplete;
+  final bool timerExpired;
 
   int get totalInitial => cards.length;
 
@@ -89,6 +91,7 @@ class DrillSessionState {
     Object? exitResult = _absent,
     Object? semanticFeedback = _absent,
     bool? isComplete,
+    bool? timerExpired,
   }) {
     return DrillSessionState(
       cards: cards ?? this.cards,
@@ -104,6 +107,7 @@ class DrillSessionState {
           ? this.semanticFeedback
           : semanticFeedback as SemanticFeedback?,
       isComplete: isComplete ?? this.isComplete,
+      timerExpired: timerExpired ?? this.timerExpired,
     );
   }
 

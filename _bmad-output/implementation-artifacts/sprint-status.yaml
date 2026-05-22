@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-27
-last_updated: 2026-05-22 # Story 7.3 done — code review : 16 patches appliqués, 3 deferred
+last_updated: 2026-05-22 # Story 7.4 done — code review BMAD + 11 patches appliqués (D1-D4 + P1-P7), tests 15/15 backend + 48/48 Flutter scope ✅
 project: appMedecine
 project_key: NOKEY
 tracking_system: file-system
@@ -124,7 +124,7 @@ development_status:
   7-1-corrections-ux-flashcard-router: done
   7-2-hardening-async-backend: done
   7-3-hardening-rgpd-safe-delete-config: done
-  7-4-chronometre-apns-singleton-docs: backlog
+  7-4-chronometre-apns-singleton-docs: done
   7-5-affinage-prompt-persona-claude: backlog              # [DIFFÉRÉ — kick-off après testeuse termine collège actuel]
   epic-7-retrospective: optional
 

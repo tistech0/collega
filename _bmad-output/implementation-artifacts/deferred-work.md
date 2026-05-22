@@ -1,5 +1,13 @@
 # Deferred Work
 
+## Deferred from: code review of 7-4-chronometre-apns-singleton-docs (2026-05-22)
+
+- `flutter_markdown` en mode maintenance / discontinued (annonce Flutter team fin 2024) — migration prévisible vers `markdown_widget` ou fork communautaire à la prochaine MAJ Flutter [`collega_app/pubspec.yaml:55-56`]
+- Workaround test viewport `Size(1200, 1600)` ne reflète plus le rendu prod iPhone — préférer `scrollUntilVisible` pour fidélité réelle [`collega_app/test/features/profile/profile_screen_test.dart:173-180,220,239`]
+- `_DrillActiveView.build()` watch `revisionPrefsProvider` → en iPad split-view, changer la durée timer depuis Profile restart le timer de la carte courante. Unreachable iPhone single-window (acceptable MVP). Documenter ou snapshot prefs au `initState` [`collega_app/lib/features/drill/presentation/drill_screen.dart:118`]
+- Icônes pause inversées vs convention iOS HIG (`Icons.timer` ↔ `Icons.timer_off` au lieu de `Icons.pause` ↔ `Icons.play_arrow`). Conforme au spec L.309 mais surprend les utilisatrices iOS — à soumettre Sally (UX) avant beta [`collega_app/lib/features/drill/presentation/drill_screen.dart:163-170`]
+- Tests `pump(Duration)` autour de `ShadToaster` peuvent être racy avec les animations internes du toast. Passent actuellement mais flakiness latente à monitorer en CI [`collega_app/test/features/drill/drill_screen_test.dart:184`]
+
 ## Deferred from: code review of 7-3-hardening-rgpd-safe-delete-config (2026-05-22)
 
 - Logger possiblement non configuré au moment de `Settings()` (instanciation module-level avant que uvicorn monte ses handlers) — warning dev peut être avalé silencieusement [`collega_backend/app/core/config.py:105`]

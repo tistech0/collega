@@ -170,6 +170,12 @@ void main() {
     });
 
     testWidgets('affiche le bouton Se déconnecter', (tester) async {
+      // Story 7.4 T2 : viewport élargi pour que ListView construise _AppCard
+      // (les ajouts dans _RevisionPrefsCard rallongent la liste).
+      tester.view.physicalSize = const Size(1200, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
@@ -211,6 +217,11 @@ void main() {
     });
 
     testWidgets('_AppCard affiche les liens CGU et politique', (tester) async {
+      // Story 7.4 T2 : viewport élargi (cf. test "Se déconnecter").
+      tester.view.physicalSize = const Size(1200, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
 
@@ -225,6 +236,11 @@ void main() {
     });
 
     testWidgets('affiche le bouton Supprimer mon compte', (tester) async {
+      // Story 7.4 T2 : viewport élargi (cf. test "Se déconnecter").
+      tester.view.physicalSize = const Size(1200, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(_buildScreen());
       await tester.pumpAndSettle();
       expect(find.text('Supprimer mon compte', skipOffstage: false), findsOneWidget);

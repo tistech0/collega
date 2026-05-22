@@ -52,6 +52,9 @@ dependencies:
   # Push notifications (APNs iOS)
   flutter_apns_only: ^1.0.0
 
+  # Markdown rendering (CGU + politique de confidentialité bundle — Story 7.4)
+  flutter_markdown: ^0.7.5
+
   # Icons
   cupertino_icons: ^1.0.8
 
@@ -69,3 +72,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/legal/cgu.md
+    - assets/legal/privacy.md

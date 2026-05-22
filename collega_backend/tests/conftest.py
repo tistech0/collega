@@ -61,6 +61,21 @@ def mock_db():
     return make_mock_db()
 
 
+@pytest.fixture(autouse=True)
+def _reset_apns_service_singleton():
+    """Reset le module-level `_service_instance` entre chaque test.
+
+    Sans ce reset, les tests qui appellent `get_notification_service()` sans
+    request/ctx polluent l'instance globale et provoquent un test-flake
+    selon l'ordre d'exécution pytest (cf. Story 7.4 review P5).
+    """
+    from app.services.notifications import apns_service
+
+    apns_service._service_instance = None
+    yield
+    apns_service._service_instance = None
+
+
 @pytest.fixture
 async def client(mock_db):
     async def override_get_db():

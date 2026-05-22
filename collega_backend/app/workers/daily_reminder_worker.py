@@ -22,7 +22,7 @@ async def send_daily_reminders(ctx: dict) -> None:
         )
         users = result.scalars().all()
         logger.info("send_daily_reminders hour=%d → %d users", current_hour, len(users))
-        svc = get_notification_service()
+        svc = get_notification_service(ctx=ctx)
         for user in users:
             try:
                 await svc.send_daily_reminder(user.apns_token)

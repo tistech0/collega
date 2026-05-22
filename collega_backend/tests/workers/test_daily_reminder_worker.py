@@ -97,3 +97,25 @@ class TestSendDailyReminders:
                 await send_daily_reminders({})
 
         assert mock_svc.send_daily_reminder.call_count == 2
+
+    async def test_ctx_notification_service_pris_en_compte(self):
+        """Story 7.4 AC #6 : si ctx contient notification_service, get_notification_service(ctx=ctx) le retourne."""
+        from app.services.notifications import apns_service
+
+        current_hour = datetime.now(timezone.utc).hour
+        user = _make_user(apns_token="token-ctx", reminder_hour_utc=current_hour)
+        mock_db = _make_mock_db([user])
+        ctx_svc = AsyncMock()
+        ctx_svc.send_daily_reminder = AsyncMock()
+
+        # Force le cache module-level à None pour valider que ctx prime.
+        apns_service._service_instance = None
+        ctx = {"notification_service": ctx_svc}
+
+        with patch(
+            "app.workers.daily_reminder_worker.async_session_factory",
+            return_value=mock_db,
+        ):
+            await send_daily_reminders(ctx)
+
+        ctx_svc.send_daily_reminder.assert_awaited_once_with(user.apns_token)

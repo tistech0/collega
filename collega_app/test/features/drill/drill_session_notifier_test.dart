@@ -254,5 +254,102 @@ void main() {
       expect(s.cards[s.queue[0]].id, 'card-0');
       expect(s.evaluatedCount, 0);
     });
+
+    // ─── Story 7.4 — handleTimerExpiry ───────────────────────────────────
+
+    test('handleTimerExpiry() — recto non-flippé → flip + timerExpired=true',
+        () async {
+      final cards = _makeCards(2);
+      final container = _makeContainer(cards);
+      addTearDown(container.dispose);
+
+      await container.read(drillSessionProvider(_params).future);
+      final notifier =
+          container.read(drillSessionProvider(_params).notifier);
+
+      notifier.handleTimerExpiry();
+
+      final s = container.read(drillSessionProvider(_params)).value!;
+      expect(s.isFlipped, isTrue);
+      expect(s.timerExpired, isTrue);
+    });
+
+    test('handleTimerExpiry() — idempotent (2 appels = même état)', () async {
+      final cards = _makeCards(2);
+      final container = _makeContainer(cards);
+      addTearDown(container.dispose);
+
+      await container.read(drillSessionProvider(_params).future);
+      final notifier =
+          container.read(drillSessionProvider(_params).notifier);
+
+      notifier.handleTimerExpiry();
+      notifier.handleTimerExpiry();
+
+      final s = container.read(drillSessionProvider(_params)).value!;
+      expect(s.isFlipped, isTrue);
+      expect(s.timerExpired, isTrue);
+    });
+
+    test('handleTimerExpiry() — ignoré si déjà flippé manuellement',
+        () async {
+      final cards = _makeCards(2);
+      final container = _makeContainer(cards);
+      addTearDown(container.dispose);
+
+      await container.read(drillSessionProvider(_params).future);
+      final notifier =
+          container.read(drillSessionProvider(_params).notifier);
+
+      notifier.flip();
+      notifier.handleTimerExpiry();
+
+      final s = container.read(drillSessionProvider(_params)).value!;
+      expect(s.isFlipped, isTrue);
+      // timerExpired ne doit PAS être passé à true puisque l'utilisateur a
+      // flippé manuellement avant expiration.
+      expect(s.timerExpired, isFalse);
+    });
+
+    test('handleTimerExpiry() — ignoré après évaluation (exitResult != null)',
+        () async {
+      final cards = _makeCards(2);
+      final container = _makeContainer(cards);
+      addTearDown(container.dispose);
+
+      await container.read(drillSessionProvider(_params).future);
+      final notifier =
+          container.read(drillSessionProvider(_params).notifier);
+
+      notifier.flip();
+      await notifier.evaluate(DrillEvaluationResult.bien);
+      notifier.handleTimerExpiry();
+
+      final s = container.read(drillSessionProvider(_params)).value!;
+      expect(s.timerExpired, isFalse);
+    });
+
+    test('advanceToNext() — reset timerExpired à false', () async {
+      final cards = _makeCards(2);
+      final container = _makeContainer(cards);
+      addTearDown(container.dispose);
+
+      await container.read(drillSessionProvider(_params).future);
+      final notifier =
+          container.read(drillSessionProvider(_params).notifier);
+
+      notifier.handleTimerExpiry();
+      expect(
+        container.read(drillSessionProvider(_params)).value!.timerExpired,
+        isTrue,
+      );
+
+      await notifier.evaluate(DrillEvaluationResult.bien);
+      notifier.advanceToNext();
+
+      final s = container.read(drillSessionProvider(_params)).value!;
+      expect(s.timerExpired, isFalse);
+      expect(s.isFlipped, isFalse);
+    });
   });
 }

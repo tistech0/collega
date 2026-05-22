@@ -1,3 +1,5 @@
+import logging
+import ssl
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -19,11 +21,61 @@ from app.api.v1.tester import router as tester_router
 from app.core.database import engine
 from app.core.limiter import limiter
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    yield
-    await engine.dispose()
+    # Story 7.4 AC #5 — init APNs singleton au démarrage.
+    # Import local pour permettre aux tests de monkeypatch `create_notification_service`.
+    from app.services.notifications import apns_service
+
+    try:
+        app.state.notification_service = apns_service.create_notification_service()
+        # Sync du fallback module-level pour que tout appel
+        # `get_notification_service()` SANS request/ctx (BackgroundTasks,
+        # scripts, tests qui n'entrent pas dans le lifespan context) renvoie
+        # la MÊME instance que `app.state` — évite la création d'une 2e
+        # instance APNs parallèle qui défait l'objectif singleton.
+        apns_service._service_instance = app.state.notification_service
+        from app.core.config import settings
+
+        logger.info(
+            "Notification service initialized (type=%s, sandbox=%s)",
+            type(app.state.notification_service).__name__,
+            settings.apns_use_sandbox,
+        )
+    except (
+        FileNotFoundError,
+        OSError,
+        ssl.SSLError,
+        ValueError,
+    ) as exc:
+        # Narrow exceptions : seuls les échecs d'init APNs attendus (config
+        # manquante, .p8 illisible, TLS broken). Les bugs de code
+        # (`ImportError`, `AssertionError`, `AttributeError`) doivent
+        # remonter pour ne pas désactiver silencieusement le push en prod.
+        logger.warning(
+            "Failed to init APNs service — falling back to NullNotificationService: %s",
+            exc,
+        )
+        app.state.notification_service = apns_service.NullNotificationService()
+        apns_service._service_instance = app.state.notification_service
+
+    try:
+        yield
+    finally:
+        # Cleanup APNs avant dispose DB (Story 7.4 AC #5).
+        svc = getattr(app.state, "notification_service", None)
+        if svc is not None:
+            try:
+                await svc.close()
+            except Exception as exc:  # pragma: no cover - cleanup non bloquant
+                logger.warning("APNs close() during shutdown failed: %s", exc)
+        # Reset du module-level singleton pour que les tests suivants ne
+        # voient pas l'instance fermée.
+        apns_service._service_instance = None
+        await engine.dispose()
 
 
 app = FastAPI(

@@ -14,6 +14,9 @@ import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/domain/drill_state.dart';
 import 'package:collega_app/features/drill/drill_providers.dart';
 import 'package:collega_app/features/drill/presentation/drill_screen.dart';
+import 'package:collega_app/features/drill/widgets/timer_ring.dart';
+import 'package:collega_app/features/profile/domain/revision_prefs.dart';
+import 'package:collega_app/features/profile/profile_providers.dart';
 import 'package:collega_app/shared/widgets/bottom_nav_bar.dart';
 
 class _FakeDrillRepository extends DrillRepository {
@@ -57,10 +60,30 @@ List<FlashCardModel> _makeCards(int count) => List.generate(
 
 const _params = DrillSessionParams(collegeId: 'c1', itemId: 'i1');
 
-Widget _wrap(List<FlashCardModel> cards) => ProviderScope(
+/// Fake notifier qui retourne instantanément des prefs fixées (Story 7.4 T15).
+class _FakeRevisionPrefsNotifier extends RevisionPrefsNotifier {
+  _FakeRevisionPrefsNotifier(this._prefs);
+  final RevisionPrefs _prefs;
+
+  @override
+  Future<RevisionPrefs> build() async => _prefs;
+
+  @override
+  Future<void> save(RevisionPrefs prefs) async {}
+}
+
+Widget _wrap(
+  List<FlashCardModel> cards, {
+  RevisionPrefs? prefs,
+}) =>
+    ProviderScope(
       overrides: [
         drillRepositoryProvider
             .overrideWithValue(_FakeDrillRepository(cards)),
+        if (prefs != null)
+          revisionPrefsProvider.overrideWith(
+            () => _FakeRevisionPrefsNotifier(prefs),
+          ),
       ],
       child: ShadApp(
         theme: buildShadTheme(),
@@ -126,6 +149,76 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Session terminée'), findsOneWidget);
+    });
+
+    // ─── Story 7.4 — Timer + auto-flip ──────────────────────────────────
+
+    testWidgets('timerEnabled=true → TimerRing affiché sur le recto',
+        (tester) async {
+      await tester.pumpWidget(_wrap(
+        _makeCards(1),
+        prefs: const RevisionPrefs(
+          timerEnabled: true,
+          timerDurationSeconds: 30,
+        ),
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.byType(TimerRing), findsOneWidget);
+      // Bouton pause/reprise dans le header
+      expect(find.byIcon(Icons.timer), findsOneWidget);
+
+      // Cleanup pour éviter pending timer leak
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
+    testWidgets('timerEnabled=false → pas de TimerRing', (tester) async {
+      await tester.pumpWidget(_wrap(
+        _makeCards(1),
+        prefs: const RevisionPrefs(timerEnabled: false),
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.byType(TimerRing), findsNothing);
+      expect(find.byIcon(Icons.timer), findsNothing);
+    });
+
+    testWidgets('timer expire → session.isFlipped + timerExpired + toast',
+        (tester) async {
+      await tester.pumpWidget(_wrap(
+        _makeCards(1),
+        prefs: const RevisionPrefs(
+          timerEnabled: true,
+          timerDurationSeconds: 1,
+        ),
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(DrillScreen)),
+      );
+
+      // Avant expiration : recto, pas de toast
+      expect(
+        container.read(drillSessionProvider(_params)).value!.isFlipped,
+        isFalse,
+      );
+      expect(find.text('Temps écoulé'), findsNothing);
+
+      // Avance le ticker au-delà de la durée
+      await tester.pump(const Duration(milliseconds: 1200));
+
+      // Après expiration : flippé + timerExpired
+      final state = container.read(drillSessionProvider(_params)).value!;
+      expect(state.isFlipped, isTrue);
+      expect(state.timerExpired, isTrue);
+      expect(find.text('Temps écoulé'), findsOneWidget);
+
+      // Cleanup
+      await tester.pumpWidget(const SizedBox.shrink());
     });
   });
 

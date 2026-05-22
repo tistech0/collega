@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:collega_app/core/notifications/notifications_service.dart';
 import 'package:collega_app/core/theme/app_theme.dart';
+import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 import 'package:collega_app/features/auth/data/revenuecat_service.dart';
@@ -12,10 +13,6 @@ import 'package:collega_app/features/auth/paywall_providers.dart';
 import 'package:collega_app/features/home/home_providers.dart';
 import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
-
-// TODO: Remplacer par les URLs réelles avant déploiement
-const _kCguUrl = 'https://appmedecine.fr/cgu';
-const _kPrivacyUrl = 'https://appmedecine.fr/politique-confidentialite';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -353,26 +350,60 @@ class _RevisionPrefsContent extends ConsumerWidget {
   const _RevisionPrefsContent({required this.prefs});
   final RevisionPrefs prefs;
 
+  /// Persiste les prefs et notifie l'utilisatrice en cas d'échec storage.
+  ///
+  /// Anti-pattern fire-and-forget noté dans la rétro MVP § Pattern #4 : sans
+  /// await + catch, un échec `flutter_secure_storage.write` divergerait
+  /// silencieusement l'UI (toggle apparent) de la storage (ancienne valeur).
+  Future<void> _persist(
+    BuildContext context,
+    WidgetRef ref,
+    RevisionPrefs updated, {
+    String? errorLabel,
+  }) async {
+    try {
+      await ref.read(revisionPrefsProvider.notifier).save(updated);
+    } catch (e) {
+      AppLogger.warning(
+        'Échec persistance prefs révision : $e',
+        tag: '_RevisionPrefsContent',
+        error: e,
+      );
+      if (!context.mounted) return;
+      ShadToaster.of(context).show(
+        ShadToast.destructive(
+          title: const Text('Préférence non sauvegardée'),
+          description: Text(errorLabel ??
+              'Impossible d\'enregistrer ta préférence — réessaie.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = prefs.defaultRangs ?? [];
 
-    void updateRangs(String rang, bool on) {
+    Future<void> updateRangs(String rang, bool on) async {
       final newList = on
           ? (selected.contains(rang) ? selected : [...selected, rang])
           : selected.where((r) => r != rang).toList();
       final updated = prefs.copyWith(
         defaultRangs: newList.isEmpty ? null : newList,
       );
-      ref.read(revisionPrefsProvider.notifier).save(updated);
+      await _persist(context, ref, updated);
+      if (!context.mounted) return;
       ref.read(homeSessionConfigProvider.notifier).reset();
       ref.invalidate(homeProvider);
     }
 
-    void updateMaxCards(int value) {
-      ref.read(revisionPrefsProvider.notifier).save(
-            prefs.copyWith(defaultMaxCards: value < 0 ? 0 : value),
-          );
+    Future<void> updateMaxCards(int value) async {
+      await _persist(
+        context,
+        ref,
+        prefs.copyWith(defaultMaxCards: value < 0 ? 0 : value),
+      );
+      if (!context.mounted) return;
       ref.read(homeSessionConfigProvider.notifier).reset();
       ref.invalidate(homeProvider);
     }
@@ -418,6 +449,47 @@ class _RevisionPrefsContent extends ConsumerWidget {
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text('Chronomètre par carte', style: AppTypography.labelMedium()),
+            ),
+            ShadSwitch(
+              value: prefs.timerEnabled,
+              onChanged: (on) {
+                _persist(
+                  context,
+                  ref,
+                  prefs.copyWith(timerEnabled: on),
+                );
+              },
+            ),
+          ],
+        ),
+        if (prefs.timerEnabled) ...[
+          const SizedBox(height: 8),
+          Text('Durée par carte', style: AppTypography.labelMedium()),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [15, 30, 60, 120].map((seconds) {
+              final isSelected = prefs.timerDurationSeconds == seconds;
+              return FilterChip(
+                label: Text('${seconds}s'),
+                selected: isSelected,
+                onSelected: (_) {
+                  _persist(
+                    context,
+                    ref,
+                    prefs.copyWith(timerDurationSeconds: seconds),
+                  );
+                },
+              );
+            }).toList(),
+          ),
+        ],
       ],
     );
   }
@@ -518,10 +590,6 @@ class _NotifCardState extends ConsumerState<_NotifCard> {
 
 // ─── AppCard ──────────────────────────────────────────────────────────────────
 
-Future<void> _launchUrl(String url) async {
-  await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
-}
-
 class _AppCard extends ConsumerStatefulWidget {
   const _AppCard({required this.onLogout, required this.isSubscribed});
   final Future<void> Function() onLogout;
@@ -594,11 +662,11 @@ class _AppCardState extends ConsumerState<_AppCard> {
           Text('Version 1.0.0', style: AppTypography.bodyMedium()),
           const SizedBox(height: 8),
           ShadButton.link(
-            onPressed: () => _launchUrl(_kCguUrl),
+            onPressed: () => context.push('/legal/cgu'),
             child: const Text("Conditions générales d'utilisation"),
           ),
           ShadButton.link(
-            onPressed: () => _launchUrl(_kPrivacyUrl),
+            onPressed: () => context.push('/legal/privacy'),
             child: const Text('Politique de confidentialité'),
           ),
           const SizedBox(height: 8),

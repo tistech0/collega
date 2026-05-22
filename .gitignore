@@ -1,4 +1,4 @@
 .claude*
-docs/
+/docs/
 *.pdf
 collega_dump.sql

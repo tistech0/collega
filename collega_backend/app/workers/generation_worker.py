@@ -55,7 +55,7 @@ async def generate_college_cards(
                     )
                     college = college_result.scalar_one_or_none()
                     if user and college:
-                        await get_notification_service().send_generation_complete(
+                        await get_notification_service(ctx=ctx).send_generation_complete(
                             user.apns_token, college.college_ref_id
                         )
             except Exception as notif_exc:

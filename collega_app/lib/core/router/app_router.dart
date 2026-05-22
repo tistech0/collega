@@ -16,6 +16,7 @@ import 'package:collega_app/features/demo/presentation/demo_screen.dart';
 import 'package:collega_app/features/home/presentation/home_screen.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/presentation/drill_screen.dart';
+import 'package:collega_app/features/legal/presentation/legal_screen.dart';
 import 'package:collega_app/features/planning/presentation/planning_config_screen.dart';
 import 'package:collega_app/features/profile/presentation/profile_screen.dart';
 import 'package:collega_app/features/search/presentation/search_screen.dart';
@@ -84,6 +85,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/auth/register', builder: (ctx, s) => const AuthRegisterScreen()),
       GoRoute(path: '/auth/login', builder: (ctx, s) => const AuthLoginScreen()),
       GoRoute(path: '/paywall', builder: (ctx, s) => const PaywallScreen()),
+      // Story 7.4 AC #9 — documents légaux bundlés (option B).
+      GoRoute(
+        path: '/legal/cgu',
+        builder: (ctx, s) => const LegalScreen(document: LegalDocument.cgu),
+      ),
+      GoRoute(
+        path: '/legal/privacy',
+        builder: (ctx, s) =>
+            const LegalScreen(document: LegalDocument.privacy),
+      ),
       GoRoute(
         path: '/colleges/:ref_id/import',
         builder: (ctx, s) => CollegeImportScreen(
