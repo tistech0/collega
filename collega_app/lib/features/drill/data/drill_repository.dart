@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
+import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/domain/drill_state.dart';
@@ -78,18 +79,51 @@ class DrillRepository {
 
   Future<SemanticFeedback> evaluateSemantic(
       String cardId, String userAnswer) async {
-    final response = await dio.post<Map<String, dynamic>>(
-      '/v1/flash-cards/$cardId/evaluate-semantic',
-      data: {'user_answer': userAnswer},
-    );
-    final raw = response.data;
-    if (raw == null) throw Exception('empty evaluateSemantic response');
-    final data = raw['data'] as Map<String, dynamic>?;
-    if (data == null) throw Exception('malformed evaluateSemantic response');
-    return SemanticFeedback(
-      result: data['result'] as String? ?? 'incorrect',
-      feedback: data['feedback'] as String? ?? '',
-    );
+    // Story 7.2 AC #6 : timeout local 15s (override du global 30s) + retry 1x
+    // sur timeout/5xx/connectionError avec backoff 500ms. Le fallback
+    // drill_screen.dart (`catch (_) → notifier.flip()`) reste le filet de
+    // sécurité après les 2 tentatives.
+    const maxAttempts = 2;
+    const retryBackoff = Duration(milliseconds: 500);
+    DioException? lastError;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final response = await dio.post<Map<String, dynamic>>(
+          '/v1/flash-cards/$cardId/evaluate-semantic',
+          data: {'user_answer': userAnswer},
+          options: Options(
+            receiveTimeout: const Duration(seconds: 15),
+            sendTimeout: const Duration(seconds: 10),
+          ),
+        );
+        final raw = response.data;
+        if (raw == null) throw Exception('empty evaluateSemantic response');
+        final data = raw['data'] as Map<String, dynamic>?;
+        if (data == null) throw Exception('malformed evaluateSemantic response');
+        return SemanticFeedback(
+          result: data['result'] as String? ?? 'incorrect',
+          feedback: data['feedback'] as String? ?? '',
+        );
+      } on DioException catch (e) {
+        lastError = e;
+        final status = e.response?.statusCode;
+        // connectionError = blip réseau cellulaire/wifi (passage de mode) :
+        // retry justifié au même titre que les timeouts.
+        final isRetriable = e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.connectionError ||
+            (status != null && status >= 500);
+        if (!isRetriable || attempt == maxAttempts) {
+          rethrow;
+        }
+        AppLogger.warning(
+          'evaluateSemantic retry $attempt/$maxAttempts (${e.type}, status=$status)',
+          tag: 'DrillRepository',
+        );
+        await Future<void>.delayed(retryBackoff);
+      }
+    }
+    throw lastError ?? Exception('evaluateSemantic failed without exception');
   }
 
   FlashCardModel rowToModel(FlashCard row) => FlashCardModel(

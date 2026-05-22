@@ -11,6 +11,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -103,11 +104,12 @@ async def process_college(
             detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
         )
 
-    # Vérifier qu'aucun job actif (pending ou processing) n'existe déjà
+    # Vérifier qu'aucun job actif n'existe déjà (aligné sur l'index UNIQUE
+    # partial créé par migration 012 : ('pending', 'processing', 'ocr_complete')).
     existing_job = await db.execute(
         select(GenerationJob)
         .where(GenerationJob.college_id == college_id)
-        .where(GenerationJob.status.in_(["pending", "processing"]))
+        .where(GenerationJob.status.in_(["pending", "processing", "ocr_complete"]))
     )
     if existing_job.scalar_one_or_none() is not None:
         raise HTTPException(
@@ -145,7 +147,8 @@ async def process_college(
 
     logger.info("PDF saved for college %s at %s", college_id, pdf_file_path)
 
-    # Créer le GenerationJob en base
+    # Créer le GenerationJob en base. IntegrityError = race avec /v1/colleges/{ref_id}/import
+    # détectée par l'index UNIQUE partial sur (college_id) WHERE status active (migration 012).
     job = GenerationJob(
         id=job_id,
         college_id=college_id,
@@ -153,8 +156,16 @@ async def process_college(
         status="pending",
     )
     db.add(job)
-    await db.commit()
-    await db.refresh(job)
+    try:
+        await db.commit()
+        await db.refresh(job)
+    except IntegrityError:
+        await db.rollback()
+        pdf_file_path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "JOB_IN_PROGRESS", "message": "An active job already exists for this college"},
+        )
 
     # Enqueuer le job ARQ — si l'enqueue échoue, on rollback et retourne 503
     pool = None

@@ -3,10 +3,10 @@ from __future__ import annotations
 import logging
 import uuid
 
-from sqlalchemy import delete, select, update as sa_update
+from sqlalchemy import delete, select
+from sqlalchemy import update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
 from app.models.college import College
 from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
@@ -50,7 +50,28 @@ class CardGenerator:
                 job.hash_shared = True
                 job.card_count = count
                 job.status = "generation_complete"
-                # hash_shared → pas d'incrément compteurs (AC #1)
+                # Story 7.2 — Décision review : pour un reimport servi par
+                # hash-sharing (Claude PAS appelé, gratuit), on compense le
+                # quota incrémenté au router. UPDATE conditionnel `> 0` évite
+                # tout underflow si un autre flow décrémentait en parallèle.
+                if await self._is_reimport(db, college_id, job_id):
+                    await db.execute(
+                        sa_update(College)
+                        .where(College.id == college_id)
+                        .where(College.reload_count > 0)
+                        .values(reload_count=College.reload_count - 1)
+                    )
+                    await db.execute(
+                        sa_update(User)
+                        .where(User.id == job.user_id)
+                        .where(User.monthly_reloads > 0)
+                        .values(monthly_reloads=User.monthly_reloads - 1)
+                    )
+                    logger.info(
+                        "Hash-sharing reimport: quota compensé (college %s, user %s)",
+                        college_id,
+                        job.user_id,
+                    )
                 await db.commit()
                 logger.info(
                     "Hash-sharing: copied %d cards for college %s from job %s",
@@ -94,31 +115,9 @@ class CardGenerator:
         job.card_count = card_count
         job.status = "generation_complete"
 
-        # Incrémenter les compteurs si c'est un reimport non-hash-share
-        prev_complete_result = await db.execute(
-            select(GenerationJob)
-            .where(GenerationJob.college_id == college_id)
-            .where(GenerationJob.id != job_id)
-            .where(GenerationJob.status == "generation_complete")
-            .limit(1)
-        )
-        is_reimport = prev_complete_result.scalar_one_or_none() is not None
-
-        if is_reimport and not job.hash_shared:
-            # P7: incréments atomiques via UPDATE conditionnel — pas de race condition
-            await db.execute(
-                sa_update(College)
-                .where(College.id == college_id)
-                .where(College.reload_count < settings.reload_count_max)
-                .values(reload_count=College.reload_count + 1)
-            )
-            await db.execute(
-                sa_update(User)
-                .where(User.id == job.user_id)
-                .where(User.monthly_reloads < settings.monthly_reloads_max)
-                .values(monthly_reloads=User.monthly_reloads + 1)
-            )
-            logger.info("Reimport counted for college %s", college_id)
+        # Note: reload_count / monthly_reloads sont incrémentés atomiquement au router
+        # (app/api/v1/colleges.py:import_college_pdf) AVANT la création du job.
+        # Cf. story 7.2 — A1 : éviter le double-comptage et éviter de payer Claude pour rien.
 
         await db.commit()
 
@@ -128,6 +127,28 @@ class CardGenerator:
             card_count,
         )
         return {"college_id": str(college_id), "job_id": str(job_id), "hash_shared": False, "card_count": card_count}
+
+    async def _is_reimport(
+        self,
+        db: AsyncSession,
+        college_id: uuid.UUID,
+        current_job_id: uuid.UUID,
+    ) -> bool:
+        """True si ce college a déjà eu un job terminé (autre que le courant).
+
+        Utilisé pour décider si l'on doit compenser le quota après hash-sharing :
+        un premier import ne consomme pas de quota au router (la branche
+        `if college.status == "generation_complete"` ne match qu'en reimport),
+        donc rien à rendre.
+        """
+        prior = await db.execute(
+            select(GenerationJob.id)
+            .where(GenerationJob.college_id == college_id)
+            .where(GenerationJob.id != current_job_id)
+            .where(GenerationJob.status == "generation_complete")
+            .limit(1)
+        )
+        return prior.scalar_one_or_none() is not None
 
     async def _copy_cards_for_hash_sharing(
         self,

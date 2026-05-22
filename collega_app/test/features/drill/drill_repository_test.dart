@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
@@ -5,9 +7,69 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/features/drill/data/drill_repository.dart';
+import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/domain/drill_state.dart';
 
 AppDatabase _makeDb() => AppDatabase.forTesting(NativeDatabase.memory());
+
+/// Adapter Dio qui rejoue une séquence pré-définie de réponses ou d'exceptions
+/// (Story 7.2 AC #6 — vérifier le retry sur receiveTimeout/5xx).
+class _ScriptedAdapter implements HttpClientAdapter {
+  _ScriptedAdapter(this.script);
+
+  final List<Object> script;
+  int callCount = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<List<int>>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final idx = callCount;
+    callCount += 1;
+    if (idx >= script.length) {
+      throw StateError('ScriptedAdapter ran out of responses at call $idx');
+    }
+    final item = script[idx];
+    if (item is DioExceptionType) {
+      throw DioException(
+        type: item,
+        requestOptions: options,
+        message: 'fake-$item',
+      );
+    }
+    if (item is int) {
+      // status code (utilisé pour les 5xx → Dio renvoie une DioException)
+      final body = utf8.encode(jsonEncode({'error': 'server', 'status': item}));
+      return ResponseBody.fromBytes(body, item);
+    }
+    if (item is Map<String, dynamic>) {
+      final body = utf8.encode(jsonEncode(item));
+      return ResponseBody.fromBytes(
+        body,
+        200,
+        headers: {
+          Headers.contentTypeHeader: ['application/json'],
+        },
+      );
+    }
+    throw StateError('Unknown scripted item type: ${item.runtimeType}');
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+Dio _makeScriptedDio(_ScriptedAdapter adapter) {
+  final dio = Dio(BaseOptions(
+    baseUrl: 'http://test',
+    // Validation : status >= 500 doit lever DioException (sinon Dio renvoie une réponse OK)
+    validateStatus: (status) => status != null && status < 500,
+  ));
+  dio.httpClientAdapter = adapter;
+  return dio;
+}
 
 Future<void> _insertCard(
   AppDatabase db, {
@@ -108,6 +170,100 @@ void main() {
             ..where((t) => t.id.equals('card')))
           .getSingle();
       expect(row2.reviewCount, 2);
+    });
+  });
+
+  group('DrillRepository.evaluateSemantic (Story 7.2 AC #6)', () {
+    Map<String, dynamic> _ok() => {
+          'data': {'result': 'correct', 'feedback': 'Bonne réponse'},
+        };
+
+    test('succès au 1er essai → 1 appel HTTP', () async {
+      final db = _makeDb();
+      addTearDown(db.close);
+      final adapter = _ScriptedAdapter([_ok()]);
+      final repo = DrillRepository(dio: _makeScriptedDio(adapter), db: db);
+
+      final feedback = await repo.evaluateSemantic('card-1', 'ma réponse');
+
+      expect(adapter.callCount, 1);
+      expect(feedback.result, 'correct');
+      expect(feedback.feedback, 'Bonne réponse');
+    });
+
+    test('timeout au 1er essai puis succès → 2 appels HTTP', () async {
+      final db = _makeDb();
+      addTearDown(db.close);
+      final adapter = _ScriptedAdapter([
+        DioExceptionType.receiveTimeout,
+        _ok(),
+      ]);
+      final repo = DrillRepository(dio: _makeScriptedDio(adapter), db: db);
+
+      final feedback = await repo.evaluateSemantic('card-1', 'ma réponse');
+
+      expect(adapter.callCount, 2);
+      expect(feedback.result, 'correct');
+    });
+
+    test('timeout sur les 2 essais → DioException relancée', () async {
+      final db = _makeDb();
+      addTearDown(db.close);
+      final adapter = _ScriptedAdapter([
+        DioExceptionType.receiveTimeout,
+        DioExceptionType.receiveTimeout,
+      ]);
+      final repo = DrillRepository(dio: _makeScriptedDio(adapter), db: db);
+
+      await expectLater(
+        repo.evaluateSemantic('card-1', 'ma réponse'),
+        throwsA(isA<DioException>()),
+      );
+      expect(adapter.callCount, 2, reason: 'maxAttempts = 2 (1 try + 1 retry)');
+    });
+
+    test('connectionTimeout → retry comme receiveTimeout', () async {
+      final db = _makeDb();
+      addTearDown(db.close);
+      final adapter = _ScriptedAdapter([
+        DioExceptionType.connectionTimeout,
+        _ok(),
+      ]);
+      final repo = DrillRepository(dio: _makeScriptedDio(adapter), db: db);
+
+      await repo.evaluateSemantic('card-1', 'ma réponse');
+      expect(adapter.callCount, 2);
+    });
+
+    test('500 → retry puis succès', () async {
+      final db = _makeDb();
+      addTearDown(db.close);
+      // Dio considère un 500 comme erreur car validateStatus < 500 = ok
+      final adapter = _ScriptedAdapter([500, _ok()]);
+      final repo = DrillRepository(dio: _makeScriptedDio(adapter), db: db);
+
+      await repo.evaluateSemantic('card-1', 'ma réponse');
+      expect(adapter.callCount, 2);
+    });
+
+    test('422 → PAS de retry, rethrow immédiat', () async {
+      final db = _makeDb();
+      addTearDown(db.close);
+      // 422 = erreur cliente, ne doit pas être retentée
+      final dio = Dio(BaseOptions(
+        baseUrl: 'http://test',
+        // Tout sauf < 422 doit lever → 422 lève
+        validateStatus: (status) => status != null && status < 422,
+      ));
+      final adapter = _ScriptedAdapter([422]);
+      dio.httpClientAdapter = adapter;
+      final repo = DrillRepository(dio: dio, db: db);
+
+      await expectLater(
+        repo.evaluateSemantic('card-1', 'ma réponse'),
+        throwsA(isA<DioException>()),
+      );
+      expect(adapter.callCount, 1, reason: 'pas de retry sur 4xx');
     });
   });
 }

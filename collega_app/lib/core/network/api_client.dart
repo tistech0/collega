@@ -79,6 +79,12 @@ class ApiClient {
     return _refreshFuture!;
   }
 
+  /// Force un refresh défensif de l'access_token, utile AVANT une connexion SSE
+  /// (Story 7.2 AC #5 — JWT figé entre background/foreground).
+  /// Retourne `true` si le token est valide ou a été rafraîchi avec succès.
+  /// Gère les appels concurrents via le verrou interne `_isRefreshing` / `_refreshFuture`.
+  Future<bool> ensureFreshAccessToken() => _getRefresh();
+
   Future<bool> _tryRefresh() async {
     final refreshToken = await _storage.read(key: _kRefreshToken);
     if (refreshToken == null) return false;

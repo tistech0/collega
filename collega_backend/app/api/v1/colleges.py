@@ -11,11 +11,13 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, select
+from sqlalchemy import update as sa_update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import async_session_factory, get_db
+from app.core.time_utils import next_month_reset as _next_month_reset
 from app.deps import get_current_user, require_subscription
 from app.models.college import College
 from app.models.flash_card import FlashCard
@@ -40,12 +42,6 @@ from app.schemas.college import (
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["colleges"])
 
-
-def _next_month_reset(now: datetime) -> datetime:
-    """Retourne le 1er du mois prochain à minuit UTC."""
-    if now.month == 12:
-        return now.replace(year=now.year + 1, month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-    return now.replace(month=now.month + 1, day=1, hour=0, minute=0, second=0, microsecond=0)
 
 _PDF_MAGIC = b"%PDF-"
 _CHUNK_SIZE = 1024 * 1024  # 1 MB
@@ -180,16 +176,31 @@ async def import_college_pdf(
             detail={"code": "JOB_IN_PROGRESS", "message": "Un import est déjà en cours pour ce collège"},
         )
 
-    # Quota checks pour les reimports uniquement (premier import = libre)
+    # Quota checks pour les reimports uniquement (premier import = libre).
+    # Atomique : UPDATE conditionnel avec RETURNING — pas de race read-then-check.
     if college.status == "generation_complete":
         now = datetime.now(timezone.utc)
         is_month_reset = (
             current_user.monthly_reloads_reset_at is None
             or now >= current_user.monthly_reloads_reset_at
         )
-        effective_monthly = 0 if is_month_reset else current_user.monthly_reloads
 
-        if college.reload_count >= settings.reload_count_max:
+        # 1. Reset mensuel lazy (filet de sécurité — cron quotidien est la source défensive)
+        if is_month_reset:
+            current_user.monthly_reloads = 0
+            current_user.monthly_reloads_reset_at = _next_month_reset(now)
+            await db.flush()
+
+        # 2. Incrément atomique College.reload_count
+        college_update = await db.execute(
+            sa_update(College)
+            .where(College.id == college.id)
+            .where(College.reload_count < settings.reload_count_max)
+            .values(reload_count=College.reload_count + 1)
+            .returning(College.reload_count)
+        )
+        new_college_count = college_update.scalar_one_or_none()
+        if new_college_count is None:
             raise HTTPException(
                 status_code=409,
                 detail={
@@ -200,27 +211,29 @@ async def import_college_pdf(
                 },
             )
 
-        if effective_monthly >= settings.monthly_reloads_max:
-            reset_at = (
-                _next_month_reset(now)
-                if is_month_reset or current_user.monthly_reloads_reset_at is None
-                else current_user.monthly_reloads_reset_at
-            )
+        # 3. Incrément atomique User.monthly_reloads — rollback college si échec
+        user_update = await db.execute(
+            sa_update(User)
+            .where(User.id == current_user.id)
+            .where(User.monthly_reloads < settings.monthly_reloads_max)
+            .values(monthly_reloads=User.monthly_reloads + 1)
+            .returning(User.monthly_reloads)
+        )
+        new_monthly = user_update.scalar_one_or_none()
+        if new_monthly is None:
+            # Annule l'incrément college fait juste avant (transaction non commitée)
+            await db.rollback()
+            reset_at = current_user.monthly_reloads_reset_at or _next_month_reset(now)
             raise HTTPException(
                 status_code=409,
                 detail={
                     "code": "MONTHLY_RELOAD_LIMIT",
                     "message": f"Limite mensuelle atteinte ({settings.monthly_reloads_max} reimports/mois)",
-                    "monthly_reloads": effective_monthly,
+                    "monthly_reloads": current_user.monthly_reloads,
                     "monthly_max": settings.monthly_reloads_max,
                     "reset_at": reset_at.isoformat(),
                 },
             )
-
-        # Auto-reset mensuel si besoin — commité avec la transaction de succès
-        if is_month_reset:
-            current_user.monthly_reloads = 0
-            current_user.monthly_reloads_reset_at = _next_month_reset(now)
 
     # Valider le type de fichier
     is_pdf = (pdf.content_type == "application/pdf") or (pdf.filename or "").lower().endswith(".pdf")
@@ -262,7 +275,8 @@ async def import_college_pdf(
 
     logger.info("PDF saved for college %s (ref_id=%s) at %s", college.id, ref_id, pdf_file_path)
 
-    # Créer le GenerationJob — nettoyer le PDF si le commit échoue
+    # Créer le GenerationJob — nettoyer le PDF si le commit échoue.
+    # IntegrityError = race OCR détectée par l'index UNIQUE partial sur (college_id) WHERE status active.
     job = GenerationJob(
         id=job_id,
         college_id=college.id,
@@ -273,6 +287,13 @@ async def import_college_pdf(
     try:
         await db.commit()
         await db.refresh(job)
+    except IntegrityError:
+        await db.rollback()
+        pdf_file_path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "JOB_IN_PROGRESS", "message": "Un import est déjà en cours pour ce collège"},
+        )
     except Exception:
         pdf_file_path.unlink(missing_ok=True)
         raise

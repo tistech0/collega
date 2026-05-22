@@ -1,7 +1,7 @@
 import secrets
 import uuid
 
-from fastapi import Depends, Header, HTTPException
+from fastapi import Depends, Header, HTTPException, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -65,10 +65,15 @@ async def get_tester_user(
 
 
 async def get_current_user(
+    request: Request,
     authorization: str | None = Header(None),
     db: AsyncSession = Depends(get_db),
 ):
-    """Extrait et valide le Bearer token, retourne l'utilisateur."""
+    """Extrait et valide le Bearer token, retourne l'utilisateur.
+
+    Peuple `request.state.user_id` pour permettre aux rate limiters per-route
+    (cf. `/v1/search`, Story 7.2 AC #3) de scoper par utilisateur plutôt que par IP.
+    """
     from app.models.user import User
 
     if not authorization or not authorization.startswith("Bearer "):
@@ -105,6 +110,7 @@ async def get_current_user(
             status_code=401,
             detail={"code": "USER_NOT_FOUND", "message": "Utilisateur introuvable"},
         )
+    request.state.user_id = str(user.id)
     return user
 
 

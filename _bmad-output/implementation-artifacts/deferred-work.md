@@ -1,5 +1,14 @@
 # Deferred Work
 
+## Deferred from: code review of 7-2-hardening-async-backend (2026-05-22)
+
+- Migration 012 sans `IF NOT EXISTS` — convention Alembic acceptable via cycle up/down, idempotence stricte non garantie en cas de re-stamp manuel [`collega_backend/alembic/versions/012_atomic_quota_and_unique_processing.py`]
+- Test AC2 e2e replay reimports manquant — `test_monthly_reset.py` mocke le UPDATE batch mais ne vérifie pas qu'un user reseté peut à nouveau lancer `monthly_reloads_max` reimports de bout en bout [`collega_backend/tests/workers/test_monthly_reset.py`]
+- Mois sautés par le cron sans log d'audit — un user inactif plusieurs mois est resété silencieusement sans trace audit des fenêtres « perdues » [`collega_backend/app/workers/cleanup_worker.py`]
+- `_ScriptedAdapter` Dio dans `drill_repository_test.dart` — abstraction fragile : un Dio dédié pour le test 422 (à cause de `validateStatus < 422`) signale une mauvaise séparation des cas de test [`collega_app/test/features/drill/drill_repository_test.dart`]
+- Mock `db.execute.side_effect=[...]` ordonné fragile — l'ajout d'un SELECT supplémentaire dans `import_college_pdf` cassera tous les tests assumant un ordre strict [`collega_backend/tests/api/test_colleges_reimport.py`]
+- Rate limit bypass partiel sur tokens invalides — `get_current_user` lève 401 AVANT `request.state.user_id = ...` → `_user_id_key` tombe sur fallback IP pour les requêtes 401 ; pré-existant côté slowapi global, hors scope hardening async [`collega_backend/app/deps.py`]
+
 ## Deferred from: code review of 7-1-corrections-ux-flashcard-router (2026-05-19)
 
 - Pas de test transition `AsyncLoading → Data` couvrant AC4 (« pas de flash visuel `/demo` si authentifié »). Le `_FakeAuthNotifier.build()` retourne immédiatement, donc le scénario loading→data réel n'est jamais exécuté — une régression sur `if (authAsync.isLoading) return null;` (app_router.dart L.30) passera silencieusement. Ajout d'un test avec `Completer<AuthState>` recommandé en hardening [`collega_app/test/core/router/app_router_test.dart:14-17`]

@@ -63,17 +63,21 @@ class TestCardGeneratorHashSharing:
             low_confidence=False,
         )
 
-        # Mock execute pour les différentes requêtes (DELETE idempotency + 3 SELECTs)
+        # Mock execute pour les différentes requêtes (DELETE idempotency + 3 SELECTs
+        # de _copy_cards_for_hash_sharing + 1 SELECT de _is_reimport).
         delete_result = MagicMock()
         scalars_source_cards = MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[source_card]))))
         scalars_target_items = MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[target_item]))))
         scalars_source_items = MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[source_item]))))
+        # _is_reimport renvoie None → premier import → pas de compensation quota
+        is_reimport_first_import = MagicMock(scalar_one_or_none=MagicMock(return_value=None))
 
         db.execute = AsyncMock(side_effect=[
             delete_result,
             scalars_source_cards,
             scalars_target_items,
             scalars_source_items,
+            is_reimport_first_import,
         ])
 
         generator = CardGenerator()
@@ -148,6 +152,8 @@ class TestCardGeneratorHashSharing:
             MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[source_card])))),
             MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[target_item])))),
             MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[source_item])))),
+            # _is_reimport → None : premier import → pas de compensation quota
+            MagicMock(scalar_one_or_none=MagicMock(return_value=None)),
         ])
 
         generator = CardGenerator()

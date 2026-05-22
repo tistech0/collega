@@ -27,10 +27,16 @@ final collegeImportRepositoryProvider = Provider<CollegeImportRepository>(
 class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
   StreamSubscription<Map<String, dynamic>>? _sseSubscription;
   SseClient? _sseClient;
+  // Story 7.2 (review patch) : flag de disposal — Riverpod 2.6 n'expose pas
+  // `ref.mounted` sur AsyncNotifierProviderRef, donc on track soi-même pour
+  // détecter qu'un await long (refresh JWT, lecture storage) s'est terminé
+  // après que le notifier a été disposé (navigation pendant la connexion SSE).
+  bool _disposed = false;
 
   @override
   Future<CollegeImportState> build() async {
     ref.onDispose(() {
+      _disposed = true;
       _sseSubscription?.cancel();
       _sseClient?.disconnect();
     });
@@ -88,8 +94,23 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
 
   Future<void> _connectSse(String collegeId) async {
     await _sseSubscription?.cancel();
+
+    // Story 7.2 AC #5 — refresh défensif AVANT (re)connexion SSE pour éviter
+    // un token figé entre background et foreground (ou expiré après >30 min).
+    final refreshOk = await ref.read(apiClientProvider).ensureFreshAccessToken();
+    if (_disposed) return;
+    if (!refreshOk) {
+      AppLogger.warning(
+        'SSE refresh failed — session expirée, transition vers ImportError',
+        tag: 'CollegeImportNotifier',
+      );
+      state = const AsyncValue.data(ImportError(message: 'session_expired'));
+      return;
+    }
+
     final storage = ref.read(secureStorageProvider);
     final token = await storage.read(key: 'access_token') ?? '';
+    if (_disposed) return;
     _sseClient = SseClient(backendBaseUrl, tokenProvider: () => token);
 
     _sseSubscription = _sseClient!

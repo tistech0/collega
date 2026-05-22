@@ -1,9 +1,9 @@
-"""Tests GET /v1/search — FR36-37 (Story 5.1)."""
+"""Tests GET /v1/search — FR36-37 (Story 5.1) + Story 7.2 (rate limit par user_id)."""
 from __future__ import annotations
 
 import types
 import uuid
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from httpx import AsyncClient
@@ -148,3 +148,64 @@ class TestSearchEndpoint:
         assert captured_user_id == user_a.id
         assert captured_user_id != user_b_id
         app.dependency_overrides.clear()
+
+
+class TestSearchRateLimitKey:
+    """Story 7.2 AC #3 — clé rate-limit par user_id (et non par IP)."""
+
+    def test_user_id_key_utilise_user_id_si_present(self):
+        from app.api.v1.search import _user_id_key
+
+        request = MagicMock()
+        request.state.user_id = "abc-123"
+        assert _user_id_key(request) == "user:abc-123"
+
+    def test_user_id_key_fallback_ip_si_pas_de_user(self):
+        from app.api.v1.search import _user_id_key
+
+        request = MagicMock()
+        # Pas de user_id → state.user_id absent (getattr renverra None)
+        del request.state.user_id
+        request.headers = {"X-Forwarded-For": "1.2.3.4"}
+        # fallback IP via get_client_ip → préfixe "ip:" (P8) pour debug Redis
+        assert _user_id_key(request) == "ip:1.2.3.4"
+
+    def test_user_id_key_deux_users_distincts_meme_ip(self):
+        """Deux utilisateurs distincts (même IP NAT fac) → clés différentes → pas de blocage croisé."""
+        from app.api.v1.search import _user_id_key
+
+        req_a = MagicMock()
+        req_a.state.user_id = "user-a"
+        req_b = MagicMock()
+        req_b.state.user_id = "user-b"
+
+        assert _user_id_key(req_a) != _user_id_key(req_b)
+
+    def test_search_decorator_wire_user_id_key(self):
+        """@limiter.limit du endpoint /search référence bien `_user_id_key`.
+
+        Inspection de l'AST du module pour vérifier que `key_func=_user_id_key`
+        est passé au décorateur — détecte une régression silencieuse en cas de
+        retrait/renommage du wiring (mieux que `assert callable(...)`).
+        """
+        import ast
+        import inspect
+
+        from app.api.v1 import search as search_module
+
+        source = inspect.getsource(search_module)
+        tree = ast.parse(source)
+        wirings: list[str] = []
+        for node in ast.walk(tree):
+            # `search` est `async def` → AsyncFunctionDef (FunctionDef ne match pas)
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) or node.name != "search":
+                continue
+            for deco in node.decorator_list:
+                if isinstance(deco, ast.Call):
+                    for kw in deco.keywords:
+                        if kw.arg == "key_func" and isinstance(kw.value, ast.Name):
+                            wirings.append(kw.value.id)
+        assert "_user_id_key" in wirings, (
+            "Décorateur @limiter.limit du endpoint search() doit avoir "
+            "key_func=_user_id_key (Story 7.2 AC #3)"
+        )
