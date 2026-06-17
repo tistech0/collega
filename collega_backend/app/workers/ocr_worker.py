@@ -19,6 +19,7 @@ from app.core.database import async_session_factory
 from app.models.college import College, CollegeStatus
 from app.models.generation_job import GenerationJob
 from app.models.item import Item
+from app.services.jobs.job_events import record_job_event
 from app.services.ocr.confidence_scorer import ConfidenceScorer
 from app.services.ocr.item_detector import DetectedItem, ItemDetector
 from app.services.ocr.ocr_processor import OcrProcessor
@@ -64,6 +65,7 @@ async def process_college_ocr(
             job.status = "failed"
             job.error_message = str(exc)
             college.status = CollegeStatus.failed
+            await record_job_event(db, job.id, "failed", message=str(exc))
             await db.commit()
             raise
 
@@ -98,6 +100,9 @@ async def _run_ocr(
         job.status = "failed"
         job.error_message = "PDF is empty or unreadable (0 pages detected)"
         college.status = CollegeStatus.failed
+        await record_job_event(
+            db, job.id, "failed", message="PDF is empty or unreadable (0 pages detected)"
+        )
         await db.commit()
         return {"college_id": str(college.id), "job_id": str(job.id), "error": "empty_pdf"}
 
@@ -105,7 +110,11 @@ async def _run_ocr(
     college.status = CollegeStatus.processing
     college.ocr_page_progress = start_page
     job.status = "processing"
+    await record_job_event(db, job.id, "ocr_started", total=total_pages)
     await db.commit()
+
+    # Throttle ocr_progress : borner à ~20 events quel que soit le volume de pages.
+    progress_step = max(1, total_pages // 20)
 
     logger.info(
         "Starting OCR for college %s — %d pages (resuming from page %d)",
@@ -120,6 +129,23 @@ async def _run_ocr(
     page_tables: list[list[list[list[str]]]] = list(previous_tables)
 
     for page_num in range(start_page, total_pages):
+        # Garde anti-race (review 7.7 D1) : si l'admin a forcé l'arrêt
+        # (Stop → status="failed") pendant l'OCR, ne pas poursuivre ni écraser ce
+        # statut. La session est propre ici (commit de la page précédente / de
+        # ocr_started), donc cette lecture reflète l'état réel en base.
+        current_status = (
+            await db.execute(
+                select(GenerationJob.status).where(GenerationJob.id == job.id)
+            )
+        ).scalar_one_or_none()
+        if current_status == "failed":
+            logger.info(
+                "OCR job %s annulé par l'admin — arrêt avant la page %d",
+                job.id,
+                page_num + 1,
+            )
+            return {"college_id": str(college.id), "job_id": str(job.id), "error": "cancelled"}
+
         page_result = await asyncio.to_thread(
             _ocr_processor.process_page, pdf_path, page_num
         )
@@ -134,6 +160,11 @@ async def _run_ocr(
             "scores": page_scores,
             "tables": page_tables,
         })
+        # Event timeline throttlé (toutes les progress_step pages + dernière page)
+        if (page_num + 1) % progress_step == 0 or page_num + 1 == total_pages:
+            await record_job_event(
+                db, job.id, "ocr_progress", page=page_num + 1, total=total_pages
+            )
         await db.commit()
 
         logger.debug(
@@ -186,6 +217,10 @@ async def _run_ocr(
             len(detected_items) - len(final_items),
         )
 
+    await record_job_event(
+        db, job.id, "items_detected", message=f"{len(final_items)} items"
+    )
+
     # 6. Insérer les items en base
     for detected in final_items:
         item_score = detected.ocr_confidence_score
@@ -206,18 +241,27 @@ async def _run_ocr(
     job.page_texts_json = None  # données intermédiaires non nécessaires après completion
     college.status = CollegeStatus.ocr_complete
     job.status = "ocr_complete"
+    await record_job_event(
+        db, job.id, "ocr_complete", message=f"{len(final_items)} items"
+    )
     await db.commit()
 
     logger.info("OCR complete for college %s — %d items created", college.id, len(final_items))
 
     if ctx and "redis" in ctx:
         try:
-            await ctx["redis"].enqueue_job(
+            gen_job = await ctx["redis"].enqueue_job(
                 "generate_college_cards",
                 str(college.id),
                 str(job.id),
                 pdf_path,
             )
+            # GOTCHA Stop (Story 7.7) : repointer arq_job_id sur le job ARQ de la
+            # phase génération. Sinon arq_job_id reste l'id OCR (déjà terminé) et
+            # Stop ne pourrait pas annuler pendant la génération. Best-effort.
+            if gen_job is not None:
+                job.arq_job_id = gen_job.job_id
+                await db.commit()
             logger.info("Generation job enqueued for college %s job %s", college.id, job.id)
         except Exception as exc:
             logger.error("Failed to enqueue generation job for college %s: %s", college.id, exc)

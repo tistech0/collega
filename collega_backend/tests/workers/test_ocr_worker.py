@@ -230,6 +230,29 @@ class TestRunOcr:
 
     @patch("app.workers.ocr_worker._item_detector")
     @patch("app.workers.ocr_worker._ocr_processor")
+    async def test_stops_when_job_cancelled_externally(self, mock_processor, mock_detector):
+        """review 7.7 D1 — si l'admin force l'arrêt (status=failed) pendant l'OCR,
+        le worker s'arrête sans traiter de page ni écraser le statut."""
+        mock_processor.count_pages.return_value = 3
+        mock_processor.process_page.side_effect = [make_page_result(i) for i in range(3)]
+        mock_detector.detect_items.return_value = []
+
+        db = AsyncMock()
+        db.commit = AsyncMock()
+        db.add = MagicMock()
+        # La garde anti-race lit le statut → "failed" dès la 1re itération
+        db.execute = AsyncMock(
+            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value="failed"))
+        )
+
+        result = await _run_ocr(db, make_college(), make_job(), "/fake/path.pdf")
+
+        assert result.get("error") == "cancelled"
+        # Aucune page traitée : on a bailé avant le premier process_page
+        mock_processor.process_page.assert_not_called()
+
+    @patch("app.workers.ocr_worker._item_detector")
+    @patch("app.workers.ocr_worker._ocr_processor")
     async def test_empty_pdf_sets_failed_status(self, mock_processor, mock_detector):
         """PDF vide (0 pages) → statut failed."""
         mock_processor.count_pages.return_value = 0

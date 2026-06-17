@@ -7,6 +7,7 @@ import uuid
 from app.core.database import async_session_factory
 from app.models.generation_job import GenerationJob
 from app.services.generation.card_generator import CardGenerator
+from app.services.jobs.job_events import record_job_event
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,7 @@ async def generate_college_cards(
             if job is not None:
                 job.status = "failed"
                 job.error_message = str(exc)
+                await record_job_event(db, job.id, "failed", message=str(exc))
                 try:
                     await db.commit()
                 except Exception:

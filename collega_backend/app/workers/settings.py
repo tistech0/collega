@@ -82,4 +82,7 @@ WORKER_SETTINGS = {
     "keep_result": 3600,
     "retry_jobs": True,
     "max_retries": 3,
+    # Story 7.7 — sans ce flag, Job.abort() est ignoré par le worker et le job
+    # continue malgré la demande d'annulation de l'endpoint Stop.
+    "allow_abort_jobs": True,
 }

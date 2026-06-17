@@ -201,3 +201,50 @@ class OverviewData(BaseModel):
 
 class OverviewResponseWrapped(BaseModel):
     data: OverviewData
+
+
+# ── Story 7.7 — Suivi & contrôle imports (timeline / détail / stop) ───────────
+
+class JobEventData(BaseModel):
+    event_type: str
+    message: str | None
+    page: int | None
+    total: int | None
+    created_at: str | None
+
+
+class JobDetailData(BaseModel):
+    job_id: str
+    college_id: str
+    user_id: str
+    status: str
+    arq_job_id: str | None
+    pdf_hash: str | None
+    hash_shared: bool
+    card_count: int
+    error_message: str | None
+    created_at: str | None
+    updated_at: str | None
+    ocr_page_progress: int
+    total_pages: int | None
+    college_status: str
+    items: list[ItemOcrData]
+    timeline: list[JobEventData]
+
+
+class JobDetailResponseWrapped(BaseModel):
+    data: JobDetailData
+
+
+class StopJobData(BaseModel):
+    job_id: str
+    status: str
+    error_message: str | None
+    # True si l'abort ARQ a été confirmé ; False si l'arq_job_id était absent ou
+    # si l'abort n'a pas abouti (job déjà terminé, Redis injoignable, flag worker
+    # absent). Le statut DB est forcé à "failed" indépendamment de cette valeur.
+    aborted: bool = False
+
+
+class StopJobResponseWrapped(BaseModel):
+    data: StopJobData

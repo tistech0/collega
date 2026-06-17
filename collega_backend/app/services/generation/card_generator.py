@@ -14,6 +14,7 @@ from app.models.item import Item
 from app.models.user import User
 from app.services.generation.claude_client import ClaudeClient
 from app.services.generation.hash_sharing import SHA256SimilarityChecker
+from app.services.jobs.job_events import record_job_event
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,11 @@ class CardGenerator:
         job = await db.get(GenerationJob, job_id)
         if job is None:
             raise ValueError(f"GenerationJob {job_id} not found")
+
+        # Jalon timeline (review 7.7 P1) : écrit à l'entrée pour couvrir TOUS les
+        # chemins, y compris le hash-sharing qui retournait avant l'ancien point
+        # d'écriture (timeline incomplète : ocr_* → generation_complete sans start).
+        await record_job_event(db, job_id, "generation_started")
 
         # Idempotency: delete any existing cards before generating (handles ARQ retries)
         await db.execute(delete(FlashCard).where(FlashCard.college_id == college_id))
@@ -72,6 +78,9 @@ class CardGenerator:
                         college_id,
                         job.user_id,
                     )
+                await record_job_event(
+                    db, job_id, "generation_complete", message=f"{count} cards (hash-sharing)"
+                )
                 await db.commit()
                 logger.info(
                     "Hash-sharing: copied %d cards for college %s from job %s",
@@ -93,6 +102,30 @@ class CardGenerator:
 
         card_count = 0
         for item in items:
+            # Garde anti-race (review 7.7 D1) : si l'admin a forcé l'arrêt
+            # (Stop → status="failed") pendant la génération, stopper avant le
+            # prochain appel Claude (évite de payer pour un job annulé) et ne pas
+            # écraser le statut. La transaction non commitée est rollback à la
+            # fermeture de session → aucune fiche partielle persistée.
+            current_status = (
+                await db.execute(
+                    select(GenerationJob.status).where(GenerationJob.id == job_id)
+                )
+            ).scalar_one_or_none()
+            if current_status == "failed":
+                logger.info(
+                    "Génération du job %s annulée par l'admin — arrêt (%d fiches générées avant annulation)",
+                    job_id,
+                    card_count,
+                )
+                return {
+                    "college_id": str(college_id),
+                    "job_id": str(job_id),
+                    "hash_shared": False,
+                    "card_count": card_count,
+                    "cancelled": True,
+                }
+
             cards_data = await self._claude.generate_cards_for_item(item)
             if not cards_data:
                 logger.warning("Item %s produced 0 cards — skipping", item.id)
@@ -119,6 +152,9 @@ class CardGenerator:
         # (app/api/v1/colleges.py:import_college_pdf) AVANT la création du job.
         # Cf. story 7.2 — A1 : éviter le double-comptage et éviter de payer Claude pour rien.
 
+        await record_job_event(
+            db, job_id, "generation_complete", message=f"{card_count} cards"
+        )
         await db.commit()
 
         logger.info(

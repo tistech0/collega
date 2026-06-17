@@ -241,3 +241,7 @@ _Décision PL : tout régler avant le commit 7.6. Aucun report restant._
 - ✅ VÉRIFIÉ CORRECT — `is_beta` bypasse le paywall (`deps.py:119`), quota mensuel uniforme : comportement voulu, aucun changement
 - ✅ ACCEPTÉ (architectural) — Basic Auth creds en mémoire JS : inhérent au pattern ; vol via XSS désormais clos par le patch XSS ; session-token = redesign hors périmètre
 - ✅ FIX — `monthly_reloads_max` ajouté à `UserBetaData` (4 sites) + affiché `x / max` dans la liste users
+
+## Deferred from: code review of story-7.7 (2026-06-17)
+
+- **Garantie « écriture défensive » de la timeline plus faible qu'annoncée** — `record_job_event` (`app/services/jobs/job_events.py:35`) enveloppe `db.add(...)` (opération mémoire qui n'échoue quasi jamais) et non le flush/commit appelant. Un INSERT d'event défaillant remonterait au `commit()` de l'appelant et annulerait la transaction de transition légitime, contredisant l'exigence AC1 « ne jamais casser le pipeline ». Risque pratique quasi nul (event_type hardcodés courts, message Text, FK valide), et `generation_worker` fait `rollback()` avant son commit. Le commit-sans-rollback de l'`except` d'`ocr_worker` (`app/workers/ocr_worker.py:63-70`) est un pattern PRÉ-EXISTANT explicitement conservé par la story 7.7. Durcissement possible si besoin : isoler l'écriture d'event dans un savepoint (`db.begin_nested()`).

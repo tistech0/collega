@@ -10,6 +10,7 @@ from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.college import College
+    from app.models.generation_job_event import GenerationJobEvent
     from app.models.user import User
 
 
@@ -59,3 +60,6 @@ class GenerationJob(Base):
 
     college: Mapped["College"] = relationship("College", back_populates="generation_jobs")
     user: Mapped["User"] = relationship("User", back_populates="generation_jobs")
+    events: Mapped[list["GenerationJobEvent"]] = relationship(
+        "GenerationJobEvent", back_populates="job", cascade="all, delete-orphan"
+    )

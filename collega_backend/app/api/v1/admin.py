@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile
 from sqlalchemy import func, select
 from sqlalchemy import update as sa_update
 from sqlalchemy.exc import IntegrityError
@@ -22,9 +22,12 @@ from app.deps import get_admin_user
 from app.models.college import College
 from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
+from app.models.generation_job_event import GenerationJobEvent
 from app.models.item import Item
 from app.models.tester_feedback import TesterFeedback
 from app.models.user import User
+from app.services.jobs.arq_control import abort_arq_job
+from app.services.jobs.job_events import record_job_event
 from app.schemas.admin import (
     BetaUpdateRequest,
     BetaUpdateResponseWrapped,
@@ -41,6 +44,9 @@ from app.schemas.admin import (
     CreateUserRequest,
     CreateUserResponseWrapped,
     ItemOcrData,
+    JobDetailData,
+    JobDetailResponseWrapped,
+    JobEventData,
     OverviewData,
     OverviewResponseWrapped,
     PertinenceByRang,
@@ -50,6 +56,8 @@ from app.schemas.admin import (
     QueueJobData,
     QueueResponse,
     ResetQuotaResponseWrapped,
+    StopJobData,
+    StopJobResponseWrapped,
     UserBetaData,
     UserCollegeSummary,
     UserDetailData,
@@ -604,6 +612,181 @@ async def get_overview(
             jobs_failed=jobs_by_status["failed"],
         )
     )
+
+
+# ── Story 7.7 — Suivi & contrôle des imports (timeline / détail / stop / delete) ─
+
+_ACTIVE_JOB_STATUSES = ("pending", "processing", "ocr_complete")
+
+
+@router.get("/jobs/{job_id}", response_model=JobDetailResponseWrapped)
+async def get_job_detail(
+    job_id: uuid.UUID,
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> JobDetailResponseWrapped:
+    """Détail brut d'un job + timeline persistée + confiance OCR par item.
+
+    Permet de débugger un import (distinguer mauvais OCR vs mauvais prompt) sans
+    fouiller Redis/psql/logs NAS.
+    """
+    job = await db.get(GenerationJob, job_id)
+    if job is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "JOB_NOT_FOUND", "message": f"Job {job_id} not found"},
+        )
+
+    college = await db.get(College, job.college_id)
+
+    # Timeline : events ordonnés par date de création croissante (lisible au refresh)
+    events_result = await db.execute(
+        select(GenerationJobEvent)
+        .where(GenerationJobEvent.generation_job_id == job_id)
+        .order_by(GenerationJobEvent.created_at.asc())
+    )
+    events = events_result.scalars().all()
+
+    # Confiance OCR par item (réutilise le schéma ItemOcrData, cf. get_college_stats)
+    items_result = await db.execute(
+        select(Item.item_number, Item.ocr_confidence_score, Item.low_confidence)
+        .where(Item.college_id == job.college_id)
+        .order_by(Item.item_number)
+    )
+    items = [
+        ItemOcrData(item_number=r[0], ocr_confidence_score=r[1], low_confidence=r[2])
+        for r in items_result.all()
+    ]
+
+    return JobDetailResponseWrapped(
+        data=JobDetailData(
+            job_id=str(job.id),
+            college_id=str(job.college_id),
+            user_id=str(job.user_id),
+            status=job.status,
+            arq_job_id=job.arq_job_id,
+            pdf_hash=job.pdf_hash,
+            hash_shared=job.hash_shared,
+            card_count=job.card_count,
+            error_message=job.error_message,
+            created_at=job.created_at.isoformat() if job.created_at else None,
+            updated_at=job.updated_at.isoformat() if job.updated_at else None,
+            ocr_page_progress=college.ocr_page_progress if college else 0,
+            total_pages=college.total_pages if college else None,
+            college_status=college.status if college else "unknown",
+            items=items,
+            timeline=[
+                JobEventData(
+                    event_type=e.event_type,
+                    message=e.message,
+                    page=e.page,
+                    total=e.total,
+                    created_at=e.created_at.isoformat() if e.created_at else None,
+                )
+                for e in events
+            ],
+        )
+    )
+
+
+@router.post("/jobs/{job_id}/stop", response_model=StopJobResponseWrapped)
+async def stop_job(
+    job_id: uuid.UUID,
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> StopJobResponseWrapped:
+    """Annule un job ARQ actif et force son statut DB à 'failed'.
+
+    L'abort ARQ est best-effort (le worker ne catche pas CancelledError) : c'est
+    l'endpoint qui est seul garant du statut DB. Réutiliser `failed` (et non un
+    `cancelled`) évite d'altérer la CheckConstraint et libère l'index UNIQUE
+    partiel (migration 012) → un réimport redevient possible. Décision PL 2026-06-17.
+    """
+    job = await db.get(GenerationJob, job_id)
+    if job is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "JOB_NOT_FOUND", "message": f"Job {job_id} not found"},
+        )
+    if job.status not in _ACTIVE_JOB_STATUSES:
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "JOB_NOT_ACTIVE", "message": "Job is not active — nothing to cancel"},
+        )
+
+    # Abort ARQ best-effort. L'arq_job_id pointe toujours sur le job ARQ actif
+    # (OCR puis génération, cf. fix persistance dans ocr_worker). On REMONTE le
+    # résultat (review 7.7 D2) : sans cela l'admin croit avoir stoppé alors que
+    # l'abort a pu échouer silencieusement (Redis down, flag worker absent) et que
+    # le worker tourne encore. Le statut DB est forcé indépendamment du résultat.
+    aborted = False
+    if job.arq_job_id:
+        aborted = await abort_arq_job(job.arq_job_id)
+
+    job.status = "failed"
+    job.error_message = "Annulé par l'admin"
+    await record_job_event(db, job.id, "cancelled", message="Annulé par l'admin")
+    await db.commit()
+
+    return StopJobResponseWrapped(
+        data=StopJobData(
+            job_id=str(job.id),
+            status=job.status,
+            error_message=job.error_message,
+            aborted=aborted,
+        )
+    )
+
+
+@router.delete("/colleges/{college_id}", status_code=204)
+async def delete_college(
+    college_id: uuid.UUID,
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> Response:
+    """Supprime un import (college) et toute sa descendance + PDF disque.
+
+    La suppression est au niveau College car FlashCard/Item n'ont aucune FK vers
+    le GenerationJob — seul `DELETE College` emporte items/jobs/events/flashcards/
+    feedbacks via la cascade ORM `all, delete-orphan` + FK `ondelete=CASCADE`.
+    """
+    college = await db.get(College, college_id)
+    if college is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
+        )
+
+    # Garde-fou symétrique au verrou de process_college (review 7.7 D3) : refuser
+    # la suppression si un job est encore actif, sinon le worker en cours
+    # commiterait sur des lignes supprimées (IntegrityError / orphelins). L'admin
+    # doit d'abord arrêter l'import (POST /jobs/{id}/stop).
+    active_job = await db.execute(
+        select(GenerationJob)
+        .where(GenerationJob.college_id == college_id)
+        .where(GenerationJob.status.in_(_ACTIVE_JOB_STATUSES))
+    )
+    if active_job.scalar_one_or_none() is not None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "JOB_ACTIVE",
+                "message": "An active job exists for this college — stop the import before deleting",
+            },
+        )
+
+    await db.delete(college)
+    await db.commit()
+
+    # Cleanup PDF best-effort : ne jamais faire échouer la suppression DB pour un
+    # problème disque. Plusieurs réimports ⇒ plusieurs PDFs ({college_id}_*.pdf).
+    try:
+        for pdf_file in Path(settings.pdf_storage_path).glob(f"{college_id}_*.pdf"):
+            pdf_file.unlink(missing_ok=True)
+    except Exception as exc:  # noqa: BLE001 — cleanup non bloquant
+        logger.warning("PDF cleanup failed for college %s: %s", college_id, exc)
+
+    return Response(status_code=204)
 
 
 # ── Story 1.4 — Configuration anti-spam ──────────────────────────────────────

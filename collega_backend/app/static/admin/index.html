@@ -48,6 +48,21 @@
     .badge-green { background: #b7f2c8; color: #1b6b3a; }
     .badge-grey { background: #e5e7e5; color: #555; }
     .badge-red { background: #ffd6d6; color: #ba1a1a; }
+    .badge-warn { background: #ffe6c2; color: #8a4b00; }
+    tr.row-blocked { background: #fff7ed; }
+
+    /* Timeline (détail import) */
+    .timeline { list-style: none; margin-top: 8px; }
+    .timeline li { padding: 8px 0 8px 16px; border-left: 2px solid #d1d9d2; position: relative; }
+    .timeline li::before { content: ""; position: absolute; left: -5px; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: #1b6b3a; }
+    .timeline li.tl-failed::before, .timeline li.tl-cancelled::before { background: #ba1a1a; }
+    .timeline .tl-type { font-weight: 600; font-size: .85rem; }
+    .timeline .tl-meta { color: #888; font-size: .75rem; margin-left: 6px; }
+    .timeline .tl-msg { color: #555; font-size: .8rem; }
+    .detail-actions { display: flex; gap: 8px; margin: 16px 0; }
+    .btn-danger { background: #ba1a1a; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: .875rem; }
+    .btn-danger:hover { background: #911414; }
+    .btn-warn { background: #fff; color: #8a4b00; border: 1px solid #e0a96d; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: .875rem; }
 
     .btn-sm { padding: 5px 10px; border-radius: 6px; font-size: .8rem; cursor: pointer; border: 1px solid #d1d9d2; background: #fff; }
     .btn-sm:hover { border-color: #1b6b3a; }
@@ -97,6 +112,7 @@
     <div class="nav-tabs">
       <button class="active" onclick="goOverview()">Accueil</button>
       <button onclick="goUsers()">Utilisateurs</button>
+      <button onclick="goImports()">Imports</button>
     </div>
     <h2 class="section-title">Vue d'ensemble</h2>
     <div id="overview-loader" class="loader">Chargement…</div>
@@ -118,6 +134,7 @@
     <div class="nav-tabs">
       <button onclick="goOverview()">Accueil</button>
       <button class="active" onclick="goUsers()">Utilisateurs</button>
+      <button onclick="goImports()">Imports</button>
     </div>
     <div style="display:flex; justify-content:space-between; align-items:center">
       <h2 class="section-title" style="margin-bottom:0">Utilisateurs</h2>
@@ -166,6 +183,44 @@
       <table id="detail-jobs-table" style="display:none">
         <thead><tr><th>Statut</th><th>Fiches</th><th>Erreur</th><th>Créé le</th></tr></thead>
         <tbody id="detail-jobs-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- IMPORTS (liste) -->
+  <section id="imports-section">
+    <div class="nav-tabs">
+      <button onclick="goOverview()">Accueil</button>
+      <button onclick="goUsers()">Utilisateurs</button>
+      <button class="active" onclick="goImports()">Imports</button>
+    </div>
+    <h2 class="section-title">Imports</h2>
+    <div id="imports-loader" class="loader">Chargement…</div>
+    <div id="imports-empty" class="empty-state" style="display:none"><h3>Aucun import</h3></div>
+    <table id="imports-table" style="display:none">
+      <thead><tr><th>Collège</th><th>Statut</th><th>OCR</th><th>Fiches</th><th>Âge</th><th>Erreur</th><th>Actions</th></tr></thead>
+      <tbody id="imports-body"></tbody>
+    </table>
+  </section>
+
+  <!-- IMPORT DETAIL -->
+  <section id="job-detail-section">
+    <button id="job-back-btn" onclick="goImports()">← Retour aux imports</button>
+    <div id="job-detail-loader" class="loader">Chargement…</div>
+    <div id="job-detail-content" style="display:none">
+      <h2 class="section-title">Détail import</h2>
+      <div class="detail-actions" id="job-detail-actions"></div>
+      <table>
+        <tbody id="job-detail-fields"></tbody>
+      </table>
+      <h3 class="subsection-title">Timeline</h3>
+      <div id="job-timeline-empty" class="empty-state" style="display:none; padding:24px">Aucun événement.</div>
+      <ul class="timeline" id="job-timeline"></ul>
+      <h3 class="subsection-title">Confiance OCR par item</h3>
+      <div id="job-items-empty" class="empty-state" style="display:none; padding:24px">Aucun item.</div>
+      <table id="job-items-table" style="display:none">
+        <thead><tr><th>Item</th><th>Score OCR</th><th>Confiance</th></tr></thead>
+        <tbody id="job-items-body"></tbody>
       </table>
     </div>
   </section>
@@ -534,6 +589,211 @@
       body.appendChild(tr);
     });
     table.style.display = "";
+  }
+
+  // ─── Imports (liste) ───────────────────────────────────────────────────────
+  const STALL_THRESHOLD_SECONDS = 3600; // 1h — seuil de stagnation (AC5)
+  let currentImport = null; // { jobId, collegeId }
+
+  // Un import est "bloqué" si failed OU (actif depuis > seuil de stagnation).
+  function isBlocked(job) {
+    if (job.status === "failed") return true;
+    const active = job.status === "pending" || job.status === "processing";
+    return active && job.elapsed_seconds > STALL_THRESHOLD_SECONDS;
+  }
+
+  function fmtAge(seconds) {
+    if (seconds == null) return "—";
+    const s = Math.floor(seconds);
+    if (s < 60) return `${s}s`;
+    if (s < 3600) return `${Math.floor(s / 60)}min`;
+    if (s < 86400) return `${Math.floor(s / 3600)}h${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}`;
+    return `${Math.floor(s / 86400)}j`;
+  }
+
+  async function goImports() {
+    showSection("imports-section");
+    await loadImports();
+  }
+
+  async function loadImports() {
+    const loader = document.getElementById("imports-loader");
+    const table = document.getElementById("imports-table");
+    const empty = document.getElementById("imports-empty");
+    loader.style.display = "block";
+    table.style.display = "none";
+    empty.style.display = "none";
+
+    try {
+      const res = await apiFetch("/v1/admin/queue");
+      if (!res.ok) { loader.textContent = "Erreur de chargement."; return; }
+      const { data } = await readJson(res);
+
+      loader.style.display = "none";
+      if (!data.length) { empty.style.display = "block"; return; }
+
+      const body = document.getElementById("imports-body");
+      body.innerHTML = "";
+      data.forEach(j => {
+        const tr = document.createElement("tr");
+        const blocked = isBlocked(j);
+        if (blocked) tr.className = "row-blocked";
+        const ocr = (j.college_total_pages != null)
+          ? `${j.college_ocr_page_progress}/${j.college_total_pages}`
+          : `${j.college_ocr_page_progress}`;
+        const blockedBadge = blocked ? ` <span class="badge badge-warn">⚠ Bloqué</span>` : "";
+        tr.innerHTML = `
+          <td>Collège ${escapeHtml(String(j.college_id))}</td>
+          <td>${statusBadge(j.status)}${blockedBadge}</td>
+          <td>${ocr}</td>
+          <td>${j.card_count}</td>
+          <td>${fmtAge(j.elapsed_seconds)}</td>
+          <td>${j.error_message ? escapeHtml(j.error_message) : "—"}</td>
+          <td></td>`;
+        const detailBtn = document.createElement("button");
+        detailBtn.className = "btn-link";
+        detailBtn.textContent = "Détail";
+        detailBtn.onclick = () => openJobDetail(j.job_id, j.college_id);
+        tr.lastElementChild.appendChild(detailBtn);
+        body.appendChild(tr);
+      });
+      table.style.display = "";
+    } catch (e) {
+      if (e.code === "unauthorized") return;  // UI déjà basculée sur le login
+      loader.textContent = "Erreur de chargement.";
+    }
+  }
+
+  // ─── Import detail ─────────────────────────────────────────────────────────
+  const ACTIVE_STATUSES = ["pending", "processing", "ocr_complete"];
+
+  async function openJobDetail(jobId, collegeId) {
+    showSection("job-detail-section");
+    const loader = document.getElementById("job-detail-loader");
+    const content = document.getElementById("job-detail-content");
+    loader.style.display = "block";
+    content.style.display = "none";
+
+    try {
+      const res = await apiFetch(`/v1/admin/jobs/${jobId}`);
+      if (res.status === 404) { loader.textContent = "Import introuvable."; return; }
+      if (!res.ok) { loader.textContent = "Erreur de chargement."; return; }
+      const { data } = await readJson(res);
+      currentImport = { jobId: data.job_id, collegeId: data.college_id };
+
+      // Détail brut (table clé/valeur)
+      document.getElementById("job-detail-fields").innerHTML = `
+        <tr><th>Job ID</th><td>${escapeHtml(data.job_id)}</td></tr>
+        <tr><th>Collège</th><td>${escapeHtml(String(data.college_id))}</td></tr>
+        <tr><th>Statut</th><td>${statusBadge(data.status)}</td></tr>
+        <tr><th>Progression OCR</th><td>${data.ocr_page_progress}${data.total_pages != null ? " / " + data.total_pages : ""}</td></tr>
+        <tr><th>Fiches</th><td>${data.card_count}</td></tr>
+        <tr><th>Hash partagé</th><td>${data.hash_shared ? "Oui" : "Non"}</td></tr>
+        <tr><th>arq_job_id</th><td>${data.arq_job_id ? escapeHtml(data.arq_job_id) : "—"}</td></tr>
+        <tr><th>Erreur</th><td>${data.error_message ? escapeHtml(data.error_message) : "—"}</td></tr>
+        <tr><th>Créé le</th><td>${fmtDate(data.created_at)}</td></tr>
+        <tr><th>MAJ le</th><td>${fmtDate(data.updated_at)}</td></tr>`;
+
+      // Actions : Stop (si actif) + Delete
+      const actions = document.getElementById("job-detail-actions");
+      actions.innerHTML = "";
+      if (ACTIVE_STATUSES.includes(data.status)) {
+        const stopBtn = document.createElement("button");
+        stopBtn.className = "btn-warn";
+        stopBtn.textContent = "⏹ Arrêter l'import";
+        stopBtn.onclick = () => stopJob(data.job_id);
+        actions.appendChild(stopBtn);
+      }
+      const delBtn = document.createElement("button");
+      delBtn.className = "btn-danger";
+      delBtn.textContent = "🗑 Supprimer l'import";
+      delBtn.onclick = () => deleteImport(data.college_id);
+      actions.appendChild(delBtn);
+
+      renderTimeline(data.timeline);
+      renderJobItems(data.items);
+
+      loader.style.display = "none";
+      content.style.display = "block";
+    } catch (e) {
+      if (e.code === "unauthorized") return;  // UI déjà basculée sur le login
+      loader.textContent = "Erreur de chargement.";
+    }
+  }
+
+  function renderTimeline(events) {
+    const ul = document.getElementById("job-timeline");
+    const empty = document.getElementById("job-timeline-empty");
+    ul.innerHTML = "";
+    if (!events || !events.length) { ul.style.display = "none"; empty.style.display = "block"; return; }
+    empty.style.display = "none";
+    ul.style.display = "";
+    events.forEach(e => {
+      const li = document.createElement("li");
+      if (e.event_type === "failed") li.className = "tl-failed";
+      if (e.event_type === "cancelled") li.className = "tl-cancelled";
+      let meta = "";
+      if (e.page != null && e.total != null) meta = ` (${e.page}/${e.total})`;
+      li.innerHTML = `
+        <span class="tl-type">${escapeHtml(e.event_type)}</span>
+        <span class="tl-meta">${fmtDate(e.created_at)}${meta}</span>
+        ${e.message ? `<div class="tl-msg">${escapeHtml(e.message)}</div>` : ""}`;
+      ul.appendChild(li);
+    });
+  }
+
+  function renderJobItems(items) {
+    const table = document.getElementById("job-items-table");
+    const empty = document.getElementById("job-items-empty");
+    const body = document.getElementById("job-items-body");
+    body.innerHTML = "";
+    if (!items || !items.length) { table.style.display = "none"; empty.style.display = "block"; return; }
+    empty.style.display = "none";
+    items.forEach(it => {
+      const tr = document.createElement("tr");
+      const conf = it.low_confidence
+        ? `<span class="badge badge-red">⚠ OCR faible</span>`
+        : `<span class="badge badge-green">OK</span>`;
+      tr.innerHTML = `<td>${it.item_number}</td><td>${(it.ocr_confidence_score * 100).toFixed(0)}%</td><td>${conf}</td>`;
+      body.appendChild(tr);
+    });
+    table.style.display = "";
+  }
+
+  async function stopJob(jobId) {
+    try {
+      const res = await apiFetch(`/v1/admin/jobs/${jobId}/stop`, { method: "POST" });
+      if (res.status === 409) { toast("Job déjà terminé — rien à arrêter", true); await openJobDetail(jobId); return; }
+      if (res.status === 404) { toast("Import introuvable", true); return; }
+      if (!res.ok) { toast("Échec de l'arrêt", true); return; }
+      const { data } = await readJson(res);
+      // L'abort ARQ est best-effort : on distingue l'annulation confirmée du cas
+      // où le statut a été forcé mais le worker n'a pas (encore) été interrompu.
+      if (data.aborted) {
+        toast("Import arrêté ✓");
+      } else {
+        toast("Arrêt demandé : statut forcé à « failed », mais l'annulation du worker n'a pas été confirmée (job déjà terminé ou Redis injoignable).", true);
+      }
+      await openJobDetail(jobId);
+    } catch (e) {
+      if (e.code === "unauthorized") return;  // UI déjà basculée sur le login
+      toast("Échec de l'arrêt", true);
+    }
+  }
+
+  async function deleteImport(collegeId) {
+    if (!confirm("Supprimer définitivement cet import (collège, fiches, jobs, PDF) ? Cette action est irréversible.")) return;
+    try {
+      const res = await apiFetch(`/v1/admin/colleges/${collegeId}`, { method: "DELETE" });
+      if (res.status === 404) { toast("Collège introuvable", true); return; }
+      if (res.status === 409) { toast("Un job est encore actif — arrêtez l'import avant de le supprimer", true); return; }
+      if (!res.ok && res.status !== 204) { toast("Échec de la suppression", true); return; }
+      toast("Import supprimé ✓");
+      goImports();
+    } catch (e) {
+      if (e.code === "unauthorized") return;  // UI déjà basculée sur le login
+      toast("Échec de la suppression", true);
+    }
   }
 
   function statusBadge(status) {

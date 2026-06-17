@@ -99,7 +99,8 @@ class TestCardGeneratorHashSharing:
 
         db = AsyncMock()
         db.get = AsyncMock(return_value=job)
-        db.add = MagicMock()
+        added = []
+        db.add = MagicMock(side_effect=lambda c: added.append(c))
         db.commit = AsyncMock()
 
         items = [make_item(1), make_item(2)]
@@ -117,7 +118,39 @@ class TestCardGeneratorHashSharing:
         assert result["hash_shared"] is False
         assert result["card_count"] == 2
         assert job.status == "generation_complete"
-        assert db.add.call_count == 2
+        # 2 FlashCard ajoutées (les events timeline Story 7.7 passent aussi par db.add,
+        # on filtre donc par type pour cibler l'intention du test).
+        from app.models.flash_card import FlashCard
+        assert len([c for c in added if isinstance(c, FlashCard)]) == 2
+
+    async def test_stops_generation_when_job_cancelled(self):
+        """review 7.7 D1 — si l'admin force l'arrêt (status=failed) pendant la
+        génération, on stoppe avant le prochain appel Claude et on n'écrase pas
+        le statut."""
+        college_id = uuid.uuid4()
+        job = make_job()
+
+        db = AsyncMock()
+        db.get = AsyncMock(return_value=job)
+        db.add = MagicMock()
+        db.commit = AsyncMock()
+
+        items = [make_item(1), make_item(2)]
+        scalars_items = MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=items))))
+        status_failed = MagicMock(scalar_one_or_none=MagicMock(return_value="failed"))
+        # execute : [DELETE idempotency, SELECT items, garde anti-race → "failed"]
+        db.execute = AsyncMock(side_effect=[MagicMock(), scalars_items, status_failed])
+
+        generator = CardGenerator()
+
+        with patch.object(generator._similarity, "compute_hash", return_value="fakehash"):
+            with patch.object(generator._similarity, "find_similar_job", new=AsyncMock(return_value=None)):
+                with patch.object(generator._claude, "generate_cards_for_item", new=AsyncMock()) as mock_claude:
+                    result = await generator.generate_for_college(db, college_id, job.id, "/fake/path.pdf")
+
+        mock_claude.assert_not_called()
+        assert result.get("cancelled") is True
+        assert job.status != "generation_complete"
 
     async def test_hash_sharing_isolates_user_id(self):
         """AC#2 — NFR8 : chaque utilisateur a ses propres fiches (user_id du job cible)."""
