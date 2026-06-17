@@ -138,10 +138,10 @@ async def import_college_pdf(
     db: AsyncSession = Depends(get_db),
 ) -> ImportCollegeResponseWrapped:
     """Soumet un PDF pour traitement OCR — crée le College si nécessaire."""
-    if not (1 <= ref_id <= 40):
+    if not (1 <= ref_id <= 39):
         raise HTTPException(
             status_code=422,
-            detail={"code": "INVALID_REF_ID", "message": "ref_id must be between 1 and 40"},
+            detail={"code": "INVALID_REF_ID", "message": "ref_id must be between 1 and 39"},
         )
 
     # Chercher ou créer le College

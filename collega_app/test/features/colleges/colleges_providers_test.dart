@@ -26,19 +26,19 @@ ProviderContainer _makeContainer(_FakeCollegesRepository repo) {
 
 void main() {
   group('CollegesNotifier', () {
-    test('état initial sans imports → 40 entrées, toutes non-importées', () async {
+    test('état initial sans imports → 39 entrées, toutes non-importées', () async {
       final container = _makeContainer(_FakeCollegesRepository());
       addTearDown(container.dispose);
 
       final entries = await container.read(collegesProvider.future);
-      expect(entries.length, 40);
+      expect(entries.length, 39);
       expect(entries.every((e) => !e.isImported), isTrue);
     });
 
     test('avec 1 college importé → cette entrée est marquée importée', () async {
       final imported = UserCollegeStatus(
-        refId: 15,
-        collegeId: 'college-uuid-15',
+        refId: 26,
+        collegeId: 'college-uuid-26',
         status: 'generation_complete',
         cardCountA: 5,
         cardCountB: 3,
@@ -48,20 +48,20 @@ void main() {
       addTearDown(container.dispose);
 
       final entries = await container.read(collegesProvider.future);
-      expect(entries.length, 40);
+      expect(entries.length, 39);
 
-      final neurologie = entries.firstWhere((e) => e.catalog.refId == 15);
+      final neurologie = entries.firstWhere((e) => e.catalog.refId == 26);
       expect(neurologie.isImported, isTrue);
       expect(neurologie.userStatus!.cardCountA, 5);
       expect(neurologie.userStatus!.totalCards, 10);
     });
 
-    test('catalogue respecte l\'ordre et contient les 40 colleges prédéfinis', () async {
+    test('catalogue respecte l\'ordre et contient les 39 colleges prédéfinis', () async {
       final container = _makeContainer(_FakeCollegesRepository());
       addTearDown(container.dispose);
 
       final entries = await container.read(collegesProvider.future);
-      expect(entries.map((e) => e.catalog.refId).toList(), List.generate(40, (i) => i + 1));
+      expect(entries.map((e) => e.catalog.refId).toList(), List.generate(39, (i) => i + 1));
       expect(entries.first.catalog.name, kCollegeCatalog.first.name);
     });
   });

@@ -52,7 +52,7 @@ class TestImportCollegePdf:
         user = _make_user()
         app.dependency_overrides[require_subscription] = lambda: user
 
-        for bad_ref_id in [0, 41]:
+        for bad_ref_id in [0, 40]:
             resp = await client.post(
                 f"/v1/colleges/{bad_ref_id}/import",
                 files={"pdf": ("test.pdf", BytesIO(_PDF_BYTES), "application/pdf")},

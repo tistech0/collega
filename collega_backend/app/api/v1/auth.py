@@ -33,7 +33,10 @@ async def register(body: RegisterRequest):
 @router.post("/login")
 @limiter.limit("5/minute")
 async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.email == body.email))
+    # Normalisation identique à la création admin (strip + lower) pour que la
+    # connexion soit insensible à la casse / aux espaces saisis.
+    email = body.email.strip().lower()
+    result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
 
     if user is None or not verify_password(body.password, user.hashed_password):

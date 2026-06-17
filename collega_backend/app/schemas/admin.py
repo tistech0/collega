@@ -1,7 +1,7 @@
 """Schemas Pydantic pour les routes admin — pipeline OCR Phase 0 + Story 1.4."""
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 # ── College creation ─────────────────────────────────────────────────────────
@@ -105,6 +105,7 @@ class UserBetaData(BaseModel):
     is_beta: bool
     is_subscribed: bool
     monthly_reloads: int
+    monthly_reloads_max: int
 
 
 class UsersListResponseWrapped(BaseModel):
@@ -134,3 +135,69 @@ class ConfigUpdateRequest(BaseModel):
 
 class ConfigResponseWrapped(BaseModel):
     data: ConfigData
+
+
+# ── Story 7.6 — Création utilisateur admin (hard-blocker onboarding) ──────────
+
+class CreateUserRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=8)
+    is_beta: bool = False
+
+
+class CreateUserResponseWrapped(BaseModel):
+    data: UserBetaData
+
+
+# ── Story 7.6 — Reset quota mensuel ──────────────────────────────────────────
+
+class ResetQuotaResponseWrapped(BaseModel):
+    data: UserBetaData
+
+
+# ── Story 7.6 — Détail utilisateur (collèges + jobs + quota) ──────────────────
+
+class UserCollegeSummary(BaseModel):
+    college_id: str
+    college_ref_id: int
+    status: str
+    reload_count: int
+    reload_count_max: int
+
+
+class UserJobSummary(BaseModel):
+    job_id: str
+    college_id: str
+    status: str
+    card_count: int
+    error_message: str | None
+    created_at: str | None
+
+
+class UserDetailData(BaseModel):
+    user_id: str
+    email: str
+    is_beta: bool
+    is_subscribed: bool
+    monthly_reloads: int
+    monthly_reloads_max: int
+    monthly_reloads_reset_at: str | None
+    created_at: str | None
+    colleges: list[UserCollegeSummary]
+    jobs: list[UserJobSummary]
+
+
+class UserDetailResponseWrapped(BaseModel):
+    data: UserDetailData
+
+
+# ── Story 7.6 — Overview KPI (point d'entrée console) ─────────────────────────
+
+class OverviewData(BaseModel):
+    users_total: int
+    jobs_by_status: dict[str, int]
+    jobs_failed: int
+
+
+class OverviewResponseWrapped(BaseModel):
+    data: OverviewData

@@ -87,6 +87,7 @@ Ces items sont des actions du Project Lead, pas des stories techniques :
 L'application est hardenisée pour supporter plusieurs utilisatrices concurrentes (atomicité quotas, rate limits par user, RGPD safe-delete) et intègre les corrections UX/router révélées par la testeuse Phase 0. La qualité des fiches générées sera traitée séparément (Story 7.5) une fois que la testeuse aura terminé son collège actuel.
 
 **Items couverts :** R1, R2, R3, R4, R5 (différé), A1, A2, A3, A4, A5, A6, A9, A10, dette infra pré-prod
+**Nouveau périmètre ajouté (2026-06-16) :** Stories 7.6-7.8 — Dashboard admin (API + vue web), découpé par thème A/B/C, prérequis du re-test 7.5 (source : brainstorm `brainstorming-session-2026-06-16-2242.md`)
 **Items déjà adressés (hors scope) :** A7 (mitigé par pattern), A8 (rate limits déjà en place)
 **Tâches opérationnelles parallèles :** OP-1, OP-2, OP-3
 
@@ -94,9 +95,9 @@ L'application est hardenisée pour supporter plusieurs utilisatrices concurrente
 
 ## Epic 7 : Hardening & Retours Beta
 
-Cet epic regroupe en **5 stories** les corrections nécessaires avant l'élargissement de la beta au-delà de la testeuse actuelle. Les stories sont groupées par **zone de modification** (frontend Flutter / backend Python / infra) pour minimiser les conflits de merge et permettre un développement parallèle si besoin.
+Cet epic regroupe en **8 stories** les corrections nécessaires avant l'élargissement de la beta au-delà de la testeuse actuelle. Les stories 7.1-7.5 sont groupées par **zone de modification** (frontend Flutter / backend Python / infra) pour minimiser les conflits de merge ; les **stories 7.6-7.8 (Dashboard admin)** ont été ajoutées le 2026-06-16 (via `correct-course`) — la console admin, prérequis du re-test du prompt persona (Story 7.5) sur base prod wipée, est découpée en 3 stories séquençables par thème (A → B → C), périmètre v1 complet conservé.
 
-**Effort total estimé :** ~2.5j de dev sur S1-S4 + ~0.5j sur S5 différée.
+**Effort total estimé :** ~2.5j de dev sur S1-S4 + ~0.5j sur S5 différée + ~3.5-4j sur S6-S8 (console admin, 3 stories par thème — estimation provisoire à affiner au `create-story`).
 
 ### Story 7.1 : Corrections UX FlashCard & Router
 
@@ -351,6 +352,138 @@ afin de pouvoir réviser efficacement en sessions courtes sans être ralentie pa
 
 ---
 
+## Dashboard Admin (Stories 7.6 → 7.8)
+
+> **Périmètre & source :** console admin (API + vue web) actée le 2026-06-16 via `correct-course`. Source de périmètre : `_bmad-output/brainstorming/brainstorming-session-2026-06-16-2242.md`. Décision Project Lead : **périmètre complet en v1** (pas de découpe MVP/v2). Le périmètre est **livré en 3 stories séquençables par thème (A → B → C)** — la découpe ne réduit pas le scope, elle réduit la taille de chaque story et permet de débloquer l'onboarding (7.6) avant le reste.
+> **Composants partagés :** backend `app/api/v1/admin/` — étend l'API admin existante (`list users`, `toggle beta`, `queue génération`, `stats collège`, `config anti-spam`) ; **vue web admin** (réutilise le pattern de l'interface admin web Phase 0, Story 1.4) ; modèles réels `User` / `College` / `Item` / `FlashCard` / `GenerationJob` / `TesterFeedback`.
+> **Séquencement vs Story 7.5 :** le re-test du prompt persona (7.5) est gated sur **7.6 + 7.7 + 7.8 done** (la console complète sert à onboarder la testeuse ET à juger la qualité/coût du nouveau prompt). 7.6 (onboarding) est le hard-blocker pour *démarrer* ; 7.8 (qualité/coût) est le *pont* d'évaluation du prompt.
+
+### Story 7.6 : Dashboard Admin — Onboarding & Gestion Users (Thème A)
+
+**Couvre :** Nouveau périmètre V1.1 — socle de la console admin. **Hard-blocker du re-test 7.5** : sans create-user admin, impossible d'onboarder la testeuse (base prod wipée, `register` = 403).
+**Composants :** backend `app/api/v1/admin/` (users) ; vue web admin (écrans users + accueil console).
+**Ajout backend :** aucun nouveau modèle DB (réutilise `User` / `College` / `GenerationJob`).
+
+En tant que **Project Lead / admin**,
+je veux créer et gérer les comptes utilisateurs depuis une console admin avec un overview d'entrée,
+afin d'onboarder une testeuse sur une base prod wipée et d'avoir un point d'entrée unique sans toucher à psql.
+
+**Critères d'acceptance :**
+
+**Étant donné** une base prod wipée où `POST /v1/register` renvoie 403 par design
+**Quand** l'admin appelle `POST /v1/admin/users` (email + mot de passe + flag `is_beta` optionnel) depuis la vue web
+**Alors** un compte testeuse est créé en quelques secondes, avec `is_beta=true` si demandé (bypass paywall)
+**Et** l'admin peut a posteriori toggler `is_beta` (route existante) et **reset le quota** `monthly_reloads` d'un user
+
+**Étant donné** la liste des users (route existante)
+**Quand** l'admin ouvre le **détail d'un user** (NEW)
+**Alors** il voit ses collèges, ses `GenerationJob`, son quota (`reload_count` / `monthly_reloads`) et son statut beta
+
+**Étant donné** l'écran d'accueil de la console
+**Quand** l'admin l'ouvre
+**Alors** un **overview KPI** affiche : nombre de users, jobs par statut, jobs `failed` (point d'entrée de la console)
+
+**Tasks/Subtasks (à finaliser au `create-story` 7.6) :**
+
+- [ ] T1 — Backend : `POST /v1/admin/users` (create-user) + endpoint reset quota `monthly_reloads` + endpoint détail user (collèges/jobs/quota)
+- [ ] T2 — Backend : endpoint overview KPI (users, jobs par statut, jobs `failed`)
+- [ ] T3 — Vue web admin : écran accueil (overview KPI) + liste/détail user + actions create-user / toggle beta / reset quota
+- [ ] T4 — Tests backend : create-user (incl. 403 `register` toujours fermé), reset quota, détail user, agrégation KPI overview
+
+---
+
+### Story 7.7 : Dashboard Admin — Suivi & Contrôle des Imports (Thème B)
+
+**Couvre :** Nouveau périmètre V1.1 — observabilité + contrôle du pipeline d'import. Te rend « voyant » pendant le test.
+**Composants :** backend `app/api/v1/admin/` (jobs) + pipeline OCR/génération (instrumentation) + worker ARQ ; vue web admin (écrans imports/jobs).
+**Ajout backend nouveau :** persister une **timeline d'événements de traitement** par `GenerationJob` (étapes OCR page X/Y, génération, succès/erreur — consultable à la demande, refresh couvre le « pendant », **pas de live SSE**).
+
+En tant que **Project Lead / admin**,
+je veux suivre l'avancement réel d'un import et pouvoir l'arrêter ou le supprimer,
+afin de détecter et débloquer une testeuse coincée sans fouiller les logs NAS / Redis.
+
+**Critères d'acceptance :**
+
+**Étant donné** un import en cours ou terminé
+**Quand** l'admin ouvre le détail du `GenerationJob`
+**Alors** il voit la **timeline persistée** des étapes (OCR page X/Y, génération, erreur) lisible au refresh
+**Et** le **détail brut** du job (`arq_job_id`, `pdf_hash`, `hash_shared`, timestamps, `error_message`) — debug sans Redis/psql
+**Et** la **confiance OCR par item** (`ocr_confidence_score` / `low_confidence`) pour distinguer mauvais OCR vs mauvais prompt
+
+**Étant donné** un import problématique (job `failed`, planté, ou à annuler)
+**Quand** l'admin clique **Stop** ou **Delete**
+**Alors** Stop annule le job ARQ en cours ; Delete supprime l'import **et** les fiches associées
+
+**Étant donné** une testeuse potentiellement bloquée
+**Quand** l'admin consulte la console
+**Alors** un **détecteur de blocage** (dérivé : quota atteint / job `failed` / import jamais terminé) la signale — pas un écran séparé
+
+**Tasks/Subtasks (à finaliser au `create-story` 7.7) :**
+
+- [ ] T1 — Backend (ajout DB) : modèle/table **timeline d'événements** par `GenerationJob` + migration Alembic + écriture des étapes dans le pipeline OCR/génération + endpoint lecture
+- [ ] T2 — Backend : endpoints **stop** (annuler job ARQ) + **delete** (import + fiches) ; endpoint détail brut job ; exposer `ocr_confidence_score` par item
+- [ ] T3 — Vue web admin : écran liste/détail imports (timeline, détail brut, confiance OCR) + actions stop/delete + indicateur de blocage
+- [ ] T4 — Tests backend : écriture+lecture timeline, stop job ARQ, delete import+fiches, exposition confiance OCR
+
+---
+
+### Story 7.8 : Dashboard Admin — Qualité & Coût (Thème C, pont vers 7.5)
+
+**Couvre :** Nouveau périmètre V1.1 — c'est ici qu'on **juge le prompt 7.5** (qualité des fiches + coût de génération).
+**Composants :** backend `app/api/v1/admin/` (fiches / feedback / usage) + pipeline génération (capture usage) ; vue web admin (écrans qualité/coût).
+**Ajout backend nouveau :** persister l'**usage tokens Anthropic** (`response.usage`) par `GenerationJob` pour le suivi conso + coût €.
+
+En tant que **Project Lead / admin**,
+je veux inspecter les fiches générées, le feedback testeuse et le coût en tokens,
+afin de juger la qualité et le coût du nouveau prompt persona (7.5) sur un re-import réel.
+
+**Critères d'acceptance :**
+
+**Étant donné** un collège lié à un user
+**Quand** l'admin inspecte les **fiches générées** (recto / verso / type / rang)
+**Alors** il peut juger qualitativement la sortie du prompt 7.5
+
+**Étant donné** les `TesterFeedback` « non pertinents » remontés par la testeuse
+**Quand** l'admin ouvre la **vue feedback**
+**Alors** il voit le signal qualité n°1 du prompt 7.5
+
+**Étant donné** que `response.usage` est désormais persisté par job
+**Quand** l'admin consulte la **conso tokens**
+**Alors** il voit tokens + coût € agrégés par import / par user / global
+
+**Tasks/Subtasks (à finaliser au `create-story` 7.8) :**
+
+- [ ] T1 — Backend (ajout DB) : persister `response.usage` Anthropic par `GenerationJob` + migration Alembic + capture dans le pipeline génération
+- [ ] T2 — Backend : endpoints inspection fiches d'un collège + lecture `TesterFeedback` + agrégation conso/coût € (import/user/global)
+- [ ] T3 — Vue web admin : écran inspection fiches + vue feedback + tableau conso tokens/coût
+- [ ] T4 — Tests backend : capture+agrégation usage tokens, inspection fiches, lecture feedback
+
+---
+
+### Story 7.9 : Refonte Auth Console Admin — Session-Token (cookie httpOnly) [DIFFÉRÉ post-beta]
+
+**Origine :** item 6 de la code review de la Story 7.6 (2026-06-17). Ajoutée le 2026-06-17 (décision PL : tracer puis traiter en dernier / post-beta).
+**Couvre :** durcissement de l'authentification de la console admin web. Aujourd'hui la console garde les identifiants HTTP Basic en mémoire JS (exfiltrables via XSS) ; le vecteur XSS a été clos en review 7.6, d'où le risque accepté pour la beta.
+**Composants :** `app/deps.py` (nouvelle dépendance `get_admin_session`), `app/core/security.py` (token de session, réutilise l'infra JWT HS256 existante), `app/api/v1/admin.py` (login/logout), `app/static/admin/index.html` (migration cookie), `app/core/config.py`, tests admin.
+
+En tant que **Project Lead / admin**,
+je veux que la console admin s'authentifie via un session-token en cookie httpOnly + Secure + SameSite (login/logout, expiration, CSRF),
+afin qu'un futur XSS ne puisse plus voler les identifiants admin et que la session expire proprement.
+
+**Décisions à acter au kick-off (T0) :** cookie en remplacement de Basic ou cohabitation (recommandé : cohabiter pour conserver l'accès API/curl) ; niveau CSRF (`SameSite=Strict` seul vs token double-submit) ; durée d'expiration session.
+
+> **Séquencement :** non bloquant, **post-beta**. Story contextée et prête : `7-9-refonte-auth-admin-session-token.md`.
+
+- [ ] T0 — Décisions archi (cookie vs Basic, niveau CSRF, expiration)
+- [ ] T1 — Token de session admin (`security.py`)
+- [ ] T2 — Endpoints `POST /v1/admin/login` + `/logout`
+- [ ] T3 — Dépendance `get_admin_session` (`deps.py`)
+- [ ] T4 — Protection CSRF
+- [ ] T5 — Migration console web (suppression creds/Basic en JS)
+- [ ] T6 — Tests (login/logout/cookie/expiration + non-régression register 403)
+
+---
+
 ## Annexes
 
 ### A. Tâches opérationnelles parallèles (P3 — Project Lead)
@@ -399,8 +532,13 @@ afin de pouvoir réviser efficacement en sessions courtes sans être ralentie pa
 | Ports DB/Redis exposés | 7.3 |
 | Wiki gotchas SDK | 7.4 |
 | CGU + privacy (FR40) | 7.4 |
+| Dashboard admin — onboarding & users + KPI (nouveau, 2026-06-16) | 7.6 |
+| Dashboard admin — suivi & contrôle imports (nouveau, 2026-06-16) | 7.7 |
+| Dashboard admin — qualité & coût / pont 7.5 (nouveau, 2026-06-16) | 7.8 |
 
 ---
 
 **Validation Project Lead :** Lesurmatthis (2026-05-19)
 **Prochaine action recommandée :** créer les fichiers de story implementables (`_bmad-output/implementation-artifacts/7-1-corrections-ux-flashcard-router.md`, etc.) via `bmad-create-story` skill, story par story dans l'ordre 7.1 → 7.2 → 7.3 → 7.4. Story 7.5 différée jusqu'à signal de la testeuse.
+
+**Addendum 2026-06-16 (`correct-course`) :** Dashboard Admin (API + vue web) acté dans Epic 7, **découpé en 3 stories par thème** : **7.6** Onboarding & users (+ KPI), **7.7** Suivi & contrôle imports, **7.8** Qualité & coût (pont 7.5). Périmètre v1 complet conservé. Source de périmètre = brainstorm `brainstorming-session-2026-06-16-2242.md`. Prochaine action : `bmad-create-story 7.6` puis 7.7, 7.8. **Séquencement :** le re-test de la Story 7.5 est gated sur 7.6 + 7.7 + 7.8 done ; 7.6 (onboarding) est le hard-blocker pour démarrer.

@@ -156,17 +156,17 @@ void main() {
     testWidgets('affiche provenance "Item N · Nom Collège"', (tester) async {
       await tester.pumpWidget(_wrap(
         SearchResultTile(
-          result: _makeResult(itemNumber: 232, collegeRefId: 1),
+          result: _makeResult(itemNumber: 232, collegeRefId: 4),
         ),
       ));
       await tester.pump(Duration.zero);
-      // collegeRefId=1 → Cardiologie et maladies vasculaires
+      // collegeRefId=4 → Cardiologie
       expect(
         find.textContaining('Item 232'),
         findsOneWidget,
       );
       expect(
-        find.textContaining('Cardiologie et maladies vasculaires'),
+        find.textContaining('Cardiologie'),
         findsOneWidget,
       );
     });
