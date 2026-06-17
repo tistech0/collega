@@ -460,6 +460,30 @@ afin de juger la qualité et le coût du nouveau prompt persona (7.5) sur un re-
 
 ---
 
+### Story 7.9 : Refonte Auth Console Admin — Session-Token (cookie httpOnly) [DIFFÉRÉ post-beta]
+
+**Origine :** item 6 de la code review de la Story 7.6 (2026-06-17). Ajoutée le 2026-06-17 (décision PL : tracer puis traiter en dernier / post-beta).
+**Couvre :** durcissement de l'authentification de la console admin web. Aujourd'hui la console garde les identifiants HTTP Basic en mémoire JS (exfiltrables via XSS) ; le vecteur XSS a été clos en review 7.6, d'où le risque accepté pour la beta.
+**Composants :** `app/deps.py` (nouvelle dépendance `get_admin_session`), `app/core/security.py` (token de session, réutilise l'infra JWT HS256 existante), `app/api/v1/admin.py` (login/logout), `app/static/admin/index.html` (migration cookie), `app/core/config.py`, tests admin.
+
+En tant que **Project Lead / admin**,
+je veux que la console admin s'authentifie via un session-token en cookie httpOnly + Secure + SameSite (login/logout, expiration, CSRF),
+afin qu'un futur XSS ne puisse plus voler les identifiants admin et que la session expire proprement.
+
+**Décisions à acter au kick-off (T0) :** cookie en remplacement de Basic ou cohabitation (recommandé : cohabiter pour conserver l'accès API/curl) ; niveau CSRF (`SameSite=Strict` seul vs token double-submit) ; durée d'expiration session.
+
+> **Séquencement :** non bloquant, **post-beta**. Story contextée et prête : `7-9-refonte-auth-admin-session-token.md`.
+
+- [ ] T0 — Décisions archi (cookie vs Basic, niveau CSRF, expiration)
+- [ ] T1 — Token de session admin (`security.py`)
+- [ ] T2 — Endpoints `POST /v1/admin/login` + `/logout`
+- [ ] T3 — Dépendance `get_admin_session` (`deps.py`)
+- [ ] T4 — Protection CSRF
+- [ ] T5 — Migration console web (suppression creds/Basic en JS)
+- [ ] T6 — Tests (login/logout/cookie/expiration + non-régression register 403)
+
+---
+
 ## Annexes
 
 ### A. Tâches opérationnelles parallèles (P3 — Project Lead)

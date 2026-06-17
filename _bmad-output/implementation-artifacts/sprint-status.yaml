@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-27
-last_updated: 2026-06-17 # Story 7.6 (dashboard admin thème A) → done après code review : 6 patchs appliqués (reset-quota UPDATE atomique, created_at str|None, XSS email escapé, apiFetch robustesse réseau/401/non-JSON, fmtDate), 3 décisions PL tranchées, 7 items deferred. 17 tests admin OK, 0 régression liée. | review : 4 routes admin (create-user/reset-quota/détail/overview) + console web /admin, 17 tests, 0 régression. | 2026-06-16 : Story 7.6 créée et passée ready-for-dev via bmad-create-story. Dashboard admin acté via correct-course, découpé en 3 stories par thème (7.6/7.7/7.8) — prérequis du re-test 7.5 (cf. epics-v1.1.md, source brainstorm 2026-06-16)
+last_updated: 2026-06-17 # Story 7.9 créée (backlog, DIFFÉRÉ post-beta) : refonte auth console admin en session-token cookie httpOnly, issue de l'item 6 de la review 7.6. | Story 7.6 (dashboard admin thème A) → done après code review : 6 patchs appliqués (reset-quota UPDATE atomique, created_at str|None, XSS email escapé, apiFetch robustesse réseau/401/non-JSON, fmtDate), 3 décisions PL tranchées, 7 items deferred. 17 tests admin OK, 0 régression liée. | review : 4 routes admin (create-user/reset-quota/détail/overview) + console web /admin, 17 tests, 0 régression. | 2026-06-16 : Story 7.6 créée et passée ready-for-dev via bmad-create-story. Dashboard admin acté via correct-course, découpé en 3 stories par thème (7.6/7.7/7.8) — prérequis du re-test 7.5 (cf. epics-v1.1.md, source brainstorm 2026-06-16)
 project: appMedecine
 project_key: NOKEY
 tracking_system: file-system
@@ -129,6 +129,7 @@ development_status:
   7-6-dashboard-admin-onboarding-users: done               # [Console admin thème A — create-user/toggle beta/détail user/reset quota + KPI overview + vue web statique ; HARD-BLOCKER onboarding testeuse ; story prête : 7-6-dashboard-admin-onboarding-users.md]
   7-7-dashboard-admin-suivi-imports: backlog               # [Console admin thème B — timeline persistée job (NEW DB)/stop/delete/détail brut/confiance OCR]
   7-8-dashboard-admin-qualite-cout: backlog                # [Console admin thème C — inspection fiches/feedback/conso tokens€ (NEW DB response.usage) ; pont d'évaluation prompt 7.5]
+  7-9-refonte-auth-admin-session-token: backlog            # [DIFFÉRÉ post-beta — issu item 6 review 7.6 : remplacer Basic Auth (creds en mémoire JS) par session-token cookie httpOnly+Secure+SameSite+CSRF, réutilise infra JWT ; story contextée prête : 7-9-refonte-auth-admin-session-token.md]
   epic-7-retrospective: optional
 
   # Tâches opérationnelles parallèles (hors stories de dev) :
