@@ -11,11 +11,13 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy import func, select
+from sqlalchemy import update as sa_update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.security import hash_password
 from app.deps import get_admin_user
 from app.models.college import College
 from app.models.flash_card import FlashCard
@@ -36,14 +38,23 @@ from app.schemas.admin import (
     CreateCollegeData,
     CreateCollegeRequest,
     CreateCollegeResponseWrapped,
+    CreateUserRequest,
+    CreateUserResponseWrapped,
     ItemOcrData,
+    OverviewData,
+    OverviewResponseWrapped,
     PertinenceByRang,
     PertinenceStats,
     ProcessCollegeResponse,
     ProcessCollegeResponseWrapped,
     QueueJobData,
     QueueResponse,
+    ResetQuotaResponseWrapped,
     UserBetaData,
+    UserCollegeSummary,
+    UserDetailData,
+    UserDetailResponseWrapped,
+    UserJobSummary,
     UsersListResponseWrapped,
 )
 
@@ -383,6 +394,7 @@ async def list_users(
             is_beta=u.is_beta,
             is_subscribed=u.is_subscribed,
             monthly_reloads=u.monthly_reloads,
+            monthly_reloads_max=settings.monthly_reloads_max,
         )
         for u in users
     ]
@@ -412,6 +424,184 @@ async def update_user_beta(
             is_beta=user.is_beta,
             is_subscribed=user.is_subscribed,
             monthly_reloads=user.monthly_reloads,
+            monthly_reloads_max=settings.monthly_reloads_max,
+        )
+    )
+
+
+# ── Story 7.6 — Création utilisateur admin (hard-blocker onboarding) ──────────
+
+@router.post("/users", response_model=CreateUserResponseWrapped, status_code=201)
+async def create_user(
+    body: CreateUserRequest,
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> CreateUserResponseWrapped:
+    """Crée un compte utilisateur (réservé admin).
+
+    Seul point d'entrée d'onboarding tant que `POST /v1/auth/register` reste 403.
+    L'inscription publique n'est PAS réouverte : cette route est protégée par
+    Basic Auth admin et ne réactive jamais le register public.
+    """
+    # id généré explicitement → réponse construite sans dépendre d'un refresh
+    # post-commit (évite un 500 si le refresh échoue alors que l'user est créé).
+    user = User(
+        id=uuid.uuid4(),
+        email=body.email.strip().lower(),
+        hashed_password=hash_password(body.password),
+        is_beta=body.is_beta,
+    )
+    db.add(user)
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "EMAIL_ALREADY_EXISTS", "message": "Un compte avec cet email existe déjà."},
+        )
+    # Invariants d'un compte neuf : jamais abonné (RevenueCat le posera plus tard),
+    # quota vierge. Pas de relecture nécessaire.
+    return CreateUserResponseWrapped(
+        data=UserBetaData(
+            user_id=str(user.id),
+            email=user.email,
+            is_beta=user.is_beta,
+            is_subscribed=False,
+            monthly_reloads=0,
+            monthly_reloads_max=settings.monthly_reloads_max,
+        )
+    )
+
+
+@router.post("/users/{user_id}/reset-quota", response_model=ResetQuotaResponseWrapped)
+async def reset_user_quota(
+    user_id: uuid.UUID,
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> ResetQuotaResponseWrapped:
+    """Réinitialise le quota mensuel d'un utilisateur.
+
+    `monthly_reloads = 0` + `monthly_reloads_reset_at = None` : la fenêtre sera
+    ré-initialisée proprement au prochain réimport via la logique lazy de
+    `colleges.py` (cohérent avec le hardening quota Story 7.2).
+    """
+    user = await db.get(User, user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "USER_NOT_FOUND", "message": f"User {user_id} not found"},
+        )
+    # UPDATE atomique (pattern Story 7.2) : évite tout lost-update vs un réimport
+    # concurrent qui incrémente monthly_reloads entre le read et le commit.
+    # La réponse est construite à partir des valeurs connues post-reset
+    # (monthly_reloads=0), sans relire l'objet.
+    await db.execute(
+        sa_update(User)
+        .where(User.id == user_id)
+        .values(monthly_reloads=0, monthly_reloads_reset_at=None)
+    )
+    await db.commit()
+    return ResetQuotaResponseWrapped(
+        data=UserBetaData(
+            user_id=str(user.id),
+            email=user.email,
+            is_beta=user.is_beta,
+            is_subscribed=user.is_subscribed,
+            monthly_reloads=0,
+            monthly_reloads_max=settings.monthly_reloads_max,
+        )
+    )
+
+
+@router.get("/users/{user_id}", response_model=UserDetailResponseWrapped)
+async def get_user_detail(
+    user_id: uuid.UUID,
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> UserDetailResponseWrapped:
+    """Détail d'un utilisateur : champs + ses collèges + ses generation_jobs."""
+    user = await db.get(User, user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "USER_NOT_FOUND", "message": f"User {user_id} not found"},
+        )
+
+    colleges_result = await db.execute(
+        select(College).where(College.user_id == user_id).order_by(College.created_at.desc())
+    )
+    colleges = colleges_result.scalars().all()
+
+    jobs_result = await db.execute(
+        select(GenerationJob)
+        .where(GenerationJob.user_id == user_id)
+        .order_by(GenerationJob.created_at.desc())
+    )
+    jobs = jobs_result.scalars().all()
+
+    return UserDetailResponseWrapped(
+        data=UserDetailData(
+            user_id=str(user.id),
+            email=user.email,
+            is_beta=user.is_beta,
+            is_subscribed=user.is_subscribed,
+            monthly_reloads=user.monthly_reloads,
+            monthly_reloads_max=settings.monthly_reloads_max,
+            monthly_reloads_reset_at=(
+                user.monthly_reloads_reset_at.isoformat() if user.monthly_reloads_reset_at else None
+            ),
+            created_at=user.created_at.isoformat() if user.created_at else None,
+            colleges=[
+                UserCollegeSummary(
+                    college_id=str(c.id),
+                    college_ref_id=c.college_ref_id,
+                    status=c.status,
+                    reload_count=c.reload_count,
+                    reload_count_max=settings.reload_count_max,
+                )
+                for c in colleges
+            ],
+            jobs=[
+                UserJobSummary(
+                    job_id=str(j.id),
+                    college_id=str(j.college_id),
+                    status=j.status,
+                    card_count=j.card_count,
+                    error_message=j.error_message,
+                    created_at=j.created_at.isoformat() if j.created_at else None,
+                )
+                for j in jobs
+            ],
+        )
+    )
+
+
+# ── Story 7.6 — Overview KPI (point d'entrée console) ─────────────────────────
+
+_JOB_STATUSES = ("pending", "processing", "ocr_complete", "generation_complete", "failed")
+
+
+@router.get("/overview", response_model=OverviewResponseWrapped)
+async def get_overview(
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> OverviewResponseWrapped:
+    """KPI d'accueil console : total users, jobs par statut, jobs failed."""
+    users_total = await db.execute(select(func.count()).select_from(User))
+    users_count = users_total.scalar_one()
+
+    jobs_result = await db.execute(
+        select(GenerationJob.status, func.count()).group_by(GenerationJob.status)
+    )
+    counts = {status: count for status, count in jobs_result.all()}
+    jobs_by_status = {status: counts.get(status, 0) for status in _JOB_STATUSES}
+
+    return OverviewResponseWrapped(
+        data=OverviewData(
+            users_total=users_count,
+            jobs_by_status=jobs_by_status,
+            jobs_failed=jobs_by_status["failed"],
         )
     )
 

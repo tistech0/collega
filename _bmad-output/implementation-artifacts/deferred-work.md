@@ -229,3 +229,15 @@
 - `/health` ne vérifie pas la connectivité DB/Redis — ajouter `GET /health/ready` avec checks dépendances en Story 1.2 ou 2.x
 - `asyncio.run()` dans `alembic/env.py` échoue si appelé depuis un event loop existant — edge case ; documenté, non bloquant en pratique
 - `app/models/__init__.py` doit importer tous les futurs modèles — règle à respecter : chaque nouveau fichier `models/xxx.py` doit être ajouté à `models/__init__.py`
+
+## Deferred from: code review of story-7.6 (2026-06-17) — TOUS RÉSOLUS le 2026-06-17
+
+_Décision PL : tout régler avant le commit 7.6. Aucun report restant._
+
+- ✅ FIX — Normalisation email au login (`auth.py` : `.strip().lower()` avant lookup) → connexion insensible à la casse
+- ✅ FIX — `create_user` : `id` généré explicitement, réponse construite depuis les invariants compte-neuf, `db.refresh` supprimé (plus de 500 si refresh échoue)
+- ✅ FIX — Test create-user non-tautologique (`_fake_refresh_factory` supprimé, vérifie le vrai contrat)
+- ✅ FIX — Test overview indépendant de l'ordre des `db.execute`
+- ✅ VÉRIFIÉ CORRECT — `is_beta` bypasse le paywall (`deps.py:119`), quota mensuel uniforme : comportement voulu, aucun changement
+- ✅ ACCEPTÉ (architectural) — Basic Auth creds en mémoire JS : inhérent au pattern ; vol via XSS désormais clos par le patch XSS ; session-token = redesign hors périmètre
+- ✅ FIX — `monthly_reloads_max` ajouté à `UserBetaData` (4 sites) + affiché `x / max` dans la liste users

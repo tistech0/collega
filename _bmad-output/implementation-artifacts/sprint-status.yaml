@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-27
-last_updated: 2026-05-22 # Story 7.4 done — code review BMAD + 11 patches appliqués (D1-D4 + P1-P7), tests 15/15 backend + 48/48 Flutter scope ✅
+last_updated: 2026-06-17 # Story 7.6 (dashboard admin thème A) → done après code review : 6 patchs appliqués (reset-quota UPDATE atomique, created_at str|None, XSS email escapé, apiFetch robustesse réseau/401/non-JSON, fmtDate), 3 décisions PL tranchées, 7 items deferred. 17 tests admin OK, 0 régression liée. | review : 4 routes admin (create-user/reset-quota/détail/overview) + console web /admin, 17 tests, 0 régression. | 2026-06-16 : Story 7.6 créée et passée ready-for-dev via bmad-create-story. Dashboard admin acté via correct-course, découpé en 3 stories par thème (7.6/7.7/7.8) — prérequis du re-test 7.5 (cf. epics-v1.1.md, source brainstorm 2026-06-16)
 project: appMedecine
 project_key: NOKEY
 tracking_system: file-system
@@ -118,14 +118,17 @@ development_status:
   # ─────────────────────────────────────────────────────────
   # Epic 7 : Hardening & Retours Beta (V1.1)
   # Document : _bmad-output/planning-artifacts/epics-v1.1.md
-  # Périmètre : R1-R5 + A1-A10 (sauf A7/A8 fermés) + dette infra pré-prod
+  # Périmètre : R1-R5 + A1-A10 (sauf A7/A8 fermés) + dette infra pré-prod + dashboard admin 7.6/7.7/7.8 (ajout 2026-06-16, 3 stories par thème A/B/C)
   # ─────────────────────────────────────────────────────────
   epic-7: in-progress
   7-1-corrections-ux-flashcard-router: done
   7-2-hardening-async-backend: done
   7-3-hardening-rgpd-safe-delete-config: done
   7-4-chronometre-apns-singleton-docs: done
-  7-5-affinage-prompt-persona-claude: backlog              # [DIFFÉRÉ — kick-off après testeuse termine collège actuel]
+  7-5-affinage-prompt-persona-claude: ready-for-dev        # [DIFFÉRÉ — kick-off du re-test gated sur livraison 7.6+7.7+7.8 (console admin) + signal testeuse]
+  7-6-dashboard-admin-onboarding-users: done               # [Console admin thème A — create-user/toggle beta/détail user/reset quota + KPI overview + vue web statique ; HARD-BLOCKER onboarding testeuse ; story prête : 7-6-dashboard-admin-onboarding-users.md]
+  7-7-dashboard-admin-suivi-imports: backlog               # [Console admin thème B — timeline persistée job (NEW DB)/stop/delete/détail brut/confiance OCR]
+  7-8-dashboard-admin-qualite-cout: backlog                # [Console admin thème C — inspection fiches/feedback/conso tokens€ (NEW DB response.usage) ; pont d'évaluation prompt 7.5]
   epic-7-retrospective: optional
 
   # Tâches opérationnelles parallèles (hors stories de dev) :

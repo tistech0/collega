@@ -45,17 +45,17 @@ class _FakeImportNotifier extends CollegeImportNotifier {
 void main() {
   group('CollegeImportScreen', () {
     testWidgets('rendu initial — affiche le nom du collège et le bouton', (tester) async {
-      await tester.pumpWidget(_buildScreen(refId: 15));
+      await tester.pumpWidget(_buildScreen(refId: 26));
       await tester.pumpAndSettle();
 
-      // Le refId 15 = Neurologie
+      // Le refId 26 = Neurologie
       expect(find.text('Neurologie'), findsWidgets);
       expect(find.text('Choisir un PDF'), findsOneWidget);
     });
 
     testWidgets('pendant upload — indicateur de progression visible, bouton absent', (tester) async {
       await tester.pumpWidget(_buildScreen(
-        refId: 15,
+        refId: 26,
         initialState: const ImportUploading(),
       ));
       // LinearProgressIndicator est une animation infinie — pump() sans settle
