@@ -23,6 +23,8 @@ def make_job(job_id=None, college_id=None, status="processing"):
         hash_shared=False,
         card_count=12,
         error_message=None,
+        input_tokens=1_000_000,
+        output_tokens=1_000_000,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -114,6 +116,11 @@ class TestJobDetail:
         assert len(data["items"]) == 2
         assert data["items"][0]["item_number"] == 1
         assert data["items"][1]["low_confidence"] is True
+
+        # Story 7.8 — coût/import (additif). 1M in + 1M out = (3+15) USD × 0.92 = 16.56 €.
+        assert data["input_tokens"] == 1_000_000
+        assert data["output_tokens"] == 1_000_000
+        assert data["cost_eur"] == 16.56
 
     async def test_handles_missing_college_gracefully(self, client: AsyncClient, mock_db):
         job = make_job()

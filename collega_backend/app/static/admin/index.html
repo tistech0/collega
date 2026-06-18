@@ -83,6 +83,10 @@
     .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
     .checkbox-row input { width: auto; }
     .checkbox-row label { margin: 0; }
+
+    /* Qualité — recto/verso d'une fiche */
+    .qa-recto { font-weight: 600; }
+    .qa-verso { color: #555; font-size: .85rem; margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -113,6 +117,8 @@
       <button class="active" onclick="goOverview()">Accueil</button>
       <button onclick="goUsers()">Utilisateurs</button>
       <button onclick="goImports()">Imports</button>
+      <button onclick="goQuality()">Qualité</button>
+      <button onclick="goCost()">Coût</button>
     </div>
     <h2 class="section-title">Vue d'ensemble</h2>
     <div id="overview-loader" class="loader">Chargement…</div>
@@ -135,6 +141,8 @@
       <button onclick="goOverview()">Accueil</button>
       <button class="active" onclick="goUsers()">Utilisateurs</button>
       <button onclick="goImports()">Imports</button>
+      <button onclick="goQuality()">Qualité</button>
+      <button onclick="goCost()">Coût</button>
     </div>
     <div style="display:flex; justify-content:space-between; align-items:center">
       <h2 class="section-title" style="margin-bottom:0">Utilisateurs</h2>
@@ -193,6 +201,8 @@
       <button onclick="goOverview()">Accueil</button>
       <button onclick="goUsers()">Utilisateurs</button>
       <button class="active" onclick="goImports()">Imports</button>
+      <button onclick="goQuality()">Qualité</button>
+      <button onclick="goCost()">Coût</button>
     </div>
     <h2 class="section-title">Imports</h2>
     <div id="imports-loader" class="loader">Chargement…</div>
@@ -222,6 +232,68 @@
         <thead><tr><th>Item</th><th>Score OCR</th><th>Confiance</th></tr></thead>
         <tbody id="job-items-body"></tbody>
       </table>
+    </div>
+  </section>
+
+  <!-- QUALITÉ (fiches + feedback d'un collège) -->
+  <section id="quality-section">
+    <div class="nav-tabs">
+      <button onclick="goOverview()">Accueil</button>
+      <button onclick="goUsers()">Utilisateurs</button>
+      <button onclick="goImports()">Imports</button>
+      <button class="active" onclick="goQuality()">Qualité</button>
+      <button onclick="goCost()">Coût</button>
+    </div>
+    <h2 class="section-title">Qualité d'un collège</h2>
+    <div class="card" style="margin-bottom:16px">
+      <label for="quality-college-id">Identifiant du collège (college_id)</label>
+      <input type="text" id="quality-college-id" autocomplete="off" placeholder="UUID du collège">
+      <button class="btn-primary" id="quality-load-btn" onclick="loadQuality()">Charger fiches & feedback</button>
+      <p style="font-size:.8rem; color:#888; margin-top:8px">Astuce : le college_id est visible dans le détail d'un import (onglet Imports) ou dans le détail d'un utilisateur.</p>
+    </div>
+
+    <div id="quality-loader" class="loader" style="display:none">Chargement…</div>
+    <div id="quality-content" style="display:none">
+      <h3 class="subsection-title">Fiches générées (<span id="quality-cards-count">0</span>)</h3>
+      <div id="quality-cards-empty" class="empty-state" style="display:none; padding:24px">Aucune fiche.</div>
+      <table id="quality-cards-table" style="display:none">
+        <thead><tr><th>Item</th><th>Type</th><th>Rang</th><th>Recto / Verso</th><th>OCR</th></tr></thead>
+        <tbody id="quality-cards-body"></tbody>
+      </table>
+
+      <h3 class="subsection-title">Feedback testeuse (<span id="quality-fb-count">0</span>)</h3>
+      <div id="quality-fb-empty" class="empty-state" style="display:none; padding:24px">Aucun feedback.</div>
+      <table id="quality-fb-table" style="display:none">
+        <thead><tr><th>Pertinence</th><th>Type</th><th>Rang</th><th>Recto / Verso</th><th>Testeur</th><th>Date</th></tr></thead>
+        <tbody id="quality-fb-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- COÛT (usage tokens + €) -->
+  <section id="cost-section">
+    <div class="nav-tabs">
+      <button onclick="goOverview()">Accueil</button>
+      <button onclick="goUsers()">Utilisateurs</button>
+      <button onclick="goImports()">Imports</button>
+      <button onclick="goQuality()">Qualité</button>
+      <button class="active" onclick="goCost()">Coût</button>
+    </div>
+    <h2 class="section-title">Conso tokens & coût</h2>
+    <div id="cost-loader" class="loader">Chargement…</div>
+    <div id="cost-content" style="display:none">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-value" id="kpi-cost-eur">—</div><div class="kpi-label">Coût total (€)</div></div>
+        <div class="kpi-card"><div class="kpi-value" id="kpi-cost-in">—</div><div class="kpi-label">Tokens input</div></div>
+        <div class="kpi-card"><div class="kpi-value" id="kpi-cost-out">—</div><div class="kpi-label">Tokens output</div></div>
+      </div>
+      <h3 class="subsection-title">Par utilisateur</h3>
+      <div id="cost-users-empty" class="empty-state" style="display:none; padding:24px">Aucune conso mesurée.</div>
+      <table id="cost-users-table" style="display:none">
+        <thead><tr><th>Email</th><th>Tokens input</th><th>Tokens output</th><th>Coût (€)</th></tr></thead>
+        <tbody id="cost-users-body"></tbody>
+      </table>
+      <p style="font-size:.8rem; color:#888; margin-top:12px">Le coût par import est visible dans le détail d'un import (onglet Imports).</p>
     </div>
   </section>
 
@@ -691,6 +763,8 @@
         <tr><th>Hash partagé</th><td>${data.hash_shared ? "Oui" : "Non"}</td></tr>
         <tr><th>arq_job_id</th><td>${data.arq_job_id ? escapeHtml(data.arq_job_id) : "—"}</td></tr>
         <tr><th>Erreur</th><td>${data.error_message ? escapeHtml(data.error_message) : "—"}</td></tr>
+        <tr><th>Coût (tokens)</th><td>${fmtTokens(data.input_tokens, data.output_tokens)}</td></tr>
+        <tr><th>Coût (€)</th><td>${data.input_tokens == null ? "<span style='color:#888'>non mesuré</span>" : "€ " + data.cost_eur.toFixed(4)}</td></tr>
         <tr><th>Créé le</th><td>${fmtDate(data.created_at)}</td></tr>
         <tr><th>MAJ le</th><td>${fmtDate(data.updated_at)}</td></tr>`;
 
@@ -794,6 +868,153 @@
       if (e.code === "unauthorized") return;  // UI déjà basculée sur le login
       toast("Échec de la suppression", true);
     }
+  }
+
+  // ─── Qualité (fiches + feedback d'un collège) ───────────────────────────────
+  function goQuality() {
+    showSection("quality-section");
+    document.getElementById("quality-content").style.display = "none";
+    document.getElementById("quality-loader").style.display = "none";
+  }
+
+  async function loadQuality() {
+    const collegeId = document.getElementById("quality-college-id").value.trim();
+    if (!collegeId) { toast("Saisissez un college_id", true); return; }
+
+    const loader = document.getElementById("quality-loader");
+    const content = document.getElementById("quality-content");
+    loader.style.display = "block";
+    content.style.display = "none";
+
+    try {
+      // Les fiches portent le flux : leur 404/erreur coupe (collège introuvable).
+      const cardsRes = await apiFetch(`/v1/admin/colleges/${collegeId}/cards`);
+      if (cardsRes.status === 404) { loader.textContent = "Collège introuvable."; return; }
+      if (!cardsRes.ok) { loader.textContent = "Erreur de chargement."; return; }
+      const cards = (await readJson(cardsRes)).data;
+      renderQualityCards(cards);
+
+      // Le feedback est secondaire : un échec ne doit PAS jeter les fiches déjà
+      // chargées. On affiche les fiches et on signale la dégradation par un toast.
+      const fbRes = await apiFetch(`/v1/admin/colleges/${collegeId}/feedback`);
+      if (fbRes.ok) {
+        renderQualityFeedback((await readJson(fbRes)).data);
+      } else {
+        renderQualityFeedback([]);
+        toast(fbRes.status === 404
+          ? "Collège introuvable — feedback indisponible"
+          : "Feedback indisponible (erreur de chargement)", true);
+      }
+
+      loader.style.display = "none";
+      content.style.display = "block";
+    } catch (e) {
+      if (e.code === "unauthorized") return;  // UI déjà basculée sur le login
+      loader.textContent = "Erreur de chargement.";
+    }
+  }
+
+  function renderQualityCards(cards) {
+    document.getElementById("quality-cards-count").textContent = cards.length;
+    const table = document.getElementById("quality-cards-table");
+    const empty = document.getElementById("quality-cards-empty");
+    const body = document.getElementById("quality-cards-body");
+    body.innerHTML = "";
+    if (!cards.length) { table.style.display = "none"; empty.style.display = "block"; return; }
+    empty.style.display = "none";
+    cards.forEach(c => {
+      const tr = document.createElement("tr");
+      const ocr = c.low_confidence
+        ? `<span class="badge badge-red">⚠ ${(c.ocr_confidence_score * 100).toFixed(0)}%</span>`
+        : `<span class="badge badge-green">${(c.ocr_confidence_score * 100).toFixed(0)}%</span>`;
+      tr.innerHTML = `
+        <td>${c.item_number != null ? c.item_number : "—"}</td>
+        <td>${escapeHtml(c.card_type)}</td>
+        <td>${escapeHtml(c.rang)}</td>
+        <td><div class="qa-recto">${escapeHtml(c.recto)}</div><div class="qa-verso">${escapeHtml(c.verso)}</div></td>
+        <td>${ocr}</td>`;
+      body.appendChild(tr);
+    });
+    table.style.display = "";
+  }
+
+  function renderQualityFeedback(feedback) {
+    document.getElementById("quality-fb-count").textContent = feedback.length;
+    const table = document.getElementById("quality-fb-table");
+    const empty = document.getElementById("quality-fb-empty");
+    const body = document.getElementById("quality-fb-body");
+    body.innerHTML = "";
+    if (!feedback.length) { table.style.display = "none"; empty.style.display = "block"; return; }
+    empty.style.display = "none";
+    feedback.forEach(f => {
+      const tr = document.createElement("tr");
+      const badge = f.is_pertinent
+        ? `<span class="badge badge-green">Pertinent</span>`
+        : `<span class="badge badge-red">⚠ Non pertinent</span>`;
+      tr.innerHTML = `
+        <td>${badge}</td>
+        <td>${escapeHtml(f.card_type)}</td>
+        <td>${escapeHtml(f.rang)}</td>
+        <td><div class="qa-recto">${escapeHtml(f.recto)}</div><div class="qa-verso">${escapeHtml(f.verso)}</div></td>
+        <td>${escapeHtml(f.tester_id)}</td>
+        <td>${fmtDate(f.created_at)}</td>`;
+      body.appendChild(tr);
+    });
+    table.style.display = "";
+  }
+
+  // ─── Coût (usage tokens + €) ────────────────────────────────────────────────
+  async function goCost() {
+    showSection("cost-section");
+    const loader = document.getElementById("cost-loader");
+    const content = document.getElementById("cost-content");
+    loader.style.display = "block";
+    content.style.display = "none";
+
+    try {
+      const res = await apiFetch("/v1/admin/usage");
+      if (!res.ok) { loader.textContent = "Erreur de chargement."; return; }
+      const { data } = await readJson(res);
+
+      document.getElementById("kpi-cost-eur").textContent = "€ " + data.cost_eur.toFixed(2);
+      document.getElementById("kpi-cost-in").textContent = fmtNumber(data.input_tokens);
+      document.getElementById("kpi-cost-out").textContent = fmtNumber(data.output_tokens);
+
+      const table = document.getElementById("cost-users-table");
+      const empty = document.getElementById("cost-users-empty");
+      const body = document.getElementById("cost-users-body");
+      body.innerHTML = "";
+      if (!data.by_user.length) {
+        table.style.display = "none"; empty.style.display = "block";
+      } else {
+        empty.style.display = "none";
+        data.by_user.forEach(u => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${escapeHtml(u.email)}</td>
+            <td>${fmtNumber(u.input_tokens)}</td>
+            <td>${fmtNumber(u.output_tokens)}</td>
+            <td>€ ${u.cost_eur.toFixed(4)}</td>`;
+          body.appendChild(tr);
+        });
+        table.style.display = "";
+      }
+
+      loader.style.display = "none";
+      content.style.display = "block";
+    } catch (e) {
+      if (e.code === "unauthorized") return;  // UI déjà basculée sur le login
+      loader.textContent = "Erreur de chargement.";
+    }
+  }
+
+  function fmtNumber(n) {
+    return (n == null ? 0 : n).toLocaleString("fr-FR");
+  }
+
+  function fmtTokens(input, output) {
+    if (input == null) return "<span style='color:#888'>non mesuré</span>";
+    return `${fmtNumber(input)} in / ${fmtNumber(output)} out`;
   }
 
   function statusBadge(status) {

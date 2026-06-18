@@ -55,6 +55,10 @@ class CardGenerator:
             if count > 0:
                 job.hash_shared = True
                 job.card_count = count
+                # Hash-sharing : Claude n'est jamais appelé → usage gratuit
+                # explicite 0/0 (distinct de NULL = non mesuré). Story 7.8 AC1.
+                job.input_tokens = 0
+                job.output_tokens = 0
                 job.status = "generation_complete"
                 # Story 7.2 — Décision review : pour un reimport servi par
                 # hash-sharing (Claude PAS appelé, gratuit), on compense le
@@ -101,6 +105,9 @@ class CardGenerator:
         items = items_result.scalars().all()
 
         card_count = 0
+        # Usage Anthropic cumulé sur tous les appels du job (Story 7.8 AC1).
+        total_input_tokens = 0
+        total_output_tokens = 0
         for item in items:
             # Garde anti-race (review 7.7 D1) : si l'admin a forcé l'arrêt
             # (Stop → status="failed") pendant la génération, stopper avant le
@@ -126,7 +133,12 @@ class CardGenerator:
                     "cancelled": True,
                 }
 
-            cards_data = await self._claude.generate_cards_for_item(item)
+            gen_result = await self._claude.generate_cards_for_item(item)
+            # Accumuler l'usage même si 0 fiche (parsing échoué) : les tokens ont
+            # été facturés. La capture survit au `continue` ci-dessous.
+            total_input_tokens += gen_result.input_tokens
+            total_output_tokens += gen_result.output_tokens
+            cards_data = gen_result.cards
             if not cards_data:
                 logger.warning("Item %s produced 0 cards — skipping", item.id)
                 continue
@@ -146,6 +158,8 @@ class CardGenerator:
                 card_count += 1
 
         job.card_count = card_count
+        job.input_tokens = total_input_tokens
+        job.output_tokens = total_output_tokens
         job.status = "generation_complete"
 
         # Note: reload_count / monthly_reloads sont incrémentés atomiquement au router

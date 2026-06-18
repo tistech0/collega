@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from app.services.generation.card_generator import CardGenerator
-from app.services.generation.claude_client import FlashCardData
+from app.services.generation.claude_client import CardGenResult, FlashCardData
 
 
 def make_job(status: str = "ocr_complete", user_id=None):
@@ -91,6 +91,9 @@ class TestCardGeneratorHashSharing:
         assert result["hash_shared"] is True
         assert job.hash_shared is True
         assert job.status == "generation_complete"
+        # Story 7.8 — hash-sharing = gratuit explicite 0/0 (Claude jamais appelé)
+        assert job.input_tokens == 0
+        assert job.output_tokens == 0
 
     async def test_calls_claude_when_no_hash_match(self):
         """AC#1 — appelle Claude pour chaque item quand pas de hash-sharing."""
@@ -108,16 +111,24 @@ class TestCardGeneratorHashSharing:
         db.execute = AsyncMock(return_value=scalars_result)
 
         generator = CardGenerator()
-        cards_returned = [FlashCardData(card_type="classique", recto="Q?", verso="R")]
+        # Chaque item retourne 1 fiche + un usage de 100/50 → cumul 200/100 sur 2 items.
+        gen_result = CardGenResult(
+            cards=[FlashCardData(card_type="classique", recto="Q?", verso="R")],
+            input_tokens=100,
+            output_tokens=50,
+        )
 
         with patch.object(generator._similarity, "compute_hash", return_value="fakehash"):
             with patch.object(generator._similarity, "find_similar_job", new=AsyncMock(return_value=None)):
-                with patch.object(generator._claude, "generate_cards_for_item", new=AsyncMock(return_value=cards_returned)):
+                with patch.object(generator._claude, "generate_cards_for_item", new=AsyncMock(return_value=gen_result)):
                     result = await generator.generate_for_college(db, college_id, job.id, "/fake/path.pdf")
 
         assert result["hash_shared"] is False
         assert result["card_count"] == 2
         assert job.status == "generation_complete"
+        # Story 7.8 — usage cumulé sur le job (2 items × 100/50)
+        assert job.input_tokens == 200
+        assert job.output_tokens == 100
         # 2 FlashCard ajoutées (les events timeline Story 7.7 passent aussi par db.add,
         # on filtre donc par type pour cibler l'intention du test).
         from app.models.flash_card import FlashCard

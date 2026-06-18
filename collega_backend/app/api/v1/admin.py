@@ -26,9 +26,14 @@ from app.models.generation_job_event import GenerationJobEvent
 from app.models.item import Item
 from app.models.tester_feedback import TesterFeedback
 from app.models.user import User
+from app.services.generation.token_cost import compute_cost_eur
 from app.services.jobs.arq_control import abort_arq_job
 from app.services.jobs.job_events import record_job_event
 from app.schemas.admin import (
+    AdminCardsResponseWrapped,
+    AdminFeedbackData,
+    AdminFeedbackResponseWrapped,
+    AdminFlashCardData,
     BetaUpdateRequest,
     BetaUpdateResponseWrapped,
     CollegeStatsData,
@@ -58,6 +63,9 @@ from app.schemas.admin import (
     ResetQuotaResponseWrapped,
     StopJobData,
     StopJobResponseWrapped,
+    UsageByUserData,
+    UsageData,
+    UsageResponseWrapped,
     UserBetaData,
     UserCollegeSummary,
     UserDetailData,
@@ -674,6 +682,9 @@ async def get_job_detail(
             ocr_page_progress=college.ocr_page_progress if college else 0,
             total_pages=college.total_pages if college else None,
             college_status=college.status if college else "unknown",
+            input_tokens=job.input_tokens,
+            output_tokens=job.output_tokens,
+            cost_eur=compute_cost_eur(job.input_tokens, job.output_tokens),
             items=items,
             timeline=[
                 JobEventData(
@@ -787,6 +798,145 @@ async def delete_college(
         logger.warning("PDF cleanup failed for college %s: %s", college_id, exc)
 
     return Response(status_code=204)
+
+
+# ── Story 7.8 — Qualité & Coût (inspection fiches / feedback / usage tokens) ──
+
+@router.get("/colleges/{college_id}/cards", response_model=AdminCardsResponseWrapped)
+async def get_college_cards(
+    college_id: uuid.UUID,
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> AdminCardsResponseWrapped:
+    """Liste les fiches générées d'un collège (juger la qualité du prompt 7.5).
+
+    `item_number` vient de l'Item parent (FlashCard n'a pas de colonne directe) via
+    une jointure ; les scores OCR sont copiés sur la fiche à la génération.
+    """
+    college = await db.get(College, college_id)
+    if college is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
+        )
+
+    result = await db.execute(
+        select(FlashCard, Item.item_number)
+        .join(Item, FlashCard.item_id == Item.id)
+        .where(FlashCard.college_id == college_id)
+        .order_by(Item.item_number)
+    )
+    cards = [
+        AdminFlashCardData(
+            card_id=str(card.id),
+            item_number=item_number,
+            card_type=card.card_type,
+            rang=card.rang,
+            recto=card.recto,
+            verso=card.verso,
+            ocr_confidence_score=card.ocr_confidence_score,
+            low_confidence=card.low_confidence,
+        )
+        for card, item_number in result.all()
+    ]
+    return AdminCardsResponseWrapped(data=cards, total=len(cards))
+
+
+@router.get("/colleges/{college_id}/feedback", response_model=AdminFeedbackResponseWrapped)
+async def get_college_feedback(
+    college_id: uuid.UUID,
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> AdminFeedbackResponseWrapped:
+    """Feedbacks testeuse d'un collège joints au contenu de la fiche concernée.
+
+    `is_pertinent=false` = signal qualité n°1. Même pattern de jointure que
+    `get_college_stats` (TesterFeedback n'a pas de relationship ORM directe).
+    """
+    college = await db.get(College, college_id)
+    if college is None:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
+        )
+
+    result = await db.execute(
+        select(
+            TesterFeedback,
+            FlashCard.recto,
+            FlashCard.verso,
+            FlashCard.card_type,
+            FlashCard.rang,
+        )
+        .join(FlashCard, TesterFeedback.flash_card_id == FlashCard.id)
+        .where(TesterFeedback.college_id == college_id)
+        .order_by(TesterFeedback.created_at.desc())
+    )
+    feedbacks = [
+        AdminFeedbackData(
+            feedback_id=str(fb.id),
+            flash_card_id=str(fb.flash_card_id),
+            tester_id=fb.tester_id,
+            is_pertinent=fb.is_pertinent,
+            created_at=fb.created_at.isoformat() if fb.created_at else None,
+            recto=recto,
+            verso=verso,
+            card_type=card_type,
+            rang=rang,
+        )
+        for fb, recto, verso, card_type, rang in result.all()
+    ]
+    return AdminFeedbackResponseWrapped(data=feedbacks, total=len(feedbacks))
+
+
+@router.get("/usage", response_model=UsageResponseWrapped)
+async def get_usage(
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> UsageResponseWrapped:
+    """Conso tokens Anthropic + coût € : total global + ventilation par user.
+
+    Les jobs `NULL` (non mesurés, antérieurs migration 014) comptent comme 0 via
+    `func.coalesce`. Le coût € est calculé à la lecture (jamais persisté).
+    """
+    global_result = await db.execute(
+        select(
+            func.coalesce(func.sum(GenerationJob.input_tokens), 0),
+            func.coalesce(func.sum(GenerationJob.output_tokens), 0),
+        )
+    )
+    g_input, g_output = global_result.one()
+
+    by_user_result = await db.execute(
+        select(
+            User.id,
+            User.email,
+            func.coalesce(func.sum(GenerationJob.input_tokens), 0),
+            func.coalesce(func.sum(GenerationJob.output_tokens), 0),
+        )
+        .join(GenerationJob, GenerationJob.user_id == User.id)
+        .group_by(User.id, User.email)
+        .order_by(User.email)
+    )
+    by_user = [
+        UsageByUserData(
+            user_id=str(uid),
+            email=email,
+            input_tokens=u_input,
+            output_tokens=u_output,
+            cost_eur=compute_cost_eur(u_input, u_output),
+        )
+        for uid, email, u_input, u_output in by_user_result.all()
+    ]
+
+    return UsageResponseWrapped(
+        data=UsageData(
+            input_tokens=g_input,
+            output_tokens=g_output,
+            cost_eur=compute_cost_eur(g_input, g_output),
+            by_user=by_user,
+        )
+    )
 
 
 # ── Story 1.4 — Configuration anti-spam ──────────────────────────────────────

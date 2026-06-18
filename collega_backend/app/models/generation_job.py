@@ -42,6 +42,11 @@ class GenerationJob(Base):
     )
     arq_job_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     card_count: Mapped[int] = mapped_column(Integer, default=0)
+    # Usage Anthropic cumulé sur le job (Story 7.8). NULL = job non mesuré
+    # (antérieur migration 014 / échec avant capture) ; 0 = mesuré et gratuit
+    # (hash-sharing, Claude jamais appelé). Le coût € est calculé à la lecture.
+    input_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    output_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
     hash_shared: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     pdf_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)

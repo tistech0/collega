@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     reload_count_max: int = 2
     monthly_reloads_max: int = 3
 
+    # Taux de conversion USD→EUR pour le calcul de coût des tokens Claude
+    # (Story 7.8). Valeur par défaut ici (PAS dans le .env prod NAS, cf. mémoire
+    # projet) ; surchargeable via la variable d'env USD_EUR_RATE si besoin.
+    usd_eur_rate: float = 0.92
+
     # Interface admin Phase 0 — HTTP Basic Auth
     admin_username: str = "admin"
     admin_password: str = "change-me"

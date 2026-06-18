@@ -230,6 +230,10 @@ class JobDetailData(BaseModel):
     college_status: str
     items: list[ItemOcrData]
     timeline: list[JobEventData]
+    # Story 7.8 — coût/import (additif). NULL = job non mesuré (antérieur migration 014).
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    cost_eur: float = 0.0
 
 
 class JobDetailResponseWrapped(BaseModel):
@@ -248,3 +252,61 @@ class StopJobData(BaseModel):
 
 class StopJobResponseWrapped(BaseModel):
     data: StopJobData
+
+
+# ── Story 7.8 — Qualité : inspection fiches générées ──────────────────────────
+
+class AdminFlashCardData(BaseModel):
+    card_id: str
+    item_number: int | None
+    card_type: str
+    rang: str
+    recto: str
+    verso: str
+    ocr_confidence_score: float
+    low_confidence: bool
+
+
+class AdminCardsResponseWrapped(BaseModel):
+    data: list[AdminFlashCardData]
+    total: int
+
+
+# ── Story 7.8 — Qualité : feedback testeuse joint au contenu fiche ────────────
+
+class AdminFeedbackData(BaseModel):
+    feedback_id: str
+    flash_card_id: str
+    tester_id: str
+    is_pertinent: bool
+    created_at: str | None
+    recto: str
+    verso: str
+    card_type: str
+    rang: str
+
+
+class AdminFeedbackResponseWrapped(BaseModel):
+    data: list[AdminFeedbackData]
+    total: int
+
+
+# ── Story 7.8 — Coût : agrégat usage tokens + € (global / par user) ───────────
+
+class UsageByUserData(BaseModel):
+    user_id: str
+    email: str
+    input_tokens: int
+    output_tokens: int
+    cost_eur: float
+
+
+class UsageData(BaseModel):
+    input_tokens: int
+    output_tokens: int
+    cost_eur: float
+    by_user: list[UsageByUserData]
+
+
+class UsageResponseWrapped(BaseModel):
+    data: UsageData

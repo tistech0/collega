@@ -63,6 +63,19 @@ class FlashCardData:
     verso: str
 
 
+@dataclass
+class CardGenResult:
+    """Résultat d'un appel `generate_cards_for_item` : fiches + usage tokens.
+
+    L'usage est porté par le résultat (et non un état partagé) pour qu'il
+    *survive* à un échec de parsing JSON : l'appel API a déjà facturé les tokens
+    même si la réponse est mal formée (Story 7.8 AC1).
+    """
+    cards: list[FlashCardData]
+    input_tokens: int
+    output_tokens: int
+
+
 class ClaudeClient:
     def __init__(self) -> None:
         self._client = anthropic.AsyncAnthropic(
@@ -85,10 +98,10 @@ class ClaudeClient:
             raise ValueError(f"No JSON object in Claude response: {text!r}")
         return json.loads(text[start:end])
 
-    async def generate_cards_for_item(self, item) -> list[FlashCardData]:
+    async def generate_cards_for_item(self, item) -> CardGenResult:
         if not item.ocr_text:
             logger.warning("Item %s has no ocr_text — skipping Claude call", item.id)
-            return []
+            return CardGenResult(cards=[], input_tokens=0, output_tokens=0)
 
         # Escape braces in OCR text to prevent str.format() KeyError/IndexError
         safe_ocr_text = item.ocr_text.replace("{", "{{").replace("}", "}}")
@@ -98,12 +111,19 @@ class ClaudeClient:
             ocr_text=safe_ocr_text,
         )
 
+        # anthropic.APIError se propage (pas de réponse → aucun usage à compter,
+        # le worker marquera le job 'failed').
+        response = await self._client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=2000,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        # Capturer l'usage AVANT le parsing : les tokens sont facturés même si la
+        # réponse JSON est invalide (Story 7.8 AC1 — le coût doit survivre au except).
+        input_tokens = response.usage.input_tokens
+        output_tokens = response.usage.output_tokens
+
         try:
-            response = await self._client.messages.create(
-                model="claude-sonnet-4-6",
-                max_tokens=2000,
-                messages=[{"role": "user", "content": prompt}],
-            )
             raw = response.content[0].text.strip()
             # Strip markdown code fence if Claude wraps JSON in ```json ... ```
             if raw.startswith("```"):
@@ -111,11 +131,12 @@ class ClaudeClient:
                 raw = re.sub(r"\n?```$", "", raw)
                 raw = raw.strip()
             data = json.loads(raw)
-        except anthropic.APIError:
-            raise
-        except (json.JSONDecodeError, KeyError, IndexError) as exc:
+        except (json.JSONDecodeError, KeyError, IndexError, AttributeError) as exc:
+            # AttributeError : content[0] peut être un bloc non-texte (refus/thinking)
+            # sans `.text` → dégrader en cards=[] avec usage préservé (cf. ask_json qui
+            # garde déjà ce cas), plutôt que de laisser l'exception crasher l'item.
             logger.error("Failed to parse Claude response for item %s: %s", item.id, exc)
-            return []
+            return CardGenResult(cards=[], input_tokens=input_tokens, output_tokens=output_tokens)
 
         cards: list[FlashCardData] = []
         for entry in data.get("flashcards", []):
@@ -127,7 +148,7 @@ class ClaudeClient:
             if recto and verso:
                 cards.append(FlashCardData(card_type=card_type, recto=recto, verso=verso))
 
-        return cards
+        return CardGenResult(cards=cards, input_tokens=input_tokens, output_tokens=output_tokens)
 
     async def regenerate_single_card(
         self,
