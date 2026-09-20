@@ -137,6 +137,7 @@ class TestTokenUsageCapture:
             MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[target_item])))),
             MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[source_item])))),
             MagicMock(scalar_one_or_none=MagicMock(return_value=None)),  # _is_reimport → premier import
+            MagicMock(),  # UPDATE colleges SET status=generation_complete
         ])
 
         generator = CardGenerator()

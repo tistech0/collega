@@ -78,6 +78,7 @@ class TestCardGeneratorHashSharing:
             scalars_target_items,
             scalars_source_items,
             is_reimport_first_import,
+            MagicMock(),  # UPDATE colleges SET status=generation_complete
         ])
 
         generator = CardGenerator()
@@ -198,6 +199,7 @@ class TestCardGeneratorHashSharing:
             MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[source_item])))),
             # _is_reimport → None : premier import → pas de compensation quota
             MagicMock(scalar_one_or_none=MagicMock(return_value=None)),
+            MagicMock(),  # UPDATE colleges SET status=generation_complete
         ])
 
         generator = CardGenerator()
@@ -212,3 +214,82 @@ class TestCardGeneratorHashSharing:
         flash_cards = [c for c in added_cards if isinstance(c, FlashCard)]
         assert len(flash_cards) == 1
         assert flash_cards[0].user_id == target_user_id
+
+
+def _college_status_updates(db) -> list[str]:
+    """Statuts écrits sur `colleges` via `UPDATE colleges SET status=...`."""
+    from sqlalchemy.sql.dml import Update
+
+    found = []
+    for call in db.execute.await_args_list:
+        stmt = call.args[0] if call.args else None
+        if isinstance(stmt, Update) and stmt.table.name == "colleges":
+            compiled = stmt.compile(compile_kwargs={"literal_binds": True})
+            if "status" in compiled.params or "status" in str(compiled):
+                found.append(str(compiled))
+    return found
+
+
+class TestCollegeStatusFinalisation:
+    """Régression prod 2026-09-20 : le job passait à generation_complete mais
+    jamais le College → /status figé sur ocr_complete, SSE sans événement
+    final, /items en 409 (collège « vide » dans l'app et l'admin)."""
+
+    async def test_claude_path_marks_college_generation_complete(self):
+        college_id = uuid.uuid4()
+        job = make_job()
+        db = AsyncMock()
+        db.get = AsyncMock(return_value=job)
+        db.add = MagicMock()
+        db.commit = AsyncMock()
+        items = [make_item(1)]
+        db.execute = AsyncMock(
+            return_value=MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=items))))
+        )
+        gen_result = CardGenResult(
+            cards=[FlashCardData(card_type="classique", recto="Q?", verso="R")],
+            input_tokens=1,
+            output_tokens=1,
+        )
+        generator = CardGenerator()
+        with patch.object(generator._similarity, "compute_hash", return_value="h"):
+            with patch.object(generator._similarity, "find_similar_job", new=AsyncMock(return_value=None)):
+                with patch.object(generator._claude, "generate_cards_for_item", new=AsyncMock(return_value=gen_result)):
+                    await generator.generate_for_college(db, college_id, job.id, "/fake.pdf")
+
+        updates = _college_status_updates(db)
+        assert updates, "aucun UPDATE colleges SET status exécuté"
+        assert any("generation_complete" in u for u in updates), updates
+
+    async def test_hash_sharing_path_marks_college_generation_complete(self):
+        college_id = uuid.uuid4()
+        job = make_job()
+        similar_job = make_job(status="generation_complete")
+        similar_job.college_id = uuid.uuid4()
+        db = AsyncMock()
+        db.get = AsyncMock(return_value=job)
+        db.add = MagicMock()
+        db.commit = AsyncMock()
+        source_item, target_item = make_item(1), make_item(1)
+        source_card = types.SimpleNamespace(
+            id=uuid.uuid4(), item_id=source_item.id, college_id=similar_job.college_id,
+            card_type="classique", rang="A", recto="Q?", verso="R",
+            ocr_confidence_score=0.85, low_confidence=False,
+        )
+        scalars = lambda rows: MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=rows))))  # noqa: E731
+        db.execute = AsyncMock(side_effect=[
+            MagicMock(),                       # DELETE idempotency
+            scalars([source_card]),
+            scalars([target_item]),
+            scalars([source_item]),
+            MagicMock(scalar_one_or_none=MagicMock(return_value=None)),  # _is_reimport
+            MagicMock(),                       # UPDATE colleges SET status
+        ])
+        generator = CardGenerator()
+        with patch.object(generator._similarity, "compute_hash", return_value="h"):
+            with patch.object(generator._similarity, "find_similar_job", new=AsyncMock(return_value=similar_job)):
+                with patch.object(generator._claude, "generate_cards_for_item", new=AsyncMock()):
+                    await generator.generate_for_college(db, college_id, job.id, "/fake.pdf")
+
+        updates = _college_status_updates(db)
+        assert any("generation_complete" in u for u in updates), updates

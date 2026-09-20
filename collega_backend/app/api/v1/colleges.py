@@ -47,6 +47,10 @@ _PDF_MAGIC = b"%PDF-"
 _CHUNK_SIZE = 1024 * 1024  # 1 MB
 _MAX_PDF_SIZE = 500 * 1024 * 1024  # 500 MB
 _SSE_MAX_DURATION = 3 * 3600  # 3h
+_SSE_POLL_INTERVAL = 1.5  # s entre deux lectures DB
+# Cloudflare / reverse proxies coupent une connexion silencieuse après ~100 s :
+# on émet un commentaire SSE `: keep-alive` si aucun événement n'est parti depuis ce délai.
+_SSE_HEARTBEAT_INTERVAL = 15.0
 
 
 @router.get("/colleges", response_model=CollegesListResponseWrapped)
@@ -391,11 +395,14 @@ async def stream_college_progress(
     async def event_generator():  # type: ignore[return]
         last_progress = -1
         ocr_complete_emitted = False
-        start_time = asyncio.get_event_loop().time()
+        loop = asyncio.get_event_loop()
+        start_time = loop.time()
+        last_emit = start_time
 
         try:
             while True:
-                if asyncio.get_event_loop().time() - start_time > _SSE_MAX_DURATION:
+                now = loop.time()
+                if now - start_time > _SSE_MAX_DURATION:
                     break
 
                 async with async_session_factory() as session:
@@ -408,11 +415,13 @@ async def stream_college_progress(
                     last_progress = c.ocr_page_progress
                     event = {"event": "ocr_progress", "data": {"page": last_progress, "total": c.total_pages}}
                     yield f"data: {json.dumps(event)}\n\n"
+                    last_emit = now
 
                 if c.status == "ocr_complete" and not ocr_complete_emitted:
                     ocr_complete_emitted = True
                     event = {"event": "card_generation_started", "data": {"college_id": str(college_id)}}
                     yield f"data: {json.dumps(event)}\n\n"
+                    last_emit = now
 
                 if c.status == "generation_complete":
                     event = {"event": "generation_complete", "data": {"college_id": str(college_id)}}
@@ -424,7 +433,13 @@ async def stream_college_progress(
                     yield f"data: {json.dumps(event)}\n\n"
                     break
 
-                await asyncio.sleep(1.5)
+                if now - last_emit >= _SSE_HEARTBEAT_INTERVAL:
+                    # Commentaire SSE (ignoré par les clients) — garde la connexion ouverte
+                    # à travers Cloudflare / NPM pendant la génération Claude.
+                    yield ": keep-alive\n\n"
+                    last_emit = now
+
+                await asyncio.sleep(_SSE_POLL_INTERVAL)
 
         except asyncio.CancelledError:
             pass  # Client déconnecté — normal

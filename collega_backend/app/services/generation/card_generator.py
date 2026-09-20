@@ -7,7 +7,7 @@ from sqlalchemy import delete, select
 from sqlalchemy import update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.college import College
+from app.models.college import College, CollegeStatus
 from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
 from app.models.item import Item
@@ -82,6 +82,7 @@ class CardGenerator:
                         college_id,
                         job.user_id,
                     )
+                await self._mark_college_generation_complete(db, college_id)
                 await record_job_event(
                     db, job_id, "generation_complete", message=f"{count} cards (hash-sharing)"
                 )
@@ -161,6 +162,7 @@ class CardGenerator:
         job.input_tokens = total_input_tokens
         job.output_tokens = total_output_tokens
         job.status = "generation_complete"
+        await self._mark_college_generation_complete(db, college_id)
 
         # Note: reload_count / monthly_reloads sont incrémentés atomiquement au router
         # (app/api/v1/colleges.py:import_college_pdf) AVANT la création du job.
@@ -177,6 +179,22 @@ class CardGenerator:
             card_count,
         )
         return {"college_id": str(college_id), "job_id": str(job_id), "hash_shared": False, "card_count": card_count}
+
+    async def _mark_college_generation_complete(
+        self, db: AsyncSession, college_id: uuid.UUID
+    ) -> None:
+        """Avance le College (pas seulement le job) à generation_complete.
+
+        C'est ce statut que lisent /status, le stream SSE (événement final) et
+        /items (409 sinon) : sans lui l'import paraît ne jamais se terminer et
+        le collège reste « vide » dans l'app et l'admin. UPDATE atomique comme
+        la compensation quota : pas d'objet ORM College chargé dans ce service.
+        """
+        await db.execute(
+            sa_update(College)
+            .where(College.id == college_id)
+            .values(status=CollegeStatus.generation_complete)
+        )
 
     async def _is_reimport(
         self,
