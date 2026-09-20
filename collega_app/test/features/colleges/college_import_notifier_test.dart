@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -273,6 +274,117 @@ void main() {
 
         // Pas de _connectSse appelé → refresh non déclenché
         expect(apiClient.refreshCalls, 0);
+      },
+    );
+    test(
+      'reconnectIfActive sur status ocr_complete (génération en cours) → reconnecte SSE',
+      () async {
+        // Régression : la phase de génération Claude est la plus longue et
+        // silencieuse ; un retour au premier plan pendant cette phase doit
+        // reprendre le stream, pas laisser l'écran figé.
+        final repo = _FakeCollegeImportRepository(
+          statusOverride: CollegeStatusResponse(
+            collegeId: 'college-uuid-15',
+            refId: 15,
+            status: 'ocr_complete',
+            ocrProgress: 355,
+            totalPages: 355,
+          ),
+        );
+        final apiClient = _FakeApiClient();
+        final container = _makeContainer(repo, apiClient: apiClient);
+        addTearDown(container.dispose);
+
+        await container
+            .read(collegeImportProvider.notifier)
+            .reconnectIfActive('college-uuid-15');
+
+        expect(apiClient.refreshCalls, 1);
+        final state = container.read(collegeImportProvider).valueOrNull;
+        expect(state, isA<ImportStreaming>());
+        if (state is ImportStreaming) {
+          expect(state.status, 'ocr_complete');
+          expect(state.ocrProgress, 355);
+        }
+      },
+    );
+
+    test(
+      'reconnectIfActive sur status failed → ImportError generation_failed',
+      () async {
+        final repo = _FakeCollegeImportRepository(
+          statusOverride: CollegeStatusResponse(
+            collegeId: 'college-uuid-15',
+            refId: 15,
+            status: 'failed',
+            ocrProgress: 0,
+          ),
+        );
+        final apiClient = _FakeApiClient();
+        final container = _makeContainer(repo, apiClient: apiClient);
+        addTearDown(container.dispose);
+
+        await container
+            .read(collegeImportProvider.notifier)
+            .reconnectIfActive('college-uuid-15');
+
+        expect(apiClient.refreshCalls, 0);
+        final state = container.read(collegeImportProvider).valueOrNull;
+        expect(state, isA<ImportError>());
+        if (state is ImportError) expect(state.message, 'generation_failed');
+      },
+    );
+
+    test(
+      'stream SSE coupé pendant ImportStreaming → re-sync via /status automatique',
+      () async {
+        // Cloudflare coupe une connexion SSE silencieuse (~100 s) : sans
+        // reconnexion l'app reste bloquée en ImportStreaming alors que le
+        // backend a terminé. Ici le stream échoue immédiatement (pas de
+        // backend en test) et /status répond generation_complete.
+        final repo = _FakeCollegeImportRepository(
+          importResult: const ImportStartResponse(
+            collegeId: 'college-uuid-15',
+            jobId: 'job-uuid-1',
+            status: 'pending',
+          ),
+          statusOverride: CollegeStatusResponse(
+            collegeId: 'college-uuid-15',
+            refId: 15,
+            status: 'generation_complete',
+            ocrProgress: 355,
+            totalPages: 355,
+          ),
+        );
+        final container = ProviderContainer(
+          overrides: [
+            collegeImportRepositoryProvider.overrideWithValue(repo),
+            secureStorageProvider.overrideWithValue(const FlutterSecureStorage()),
+            databaseProvider.overrideWithValue(_makeInMemoryDb()),
+            apiClientProvider.overrideWithValue(_FakeApiClient()),
+            sseReconnectDelayProvider.overrideWithValue(Duration.zero),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        final completed = Completer<void>();
+        container.listen<AsyncValue<CollegeImportState>>(
+          collegeImportProvider,
+          (_, next) {
+            if (next.valueOrNull is ImportComplete && !completed.isCompleted) {
+              completed.complete();
+            }
+          },
+        );
+
+        final tmpFile = File('${Directory.systemTemp.path}/test-sse-cut.pdf');
+        tmpFile.writeAsBytesSync([0x25, 0x50, 0x44, 0x46, 0x2D]);
+        addTearDown(tmpFile.deleteSync);
+
+        await container.read(collegeImportProvider.notifier).startImport(15, tmpFile);
+
+        await completed.future.timeout(const Duration(seconds: 15));
+        expect(container.read(collegeImportProvider).valueOrNull, isA<ImportComplete>());
       },
     );
   });

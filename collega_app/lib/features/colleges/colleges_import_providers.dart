@@ -24,6 +24,12 @@ final collegeImportRepositoryProvider = Provider<CollegeImportRepository>(
   ),
 );
 
+/// Délai de base avant re-synchronisation quand le stream SSE se ferme ou
+/// échoue en cours d'import (backoff exponentiel jusqu'à [_sseReconnectMaxDelay]).
+/// Overridable en test pour ne pas attendre.
+final sseReconnectDelayProvider = Provider<Duration>((_) => const Duration(seconds: 3));
+const _sseReconnectMaxDelay = Duration(seconds: 30);
+
 class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
   StreamSubscription<Map<String, dynamic>>? _sseSubscription;
   SseClient? _sseClient;
@@ -32,11 +38,14 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
   // détecter qu'un await long (refresh JWT, lecture storage) s'est terminé
   // après que le notifier a été disposé (navigation pendant la connexion SSE).
   bool _disposed = false;
+  Timer? _reconnectTimer;
+  int _reconnectAttempt = 0;
 
   @override
   Future<CollegeImportState> build() async {
     ref.onDispose(() {
       _disposed = true;
+      _reconnectTimer?.cancel();
       _sseSubscription?.cancel();
       _sseClient?.disconnect();
     });
@@ -44,6 +53,8 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
   }
 
   Future<void> reset() async {
+    _reconnectTimer?.cancel();
+    _reconnectAttempt = 0;
     await _sseSubscription?.cancel();
     _sseClient?.disconnect();
     _sseSubscription = null;
@@ -116,10 +127,38 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
     _sseSubscription = _sseClient!
         .connect('/v1/colleges/$collegeId/stream')
         .listen(
-          (event) => _handleSseEvent(event, collegeId),
-          onError: (Object e) =>
-              AppLogger.error('SSE error', tag: 'CollegeImportNotifier', error: e),
+          (event) {
+            _reconnectAttempt = 0;
+            _handleSseEvent(event, collegeId);
+          },
+          onError: (Object e) {
+            AppLogger.error('SSE error', tag: 'CollegeImportNotifier', error: e);
+            _scheduleResync(collegeId);
+          },
+          // Cloudflare / proxies coupent un stream silencieux (~100 s) et les
+          // réseaux mobiles perdent des connexions : une fermeture sans
+          // événement terminal n'est PAS une fin d'import.
+          onDone: () => _scheduleResync(collegeId),
         );
+  }
+
+  /// Re-synchronise via GET /status puis rouvre le SSE si l'import est encore
+  /// actif. Backoff exponentiel ; abandonné si l'état n'est plus ImportStreaming.
+  void _scheduleResync(String collegeId) {
+    if (_disposed || state.valueOrNull is! ImportStreaming) return;
+    final base = ref.read(sseReconnectDelayProvider);
+    var delay = base * (1 << _reconnectAttempt);
+    if (delay > _sseReconnectMaxDelay) delay = _sseReconnectMaxDelay;
+    _reconnectAttempt = (_reconnectAttempt + 1).clamp(0, 10);
+    AppLogger.warning(
+      'SSE fermé pendant l\'import — resync dans ${delay.inSeconds}s',
+      tag: 'CollegeImportNotifier',
+    );
+    _reconnectTimer?.cancel();
+    _reconnectTimer = Timer(delay, () {
+      if (_disposed || state.valueOrNull is! ImportStreaming) return;
+      unawaited(reconnectIfActive(collegeId));
+    });
   }
 
   void _handleSseEvent(Map<String, dynamic> event, String collegeId) {
@@ -172,21 +211,29 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
     final repo = ref.read(collegeImportRepositoryProvider);
     try {
       final status = await repo.getStatus(collegeId);
-      if (status.status == 'pending' || status.status == 'processing') {
-        state = AsyncValue.data(ImportStreaming(
-          collegeId: collegeId,
-          jobId: status.jobId ?? '',
-          ocrProgress: status.ocrProgress,
-          totalPages: status.totalPages,
-          status: status.status,
-        ));
-        await _connectSse(collegeId);
-      } else if (status.status == 'generation_complete') {
-        state = AsyncValue.data(ImportComplete(collegeId: collegeId));
-        ref.invalidate(collegesProvider);
+      if (_disposed) return;
+      switch (status.status) {
+        // ocr_complete = génération Claude en cours : phase la plus longue,
+        // il faut bien reprendre le stream ici aussi.
+        case 'pending' || 'processing' || 'ocr_complete':
+          state = AsyncValue.data(ImportStreaming(
+            collegeId: collegeId,
+            jobId: status.jobId ?? '',
+            ocrProgress: status.ocrProgress,
+            totalPages: status.totalPages,
+            status: status.status,
+          ));
+          await _connectSse(collegeId);
+        case 'generation_complete':
+          state = AsyncValue.data(ImportComplete(collegeId: collegeId));
+          ref.invalidate(collegesProvider);
+        case 'failed':
+          state = const AsyncValue.data(ImportError(message: 'generation_failed'));
       }
     } catch (e) {
       AppLogger.warning('reconnectIfActive failed: $e', tag: 'CollegeImportNotifier');
+      // Réseau indisponible : on réessaie tant que l'import est en cours.
+      _scheduleResync(collegeId);
     }
   }
 

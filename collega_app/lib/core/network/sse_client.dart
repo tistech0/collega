@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
+import 'package:collega_app/core/network/cloudflare_access.dart';
 import 'package:collega_app/core/utils/logger.dart';
+import 'package:collega_app/env.dart';
 
 class SseClient {
   SseClient(this._baseUrl, {required String Function() tokenProvider})
@@ -31,6 +33,10 @@ class SseClient {
             'Authorization': 'Bearer ${_tokenProvider()}',
             'Accept': 'text/event-stream',
             'Cache-Control': 'no-cache',
+            ...cloudflareAccessHeaders(
+              clientId: cfAccessClientId,
+              clientSecret: cfAccessClientSecret,
+            ),
           },
         ),
         cancelToken: _cancelToken,

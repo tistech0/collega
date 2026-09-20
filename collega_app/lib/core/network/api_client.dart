@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'package:collega_app/core/network/cloudflare_access.dart';
 import 'package:collega_app/env.dart';
 
 const _kAccessToken = 'access_token';
@@ -32,7 +33,13 @@ class ApiClient {
         baseUrl: backendBaseUrl,
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 30),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          ...cloudflareAccessHeaders(
+            clientId: cfAccessClientId,
+            clientSecret: cfAccessClientSecret,
+          ),
+        },
       ),
     );
   }
