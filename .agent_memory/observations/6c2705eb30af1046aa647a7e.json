@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh -o BatchMode=yes nas 'docker exec collega-db-1 psql -U postgres collega -c \"select id,email,is_beta,is_subscribed,created_at::date from users order by created_at desc limit 8;\" -c \"select c.id,c.college_ref_id,c.status,c.ocr_page_progress,c.total_pages,c.updated_at from colleges c order by updated_at desc limit 8;\" -c \"select id,college_id,status,left(error_message,80) err,created_at from generation_jobs order by created_at desc limit 8;\"' 2>&1",
+  "summary": "About to run: ssh -o BatchMode=yes nas 'docker exec collega-db-1 psql -U postgres collega -c \"select id,email,is_beta,is_subscribed,created_at::date from users order by created_at desc limit 8;\" -c \"select c.id,c.c",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6c2705eb30af1046aa647a7e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T20:04:20.356Z",
+  "stored_at": "2026-09-20T20:04:20.357Z"
+}

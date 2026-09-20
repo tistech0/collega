@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && python3 - <<'EOF'\nimport json\np='.claude/settings.local.json'\nd=json.load(open(p))\nnew=[\n \"Bash(ssh nas *)\",\n \"Bash(ssh -o BatchMode=yes nas *)\",\n \"Bash(ssh -o BatchMode=yes -o ConnectTimeout=5 nas *)\",\n \"Bash(curl *)\",\n \"Bash(docker *)\",\n \"Bash(orb *)\",\n \"Bash(xcrun simctl *)\",\n \"Bash(flutter run *)\",\n \"Bash(flutter devices *)\",\n \"Bash(flutter build *)\",\n \"Bash(dig *)\",\n]\na=d.setdefault('permissions',{}).setdefault('allow',[])\nadded=[r for r in new if r not in a]\na.extend(added)\njson.dump(d,open(p,'w'),indent=2,ensure_ascii=False)\nopen(p,'a… [+141 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && python3 - <<'EOF' import json p='.claude/settings.local.json' d=json.load(open(p)) new=[ \"Bash(ssh nas *)\", \"Bash(ssh -o BatchMode=yes nas *)\", \"Ba",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9383983eb4b3fbcba5985c27",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:57:53.738Z",
+  "stored_at": "2026-09-20T19:57:53.738Z"
+}

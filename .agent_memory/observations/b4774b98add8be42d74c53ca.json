@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "ok normalement on est dans un etat fonctionnel de lapplication du moins pour tester mais quand jupload rien ne se passe et ca echoue type timeout dans lapp enfin quand je reviens il faut que je le reupload quand je clique dessus et il apparait comme vide et dans ladmin parreille est ce que toi tu pourrais lancer lapp et le back en local et lapp en emulateur ou alors sur mon iphone brancher et tu creer un user comme il faut et tu essaie un upload via lapp et tu regarde les logs des deux cote ? possible ou alors je peux faire des etapes a la main aussi si tu me donnel modop",
+  "summary": "ok normalement on est dans un etat fonctionnel de lapplication du moins pour tester mais quand jupload rien ne se passe et ca echoue type timeout dans lapp enfin quand je reviens il faut que je le reupload quand je clique dessus et il appar",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b4774b98add8be42d74c53ca",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:45:03.379Z",
+  "stored_at": "2026-09-20T19:45:03.379Z",
+  "low_signal": true
+}

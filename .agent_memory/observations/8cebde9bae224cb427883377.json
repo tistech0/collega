@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "Skill",
+  "path": "",
+  "command": "",
+  "summary": "Skill: superpowers:systematic-debugging",
+  "text": "superpowers:systematic-debugging",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8cebde9bae224cb427883377",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:45:10.907Z",
+  "stored_at": "2026-09-20T19:45:10.908Z",
+  "low_signal": true
+}

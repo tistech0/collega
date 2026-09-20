@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage reverify --packet \"repo:git-github-com-tistech0-collega:gotcha:prod-collegatest-2-chemins-r-seau-le-chemin-public-est-bloqu-par-cloudflare-acce\" 2>&1 | tail -5",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage reverify --packet \"repo:git-github-com-tistech0-collega:gotcha:prod-collegatest-2-chemins-r-seau-le-chemin-public-est-bloqu-par-cloudflare-acce\" 2>&1 | tail -5: Reverify failed: Cited code changed since the last verification (collega_app/lib/env.dart, collega_ap",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage reverify --packet \"repo:git-github-com-tistech0-collega:gotcha:prod-collegatest-2-chemins-r-seau-le-chemin-public-est-bloqu-par-cloudflare-acce\" 2>&1 | tail -5: Reverify failed: Cited code changed since the last verification (collega_app/lib/env.dart, collega_app/lib/core/network/api_client.dart). Re-stamping without evidence would mark an unchecked claim verified: rerun with --evidence \"<what you checked>\" or --verified-by \"<command/test that proved it>\", or supersede the packet if the claim no longer holds.",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "355561395f2fc96be6692267",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T20:14:29.954Z",
+  "stored_at": "2026-09-20T20:14:29.955Z"
+}

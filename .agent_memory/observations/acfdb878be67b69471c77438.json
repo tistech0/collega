@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls collega_app/test/core collega_app/test/core/* | head -20; echo \"--- backend test for colleges stream? ---\"; grep -rn \"/stream\" collega_backend/tests | head -5; echo \"--- conftest client fixture ---\"; grep -n \"def client\\|async_client\\|AsyncClient\\|def auth_headers\\|def college\" collega_backend/tests/conftest.py | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls collega_app/test/core collega_app/test/core/* | head -20; echo \"--- backend test for colleges stream? ---\"; grep -rn \"/stream\" collega_backend/tests | head -5; echo \"--- conftest client fixture ---\"; grep -n \"def client\\|async_client\\|AsyncClient\\|def auth_headers",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls collega_app/test/core collega_app/test/core/* | head -20; echo \"--- backend test for colleges stream? ---\"; grep -rn \"/stream\" collega_backend/tests | head -5; echo \"--- conftest client fixture ---\"; grep -n \"def client\\|async_client\\|AsyncClient\\|def auth_headers\\|def college\" collega_backend/tests/conftest.py | head: collega_app/test/core: router collega_app/test/core/router: app_router_test.dart --- backend test for colleges stream? --- --- conftest client fixture --- 22:from httpx import ASGITransport, AsyncClient 80:async def client(mock_db): 85: async with AsyncClient(transport=ASGITransport(app=app), base_url=\"http://test\") as ac:",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "acfdb878be67b69471c77438",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:58:22.015Z",
+  "stored_at": "2026-09-20T19:58:22.016Z"
+}

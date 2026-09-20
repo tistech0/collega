@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && echo \"--- backend stream tests ---\"; grep -rln \"stream\\|event-stream\" collega_backend/tests | head; grep -n \"_SSE_MAX_DURATION\\|_SSE\" collega_backend/app/api/v1/colleges.py | head -3; echo \"--- app tests network ---\"; ls collega_app/test; ls collega_app/test/core 2>/dev/null; find collega_app/test -name \"*api_client*\" -o -name \"*sse*\" | head; echo \"--- where SseClient is built ---\"; grep -rn \"SseClient(\" collega_app/lib | grep -v \"class SseClient\"; echo \"--- dart-define usage ---\"; grep -rn \"fromEnvironment\" collega_app/lib | head -3",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && echo \"--- backend stream tests ---\"; grep -rln \"stream\\|event-stream\" collega_backend/tests | head; grep -n \"_SSE_MAX_DURATION\\|_SSE\" collega_backe",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bb226f8a96b97d4a6cd35706",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:58:17.250Z",
+  "stored_at": "2026-09-20T19:58:17.251Z"
+}

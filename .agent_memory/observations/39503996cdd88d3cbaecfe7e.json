@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn \"baseUrl\\|BASE_URL\\|localhost\\|127.0.0.1\\|10.0.2.2\\|http://\\|https://\" collega_app/lib --include=*.dart | grep -v \"^.*//.*http\" | head -30; echo \"---upload in app---\"; grep -rln \"upload\\|multipart\\|FormData\" collega_app/lib | head; echo \"---docker---\"; docker ps -a --format '{{.Names}}\\t{{.Status}}\\t{{.Ports}}' 2>&1 | head; echo \"---backend env example---\"; cat collega_backend/.env.example; echo \"---sed keys of .env (values hidden)---\"; sed 's/=.*/=***/' collega_backend/.env",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn \"baseUrl\\|BASE_URL\\|localhost\\|127.0.0.1\\|10.0.2.2\\|http://\\|https://\" collega_app/lib --include=*.dart | grep -v \"^.*//.*http\" | head -30",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "39503996cdd88d3cbaecfe7e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:45:30.012Z",
+  "stored_at": "2026-09-20T19:45:30.012Z"
+}

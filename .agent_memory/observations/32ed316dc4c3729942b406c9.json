@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls -la .claude 2>/dev/null; cat .claude/settings.local.json 2>/dev/null; echo \"---project settings---\"; cat .claude/settings.json 2>/dev/null; echo \"---gitignore has settings.local?---\"; grep -n \"settings.local\\|\\.claude\" .gitignore",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls -la .claude 2>/dev/null; cat .claude/settings.local.json 2>/dev/null; echo \"---project settings---\"; cat .claude/settings.json 2>/dev/null; echo",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "32ed316dc4c3729942b406c9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:57:41.417Z",
+  "stored_at": "2026-09-20T19:57:41.417Z"
+}

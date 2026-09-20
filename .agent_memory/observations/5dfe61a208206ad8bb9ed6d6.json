@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "PUB=172.67.211.66; for p in /v1/auth/login /v1/colleges /admin /tester/; do printf \"%-18s \" $p; curl -s -m 10 -o /dev/null -w \"%{http_code} -> %{redirect_url}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$PUB https://collegatest.matthislesur.com$p -H 'Content-Type: application/json' -d '{}' | cut -c1-90; done",
+  "summary": "PUB=172.67.211.66; for p in /v1/auth/login /v1/colleges /admin /tester/; do printf \"%-18s \" $p; curl -s -m 10 -o /dev/null -w \"%{http_code} -> %{redirect_url}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$PUB https://collegatest.matthislesur.com$p -H 'Content-Type: application/json' -d '{}' | cut -c1-90; done:",
+  "text": "PUB=172.67.211.66; for p in /v1/auth/login /v1/colleges /admin /tester/; do printf \"%-18s \" $p; curl -s -m 10 -o /dev/null -w \"%{http_code} -> %{redirect_url}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$PUB https://collegatest.matthislesur.com$p -H 'Content-Type: application/json' -d '{}' | cut -c1-90; done: /v1/auth/login 302 -> https://matthislesur.cloudflareaccess.com/cdn-cgi/access/login/collegatest.matthisl /v1/colleges 302 -> https://matthislesur.cloudflareaccess.com/cdn-cgi/access/login/collegatest.matthisl /admin 302 -> https://matthislesur.cloudflareaccess.com/cdn-cgi/access/login/collegatest.matthisl /tester/ 302 -> https://matthislesur.cloudflareaccess.com/cdn-cgi/access/login/collegatest.matthisl",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5dfe61a208206ad8bb9ed6d6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:50:19.085Z",
+  "stored_at": "2026-09-20T19:50:19.086Z"
+}

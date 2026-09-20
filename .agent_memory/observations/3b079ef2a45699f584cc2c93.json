@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls && echo \"---README---\" && cat README.md | head -120 && echo \"---tree---\" && ls collega_backend && ls collega_backend/app && ls collega_backend/app/api/v1 && ls collega_backend/app/workers",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls && echo \"---README---\" && cat README.md | head -120 && echo \"---tree---\" && ls collega_backend && ls collega_backend/app && ls collega_backend/a",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3b079ef2a45699f584cc2c93",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:45:18.358Z",
+  "stored_at": "2026-09-20T19:45:18.358Z"
+}

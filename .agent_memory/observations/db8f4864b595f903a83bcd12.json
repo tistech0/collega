@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git add collega_backend/app/api/v1/colleges.py collega_backend/app/services/generation/card_generator.py collega_backend/tests/services/test_card_generator.py collega_backend/tests/services/test_token_usage_capture.py collega_backend/tests/api/test_colleges_stream.py && git commit -q -F - <<'EOF'\nfix(backend): finaliser College.status à generation_complete + heartbeat SSE\n\n- card_generator : le College n'était jamais passé à generation_complete\n  (seul le job l'était) → /status figé sur ocr_complete, aucun événement\n  final SSE, /items en 40… [+1707 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git add collega_backend/app/api/v1/colleges.py collega_backend/app/services/generation/card_generator.py collega_backend/tests/services/test_card_g",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "db8f4864b595f903a83bcd12",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T20:43:32.249Z",
+  "stored_at": "2026-09-20T20:43:32.250Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "PUB=172.67.211.66; for p in /v1/auth/login /v1/colleges /admin /tester/; do printf \"%-18s \" $p; curl -s -m 10 -o /dev/null -w \"%{http_code} -> %{redirect_url}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$PUB https://collegatest.matthislesur.com$p -H 'Content-Type: application/json' -d '{}' | cut -c1-90; done",
+  "summary": "About to run: PUB=172.67.211.66; for p in /v1/auth/login /v1/colleges /admin /tester/; do printf \"%-18s \" $p; curl -s -m 10 -o /dev/null -w \"%{http_code} -> %{redirect_url}\\n\" -X POST --resolve collegatest.matthisl",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f400119481e464aba131e3d3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:50:12.080Z",
+  "stored_at": "2026-09-20T19:50:12.081Z"
+}

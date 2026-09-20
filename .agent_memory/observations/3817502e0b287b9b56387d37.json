@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn --include='*.dart' -e \"baseUrl\" -e \"BASE_URL\" -e \"http://\" -e \"https://\" collega_app/lib | head -30; echo \"---repo import---\"; cat collega_app/lib/features/colleges/data/college_import_repository.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn --include='*.dart' -e \"baseUrl\" -e \"BASE_URL\" -e \"http://\" -e \"https://\" collega_app/lib | head -30; echo \"---repo import---\"; cat collega_app/lib/features/colleges/data/college_import_repository.dart: , ); } if (status == 503) throw const QueueUnavailableEx",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn --include='*.dart' -e \"baseUrl\" -e \"BASE_URL\" -e \"http://\" -e \"https://\" collega_app/lib | head -30; echo \"---repo import---\"; cat collega_app/lib/features/colleges/data/college_import_repository.dart: , ); } if (status == 503) throw const QueueUnavailableException(); AppLogger.error('importPdf failed', tag: 'CollegeImportRepository', error: e); rethrow; } } Future<ReloadLimits> getReloadLimits(int refId) async { try { final response = await dio.get<Map<String, dynamic>>( '/v1/colleges/$refId/reload-limits', ); return ReloadLimits.fromJson( response.data!['data'] as Map<String, dynamic>, ); } on DioException catch (e) { AppLogger.error('getReloadLimits failed', tag: 'CollegeImportRepository', error: e); rethrow; } } Future<CollegeStatusResponse> getStatus(String collegeId) async { try { final response = await dio.get<Map<String, dynamic>>( '/v1/colleges/$collegeId/status', ); return CollegeStatusResponse.fromJson( response.data!['data'] as Map<String, dynamic>, ); } on DioException catch (e) { AppLogger.error('getStatus failed', tag: 'CollegeImportRepository', error: e); rethrow; } } }",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3817502e0b287b9b56387d37",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:45:35.599Z",
+  "stored_at": "2026-09-20T19:45:35.599Z"
+}

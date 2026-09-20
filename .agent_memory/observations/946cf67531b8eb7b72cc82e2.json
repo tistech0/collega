@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat install.md && echo \"---compose---\" && cat collega_backend/docker-compose.yml && echo \"---env---\" && ls -la collega_backend | grep -i env; ls collega_backend/docs; echo \"---app---\"; ls collega_app; cat collega_app/pubspec.yaml 2>/dev/null | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat install.md && echo \"---compose---\" && cat collega_backend/docker-compose.yml && echo \"---env---\" && ls -la collega_backend | grep -i env; ls collega_backend/docs; echo \"---app---\"; ls collega_app; cat collega_app/pubspec.yaml 2>/dev/null | head -40: 15:45 .env.ex",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat install.md && echo \"---compose---\" && cat collega_backend/docker-compose.yml && echo \"---env---\" && ls -la collega_backend | grep -i env; ls collega_backend/docs; echo \"---app---\"; ls collega_app; cat collega_app/pubspec.yaml 2>/dev/null | head -40: 15:45 .env.example -rw-r--r--@ 1 lesurmatthis staff 1463 May 7 08:13 .env.nas.example drwxr-xr-x@ 7 lesurmatthis staff 224 Apr 27 10:03 .venv deployment.md sdk-gotchas.md ---app--- README.md analysis_options.yaml android assets build collega_app.iml ios lib pubspec.lock pubspec.yaml test name: collega_app description: \"AppMédecine — révision médicale personnalisée par collège et par rang\" publish_to: 'none' version: 1.0.0+1 environment: sdk: ^3.6.0 dependencies: flutter: sdk: flutter # State management flutter_riverpod: ^2.6.1 riverpod_annotation: ^2.6.1 # Navigation go_router: ^14.6.3 # Utilities collection: ^1.18.0 # Local storage (offline-first) drift: ^2.21.0 sqlite3_flutter_libs: ^0.5.24 path_provider: ^2.1.4 path: ^1.9.0 # HTTP client dio: ^5.7.0 # Design system shadcn_ui: ^0.19.0 google_fonts: ^6.2.1 # Animations flutter_animate: ^4.5.0 # Secure storage (JWT tokens — Keychain iOS)",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "946cf67531b8eb7b72cc82e2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:45:22.959Z",
+  "stored_at": "2026-09-20T19:45:22.959Z"
+}

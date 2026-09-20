@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "echo \"--- Mac DNS ---\"; scutil --dns | grep -m3 nameserver; echo \"--- env.dart history ---\"; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git log --oneline -5 -- collega_app/lib/env.dart; git log -p -3 --format='%h %ad %s' --date=short -- collega_app/lib/env.dart | grep -E \"^[0-9a-f]{7}|backendBaseUrl\"; echo \"--- last app build ---\"; ls -la collega_app/build/ios/iphoneos/*.app 2>/dev/null | head -3; ls -lat collega_app/build/ios 2>/dev/null | head -5",
+  "summary": "echo \"--- Mac DNS ---\"; scutil --dns | grep -m3 nameserver; echo \"--- env.dart history ---\"; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git log --oneline -5 -- collega_app/lib/env.dart; git log -p -3 --format='%h %ad %s' --date=short -- collega_app/lib/env.dart | grep -E \"^[0-9a-f]{7}|backendBaseUrl\"; echo \"-",
+  "text": "echo \"--- Mac DNS ---\"; scutil --dns | grep -m3 nameserver; echo \"--- env.dart history ---\"; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git log --oneline -5 -- collega_app/lib/env.dart; git log -p -3 --format='%h %ad %s' --date=short -- collega_app/lib/env.dart | grep -E \"^[0-9a-f]{7}|backendBaseUrl\"; echo \"--- last app build ---\"; ls -la collega_app/build/ios/iphoneos/*.app 2>/dev/null | head -3; ls -lat collega_app/build/ios 2>/dev/null | head -5: ckend 320d5ea 2026-05-15 feat(epic-4): Stories 4-1 à 4-4 — drill, accueil, planning algorithmique -const String backendBaseUrl = 'https://api.collega.local'; +const String backendBaseUrl = 'https://collegatest.matthislesur.com'; 3b266fb 2026-05-07 feat(auth): Story 2.4 — abonnement in-app purchase & paywall RevenueCat const String backendBaseUrl = 'https://api.collega.local'; c46c2f1 2026-04-27 feat: initialize collega project with Flutter app and FastAPI backend +const String backendBaseUrl = 'https://api.collega.local'; --- last app build --- total 29960 drwxr-xr-x@ 23 lesurmatthis staff 736 Jul 4 11:20 . drwxr-xr-x@ 3 lesurmatthis staff 96 Jul 4 11:20 .. total 8 drwxr-xr-x@ 3 lesurmatthis staff 96 Jul 4 11:20 iphoneos drwxr-xr-x@ 6 lesurmatthis staff 192 Jul 4 11:20 . drwxr-xr-x@ 26 lesurmatthis staff 832 Jul 4 11:20 Release-iphoneos drwxr-xr-x@ 4 lesurmatthis staff 128 Jul 4 11:20 ..",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ad83727573d0ecb04b0852b4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:49:05.639Z",
+  "stored_at": "2026-09-20T19:49:05.640Z"
+}

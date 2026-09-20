@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,120p tests/conftest.py; echo \"--- an existing colleges test using college model ---\"; grep -n \"def test_\\|monkeypatch\\|patch(\" tests/api/test_colleges.py | head -20",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,120p tests/conftest.py; echo \"--- an existing colleges test using college model ---\"; grep -n \"def test_\\|monkeypatch\\|pat",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5bbd2a9ff719e5da0477021b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:58:29.765Z",
+  "stored_at": "2026-09-20T19:58:29.765Z"
+}

@@ -2,3 +2,12 @@
 /docs/
 *.pdf
 collega_dump.sql
+# Kage: indexes/reports régénérables (packets/ restent versionnés)
+.agent_memory/indexes/
+.agent_memory/reports/
+.agent_memory/graph/
+.agent_memory/code_graph/
+.agent_memory/structural/
+
+# Secrets locaux build app (service token Cloudflare) — jamais committés
+collega_app/.env.local

@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_prod_network_topology.md",
+  "summary": "wrote /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_prod_network_topology.md: ---\nname: project_prod_network_topology\ndescription: Topologie réseau prod collega (NAS 192.168.1.10, alias ssh `nas`, NPM host 53, Cloudflare Access bloque le chemin public) + comment lire l",
+  "text": "wrote /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_prod_network_topology.md: ---\nname: project_prod_network_topology\ndescription: Topologie réseau prod collega (NAS 192.168.1.10, alias ssh `nas`, NPM host 53, Cloudflare Access bloque le chemin public) + comment lire les logs prod\nmetadata:\n  type: project\n---\n\nProd collega tourne sur le NAS Unraid (`ssh nas`, LAN 192.168.1.10) : containers `collega-api-1`, `collega-worker-1`, `collega-db-1`, `collega-redis-1`, derrière **Nginx Proxy Manager** (proxy host n°53, logs dans `/mnt/user/appdata/Nginx-Proxy-Manager-Official/data/logs/proxy-host-53_*.log`). Pas de Caddy en prod (le Caddyfile.prod du repo est un placeholder).\n\n",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "db02e7028ba0254d1f3a860f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:50:56.965Z",
+  "stored_at": "2026-09-20T19:50:56.966Z"
+}

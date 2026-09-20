@@ -1,0 +1,13 @@
+{
+  "type": "user_prompt",
+  "text": "je peux te donner le token mais je ne sais pas ou le trouver voila ce que jai \n\n<pasted_content id=\"51f2\">\nPolicy rules\nOR\nInclude\nUsers only need to meet one \"include\" rule\n\nService Token\ncollega-mobile\nPolicy details\ncollega-mobile token access \nAction\nService Auth\nThe Service Auth type will allow systems to connect to the protected application based on options like Client Certificates, IP Addresses, and Service Tokens. This can be used in conjunction with or as an alternative to the identity provider login. A signed JWT will still be produced and forwarded to your application. In order to use the ‘Valid Certificate’ rule, you must configure a root certificate for this domain.\nPolicy session duration\n1 month\nThis session duration will supersede application and global session durations.\nAdditional settings (optional)\nOverride global multi-factor authentication settings (MFA)\nSet MFA requirements for users matching this policy.\n\n\n\nOff\nJust-in-time access\nEnable temporary, time-bound access to resources with customizable approval workflows and durations. \nLearn more about just-in-time (JIT)\nThis link opens in a new tab.\n\n\n\nOff\nConnection settings\nSettings that control user actions after they are granted access.\n\nRemote Desktop Protocol (RDP)\n\nClipboard sharing\n\nManage copying/pasting between local clients and remote sessions.\n\nText controls\nDisable copying/pasting\nFile controls\n\nBeta\nDisable uploading/downloading\n</pasted_content id=\"51f2\">",
+  "summary": "je peux te donner le token mais je ne sais pas ou le trouver voila ce que jai <pasted_content id=\"51f2\"> Policy rules OR Include Users only need to meet one \"include\" rule Service Token collega-mobile Policy details collega-mobile token acc",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "df281cd9b657493aa2a9cd83",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T20:13:56.162Z",
+  "stored_at": "2026-09-20T20:13:56.163Z"
+}

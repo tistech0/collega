@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat Caddyfile.prod; echo \"---compose prod---\"; cat docker-compose.prod.yml; echo \"---env.dart---\"; cat ../collega_app/lib/env.dart; echo \"---api_client---\"; cat ../collega_app/lib/core/network/api_client.dart",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat Caddyfile.prod; echo \"---compose prod---\"; cat docker-compose.prod.yml; echo \"---env.dart---\"; cat ../collega_app/lib/env.dart;",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "11ea138cc6f60071f4cb1a39",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:45:42.447Z",
+  "stored_at": "2026-09-20T19:45:42.447Z"
+}

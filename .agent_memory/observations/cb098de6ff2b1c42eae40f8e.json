@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_context",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_context: [{'type': 'text', 'text': '# Kage Context\\n\\nQuery: upload from mobile app fails timeout, document appears empty in app and admin; how to run backend and mobile app locally, upload pipeline, worker, logs\\n\\n## Relevant Code Graph\\n1. [route] POST /colleges -> collega_backend/app/api/v1/admin.py:84\\n",
+  "text": "[{'type': 'text', 'text': '# Kage Context\\n\\nQuery: upload from mobile app fails timeout, document appears empty in app and admin; how to run backend and mobile app locally, upload pipeline, worker, logs\\n\\n## Relevant Code Graph\\n1. [route] POST /colleges -> collega_backend/app/api/v1/admin.py:84\\n2. [route] POST /colleges -> collega_backend/app/api/v1/admin.py:84\\n3. [route] GET /config -> collega_backend/app/api/v1/admin.py:944\\n1. [symbol] class AdminCardsResponseWrapped in collega_backend/app/schemas/admin.py:270\\n2. [symbol] class AdminFeedbackResponseWrapped in collega_backend/app/schemas/admin.py:289\\n3. [symbol] function _run_ocr in collega_backend/app/workers/ocr_worker.py:73\\n4. [symbol] class CreateCollegeResponseWrapped in collega_backend/app/schemas/admin.py:20\\n5. [symbol] class ProcessCollegeResponseWrapped in collega_backend/app/schemas/admin.py:38\\n1. [test] test_reset_monthly_reloads_appelle_un_seul_update in collega_backend/tests/workers/test_monthly_reset.py:11\\n2. [test] test_response_has_data_wrapper in collega_backend/tests/api/test_admin_college_stats.py:159\\n3. [test] test_response_has_data_wrapper in collega_backend/tests/api/test_admin_config.py:32\\n\\n##",
+  "session_id": "eff73fd9-56ce-4bc1-9e1d-7507345f367a",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "cb098de6ff2b1c42eae40f8e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:45:15.461Z",
+  "stored_at": "2026-09-20T19:45:15.462Z"
+}

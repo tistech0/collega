@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "ok alors non je netait pas chez moi donc depuis le tunel il faudrait reparer ca et pour les acces bach comment te les donner pour que tu fasse tous les tests correctement quitte a ce que je doivent reddemarrer la session sinon pour cloudflare jai prevue un acces token a ajouter a lapp peut etre [Image #1]",
+  "summary": "ok alors non je netait pas chez moi donc depuis le tunel il faudrait reparer ca et pour les acces bach comment te les donner pour que tu fasse tous les tests correctement quitte a ce que je doivent reddemarrer la session sinon pour cloudfla",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6f492b0a8a9eb45b656e30e2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T19:56:48.017Z",
+  "stored_at": "2026-09-20T19:56:48.018Z",
+  "low_signal": true
+}
