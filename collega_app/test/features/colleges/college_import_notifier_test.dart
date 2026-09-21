@@ -11,6 +11,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_client.dart';
 import 'package:collega_app/core/network/api_providers.dart';
+import 'package:collega_app/core/upload/chunked_upload_service.dart';
+import 'package:collega_app/core/upload/part_transport.dart';
+import 'package:collega_app/core/upload/upload_api.dart';
+import 'package:collega_app/core/upload/upload_models.dart';
+import 'package:collega_app/core/upload/upload_providers.dart';
 import 'package:collega_app/features/colleges/colleges_import_providers.dart';
 import 'package:collega_app/features/colleges/data/college_import_repository.dart';
 import 'package:collega_app/features/colleges/domain/import_models.dart';
@@ -67,16 +72,85 @@ AppDatabase _makeInMemoryDb() {
   return AppDatabase.forTesting(NativeDatabase.memory());
 }
 
+/// `File` dont seul `length()` est implémenté — évite d'écrire 90+ MB sur disque en test.
+class _SizedFile implements File {
+  _SizedFile(this.path, this.size);
+  @override
+  final String path;
+  final int size;
+
+  @override
+  Future<int> length() async => size;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError('${invocation.memberName}');
+}
+
+class _NoopUploadApi implements UploadApi {
+  @override
+  Future<UploadInitResponse> init(int refId, int sizeBytes) => throw UnimplementedError();
+  @override
+  Future<UploadStatusResponse> status(String uploadId) => throw UnimplementedError();
+  @override
+  Future<ImportStartResponse> complete(String uploadId) => throw UnimplementedError();
+}
+
+/// Service d'upload par morceaux factice : compte les appels et simule la progression.
+class _FakeChunkedUploadService extends ChunkedUploadService {
+  _FakeChunkedUploadService({required super.db, required super.cacheDir, this.pending = false, this.uploadError})
+      : super(api: _NoopUploadApi(), transport: InMemoryPartTransport());
+
+  final bool pending;
+  final Exception? uploadError;
+  int uploadCalls = 0, resumeCalls = 0;
+
+  @override
+  Future<bool> hasPending() async => pending;
+
+  @override
+  Future<ImportStartResponse> upload(int refId, File file, {void Function(double)? onProgress}) async {
+    uploadCalls++;
+    if (uploadError != null) throw uploadError!;
+    onProgress?.call(0.5);
+    onProgress?.call(1);
+    return const ImportStartResponse(collegeId: 'c', jobId: 'j', status: 'pending');
+  }
+
+  @override
+  Future<ImportStartResponse?> resume({void Function(double)? onProgress}) async {
+    resumeCalls++;
+    if (!pending) return null;
+    onProgress?.call(0.5);
+    onProgress?.call(1);
+    return const ImportStartResponse(collegeId: 'c', jobId: 'j', status: 'pending');
+  }
+}
+
+Future<_FakeChunkedUploadService> _makeFakeChunkedService(AppDatabase db, {bool pending = false, Exception? uploadError}) async {
+  final dir = await Directory.systemTemp.createTemp('notif');
+  addTearDown(() => dir.delete(recursive: true));
+  if (pending) {
+    await db.into(db.pendingUploads).insert(PendingUploadsCompanion.insert(
+          uploadId: 'u1', refId: 15, filePath: '${dir.path}/x.pdf', sizeBytes: 25, partSize: 10, partsTotal: 3,
+          createdAt: DateTime.now(),
+        ));
+  }
+  return _FakeChunkedUploadService(db: db, cacheDir: dir, pending: pending, uploadError: uploadError);
+}
+
 ProviderContainer _makeContainer(
   _FakeCollegeImportRepository repo, {
   _FakeApiClient? apiClient,
+  AppDatabase? db,
+  ChunkedUploadService? chunked,
 }) {
   return ProviderContainer(
     overrides: [
       collegeImportRepositoryProvider.overrideWithValue(repo),
       secureStorageProvider.overrideWithValue(const FlutterSecureStorage()),
-      databaseProvider.overrideWithValue(_makeInMemoryDb()),
+      databaseProvider.overrideWithValue(db ?? _makeInMemoryDb()),
       if (apiClient != null) apiClientProvider.overrideWithValue(apiClient),
+      if (chunked != null) chunkedUploadServiceProvider.overrideWith((ref) async => chunked),
     ],
   );
 }
@@ -415,5 +489,142 @@ void main() {
         expect(container.read(collegeImportProvider).valueOrNull, isA<ImportStreaming>());
       },
     );
+
+    test('startImport > 500 MB → ImportError file_too_large sans appel réseau', () async {
+      final repo = _FakeCollegeImportRepository();
+      final container = _makeContainer(repo, apiClient: _FakeApiClient());
+      addTearDown(container.dispose);
+      final big = _SizedFile('${Directory.systemTemp.path}/big.pdf', 500 * 1024 * 1024 + 1);
+
+      await container.read(collegeImportProvider.future);
+      await container.read(collegeImportProvider.notifier).startImport(15, big);
+
+      final state = container.read(collegeImportProvider).valueOrNull;
+      expect(state, isA<ImportError>());
+      expect((state as ImportError).message, 'file_too_large');
+    });
+
+    test('startImport > 90 MB → passe par ChunkedUploadService (progression) puis ImportStreaming', () async {
+      final repo = _FakeCollegeImportRepository();
+      final db = _makeInMemoryDb();
+      final fakeSvc = await _makeFakeChunkedService(db);
+      final container = _makeContainer(repo, apiClient: _FakeApiClient(), db: db, chunked: fakeSvc);
+      addTearDown(container.dispose);
+      final big = _SizedFile('${Directory.systemTemp.path}/mid.pdf', 90 * 1024 * 1024 + 1);
+      final states = <CollegeImportState>[];
+      container.listen<AsyncValue<CollegeImportState>>(collegeImportProvider, (_, n) {
+        if (n.valueOrNull != null) states.add(n.value!);
+      });
+
+      await container.read(collegeImportProvider.future);
+      await container.read(collegeImportProvider.notifier).startImport(15, big);
+
+      expect(states.whereType<ImportUploading>().map((s) => s.progress), containsAll([0.5, 1.0]));
+      expect(states.last, isA<ImportStreaming>());
+      expect(fakeSvc.uploadCalls, 1);
+      expect((await db.select(db.collegeImports).get()).single.jobId, 'j');
+    });
+
+    test('startImport ≤ 90 MB → chemin mono-requête, service par morceaux non appelé', () async {
+      final repo = _FakeCollegeImportRepository(
+        importResult: const ImportStartResponse(collegeId: 'c', jobId: 'j', status: 'pending'),
+      );
+      final db = _makeInMemoryDb();
+      final fakeSvc = await _makeFakeChunkedService(db);
+      final container = _makeContainer(repo, apiClient: _FakeApiClient(), db: db, chunked: fakeSvc);
+      addTearDown(container.dispose);
+      final small = _SizedFile('${Directory.systemTemp.path}/small.pdf', 90 * 1024 * 1024);
+
+      await container.read(collegeImportProvider.future);
+      await container.read(collegeImportProvider.notifier).startImport(15, small);
+
+      expect(fakeSvc.uploadCalls, 0);
+      expect(container.read(collegeImportProvider).valueOrNull, isA<ImportStreaming>());
+    });
+
+    test('startImport avec pending_uploads existant → upload_in_progress', () async {
+      final repo = _FakeCollegeImportRepository();
+      final db = _makeInMemoryDb();
+      final fakeSvc = await _makeFakeChunkedService(db, pending: true);
+      final container = _makeContainer(repo, apiClient: _FakeApiClient(), db: db, chunked: fakeSvc);
+      addTearDown(container.dispose);
+      final big = _SizedFile('${Directory.systemTemp.path}/mid2.pdf', 90 * 1024 * 1024 + 1);
+
+      await container.read(collegeImportProvider.future);
+      await container.read(collegeImportProvider.notifier).startImport(15, big);
+
+      expect((container.read(collegeImportProvider).valueOrNull as ImportError).message, 'upload_in_progress');
+      expect(fakeSvc.uploadCalls, 0);
+    });
+
+    test('startImport par morceaux : PartUploadFailed → upload_failed', () async {
+      final repo = _FakeCollegeImportRepository();
+      final db = _makeInMemoryDb();
+      final fakeSvc = await _makeFakeChunkedService(db, uploadError: const PartUploadFailed(2, 'boom'));
+      final container = _makeContainer(repo, apiClient: _FakeApiClient(), db: db, chunked: fakeSvc);
+      addTearDown(container.dispose);
+      final big = _SizedFile('${Directory.systemTemp.path}/mid3.pdf', 90 * 1024 * 1024 + 1);
+
+      await container.read(collegeImportProvider.future);
+      await container.read(collegeImportProvider.notifier).startImport(15, big);
+
+      expect((container.read(collegeImportProvider).valueOrNull as ImportError).message, 'upload_failed');
+    });
+
+    test('startImport par morceaux : 413 → file_too_large', () async {
+      final repo = _FakeCollegeImportRepository();
+      final db = _makeInMemoryDb();
+      final fakeSvc = await _makeFakeChunkedService(db, uploadError: const FileTooLargeException());
+      final container = _makeContainer(repo, apiClient: _FakeApiClient(), db: db, chunked: fakeSvc);
+      addTearDown(container.dispose);
+      final big = _SizedFile('${Directory.systemTemp.path}/mid4.pdf', 90 * 1024 * 1024 + 1);
+
+      await container.read(collegeImportProvider.future);
+      await container.read(collegeImportProvider.notifier).startImport(15, big);
+
+      expect((container.read(collegeImportProvider).valueOrNull as ImportError).message, 'file_too_large');
+    });
+
+    test('resumePendingUpload : reprise → ImportStreaming avec le refId de la ligne', () async {
+      final repo = _FakeCollegeImportRepository();
+      final db = _makeInMemoryDb();
+      final fakeSvc = await _makeFakeChunkedService(db, pending: true);
+      final container = _makeContainer(repo, apiClient: _FakeApiClient(), db: db, chunked: fakeSvc);
+      addTearDown(container.dispose);
+
+      await container.read(collegeImportProvider.future);
+      await container.read(collegeImportProvider.notifier).resumePendingUpload();
+
+      expect(container.read(collegeImportProvider).valueOrNull, isA<ImportStreaming>());
+      expect(fakeSvc.resumeCalls, 1);
+      expect((await db.select(db.collegeImports).get()).single.refId, 15);
+    });
+
+    test('resumePendingUpload sans ligne → état inchangé, resume non appelé', () async {
+      final repo = _FakeCollegeImportRepository();
+      final db = _makeInMemoryDb();
+      final fakeSvc = await _makeFakeChunkedService(db);
+      final container = _makeContainer(repo, apiClient: _FakeApiClient(), db: db, chunked: fakeSvc);
+      addTearDown(container.dispose);
+
+      await container.read(collegeImportProvider.future);
+      await container.read(collegeImportProvider.notifier).resumePendingUpload();
+
+      expect(container.read(collegeImportProvider).valueOrNull, isA<ImportIdle>());
+      expect(fakeSvc.resumeCalls, 0);
+    });
+
+    test('reset() ne coupe pas un upload par morceaux en cours', () async {
+      final repo = _FakeCollegeImportRepository();
+      final container = _makeContainer(repo, apiClient: _FakeApiClient());
+      addTearDown(container.dispose);
+      final notifier = container.read(collegeImportProvider.notifier);
+      await container.read(collegeImportProvider.future);
+
+      notifier.debugSetState(const ImportUploading(progress: 0.3));
+      await notifier.reset();
+
+      expect(container.read(collegeImportProvider).valueOrNull, isA<ImportUploading>());
+    });
   });
 }

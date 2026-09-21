@@ -3,11 +3,15 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/network/sse_client.dart';
+import 'package:collega_app/core/upload/chunked_upload_service.dart';
+import 'package:collega_app/core/upload/upload_models.dart';
+import 'package:collega_app/core/upload/upload_providers.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/env.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
@@ -56,6 +60,9 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
   }
 
   Future<void> reset() async {
+    // Un upload par morceaux en cours (transport arrière-plan) survit à la navigation :
+    // l'écran d'import le réaffiche via ImportUploading.progress.
+    if (state.valueOrNull case ImportUploading(progress: != null)) return;
     _reconnectTimer?.cancel();
     _reconnectAttempt = 0;
     await _sseSubscription?.cancel();
@@ -68,29 +75,32 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
   Future<void> startImport(int refId, File file) async {
     state = const AsyncValue.data(ImportUploading());
     try {
-      final repo = ref.read(collegeImportRepositoryProvider);
-      final response = await repo.importPdf(refId, file);
-
-      final db = ref.read(databaseProvider);
-      await db.into(db.collegeImports).insertOnConflictUpdate(
-            CollegeImportsCompanion.insert(
-              id: response.collegeId,
-              refId: refId,
-              jobId: response.jobId,
-              status: response.status,
-              updatedAt: DateTime.now().toUtc(),
-            ),
-          );
-
-      state = AsyncValue.data(ImportStreaming(
-        collegeId: response.collegeId,
-        jobId: response.jobId,
-        ocrProgress: 0,
-        totalPages: null,
-        status: 'pending',
-      ));
-
-      await _connectSse(response.collegeId);
+      final size = await file.length();
+      if (size > ChunkedUploadService.maxSize) {
+        state = const AsyncValue.data(ImportError(message: 'file_too_large'));
+        return;
+      }
+      final ImportStartResponse response;
+      if (size > ChunkedUploadService.chunkThreshold) {
+        // Story 7.11 : au-delà de 90 MB, Cloudflare refuserait la requête unique (413).
+        final chunked = await ref.read(chunkedUploadServiceProvider.future);
+        if (await chunked.hasPending()) {
+          state = const AsyncValue.data(ImportError(message: 'upload_in_progress'));
+          return;
+        }
+        response = await chunked.upload(refId, file, onProgress: _onUploadProgress);
+      } else {
+        final repo = ref.read(collegeImportRepositoryProvider);
+        response = await repo.importPdf(refId, file);
+      }
+      await _afterUploadAccepted(refId, response);
+    } on FileTooLargeException {
+      state = const AsyncValue.data(ImportError(message: 'file_too_large'));
+    } on UploadExpiredException {
+      state = const AsyncValue.data(ImportError(message: 'upload_expired'));
+    } on PartUploadFailed catch (e) {
+      AppLogger.error('part upload failed', tag: 'CollegeImportNotifier', error: e.error);
+      state = const AsyncValue.data(ImportError(message: 'upload_failed'));
     } on SubscriptionRequiredException {
       state = const AsyncValue.data(ImportError(message: 'subscription_required'));
     } on JobInProgressException {
@@ -105,6 +115,76 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
       state = AsyncValue.data(ImportError(message: e.message ?? 'network_error'));
     }
   }
+
+  /// Upload accepté (202) : mémorise l'import en local, passe en streaming et ouvre le SSE.
+  Future<void> _afterUploadAccepted(int refId, ImportStartResponse response) async {
+    final db = ref.read(databaseProvider);
+    await db.into(db.collegeImports).insertOnConflictUpdate(
+          CollegeImportsCompanion.insert(
+            id: response.collegeId,
+            refId: refId,
+            jobId: response.jobId,
+            status: response.status,
+            updatedAt: DateTime.now().toUtc(),
+          ),
+        );
+
+    state = AsyncValue.data(ImportStreaming(
+      collegeId: response.collegeId,
+      jobId: response.jobId,
+      ocrProgress: 0,
+      totalPages: null,
+      status: 'pending',
+    ));
+
+    await _connectSse(response.collegeId);
+  }
+
+  void _onUploadProgress(double p) {
+    if (_disposed) return;
+    if (state.valueOrNull is ImportUploading) state = AsyncValue.data(ImportUploading(progress: p));
+  }
+
+  bool _resumeInFlight = false;
+
+  /// Reprise d'un upload par morceaux interrompu (démarrage / retour premier plan, Story 7.11).
+  /// No-op sans ligne `pending_uploads` ou si une reprise / un upload est déjà en cours.
+  Future<void> resumePendingUpload() async {
+    if (_resumeInFlight || state.valueOrNull is ImportUploading) return;
+    final ChunkedUploadService chunked;
+    final int refId;
+    try {
+      chunked = await ref.read(chunkedUploadServiceProvider.future);
+      if (_disposed || !await chunked.hasPending()) return;
+      final db = ref.read(databaseProvider);
+      refId = (await db.select(db.pendingUploads).get()).first.refId;
+    } catch (e) {
+      // Pas de reprise possible (DB / cache indisponible) : on ne touche pas à l'état.
+      AppLogger.warning('resumePendingUpload: check failed: $e', tag: 'CollegeImportNotifier');
+      return;
+    }
+    _resumeInFlight = true;
+    state = const AsyncValue.data(ImportUploading(progress: 0));
+    try {
+      final response = await chunked.resume(onProgress: _onUploadProgress);
+      if (response != null) await _afterUploadAccepted(refId, response);
+    } on UploadExpiredException {
+      state = const AsyncValue.data(ImportError(message: 'upload_expired'));
+    } on UploadSourceMissing {
+      state = const AsyncValue.data(ImportError(message: 'upload_source_missing'));
+    } on PartUploadFailed catch (e) {
+      AppLogger.error('part upload failed (resume)', tag: 'CollegeImportNotifier', error: e.error);
+      state = const AsyncValue.data(ImportError(message: 'upload_failed'));
+    } catch (e) {
+      AppLogger.warning('resumePendingUpload failed: $e', tag: 'CollegeImportNotifier');
+      state = const AsyncValue.data(ImportError(message: 'network_error'));
+    } finally {
+      _resumeInFlight = false;
+    }
+  }
+
+  @visibleForTesting
+  void debugSetState(CollegeImportState value) => state = AsyncValue.data(value);
 
   Future<void> _connectSse(String collegeId) async {
     await _sseSubscription?.cancel();

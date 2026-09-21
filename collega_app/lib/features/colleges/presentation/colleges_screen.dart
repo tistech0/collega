@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:collega_app/core/theme/app_theme.dart';
+import 'package:collega_app/features/colleges/colleges_import_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/colleges/widgets/college_progress_tile.dart';
@@ -20,6 +21,27 @@ class CollegesScreen extends ConsumerStatefulWidget {
 
 class _CollegesScreenState extends ConsumerState<CollegesScreen> {
   CollegeFilter _filter = CollegeFilter.tous;
+  late final AppLifecycleListener _lifecycleListener;
+
+  @override
+  void initState() {
+    super.initState();
+    // Story 7.11 : reprend un upload par morceaux interrompu (app tuée pendant l'envoi)
+    // au démarrage et à chaque retour au premier plan.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _resumePendingUpload());
+    _lifecycleListener = AppLifecycleListener(onResume: _resumePendingUpload);
+  }
+
+  @override
+  void dispose() {
+    _lifecycleListener.dispose();
+    super.dispose();
+  }
+
+  void _resumePendingUpload() {
+    if (!mounted) return;
+    ref.read(collegeImportProvider.notifier).resumePendingUpload();
+  }
 
   List<CollegeListEntry> _applyFilter(List<CollegeListEntry> all) {
     return switch (_filter) {

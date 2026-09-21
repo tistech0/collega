@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:collega_app/core/upload/upload_api.dart';
 import 'package:collega_app/core/upload/upload_models.dart';
-import 'package:collega_app/features/colleges/data/college_import_repository.dart';
 
 DioException _err(int status, Object? data) => DioException(
       requestOptions: RequestOptions(path: '/x'),

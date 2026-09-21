@@ -81,8 +81,6 @@ class _CollegeImportScreenState extends ConsumerState<CollegeImportScreen> {
       }
     });
 
-    final isUploading = importAsync.valueOrNull is ImportUploading;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -113,15 +111,21 @@ class _CollegeImportScreenState extends ConsumerState<CollegeImportScreen> {
               textAlign: TextAlign.center,
             ),
             const Spacer(),
-            if (isUploading)
+            if (importAsync.valueOrNull case ImportUploading(:final progress))
               Column(
                 children: [
-                  const SizedBox(
+                  SizedBox(
                     height: 48,
-                    child: Center(child: LinearProgressIndicator(color: AppColors.primary)),
+                    child: Center(child: LinearProgressIndicator(value: progress, color: AppColors.primary)),
                   ),
                   const SizedBox(height: AppSpacing.baseUnit),
-                  Text('Upload en cours…', style: AppTypography.bodyMedium()),
+                  Text(
+                    progress == null
+                        ? 'Upload en cours…'
+                        : 'Upload en cours (${(progress * 100).round()} %) — continue en arrière-plan',
+                    style: AppTypography.bodyMedium(),
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               )
             else
@@ -167,6 +171,29 @@ class _CollegeImportScreenState extends ConsumerState<CollegeImportScreen> {
           ShadToast.destructive(
             title: const Text('Limite mensuelle atteinte'),
             description: Text('Réinitialisation le ${_formatDate(resetAt)}'),
+          ),
+        );
+      case 'file_too_large':
+        ShadToaster.of(context).show(
+          const ShadToast.destructive(title: Text('PDF trop volumineux (max 500 Mo)')),
+        );
+      case 'upload_in_progress':
+        ShadToaster.of(context).show(
+          const ShadToast(title: Text('Un upload est déjà en cours — patientez')),
+        );
+      case 'upload_expired':
+        ShadToaster.of(context).show(
+          const ShadToast.destructive(title: Text('Upload expiré — relancez l\'import')),
+        );
+      case 'upload_source_missing':
+        ShadToaster.of(context).show(
+          const ShadToast.destructive(title: Text('Fichier introuvable — relancez l\'import')),
+        );
+      case 'upload_failed':
+        ShadToaster.of(context).show(
+          const ShadToast.destructive(
+            title: Text('Envoi interrompu'),
+            description: Text('L\'import reprendra automatiquement à la prochaine ouverture'),
           ),
         );
       default:
