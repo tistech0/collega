@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls scripts/ 2>/dev/null; grep -n \"^## \" docs/deployment.md | head -20; grep -n \"CF_ACCESS\" ../collega_app/.env.local.example ../collega_app/.env.example 2>/dev/null | head; ls ../collega_app/.env* 2>/dev/null",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls scripts/ 2>/dev/null; grep -n \"^## \" docs/deployment.md | head -20; grep -n \"CF_ACCESS\" ../collega_app/.env.local.example ../col",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "966d19d5ac5355467014c66d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:14:38.965Z",
+  "stored_at": "2026-09-21T14:14:38.965Z"
+}

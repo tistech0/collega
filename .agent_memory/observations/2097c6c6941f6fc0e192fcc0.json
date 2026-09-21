@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,30p app/workers/cleanup_worker.py; echo \"--- settings\"; grep -n \"import\\|cron(\" app/workers/settings.py",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,30p app/workers/cleanup_worker.py; echo \"--- settings\"; grep -n \"import\\|cron(\" app/workers/settings.py",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2097c6c6941f6fc0e192fcc0",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:14:07.508Z",
+  "stored_at": "2026-09-21T14:14:07.509Z"
+}

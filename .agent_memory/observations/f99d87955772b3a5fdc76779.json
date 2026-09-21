@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "vas y met a jour encore une fois je vais tester en wifi toujours pas de 4g cehez moi",
+  "summary": "vas y met a jour encore une fois je vais tester en wifi toujours pas de 4g cehez moi",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f99d87955772b3a5fdc76779",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:18:04.898Z",
+  "stored_at": "2026-09-21T15:18:04.898Z",
+  "low_signal": true
+}

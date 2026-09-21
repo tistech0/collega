@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_pr_check",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_pr_check: [{'type': 'text', 'text': '✓ No team memory invalidated by this change\\n\\n{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"branch\": \"main\",\\n \"head\": \"c56e83c5f9cffb6fc3a466f8879dfed8524abbc5\",\\n \"changed_files\": [\\n \".gitattributes\",\\n \"AGENTS.md\",\\n \"CLAUDE.md\"\\n",
+  "text": "[{'type': 'text', 'text': '✓ No team memory invalidated by this change\\n\\n{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"branch\": \"main\",\\n \"head\": \"c56e83c5f9cffb6fc3a466f8879dfed8524abbc5\",\\n \"changed_files\": [\\n \".gitattributes\",\\n \"AGENTS.md\",\\n \"CLAUDE.md\"\\n ],\\n \"validation\": {\\n \"ok\": true,\\n \"errors\": [],\\n \"warnings\": [\\n \".agent_memory/packets/repo_map-collega-repo-overview-cf8b6e00.md: low memory quality score 54\"\\n ]\\n },\\n \"stale_packets\": [],\\n \"memory_packet_changes\": [],\\n \"code_graph_current\": true,\\n \"memory_graph_current\": true,\\n \"memory_reconciliation\": {\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"generated_at\": \"2026-09-21T14:06:24.699Z\",\\n \"touched_paths\": [\\n \"Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_prod_network_topology.md\",\\n \"Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_upload_debug_2026_09.md\"\\n ],\\n \"unresolved_count\": 0,\\n \"items\": [],\\n \"agent_instruction\": \"No agent memory reconciliation is required.\"\\n },\\n \"errors\": [],\\n \"warnings\": [\\n \".agent_memory/packets/repo_map",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "90105ecc7a00ab9fa67b306d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:06:24.939Z",
+  "stored_at": "2026-09-21T14:06:24.939Z",
+  "low_signal": true
+}

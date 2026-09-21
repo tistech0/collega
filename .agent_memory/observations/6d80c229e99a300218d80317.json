@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"BaseDirectory.root\" -B3 -A6 task.dart base_downloader.dart 2>/dev/null | grep -n \"root\\|directory\\|join\\|path\" | head -12",
+  "summary": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"BaseDirectory.root\" -B3 -A6 task.dart base_downloader.dart 2>/dev/null | grep -n \"root\\|directory\\|join\\|path\" | head -12: 2:task.dart-466- p.join((await getApplicationSupportDirectory()).path, 'Library'), 4:task.dart:468: (BaseDirectory.roo",
+  "text": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"BaseDirectory.root\" -B3 -A6 task.dart base_downloader.dart 2>/dev/null | grep -n \"root\\|directory\\|join\\|path\" | head -12: 2:task.dart-466- p.join((await getApplicationSupportDirectory()).path, 'Library'), 4:task.dart:468: (BaseDirectory.root, _) => Directory('/'), 9:task.dart-473- p.join(externalStorageDirectory!.path, 'Support'), 14:task.dart-479- final path = (defaultTargetPlatform == TargetPlatform.windows && 15:task.dart:480: baseDirectory == BaseDirectory.root) 17:task.dart-482- : baseDir.absolute.path; 18:task.dart-483- _baseDirectoryPathCache[cacheKey] = path; 19:task.dart-484- return path; 23:task.dart-516- return (baseDirectoryEnum, directory, filename); 26:task.dart:519: // if no match, return a BaseDirectory.root with the absoluteDirectory 27:task.dart-520- // minus the leading characters that designate the root (differs by platform) 28:task.dart-521- final match = _rootDirectoryRegExp.firstMatch(absoluteDirectoryPath);",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6d80c229e99a300218d80317",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:20:41.920Z",
+  "stored_at": "2026-09-21T14:20:41.921Z"
+}

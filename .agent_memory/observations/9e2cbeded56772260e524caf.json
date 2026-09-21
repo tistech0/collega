@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && mkdir -p test/core/database && cat > test/core/database/pending_uploads_test.dart <<'EOF'\nimport 'package:drift/native.dart';\nimport 'package:flutter_test/flutter_test.dart';\n\nimport 'package:collega_app/core/database/app_database.dart';\n\nvoid main() {\n  test('pending_uploads : insert/read/delete et deleteEverything', () async {\n    final db = AppDatabase.forTesting(NativeDatabase.memory());\n    addTearDown(db.close);\n\n    await db.into(db.pendingUploads).insert(PendingUploadsCompanion.insert(\n          uploadId: 'u1',… [+2480 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && mkdir -p test/core/database && cat > test/core/database/pending_uploads_test.dart <<'EOF' import 'package:drift/native.dart'; import 'p",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9e2cbeded56772260e524caf",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:15:34.237Z",
+  "stored_at": "2026-09-21T14:15:34.237Z"
+}

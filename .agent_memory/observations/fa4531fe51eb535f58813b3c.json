@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && sed -n 875,905p task.dart; echo \"--- TaskStatus values\"; sed -n 7,60p models.dart | grep -E \"^\\s+[a-zA-Z]+[,;]\"; echo \"--- httpRequestMethod / allowPause / post\"; grep -n \"httpRequestMethod\\|allowPause\" task.dart | head -8; echo \"--- FileDownloader API\"; grep -n \"Future<bool> enqueue\\|registerCallbacks\\|Future<.*> start(\\|cancelTasksWithIds\\|Future<bool> cancel\\|get database\\|allRecords\\|Future<List<Task>> allTasks\" file_downloader.dart database.dart 2>/dev/null | head -12; echo \"--- TaskRecord\"; grep -n \"class TaskRecord\" -… [+241 chars truncated]",
+  "summary": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && sed -n 875,905p task.dart; echo \"--- TaskStatus values\"; sed -n 7,60p models.dart | grep -E \"^\\s+[a-zA-Z]+[,;]\"; echo \"--- httpRequestMethod / allowPause / post\"; grep -n \"httpRequestMethod\\|allowPause\" task.dart | head -8; echo \"--- FileDownloader A",
+  "text": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && sed -n 875,905p task.dart; echo \"--- TaskStatus values\"; sed -n 7,60p models.dart | grep -E \"^\\s+[a-zA-Z]+[,;]\"; echo \"--- httpRequestMethod / allowPause / post\"; grep -n \"httpRequestMethod\\|allowPause\" task.dart | head -8; echo \"--- FileDownloader API\"; grep -n \"Future<bool> enqueue\\|registerCallbacks\\|Future<.*> start(\\|cancelTasksWithIds\\|Future<bool> cancel\\|get database\\|allRecords\\|Future<List<Task>> allTasks\" file_downloader.dart database.dart 2>/dev/null | head -12; echo \"--- TaskRecord\"; grep -n \"class TaskRecord\" -A12 database.dart | grep -E \"final|get \" | head; echo \"--- callbacks types\"; grep -n \"typedef TaskStatusCallback\\|typedef TaskProgressCallback\\|class TaskStatusUpdate\\|class TaskProgressUpdate\" -A3 *.dart | grep -E \"typedef|final\" | head -10: up: group); database.dart:75: return allRecordsInGroup database.dart:102: final allRecordsInGroup = await allRecords(group: group); database.dart:104: allRecordsInGroup.map((record) => record.taskId), --- TaskRecord 235:final class TaskRecord { 236- final Task task; 237- final TaskStatus status; 238- final double progress; 239- final int expectedFileSize; 240- final TaskException? exception; --- callbacks types models.dart:122:typedef TaskStatusCallback = void Function(TaskStatusUpdate update); models.dart:133:typedef TaskProgressCallback = void Function(TaskProgressUpdate update); models.dart-200- final TaskStatus status; // note: serialized as 'taskStatus' models.dart-201- final TaskException? exception; models.dart-202- final String? responseBody; models.dart-292- final double progress; models.dart-293- final int expectedFileSize; models.dart-294- final double networkSpeed; // in MB/s",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "fa4531fe51eb535f58813b3c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:19:14.721Z",
+  "stored_at": "2026-09-21T14:19:14.721Z"
+}

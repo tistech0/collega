@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "tr '\\r' '\\n' < \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bp4o0fypu.output\" | grep -E \"issues found|No issues|All tests|Some tests|\\[E\\]|^[0-9:]+ \\+[0-9]+\" | tail -4; ps aux | grep -c \"[f]lutter test\"",
+  "summary": "About to run: tr '\\r' '\\n' < \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bp4o0fypu.output\" | grep -E \"issues found|No issues|All tests|Some tests",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5d03f912fd63e0a98146d491",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:32:40.773Z",
+  "stored_at": "2026-09-21T14:32:40.774Z"
+}

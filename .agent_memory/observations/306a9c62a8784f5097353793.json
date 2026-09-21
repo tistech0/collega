@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat .agent_memory/packets/runbook-d-ployer-le-backend-en-prod*.md 2>/dev/null | sed -n '/^---$/,$p' | tail -n +2 | head -40 || ls .agent_memory/packets | grep -i ploy",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat .agent_memory/packets/runbook-d-ployer-le-backend-en-prod*.md 2>/dev/null | sed -n '/^---$/,$p' | tail -n +2 | head -40 || ls .agent_memory/pac",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "306a9c62a8784f5097353793",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:18:23.904Z",
+  "stored_at": "2026-09-21T15:18:23.904Z"
+}

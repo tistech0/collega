@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && sed -n 250,260p task.dart; sed -n 335,350p task.dart | grep -n \"allowPause\\|DownloadTask\\|Task(\" ; grep -n \"class TaskRecord\" -A25 database.dart | grep \"taskId\\|group\" | head -4; sed -n 141,160p file_downloader.dart; grep -n \"Database get database\\|final database\\|get database\" file_downloader.dart",
+  "summary": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && sed -n 250,260p task.dart; sed -n 335,350p task.dart | grep -n \"allowPause\\|DownloadTask\\|Task(\" ; grep -n \"class TaskRecord\" -A25 database.dart | grep \"taskId\\|group\" | head -4; sed -n 141,160p file_downloader.dart; grep -n \"Database get database\\|f",
+  "text": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && sed -n 250,260p task.dart; sed -n 335,350p task.dart | grep -n \"allowPause\\|DownloadTask\\|Task(\" ; grep -n \"class TaskRecord\" -A25 database.dart | grep \"taskId\\|group\" | head -4; sed -n 141,160p file_downloader.dart; grep -n \"Database get database\\|final database\\|get database\" file_downloader.dart:  collection this record is stored under, which is 251- /// the [task]'s [Task.group] 252- String get group => task.group; 254- /// Returns the record id, which is the [task]'s [Task.taskId] FileDownloader registerCallbacks({ String group = defaultGroup, TaskStatusCallback? taskStatusCallback, TaskProgressCallback? taskProgressCallback, TaskNotificationTapCallback? taskNotificationTapCallback, }) { assert( taskStatusCallback != null || taskProgressCallback != null || taskNotificationTapCallback != null, 'Must provide at least one callback', ); if (taskStatusCallback != null) { _downloader.groupStatusCallbacks[group] = taskStatusCallback; } if (taskProgressCallback != null) { _downloader.groupProgressCallbacks[group] = taskProgressCallback; } if (taskNotificationTapCallback != null) { _downloader.groupNotificationTapCallbacks[group] = 681: final databaseTasks = await database.allRecords();",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "10ce313f5ad875e559eb1e29",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:19:27.955Z",
+  "stored_at": "2026-09-21T14:19:27.955Z"
+}

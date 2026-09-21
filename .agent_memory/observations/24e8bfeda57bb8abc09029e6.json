@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git log --oneline -3 -- .agent_memory/observations | head -3; git ls-files .agent_memory/observations | wc -l; git ls-files .agent_memory/audit .agent_memory/branches .agent_memory/review .agent_memory/pending | head; cat .gitattributes; head -5 AGENTS.md; git status --short main.. 2>/dev/null | head -0; git fetch -q origin && git log --oneline main..origin/main | wc -l",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git log --oneline -3 -- .agent_memory/observations | head -3; git ls-files .agent_memory/observations | wc -l; git ls-files .agent_memory/audit .agent_memory/branches .agent_memory/review .agent_memory/pending | head; cat .gitattributes; head -5 AGENTS.md; git status",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git log --oneline -3 -- .agent_memory/observations | head -3; git ls-files .agent_memory/observations | wc -l; git ls-files .agent_memory/audit .agent_memory/branches .agent_memory/review .agent_memory/pending | head; cat .gitattributes; head -5 AGENTS.md; git status --short main.. 2>/dev/null | head -0; git fetch -q origin && git log --oneline main..origin/main | wc -l: c56e83c chore: mémoire Kage de la session (repro iPhone, écrans empilés) + réglages Xcode mis à jour par l'ouverture du projet 092b78e chore: gitignore secrets app + index Kage, mémoire repo de la session upload 150 .agent_memory/audit/events.jsonl .agent_memory/branches/main.json .agent_memory/review/branch-summary-main.json .agent_memory/review/memory-review.md .agent_memory/packets/*.md merge=kage-packet <!-- KAGE_MEMORY_POLICY_V1 --> # Kage Memory Harness This repo uses Kage as an automatic memory harness for coding agents. Memory is stored and exchanged in Open Knowledge Format (OKF) — markdown concept files under head: illegal line count -- 0 0",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "24e8bfeda57bb8abc09029e6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T18:57:19.867Z",
+  "stored_at": "2026-09-21T18:57:19.868Z"
+}

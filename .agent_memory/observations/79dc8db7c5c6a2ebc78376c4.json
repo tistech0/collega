@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 900,1500p _bmad-output/planning-artifacts/plans/2026-09-21-upload-chunked-cloudflare.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 900,1500p _bmad-output/planning-artifacts/plans/2026-09-21-upload-chunked-cloudflare.md: as String).toUtc(), ); } class UploadStatusResponse { const UploadStatusResponse({required this.received, required this.partsTotal, required this.partSize, required this.s",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 900,1500p _bmad-output/planning-artifacts/plans/2026-09-21-upload-chunked-cloudflare.md: as String).toUtc(), ); } class UploadStatusResponse { const UploadStatusResponse({required this.received, required this.partsTotal, required this.partSize, required this.sizeBytes}); final List<int> received; final int partsTotal; final int partSize; final int sizeBytes; factory UploadStatusResponse.fromJson(Map<String, dynamic> json) => UploadStatusResponse( received: (json['received'] as List).cast<int>()..sort(), partsTotal: json['parts_total'] as int, partSize: json['part_size'] as int, sizeBytes: json['size_bytes'] as int, ); } class FileTooLargeException implements Exception { const FileTooLargeException(); } class UploadExpiredException implements Exception { const UploadExpiredException(); } class UploadIncompleteException implements Exception { const UploadIncompleteException(this.missing); final List<int> missing; } ``` `upload_api.dart` : ```dart import 'package:dio/dio.dart';",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "79dc8db7c5c6a2ebc78376c4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:08:20.437Z",
+  "stored_at": "2026-09-21T14:08:20.437Z"
+}

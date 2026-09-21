@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "kill 10769 11273 2>/dev/null; sleep 5; cat \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bloirwnnv.output\" | cut -c1-160; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git stash list | wc -l; git status --short | grep -v agent_memory",
+  "summary": "kill 10769 11273 2>/dev/null; sleep 5; cat \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bloirwnnv.output\" | cut -c1-160; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git stash list | wc -l; git status --short | grep -v agent_memory: b/features/",
+  "text": "kill 10769 11273 2>/dev/null; sleep 5; cat \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bloirwnnv.output\" | cut -c1-160; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git stash list | wc -l; git status --short | grep -v agent_memory: b/features/colleges/presentation/colleges_screen.dart M test/core/upload/upload_models_test.dart M test/features/colleges/college_import_notifier_test.dart M test/features/colleges/colleges_screen_test.dart ?? ../.gitattributes [exited with code 0] 0 M _bmad-output/implementation-artifacts/7-11-upload-pdf-100mb-tunnel-cloudflare.md M _bmad-output/implementation-artifacts/sprint-status.yaml M collega_app/lib/features/colleges/colleges_import_providers.dart M collega_app/lib/features/colleges/domain/import_models.dart M collega_app/lib/features/colleges/presentation/college_import_screen.dart M collega_app/lib/features/colleges/presentation/colleges_screen.dart M collega_app/test/core/upload/upload_models_test.dart M collega_app/test/features/colleges/college_import_notifier_test.dart M collega_app/test/features/colleges/colleges_screen_test.dart ?? .gitattributes ?? AGENTS.md ?? CLAUDE.md",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f8a716121186e12a28e3577e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:10:32.128Z",
+  "stored_at": "2026-09-21T15:10:32.128Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && sed -n 875,905p task.dart; echo \"--- TaskStatus values\"; sed -n 7,60p models.dart | grep -E \"^\\s+[a-zA-Z]+[,;]\"; echo \"--- httpRequestMethod / allowPause / post\"; grep -n \"httpRequestMethod\\|allowPause\" task.dart | head -8; echo \"--- FileDownloader API\"; grep -n \"Future<bool> enqueue\\|registerCallbacks\\|Future<.*> start(\\|cancelTasksWithIds\\|Future<bool> cancel\\|get database\\|allRecords\\|Future<List<Task>> allTasks\" file_downloader.dart database.dart 2>/dev/null | head -12; echo \"--- TaskRecord\"; grep -n \"class TaskRecord\" -… [+241 chars truncated]",
+  "summary": "About to run: cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && sed -n 875,905p task.dart; echo \"--- TaskStatus values\"; sed -n 7,60p models.dart | grep -E \"^\\s+[a-zA-Z]+[,;]\"; echo \"--- httpReq",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a3257a8a3ce040c84a4e40c6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:19:12.121Z",
+  "stored_at": "2026-09-21T14:19:12.121Z"
+}

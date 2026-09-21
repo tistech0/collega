@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_learn",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_learn: [{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/workflow-story-7-11-d-ploy-e-et-v-rifi-e-en-prod-wi-fi-cancero-411-mb-en-17-morceaux-177--8ba9bed7.md\\nRepo-local memory is written immediately. Org/global promotion still require",
+  "text": "[{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/workflow-story-7-11-d-ploy-e-et-v-rifi-e-en-prod-wi-fi-cancero-411-mb-en-17-morceaux-177--8ba9bed7.md\\nRepo-local memory is written immediately. Org/global promotion still requires explicit review.'}]",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "eca599baef813d43f4b6c6ff",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:39:50.047Z",
+  "stored_at": "2026-09-21T15:39:50.047Z"
+}

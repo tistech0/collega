@@ -1,0 +1,13 @@
+{
+  "type": "user_prompt",
+  "text": "<pasted_content id=\"36da\">\nContexte : projet Collega (Flutter app collega_app/ + backend FastAPI collega_backend/).\nLis d'abord la mémoire : kage_context + ~/.claude/.../memory/project_upload_debug_2026_09.md.\n\nÉtat : la story 7.11 (upload PDF par morceaux) est implémentée, déployée en prod et vérifiée\nen Wi-Fi sur la branche feat/story-7.11-upload-chunked (non mergée dans main). L'iPhone\n(00008110-000115D43499801E) a le build release de cette branche.\n\nSujet de cette session : la GESTION DES ÉCRANS de l'app Flutter. Pendant les tests d'import\nsur l'iPhone j'ai constaté de gros problèmes de navigation/écrans que je vais te décrire.\nPistes déjà identifiées : context.push dans des ref.listen (college_import_screen.dart),\nImportProgressScreen + AppLifecycleListener, context.go('/colleges') sur ImportComplete,\nreset() du notifier dans initState de l'écran d'import, et la reprise d'upload déclenchée\ndepuis CollegesScreen (resumePendingUpload). Fichiers clés :\ncollega_app/lib/core/router/app_router.dart,\ncollega_app/lib/features/colleges/presentation/{college_import_screen,import_progress_screen,colleges_screen}.dart,\ncollega_app/lib/features/colleges/colleges_import_providers.dart.\n\nMéthode : commence par superpowers:brainstorming pour clarifier les symptômes que je vais\ndécrire, puis systematic-debugging ; ne modifie rien avant qu'on ait le diagnostic. Tests :\nlancer les dossiers ciblés (flutter test test/features/colleges), pas la suite complète\n(home/search sont rouges et la suite se bloque — pré-existant, voir packet Kage\ngotcha-flutter-test-complet-*). Pour rebuild sur l'iPhone :\ncollega_app/tool/run_device.sh --release -d 00008110-000115D43499801E.\n\nCommence par me demander de décrire les problèmes d'écrans que j'ai vus.\n</pasted_content id=\"36da\">",
+  "summary": "<pasted_content id=\"36da\"> Contexte : projet Collega (Flutter app collega_app/ + backend FastAPI collega_backend/). Lis d'abord la mémoire : kage_context + ~/.claude/.../memory/project_upload_debug_2026_09.md. État : la story 7.11 (upload P",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "48f9782bfa850732f0b94f11",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:43:43.475Z",
+  "stored_at": "2026-09-21T15:43:43.476Z"
+}

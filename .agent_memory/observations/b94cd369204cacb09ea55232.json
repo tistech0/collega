@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "Skill",
+  "path": "",
+  "command": "",
+  "summary": "Skill: superpowers:brainstorming",
+  "text": "superpowers:brainstorming",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b94cd369204cacb09ea55232",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:43:49.209Z",
+  "stored_at": "2026-09-21T15:43:49.210Z",
+  "low_signal": true
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && mkdir -p app/services/upload tests/fakes && touch app/services/upload/__init__.py && ls tests/services/__init__.py tests/workers/__init__.py 2>&1; ls tests/workers/ | head; grep -n \"asyncio_mode\\|pytest\" pyproject.toml pytest.ini setup.cfg 2>/dev/null | head",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && mkdir -p app/services/upload tests/fakes && touch app/services/upload/__init__.py && ls tests/services/__init__.py tests/workers/__",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6e0226561fcfcd69ae7d2ea2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:10:58.279Z",
+  "stored_at": "2026-09-21T14:10:58.280Z"
+}

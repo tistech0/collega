@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | grep -v agent_memory; echo \"--- branch\"; git branch --show-current; echo \"--- colleges.py\"; wc -l collega_backend/app/api/v1/colleges.py; sed -n 1,60p collega_backend/app/api/v1/colleges.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | grep -v agent_memory; echo \"--- branch\"; git branch --show-current; echo \"--- colleges.py\"; wc -l collega_backend/app/api/v1/colleges.py; sed -n 1,60p collega_backend/app/api/v1/colleges.py: nseWrapped, CollegesListResponseWrapped, FlashCardData,",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | grep -v agent_memory; echo \"--- branch\"; git branch --show-current; echo \"--- colleges.py\"; wc -l collega_backend/app/api/v1/colleges.py; sed -n 1,60p collega_backend/app/api/v1/colleges.py: nseWrapped, CollegesListResponseWrapped, FlashCardData, ImportCollegeResponseData, ImportCollegeResponseWrapped, ItemSummaryData, ItemsListResponseWrapped, ReloadLimitsData, ReloadLimitsResponseWrapped, UserCollegeData, ) logger = logging.getLogger(__name__) router = APIRouter(tags=[\"colleges\"]) _PDF_MAGIC = b\"%PDF-\" _CHUNK_SIZE = 1024 * 1024 # 1 MB _MAX_PDF_SIZE = 500 * 1024 * 1024 # 500 MB _SSE_MAX_DURATION = 3 * 3600 # 3h _SSE_POLL_INTERVAL = 1.5 # s entre deux lectures DB # Cloudflare / reverse proxies coupent une connexion silencieuse après ~100 s : # on émet un commentaire SSE `: keep-alive` si aucun événement n'est parti depuis ce délai. _SSE_HEARTBEAT_INTERVAL = 15.0 @router.get(\"/colleges\", response_model=CollegesListResponseWrapped) async def list_user_colleges( current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db), ) -> CollegesListResponseWrapped:",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "559a3ec9a96309d03cdcb968",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:08:41.474Z",
+  "stored_at": "2026-09-21T14:08:41.474Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bloirwnnv.output\"; echo \"---\"; ps aux | grep -E \"[f]lutter test|[g]it stash\" | awk '{print $2, $11, $12, $13, $14}' | head; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git stash list | wc -l",
+  "summary": "About to run: cat \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bloirwnnv.output\"; echo \"---\"; ps aux | grep -E \"[f]lutter test|[g]it stash\" | awk ",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3a08c72ed98fba1666673a79",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:10:07.733Z",
+  "stored_at": "2026-09-21T15:10:07.733Z"
+}

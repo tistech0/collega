@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "TaskStop",
+  "path": "",
+  "command": "",
+  "summary": "TaskStop: Successfully stopped task: bf5fq8nbk (f=\"$CLAUDE_JOB_DIR/tmp/flutter_full.log\"; while true; do sleep 30; n=$(grep -cE \"^[0-9:]+ \\+[0-9]+\" \"$f\" 2>/dev/null); last=$(grep -E \"^[0-9:]+ \\+[0-9]+\" \"$f\" | tail -1 | cut -c1-140); echo \"progress: $n lines | $last\"; if grep -qE \"All tests|Some tests|^EXIT\" \"",
+  "text": "Successfully stopped task: bf5fq8nbk (f=\"$CLAUDE_JOB_DIR/tmp/flutter_full.log\"; while true; do sleep 30; n=$(grep -cE \"^[0-9:]+ \\+[0-9]+\" \"$f\" 2>/dev/null); last=$(grep -E \"^[0-9:]+ \\+[0-9]+\" \"$f\" | tail -1 | cut -c1-140); echo \"progress: $n lines | $last\"; if grep -qE \"All tests|Some tests|^EXIT\" \"$f\"; then grep -E \"All tests|Some tests|^EXIT|\\[E\\]\" \"$f\" | tail -5; break; fi; done)",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4fb829cd24496181c9feab47",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:59:23.611Z",
+  "stored_at": "2026-09-21T14:59:23.611Z"
+}

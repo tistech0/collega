@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "f=\"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bp4o0fypu.output\"; wc -c \"$f\"; head -c 3000 \"$f\" | tr '\\r' '\\n' | grep -v \"^$\" | head -20; echo ...; tail -c 600 \"$f\" | tr '\\r' '\\n' | tail -3 | cut -c1-160",
+  "summary": "About to run: f=\"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bp4o0fypu.output\"; wc -c \"$f\"; head -c 3000 \"$f\" | tr '\\r' '\\n' | grep -v \"^$\" | head",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1f4dcae09c378de1b2add7bd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:32:50.251Z",
+  "stored_at": "2026-09-21T14:32:50.251Z"
+}

@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_feedback",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_feedback: [{'type': 'text', 'text': 'Recorded helpful feedback for repo:git-github-com-tistech0-collega:bug_fix:crans-de-progression-empil-s-un-push-par-tat-importstreaming-rafales-status-n-st'}]",
+  "text": "[{'type': 'text', 'text': 'Recorded helpful feedback for repo:git-github-com-tistech0-collega:bug_fix:crans-de-progression-empil-s-un-push-par-tat-importstreaming-rafales-status-n-st'}]",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1d5972a8300d4578cf9a2b20",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:12:26.766Z",
+  "stored_at": "2026-09-21T15:12:26.766Z",
+  "low_signal": true
+}

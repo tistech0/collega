@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && orb start 2>/dev/null; SHA=$(git rev-parse --short HEAD); echo \"sha=$SHA\"; docker build --platform linux/amd64 -t tistech0/collega-backend:latest -t tistech0/collega-backend:$SHA . 2>&1 | tail -4",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && orb start 2>/dev/null; SHA=$(git rev-parse --short HEAD); echo \"sha=$SHA\"; docker build --platform linux/amd64 -t tistech0/collega-",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2efe155f154d64fe6da77f8f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:18:30.192Z",
+  "stored_at": "2026-09-21T15:18:30.192Z"
+}

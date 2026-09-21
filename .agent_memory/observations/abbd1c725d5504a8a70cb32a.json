@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s|    expect(task.directory, '/tmp/parts_u1');|    expect(task.baseDirectory, BaseDirectory.root);\\n    expect(task.directory, 'tmp/parts_u1'); // le package retire le / initial (root = /)|\" test/core/upload/background_part_transport_test.dart && sed -i '' \"s|import 'package:flutter_test/flutter_test.dart';|import 'package:background_downloader/background_downloader.dart' show BaseDirectory;\\nimport 'package:flutter_test/flutter_test.dart';|\" test/core/upload/background_part_transport_test.dart && flutter test test/cor… [+397 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s| expect(task.directory, '/tmp/parts_u1');| expect(task.baseDirectory, BaseDirectory.root);\\n expect(task.directory, 'tmp/p",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "abbd1c725d5504a8a70cb32a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:20:49.633Z",
+  "stored_at": "2026-09-21T14:20:49.633Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/features/home/home_notifier_test.dart --reporter compact 2>&1 | tr '\\r' '\\n' | grep -E \"All tests|Some tests|\\[E\\]\" | cut -c1-160 | tail -4",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/features/home/home_notifier_test.dart --reporter compact 2>&1 | tr '\\r' '\\n' | grep -E \"All tests|Some tests|\\[E\\]\" |",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "da1dfcd3a31c5d740947e663",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:10:45.660Z",
+  "stored_at": "2026-09-21T15:10:45.661Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "sed -n 76,100p \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | cut -c1-200; echo ...; sed -n 2195,2215p \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | cut -c1-200; grep -n \"HomeReady avec 1 college récent\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | head -2",
+  "summary": "sed -n 76,100p \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | cut -c1-200; echo ...; sed -n 2195,2215p \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | cut -c1-200; grep -n \"HomeReady avec 1 college récent\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | head -2: :matcher expect package:flutter_test/src/widget_tester.dart 480:18 expect tes",
+  "text": "sed -n 76,100p \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | cut -c1-200; echo ...; sed -n 2195,2215p \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | cut -c1-200; grep -n \"HomeReady avec 1 college récent\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | head -2: :matcher expect package:flutter_test/src/widget_tester.dart 480:18 expect test/features/search/search_notifier_test.dart 59:7 main.<fn>.<fn> 00:12 +201 -4: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/search/search_notifier_test.dart: SearchNotifier après repo retournant résultats → results non vide 00:12 +202 -4: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/search/search_notifier_test.dart: SearchNotifier après repo retournant résultats → results non vide 213:00:03 +43 -2: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/home/home_notifier_test.dart: HomeNotifier HomeReady avec 1 college récent si 1 en generation_complete 231:00:03 +43 -3: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/home/home_notifier_test.dart: HomeNotifier HomeReady avec 1 college récent si 1 en generation_complete [E]",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "be947867317f0b71dfdd45dd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:59:53.026Z",
+  "stored_at": "2026-09-21T14:59:53.026Z"
+}

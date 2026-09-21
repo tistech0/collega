@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"Future<bool> enqueue(\\|registerCallbacks(\\|Future<.*> start(\\|Future<bool> cancelTasksWithIds\\|Future<bool> cancelTaskWithId\\|Future<bool> cancel(\\|Database get database\\|trackTasks(\\|allowPause\\|Future<List<Task>> allTasks(\" file_downloader.dart | head -12; grep -n \"allowPause\" task.dart | head -3; grep -n \"taskId\" -B2 -A6 database.dart | grep \"TaskRecord\\|get taskId\\|taskId\" | head -5; grep -n \"autoCleanDatabase\\|Future<void> start\\|Future<bool> start\" file_downloader.dart | head",
+  "summary": "About to run: cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"Future<bool> enqueue(\\|registerCallbacks(\\|Future<.*> start(\\|Future<bool> cancelTasksWithIds\\|Future<bool> cancelTaskWit",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7f35941ad709cb103b6179b3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:19:19.858Z",
+  "stored_at": "2026-09-21T14:19:19.858Z"
+}

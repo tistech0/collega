@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ps -eo pid,ppid,etime,command | grep -E \"flutter_tools|dart.*(test|frontend)|flutter test\" | grep -v grep | cut -c1-160 | head",
+  "summary": "About to run: ps -eo pid,ppid,etime,command | grep -E \"flutter_tools|dart.*(test|frontend)|flutter test\" | grep -v grep | cut -c1-160 | head",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "11f2ea2a0f73532237741bee",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:10:13.428Z",
+  "stored_at": "2026-09-21T15:10:13.428Z"
+}

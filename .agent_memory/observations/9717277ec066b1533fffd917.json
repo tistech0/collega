@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"database\" file_downloader.dart | grep -i \"get \\|final \\|Database \" | head -3; grep -n \"class UploadTask\" task.dart; grep -n \"super.allowPause\\|allowPause\" task.dart | sed -n 1,10p; grep -n \"test\\|TestWidgetsFlutterBinding\\|MethodChannel\" file_downloader.dart | head -3",
+  "summary": "About to run: cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"database\" file_downloader.dart | grep -i \"get \\|final \\|Database \" | head -3; grep -n \"class UploadTask\" task.dart; grep ",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9717277ec066b1533fffd917",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:19:33.969Z",
+  "stored_at": "2026-09-21T14:19:33.969Z"
+}

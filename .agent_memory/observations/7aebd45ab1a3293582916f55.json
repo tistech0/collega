@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 24,34p collega_backend/app/api/v1/auth.py; sed -n 27,50p collega_app/lib/features/auth/data/auth_repository.dart; sed -n 45,60p collega_app/lib/features/auth/auth_providers.dart",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 24,34p collega_backend/app/api/v1/auth.py; sed -n 27,50p collega_app/lib/features/auth/data/auth_repository.dart; sed -n 45,60p collega_app/",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7aebd45ab1a3293582916f55",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T18:56:32.503Z",
+  "stored_at": "2026-09-21T18:56:32.503Z"
+}

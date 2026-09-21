@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n 1,80p test/features/home/home_screen_test.dart; grep -n \"testWidgets(\" test/features/home/home_screen_test.dart; sed -n 120,145p lib/features/home/presentation/home_screen.dart",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n 1,80p test/features/home/home_screen_test.dart; grep -n \"testWidgets(\" test/features/home/home_screen_test.dart; sed -n 120,145p",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6b240e7bb66d6315850dd552",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T16:01:56.901Z",
+  "stored_at": "2026-09-21T16:01:56.901Z"
+}

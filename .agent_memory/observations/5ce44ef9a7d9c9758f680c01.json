@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls _bmad-output/planning-artifacts 2>/dev/null | head -20; ls _bmad-output 2>/dev/null; grep -n \"^  [a-z_]*:\" collega_app/pubspec.yaml | sed -n 1,40p | tr '\\n' ' '",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls _bmad-output/planning-artifacts 2>/dev/null | head -20; ls _bmad-output 2>/dev/null; grep -n \"^ [a-z_]*:\" collega_app/pubspec.yaml | sed -n 1,40",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5ce44ef9a7d9c9758f680c01",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T18:51:32.815Z",
+  "stored_at": "2026-09-21T18:51:32.815Z"
+}

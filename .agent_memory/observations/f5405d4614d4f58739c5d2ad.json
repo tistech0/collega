@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat collega_app/tool/run_device.sh | head -40; ls collega_backend/Dockerfile; xcrun xctrace list devices 2>/dev/null | grep -i iphone | head -3",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat collega_app/tool/run_device.sh | head -40; ls collega_backend/Dockerfile; xcrun xctrace list devices 2>/dev/null | grep -i iphone | head -3",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f5405d4614d4f58739c5d2ad",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:18:14.617Z",
+  "stored_at": "2026-09-21T15:18:14.617Z"
+}

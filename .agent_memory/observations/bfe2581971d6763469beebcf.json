@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"Future<bool> enqueue(\\|registerCallbacks(\\|Future<.*> start(\\|Future<bool> cancelTasksWithIds\\|Future<bool> cancelTaskWithId\\|Future<bool> cancel(\\|Database get database\\|trackTasks(\\|allowPause\\|Future<List<Task>> allTasks(\" file_downloader.dart | head -12; grep -n \"allowPause\" task.dart | head -3; grep -n \"taskId\" -B2 -A6 database.dart | grep \"TaskRecord\\|get taskId\\|taskId\" | head -5; grep -n \"autoCleanDatabase\\|Future<void> start\\|Future<bool> start\" file_downloader.dart | head",
+  "summary": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"Future<bool> enqueue(\\|registerCallbacks(\\|Future<.*> start(\\|Future<bool> cancelTasksWithIds\\|Future<bool> cancelTaskWithId\\|Future<bool> cancel(\\|Database get database\\|trackTasks(\\|allowPause\\|Future<List<Task>> allTasks(\" file_downloader",
+  "text": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"Future<bool> enqueue(\\|registerCallbacks(\\|Future<.*> start(\\|Future<bool> cancelTasksWithIds\\|Future<bool> cancelTaskWithId\\|Future<bool> cancel(\\|Database get database\\|trackTasks(\\|allowPause\\|Future<List<Task>> allTasks(\" file_downloader.dart | head -12; grep -n \"allowPause\" task.dart | head -3; grep -n \"taskId\" -B2 -A6 database.dart | grep \"TaskRecord\\|get taskId\\|taskId\" | head -5; grep -n \"autoCleanDatabase\\|Future<void> start\\|Future<bool> start\" file_downloader.dart | head:  => cancelTasksWithIds([taskId]); 541: Future<bool> cancel(Task task) => cancelTasksWithIds([task.taskId]); 574: Future<void> start({ 581: await FileDownloader().trackTasks( 617: await _downloader.trackTasks(group, markDownloadedComplete); 637: Future<FileDownloader> trackTasks({ 640: await _downloader.trackTasks(null, markDownloadedComplete); 253: final bool allowPause; 317: /// [allowPause] 343: this.allowPause = false, 80: /// Return [TaskRecord] for this [taskId] or null if not found 81: Future<TaskRecord?> recordForId(String taskId) => 82: _storage.retrieveTaskRecord(taskId); 84: /// Return list of [TaskRecord] corresponding to the [taskIds] 88: Future<List<TaskRecord>> recordsForIds(Iterable<String> taskIds) async { 571: /// If [autoCleanDatabase] is true, [Database.cleanUp] is called after 574: Future<void> start({ 578: bool autoCleanDatabase = false, 592: if (autoCleanDatabase) {",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bfe2581971d6763469beebcf",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:19:21.936Z",
+  "stored_at": "2026-09-21T14:19:21.937Z"
+}

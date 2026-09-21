@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"background_downloader\" ~/dev/projet\\ perso/collega/collega_app/pubspec.lock | head -2; echo \"--- UploadTask ctor\"; grep -n \"^  UploadTask(\" -A40 task.dart | grep -E \"this\\.|super\\.|String |bool |int |Updates|BaseDirectory|Map\" | head -40; echo \"--- enums\"; grep -n \"enum TaskStatus\" -A25 models.dart | grep -E \"^\\S*[0-9]+-\\s+[a-zA-Z]+[,;]|enum\" | head -20",
+  "summary": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"background_downloader\" ~/dev/projet\\ perso/collega/collega_app/pubspec.lock | head -2; echo \"--- UploadTask ctor\"; grep -n \"^  UploadTask(\" -A40 task.dart | grep -E \"this\\.|super\\.|String |bool |int |Updates|BaseDirectory|Map\" | head -40; ec",
+  "text": "cd ~/.pub-cache/hosted/pub.dev/background_downloader-9.5.5/lib/src && grep -n \"background_downloader\" ~/dev/projet\\ perso/collega/collega_app/pubspec.lock | head -2; echo \"--- UploadTask ctor\"; grep -n \"^  UploadTask(\" -A40 task.dart | grep -E \"this\\.|super\\.|String |bool |int |Updates|BaseDirectory|Map\" | head -40; echo \"--- enums\"; grep -n \"enum TaskStatus\" -A25 models.dart | grep -E \"^\\S*[0-9]+-\\s+[a-zA-Z]+[,;]|enum\" | head -20: 44: background_downloader: 47: name: background_downloader --- UploadTask ctor 882- super.taskId, 883- required super.url, 884- super.urlQueryParameters, 885- required String super.filename, 886- super.headers, 888- String? super.post, 889- this.fileField = 'file', 891- Map<String, String>? fields, 892- super.directory, 893- super.baseDirectory, 894- super.group, 895- super.updates, 896- super.requiresWiFi, 897- super.retries, 898- super.priority, 899- super.metaData, 900- super.displayName, 901- super.creationTime, 902- super.options, --- enums 7:enum TaskStatus { 13- enqueued, 16- running, 21- complete, 26- notFound, 31- failed,",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2513aa00a187daa595cd37ef",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:19:04.963Z",
+  "stored_at": "2026-09-21T14:19:04.964Z"
+}

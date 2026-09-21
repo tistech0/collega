@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "ok donc normale ok publie tout sur git merge tout et ajoute dans le prompt de bien creer une branche a part pour le redesign",
+  "summary": "ok donc normale ok publie tout sur git merge tout et ajoute dans le prompt de bien creer une branche a part pour le redesign",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f8f97262d00b154a368b93f9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T18:57:01.106Z",
+  "stored_at": "2026-09-21T18:57:01.106Z",
+  "low_signal": true
+}

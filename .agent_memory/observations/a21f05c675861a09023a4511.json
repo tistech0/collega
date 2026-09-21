@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "Skill",
+  "path": "",
+  "command": "",
+  "summary": "About to run: Skill",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a21f05c675861a09023a4511",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:43:48.950Z",
+  "stored_at": "2026-09-21T15:43:48.950Z",
+  "low_signal": true
+}

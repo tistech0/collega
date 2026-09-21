@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory && printf '%s\\n' '- [Session debug upload 2026-09](project_upload_debug_2026_09.md) — 4 bugs import corrigés/déployés (Access, SSE, College.status, écrans empilés) ; 7.11 spec+plan prêts ; prochain sujet : gestion des écrans app' >> MEMORY.md && tail -2 MEMORY.md",
+  "summary": "About to run: cd /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory && printf '%s\\n' '- [Session debug upload 2026-09](project_upload_debug_2026_09.md) — 4 bugs import corrigés",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3e5b2ba3e3bce8d0635afd44",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:06:18.671Z",
+  "stored_at": "2026-09-21T14:06:18.671Z"
+}
