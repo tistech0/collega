@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -130,6 +131,223 @@ async def get_college_reload_limits(
     )
 
 
+def _job_in_progress() -> HTTPException:
+    return HTTPException(
+        status_code=409,
+        detail={"code": "JOB_IN_PROGRESS", "message": "Un import est déjà en cours pour ce collège"},
+    )
+
+
+def _invalid_ref_id(ref_id: int) -> None:
+    if not (1 <= ref_id <= 39):
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "INVALID_REF_ID", "message": "ref_id must be between 1 and 39"},
+        )
+
+
+async def _select_college(db: AsyncSession, user: User, ref_id: int) -> College | None:
+    result = await db.execute(
+        select(College)
+        .where(College.user_id == user.id)
+        .where(College.college_ref_id == ref_id)
+    )
+    return result.scalar_one_or_none()
+
+
+async def _get_or_create_college(db: AsyncSession, user: User, ref_id: int) -> College:
+    college = await _select_college(db, user, ref_id)
+    if college is None:
+        college = College(user_id=user.id, college_ref_id=ref_id)
+        db.add(college)
+        try:
+            await db.flush()
+        except IntegrityError:
+            await db.rollback()
+            raise _job_in_progress()
+    return college
+
+
+async def _assert_no_active_job(db: AsyncSession, college: College) -> None:
+    """Aucun job actif (inclut ocr_complete : génération Claude en cours)."""
+    existing_job = await db.execute(
+        select(GenerationJob)
+        .where(GenerationJob.college_id == college.id)
+        .where(GenerationJob.status.in_(["pending", "processing", "ocr_complete"]))
+    )
+    if existing_job.scalar_one_or_none() is not None:
+        raise _job_in_progress()
+
+
+def _college_reload_limit(college: College) -> HTTPException:
+    return HTTPException(
+        status_code=409,
+        detail={
+            "code": "COLLEGE_RELOAD_LIMIT",
+            "message": f"Ce collège ne peut plus être retraité (limite : {settings.reload_count_max})",
+            "reload_count": college.reload_count,
+            "reload_count_max": settings.reload_count_max,
+        },
+    )
+
+
+def _monthly_reload_limit(user: User, now: datetime) -> HTTPException:
+    reset_at = user.monthly_reloads_reset_at or _next_month_reset(now)
+    return HTTPException(
+        status_code=409,
+        detail={
+            "code": "MONTHLY_RELOAD_LIMIT",
+            "message": f"Limite mensuelle atteinte ({settings.monthly_reloads_max} reimports/mois)",
+            "monthly_reloads": user.monthly_reloads,
+            "monthly_max": settings.monthly_reloads_max,
+            "reset_at": reset_at.isoformat(),
+        },
+    )
+
+
+async def _apply_reimport_quota(db: AsyncSession, user: User, college: College) -> None:
+    """Quota checks pour les reimports uniquement (premier import = libre).
+    Atomique : UPDATE conditionnel avec RETURNING — pas de race read-then-check."""
+    if college.status != "generation_complete":
+        return
+
+    now = datetime.now(timezone.utc)
+    is_month_reset = user.monthly_reloads_reset_at is None or now >= user.monthly_reloads_reset_at
+
+    # 1. Reset mensuel lazy (filet de sécurité — cron quotidien est la source défensive)
+    if is_month_reset:
+        user.monthly_reloads = 0
+        user.monthly_reloads_reset_at = _next_month_reset(now)
+        await db.flush()
+
+    # 2. Incrément atomique College.reload_count
+    college_update = await db.execute(
+        sa_update(College)
+        .where(College.id == college.id)
+        .where(College.reload_count < settings.reload_count_max)
+        .values(reload_count=College.reload_count + 1)
+        .returning(College.reload_count)
+    )
+    if college_update.scalar_one_or_none() is None:
+        raise _college_reload_limit(college)
+
+    # 3. Incrément atomique User.monthly_reloads — rollback college si échec
+    user_update = await db.execute(
+        sa_update(User)
+        .where(User.id == user.id)
+        .where(User.monthly_reloads < settings.monthly_reloads_max)
+        .values(monthly_reloads=User.monthly_reloads + 1)
+        .returning(User.monthly_reloads)
+    )
+    if user_update.scalar_one_or_none() is None:
+        # Annule l'incrément college fait juste avant (transaction non commitée)
+        await db.rollback()
+        raise _monthly_reload_limit(user, now)
+
+
+async def _assert_import_allowed(db: AsyncSession, user: User, ref_id: int) -> College | None:
+    """Gardes d'import en lecture seule (aucune écriture) — utilisées par POST /import/init
+    (morceaux) avant de recevoir le moindre octet. Renvoie le College existant ou None.
+    Lève les mêmes HTTPException que le chemin d'import (422 INVALID_REF_ID, 409 JOB_IN_PROGRESS,
+    409 COLLEGE_RELOAD_LIMIT / MONTHLY_RELOAD_LIMIT) ; le quota réel est consommé à `complete`."""
+    _invalid_ref_id(ref_id)
+    college = await _select_college(db, user, ref_id)
+    if college is None:
+        return None
+    await _assert_no_active_job(db, college)
+
+    if college.status == "generation_complete":
+        now = datetime.now(timezone.utc)
+        month_reset_due = user.monthly_reloads_reset_at is None or now >= user.monthly_reloads_reset_at
+        if college.reload_count >= settings.reload_count_max:
+            raise _college_reload_limit(college)
+        if not month_reset_due and user.monthly_reloads >= settings.monthly_reloads_max:
+            raise _monthly_reload_limit(user, now)
+    return college
+
+
+async def _create_job_and_enqueue(
+    db: AsyncSession, user: User, college: College, job_id: uuid.UUID, pdf_file_path: Path
+) -> ImportCollegeResponseData:
+    """Crée le GenerationJob et enqueue l'OCR. Supprime le PDF sur toute erreur."""
+    # IntegrityError = race OCR détectée par l'index UNIQUE partial sur (college_id) WHERE status active.
+    job = GenerationJob(
+        id=job_id,
+        college_id=college.id,
+        user_id=user.id,
+        status="pending",
+    )
+    db.add(job)
+    try:
+        await db.commit()
+        await db.refresh(job)
+    except IntegrityError:
+        await db.rollback()
+        pdf_file_path.unlink(missing_ok=True)
+        raise _job_in_progress()
+    except Exception:
+        pdf_file_path.unlink(missing_ok=True)
+        raise
+
+    # Enqueuer le job ARQ
+    pool = None
+    try:
+        from arq import create_pool  # type: ignore[import]
+        from app.core.redis import redis_settings as _redis_settings
+
+        pool = await create_pool(_redis_settings)
+        arq_job = await pool.enqueue_job(
+            "process_college_ocr",
+            str(college.id),
+            str(job_id),
+            str(pdf_file_path),
+        )
+        if arq_job is not None:
+            job.arq_job_id = arq_job.job_id
+            await db.commit()
+        logger.info("OCR job %s enqueued for college %s", job_id, college.id)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Failed to enqueue OCR job: %s", exc)
+        await db.delete(job)
+        await db.commit()
+        pdf_file_path.unlink(missing_ok=True)
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "QUEUE_UNAVAILABLE", "message": "Impossible d'enqueuer le job OCR — réessayez"},
+        )
+    finally:
+        if pool is not None:
+            await pool.close()
+
+    return ImportCollegeResponseData(
+        college_id=str(college.id),
+        job_id=str(job_id),
+        status="pending",
+    )
+
+
+async def _start_import_from_file(
+    db: AsyncSession, user: User, ref_id: int, pdf_file_path: Path
+) -> ImportCollegeResponseData:
+    """Chemin d'import à partir d'un PDF déjà écrit sur le volume partagé (upload par morceaux
+    assemblé) : get/create College, garde job actif, quotas atomiques, renommage en
+    `{college.id}_{job_id}.pdf` (convention attendue par la purge admin), GenerationJob + enqueue.
+    Supprime le PDF sur toute erreur."""
+    try:
+        college = await _get_or_create_college(db, user, ref_id)
+        await _assert_no_active_job(db, college)
+        await _apply_reimport_quota(db, user, college)
+    except HTTPException:
+        pdf_file_path.unlink(missing_ok=True)
+        raise
+
+    job_id = uuid.uuid4()
+    final_path = pdf_file_path.with_name(f"{college.id}_{job_id}.pdf")
+    os.replace(pdf_file_path, final_path)
+    logger.info("PDF ready for college %s (ref_id=%s) at %s", college.id, ref_id, final_path)
+    return await _create_job_and_enqueue(db, user, college, job_id, final_path)
+
+
 @router.post(
     "/colleges/{ref_id}/import",
     response_model=ImportCollegeResponseWrapped,
@@ -141,103 +359,12 @@ async def import_college_pdf(
     current_user: User = Depends(require_subscription),
     db: AsyncSession = Depends(get_db),
 ) -> ImportCollegeResponseWrapped:
-    """Soumet un PDF pour traitement OCR — crée le College si nécessaire."""
-    if not (1 <= ref_id <= 39):
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "INVALID_REF_ID", "message": "ref_id must be between 1 and 39"},
-        )
-
-    # Chercher ou créer le College
-    result = await db.execute(
-        select(College)
-        .where(College.user_id == current_user.id)
-        .where(College.college_ref_id == ref_id)
-    )
-    college = result.scalar_one_or_none()
-
-    if college is None:
-        college = College(user_id=current_user.id, college_ref_id=ref_id)
-        db.add(college)
-        try:
-            await db.flush()
-        except IntegrityError:
-            await db.rollback()
-            raise HTTPException(
-                status_code=409,
-                detail={"code": "JOB_IN_PROGRESS", "message": "Un import est déjà en cours pour ce collège"},
-            )
-
-    # Vérifier qu'aucun job actif n'existe (inclut ocr_complete : génération Claude en cours)
-    existing_job = await db.execute(
-        select(GenerationJob)
-        .where(GenerationJob.college_id == college.id)
-        .where(GenerationJob.status.in_(["pending", "processing", "ocr_complete"]))
-    )
-    if existing_job.scalar_one_or_none() is not None:
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "JOB_IN_PROGRESS", "message": "Un import est déjà en cours pour ce collège"},
-        )
-
-    # Quota checks pour les reimports uniquement (premier import = libre).
-    # Atomique : UPDATE conditionnel avec RETURNING — pas de race read-then-check.
-    if college.status == "generation_complete":
-        now = datetime.now(timezone.utc)
-        is_month_reset = (
-            current_user.monthly_reloads_reset_at is None
-            or now >= current_user.monthly_reloads_reset_at
-        )
-
-        # 1. Reset mensuel lazy (filet de sécurité — cron quotidien est la source défensive)
-        if is_month_reset:
-            current_user.monthly_reloads = 0
-            current_user.monthly_reloads_reset_at = _next_month_reset(now)
-            await db.flush()
-
-        # 2. Incrément atomique College.reload_count
-        college_update = await db.execute(
-            sa_update(College)
-            .where(College.id == college.id)
-            .where(College.reload_count < settings.reload_count_max)
-            .values(reload_count=College.reload_count + 1)
-            .returning(College.reload_count)
-        )
-        new_college_count = college_update.scalar_one_or_none()
-        if new_college_count is None:
-            raise HTTPException(
-                status_code=409,
-                detail={
-                    "code": "COLLEGE_RELOAD_LIMIT",
-                    "message": f"Ce collège ne peut plus être retraité (limite : {settings.reload_count_max})",
-                    "reload_count": college.reload_count,
-                    "reload_count_max": settings.reload_count_max,
-                },
-            )
-
-        # 3. Incrément atomique User.monthly_reloads — rollback college si échec
-        user_update = await db.execute(
-            sa_update(User)
-            .where(User.id == current_user.id)
-            .where(User.monthly_reloads < settings.monthly_reloads_max)
-            .values(monthly_reloads=User.monthly_reloads + 1)
-            .returning(User.monthly_reloads)
-        )
-        new_monthly = user_update.scalar_one_or_none()
-        if new_monthly is None:
-            # Annule l'incrément college fait juste avant (transaction non commitée)
-            await db.rollback()
-            reset_at = current_user.monthly_reloads_reset_at or _next_month_reset(now)
-            raise HTTPException(
-                status_code=409,
-                detail={
-                    "code": "MONTHLY_RELOAD_LIMIT",
-                    "message": f"Limite mensuelle atteinte ({settings.monthly_reloads_max} reimports/mois)",
-                    "monthly_reloads": current_user.monthly_reloads,
-                    "monthly_max": settings.monthly_reloads_max,
-                    "reset_at": reset_at.isoformat(),
-                },
-            )
+    """Soumet un PDF pour traitement OCR — crée le College si nécessaire (mono-requête, ≤ 100 MB
+    derrière Cloudflare ; au-delà, voir /import/init)."""
+    _invalid_ref_id(ref_id)
+    college = await _get_or_create_college(db, current_user, ref_id)
+    await _assert_no_active_job(db, college)
+    await _apply_reimport_quota(db, current_user, college)
 
     # Valider le type de fichier
     is_pdf = (pdf.content_type == "application/pdf") or (pdf.filename or "").lower().endswith(".pdf")
@@ -279,66 +406,8 @@ async def import_college_pdf(
 
     logger.info("PDF saved for college %s (ref_id=%s) at %s", college.id, ref_id, pdf_file_path)
 
-    # Créer le GenerationJob — nettoyer le PDF si le commit échoue.
-    # IntegrityError = race OCR détectée par l'index UNIQUE partial sur (college_id) WHERE status active.
-    job = GenerationJob(
-        id=job_id,
-        college_id=college.id,
-        user_id=current_user.id,
-        status="pending",
-    )
-    db.add(job)
-    try:
-        await db.commit()
-        await db.refresh(job)
-    except IntegrityError:
-        await db.rollback()
-        pdf_file_path.unlink(missing_ok=True)
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "JOB_IN_PROGRESS", "message": "Un import est déjà en cours pour ce collège"},
-        )
-    except Exception:
-        pdf_file_path.unlink(missing_ok=True)
-        raise
-
-    # Enqueuer le job ARQ
-    pool = None
-    try:
-        from arq import create_pool  # type: ignore[import]
-        from app.core.redis import redis_settings as _redis_settings
-
-        pool = await create_pool(_redis_settings)
-        arq_job = await pool.enqueue_job(
-            "process_college_ocr",
-            str(college.id),
-            str(job_id),
-            str(pdf_file_path),
-        )
-        if arq_job is not None:
-            job.arq_job_id = arq_job.job_id
-            await db.commit()
-        logger.info("OCR job %s enqueued for college %s", job_id, college.id)
-    except Exception as exc:  # noqa: BLE001
-        logger.error("Failed to enqueue OCR job: %s", exc)
-        await db.delete(job)
-        await db.commit()
-        pdf_file_path.unlink(missing_ok=True)
-        raise HTTPException(
-            status_code=503,
-            detail={"code": "QUEUE_UNAVAILABLE", "message": "Impossible d'enqueuer le job OCR — réessayez"},
-        )
-    finally:
-        if pool is not None:
-            await pool.close()
-
-    return ImportCollegeResponseWrapped(
-        data=ImportCollegeResponseData(
-            college_id=str(college.id),
-            job_id=str(job_id),
-            status="pending",
-        )
-    )
+    data = await _create_job_and_enqueue(db, current_user, college, job_id, pdf_file_path)
+    return ImportCollegeResponseWrapped(data=data)
 
 
 @router.get(
