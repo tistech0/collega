@@ -229,6 +229,71 @@ void main() {
       );
     });
 
+    test('evaluate(aRevoir) — requeued=true, puis reset par advanceToNext()',
+        () async {
+      final cards = _makeCards(5);
+      final container = _makeContainer(cards);
+      addTearDown(container.dispose);
+
+      await container.read(drillSessionProvider(_params).future);
+      final notifier =
+          container.read(drillSessionProvider(_params).notifier);
+
+      await notifier.evaluate(DrillEvaluationResult.aRevoir);
+      expect(container.read(drillSessionProvider(_params)).value!.requeued,
+          true);
+
+      notifier.advanceToNext();
+      expect(container.read(drillSessionProvider(_params)).value!.requeued,
+          false);
+    });
+
+    test('evaluate(bien) — requeued reste false', () async {
+      final cards = _makeCards(2);
+      final container = _makeContainer(cards);
+      addTearDown(container.dispose);
+
+      await container.read(drillSessionProvider(_params).future);
+      final notifier =
+          container.read(drillSessionProvider(_params).notifier);
+
+      await notifier.evaluate(DrillEvaluationResult.bien);
+      expect(container.read(drillSessionProvider(_params)).value!.requeued,
+          false);
+    });
+
+    test(
+        'evaluate(aRevoir) une 2e fois sur la même carte — pas de réinsertion, '
+        'comptée en erreur, la session se termine', () async {
+      // 2 cartes : card-0 à revoir → réinsérée en fin de file (pos 2).
+      final cards = _makeCards(2);
+      final container = _makeContainer(cards);
+      addTearDown(container.dispose);
+
+      await container.read(drillSessionProvider(_params).future);
+      final notifier =
+          container.read(drillSessionProvider(_params).notifier);
+
+      await notifier.evaluate(DrillEvaluationResult.aRevoir); // card-0, 1re
+      notifier.advanceToNext();
+      await notifier.evaluate(DrillEvaluationResult.bien); // card-1
+      notifier.advanceToNext();
+
+      var s = container.read(drillSessionProvider(_params)).value!;
+      expect(s.currentCard!.id, 'card-0');
+      expect(s.queue.length, 3);
+
+      await notifier.evaluate(DrillEvaluationResult.aRevoir); // card-0, 2e
+      s = container.read(drillSessionProvider(_params)).value!;
+      expect(s.queue.length, 3, reason: 'pas de nouvelle réinsertion');
+      expect(s.requeued, false);
+      expect(s.evaluations['card-0'], DrillEvaluationResult.aRevoir);
+
+      notifier.advanceToNext();
+      expect(container.read(drillSessionProvider(_params)).value!.isComplete,
+          true);
+    });
+
     test('restartWithErrors() — queue = indices des cartes à revoir', () async {
       final cards = _makeCards(3);
       final container = _makeContainer(cards);

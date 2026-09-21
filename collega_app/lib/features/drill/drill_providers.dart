@@ -71,10 +71,11 @@ class DrillSessionNotifier
     state = AsyncValue.data(s.copyWith(semanticFeedback: feedback));
   }
 
-  Future<void> evaluate(DrillEvaluationResult result) async {
+  /// Retourne `true` si la carte a été réinsérée plus loin dans la file.
+  Future<bool> evaluate(DrillEvaluationResult result) async {
     final s = state.value;
-    if (s == null || s.currentCard == null) return;
-    if (s.exitResult != null) return;
+    if (s == null || s.currentCard == null) return false;
+    if (s.exitResult != null) return false;
 
     final card = s.currentCard!;
     final repo = ref.read(drillRepositoryProvider);
@@ -86,8 +87,14 @@ class DrillSessionNotifier
       ),
     );
 
+    // Un 1er « à revoir » réinsère la carte 3 positions plus loin ; un 2e
+    // « à revoir » sur la même carte ne la réinsère plus (comptée en erreur,
+    // la session peut se terminer — reprise via restartWithErrors).
+    final alreadyFailed =
+        s.evaluations[card.id] == DrillEvaluationResult.aRevoir;
+    final requeue = result == DrillEvaluationResult.aRevoir && !alreadyFailed;
     final newQueue = List<int>.from(s.queue);
-    if (result == DrillEvaluationResult.aRevoir) {
+    if (requeue) {
       final insertPos = (s.currentQueuePos + 3).clamp(
         s.currentQueuePos + 1,
         newQueue.length,
@@ -106,7 +113,9 @@ class DrillSessionNotifier
           ? s.evaluatedCount
           : s.evaluatedCount + 1,
       exitResult: result,
+      requeued: requeue,
     ));
+    return requeue;
   }
 
   void advanceToNext() {
@@ -121,6 +130,7 @@ class DrillSessionNotifier
       semanticFeedback: null,
       isComplete: isComplete,
       timerExpired: false,
+      requeued: false,
     ));
   }
 

@@ -7,6 +7,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
+import 'package:collega_app/features/drill/domain/drill_state.dart';
 import 'package:collega_app/features/drill/drill_providers.dart';
 import 'package:collega_app/features/drill/widgets/drill_evaluation_bar.dart';
 import 'package:collega_app/features/drill/widgets/timer_ring.dart';
@@ -93,6 +94,18 @@ class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
     } catch (_) {
       widget.notifier.flip();
     }
+  }
+
+  /// Rappel quand un 1er « à revoir » réinsère la carte plus loin dans la
+  /// file (S4) — l'exit de la carte dure 300 ms, un toast reste lisible.
+  Future<void> _handleEvaluate(DrillEvaluationResult result) async {
+    final requeued = await widget.notifier.evaluate(result);
+    if (!requeued || !mounted) return;
+    ShadToaster.of(context).show(
+      const ShadToast(
+        title: Text('Cette fiche reviendra dans quelques questions'),
+      ),
+    );
   }
 
   @override
@@ -275,7 +288,7 @@ class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
         // Evaluation bar
         DrillEvaluationBar(
           isVisible: session.isFlipped,
-          onEvaluate: notifier.evaluate,
+          onEvaluate: _handleEvaluate,
         ),
         const SizedBox(height: 24),
       ],
