@@ -44,9 +44,11 @@ class HomeScreen extends ConsumerWidget {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(
+              // Le shell n'a pas de SafeArea et la Home n'a pas d'AppBar :
+              // on absorbe la status bar ici.
+              padding: EdgeInsets.fromLTRB(
                 AppSpacing.screenMargin,
-                AppSpacing.screenMargin,
+                AppSpacing.screenMargin + MediaQuery.paddingOf(context).top,
                 AppSpacing.screenMargin,
                 8,
               ),
