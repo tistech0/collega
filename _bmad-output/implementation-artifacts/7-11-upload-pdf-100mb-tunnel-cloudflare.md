@@ -2,7 +2,7 @@
 
 Status: backlog
 
-<!-- OUVERTE le 2026-09-20 suite à la repro upload (session debug). Décision d'approche (AC1) à acter par le PL au kick-off — story contextée, pas encore ready-for-dev. -->
+<!-- OUVERTE le 2026-09-20 suite à la repro upload (session debug). 2026-09-21 : AC1 ACTÉ par le PL — option A (morceaux de 25 MB) + reprise + transfert en arrière-plan (background_downloader 9.5.5). Design validé : _bmad-output/planning-artifacts/specs/2026-09-21-upload-chunked-cloudflare-design.md — prochaine étape : plan d'implémentation. -->
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -43,8 +43,7 @@ Découvert le **2026-09-20** pendant la repro du bug « upload timeout / collèg
 
 ### AC1 — Décision d'approche actée et documentée
 
-**Étant donné** le tableau ci-dessus,
-**Alors** le PL choisit l'option au kick-off, la consigne dans cette story (section Dev Notes) et dans `deferred-work.md` si une option est reportée.
+**ACTÉ 2026-09-21** : option **A** (morceaux de **25 MB**), **reprise automatique** après coupure, **transfert en arrière-plan** via `background_downloader` 9.5.5. Design complet (routes, état Redis, refacto, app, erreurs, tests) : `_bmad-output/planning-artifacts/specs/2026-09-21-upload-chunked-cloudflare-design.md`. Preuve du blocage : ANAPATH 153 MB → `413` signé cloudflare en 0,2 s ; PNEUMO 67 MB → traverse.
 
 ### AC2 — Un PDF de 411 MB s'importe via le tunnel Cloudflare
 
