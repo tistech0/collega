@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bsx5uv7rm</task-id>\n<summary>Monitor event: \"import PNEUMO iPhone : étapes worker (OCR/génération), reconnexions SSE, erreurs\"</summary>\n<event>INFO:     172.26.0.4:52046 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/status HTTP/1.1\" 200 OK\nINFO:     172.26.0.4:52108 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/status HTTP/1.1\" 200 OK\nINFO:     172.26.0.4:52056 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/status HTTP/1.1\" 200 OK\nINFO:     172.26.0.4:52054 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/status HTTP/1.1\" 200 OK\nINFO:     172.26.0.4:52136 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/status HTTP/1.1\" 200 OK\nINFO:     172.26.0.4:52222 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/status HTTP/1.1\" 200 OK\nINFO:     172.26.0.4:52168 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/status HTTP/1.1\" 200 OK\nINFO:     172.26.0.4:52254 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/status HTTP/1.1\" 200 OK</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bsx5uv7rm</task-id> <summary>Monitor event: \"import PNEUMO iPhone : étapes worker (OCR/génération), reconnexions SSE, erreurs\"</summary> <event>INFO: 172.26.0.4:52046 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "194896fc754fcfbd556a1b70",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:54:12.696Z",
+  "stored_at": "2026-09-21T13:54:12.696Z",
+  "low_signal": true
+}

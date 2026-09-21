@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && echo \"=== import_models.dart ===\"; cat collega_app/lib/features/colleges/domain/import_models.dart; echo \"=== app_database.dart (tables/version) ===\"; grep -n \"class \\|schemaVersion\\|MigrationStrategy\\|onUpgrade\\|from <\\|@DriftDatabase\\|tables:\" collega_app/lib/core/database/app_database.dart | head -30",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && echo \"=== import_models.dart ===\"; cat collega_app/lib/features/colleges/domain/import_models.dart; echo \"=== app_database.dart (tables/version) ==",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b64bb8c37991ed206d97af97",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:34:08.451Z",
+  "stored_at": "2026-09-21T13:34:08.452Z"
+}

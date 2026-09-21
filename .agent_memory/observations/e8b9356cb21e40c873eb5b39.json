@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "Skill",
+  "path": "",
+  "command": "",
+  "summary": "Skill: bmad-create-story",
+  "text": "bmad-create-story",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e8b9356cb21e40c873eb5b39",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T20:49:37.299Z",
+  "stored_at": "2026-09-20T20:49:37.299Z",
+  "low_signal": true
+}

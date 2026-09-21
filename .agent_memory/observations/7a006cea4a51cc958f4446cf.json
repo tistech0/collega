@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker exec collega-db-1 psql -U postgres collega -Atc \"select status,ocr_page_progress,total_pages from colleges where id='\"'\"'ed9a1032-24f5-4243-8ad2-2d71ff9eae44'\"'\"';\" -Atc \"select status,card_count from generation_jobs where id='\"'\"'5bbd3c32-a9f0-4d35-b4fd-f3e992975ae6'\"'\"';\"'; echo \"--- stream/API tail ---\"; grep -v \"^\\s*$\" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bfgcatvl0.output | grep -v \"/status\" | tail -4 | cut -c1-120",
+  "summary": "ssh nas 'docker exec collega-db-1 psql -U postgres collega -Atc \"select status,ocr_page_progress,total_pages from colleges where id='\"'\"'ed9a1032-24f5-4243-8ad2-2d71ff9eae44'\"'\"';\" -Atc \"select status,card_count from generation_jobs where id='\"'\"'5bbd3c32-a9f0-4d35-b4fd-f3e992975ae6'\"'\"';\"'; echo \"--- stream/API tail -",
+  "text": "ssh nas 'docker exec collega-db-1 psql -U postgres collega -Atc \"select status,ocr_page_progress,total_pages from colleges where id='\"'\"'ed9a1032-24f5-4243-8ad2-2d71ff9eae44'\"'\"';\" -Atc \"select status,card_count from generation_jobs where id='\"'\"'5bbd3c32-a9f0-4d35-b4fd-f3e992975ae6'\"'\"';\"'; echo \"--- stream/API tail ---\"; grep -v \"^\\s*$\" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bfgcatvl0.output | grep -v \"/status\" | tail -4 | cut -c1-120: generation_complete|355|355 generation_complete|164 --- stream/API tail --- 14:01:32: 415.87s ← 0ddfd85c57f342f2a7639be40c571d1f:generate_college_cards ● {'college_id': 'ed9a1032-24f5-4243-8ad2-2d INFO: 172.26.0.4:46090 - \"GET /v1/colleges HTTP/1.1\" 200 OK INFO: 172.26.0.4:46106 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/items HTTP/1.1\" 200 OK INFO: 172.26.0.4:37214 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/items/bb2f79e1-051e-4bfc-8978-202b4b",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7a006cea4a51cc958f4446cf",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:02:23.646Z",
+  "stored_at": "2026-09-21T14:02:23.647Z"
+}

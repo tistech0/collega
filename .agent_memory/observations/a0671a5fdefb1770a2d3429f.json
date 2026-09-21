@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "TaskStop",
+  "path": "",
+  "command": "",
+  "summary": "About to run: TaskStop",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a0671a5fdefb1770a2d3429f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:02:33.215Z",
+  "stored_at": "2026-09-21T14:02:33.215Z",
+  "low_signal": true
+}

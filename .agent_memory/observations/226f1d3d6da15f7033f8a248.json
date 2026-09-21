@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && echo \"=== import_models.dart ===\"; cat collega_app/lib/features/colleges/domain/import_models.dart; echo \"=== app_database.dart (tables/version) ===\"; grep -n \"class \\|schemaVersion\\|MigrationStrategy\\|onUpgrade\\|from <\\|@DriftDatabase\\|tables:\" collega_app/lib/core/database/app_database.dart | head -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && echo \"=== import_models.dart ===\"; cat collega_app/lib/features/colleges/domain/import_models.dart; echo \"=== app_database.dart (tables/version) ===\"; grep -n \"class \\|schemaVersion\\|MigrationStrategy\\|onUpgrade\\|from <\\|@DriftDatabase\\|tables:\" collega_app/lib/core/",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && echo \"=== import_models.dart ===\"; cat collega_app/lib/features/colleges/domain/import_models.dart; echo \"=== app_database.dart (tables/version) ===\"; grep -n \"class \\|schemaVersion\\|MigrationStrategy\\|onUpgrade\\|from <\\|@DriftDatabase\\|tables:\" collega_app/lib/core/database/app_database.dart | head -30: O 8601 UTC bool get isCollegeLimitReached => collegeReloadCount >= collegeReloadMax; bool get isMonthlyLimitReached => monthlyReloads >= monthlyMax; factory ReloadLimits.fromJson(Map<String, dynamic> json) => ReloadLimits( collegeReloadCount: json['college_reload_count'] as int, collegeReloadMax: json['college_reload_max'] as int, monthlyReloads: json['monthly_reloads'] as int, monthlyMax: json['monthly_max'] as int, monthlyResetAt: json['monthly_reset_at'] as String, ); } === app_database.dart (tables/version) === 17:@DriftDatabase(tables: [CollegeImports, Items, FlashCards, PlanningConfigs, PlanningSessions]) 18:class AppDatabase extends _$AppDatabase { 24: int get schemaVersion => 5; 27: MigrationStrategy get migration => MigrationStrategy( 31: onUpgrade: (Migrator m, int from, int to) async { 32: if (from < 2) { 40: if (from >= 2 && from < 3) { 43: if (from < 4) { 48: if (from < 5) {",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "226f1d3d6da15f7033f8a248",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:34:09.292Z",
+  "stored_at": "2026-09-21T13:34:09.293Z"
+}

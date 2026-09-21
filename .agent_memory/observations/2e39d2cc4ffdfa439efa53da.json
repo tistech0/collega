@@ -1,0 +1,13 @@
+{
+  "type": "session_end",
+  "summary": "Subagent finished; distill durable observations from the subagent run.",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2e39d2cc4ffdfa439efa53da",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:49:18.181Z",
+  "stored_at": "2026-09-21T13:49:18.182Z",
+  "low_signal": true
+}

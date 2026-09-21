@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker exec Nginx-Proxy-Manager-Official sh -c \"grep -rn client_max_body_size /etc/nginx/ /data/nginx/ 2>/dev/null | head -5\"'; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"_MAX_PDF_SIZE\\|_CHUNK_SIZE\\|pdf_storage_path\" app/api/v1/colleges.py app/core/config.py | head -6; grep -n \"file_picker\\|image_picker\" ../collega_app/pubspec.yaml",
+  "summary": "About to run: ssh nas 'docker exec Nginx-Proxy-Manager-Official sh -c \"grep -rn client_max_body_size /etc/nginx/ /data/nginx/ 2>/dev/null | head -5\"'; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backen",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d607303e06ef818073ca6ec4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T20:50:07.667Z",
+  "stored_at": "2026-09-20T20:50:07.668Z"
+}

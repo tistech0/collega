@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "ok limport a fonctionner et le drill aussi maintenant on peut voir les ecran ou je recommence une session pour ca ?",
+  "summary": "ok limport a fonctionner et le drill aussi maintenant on peut voir les ecran ou je recommence une session pour ca ?",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7d02a1f6aa5e9a4419ced1cb",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:05:30.798Z",
+  "stored_at": "2026-09-21T14:05:30.798Z",
+  "low_signal": true
+}

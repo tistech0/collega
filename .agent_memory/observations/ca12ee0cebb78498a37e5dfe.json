@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff collega_app/ios/Runner.xcodeproj/project.pbxproj | grep \"^[-+]\" | grep -v \"^+++\\|^---\" | head -8",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff collega_app/ios/Runner.xcodeproj/project.pbxproj | grep \"^[-+]\" | grep -v \"^+++\\|^---\" | head -8: - name = Pods; + CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES; + STRING_CATALOG_GENERATE_SYMBOLS = YES; + CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER =",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff collega_app/ios/Runner.xcodeproj/project.pbxproj | grep \"^[-+]\" | grep -v \"^+++\\|^---\" | head -8: - name = Pods; + CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES; + STRING_CATALOG_GENERATE_SYMBOLS = YES; + CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES; + STRING_CATALOG_GENERATE_SYMBOLS = YES; + CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES; + STRING_CATALOG_GENERATE_SYMBOLS = YES;",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ca12ee0cebb78498a37e5dfe",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:05:46.215Z",
+  "stored_at": "2026-09-21T14:05:46.215Z"
+}

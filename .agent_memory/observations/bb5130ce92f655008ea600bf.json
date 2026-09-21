@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff --stat _bmad-output/implementation-artifacts/sprint-status.yaml; git diff _bmad-output/implementation-artifacts/sprint-status.yaml | grep \"^[-+]\" | grep -v \"^+++\\|^---\" | cut -c1-160",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff --stat _bmad-output/implementation-artifacts/sprint-status.yaml; git diff _bmad-output/implementation-artifacts/sprint-status.yaml | grep \"^[-+]\" | grep -v \"^+++\\|^---\" | cut -c1-160: _bmad-output/implementation-artifacts/sprint-status.yaml | 3 ++- 1 file ch",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff --stat _bmad-output/implementation-artifacts/sprint-status.yaml; git diff _bmad-output/implementation-artifacts/sprint-status.yaml | grep \"^[-+]\" | grep -v \"^+++\\|^---\" | cut -c1-160: _bmad-output/implementation-artifacts/sprint-status.yaml | 3 ++- 1 file changed, 2 insertions(+), 1 deletion(-) -last_updated: 2026-06-18 # Story 7.8 (dashboard admin thème C — qualité & coût) → DONE après code review (bmad-code-review) : 1 decision-needed tranchée (/usag +last_updated: 2026-06-19 # Story 7.10 (hardening sécu/résilience pré-prod) CRÉÉE et passée ready-for-dev via bmad-create-story. Issue de la short-list avant-pr + 7-10-hardening-securite-pre-prod: ready-for-dev # [Hardening sécu/résilience backend pré-prod — short-list avant-prod de deferred-work.md. Périmètre",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bb5130ce92f655008ea600bf",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T20:51:19.350Z",
+  "stored_at": "2026-09-20T20:51:19.351Z"
+}

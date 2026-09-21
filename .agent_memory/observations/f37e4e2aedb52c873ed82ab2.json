@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_learn",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_learn: [{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/bug_fix-crans-de-progression-empil-s-un-push-par-tat-importstreaming-rafales-status-n-st-c3e6a84b.md\\nRepo-local memory is written immediately. Org/global promotion still requires",
+  "text": "[{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/bug_fix-crans-de-progression-empil-s-un-push-par-tat-importstreaming-rafales-status-n-st-c3e6a84b.md\\nRepo-local memory is written immediately. Org/global promotion still requires explicit review.'}]",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f37e4e2aedb52c873ed82ab2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:58:24.808Z",
+  "stored_at": "2026-09-21T13:58:24.808Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && python3 _bmad/scripts/resolve_customization.py --skill \".claude/skills/bmad-create-story\" --key workflow 2>&1 | head -20; echo \"--- config ---\"; cat _bmad/bmm/config.yaml; echo \"--- sprint status tail ---\"; grep -n \"^  7-\\|^  epic-7\\|last_updated\" _bmad-output/implementation-artifacts/sprint-status.yaml; echo \"--- 7.9 backlog story ---\"; ls _bmad-output/implementation-artifacts/ | grep \"^7-\"; head -40 \"_bmad-output/implementation-artifacts/7-9-refonte-auth-admin-console-session-token.md\" 2>/dev/null",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && python3 _bmad/scripts/resolve_customization.py --skill \".claude/skills/bmad-create-story\" --key workflow 2>&1 | head -20; echo \"--- config ---\"; ca",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3bfe6caebfcab1d474c6e8e6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-20T20:49:48.350Z",
+  "stored_at": "2026-09-20T20:49:48.350Z"
+}

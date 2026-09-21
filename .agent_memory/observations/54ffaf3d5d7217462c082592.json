@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "je vois que pneumo est deja importer possible de le retirer ?",
+  "summary": "je vois que pneumo est deja importer possible de le retirer ?",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "54ffaf3d5d7217462c082592",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:50:24.862Z",
+  "stored_at": "2026-09-21T13:50:24.863Z",
+  "low_signal": true
+}

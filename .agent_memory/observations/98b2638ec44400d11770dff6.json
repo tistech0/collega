@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "je suis connecter et lancer limport la",
+  "summary": "je suis connecter et lancer limport la",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "98b2638ec44400d11770dff6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:53:15.870Z",
+  "stored_at": "2026-09-21T13:53:15.871Z",
+  "low_signal": true
+}

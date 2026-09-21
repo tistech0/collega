@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bcjzpmixl</task-id>\n<summary>Monitor event: \"fin génération PNEUMO (generate_college_cards ←), ouverture /items, erreurs 500/pool\"</summary>\n<event>14:01:32: 415.87s ← 0ddfd85c57f342f2a7639be40c571d1f:generate_college_cards ● {'college_id': 'ed9a1032-24f5-4243-8ad2-2d71ff9eae44', 'job_id': '5bbd3c32-a9f0…</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bcjzpmixl</task-id> <summary>Monitor event: \"fin génération PNEUMO (generate_college_cards ←), ouverture /items, erreurs 500/pool\"</summary> <event>14:01:32: 415.87s ← 0ddfd85c57f342f2a7639be40c571d1f:generate_c",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4c71814e27d6bf78600228eb",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:02:14.193Z",
+  "stored_at": "2026-09-21T14:02:14.193Z",
+  "low_signal": true
+}

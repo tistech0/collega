@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && tool/run_device.sh --release -d 00008110-000115D43499801E --no-resident 2>&1 | grep -v \"^\\s*$\" | tail -8",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && tool/run_device.sh --release -d 00008110-000115D43499801E --no-resident 2>&1 | grep -v \"^\\s*$\" | tail -8: b18d3u645 Session cwd remains /Users/lesurmatthis/dev/projet perso/collega; directory changes made by the backgrounded command do not apply to subseq",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && tool/run_device.sh --release -d 00008110-000115D43499801E --no-resident 2>&1 | grep -v \"^\\s*$\" | tail -8: b18d3u645 Session cwd remains /Users/lesurmatthis/dev/projet perso/collega; directory changes made by the backgrounded command do not apply to subsequent commands.",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bbf1230e3aed047ee6bab751",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:59:01.407Z",
+  "stored_at": "2026-09-21T13:59:01.408Z"
+}

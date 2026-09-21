@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bcjzpmixl</task-id>\n<summary>Monitor event: \"fin génération PNEUMO (generate_college_cards ←), ouverture /items, erreurs 500/pool\"</summary>\n<event>INFO:     172.26.0.4:46106 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/items HTTP/1.1\" 200 OK</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bcjzpmixl</task-id> <summary>Monitor event: \"fin génération PNEUMO (generate_college_cards ←), ouverture /items, erreurs 500/pool\"</summary> <event>INFO: 172.26.0.4:46106 - \"GET /v1/colleges/ed9a1032-24f5-4243-8",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ebb966ee92f9dc4006728c71",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:02:23.894Z",
+  "stored_at": "2026-09-21T14:02:23.894Z",
+  "low_signal": true
+}

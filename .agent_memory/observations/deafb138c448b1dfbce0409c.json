@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>b18d3u645</task-id>\n<tool-use-id>toolu_019RVA9QN2nmBzBayaGq8fvc</tool-use-id>\n<output-file>/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/b18d3u645.output</output-file>\n<status>completed</status>\n<summary>Background command \"Rebuild and reinstall the fixed app on the iPhone (background)\" completed (exit code 0)</summary>\n</task-notification>",
+  "summary": "<task-notification> <task-id>b18d3u645</task-id> <tool-use-id>toolu_019RVA9QN2nmBzBayaGq8fvc</tool-use-id> <output-file>/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/b18d3u64",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "deafb138c448b1dfbce0409c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:00:02.870Z",
+  "stored_at": "2026-09-21T14:00:02.870Z",
+  "low_signal": true
+}

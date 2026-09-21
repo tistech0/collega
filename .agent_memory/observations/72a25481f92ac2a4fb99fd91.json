@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "Skill",
+  "path": "",
+  "command": "",
+  "summary": "Skill: superpowers:writing-plans",
+  "text": "superpowers:writing-plans",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "72a25481f92ac2a4fb99fd91",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:33:59.301Z",
+  "stored_at": "2026-09-21T13:33:59.302Z",
+  "low_signal": true
+}

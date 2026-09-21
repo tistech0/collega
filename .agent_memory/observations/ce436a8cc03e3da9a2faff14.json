@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage reverify --packet \"repo:git-github-com-tistech0-collega:bug_fix:import-timeout-coll-ge-vide-sse-coup-par-cloudflare-apr-s-90-s-de-silence-app-sa\" --evidence \"Le resync avec backoff (_scheduleResync, reconnectIfActive gérant ocr_complete/failed) est toujours en place ; le commit 1a55430 ajoute la fusion des appels concurrents (_resyncInFlight) et la déconnexion de l'ancien SseClient, documentées dans le packet 'Écrans de progression empilés'. flutter test test/features/colleges : 47 passed.\" --verified-by \"flutter test test/features/coll… [+50 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage reverify --packet \"repo:git-github-com-tistech0-collega:bug_fix:import-timeout-coll-ge-vide-sse-coup-par-cloudflare-apr-s-90-s-de-silence-app-sa\" --evidence \"Le resync avec backoff (_scheduleResync, reconnectIfActive gérant ocr_complete/failed) est toujours en p",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage reverify --packet \"repo:git-github-com-tistech0-collega:bug_fix:import-timeout-coll-ge-vide-sse-coup-par-cloudflare-apr-s-90-s-de-silence-app-sa\" --evidence \"Le resync avec backoff (_scheduleResync, reconnectIfActive gérant ocr_complete/failed) est toujours en place ; le commit 1a55430 ajoute la fusion des appels concurrents (_resyncInFlight) et la déconnexion de l'ancien SseClient, documentées dans le packet 'Écrans de progression empilés'. flutter test test/features/colleges : 47 passed.\" --verified-by \"flutter test test/features/colleges (47 passed), git show 1a55430\" 2>&1 | tail -3: Reverified repo:git-github-com-tistech0-collega:bug_fix:import-timeout-coll-ge-vide-sse-coup-par-cloudflare-apr-s-90-s-de-silence-app-sa grounding refreshed for 4 path(s) · stale flag cleared evidence recorded for changed path(s): collega_app/lib/features/colleges/colleges_import_providers.dart, collega_app/test/features/colleges/college_import_notifier_test.dart",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ce436a8cc03e3da9a2faff14",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:58:32.266Z",
+  "stored_at": "2026-09-21T13:58:32.266Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 1,70p collega_app/lib/core/database/app_database.dart; echo \"=== tables files ===\"; ls collega_app/lib/core/database/; grep -n \"class CollegeImports\" -A 12 collega_app/lib/core/database/tables.dart 2>/dev/null | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 1,70p collega_app/lib/core/database/app_database.dart; echo \"=== tables files ===\"; ls collega_app/lib/core/database/; grep -n \"class CollegeImports\" -A 12 collega_app/lib/core/database/tables.dart 2>/dev/null | head -20: rom < 3) { await m.addColumn(flashCard",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 1,70p collega_app/lib/core/database/app_database.dart; echo \"=== tables files ===\"; ls collega_app/lib/core/database/; grep -n \"class CollegeImports\" -A 12 collega_app/lib/core/database/tables.dart 2>/dev/null | head -20: rom < 3) { await m.addColumn(flashCards, flashCards.userFeedback); } if (from < 4) { await m.addColumn(flashCards, flashCards.drillLevel); await m.addColumn(flashCards, flashCards.nextReviewAt); await m.addColumn(flashCards, flashCards.reviewCount); } if (from < 5) { await m.createTable(planningConfigs); await m.createTable(planningSessions); } }, ); Future<void> deleteEverything() async { await transaction(() async { await delete(collegeImports).go(); await delete(items).go(); await delete(flashCards).go(); await delete(planningConfigs).go(); await delete(planningSessions).go(); }); } static LazyDatabase _openConnection() { return LazyDatabase(() async { final dbFolder = await getApplicationDocumentsDirectory(); final file = File(p.join(dbFolder.path, 'collega.sqlite')); return NativeDatabase.createInBackground(file); }); === tables files === app_database.dart app_database.g.dart tables",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e72690c5591a706973a18b88",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:34:14.632Z",
+  "stored_at": "2026-09-21T13:34:14.633Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "TaskStop",
+  "path": "",
+  "command": "",
+  "summary": "TaskStop: Successfully stopped task: bsx5uv7rm (tail -n0 -F /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bfgcatvl0.output | grep -E --line-buffered \"process_college_ocr|generate_college_cards|/stream|/status|/items|Traceback|Error|error|failed",
+  "text": "Successfully stopped task: bsx5uv7rm (tail -n0 -F /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bfgcatvl0.output | grep -E --line-buffered \"process_college_ocr|generate_college_cards|/stream|/status|/items|Traceback|Error|error|failed|5[0-9][0-9] |4[0-9][0-9] \")",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3c8e22abf51da94f3277d04b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:58:48.835Z",
+  "stored_at": "2026-09-21T13:58:48.835Z"
+}

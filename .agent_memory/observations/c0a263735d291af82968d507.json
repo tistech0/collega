@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 1,70p collega_app/lib/core/database/app_database.dart; echo \"=== tables files ===\"; ls collega_app/lib/core/database/; grep -n \"class CollegeImports\" -A 12 collega_app/lib/core/database/tables.dart 2>/dev/null | head -20",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 1,70p collega_app/lib/core/database/app_database.dart; echo \"=== tables files ===\"; ls collega_app/lib/core/database/; grep -n \"class Colleg",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c0a263735d291af82968d507",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T13:34:13.633Z",
+  "stored_at": "2026-09-21T13:34:13.634Z"
+}
