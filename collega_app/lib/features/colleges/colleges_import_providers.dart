@@ -40,6 +40,9 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
   bool _disposed = false;
   Timer? _reconnectTimer;
   int _reconnectAttempt = 0;
+  // Appels concurrents à reconnectIfActive (N écrans, onResume + resync) fusionnés
+  // en une seule requête /status + un seul stream SSE.
+  Future<void>? _resyncInFlight;
 
   @override
   Future<CollegeImportState> build() async {
@@ -122,6 +125,9 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
     final storage = ref.read(secureStorageProvider);
     final token = await storage.read(key: 'access_token') ?? '';
     if (_disposed) return;
+    // Un seul stream actif : l'ancien client est déconnecté (cancel token), pas
+    // seulement sa subscription — sinon la connexion HTTP reste ouverte côté serveur.
+    _sseClient?.disconnect();
     _sseClient = SseClient(backendBaseUrl, tokenProvider: () => token);
 
     _sseSubscription = _sseClient!
@@ -207,7 +213,15 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
     );
   }
 
-  Future<void> reconnectIfActive(String collegeId) async {
+  Future<void> reconnectIfActive(String collegeId) {
+    final inFlight = _resyncInFlight;
+    if (inFlight != null) return inFlight;
+    final run = _reconnectIfActive(collegeId).whenComplete(() => _resyncInFlight = null);
+    _resyncInFlight = run;
+    return run;
+  }
+
+  Future<void> _reconnectIfActive(String collegeId) async {
     final repo = ref.read(collegeImportRepositoryProvider);
     try {
       final status = await repo.getStatus(collegeId);

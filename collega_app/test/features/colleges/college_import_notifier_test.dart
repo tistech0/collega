@@ -25,6 +25,7 @@ class _FakeCollegeImportRepository extends CollegeImportRepository {
   final ImportStartResponse? importResult;
   final Exception? throwOnImport;
   final CollegeStatusResponse? statusOverride;
+  int statusCalls = 0;
 
   @override
   Future<ImportStartResponse> importPdf(int refId, File pdfFile) async {
@@ -34,6 +35,7 @@ class _FakeCollegeImportRepository extends CollegeImportRepository {
 
   @override
   Future<CollegeStatusResponse> getStatus(String collegeId) async {
+    statusCalls++;
     return statusOverride ??
         CollegeStatusResponse(
           collegeId: collegeId,
@@ -385,6 +387,32 @@ void main() {
 
         await completed.future.timeout(const Duration(seconds: 15));
         expect(container.read(collegeImportProvider).valueOrNull, isA<ImportComplete>());
+      },
+    );
+    test(
+      'reconnectIfActive appelé N fois en parallèle → UN seul /status et UN seul refresh',
+      () async {
+        // Régression prod 2026-09-21 : N écrans empilés rappelaient reconnectIfActive au
+        // même onResume → N GET /status + N streams SSE → pool DB épuisé côté backend.
+        final repo = _FakeCollegeImportRepository(
+          statusOverride: CollegeStatusResponse(
+            collegeId: 'college-uuid-15', refId: 15, status: 'processing', ocrProgress: 5,
+          ),
+        );
+        final apiClient = _FakeApiClient();
+        final container = _makeContainer(repo, apiClient: apiClient);
+        addTearDown(container.dispose);
+        final notifier = container.read(collegeImportProvider.notifier);
+
+        await Future.wait([
+          notifier.reconnectIfActive('college-uuid-15'),
+          notifier.reconnectIfActive('college-uuid-15'),
+          notifier.reconnectIfActive('college-uuid-15'),
+        ]);
+
+        expect(repo.statusCalls, 1);
+        expect(apiClient.refreshCalls, 1);
+        expect(container.read(collegeImportProvider).valueOrNull, isA<ImportStreaming>());
       },
     );
   });

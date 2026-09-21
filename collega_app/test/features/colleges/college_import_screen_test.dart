@@ -18,6 +18,10 @@ Widget _buildScreen({
         path: '/',
         builder: (ctx, s) => CollegeImportScreen(refId: refId),
       ),
+      GoRoute(
+        path: '/colleges/:refId/import/progress',
+        builder: (ctx, s) => const _ProgressStub(),
+      ),
     ],
   );
 
@@ -31,6 +35,12 @@ Widget _buildScreen({
   );
 }
 
+class _ProgressStub extends StatelessWidget {
+  const _ProgressStub();
+  @override
+  Widget build(BuildContext context) => const Scaffold(body: Text('progress-stub'));
+}
+
 class _FakeImportNotifier extends CollegeImportNotifier {
   _FakeImportNotifier(this._initial);
   final CollegeImportState _initial;
@@ -40,6 +50,8 @@ class _FakeImportNotifier extends CollegeImportNotifier {
 
   @override
   Future<void> reset() async {}
+
+  void emit(CollegeImportState s) => state = AsyncValue.data(s);
 }
 
 void main() {
@@ -65,5 +77,36 @@ void main() {
       expect(find.byType(LinearProgressIndicator), findsOneWidget);
       expect(find.text('Choisir un PDF'), findsNothing);
     });
+    testWidgets(
+      "n'empile qu'UN écran de progression malgré plusieurs états ImportStreaming",
+      (tester) async {
+        // Régression prod 2026-09-21 : chaque événement OCR produisait un nouvel
+        // ImportStreaming → context.push à chaque fois → ~55 écrans empilés, dont les
+        // 55 AppLifecycleListener rappelaient reconnectIfActive au retour premier plan.
+        final notifier = _FakeImportNotifier(const ImportIdle());
+        final container = ProviderContainer(
+          overrides: [collegeImportProvider.overrideWith(() => notifier)],
+        );
+        addTearDown(container.dispose);
+        final router = GoRouter(routes: [
+          GoRoute(path: '/', builder: (ctx, s) => const CollegeImportScreen(refId: 26)),
+          GoRoute(path: '/colleges/:refId/import/progress', builder: (ctx, s) => const _ProgressStub()),
+        ]);
+        await tester.pumpWidget(UncontrolledProviderScope(
+          container: container,
+          child: ShadApp.router(routerConfig: router),
+        ));
+        await tester.pumpAndSettle();
+
+        notifier.emit(const ImportStreaming(collegeId: 'c1', jobId: 'j', ocrProgress: 1, status: 'processing'));
+        await tester.pumpAndSettle();
+        notifier.emit(const ImportStreaming(collegeId: 'c1', jobId: 'j', ocrProgress: 2, status: 'processing'));
+        await tester.pumpAndSettle();
+        notifier.emit(const ImportStreaming(collegeId: 'c1', jobId: 'j', ocrProgress: 3, status: 'processing'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(_ProgressStub, skipOffstage: false), findsOneWidget);
+      },
+    );
   });
 }

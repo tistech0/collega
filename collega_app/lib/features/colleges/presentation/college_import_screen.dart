@@ -65,9 +65,13 @@ class _CollegeImportScreenState extends ConsumerState<CollegeImportScreen> {
   Widget build(BuildContext context) {
     final importAsync = ref.watch(collegeImportProvider);
 
-    ref.listen<AsyncValue<CollegeImportState>>(collegeImportProvider, (_, next) {
+    ref.listen<AsyncValue<CollegeImportState>>(collegeImportProvider, (previous, next) {
       final value = next.valueOrNull;
-      if (value is ImportStreaming) {
+      // Ne pousser l'écran de progression qu'à la TRANSITION vers ImportStreaming :
+      // chaque événement OCR produit un nouvel ImportStreaming (copyWith), un push
+      // par état empilait ~1 écran par page (régression prod 2026-09-21).
+      final wasStreaming = previous?.valueOrNull is ImportStreaming;
+      if (value is ImportStreaming && !wasStreaming) {
         context.push(
           '/colleges/${widget.refId}/import/progress',
           extra: {'collegeId': value.collegeId, 'refId': widget.refId},
