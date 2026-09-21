@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "grep -E \"\\[E\\]\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | cut -c1-200 | sort -u",
+  "summary": "About to run: grep -E \"\\[E\\]\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | cut -c1-200 | sort -u",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "105aa731e6efa46cef1b58d1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:56:00.196Z",
+  "stored_at": "2026-09-21T14:56:00.196Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bloirwnnv.output\"; echo \"---\"; ps aux | grep -E \"[f]lutter test|[g]it stash\" | awk '{print $2, $11, $12, $13, $14}' | head; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git stash list | wc -l",
+  "summary": "cat \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bloirwnnv.output\"; echo \"---\"; ps aux | grep -E \"[f]lutter test|[g]it stash\" | awk '{print $2, $11, $12, $13, $14}' | head; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git stash list | wc -l: --",
+  "text": "cat \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bloirwnnv.output\"; echo \"---\"; ps aux | grep -E \"[f]lutter test|[g]it stash\" | awk '{print $2, $11, $12, $13, $14}' | head; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git stash list | wc -l: --- 10768 /bin/zsh -c source /Users/lesurmatthis/.claude/shell-snapshots/snapshot-zsh-1789934237580-ajp2wl.sh 10752 /bin/zsh -c source /Users/lesurmatthis/.claude/shell-snapshots/snapshot-zsh-1789934237580-ajp2wl.sh 13213 /bin/zsh -c source /Users/lesurmatthis/.claude/shell-snapshots/snapshot-zsh-1789934237580-ajp2wl.sh 13203 /bin/zsh -c source /Users/lesurmatthis/.claude/shell-snapshots/snapshot-zsh-1789934237580-ajp2wl.sh 12209 /bin/zsh -c source /Users/lesurmatthis/.claude/shell-snapshots/snapshot-zsh-1789934237580-ajp2wl.sh 11275 /bin/zsh -c source /Users/lesurmatthis/.claude/shell-snapshots/snapshot-zsh-1789934237580-ajp2wl.sh 11259 /bin/zsh -c source /Users/lesurmatthis/.claude/shell-snapshots/snapshot-zsh-1789934237580-ajp2wl.sh 1",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "51f1d294ab034e6b249b7d43",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:10:10.004Z",
+  "stored_at": "2026-09-21T15:10:10.005Z"
+}

@@ -1,0 +1,41 @@
+---
+type: "Decision"
+title: "Drill : une fiche « à revoir » n'est réinsérée qu'une fois (toast 2 s), la 2e fois elle est comptée en erreur"
+description: "Décision produit 2026 09 21 : la répétition intra session est conservée 1er « à revoir » → réinsertion 3 positions plus loin, DrillSessionState.requeued = true, toast « Cette fiche reviendra dans quelques questions » 2 s"
+resource: "collega_app/lib/features/drill/drill_providers.dart"
+tags: ["session-learning", "drill", "à revoir", "requeue", "toast", "SafeArea"]
+timestamp: "2026-09-21T18:49:10.021Z"
+x-kage-id: "repo:git-github-com-tistech0-collega:decision:drill-une-fiche-revoir-nest-r-ins-r-e-quune-fois-toast-2-s-la-2e-fois-elle-est-c"
+x-kage-type: "decision"
+x-kage-status: "approved"
+x-kage-scope: "repo"
+x-kage-visibility: "team"
+x-kage-verified: "unverified"
+x-kage-paths: ["collega_app/lib/features/drill/drill_providers.dart", "collega_app/lib/features/drill/domain/drill_session_state.dart", "collega_app/lib/features/drill/presentation/drill_screen.dart", "collega_app/lib/features/home/presentation/home_screen.dart"]
+x-kage-stack: ["flutter", "riverpod"]
+---
+
+# Drill : une fiche « à revoir » n'est réinsérée qu'une fois (toast 2 s), la 2e fois elle est comptée en erreur
+
+> Décision produit 2026 09 21 : la répétition intra session est conservée 1er « à revoir » → réinsertion 3 positions pl…
+
+Décision produit 2026-09-21 : la répétition intra-session est conservée (1er « à revoir » → réinsertion 3 positions plus loin, DrillSessionState.requeued = true, toast « Cette fiche reviendra dans quelques questions » 2 s), mais un 2e « à revoir » sur la même fiche ne la réinsère plus : elle reste en erreur (evaluations[id] = aRevoir) et la session peut se terminer, la reprise passant par restartWithErrors sur l'écran de fin. Avant, le drill ne se terminait que lorsque toutes les fiches étaient ≥ « bien », ce qui déroutait l'utilisateur. evaluate() renvoie désormais bool (requeued) pour éviter de lire notifier.state (protégé) depuis l'écran. Hors scope volontaire : barre de progression du drill colorée par niveau de maîtrise (évolution de design), autoDispose sur collegeDetailProvider. Le shell (app_router Scaffold) n'a pas de SafeArea : les écrans sans AppBar (Home) doivent absorber MediaQuery.paddingOf(context).top eux-mêmes.
+Evidence: Demande utilisateur en session ; tests drill_session_notifier_test (requeued, 2e aRevoir → isComplete) et drill_screen_test (toast présent puis disparu à ~2 s) ; home_screen_safe_area_test.
+Verified by: flutter test test/features/drill (58 passed) ; commits dbd3220, 7e32853 ; validation iPhone
+
+## Verification
+
+Demande utilisateur en session ; tests drill_session_notifier_test (requeued, 2e aRevoir → isComplete) et drill_screen_test (toast présent puis disparu à ~2 s) ; home_screen_safe_area_test.
+
+# Citations
+
+[1] explicit_capture (2026-09-21T18:49:10.021Z)
+
+## Kage state
+
+Machine state for lossless round-trip; OKF consumers can ignore it.
+
+```json kage-state
+{"schema_version":2,"id":"repo:git-github-com-tistech0-collega:decision:drill-une-fiche-revoir-nest-r-ins-r-e-quune-fois-toast-2-s-la-2e-fois-elle-est-c","title":"Drill : une fiche « à revoir » n'est réinsérée qu'une fois (toast 2 s), la 2e fois elle est comptée en erreur","summary":"Décision produit 2026 09 21 : la répétition intra session est conservée 1er « à revoir » → réinsertion 3 positions plus loin, DrillSessionState.requeued = true, toast « Cette fiche reviendra dans quelques questions » 2 s","body":"Décision produit 2026-09-21 : la répétition intra-session est conservée (1er « à revoir » → réinsertion 3 positions plus loin, DrillSessionState.requeued = true, toast « Cette fiche reviendra dans quelques questions » 2 s), mais un 2e « à revoir » sur la même fiche ne la réinsère plus : elle reste en erreur (evaluations[id] = aRevoir) et la session peut se terminer, la reprise passant par restartWithErrors sur l'écran de fin. Avant, le drill ne se terminait que lorsque toutes les fiches étaient ≥ « bien », ce qui déroutait l'utilisateur. evaluate() renvoie désormais bool (requeued) pour éviter de lire notifier.state (protégé) depuis l'écran. Hors scope volontaire : barre de progression du drill colorée par niveau de maîtrise (évolution de design), autoDispose sur collegeDetailProvider. Le shell (app_router Scaffold) n'a pas de SafeArea : les écrans sans AppBar (Home) doivent absorber MediaQuery.paddingOf(context).top eux-mêmes.\nEvidence: Demande utilisateur en session ; tests drill_session_notifier_test (requeued, 2e aRevoir → isComplete) et drill_screen_test (toast présent puis disparu à ~2 s) ; home_screen_safe_area_test.\nVerified by: flutter test test/features/drill (58 passed) ; commits dbd3220, 7e32853 ; validation iPhone","type":"decision","scope":"repo","visibility":"team","sensitivity":"internal","status":"approved","confidence":0.7,"tags":["session-learning","drill","à revoir","requeue","toast","SafeArea"],"paths":["collega_app/lib/features/drill/drill_providers.dart","collega_app/lib/features/drill/domain/drill_session_state.dart","collega_app/lib/features/drill/presentation/drill_screen.dart","collega_app/lib/features/home/presentation/home_screen.dart"],"stack":["flutter","riverpod"],"source_refs":[{"kind":"explicit_capture","captured_at":"2026-09-21T18:49:10.021Z"}],"context":{"fact":"Décision produit 2026-09-21 : la répétition intra-session est conservée (1er « à revoir » → réinsertion 3 positions plus loin, DrillSessionState.requeued = true, toast « Cette fiche reviendra dans quelques questions » 2 s), mais un 2e « à revoir » sur la même fiche ne la réinsère plus : elle reste en erreur (evaluations[id] = aRevoir) et la session peut se terminer, la reprise passant par restartWithErrors sur l'écran de fin. Avant, le drill ne se terminait que lorsque toutes les fiches étaient ≥ « bien », ce qui déroutait l'utilisateur. evaluate() renvoie désormais bool (requeued) pour éviter de lire notifier.state (protégé) depuis l'écran. Hors scope volontaire : barre de progression du drill colorée par niveau de maîtrise (évolution de design), autoDispose sur collegeDetailProvider. Le shell (app_router Scaffold) n'a pas de SafeArea : les écrans sans AppBar (Home) doivent absorber MediaQuery.paddingOf(context).top eux-mêmes.\nEvidence: Demande utilisateur en session ; tests drill_session_notifier_test (requeued, 2e aRevoir → isComplete) et drill_screen_test (toast présent puis disparu à ~2 s) ; home_screen_safe_area_test.\nVerified by: flutter test test/features/drill (58 passed) ; commits dbd3220, 7e32853 ; validation iPhone","verification":"Demande utilisateur en session ; tests drill_session_notifier_test (requeued, 2e aRevoir → isComplete) et drill_screen_test (toast présent puis disparu à ~2 s) ; home_screen_safe_area_test."},"freshness":{"ttl_days":365,"last_verified_at":"2026-09-21T18:49:10.021Z","path_fingerprints":[{"path":"collega_app/lib/features/drill/drill_providers.dart","sha256":"ece7f0095ba095e66db9a83e2344f2cd10ba68da6e6581924df1207ecf37c0ed","size":5228},{"path":"collega_app/lib/features/drill/domain/drill_session_state.dart","sha256":"4eef213f47e6815a79c4d0db214241ca9cae1df881fc97cf02ccb44a0b7b0124","size":4495},{"path":"collega_app/lib/features/drill/presentation/drill_screen.dart","sha256":"f18f8d186cedd35ff72e3adb7be418206104b88e4940e774ad5b273bc4a29f57","size":18136},{"path":"collega_app/lib/features/home/presentation/home_screen.dart","sha256":"c82ff9b2c75b2abf3ec99eed4971542456c1bad5378e173287e58a305311e5c8","size":6815}],"path_fingerprint_policy":"source_hash_staleness","verification":"repo_local_agent_capture"},"edges":[],"quality":{"reviewer":"repo-local-agent","votes_up":0,"votes_down":0,"uses_30d":0,"reports_stale":0,"review_boundary":"git_or_pr","promotion_requires_review":true,"discovery_tokens":4000,"discovery_tokens_estimated":true,"score":100,"reasons":["high-value memory type","has source evidence","grounded to repo paths","tagged","concise but substantive","actionable rationale or verification"],"risks":[],"duplicate_candidates":[],"stale_reasons":[],"estimated_tokens_saved":312},"created_at":"2026-09-21T18:49:10.021Z","updated_at":"2026-09-21T18:49:10.021Z","author_branch":"feat/story-7.11-upload-chunked"}
+```
+

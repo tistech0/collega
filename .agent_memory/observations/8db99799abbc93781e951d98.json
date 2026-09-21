@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && find . -name \"project-context.md\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" 2>/dev/null | head; echo \"---\"; f=$(find . -name \"project-context.md\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" 2>/dev/null | head -1); [ -n \"$f\" ] && cat \"$f\"",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && find . -name \"project-context.md\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" 2>/dev/null | head; echo \"---\"; f=$(find . -name \"project-context.md\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" 2>/dev/null | head -1); [ -n \"$f\" ] && cat \"$f\" failed: Exi",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && find . -name \"project-context.md\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" 2>/dev/null | head; echo \"---\"; f=$(find . -name \"project-context.md\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" 2>/dev/null | head -1); [ -n \"$f\" ] && cat \"$f\" failed: Exit code 1 ---",
+  "session_id": "8252e051-272c-4a9f-bb5a-d9a5e9ec4f36",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8db99799abbc93781e951d98",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:43:46.129Z",
+  "stored_at": "2026-09-21T15:43:46.130Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | awk '{print $1, $2}' | sed 's#\\(.agent_memory/[a-z]*\\)/.*#\\1/#' | sort | uniq -c; echo ---; cat .gitignore 2>/dev/null | grep -n agent_memory; git log --oneline main..HEAD | wc -l; git log --oneline origin/main..main 2>/dev/null | wc -l; git remote -v | head -1",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | awk '{print $1, $2}' | sed 's#\\(.agent_memory/[a-z]*\\)/.*#\\1/#' | sort | uniq -c; echo ---; cat .gitignore 2>/dev/null | grep ",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d7eae040147984a07ba87fe4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T18:57:11.441Z",
+  "stored_at": "2026-09-21T18:57:11.441Z"
+}

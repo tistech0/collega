@@ -54,7 +54,10 @@ class ImportIdle extends CollegeImportState {
 }
 
 class ImportUploading extends CollegeImportState {
-  const ImportUploading();
+  const ImportUploading({this.progress});
+
+  /// Progression 0..1 de l'upload par morceaux (Story 7.11) ; null pour l'upload mono-requête.
+  final double? progress;
 }
 
 class ImportStreaming extends CollegeImportState {

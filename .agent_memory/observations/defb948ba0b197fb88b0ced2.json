@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ps -eo pid,ppid,etime,command | grep -E \"flutter_tools|dart.*(test|frontend)|flutter test\" | grep -v grep | cut -c1-160 | head",
+  "summary": "ps -eo pid,ppid,etime,command | grep -E \"flutter_tools|dart.*(test|frontend)|flutter test\" | grep -v grep | cut -c1-160 | head: rmatthis/dev/app/flutter/bin/cache/dart-sdk/bin/dart --packages=/Users/lesurmatthis/dev/app/flutter/packages/flutter_tools/.d 10797 10769 15:10 /Users/lesurmatthis/dev/app/flutter/bin/cache/da",
+  "text": "ps -eo pid,ppid,etime,command | grep -E \"flutter_tools|dart.*(test|frontend)|flutter test\" | grep -v grep | cut -c1-160 | head: rmatthis/dev/app/flutter/bin/cache/dart-sdk/bin/dart --packages=/Users/lesurmatthis/dev/app/flutter/packages/flutter_tools/.d 10797 10769 15:10 /Users/lesurmatthis/dev/app/flutter/bin/cache/dart-sdk/bin/dartaotruntime /Users/lesurmatthis/dev/app/flutter/bin/cache/dart-sdk/bin/sna 10868 10769 15:05 /Users/lesurmatthis/dev/app/flutter/bin/cache/artifacts/engine/darwin-x64/flutter_tester --disable-vm-service --enable-checked-mode --ve 11273 11259 14:07 /Users/lesurmatthis/dev/app/flutter/bin/cache/dart-sdk/bin/dart --packages=/Users/lesurmatthis/dev/app/flutter/packages/flutter_tools/.d 11305 11273 14:06 /Users/lesurmatthis/dev/app/flutter/bin/cache/dart-sdk/bin/dartaotruntime /Users/lesurmatthis/dev/app/flutter/bin/cache/dart-sdk/bin/sna 11331 11273 14:03 /Users/lesurmatthis/dev/app/flutter/bin/cache/artifacts/engine/darwin-x64/flutter_tester --disable-vm-service --enable-checked-mode --ve",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "defb948ba0b197fb88b0ced2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:10:15.581Z",
+  "stored_at": "2026-09-21T15:10:15.581Z"
+}

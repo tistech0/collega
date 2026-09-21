@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/network/cloudflare_access.dart | head -30; grep -n \"cfAccess\\|backendBaseUrl\" lib/env.dart; sed -n 1,25p lib/main.dart; grep -n \"apiClientProvider\\|class ApiClient\\|Dio get dio\\|final Dio dio\" lib/core/network/api_providers.dart lib/core/network/api_client.dart | head",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/network/cloudflare_access.dart | head -30; grep -n \"cfAccess\\|backendBaseUrl\" lib/env.dart; sed -n 1,25p lib/main.dart; gr",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1c55f95ecaecde57c7ce044d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:19:44.692Z",
+  "stored_at": "2026-09-21T14:19:44.692Z"
+}

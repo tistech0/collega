@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/database/app_database.dart; ls lib/core/database/tables/; ls test/core/database/ 2>/dev/null",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/database/app_database.dart; ls lib/core/database/tables/; ls test/core/database/ 2>/dev/null",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1b5d59c288650b47962ef275",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:15:20.248Z",
+  "stored_at": "2026-09-21T14:15:20.248Z"
+}

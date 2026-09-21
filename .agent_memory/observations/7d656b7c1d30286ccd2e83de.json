@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/database/app_database.dart; ls lib/core/database/tables/; ls test/core/database/ 2>/dev/null",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/database/app_database.dart; ls lib/core/database/tables/; ls test/core/database/ 2>/dev/null failed: wait m.addColumn(flashCards, flashCards.reviewCount); } if (from < 5) { await m.createTable(planningConfigs); await m.createTable(planningSes",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/database/app_database.dart; ls lib/core/database/tables/; ls test/core/database/ 2>/dev/null failed: wait m.addColumn(flashCards, flashCards.reviewCount); } if (from < 5) { await m.createTable(planningConfigs); await m.createTable(planningSessions); } }, ); Future<void> deleteEverything() async { await transaction(() async { await delete(collegeImports).go(); await delete(items).go(); await delete(flashCards).go(); await delete(planningConfigs).go(); await delete(planningSessions).go(); }); } static LazyDatabase _openConnection() { return LazyDatabase(() async { final dbFolder = await getApplicationDocumentsDirectory(); final file = File(p.join(dbFolder.path, 'collega.sqlite')); return NativeDatabase.createInBackground(file); }); } } final databaseProvider = Provider<AppDatabase>((ref) { final db = AppDatabase(); ref.onDispose(() async => db.close()); return db; }); college_import_table.dart flash_cards_table.dart items_table.dart planning_configs_table.dart planning_sessions_table.dart",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7d656b7c1d30286ccd2e83de",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:15:20.592Z",
+  "stored_at": "2026-09-21T14:15:20.593Z"
+}

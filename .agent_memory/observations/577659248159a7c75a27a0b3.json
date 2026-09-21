@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_learn",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_learn: [{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/gotcha-app-upload-par-morceaux-chunkeduploadservice-background-downloader-9-5-5-pi-ges--83a931c5.md\\nRepo-local memory is written immediately. Org/global promotion still requires ",
+  "text": "[{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/gotcha-app-upload-par-morceaux-chunkeduploadservice-background-downloader-9-5-5-pi-ges--83a931c5.md\\nRepo-local memory is written immediately. Org/global promotion still requires explicit review.'}]",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "577659248159a7c75a27a0b3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:11:56.659Z",
+  "stored_at": "2026-09-21T15:11:56.659Z"
+}

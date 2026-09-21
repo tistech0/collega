@@ -61,6 +61,7 @@ class DrillSessionState {
     this.semanticFeedback,
     this.isComplete = false,
     this.timerExpired = false,
+    this.requeued = false,
   });
 
   final List<FlashCardModel> cards;
@@ -73,6 +74,10 @@ class DrillSessionState {
   final SemanticFeedback? semanticFeedback;
   final bool isComplete;
   final bool timerExpired;
+
+  /// La dernière évaluation a réinséré la carte plus loin dans la file
+  /// (1er « à revoir ») — l'écran affiche un rappel. Reset par advanceToNext.
+  final bool requeued;
 
   int get totalInitial => cards.length;
 
@@ -92,6 +97,7 @@ class DrillSessionState {
     Object? semanticFeedback = _absent,
     bool? isComplete,
     bool? timerExpired,
+    bool? requeued,
   }) {
     return DrillSessionState(
       cards: cards ?? this.cards,
@@ -108,6 +114,7 @@ class DrillSessionState {
           : semanticFeedback as SemanticFeedback?,
       isComplete: isComplete ?? this.isComplete,
       timerExpired: timerExpired ?? this.timerExpired,
+      requeued: requeued ?? this.requeued,
     );
   }
 

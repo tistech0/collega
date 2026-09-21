@@ -2,37 +2,19 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+import 'package:collega_app/core/upload/upload_api.dart' show mapImportDioError;
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/colleges/domain/import_models.dart';
 
-class SubscriptionRequiredException implements Exception {
-  const SubscriptionRequiredException();
-}
-
-class JobInProgressException implements Exception {
-  const JobInProgressException();
-}
-
-class QueueUnavailableException implements Exception {
-  const QueueUnavailableException();
-}
-
-class CollegeReloadLimitException implements Exception {
-  const CollegeReloadLimitException({required this.reloadCount, required this.reloadCountMax});
-  final int reloadCount;
-  final int reloadCountMax;
-}
-
-class MonthlyReloadLimitException implements Exception {
-  const MonthlyReloadLimitException({
-    required this.monthlyReloads,
-    required this.monthlyMax,
-    required this.resetAt,
-  });
-  final int monthlyReloads;
-  final int monthlyMax;
-  final String resetAt; // ISO 8601
-}
+// Les exceptions d'import vivent dans upload_models.dart (partagées avec l'upload par
+// morceaux, Story 7.11) ; ré-exportées ici pour les imports existants.
+export 'package:collega_app/core/upload/upload_models.dart'
+    show
+        SubscriptionRequiredException,
+        JobInProgressException,
+        QueueUnavailableException,
+        CollegeReloadLimitException,
+        MonthlyReloadLimitException;
 
 class CollegeImportRepository {
   const CollegeImportRepository({required this.dio});
@@ -60,33 +42,11 @@ class CollegeImportRepository {
         response.data!['data'] as Map<String, dynamic>,
       );
     } on DioException catch (e) {
-      final status = e.response?.statusCode;
-      final code = ((e.response?.data as Map?)?['detail'] as Map?)?['code'] as String?;
-
-      if (status == 403 && code == 'SUBSCRIPTION_REQUIRED') {
-        throw const SubscriptionRequiredException();
+      final mapped = mapImportDioError(e);
+      if (identical(mapped, e)) {
+        AppLogger.error('importPdf failed', tag: 'CollegeImportRepository', error: e);
       }
-      if (status == 409 && code == 'JOB_IN_PROGRESS') {
-        throw const JobInProgressException();
-      }
-      if (status == 409 && code == 'COLLEGE_RELOAD_LIMIT') {
-        final detail = (e.response?.data as Map?)?['detail'] as Map?;
-        throw CollegeReloadLimitException(
-          reloadCount: (detail?['reload_count'] as num).toInt(),
-          reloadCountMax: (detail?['reload_count_max'] as num).toInt(),
-        );
-      }
-      if (status == 409 && code == 'MONTHLY_RELOAD_LIMIT') {
-        final detail = (e.response?.data as Map?)?['detail'] as Map?;
-        throw MonthlyReloadLimitException(
-          monthlyReloads: (detail?['monthly_reloads'] as num).toInt(),
-          monthlyMax: (detail?['monthly_max'] as num).toInt(),
-          resetAt: detail?['reset_at'] as String,
-        );
-      }
-      if (status == 503) throw const QueueUnavailableException();
-      AppLogger.error('importPdf failed', tag: 'CollegeImportRepository', error: e);
-      rethrow;
+      throw mapped;
     }
   }
 

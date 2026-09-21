@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "grep -n \"EXCEPTION CAUGHT\\|The following\\|Expected:\\|Actual:\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | head -12 | cut -c1-220",
+  "summary": "grep -n \"EXCEPTION CAUGHT\\|The following\\|Expected:\\|Actual:\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | head -12 | cut -c1-220: 76:══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════ 77:The following assertion was thrown running a test: 2207: Expected: true 2208: Actual: ",
+  "text": "grep -n \"EXCEPTION CAUGHT\\|The following\\|Expected:\\|Actual:\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | head -12 | cut -c1-220: 76:══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════ 77:The following assertion was thrown running a test: 2207: Expected: true 2208: Actual: <false>",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b1e9ac2a3a4c0aff285596ef",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:59:46.780Z",
+  "stored_at": "2026-09-21T14:59:46.780Z"
+}

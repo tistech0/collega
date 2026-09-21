@@ -17,6 +17,26 @@ final collegeDetailRepositoryProvider = Provider<CollegeDetailRepository>(
   ),
 );
 
+/// Stats de drill par item, vivantes (watch Drift) — même pattern que
+/// `collegeDrillStatsProvider` côté liste. Calculées hors du notifier de
+/// détail pour que le détail suive les drills sans invalidation manuelle.
+final collegeDrillStatsByItemProvider =
+    StreamProvider.family<Map<String, DrillStats>, String>((ref, collegeId) {
+  final db = ref.watch(databaseProvider);
+  return (db.select(db.flashCards)
+        ..where((t) => t.collegeId.equals(collegeId)))
+      .watch()
+      .map((cards) {
+    final levelsByItem = <String, List<String>>{};
+    for (final c in cards) {
+      levelsByItem.putIfAbsent(c.itemId, () => []).add(c.drillLevel);
+    }
+    return levelsByItem.map(
+      (itemId, levels) => MapEntry(itemId, DrillStats.fromDrillLevels(levels)),
+    );
+  });
+});
+
 final collegeDetailProvider = AsyncNotifierProvider.family<
     CollegeDetailNotifier, CollegeDetailState, String>(
   CollegeDetailNotifier.new,
@@ -38,33 +58,6 @@ class CollegeDetailNotifier
       items = await repo.getItemsFromDrift(collegeId);
       if (items.isEmpty) return const CollegeDetailEmpty();
     }
-    Map<String, DrillStats> drillByItem;
-    try {
-      drillByItem = await repo.getDrillStatsByItem(collegeId);
-    } catch (e) {
-      AppLogger.error('getDrillStatsByItem failed', tag: 'CollegeDetailNotifier', error: e);
-      return CollegeDetailLoaded(items: items);
-    }
-    items = items.map((item) {
-      final drill = drillByItem[item.id];
-      if (drill == null) return item;
-      return ItemModel(
-        id: item.id,
-        collegeId: item.collegeId,
-        itemNumber: item.itemNumber,
-        rang: item.rang,
-        chapterTitle: item.chapterTitle,
-        ocrConfidenceScore: item.ocrConfidenceScore,
-        lowConfidence: item.lowConfidence,
-        cardCountA: item.cardCountA,
-        cardCountB: item.cardCountB,
-        cardCountC: item.cardCountC,
-        drillMaitrise: drill.maitrise,
-        drillBien: drill.bien,
-        drillARevoir: drill.aRevoir,
-        drillNotSeen: drill.notSeen,
-      );
-    }).toList();
     return CollegeDetailLoaded(items: items);
   }
 

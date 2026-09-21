@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat \"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_upload_debug_2026_09.md\"",
+  "summary": "About to run: cat \"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_upload_debug_2026_09.md\"",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "17978432200a4d8a835d5260",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:13:12.516Z",
+  "stored_at": "2026-09-21T15:13:12.516Z"
+}

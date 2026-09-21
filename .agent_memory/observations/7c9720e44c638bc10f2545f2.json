@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n 40,115p lib/features/drill/domain/drill_session_state.dart; echo ---NOTIFIER; sed -n 1,80p lib/features/drill/drill_providers.dart; echo ---TEST; sed -n 1,70p test/features/drill/drill_session_notifier_test.dart; grep -n \"test(\\|testWidgets(\" test/features/drill/drill_session_notifier_test.dart",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n 40,115p lib/features/drill/domain/drill_session_state.dart; echo ---NOTIFIER; sed -n 1,80p lib/features/drill/drill_providers.da",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7c9720e44c638bc10f2545f2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T16:18:25.277Z",
+  "stored_at": "2026-09-21T16:18:25.278Z"
+}

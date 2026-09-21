@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ls test/core/theme 2>/dev/null; sed -n 1,80p lib/core/theme/app_theme.dart | grep -n \"class AppColors\\|static const\\|buildShadTheme\\|ShadThemeData(\\|colorScheme\\|Theme(\" | head -30",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ls test/core/theme 2>/dev/null; sed -n 1,80p lib/core/theme/app_theme.dart | grep -n \"class AppColors\\|static const\\|buildShadTheme\\|Sh",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "db477cbfb3f194732dcac359",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T16:00:50.157Z",
+  "stored_at": "2026-09-21T16:00:50.157Z"
+}

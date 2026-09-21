@@ -2218,6 +2218,394 @@ class PlanningSessionsCompanion extends UpdateCompanion<PlanningSessionRow> {
   }
 }
 
+class $PendingUploadsTable extends PendingUploads
+    with TableInfo<$PendingUploadsTable, PendingUpload> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PendingUploadsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _uploadIdMeta =
+      const VerificationMeta('uploadId');
+  @override
+  late final GeneratedColumn<String> uploadId = GeneratedColumn<String>(
+      'upload_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _refIdMeta = const VerificationMeta('refId');
+  @override
+  late final GeneratedColumn<int> refId = GeneratedColumn<int>(
+      'ref_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _filePathMeta =
+      const VerificationMeta('filePath');
+  @override
+  late final GeneratedColumn<String> filePath = GeneratedColumn<String>(
+      'file_path', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _sizeBytesMeta =
+      const VerificationMeta('sizeBytes');
+  @override
+  late final GeneratedColumn<int> sizeBytes = GeneratedColumn<int>(
+      'size_bytes', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _partSizeMeta =
+      const VerificationMeta('partSize');
+  @override
+  late final GeneratedColumn<int> partSize = GeneratedColumn<int>(
+      'part_size', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _partsTotalMeta =
+      const VerificationMeta('partsTotal');
+  @override
+  late final GeneratedColumn<int> partsTotal = GeneratedColumn<int>(
+      'parts_total', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [uploadId, refId, filePath, sizeBytes, partSize, partsTotal, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pending_uploads';
+  @override
+  VerificationContext validateIntegrity(Insertable<PendingUpload> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('upload_id')) {
+      context.handle(_uploadIdMeta,
+          uploadId.isAcceptableOrUnknown(data['upload_id']!, _uploadIdMeta));
+    } else if (isInserting) {
+      context.missing(_uploadIdMeta);
+    }
+    if (data.containsKey('ref_id')) {
+      context.handle(
+          _refIdMeta, refId.isAcceptableOrUnknown(data['ref_id']!, _refIdMeta));
+    } else if (isInserting) {
+      context.missing(_refIdMeta);
+    }
+    if (data.containsKey('file_path')) {
+      context.handle(_filePathMeta,
+          filePath.isAcceptableOrUnknown(data['file_path']!, _filePathMeta));
+    } else if (isInserting) {
+      context.missing(_filePathMeta);
+    }
+    if (data.containsKey('size_bytes')) {
+      context.handle(_sizeBytesMeta,
+          sizeBytes.isAcceptableOrUnknown(data['size_bytes']!, _sizeBytesMeta));
+    } else if (isInserting) {
+      context.missing(_sizeBytesMeta);
+    }
+    if (data.containsKey('part_size')) {
+      context.handle(_partSizeMeta,
+          partSize.isAcceptableOrUnknown(data['part_size']!, _partSizeMeta));
+    } else if (isInserting) {
+      context.missing(_partSizeMeta);
+    }
+    if (data.containsKey('parts_total')) {
+      context.handle(
+          _partsTotalMeta,
+          partsTotal.isAcceptableOrUnknown(
+              data['parts_total']!, _partsTotalMeta));
+    } else if (isInserting) {
+      context.missing(_partsTotalMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {uploadId};
+  @override
+  PendingUpload map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PendingUpload(
+      uploadId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}upload_id'])!,
+      refId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}ref_id'])!,
+      filePath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}file_path'])!,
+      sizeBytes: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}size_bytes'])!,
+      partSize: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}part_size'])!,
+      partsTotal: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}parts_total'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $PendingUploadsTable createAlias(String alias) {
+    return $PendingUploadsTable(attachedDatabase, alias);
+  }
+}
+
+class PendingUpload extends DataClass implements Insertable<PendingUpload> {
+  final String uploadId;
+  final int refId;
+  final String filePath;
+  final int sizeBytes;
+  final int partSize;
+  final int partsTotal;
+  final DateTime createdAt;
+  const PendingUpload(
+      {required this.uploadId,
+      required this.refId,
+      required this.filePath,
+      required this.sizeBytes,
+      required this.partSize,
+      required this.partsTotal,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['upload_id'] = Variable<String>(uploadId);
+    map['ref_id'] = Variable<int>(refId);
+    map['file_path'] = Variable<String>(filePath);
+    map['size_bytes'] = Variable<int>(sizeBytes);
+    map['part_size'] = Variable<int>(partSize);
+    map['parts_total'] = Variable<int>(partsTotal);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  PendingUploadsCompanion toCompanion(bool nullToAbsent) {
+    return PendingUploadsCompanion(
+      uploadId: Value(uploadId),
+      refId: Value(refId),
+      filePath: Value(filePath),
+      sizeBytes: Value(sizeBytes),
+      partSize: Value(partSize),
+      partsTotal: Value(partsTotal),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory PendingUpload.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PendingUpload(
+      uploadId: serializer.fromJson<String>(json['uploadId']),
+      refId: serializer.fromJson<int>(json['refId']),
+      filePath: serializer.fromJson<String>(json['filePath']),
+      sizeBytes: serializer.fromJson<int>(json['sizeBytes']),
+      partSize: serializer.fromJson<int>(json['partSize']),
+      partsTotal: serializer.fromJson<int>(json['partsTotal']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'uploadId': serializer.toJson<String>(uploadId),
+      'refId': serializer.toJson<int>(refId),
+      'filePath': serializer.toJson<String>(filePath),
+      'sizeBytes': serializer.toJson<int>(sizeBytes),
+      'partSize': serializer.toJson<int>(partSize),
+      'partsTotal': serializer.toJson<int>(partsTotal),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  PendingUpload copyWith(
+          {String? uploadId,
+          int? refId,
+          String? filePath,
+          int? sizeBytes,
+          int? partSize,
+          int? partsTotal,
+          DateTime? createdAt}) =>
+      PendingUpload(
+        uploadId: uploadId ?? this.uploadId,
+        refId: refId ?? this.refId,
+        filePath: filePath ?? this.filePath,
+        sizeBytes: sizeBytes ?? this.sizeBytes,
+        partSize: partSize ?? this.partSize,
+        partsTotal: partsTotal ?? this.partsTotal,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  PendingUpload copyWithCompanion(PendingUploadsCompanion data) {
+    return PendingUpload(
+      uploadId: data.uploadId.present ? data.uploadId.value : this.uploadId,
+      refId: data.refId.present ? data.refId.value : this.refId,
+      filePath: data.filePath.present ? data.filePath.value : this.filePath,
+      sizeBytes: data.sizeBytes.present ? data.sizeBytes.value : this.sizeBytes,
+      partSize: data.partSize.present ? data.partSize.value : this.partSize,
+      partsTotal:
+          data.partsTotal.present ? data.partsTotal.value : this.partsTotal,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingUpload(')
+          ..write('uploadId: $uploadId, ')
+          ..write('refId: $refId, ')
+          ..write('filePath: $filePath, ')
+          ..write('sizeBytes: $sizeBytes, ')
+          ..write('partSize: $partSize, ')
+          ..write('partsTotal: $partsTotal, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      uploadId, refId, filePath, sizeBytes, partSize, partsTotal, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PendingUpload &&
+          other.uploadId == this.uploadId &&
+          other.refId == this.refId &&
+          other.filePath == this.filePath &&
+          other.sizeBytes == this.sizeBytes &&
+          other.partSize == this.partSize &&
+          other.partsTotal == this.partsTotal &&
+          other.createdAt == this.createdAt);
+}
+
+class PendingUploadsCompanion extends UpdateCompanion<PendingUpload> {
+  final Value<String> uploadId;
+  final Value<int> refId;
+  final Value<String> filePath;
+  final Value<int> sizeBytes;
+  final Value<int> partSize;
+  final Value<int> partsTotal;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const PendingUploadsCompanion({
+    this.uploadId = const Value.absent(),
+    this.refId = const Value.absent(),
+    this.filePath = const Value.absent(),
+    this.sizeBytes = const Value.absent(),
+    this.partSize = const Value.absent(),
+    this.partsTotal = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PendingUploadsCompanion.insert({
+    required String uploadId,
+    required int refId,
+    required String filePath,
+    required int sizeBytes,
+    required int partSize,
+    required int partsTotal,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  })  : uploadId = Value(uploadId),
+        refId = Value(refId),
+        filePath = Value(filePath),
+        sizeBytes = Value(sizeBytes),
+        partSize = Value(partSize),
+        partsTotal = Value(partsTotal),
+        createdAt = Value(createdAt);
+  static Insertable<PendingUpload> custom({
+    Expression<String>? uploadId,
+    Expression<int>? refId,
+    Expression<String>? filePath,
+    Expression<int>? sizeBytes,
+    Expression<int>? partSize,
+    Expression<int>? partsTotal,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (uploadId != null) 'upload_id': uploadId,
+      if (refId != null) 'ref_id': refId,
+      if (filePath != null) 'file_path': filePath,
+      if (sizeBytes != null) 'size_bytes': sizeBytes,
+      if (partSize != null) 'part_size': partSize,
+      if (partsTotal != null) 'parts_total': partsTotal,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PendingUploadsCompanion copyWith(
+      {Value<String>? uploadId,
+      Value<int>? refId,
+      Value<String>? filePath,
+      Value<int>? sizeBytes,
+      Value<int>? partSize,
+      Value<int>? partsTotal,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return PendingUploadsCompanion(
+      uploadId: uploadId ?? this.uploadId,
+      refId: refId ?? this.refId,
+      filePath: filePath ?? this.filePath,
+      sizeBytes: sizeBytes ?? this.sizeBytes,
+      partSize: partSize ?? this.partSize,
+      partsTotal: partsTotal ?? this.partsTotal,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (uploadId.present) {
+      map['upload_id'] = Variable<String>(uploadId.value);
+    }
+    if (refId.present) {
+      map['ref_id'] = Variable<int>(refId.value);
+    }
+    if (filePath.present) {
+      map['file_path'] = Variable<String>(filePath.value);
+    }
+    if (sizeBytes.present) {
+      map['size_bytes'] = Variable<int>(sizeBytes.value);
+    }
+    if (partSize.present) {
+      map['part_size'] = Variable<int>(partSize.value);
+    }
+    if (partsTotal.present) {
+      map['parts_total'] = Variable<int>(partsTotal.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingUploadsCompanion(')
+          ..write('uploadId: $uploadId, ')
+          ..write('refId: $refId, ')
+          ..write('filePath: $filePath, ')
+          ..write('sizeBytes: $sizeBytes, ')
+          ..write('partSize: $partSize, ')
+          ..write('partsTotal: $partsTotal, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2228,12 +2616,19 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $PlanningConfigsTable(this);
   late final $PlanningSessionsTable planningSessions =
       $PlanningSessionsTable(this);
+  late final $PendingUploadsTable pendingUploads = $PendingUploadsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [collegeImports, items, flashCards, planningConfigs, planningSessions];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        collegeImports,
+        items,
+        flashCards,
+        planningConfigs,
+        planningSessions,
+        pendingUploads
+      ];
 }
 
 typedef $$CollegeImportsTableCreateCompanionBuilder = CollegeImportsCompanion
@@ -3330,6 +3725,210 @@ typedef $$PlanningSessionsTableProcessedTableManager = ProcessedTableManager<
     ),
     PlanningSessionRow,
     PrefetchHooks Function()>;
+typedef $$PendingUploadsTableCreateCompanionBuilder = PendingUploadsCompanion
+    Function({
+  required String uploadId,
+  required int refId,
+  required String filePath,
+  required int sizeBytes,
+  required int partSize,
+  required int partsTotal,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $$PendingUploadsTableUpdateCompanionBuilder = PendingUploadsCompanion
+    Function({
+  Value<String> uploadId,
+  Value<int> refId,
+  Value<String> filePath,
+  Value<int> sizeBytes,
+  Value<int> partSize,
+  Value<int> partsTotal,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+class $$PendingUploadsTableFilterComposer
+    extends Composer<_$AppDatabase, $PendingUploadsTable> {
+  $$PendingUploadsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get uploadId => $composableBuilder(
+      column: $table.uploadId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get refId => $composableBuilder(
+      column: $table.refId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get filePath => $composableBuilder(
+      column: $table.filePath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sizeBytes => $composableBuilder(
+      column: $table.sizeBytes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get partSize => $composableBuilder(
+      column: $table.partSize, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get partsTotal => $composableBuilder(
+      column: $table.partsTotal, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$PendingUploadsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PendingUploadsTable> {
+  $$PendingUploadsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get uploadId => $composableBuilder(
+      column: $table.uploadId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get refId => $composableBuilder(
+      column: $table.refId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get filePath => $composableBuilder(
+      column: $table.filePath, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sizeBytes => $composableBuilder(
+      column: $table.sizeBytes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get partSize => $composableBuilder(
+      column: $table.partSize, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get partsTotal => $composableBuilder(
+      column: $table.partsTotal, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PendingUploadsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PendingUploadsTable> {
+  $$PendingUploadsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get uploadId =>
+      $composableBuilder(column: $table.uploadId, builder: (column) => column);
+
+  GeneratedColumn<int> get refId =>
+      $composableBuilder(column: $table.refId, builder: (column) => column);
+
+  GeneratedColumn<String> get filePath =>
+      $composableBuilder(column: $table.filePath, builder: (column) => column);
+
+  GeneratedColumn<int> get sizeBytes =>
+      $composableBuilder(column: $table.sizeBytes, builder: (column) => column);
+
+  GeneratedColumn<int> get partSize =>
+      $composableBuilder(column: $table.partSize, builder: (column) => column);
+
+  GeneratedColumn<int> get partsTotal => $composableBuilder(
+      column: $table.partsTotal, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$PendingUploadsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PendingUploadsTable,
+    PendingUpload,
+    $$PendingUploadsTableFilterComposer,
+    $$PendingUploadsTableOrderingComposer,
+    $$PendingUploadsTableAnnotationComposer,
+    $$PendingUploadsTableCreateCompanionBuilder,
+    $$PendingUploadsTableUpdateCompanionBuilder,
+    (
+      PendingUpload,
+      BaseReferences<_$AppDatabase, $PendingUploadsTable, PendingUpload>
+    ),
+    PendingUpload,
+    PrefetchHooks Function()> {
+  $$PendingUploadsTableTableManager(
+      _$AppDatabase db, $PendingUploadsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PendingUploadsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PendingUploadsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PendingUploadsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> uploadId = const Value.absent(),
+            Value<int> refId = const Value.absent(),
+            Value<String> filePath = const Value.absent(),
+            Value<int> sizeBytes = const Value.absent(),
+            Value<int> partSize = const Value.absent(),
+            Value<int> partsTotal = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PendingUploadsCompanion(
+            uploadId: uploadId,
+            refId: refId,
+            filePath: filePath,
+            sizeBytes: sizeBytes,
+            partSize: partSize,
+            partsTotal: partsTotal,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String uploadId,
+            required int refId,
+            required String filePath,
+            required int sizeBytes,
+            required int partSize,
+            required int partsTotal,
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PendingUploadsCompanion.insert(
+            uploadId: uploadId,
+            refId: refId,
+            filePath: filePath,
+            sizeBytes: sizeBytes,
+            partSize: partSize,
+            partsTotal: partsTotal,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PendingUploadsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PendingUploadsTable,
+    PendingUpload,
+    $$PendingUploadsTableFilterComposer,
+    $$PendingUploadsTableOrderingComposer,
+    $$PendingUploadsTableAnnotationComposer,
+    $$PendingUploadsTableCreateCompanionBuilder,
+    $$PendingUploadsTableUpdateCompanionBuilder,
+    (
+      PendingUpload,
+      BaseReferences<_$AppDatabase, $PendingUploadsTable, PendingUpload>
+    ),
+    PendingUpload,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3344,4 +3943,6 @@ class $AppDatabaseManager {
       $$PlanningConfigsTableTableManager(_db, _db.planningConfigs);
   $$PlanningSessionsTableTableManager get planningSessions =>
       $$PlanningSessionsTableTableManager(_db, _db.planningSessions);
+  $$PendingUploadsTableTableManager get pendingUploads =>
+      $$PendingUploadsTableTableManager(_db, _db.pendingUploads);
 }

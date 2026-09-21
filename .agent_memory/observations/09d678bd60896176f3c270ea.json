@@ -1,0 +1,13 @@
+{
+  "type": "session_end",
+  "summary": "Claude Code session ended; distill durable observations for teammate handoff.",
+  "session_id": "5cc2a0ff-0d5b-4c8f-8476-3ec19c95dd7c",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "09d678bd60896176f3c270ea",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:43:30.886Z",
+  "stored_at": "2026-09-21T15:43:30.887Z",
+  "low_signal": true
+}

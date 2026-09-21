@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "grep -B2 -A25 \"home_screen_test.dart: HomeScreen — état HomeReady affiche le CTA Commencer et le nombre de fiches \\[E\\]\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | grep -vE \"^\\s*$\" | head -40 | cut -c1-200",
+  "summary": "grep -B2 -A25 \"home_screen_test.dart: HomeScreen — état HomeReady affiche le CTA Commencer et le nombre de fiches \\[E\\]\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | grep -vE \"^\\s*$\" | head -40 | cut -c1-200: perso/collega/collega_app/test/features/home/home_notifier_test.dart:76:25) #8 Declarer.test.<anonymous closure>.<a",
+  "text": "grep -B2 -A25 \"home_screen_test.dart: HomeScreen — état HomeReady affiche le CTA Commencer et le nombre de fiches \\[E\\]\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | grep -vE \"^\\s*$\" | head -40 | cut -c1-200: perso/collega/collega_app/test/features/home/home_notifier_test.dart:76:25) #8 Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:215:19) <asynchronous suspension> #9 Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:213:7) <asynchronous suspension> #10 Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:258:9) <asynchronous suspension> This warning will only appear on debug builds. 00:03 +43 -1: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/home/home_notifier_test.dart: HomeNotifier HomeReady avec 2 colleges récents si 2+ en generation_complete WARNING (drift): It looks like you've created the database class AppDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the datab",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "fad0fdd05745c498af56f04b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:59:41.632Z",
+  "stored_at": "2026-09-21T14:59:41.632Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git merge-base --is-ancestor main HEAD && echo \"ff possible\"; git log --oneline --merges main | head -3; head -12 .agent_memory/pending/bug_fix-pasted-content-id-36da-*.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git merge-base --is-ancestor main HEAD && echo \"ff possible\"; git log --oneline --merges main | head -3; head -12 .agent_memory/pending/bug_fix-pasted-content-id-36da-*.md: ff possible 943ccc9 Merge story 7.6 (dashboard admin thème A + review fixes) & story 7.9 backl",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git merge-base --is-ancestor main HEAD && echo \"ff possible\"; git log --oneline --merges main | head -3; head -12 .agent_memory/pending/bug_fix-pasted-content-id-36da-*.md: ff possible 943ccc9 Merge story 7.6 (dashboard admin thème A + review fixes) & story 7.9 backlog --- type: \"Bug Fix\" title: \"<pasted_content id=\\\"36da\\\"> Contexte : projet Collega (Flutter app collega_app/ + backend F\" description: \"<pasted content id=\\\"36da\\\" Contexte : projet Collega Flutter app collega app/ + backend FastAPI collega backend/ . Lis d'abord la mémoire : kage context + ~/.claude/.../memory/project upload debug 2026 09.md. État : la st\" tags: [\"session-learning\", \"observed-session\", \"intent\", \"auto-distill\"] timestamp: \"2026-09-21T15:44:27.979Z\" x-kage-id: \"repo:git-github-com-tistech0-collega:bug_fix:pasted-content-id-36da-contexte-projet-collega-flutter-app-collega-app-backend-f\" x-kage-type: \"bug_fix\" x-kage-status: \"pending\" x-kage-scope: \"repo\" x-kage-visibility: \"team\" x-kage-verified: \"unverified\"",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "fe9892a043cdfbbb80a2ffe3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T18:57:30.537Z",
+  "stored_at": "2026-09-21T18:57:30.537Z"
+}

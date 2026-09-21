@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_upload_debug_2026_09.md",
+  "summary": "wrote /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_upload_debug_2026_09.md: ---\nname: project_upload_debug_2026_09\ndescription: État au 2026-09-21 après la session debug upload — 4 bugs corrigés et déployés, story 7.11 (upload > 100 MB) spec + plan prêts, prochain suj",
+  "text": "wrote /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_upload_debug_2026_09.md: ---\nname: project_upload_debug_2026_09\ndescription: État au 2026-09-21 après la session debug upload — 4 bugs corrigés et déployés, story 7.11 (upload > 100 MB) spec + plan prêts, prochain sujet = gestion des écrans app\nmetadata:\n  type: project\n---\n\nSession des 2026-09-20/21 (« upload timeout / collège vide ») — tout est **committé, pushé et déployé** (backend image `tistech0/collega-backend:latest`, app rebuild sur l'iPhone via `collega_app/tool/run_device.sh --release -d 00008110-000115D43499801E`).\n\nBugs corrigés (détails dans les packets Kage `.agent_memory/packets/bug_fix-*`) :\n1. Cloudf",
+  "session_id": "351f5ec3-00ed-44aa-85f4-508c185cdfd3",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5df39e2c21cf34072e797ece",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:06:14.575Z",
+  "stored_at": "2026-09-21T14:06:14.575Z"
+}

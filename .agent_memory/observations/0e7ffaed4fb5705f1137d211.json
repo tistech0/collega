@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "ok enfaite quitte a revoir un bout du front jaimerais refaire tous l'ux et ui quelle skill lib site reference utilise avec claude pour faire un bonne ux et ensuite un bonne ui pour une app flutter",
+  "summary": "ok enfaite quitte a revoir un bout du front jaimerais refaire tous l'ux et ui quelle skill lib site reference utilise avec claude pour faire un bonne ux et ensuite un bonne ui pour une app flutter",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0e7ffaed4fb5705f1137d211",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T18:51:19.613Z",
+  "stored_at": "2026-09-21T18:51:19.614Z",
+  "low_signal": true
+}

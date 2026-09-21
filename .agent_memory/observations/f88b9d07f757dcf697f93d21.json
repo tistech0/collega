@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_context",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_context: [{'type': 'text', 'text': '# Kage Context\\n\\nQuery: gestion des écrans navigation Flutter : context.push dans ref.listen college_import_screen, ImportProgressScreen AppLifecycleListener, context.go(\\'/colleges\\') ImportComplete, reset() notifier initState, resumePendingUpload CollegesScreen, app_rou",
+  "text": "[{'type': 'text', 'text': '# Kage Context\\n\\nQuery: gestion des écrans navigation Flutter : context.push dans ref.listen college_import_screen, ImportProgressScreen AppLifecycleListener, context.go(\\'/colleges\\') ImportComplete, reset() notifier initState, resumePendingUpload CollegesScreen, app_router go_router\\n\\n## Relevant Code Graph\\n1. [route] GET /colleges -> collega_backend/app/api/v1/colleges.py:69\\n2. [route] GET /colleges -> collega_backend/app/api/v1/colleges.py:69\\n3. [route] POST /colleges -> collega_backend/app/api/v1/admin.py:84\\n1. [symbol] function reset in collega_app/ios/Pods/DKPhotoGallery/DKPhotoGallery/Preview/PlayerPreview/DKPlayerView.swift:311\\n2. [symbol] method registerWith in collega_app/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:17\\n3. [symbol] class DKUINavigationController in collega_app/ios/Pods/DKImagePickerController/Sources/DKImagePickerController/DKImagePickerController.swift:55\\n4. [symbol] class GeneratedPluginRegistrant in collega_app/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:14\\n5. [symbol] function list_user_colleges in collega_backend/app/api/v1/colleges.py:70\\n1. [test] te",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f88b9d07f757dcf697f93d21",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:44:10.910Z",
+  "stored_at": "2026-09-21T15:44:10.910Z"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "on va faire limplementation de la 7.1 je crois sur le decoupage des pdf",
+  "summary": "on va faire limplementation de la 7.1 je crois sur le decoupage des pdf",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "15db051476943edf2a1230e7",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:07:50.811Z",
+  "stored_at": "2026-09-21T14:07:50.811Z",
+  "low_signal": true
+}

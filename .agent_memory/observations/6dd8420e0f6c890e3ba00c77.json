@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "tr '\\r' '\\n' < \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bp4o0fypu.output\" | grep -E \"info •|warning •|error •\"; tr '\\r' '\\n' < \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bp4o0fypu.output\" | grep -E \"^[0-9:]+ \\+\" | tail -1 | cut -c1-120",
+  "summary": "About to run: tr '\\r' '\\n' < \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bp4o0fypu.output\" | grep -E \"info •|warning •|error •\"; tr '\\r' '\\n' < \"",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6dd8420e0f6c890e3ba00c77",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:32:46.330Z",
+  "stored_at": "2026-09-21T14:32:46.331Z"
+}

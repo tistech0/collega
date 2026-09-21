@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"^from\\|^import\\|class ImportCollegeResponseWrapped\" -A2 app/schemas/college.py | head -20; echo \"--- conftest\"; sed -n 40,95p tests/conftest.py",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"^from\\|^import\\|class ImportCollegeResponseWrapped\" -A2 app/schemas/college.py | head -20; echo \"--- conftest\"; sed -n 40,",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f2d7df95b5ca866db6320dd5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:12:08.832Z",
+  "stored_at": "2026-09-21T14:12:08.833Z"
+}

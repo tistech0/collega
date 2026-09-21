@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "grep -n \"EXCEPTION CAUGHT\\|The following\\|Expected:\\|Actual:\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | head -12 | cut -c1-220",
+  "summary": "About to run: grep -n \"EXCEPTION CAUGHT\\|The following\\|Expected:\\|Actual:\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | head -12 | cut -c1-220",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d9e1092b4c13a40895db796f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:59:44.736Z",
+  "stored_at": "2026-09-21T14:59:44.736Z"
+}

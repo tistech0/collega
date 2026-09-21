@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ls lib/features/colleges/presentation lib/features/home/presentation 2>/dev/null; echo ---; grep -rn \"LinearProgressIndicator\\|progress\" lib/features/colleges/presentation/colleges_screen.dart lib/features/home/presentation/*.dart | head -40",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ls lib/features/colleges/presentation lib/features/home/presentation 2>/dev/null; echo ---; grep -rn \"LinearProgressIndicator\\|progress",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ea990b30a3e56f721e5dea28",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:47:26.211Z",
+  "stored_at": "2026-09-21T15:47:26.211Z"
+}

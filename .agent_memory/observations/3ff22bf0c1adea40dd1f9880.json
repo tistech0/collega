@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bloirwnnv.output\" 2>/dev/null | head; echo \"--- stash state\"; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git stash list | head -3; git status --short | grep -v agent_memory | head -5; ps aux | grep -cE \"[f]lutter test\"",
+  "summary": "cat \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bloirwnnv.output\" 2>/dev/null | head; echo \"--- stash state\"; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git stash list | head -3; git status --short | grep -v agent_memory | head -5; ps aux | ",
+  "text": "cat \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/351f5ec3-00ed-44aa-85f4-508c185cdfd3/tasks/bloirwnnv.output\" 2>/dev/null | head; echo \"--- stash state\"; cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git stash list | head -3; git status --short | grep -v agent_memory | head -5; ps aux | grep -cE \"[f]lutter test\": --- stash state stash@{0}: WIP on feat/story-7.11-upload-chunked: b6a591c feat(app): transport arrière-plan des morceaux via background_downloader 9.5.5 (story 7.11) ?? .gitattributes ?? AGENTS.md ?? CLAUDE.md 4",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3ff22bf0c1adea40dd1f9880",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:59:27.756Z",
+  "stored_at": "2026-09-21T14:59:27.757Z"
+}

@@ -38,27 +38,5 @@ final collegeDrillStatsProvider =
   return (db.select(db.flashCards)
         ..where((t) => t.collegeId.equals(collegeId)))
       .watch()
-      .map((cards) {
-    int maitrise = 0, bien = 0, aRevoir = 0, notSeen = 0;
-    for (final c in cards) {
-      switch (c.drillLevel) {
-        case 'maitrise':
-          maitrise++;
-        case 'bien':
-          bien++;
-        case 'a_revoir':
-          aRevoir++;
-        case 'new':
-          notSeen++;
-        default:
-          break;
-      }
-    }
-    return DrillStats(
-      maitrise: maitrise,
-      bien: bien,
-      aRevoir: aRevoir,
-      notSeen: notSeen,
-    );
-  });
+      .map((cards) => DrillStats.fromDrillLevels(cards.map((c) => c.drillLevel)));
 });

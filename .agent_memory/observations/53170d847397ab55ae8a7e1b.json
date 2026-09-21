@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "grep -B2 -A25 \"home_screen_test.dart: HomeScreen — état HomeReady affiche le CTA Commencer et le nombre de fiches \\[E\\]\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | grep -vE \"^\\s*$\" | head -40 | cut -c1-200",
+  "summary": "About to run: grep -B2 -A25 \"home_screen_test.dart: HomeScreen — état HomeReady affiche le CTA Commencer et le nombre de fiches \\[E\\]\" \"$CLAUDE_JOB_DIR/tmp/flutter_full.log\" | grep -vE \"^\\s*$\" | head -40 | cut -c1-",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "53170d847397ab55ae8a7e1b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:59:39.542Z",
+  "stored_at": "2026-09-21T14:59:39.542Z"
+}

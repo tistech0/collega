@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls _bmad-output/planning-artifacts 2>/dev/null | head -20; ls _bmad-output 2>/dev/null; grep -n \"^  [a-z_]*:\" collega_app/pubspec.yaml | sed -n 1,40p | tr '\\n' ' '",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls _bmad-output/planning-artifacts 2>/dev/null | head -20; ls _bmad-output 2>/dev/null; grep -n \"^  [a-z_]*:\" collega_app/pubspec.yaml | sed -n 1,40p | tr '\\n' ' ': -27.md plans prd.md screens specs ux-design-directions.html ux-design-specification.md brainstorming i",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls _bmad-output/planning-artifacts 2>/dev/null | head -20; ls _bmad-output 2>/dev/null; grep -n \"^  [a-z_]*:\" collega_app/pubspec.yaml | sed -n 1,40p | tr '\\n' ' ': -27.md plans prd.md screens specs ux-design-directions.html ux-design-specification.md brainstorming implementation-artifacts planning-artifacts test-artifacts 8: sdk: ^3.6.0 11: flutter: 15: flutter_riverpod: ^2.6.1 16: riverpod_annotation: ^2.6.1 19: go_router: ^14.6.3 22: collection: ^1.18.0 25: drift: ^2.21.0 27: path_provider: ^2.1.4 28: path: ^1.9.0 31: dio: ^5.7.0 32: background_downloader: 9.5.5 # 9.6.x exige Flutter >= 3.47 35: shadcn_ui: ^0.19.0 36: google_fonts: ^6.2.1 39: flutter_animate: ^4.5.0 42: flutter_secure_storage: ^9.2.2 45: purchases_flutter: ^10.0.1 48: url_launcher: ^6.3.0 51: file_picker: ^8.1.6 54: flutter_apns_only: ^1.0.0 57: flutter_markdown: ^0.7.5 60: cupertino_icons: ^1.0.8 63: flutter_test: 65: flutter_lints: ^5.0.0 68: drift_dev: ^2.21.0 69: build_runner: ^2.4.13 70: riverpod_generator: ^2.6.5 71: custom_lint: ^0.7.5 72: riverpod_lint: ^2.6.5 76: assets:",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b6ff4e84b5246b5a0dbcdc16",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T18:51:33.134Z",
+  "stored_at": "2026-09-21T18:51:33.134Z"
+}

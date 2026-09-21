@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "python3 - <<'PYEOF'\nimport pathlib\np = pathlib.Path(\"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_upload_debug_2026_09.md\")\ns = p.read_text()\ns = s.replace('description: \"État au 2026-09-21 après la session debug upload — 4 bugs corrigés et déployés, story 7.11 (upload > 100 MB) spec + plan prêts, prochain sujet = gestion des écrans app\"',\n              'description: \"État au 2026-09-21 après la session debug upload — 4 bugs corrigés et déployés ; story 7.11 (upload > 100 MB par morceaux) IMPLÉMENTÉE sur la branche feat/story-7.11-upload-chun… [+2263 chars truncated]",
+  "summary": "About to run: python3 - <<'PYEOF' import pathlib p = pathlib.Path(\"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_upload_debug_2026_09.md\") s = p.read_text() s = s.",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c58e6b82ac0c453cdebfe090",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:13:28.404Z",
+  "stored_at": "2026-09-21T15:13:28.405Z"
+}

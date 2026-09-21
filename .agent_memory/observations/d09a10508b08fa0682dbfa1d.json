@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"side_effect\\|execute\\|patch(\" tests/api/test_colleges_import.py | head -60; echo \"--- reimport\"; grep -n \"side_effect\\|execute\\|patch(\" tests/api/test_colleges_reimport.py | head -60; echo \"--- conftest\"; grep -n \"mock_db\\|def client\\|dependency_overrides\" tests/conftest.py | head -30",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"side_effect\\|execute\\|patch(\" tests/api/test_colleges_import.py | head -60; echo \"--- reimport\"; grep -n \"side_effect\\|exe",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d09a10508b08fa0682dbfa1d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:08:52.176Z",
+  "stored_at": "2026-09-21T14:08:52.177Z"
+}

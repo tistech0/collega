@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff --stat collega_app/ios/Podfile.lock && git diff collega_app/ios/Podfile.lock | grep \"^[+-] \" | head -8",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff --stat collega_app/ios/Podfile.lock && git diff collega_app/ios/Podfile.lock | grep \"^[+-] \" | head -8",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "dec8a954ef24820c1b94b43b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:40:07.873Z",
+  "stored_at": "2026-09-21T15:40:07.873Z"
+}

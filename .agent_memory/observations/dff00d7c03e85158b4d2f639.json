@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_context",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_context: [{'type': 'text', 'text': '# Kage Context\\n\\nQuery: déployer le backend en prod docker build push NAS compose ; lancer l\\'app sur l\\'iPhone run_device.sh\\n\\n## Relevant Code Graph\\n1. [route] GET /colleges -> collega_backend/app/api/v1/colleges.py:69\\n2. [route] GET /colleges -> collega_backend/app/",
+  "text": "[{'type': 'text', 'text': '# Kage Context\\n\\nQuery: déployer le backend en prod docker build push NAS compose ; lancer l\\'app sur l\\'iPhone run_device.sh\\n\\n## Relevant Code Graph\\n1. [route] GET /colleges -> collega_backend/app/api/v1/colleges.py:69\\n2. [route] GET /colleges -> collega_backend/app/api/v1/colleges.py:69\\n3. [route] DELETE /colleges/:college_id -> collega_backend/app/api/v1/admin.py:752\\n1. [symbol] function build in collega_app/ios/Pods/RevenueCat/Sources/LocalReceiptParsing/Builders/ASN1ObjectIdentifierBuilder.swift:20\\n2. [symbol] class Backend in collega_app/ios/Pods/RevenueCat/Sources/Networking/Backend.swift:16\\n3. [symbol] class ProductEntitlementMappingCallback in collega_app/ios/Pods/RevenueCat/Sources/Networking/Caching/ProductEntitlementMappingCallback.swift:16\\n4. [symbol] class GetProductEntitlementMappingOperation in collega_app/ios/Pods/RevenueCat/Sources/Networking/Operations/GetProductEntitlementMappingOperation.swift:16\\n5. [symbol] class ProductEntitlementMappingResponse in collega_app/ios/Pods/RevenueCat/Sources/Networking/Responses/ProductEntitlementMappingResponse.swift:18\\n1. [test] test_complete_appelle_le_chemin_commun_et_purge in collega_ba",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "dff00d7c03e85158b4d2f639",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:18:13.882Z",
+  "stored_at": "2026-09-21T15:18:13.883Z"
+}

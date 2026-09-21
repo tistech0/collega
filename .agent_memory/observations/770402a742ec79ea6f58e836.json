@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bf5fq8nbk</task-id>\n<summary>Monitor event: \"Flutter full test suite progress\"</summary>\n<event>progress: 278 lines | 00:14 +236 -4: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/profile/profile_screen_test.dart: (tearDownAll)</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bf5fq8nbk</task-id> <summary>Monitor event: \"Flutter full test suite progress\"</summary> <event>progress: 278 lines | 00:14 +236 -4: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/profile",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "770402a742ec79ea6f58e836",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:55:54.691Z",
+  "stored_at": "2026-09-21T14:55:54.691Z",
+  "low_signal": true
+}

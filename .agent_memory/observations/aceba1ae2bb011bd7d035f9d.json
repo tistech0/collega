@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && git stash -q && flutter test test/features/home test/features/search/search_notifier_test.dart --reporter compact 2>&1 | tr '\\r' '\\n' | grep -E \"All tests|Some tests|\\[E\\]\" | cut -c1-160 | tail -6; git stash pop -q; git status --short | grep -v agent_memory | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && git stash -q && flutter test test/features/home test/features/search/search_notifier_test.dart --reporter compact 2>&1 | tr '\\r' '\\n' | grep -E \"All tests|Some tests|\\[E\\]\" | cut -c1-160 | tail -6; git stash pop -q; git status --short | grep -v agent_memo",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && git stash -q && flutter test test/features/home test/features/search/search_notifier_test.dart --reporter compact 2>&1 | tr '\\r' '\\n' | grep -E \"All tests|Some tests|\\[E\\]\" | cut -c1-160 | tail -6; git stash pop -q; git status --short | grep -v agent_memory | head: bloirwnnv Session cwd remains /Users/lesurmatthis/dev/projet perso/collega; directory changes made by the backgrounded command do not apply to subsequent commands.",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "aceba1ae2bb011bd7d035f9d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:59:08.840Z",
+  "stored_at": "2026-09-21T14:59:08.841Z"
+}

@@ -1,6 +1,6 @@
 # Story 7.11 : Upload de PDF > 100 MB via le tunnel Cloudflare
 
-Status: backlog
+Status: review
 
 <!-- OUVERTE le 2026-09-20 suite à la repro upload (session debug). 2026-09-21 : AC1 ACTÉ par le PL — option A (morceaux de 25 MB) + reprise + transfert en arrière-plan (background_downloader 9.5.5). Design validé : _bmad-output/planning-artifacts/specs/2026-09-21-upload-chunked-cloudflare-design.md — prochaine étape : plan d'implémentation. -->
 
@@ -72,12 +72,12 @@ Découvert le **2026-09-20** pendant la repro du bug « upload timeout / collèg
 
 ## Tasks / Subtasks
 
-- [ ] T0 — Kick-off : acter l'option (AC1)
-- [ ] T1 — Backend (option A) : endpoints init/part/complete + état Redis + assemblage ; réutiliser les gardes existantes (`require_subscription`, `JOB_IN_PROGRESS`, quotas reimport — déplacer la vérification atomique de quota dans `complete`) (AC2, AC3)
-- [ ] T2 — Backend : purge des uploads orphelins dans `app/workers/cleanup_worker.py` (AC3)
-- [ ] T3 — App : `CollegeImportRepository.importPdf` → découpage en parts, reprise, mapping 413/`file_too_large` ; UI progression d'upload par part (AC2, AC3, AC4)
-- [ ] T4 — Tests backend + app (AC5)
-- [ ] T5 — Vérif prod via le tunnel avec CANCERO 411 MB (AC2) et mise à jour de `deployment.md`
+- [x] T0 — Kick-off : acter l'option (AC1)
+- [x] T1 — Backend (option A) : endpoints init/part/complete + état Redis + assemblage ; réutiliser les gardes existantes (`require_subscription`, `JOB_IN_PROGRESS`, quotas reimport — déplacer la vérification atomique de quota dans `complete`) (AC2, AC3)
+- [x] T2 — Backend : purge des uploads orphelins dans `app/workers/cleanup_worker.py` (AC3)
+- [x] T3 — App : `CollegeImportRepository.importPdf` → découpage en parts, reprise, mapping 413/`file_too_large` ; UI progression d'upload par part (AC2, AC3, AC4)
+- [x] T4 — Tests backend + app (AC5)
+- [x] T5 — Déployé (image `tistech0/collega-backend:0a7d3c5`) et vérifié en prod depuis l'iPhone **en Wi-Fi (LAN)** avec CANCERO 411 MB : 17 × 204, complete 202, 436 pages OCR, 177 fiches, job 2 min 46 s (AC2 côté pipeline). **Restent** : test hors LAN (4G ou `scripts/chunked_upload.py --cloudflare-ip`) pour prouver le contournement des 100 MB Cloudflare, et test de reprise (app tuée en cours d'upload).
 
 ## Dev Notes
 
@@ -111,8 +111,41 @@ Découvert le **2026-09-20** pendant la repro du bug « upload timeout / collèg
 
 ### Agent Model Used
 
+Claude Opus 5 (1M context) — 2026-09-21, branche `feat/story-7.11-upload-chunked`, plan `_bmad-output/planning-artifacts/plans/2026-09-21-upload-chunked-cloudflare.md` exécuté tâche par tâche (TDD, 1 commit par tâche).
+
 ### Debug Log References
+
+- Backend : `.venv/bin/python -m pytest -q` → 349 passed / 16 failed (les 16 rouges pré-existants : Redis local absent, `/register` 403 by design, APNs 422) — 0 nouveau rouge. Nouveaux : `tests/services/test_chunked_upload_store.py` (12), `tests/api/test_colleges_chunked_upload.py` (19), `tests/workers/test_cleanup_uploads.py` (2).
+- App : `flutter analyze` → 0 nouvelle issue (5 infos/warnings pré-existants) ; nouveaux tests `test/core/upload/*` (21), `test/core/database/pending_uploads_test.dart` (1), +9 cas dans `college_import_notifier_test.dart`.
+- Piège rencontré : `AsyncNotifier.build()` est async → dans les tests, `startImport` doit être précédé de `await container.read(collegeImportProvider.future)` sinon `ImportIdle` écrase `ImportUploading(progress)` pendant les `await` (en prod l'écran watch le provider avant le pick, pas de problème).
 
 ### Completion Notes List
 
+- **Écart vs plan (T1)** : le plan appelait `_assert_import_allowed` **puis** `_start_import_from_file` dans `POST /import`, ce qui doublait les SELECT et cassait les tests existants qui chaînent `db.execute.side_effect` (le plan exigeait pourtant qu'ils restent verts sans modification). Décomposition en helpers (`_get_or_create_college`, `_assert_no_active_job`, `_apply_reimport_quota`, `_create_job_and_enqueue`) : `POST /import` garde exactement sa séquence DB → **0 test existant modifié** (le patch `os.replace` prévu par le plan est devenu inutile). `_assert_import_allowed` (lecture seule) ne sert qu'à `init` ; `_start_import_from_file` (get/create + garde + quotas + renommage `{college.id}_{job_id}.pdf` + job + enqueue) ne sert qu'à `complete`.
+- **`complete`** : `UPLOAD_INCOMPLETE` (409 + `missing`) avant le claim ; magic bytes vérifiés sur `part_0` avant le claim (422 + purge) ; claim atomique (DEL) → perdant = 409 `JOB_IN_PROGRESS` (état déjà disparu = 404) ; 503 `QUEUE_UNAVAILABLE` restaure l'état Redis + garde les morceaux (nouveau `complete` sans re-upload) ; toute autre `HTTPException` purge.
+- **`background_downloader` 9.5.5** : `allowPause` est incompatible avec `post: 'binary'` (assert du package) → retiré de `buildTask`. Le package normalise `directory` sans `/` initial avec `BaseDirectory.root`.
+- **Reprise** : `CollegesScreen` appelle `resumePendingUpload()` au montage et à chaque `onResume` ; `reset()` du notifier ne coupe plus un `ImportUploading(progress != null)` (l'écran d'import réaffiche la progression). Nouveau cas géré hors plan : copie locale du PDF disparue (`UploadSourceMissing` → toast « Fichier introuvable »).
+- **Vérification réelle 2026-09-21 (Wi-Fi LAN, iPhone release)** : backend déployé sur le NAS (`docker compose pull/up`, cron `cleanup_stale_uploads` chargé, migration OK). Import CANCERO 411 MB : `init` 201 (17 morceaux), 17 × `PUT parts` 204 (part 16 reçue avant 15 : ordre indifférent), `complete` 202 → PDF assemblé 430 964 137 octets, `uploads/` purgé, OCR 436/436 pages, génération 23 items / 177 fiches (132 761 tokens in, 17 376 out), durée job 2 min 46 s. Progression déterminée visible dans l'app. **Non testé** : chemin public Cloudflare (pas de 4G ; à faire avec `scripts/chunked_upload.py --cloudflare-ip 172.67.211.66 --env-file ../collega_app/.env.local`, consomme un reimport) et reprise après kill de l'app. Le schéma Drift passe en v6 (migration `createTable(pendingUploads)`).
+
 ### File List
+
+Backend (`collega_backend/`)
+- `app/api/v1/colleges.py` — refacto helpers d'import + 4 routes (`POST /colleges/{ref_id}/import/init`, `GET /colleges/import/{upload_id}`, `PUT /colleges/import/{upload_id}/parts/{n}`, `POST /colleges/import/{upload_id}/complete`) + `get_upload_store`
+- `app/services/upload/__init__.py`, `app/services/upload/chunked_upload.py` — `ChunkedUploadStore`, `UploadState`, constantes
+- `app/schemas/college.py` — `UploadInitRequest/Data`, `UploadStatusData` + wrappers
+- `app/workers/cleanup_worker.py`, `app/workers/settings.py` — cron `cleanup_stale_uploads` (xx:30)
+- `scripts/chunked_upload.py` — client curl de vérification réelle (`--cloudflare-ip`, `--env-file`, `--resume`)
+- `docs/deployment.md` — section « Upload par morceaux »
+- `tests/fakes/__init__.py`, `tests/fakes/fake_redis.py`, `tests/services/test_chunked_upload_store.py`, `tests/api/test_colleges_chunked_upload.py`, `tests/workers/test_cleanup_uploads.py`
+
+App (`collega_app/`)
+- `pubspec.yaml`, `pubspec.lock` — `background_downloader: 9.5.5`
+- `lib/main.dart` — `FileDownloader().start(autoCleanDatabase: true)`
+- `lib/core/database/tables/pending_uploads_table.dart`, `lib/core/database/app_database.dart` (+ `.g.dart`) — schéma v6
+- `lib/core/upload/upload_models.dart` (modèles + exceptions d'import déplacées ici), `upload_api.dart` (`mapImportDioError`, `DioUploadApi`), `part_splitter.dart`, `part_transport.dart` (+ `InMemoryPartTransport`), `chunked_upload_service.dart`, `background_part_transport.dart`, `upload_providers.dart`
+- `lib/features/colleges/domain/import_models.dart` — `ImportUploading.progress`
+- `lib/features/colleges/data/college_import_repository.dart` — exceptions ré-exportées, `mapImportDioError`
+- `lib/features/colleges/colleges_import_providers.dart` — aiguillage 90/500 MB, `_afterUploadAccepted`, `resumePendingUpload`, `reset()` protégé
+- `lib/features/colleges/presentation/college_import_screen.dart` — barre de progression déterminée + 5 toasts
+- `lib/features/colleges/presentation/colleges_screen.dart` — reprise au montage / onResume
+- `test/core/upload/*.dart` (5 fichiers), `test/core/database/pending_uploads_test.dart`, `test/features/colleges/college_import_notifier_test.dart`, `test/features/colleges/colleges_screen_test.dart`

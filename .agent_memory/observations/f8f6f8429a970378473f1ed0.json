@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_feedback",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_feedback: [{'type': 'text', 'text': 'Recorded helpful feedback for repo:git-github-com-tistech0-collega:decision:acc-s-backend-via-tunnel-cloudflare-service-token-dans-lapp-heartbeat-sse-limite'}]",
+  "text": "[{'type': 'text', 'text': 'Recorded helpful feedback for repo:git-github-com-tistech0-collega:decision:acc-s-backend-via-tunnel-cloudflare-service-token-dans-lapp-heartbeat-sse-limite'}]",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f8f6f8429a970378473f1ed0",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:12:32.982Z",
+  "stored_at": "2026-09-21T15:12:32.983Z"
+}

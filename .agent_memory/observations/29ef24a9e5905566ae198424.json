@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_feedback",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_feedback: [{'type': 'text', 'text': 'Recorded helpful feedback for repo:git-github-com-tistech0-collega:bug_fix:college-status-n-tait-jamais-avanc-generation-complete-job-seulement-import-jama'}]",
+  "text": "[{'type': 'text', 'text': 'Recorded helpful feedback for repo:git-github-com-tistech0-collega:bug_fix:college-status-n-tait-jamais-avanc-generation-complete-job-seulement-import-jama'}]",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "29ef24a9e5905566ae198424",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T15:12:23.765Z",
+  "stored_at": "2026-09-21T15:12:23.765Z",
+  "low_signal": true
+}

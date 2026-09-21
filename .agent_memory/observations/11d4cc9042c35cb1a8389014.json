@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/features/colleges/data/college_import_repository.dart; echo \"--- import_models\"; grep -n \"class ImportStartResponse\" -A12 lib/features/colleges/domain/import_models.dart; echo \"--- who imports exceptions\"; grep -rln \"SubscriptionRequiredException\\|JobInProgressException\" lib test | sort",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/features/colleges/data/college_import_repository.dart; echo \"--- import_models\"; grep -n \"class ImportStartResponse\" -A12 lib/f",
+  "session_id": "711a9378-8bc2-4c3d-aa1b-62e1e41a0a57",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "11d4cc9042c35cb1a8389014",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T14:16:18.100Z",
+  "stored_at": "2026-09-21T14:16:18.101Z"
+}

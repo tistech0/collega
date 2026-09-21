@@ -96,3 +96,18 @@ ou une donnée nouvelle collectée :
   pour les comptes existants).
 
 Responsable de la dernière révision : Lesurmatthis (2026-05-22).
+
+## Upload par morceaux (Story 7.11)
+
+- Cloudflare limite chaque requête à 100 MB : au-delà de 90 MB l'app passe par
+  `POST /v1/colleges/{ref_id}/import/init` → `PUT /v1/colleges/import/{upload_id}/parts/{n}`
+  (morceaux de 25 MB) → `POST /v1/colleges/import/{upload_id}/complete`.
+- Les morceaux sont écrits dans `${PDF_STORAGE_PATH}/uploads/{upload_id}/` sur le volume
+  `pdf_storage` (partagé api/worker). Pic disque ≈ 2 × taille du PDF pendant `complete`
+  (morceaux + fichier assemblé), puis les morceaux sont purgés.
+- État en Redis (`upload:{id}` hash + `upload:{id}:parts` set, TTL 24 h). Le cron
+  `cleanup_stale_uploads` (worker, toutes les heures à xx:30) purge les dossiers orphelins
+  (sans clé Redis ou > 24 h).
+- Vérification après déploiement : `scripts/chunked_upload.py` (voir docstring), avec
+  `--cloudflare-ip` + `--env-file ../collega_app/.env.local` pour reproduire le chemin hors LAN.
+  Couper le script en cours de route puis relancer avec `--resume <upload_id>` vérifie la reprise.

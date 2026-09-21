@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git merge-base --is-ancestor main HEAD && echo \"ff possible\"; git log --oneline --merges main | head -3; head -12 .agent_memory/pending/bug_fix-pasted-content-id-36da-*.md",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git merge-base --is-ancestor main HEAD && echo \"ff possible\"; git log --oneline --merges main | head -3; head -12 .agent_memory/pending/bug_fix-pas",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "230f5ee153f447429f28e298",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T18:57:30.172Z",
+  "stored_at": "2026-09-21T18:57:30.172Z"
+}
