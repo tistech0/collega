@@ -10,6 +10,11 @@ class AppColors {
   static const onSurface = Color(0xFF1A1C1A);
   static const error = Color(0xFFBA1A1A);
   static const warning = Color(0xFFF0A500);
+
+  /// Rail (fond) des barres de progression. shadcn_ui utilise sinon
+  /// `colorScheme.secondary` — vert foncé chez nous, ce qui rend une barre
+  /// vide visuellement pleine.
+  static const progressTrack = Color(0xFFE2EAE4);
 }
 
 class AppSpacing {
@@ -60,6 +65,10 @@ ShadThemeData buildShadTheme() {
       input: Color(0xFFE2EAE4),
       ring: Color(0xFF1B6B3A),
       selection: Color(0xFFB7F2C8),
+    ),
+    progressTheme: const ShadProgressTheme(
+      color: AppColors.primary,
+      backgroundColor: AppColors.progressTrack,
     ),
     textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.inter).copyWith(
       h2: AppTypography.displayMedium(),
