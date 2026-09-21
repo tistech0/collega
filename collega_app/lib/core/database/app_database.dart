@@ -9,19 +9,20 @@ import 'package:path_provider/path_provider.dart';
 import 'tables/college_import_table.dart';
 import 'tables/flash_cards_table.dart';
 import 'tables/items_table.dart';
+import 'tables/pending_uploads_table.dart';
 import 'tables/planning_configs_table.dart';
 import 'tables/planning_sessions_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [CollegeImports, Items, FlashCards, PlanningConfigs, PlanningSessions])
+@DriftDatabase(tables: [CollegeImports, Items, FlashCards, PlanningConfigs, PlanningSessions, PendingUploads])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -49,6 +50,10 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(planningConfigs);
             await m.createTable(planningSessions);
           }
+          if (from < 6) {
+            // Story 7.11 : reprise d'upload par morceaux
+            await m.createTable(pendingUploads);
+          }
         },
       );
 
@@ -59,6 +64,7 @@ class AppDatabase extends _$AppDatabase {
       await delete(flashCards).go();
       await delete(planningConfigs).go();
       await delete(planningSessions).go();
+      await delete(pendingUploads).go();
     });
   }
 
