@@ -250,6 +250,22 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
 
+    testWidgets('le toast disparaît en ~2 s (5 s par défaut = trop long)',
+        (tester) async {
+      await flipAndPump(tester, 3);
+
+      await tester.tap(find.text('À revoir'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.textContaining('reviendra'), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 2500));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.textContaining('reviendra'), findsNothing);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
     testWidgets('« Bien » → pas de toast', (tester) async {
       await flipAndPump(tester, 3);
 

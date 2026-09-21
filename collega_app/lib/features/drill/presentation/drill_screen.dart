@@ -104,6 +104,7 @@ class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
     ShadToaster.of(context).show(
       const ShadToast(
         title: Text('Cette fiche reviendra dans quelques questions'),
+        duration: Duration(seconds: 2),
       ),
     );
   }
