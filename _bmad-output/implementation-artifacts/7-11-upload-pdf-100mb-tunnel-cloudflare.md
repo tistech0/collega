@@ -77,7 +77,7 @@ Découvert le **2026-09-20** pendant la repro du bug « upload timeout / collèg
 - [x] T2 — Backend : purge des uploads orphelins dans `app/workers/cleanup_worker.py` (AC3)
 - [x] T3 — App : `CollegeImportRepository.importPdf` → découpage en parts, reprise, mapping 413/`file_too_large` ; UI progression d'upload par part (AC2, AC3, AC4)
 - [x] T4 — Tests backend + app (AC5)
-- [ ] T5 — Vérif prod via le tunnel avec CANCERO 411 MB (AC2) — `deployment.md` mis à jour, script `scripts/chunked_upload.py` prêt ; **déploiement + test réel restent à faire** (voir Completion Notes)
+- [x] T5 — Déployé (image `tistech0/collega-backend:0a7d3c5`) et vérifié en prod depuis l'iPhone **en Wi-Fi (LAN)** avec CANCERO 411 MB : 17 × 204, complete 202, 436 pages OCR, 177 fiches, job 2 min 46 s (AC2 côté pipeline). **Restent** : test hors LAN (4G ou `scripts/chunked_upload.py --cloudflare-ip`) pour prouver le contournement des 100 MB Cloudflare, et test de reprise (app tuée en cours d'upload).
 
 ## Dev Notes
 
@@ -125,7 +125,7 @@ Claude Opus 5 (1M context) — 2026-09-21, branche `feat/story-7.11-upload-chunk
 - **`complete`** : `UPLOAD_INCOMPLETE` (409 + `missing`) avant le claim ; magic bytes vérifiés sur `part_0` avant le claim (422 + purge) ; claim atomique (DEL) → perdant = 409 `JOB_IN_PROGRESS` (état déjà disparu = 404) ; 503 `QUEUE_UNAVAILABLE` restaure l'état Redis + garde les morceaux (nouveau `complete` sans re-upload) ; toute autre `HTTPException` purge.
 - **`background_downloader` 9.5.5** : `allowPause` est incompatible avec `post: 'binary'` (assert du package) → retiré de `buildTask`. Le package normalise `directory` sans `/` initial avec `BaseDirectory.root`.
 - **Reprise** : `CollegesScreen` appelle `resumePendingUpload()` au montage et à chaque `onResume` ; `reset()` du notifier ne coupe plus un `ImportUploading(progress != null)` (l'écran d'import réaffiche la progression). Nouveau cas géré hors plan : copie locale du PDF disparue (`UploadSourceMissing` → toast « Fichier introuvable »).
-- **Non fait / à faire (T5)** : build + push image backend, `docker compose up -d` sur le NAS, test réel CANCERO 411 MB via `scripts/chunked_upload.py --cloudflare-ip … --env-file …` (init 201 → 17 × 204 → complete 202, puis test `--resume` après Ctrl-C), test iPhone 4G avec passage en arrière-plan. Le schéma Drift passe en v6 (migration `createTable(pendingUploads)`).
+- **Vérification réelle 2026-09-21 (Wi-Fi LAN, iPhone release)** : backend déployé sur le NAS (`docker compose pull/up`, cron `cleanup_stale_uploads` chargé, migration OK). Import CANCERO 411 MB : `init` 201 (17 morceaux), 17 × `PUT parts` 204 (part 16 reçue avant 15 : ordre indifférent), `complete` 202 → PDF assemblé 430 964 137 octets, `uploads/` purgé, OCR 436/436 pages, génération 23 items / 177 fiches (132 761 tokens in, 17 376 out), durée job 2 min 46 s. Progression déterminée visible dans l'app. **Non testé** : chemin public Cloudflare (pas de 4G ; à faire avec `scripts/chunked_upload.py --cloudflare-ip 172.67.211.66 --env-file ../collega_app/.env.local`, consomme un reimport) et reprise après kill de l'app. Le schéma Drift passe en v6 (migration `createTable(pendingUploads)`).
 
 ### File List
 
