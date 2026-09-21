@@ -1,18 +1,23 @@
-"""Worker ARQ cron — supprime ocr_text 24h après génération (NFR9)
-et reset défensif des quotas mensuels (Story 7.2 — AC #2)."""
+"""Worker ARQ cron — supprime ocr_text 24h après génération (NFR9),
+reset défensif des quotas mensuels (Story 7.2 — AC #2) et purge des
+uploads par morceaux orphelins (Story 7.11)."""
 from __future__ import annotations
 
 import logging
+import shutil
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from sqlalchemy import select
 from sqlalchemy import update as sql_update
 
+from app.core.config import settings
 from app.core.database import async_session_factory
 from app.core.time_utils import next_month_reset
 from app.models.generation_job import GenerationJob
 from app.models.item import Item
 from app.models.user import User
+from app.services.upload.chunked_upload import ChunkedUploadStore
 
 logger = logging.getLogger(__name__)
 
@@ -69,3 +74,20 @@ async def reset_monthly_reloads(ctx: dict) -> None:
         )
         await db.commit()
         logger.info("Reset monthly reloads for %d users", result.rowcount)
+
+
+async def cleanup_stale_uploads(ctx: dict) -> int:
+    """Supprime les dossiers uploads/{id} sans clé Redis (upload terminé/abandonné) ou > 24 h.
+    Story 7.11 — filet de sécurité disque au-dessus du TTL Redis. Renvoie le nombre de dossiers purgés."""
+    store = ChunkedUploadStore(ctx["redis"], Path(settings.pdf_storage_path))
+    base = Path(settings.pdf_storage_path) / "uploads"
+    if not base.exists():
+        return 0
+    stale = set(store.stale_dirs(timedelta(hours=24)))
+    removed = 0
+    for d in sorted(p for p in base.iterdir() if p.is_dir()):
+        if d in stale or await store.get(d.name) is None:
+            shutil.rmtree(d, ignore_errors=True)
+            removed += 1
+    logger.info("Purged %d stale chunked uploads", removed)
+    return removed
