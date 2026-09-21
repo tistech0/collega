@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserCollegeData(BaseModel):
@@ -25,6 +25,36 @@ class ImportCollegeResponseData(BaseModel):
 
 class ImportCollegeResponseWrapped(BaseModel):
     data: ImportCollegeResponseData
+
+
+# ── Story 7.11 — upload par morceaux ──────────────────────────────────────────
+
+
+class UploadInitRequest(BaseModel):
+    size_bytes: int = Field(..., gt=0)
+
+
+class UploadInitData(BaseModel):
+    upload_id: str
+    part_size: int
+    parts_total: int
+    expires_at: str
+
+
+class UploadInitResponseWrapped(BaseModel):
+    data: UploadInitData
+
+
+class UploadStatusData(BaseModel):
+    received: list[int]
+    parts_total: int
+    part_size: int
+    size_bytes: int
+    expires_at: str
+
+
+class UploadStatusResponseWrapped(BaseModel):
+    data: UploadStatusData
 
 
 class CollegeStatusData(BaseModel):

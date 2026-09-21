@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncIterator
 import json
 import logging
 import os
@@ -9,7 +10,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, select
 from sqlalchemy import update as sa_update
@@ -37,7 +38,18 @@ from app.schemas.college import (
     ItemsListResponseWrapped,
     ReloadLimitsData,
     ReloadLimitsResponseWrapped,
+    UploadInitData,
+    UploadInitRequest,
+    UploadInitResponseWrapped,
+    UploadStatusData,
+    UploadStatusResponseWrapped,
     UserCollegeData,
+)
+from app.services.upload.chunked_upload import (
+    MAX_UPLOAD_SIZE,
+    ChunkedUploadStore,
+    InvalidPartIndex,
+    PartSizeError,
 )
 
 logger = logging.getLogger(__name__)
@@ -407,6 +419,158 @@ async def import_college_pdf(
     logger.info("PDF saved for college %s (ref_id=%s) at %s", college.id, ref_id, pdf_file_path)
 
     data = await _create_job_and_enqueue(db, current_user, college, job_id, pdf_file_path)
+    return ImportCollegeResponseWrapped(data=data)
+
+
+# ── Story 7.11 — upload par morceaux (Cloudflare : 100 MB max par requête) ──────
+
+
+async def get_upload_store() -> AsyncIterator[ChunkedUploadStore]:
+    """Store d'upload : Redis via le pool ARQ (redis.asyncio) + volume pdf_storage."""
+    from arq import create_pool  # type: ignore[import]
+    from app.core.redis import redis_settings as _redis_settings
+
+    pool = await create_pool(_redis_settings)
+    try:
+        yield ChunkedUploadStore(pool, Path(settings.pdf_storage_path))
+    finally:
+        await pool.close()
+
+
+def _upload_not_found() -> HTTPException:
+    return HTTPException(
+        status_code=404,
+        detail={"code": "UPLOAD_NOT_FOUND", "message": "Upload inconnu ou expiré — relancer l'import"},
+    )
+
+
+@router.post(
+    "/colleges/{ref_id}/import/init",
+    response_model=UploadInitResponseWrapped,
+    status_code=201,
+)
+async def init_chunked_import(
+    ref_id: int,
+    body: UploadInitRequest,
+    current_user: User = Depends(require_subscription),
+    db: AsyncSession = Depends(get_db),
+    store: ChunkedUploadStore = Depends(get_upload_store),
+) -> UploadInitResponseWrapped:
+    """Ouvre un upload par morceaux. Mêmes gardes que POST /import, quota NON consommé."""
+    await _assert_import_allowed(db, current_user, ref_id)
+    if body.size_bytes > MAX_UPLOAD_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail={"code": "FILE_TOO_LARGE", "message": "Le PDF ne doit pas dépasser 500 MB"},
+        )
+    state = await store.create(current_user.id, ref_id, body.size_bytes)
+    logger.info("Chunked upload %s opened (ref_id=%s, %d parts)", state.upload_id, ref_id, state.parts_total)
+    return UploadInitResponseWrapped(
+        data=UploadInitData(
+            upload_id=state.upload_id,
+            part_size=state.part_size,
+            parts_total=state.parts_total,
+            expires_at=state.expires_at.isoformat(),
+        )
+    )
+
+
+@router.get("/colleges/import/{upload_id}", response_model=UploadStatusResponseWrapped)
+async def get_chunked_import_status(
+    upload_id: uuid.UUID,
+    store: ChunkedUploadStore = Depends(get_upload_store),
+) -> UploadStatusResponseWrapped:
+    """Morceaux déjà reçus — authentifié par l'upload_id seul (cf. spec §3.4)."""
+    state = await store.get(str(upload_id))
+    if state is None:
+        raise _upload_not_found()
+    return UploadStatusResponseWrapped(
+        data=UploadStatusData(
+            received=sorted(state.received),
+            parts_total=state.parts_total,
+            part_size=state.part_size,
+            size_bytes=state.size_bytes,
+            expires_at=state.expires_at.isoformat(),
+        )
+    )
+
+
+@router.put("/colleges/import/{upload_id}/parts/{n}", status_code=204)
+async def put_chunked_import_part(
+    upload_id: uuid.UUID,
+    n: int,
+    request: Request,
+    store: ChunkedUploadStore = Depends(get_upload_store),
+) -> Response:
+    """Reçoit un morceau binaire brut (body = octets du morceau). Idempotent."""
+    state = await store.get(str(upload_id))
+    if state is None:
+        raise _upload_not_found()
+    try:
+        await store.write_part(state, n, request.stream())
+    except (PartSizeError, InvalidPartIndex) as exc:
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "INVALID_PART", "message": f"Morceau invalide : {exc}"},
+        )
+    return Response(status_code=204)
+
+
+@router.post(
+    "/colleges/import/{upload_id}/complete",
+    response_model=ImportCollegeResponseWrapped,
+    status_code=202,
+)
+async def complete_chunked_import(
+    upload_id: uuid.UUID,
+    current_user: User = Depends(require_subscription),
+    db: AsyncSession = Depends(get_db),
+    store: ChunkedUploadStore = Depends(get_upload_store),
+) -> ImportCollegeResponseWrapped:
+    """Assemble les morceaux puis enchaîne sur le pipeline d'import existant."""
+    state = await store.get(str(upload_id))
+    if state is None or state.user_id != str(current_user.id):
+        raise _upload_not_found()
+    if not state.is_complete:
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "UPLOAD_INCOMPLETE", "message": "Morceaux manquants", "missing": state.missing},
+        )
+    with open(store.part_path(state.upload_id, 0), "rb") as f:
+        if not f.read(len(_PDF_MAGIC)).startswith(_PDF_MAGIC):
+            await store.claim(state.upload_id)
+            store.purge(state.upload_id)
+            raise HTTPException(
+                status_code=422,
+                detail={"code": "INVALID_FILE_TYPE", "message": "Le fichier ne semble pas être un PDF valide"},
+            )
+
+    # Prise de possession atomique : un complete concurrent qui perd le DEL reçoit 409.
+    claimed = await store.claim(state.upload_id)
+    if claimed is None:
+        raise _job_in_progress()
+
+    storage_path = Path(settings.pdf_storage_path)
+    storage_path.mkdir(parents=True, exist_ok=True)
+    assembled = storage_path / f"incoming_{state.upload_id}.pdf"
+    try:
+        store.assemble(claimed, assembled)
+        data = await _start_import_from_file(db, current_user, claimed.ref_id, assembled)
+    except HTTPException as exc:
+        assembled.unlink(missing_ok=True)
+        if exc.status_code == 503:
+            # File indisponible : on garde les morceaux pour permettre un nouveau complete sans re-upload
+            await store.restore(claimed)
+        else:
+            store.purge(claimed.upload_id)
+        raise
+    except Exception:
+        assembled.unlink(missing_ok=True)
+        await store.restore(claimed)
+        raise
+
+    store.purge(claimed.upload_id)
+    logger.info("Chunked upload %s completed → college %s job %s", upload_id, data.college_id, data.job_id)
     return ImportCollegeResponseWrapped(data=data)
 
 
