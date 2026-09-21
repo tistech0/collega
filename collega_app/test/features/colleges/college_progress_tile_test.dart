@@ -87,5 +87,34 @@ void main() {
 
       expect(find.text(kCollegeCatalog.first.name), findsOneWidget);
     });
+
+    testWidgets(
+        'le non-vu est calculé sur le total serveur, pas sur les fiches cachées',
+        (tester) async {
+      // Repro iPhone 2026-09-21 : 15 fiches d'un seul item cachées et drillées
+      // sur un collège de 177 fiches → la barre était pleine (0 gris).
+      final status = UserCollegeStatus(
+        refId: kCollegeCatalog.first.refId,
+        collegeId: 'cancero',
+        status: 'generation_complete',
+        cardCountA: 100,
+        cardCountB: 50,
+        cardCountC: 27,
+      );
+      final entry = CollegeListEntry(
+        catalog: kCollegeCatalog.first,
+        userStatus: status,
+      );
+      const stats = DrillStats(maitrise: 14, bien: 1, aRevoir: 0, notSeen: 0);
+
+      await tester.pumpWidget(_buildTile(entry, stats: stats));
+      await tester.pumpAndSettle();
+
+      final flexes = tester
+          .widgetList<Flexible>(find.byType(Flexible))
+          .map((f) => f.flex)
+          .toList();
+      expect(flexes, containsAll([14, 1, 162]));
+    });
   });
 }

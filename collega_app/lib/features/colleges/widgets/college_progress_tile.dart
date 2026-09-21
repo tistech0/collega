@@ -46,7 +46,11 @@ class _ImportedTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(collegeDrillStatsProvider(collegeId));
-    final stats = statsAsync.valueOrNull ?? const DrillStats();
+    // Les fiches locales ne couvrent que les items déjà ouverts : le non-vu
+    // se déduit du total serveur (card_count_*), sinon la barre est pleine
+    // dès qu'un seul item a été drillé.
+    final stats = (statsAsync.valueOrNull ?? const DrillStats())
+        .withTotal(entry.userStatus!.totalCards);
     return ShadCard(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       child: InkWell(

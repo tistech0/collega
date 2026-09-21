@@ -4,7 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
+import 'package:collega_app/features/colleges/domain/drill_stats.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/colleges/presentation/college_detail_screen.dart';
@@ -25,9 +28,31 @@ CollegeListEntry _loadingEntry() => CollegeListEntry(
       ),
     );
 
+CollegeListEntry _completeEntry() => CollegeListEntry(
+      catalog: _catalogEntry,
+      userStatus: UserCollegeStatus(
+        refId: _catalogEntry.refId,
+        collegeId: 'college-uuid-1',
+        status: 'generation_complete',
+        cardCountA: 3,
+        cardCountB: 2,
+        cardCountC: 0,
+      ),
+    );
+
+class _FakeDetailNotifier extends CollegeDetailNotifier {
+  _FakeDetailNotifier(this._state);
+  final CollegeDetailState _state;
+
+  @override
+  Future<CollegeDetailState> build(String collegeId) async => _state;
+}
+
 Widget _buildScreen({
   required int refId,
   required List<CollegeListEntry> colleges,
+  CollegeDetailState? detailState,
+  Map<String, DrillStats> drillByItem = const {},
 }) {
   final router = GoRouter(
     routes: [
@@ -48,6 +73,13 @@ Widget _buildScreen({
     overrides: [
       collegesProvider.overrideWith(
         () => _FakeCollegesNotifier(colleges),
+      ),
+      if (detailState != null)
+        collegeDetailProvider.overrideWith(
+          () => _FakeDetailNotifier(detailState),
+        ),
+      collegeDrillStatsByItemProvider.overrideWith(
+        (ref, collegeId) => Stream.value(drillByItem),
       ),
     ],
     child: ShadApp.router(routerConfig: router),
@@ -87,6 +119,34 @@ void main() {
       await tester.pump(Duration.zero);
 
       expect(find.byType(LinearProgressIndicator), findsWidgets);
+    });
+
+    testWidgets(
+        'progression globale = stats de drill vivantes sur le total serveur',
+        (tester) async {
+      // Repro iPhone 2026-09-21 : item de 5 fiches (serveur), 2 maîtrisées en
+      // local → « 40% maîtrisé · 5 fiches », et non « 0% · 0 fiches ».
+      const item = ItemModel(
+        id: 'item-1',
+        collegeId: 'college-uuid-1',
+        itemNumber: 310,
+        rang: 'A',
+        ocrConfidenceScore: 0.9,
+        lowConfidence: false,
+        cardCountA: 3,
+        cardCountB: 2,
+        cardCountC: 0,
+      );
+
+      await tester.pumpWidget(_buildScreen(
+        refId: _catalogEntry.refId,
+        colleges: [_completeEntry()],
+        detailState: const CollegeDetailLoaded(items: [item]),
+        drillByItem: {'item-1': const DrillStats(maitrise: 2)},
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('40% maîtrisé · 5 fiches'), findsOneWidget);
     });
   });
 }

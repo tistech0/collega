@@ -10,6 +10,7 @@ import 'package:collega_app/features/colleges/colleges_import_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
+import 'package:collega_app/features/colleges/domain/drill_stats.dart';
 import 'package:collega_app/features/colleges/domain/import_models.dart';
 import 'package:collega_app/features/colleges/presentation/widgets/item_progress_bar.dart';
 import 'package:collega_app/features/colleges/presentation/widgets/ocr_confidence_badge.dart';
@@ -189,6 +190,12 @@ class _CollegeDetailViewState extends ConsumerState<_CollegeDetailView> {
   @override
   Widget build(BuildContext context) {
     final detailAsync = ref.watch(collegeDetailProvider(widget.collegeId));
+    // Stats vivantes (watch Drift) : le notifier de détail n'est jamais
+    // invalidé, un instantané pris avant un drill resterait figé à 0.
+    final drillByItem = ref
+            .watch(collegeDrillStatsByItemProvider(widget.collegeId))
+            .valueOrNull ??
+        const {};
 
     return Scaffold(
       appBar: AppBar(
@@ -230,6 +237,7 @@ class _CollegeDetailViewState extends ConsumerState<_CollegeDetailView> {
           CollegeDetailLoaded() => _LoadedBody(
               entry: widget.entry,
               state: state,
+              drillByItem: drillByItem,
               refId: widget.entry.catalog.refId,
               onRangFilter: (rang) =>
                   ref.read(collegeDetailProvider(widget.collegeId).notifier).filterByRang(rang),
@@ -245,6 +253,7 @@ class _LoadedBody extends StatelessWidget {
   const _LoadedBody({
     required this.entry,
     required this.state,
+    required this.drillByItem,
     required this.refId,
     required this.onRangFilter,
     required this.selectedRang,
@@ -252,18 +261,25 @@ class _LoadedBody extends StatelessWidget {
 
   final CollegeListEntry entry;
   final CollegeDetailLoaded state;
+  final Map<String, DrillStats> drillByItem;
   final int refId;
   final void Function(String?) onRangFilter;
   final String? selectedRang;
 
+  /// Non-vu recalé sur le total serveur de l'item : les fiches locales ne
+  /// couvrent que les items déjà ouverts.
+  DrillStats _statsFor(ItemModel item) =>
+      (drillByItem[item.id] ?? const DrillStats()).withTotal(item.totalCards);
+
   @override
   Widget build(BuildContext context) {
     final filteredItems = state.filteredItems;
+    final statsByItem = {for (final i in filteredItems) i.id: _statsFor(i)};
 
-    final totalMaitrise = filteredItems.fold(0, (s, i) => s + i.drillMaitrise);
-    final totalBien = filteredItems.fold(0, (s, i) => s + i.drillBien);
-    final totalARevoir = filteredItems.fold(0, (s, i) => s + i.drillARevoir);
-    final totalNotSeen = filteredItems.fold(0, (s, i) => s + i.drillNotSeen);
+    final totalMaitrise = statsByItem.values.fold(0, (s, d) => s + d.maitrise);
+    final totalBien = statsByItem.values.fold(0, (s, d) => s + d.bien);
+    final totalARevoir = statsByItem.values.fold(0, (s, d) => s + d.aRevoir);
+    final totalNotSeen = statsByItem.values.fold(0, (s, d) => s + d.notSeen);
     final totalCards = totalMaitrise + totalBien + totalARevoir + totalNotSeen;
     final masteryPct =
         totalCards == 0 ? 0 : ((totalMaitrise / totalCards) * 100).round();
@@ -312,6 +328,7 @@ class _LoadedBody extends StatelessWidget {
                   itemCount: filteredItems.length,
                   itemBuilder: (ctx, i) => _ItemTile(
                     item: filteredItems[i],
+                    stats: statsByItem[filteredItems[i].id]!,
                     refId: refId,
                   )
                       .animate(
@@ -417,9 +434,14 @@ class _RangBadge extends StatelessWidget {
 }
 
 class _ItemTile extends StatelessWidget {
-  const _ItemTile({required this.item, required this.refId});
+  const _ItemTile({
+    required this.item,
+    required this.stats,
+    required this.refId,
+  });
 
   final ItemModel item;
+  final DrillStats stats;
   final int refId;
 
   @override
@@ -458,10 +480,10 @@ class _ItemTile extends StatelessWidget {
             ],
             const SizedBox(height: 8),
             ItemProgressBar(
-              countARevoir: item.drillARevoir,
-              countBien: item.drillBien,
-              countMaitrise: item.drillMaitrise,
-              countNotSeen: item.drillNotSeen,
+              countARevoir: stats.aRevoir,
+              countBien: stats.bien,
+              countMaitrise: stats.maitrise,
+              countNotSeen: stats.notSeen,
               showCounts: true,
             ),
           ],
