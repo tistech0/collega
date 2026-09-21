@@ -29,6 +29,7 @@ dependencies:
 
   # HTTP client
   dio: ^5.7.0
+  background_downloader: 9.5.5 # 9.6.x exige Flutter >= 3.47
 
   # Design system
   shadcn_ui: ^0.19.0
