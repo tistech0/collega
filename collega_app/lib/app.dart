@@ -5,6 +5,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:collega_app/core/notifications/notifications_service.dart';
 import 'package:collega_app/core/router/app_router.dart';
 import 'package:collega_app/core/theme/app_theme.dart';
+import 'package:collega_app/core/ui/theme/cg_theme.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 
 class App extends ConsumerWidget {
@@ -25,11 +26,20 @@ class App extends ConsumerWidget {
       }
     });
 
-    return ShadApp.router(
-      title: 'AppMédecine',
-      theme: buildShadTheme(),
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
+    // Collega UI (story 8.1) : CgTheme au-dessus des routes, Material réduit à un
+    // conteneur technique. Les écrans shadcn gardent leurs couleurs jusqu'à leur
+    // migration (8.3 → 8.14).
+    return CgTheme(
+      data: CgThemeData.light,
+      child: ShadApp.router(
+        title: 'Collega',
+        theme: buildShadTheme(),
+        routerConfig: router,
+        debugShowCheckedModeBanner: false,
+        materialThemeBuilder: (context, theme) => neutralizeMaterial(theme).copyWith(
+          cupertinoOverrideTheme: buildCgCupertinoTheme(CgThemeData.light),
+        ),
+      ),
     );
   }
 }
