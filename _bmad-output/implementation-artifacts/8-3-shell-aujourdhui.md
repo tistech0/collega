@@ -1,6 +1,6 @@
 # Story 8.3 : Shell 4 onglets + Aujourd'hui (et moteur de la session du jour)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -51,7 +51,7 @@ afin de réviser sans rien décider.
 - [x] T4 `DailySessionRepository` / provider : obtenir-ou-construire, personnaliser, `recordVerdict`, `completeIfLast`, reprise ; planning : marquage + correctif `postponeSession`.
 - [x] T5 Shell `CgTabBar`, route `/progress`, `/search` hors onglets, redirections ; tests routeur.
 - [x] T6 Écran Aujourd'hui + sheet Personnaliser (`CgSheet`, `CgSegmented`, `CgListRow` à coche) ; tests widget + goldens des états.
-- [ ] T7 Build iPhone `tool/run_device.sh --release -d 00008110-000115D43499801E` → validation visuelle utilisateur.
+- [x] T7 Build iPhone `tool/run_device.sh --release -d 00008110-000115D43499801E` → validation visuelle utilisateur.
 
 ## Dev Notes
 
