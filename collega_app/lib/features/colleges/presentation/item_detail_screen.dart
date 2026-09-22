@@ -11,6 +11,7 @@ import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
+import 'package:collega_app/features/colleges/domain/item_title.dart';
 import 'package:collega_app/features/colleges/presentation/widgets/ocr_confidence_badge.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 
@@ -67,7 +68,7 @@ class ItemDetailScreen extends ConsumerWidget {
               appBar: AppBar(
                 title: Text(
                   currentItem != null
-                      ? 'Item ${currentItem.itemNumber}${currentItem.chapterTitle != null ? ' · ${currentItem.chapterTitle}' : ''}'
+                      ? itemFullLabel(currentItem.itemNumber, currentItem.chapterTitle)
                       : 'Détail item',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -83,8 +84,7 @@ class ItemDetailScreen extends ConsumerWidget {
                 collegeId: collegeId,
                 itemId: itemId,
                 itemName: currentItem != null
-                    ? 'Item ${currentItem.itemNumber}'
-                        '${currentItem.chapterTitle != null ? ' · ${currentItem.chapterTitle}' : ''}'
+                    ? itemFullLabel(currentItem.itemNumber, currentItem.chapterTitle)
                     : null,
               ),
               body: _ItemDetailBody(

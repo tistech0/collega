@@ -50,13 +50,15 @@ void main() {
       expect(state.results, isEmpty);
     });
 
-    test("onQueryChanged('BNP') → isLoading=true immédiatement", () {
+    test("onQueryChanged('BNP') → requête enregistrée, pas de chargement pendant le debounce", () {
       final container = _makeContainer(_FakeSearchRepository());
       addTearDown(container.dispose);
 
       container.read(searchNotifierProvider.notifier).onQueryChanged('BNP');
       final state = container.read(searchNotifierProvider);
-      expect(state.isLoading, isTrue);
+      // isLoading ne passe à true qu'au lancement de la requête (après 400 ms),
+      // pour garder les résultats précédents affichés pendant la frappe.
+      expect(state.isLoading, isFalse);
       expect(state.query, 'BNP');
     });
 

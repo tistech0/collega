@@ -4,6 +4,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
+import 'package:collega_app/features/colleges/domain/item_title.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/search/domain/search_result.dart';
 
@@ -59,7 +60,7 @@ class SearchResultTile extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    result.chapterTitle ?? 'Item ${result.itemNumber}',
+                    itemDisplayTitle(result.itemNumber, result.chapterTitle),
                     style: AppTypography.titleMedium(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

@@ -22,6 +22,7 @@ from app.models.item import Item
 from app.services.jobs.job_events import record_job_event
 from app.services.ocr.confidence_scorer import ConfidenceScorer
 from app.services.ocr.item_detector import DetectedItem, ItemDetector
+from app.services.ocr.item_titles import lookup_title, record_title
 from app.services.ocr.ocr_processor import OcrProcessor
 
 logger = logging.getLogger(__name__)
@@ -68,6 +69,39 @@ async def process_college_ocr(
             await record_job_event(db, job.id, "failed", message=str(exc))
             await db.commit()
             raise
+
+
+async def _resolve_title(
+    db: AsyncSession, college_id: uuid.UUID, detected: DetectedItem
+) -> str | None:
+    """Story 8.0 — cascade du titre d'un item.
+
+    1. Titre extrait de l'en-tête (déjà filtré par le détecteur) → gardé et versé au
+       référentiel partagé (qui complète au passage les items vides des autres collèges).
+    2. Sinon libellé du référentiel pour ce numéro.
+    3. Sinon NULL + warning ; l'item sera complété au prochain import qui fournit ce titre.
+    Le référentiel est un bonus : une erreur de sa part ne doit jamais casser l'import.
+    """
+    number = detected.item_number
+    if detected.chapter_title:
+        try:
+            await record_title(db, number, detected.chapter_title)
+        except Exception:  # noqa: BLE001
+            logger.exception("Référentiel item_titles : échec d'écriture pour l'item %d", number)
+        return detected.chapter_title
+
+    try:
+        title = await lookup_title(db, number)
+    except Exception:  # noqa: BLE001
+        logger.exception("Référentiel item_titles : échec de lecture pour l'item %d", number)
+        title = None
+    if title:
+        return title
+
+    logger.warning(
+        "Item %d du collège %s sans titre (ni en-tête ni référentiel)", number, college_id
+    )
+    return None
 
 
 async def _run_ocr(
@@ -221,14 +255,14 @@ async def _run_ocr(
         db, job.id, "items_detected", message=f"{len(final_items)} items"
     )
 
-    # 6. Insérer les items en base
+    # 6. Insérer les items en base (titre : en-tête → référentiel partagé → NULL)
     for detected in final_items:
         item_score = detected.ocr_confidence_score
         item = Item(
             college_id=college.id,
             item_number=detected.item_number,
             rang=detected.rang,
-            chapter_title=detected.chapter_title or "",
+            chapter_title=await _resolve_title(db, college.id, detected),
             ocr_text=detected.ocr_text,
             ocr_confidence_score=item_score,
             low_confidence=_confidence_scorer.is_low_confidence(item_score),

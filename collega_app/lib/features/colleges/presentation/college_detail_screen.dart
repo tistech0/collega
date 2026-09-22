@@ -12,6 +12,7 @@ import 'package:collega_app/features/colleges/domain/college_detail_models.dart'
 import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/colleges/domain/drill_stats.dart';
 import 'package:collega_app/features/colleges/domain/import_models.dart';
+import 'package:collega_app/features/colleges/domain/item_title.dart';
 import 'package:collega_app/features/colleges/presentation/widgets/item_progress_bar.dart';
 import 'package:collega_app/features/colleges/presentation/widgets/ocr_confidence_badge.dart';
 
@@ -469,10 +470,10 @@ class _ItemTile extends StatelessWidget {
                 const Icon(Icons.chevron_right, size: 18),
               ],
             ),
-            if (item.chapterTitle != null) ...[
+            if (hasItemTitle(item.chapterTitle)) ...[
               const SizedBox(height: 4),
               Text(
-                item.chapterTitle!,
+                item.chapterTitle!.trim(),
                 style: AppTypography.titleMedium().copyWith(fontSize: 14),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

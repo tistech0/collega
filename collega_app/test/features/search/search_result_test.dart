@@ -170,5 +170,13 @@ void main() {
         findsOneWidget,
       );
     });
+  
+    testWidgets('titre vide → repli « Item N » en titre (story 8.0)', (tester) async {
+      await tester.pumpWidget(_wrap(
+        SearchResultTile(result: _makeResult(itemNumber: 310, chapterTitle: '')),
+      ));
+      await tester.pump(Duration.zero);
+      expect(find.text('Item 310'), findsOneWidget);
+    });
   });
 }

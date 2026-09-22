@@ -18,6 +18,15 @@ from app.services.ocr.ocr_processor import OcrPageResult
 from app.workers.ocr_worker import _run_ocr
 
 
+@pytest.fixture(autouse=True)
+def _stub_referential():
+    """Le référentiel de titres (story 8.0) fait du SQL réel : neutralisé ici, testé à part."""
+    with patch("app.workers.ocr_worker.record_title", new_callable=AsyncMock) as record, patch(
+        "app.workers.ocr_worker.lookup_title", new_callable=AsyncMock, return_value=None
+    ) as lookup:
+        yield record, lookup
+
+
 def make_college(progress: int = 0, total_pages: int | None = None):
     """SimpleNamespace simule un College SQLAlchemy sans instrumentalisation."""
     return types.SimpleNamespace(
@@ -337,3 +346,99 @@ class TestRunOcr:
         assert len(created) == 1
         # La seconde occurrence a plus de contenu → gardée (rang B)
         assert created[0].rang == "B"
+
+
+class TestTitleCascade:
+    """Story 8.0 — en-tête valide → référentiel → NULL + warning."""
+
+    @staticmethod
+    def _db(added):
+        db = AsyncMock()
+        db.commit = AsyncMock()
+        db.add = MagicMock(side_effect=lambda obj: added.append(obj))
+        return db
+
+    @staticmethod
+    def _detected(number: int, title: str) -> DetectedItem:
+        return DetectedItem(
+            item_number=number, rang="A", chapter_title=title, ocr_text="x",
+            start_page=0, end_page=0, ocr_confidence_score=0.9,
+        )
+
+    @staticmethod
+    def _created(added):
+        from app.models.item import Item
+        return {i.item_number: i for i in added if isinstance(i, Item)}
+
+    @patch("app.workers.ocr_worker.lookup_title", new_callable=AsyncMock)
+    @patch("app.workers.ocr_worker.record_title", new_callable=AsyncMock)
+    @patch("app.workers.ocr_worker._item_detector")
+    @patch("app.workers.ocr_worker._ocr_processor")
+    async def test_valid_title_kept_and_recorded(self, proc, det, record, lookup):
+        proc.count_pages.return_value = 1
+        proc.process_page.return_value = make_page_result(0)
+        det.detect_items.return_value = [self._detected(310, "Tumeurs du testicule")]
+        record.return_value = True
+        added = []
+
+        await _run_ocr(self._db(added), make_college(), make_job(), "/fake.pdf")
+
+        assert self._created(added)[310].chapter_title == "Tumeurs du testicule"
+        assert record.await_args.args[1:] == (310, "Tumeurs du testicule")
+        lookup.assert_not_awaited()
+
+    @patch("app.workers.ocr_worker.lookup_title", new_callable=AsyncMock)
+    @patch("app.workers.ocr_worker.record_title", new_callable=AsyncMock)
+    @patch("app.workers.ocr_worker._item_detector")
+    @patch("app.workers.ocr_worker._ocr_processor")
+    async def test_missing_title_taken_from_referential(self, proc, det, record, lookup):
+        """T5 non-régression : jamais de titre vide quand le référentiel en a un."""
+        proc.count_pages.return_value = 1
+        proc.process_page.return_value = make_page_result(0)
+        det.detect_items.return_value = [self._detected(309, "")]
+        lookup.return_value = "Tumeurs du poumon, primitives et secondaires"
+        added = []
+
+        await _run_ocr(self._db(added), make_college(), make_job(), "/fake.pdf")
+
+        assert self._created(added)[309].chapter_title == (
+            "Tumeurs du poumon, primitives et secondaires"
+        )
+        record.assert_not_awaited()
+
+    @patch("app.workers.ocr_worker.lookup_title", new_callable=AsyncMock)
+    @patch("app.workers.ocr_worker.record_title", new_callable=AsyncMock)
+    @patch("app.workers.ocr_worker._item_detector")
+    @patch("app.workers.ocr_worker._ocr_processor")
+    async def test_no_title_anywhere_is_null_with_warning(self, proc, det, record, lookup, caplog):
+        proc.count_pages.return_value = 1
+        proc.process_page.return_value = make_page_result(0)
+        det.detect_items.return_value = [self._detected(313, "")]
+        lookup.return_value = None
+        added = []
+        college = make_college()
+
+        with caplog.at_level("WARNING", logger="app.workers.ocr_worker"):
+            await _run_ocr(self._db(added), college, make_job(), "/fake.pdf")
+
+        assert self._created(added)[313].chapter_title is None
+        assert any(
+            "313" in r.getMessage() and str(college.id) in r.getMessage()
+            for r in caplog.records
+        )
+
+    @patch("app.workers.ocr_worker.lookup_title", new_callable=AsyncMock)
+    @patch("app.workers.ocr_worker.record_title", new_callable=AsyncMock)
+    @patch("app.workers.ocr_worker._item_detector")
+    @patch("app.workers.ocr_worker._ocr_processor")
+    async def test_referential_failure_does_not_break_import(self, proc, det, record, lookup):
+        proc.count_pages.return_value = 1
+        proc.process_page.return_value = make_page_result(0)
+        det.detect_items.return_value = [self._detected(310, "Tumeurs du testicule")]
+        record.side_effect = RuntimeError("db down")
+        added = []
+
+        result = await _run_ocr(self._db(added), make_college(), make_job(), "/fake.pdf")
+
+        assert result["item_count"] == 1
+        assert self._created(added)[310].chapter_title == "Tumeurs du testicule"
