@@ -4,7 +4,21 @@ import 'package:widgetbook/widgetbook.dart';
 import 'package:collega_app/core/ui/gallery/cg_tokens_page.dart';
 import 'package:collega_app/core/ui/theme/cg_theme.dart';
 
+import 'use_cases/cg_badge_use_cases.dart';
 import 'use_cases/cg_button_use_cases.dart';
+import 'use_cases/cg_drill_card_use_cases.dart';
+import 'use_cases/cg_field_use_cases.dart';
+import 'use_cases/cg_header_use_cases.dart';
+import 'use_cases/cg_list_row_use_cases.dart';
+import 'use_cases/cg_rank_bar_use_cases.dart';
+import 'use_cases/cg_ring_use_cases.dart';
+import 'use_cases/cg_segmented_use_cases.dart';
+import 'use_cases/cg_sheet_use_cases.dart';
+import 'use_cases/cg_skeleton_use_cases.dart';
+import 'use_cases/cg_state_use_cases.dart';
+import 'use_cases/cg_tab_bar_use_cases.dart';
+import 'use_cases/cg_toast_use_cases.dart';
+import 'use_cases/cg_verdict_bar_use_cases.dart';
 
 void main() => runApp(const CollegaWidgetbook());
 
@@ -40,7 +54,21 @@ class CollegaWidgetbook extends StatelessWidget {
         WidgetbookFolder(
           name: 'Composants',
           children: [
+            cgBadgeComponent,
             cgButtonComponent,
+            cgDrillCardComponent,
+            cgFieldComponent,
+            cgHeaderComponent,
+            cgListRowComponent,
+            cgRankBarComponent,
+            cgRingComponent,
+            cgSegmentedComponent,
+            cgSheetComponent,
+            cgSkeletonComponent,
+            cgStateComponent,
+            cgTabBarComponent,
+            cgToastComponent,
+            cgVerdictBarComponent,
           ],
         ),
       ],

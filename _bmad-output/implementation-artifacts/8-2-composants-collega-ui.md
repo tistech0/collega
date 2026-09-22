@@ -1,6 +1,6 @@
 # Story 8.2 : Les quatorze composants Collega UI
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -101,18 +101,30 @@ afin que les écrans (8.3 → 8.14) ne fassent qu'assembler.
 ## Tâches
 
 - [x] T0 Base : `CgIcons` (29 icônes de la maquette) + `CgIcon`, `CgHaptics`
-- [ ] T1 CgButton · T2 CgBadge · T3 CgField · T4 CgSegmented
-- [ ] T5 CgListRow/CgListGroup · T6 CgHeader/CgPage · T7 CgTabBar
-- [ ] T8 CgDrillCard · T9 CgVerdictBar
-- [ ] T10 CgRing · T11 CgRankBar · T12 CgSkeleton/CgToast
-- [ ] T13 CgSheet · T14 CgState (+ illustrations)
-- [ ] T15 Widgetbook : une entrée par composant, `widgetbook/lib/main.dart` · barrel `lib/core/ui/collega_ui.dart`
-- [ ] T16 Revue d'accessibilité (libellés, cibles 44 pt) + test « aucun import Material/shadcn dans components »
+- [x] T1 CgButton · T2 CgBadge · T3 CgField · T4 CgSegmented
+- [x] T5 CgListRow/CgListGroup · T6 CgHeader/CgPage · T7 CgTabBar
+- [x] T8 CgDrillCard · T9 CgVerdictBar
+- [x] T10 CgRing · T11 CgRankBar · T12 CgSkeleton/CgToast
+- [x] T13 CgSheet · T14 CgState (+ illustrations)
+- [x] T15 Widgetbook : une entrée par composant, `widgetbook/lib/main.dart` · barrel `lib/core/ui/collega_ui.dart`
+- [x] T16 Revue d'accessibilité (libellés, cibles 44 pt) + test « aucun import Material/shadcn dans components »
 
 ## Dev Agent Record
 
 ### Agent Model Used
 
+Claude Opus 5.5 (1M context) — orchestration + CgButton/base ; 5 sous-agents en parallèle (A : badge/champ/segmented ; B : lignes/en-tête/page/tab bar ; C : carte de drill/verdicts ; D : anneau/barre de rangs/skeleton/toast ; E : sheets/états), puis revue adversariale indépendante.
+
 ### Completion Notes List
 
+- 16 fichiers `lib/core/ui/components/` (14 composants + `CgIllustrations`), point d'entrée `lib/core/ui/collega_ui.dart`, planches `lib/core/ui/gallery/`, 15 entrées Widgetbook (dossier « Composants »).
+- `flutter test test/core/ui` : **444 verts** (dont ~96 goldens 3 largeurs × 2 échelles, inspectés à 1,6×) ; test de contrat : aucun import Material/shadcn, aucune couleur brute, barrel complet.
+- Arbitrages : champ de recherche avec contour `accent` 2 pt au focus (spec § Accessibilité, focus visible) ; tab bar sans Dynamic Type sur ses libellés (comme iOS, sinon « Bibliothèque » déborde) ; « Bien » par glissé vers le haut hors du texte quand la réponse défile.
+- **Revue adversariale — 9 correctifs appliqués** : (1) balayage retour iOS depuis le bord gauche sur le verso donnait « Maîtrisé » → bande de 20 pt réservée, appelle `onClose` (« Quitter ? ») au-delà de 60 pt ; (2) mode définition : clavier resté ouvert après le retournement → unfocus + champ replié exclu de VoiceOver ; (3) carte figée invisible si la même fiche revient → `cardKey` + remise au recto après toute sortie ; (4) deux toasts dans la même frame → suivi des entrées insérées ; (5) toast placé au-dessus d'une tab bar absente (drill) → `CgTabBarScope` posé par le shell, détection automatique ; (6) `trailing` de `CgPage` monté deux fois (GlobalKey) → une seule instance, emplacement vide conservé ; (7) `CgPage` ignorait le clavier → action ancrée au-dessus ; (8) `CgRing` : règle `animate` documentée pour les listes ; (9) sheet à pied dynamique → `CgSheetFooter` public.
+- Pièges notés : `CupertinoTextField` désactivé peint son propre fond gris (passer une décoration vide) ; `pumpAndSettle` bloque sur toute animation en boucle (indicateur, skeleton) — les composants doivent être statiques en mouvement réduit ; hors `Material`, le `DefaultTextStyle` de repli souligne en jaune (neutralisé dans `CgType`).
+
 ### File List
+
+- collega_app/lib/core/ui/collega_ui.dart, lib/core/ui/components/*.dart (16), lib/core/ui/foundation/{cg_icon,cg_haptics}.dart, lib/core/ui/gallery/*_gallery.dart, lib/core/ui/tokens/cg_type.dart
+- collega_app/test/core/ui/components/*_test.dart + goldens/, test/core/ui/foundation/cg_icon_test.dart, test/support/cg_golden.dart
+- collega_app/widgetbook/lib/main.dart, widgetbook/lib/use_cases/*.dart (15)

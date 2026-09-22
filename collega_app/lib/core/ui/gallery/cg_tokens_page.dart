@@ -78,8 +78,10 @@ const _durations = {
   'sheetRise': CgMotion.sheetRise, 'ringFill': CgMotion.ringFill, 'toast': CgMotion.toast,
 };
 
-String _hex(Color color) =>
-    '#${(color.value & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+String _hex(Color color) {
+  String channel(double v) => (v * 255).round().toRadixString(16).padLeft(2, '0');
+  return '#${channel(color.r)}${channel(color.g)}${channel(color.b)}'.toUpperCase();
+}
 
 class _Section extends StatelessWidget {
   const _Section(this.title, {required this.children});
