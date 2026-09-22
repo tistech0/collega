@@ -1,0 +1,334 @@
+<title>Collega — Bloc</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap">
+<style>
+  :root{
+    --ground:#ECEAE3; --surface:#F7F6F2; --ink:#17201F; --ink2:#5B6664; --ink3:#9A9E97; --line:#D9D6CC;
+    --accent:#0E5E63; --accent-soft:#D5E6E4; --accent-ink:#F2F5F3; --accent-deep:#0A474B;
+    --rank-a:#0E5E63; --rank-b:#4C6A6E; --rank-c:#8B8A80;
+    --mastered:#0E5E63; --good:#6FA8A2; --review:#D9822B; --unseen:#D9D6CC;
+    --danger:#B8352B; --warning:#D9822B;
+    --font:"Bricolage Grotesque",system-ui,-apple-system,"Helvetica Neue",sans-serif;
+    --rs:8px; --rl:28px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:#CFCDC4;color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.4;padding-inline:16px;padding-block:20px 48px}
+  .intro{max-width:420px;margin:0 auto 20px}
+  .intro h1{font-size:30px;font-weight:800;letter-spacing:-.03em;margin:0 0 6px;font-variation-settings:"opsz" 96}
+  .intro p{margin:0;color:#3E4543;font-size:15px}
+  .tokens{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .tokens span{display:inline-flex;align-items:center;gap:6px;font-size:12px;background:#F7F6F2;border-radius:999px;padding:4px 10px 4px 5px;color:#333}
+  .tokens i{width:16px;height:16px;border-radius:50%;display:inline-block}
+  .stack{display:grid;gap:28px;justify-items:center}
+  .stack>div{width:100%;max-width:390px}
+  .cap{font-size:13px;color:#4E5553;margin-bottom:8px;text-align:center}
+  .phone{width:100%;max-width:390px;height:min(800px,90svh);background:var(--ground);border-radius:40px;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2);border:8px solid #111;color:var(--ink)}
+  .phone .scr{position:absolute;inset:0;overflow:hidden;display:flex;flex-direction:column}
+  .status{height:44px;flex:0 0 44px;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:15px;font-weight:600;position:relative;z-index:2}
+  .status .r{display:flex;gap:6px;align-items:center}
+  .status .r i{display:inline-block;width:26px;height:12px;border:1.5px solid currentColor;border-radius:4px;position:relative}
+  .status .r i::after{content:"";position:absolute;inset:2px;right:6px;background:currentColor;border-radius:2px}
+  .body{flex:1;overflow:auto;padding:0 0 120px;scrollbar-width:none}
+  .body::-webkit-scrollbar{display:none}
+  .pad{padding:0 22px}
+  .tab{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 48px);height:64px;border-radius:999px;background:rgba(23,32,31,.86);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 10px 30px rgba(23,32,31,.25);display:grid;grid-template-columns:repeat(4,1fr);align-items:center;padding:0 6px;color:#fff}
+  .tab a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:500;color:rgba(255,255,255,.55);text-decoration:none;height:52px;justify-content:center;border-radius:999px}
+  .tab a.on{color:#fff;background:rgba(255,255,255,.14)}
+  .tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  /* type */
+  .lt{font-size:44px;font-weight:800;letter-spacing:-.035em;line-height:.98;margin:14px 0 4px;font-variation-settings:"opsz" 96}
+  .sub{color:var(--ink2);font-size:15px}
+  .num{font-size:120px;font-weight:800;letter-spacing:-.06em;line-height:.9;font-variation-settings:"opsz" 96;font-variant-numeric:tabular-nums}
+  .sec{font-size:15px;font-weight:600;color:var(--ink);margin:28px 0 8px}
+  .btn{display:flex;align-items:center;justify-content:center;height:58px;border-radius:var(--rs);background:var(--ink);color:#fff;font-weight:600;font-size:17px;border:0;width:100%;font-family:inherit;cursor:pointer}
+  .btn.acc{background:var(--accent);color:var(--accent-ink)}
+  .btn.inv{background:var(--accent-ink);color:var(--accent)}
+  .btn.q{background:transparent;color:inherit;height:44px;font-weight:500;opacity:.8}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  /* block hero */
+  .block{background:var(--accent);color:var(--accent-ink);padding:22px 22px 24px;border-radius:0 0 var(--rl) var(--rl);margin-top:-44px;padding-top:56px}
+  .block .sub{color:rgba(242,245,243,.7)}
+  .block .lt{color:#fff}
+  .block .mix{display:grid;gap:6px;margin:16px 0 20px;font-size:15px}
+  .block .mix div{display:flex;justify-content:space-between;color:rgba(242,245,243,.8)}
+  .block .mix b{color:#fff;font-weight:600}
+  .rows{margin:0 22px}
+  .row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .row .t{font-weight:600;font-size:18px;letter-spacing:-.01em}
+  .row .m{color:var(--ink2);font-size:14px;margin-top:1px;font-variant-numeric:tabular-nums}
+  .row .r{color:var(--ink2);font-size:15px;font-variant-numeric:tabular-nums;font-weight:600}
+  .chev{width:8px;height:8px;border-right:1.5px solid var(--ink3);border-bottom:1.5px solid var(--ink3);transform:rotate(-45deg)}
+  .sq{width:40px;height:40px;border-radius:var(--rs);background:var(--accent-soft);display:grid;place-items:center}
+  .sq svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .sq.g{background:#E2E0D8}.sq.g svg{stroke:var(--ink3)}
+  .rb{display:flex;height:10px;border-radius:2px;overflow:hidden;background:var(--unseen);margin-top:8px}
+  .rb i{display:block;height:100%}
+  .rb .a{background:var(--mastered)} .rb .b{background:var(--good)} .rb .c{background:var(--review)}
+  .badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;font-size:13px;font-weight:700;background:var(--accent);color:#fff}
+  .badge.b{background:var(--rank-b)} .badge.c{background:var(--rank-c)}
+  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+  .week div{text-align:center;font-size:12px;color:var(--ink3)}
+  .week b{display:block;width:100%;height:34px;border-radius:var(--rs);background:#E2E0D8;margin-bottom:4px}
+  .week .d b{background:var(--accent)} .week .t b{box-shadow:inset 0 0 0 2px var(--accent)}
+  /* drill: the screen is the card */
+  .dwrap{position:absolute;inset:0;perspective:1400px;touch-action:pan-y}
+  .dcard{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.2,1);will-change:transform;cursor:pointer}
+  .dcard.flipped{transform:rotateY(180deg)}
+  .dcard.drag{transition:none}
+  .dcard.exit{transition:transform .28s ease-in,opacity .28s;opacity:0}
+  .dface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;padding:0 24px 24px}
+  .dface.front{background:var(--accent);color:var(--accent-ink)}
+  .dface.back{background:var(--ground);color:var(--ink);transform:rotateY(180deg)}
+  .dtop{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;height:44px;margin-top:44px}
+  .dtop .x{width:44px;height:44px;display:grid;place-items:center;opacity:.8}
+  .dtop .c{text-align:center;font-size:14px;opacity:.75}
+  .dtop .c b{display:block;font-size:15px;font-weight:600;opacity:1}
+  .dprog{display:flex;gap:3px;margin-top:10px}
+  .dprog i{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.22)}
+  .dprog i.on{background:#fff}
+  .back .dprog i{background:var(--unseen)} .back .dprog i.on{background:var(--accent)}
+  .dmeta{display:flex;gap:10px;align-items:center;margin-top:34px;font-size:14px;opacity:.8}
+  .dmeta .badge{background:rgba(255,255,255,.18);color:#fff}
+  .back .dmeta .badge{background:var(--accent);color:#fff}
+  .dq{font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1.08;margin:auto 0;font-variation-settings:"opsz" 96;text-wrap:balance}
+  .dqs{font-size:15px;color:var(--ink2);margin-top:26px;padding-bottom:12px;border-bottom:1px solid var(--line);line-height:1.35}
+  .dans{font-size:22px;line-height:1.35;margin:auto 0;letter-spacing:-.01em;font-weight:500}
+  .dhint{text-align:center;font-size:13px;opacity:.65;margin-top:auto;padding-bottom:6px}
+  .verdict{position:absolute;top:104px;font-size:16px;font-weight:700;padding:8px 14px;border-radius:var(--rs);opacity:0;transition:opacity .15s;pointer-events:none;color:#fff;z-index:3}
+  .verdict.l{left:22px;background:var(--review)} .verdict.r{right:22px;background:var(--accent)}
+  .vbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:16px}
+  .vbar button{height:58px;border-radius:var(--rs);border:0;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;background:#E2E0D8;color:var(--ink)}
+  .vbar .rv{color:var(--review)} .vbar .ok{background:var(--accent);color:#fff}
+  .vbar button:active{transform:scale(.97)}
+  /* end */
+  .endblock{background:var(--accent);color:var(--accent-ink);padding:60px 22px 28px;margin-top:-44px;border-radius:0 0 var(--rl) var(--rl)}
+  .endblock .num{color:#fff}
+  .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:22px 22px 0}
+  .stats div{padding:14px;border-radius:var(--rs);background:var(--surface)}
+  .stats b{display:block;font-size:30px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;font-variation-settings:"opsz" 96}
+  .stats span{font-size:13px;color:var(--ink2)}
+  .stats .m b{color:var(--mastered)} .stats .g b{color:var(--good)} .stats .r b{color:var(--review)}
+  /* progression: stacked bars big */
+  .big{margin:0 22px}
+  .big .h{display:flex;justify-content:space-between;align-items:baseline}
+  .big .h b{font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .big .h span{font-size:15px;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .big .rb{height:22px;border-radius:var(--rs);margin-top:10px}
+  .leg{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin-top:8px}
+  .leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .bars{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:96px;margin-top:10px}
+  .bars i{display:block;background:#E2E0D8;border-radius:var(--rs) var(--rs) 2px 2px}
+  .bars i.on{background:var(--accent)}
+  .bars-l{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:11px;color:var(--ink3);text-align:center;margin-top:6px}
+  .seg{display:flex;gap:6px;margin:16px 22px 0}
+  .seg span{flex:1;text-align:center;font-size:14px;font-weight:500;padding:9px 0;border-radius:var(--rs);color:var(--ink2);background:#E2E0D8}
+  .seg .on{background:var(--ink);color:#fff;font-weight:600}
+  .srch{display:flex;align-items:center;gap:8px;height:46px;border-radius:var(--rs);background:#E2E0D8;padding:0 14px;color:var(--ink2);font-size:15px;margin:14px 22px 0}
+  .srch svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="intro">
+  <h1>Direction C — Bloc</h1>
+  <p>Lignée Arc / éditorial. Pierre et sarcelle profonde (héritière du vert, assombrie), l'accent utilisé en surfaces pleines, une grotesque à optique large. Le geste mémorable : dans le drill, l'écran entier est la carte — il bascule de couleur au retournement.</p>
+  <div class="tokens">
+    <span><i style="background:#ECEAE3;border:1px solid #ccc"></i>ground</span><span><i style="background:#0E5E63"></i>accent</span><span><i style="background:#6FA8A2"></i>bien</span><span><i style="background:#D9822B"></i>à revoir</span><span><i style="background:#17201F"></i>ink</span><span style="font-family:'Bricolage Grotesque'">Bricolage Grotesque</span>
+  </div>
+</div>
+
+<div class="stack">
+
+<!-- 1 AUJOURD'HUI -->
+<div><div class="cap">1 · Aujourd'hui</div>
+<div class="phone"><div class="scr">
+  <div class="status" style="color:#fff"><span>9:41</span><span class="r">●●●●<i></i></span></div>
+  <div class="body">
+    <div class="block">
+      <div class="sub">Lundi 21 septembre · jour 1 sur 30</div>
+      <div class="num" style="margin-top:14px">24</div>
+      <div style="font-size:20px;font-weight:600;margin-top:4px">fiches aujourd'hui <span style="opacity:.7;font-weight:400">· 20 min</span></div>
+      <div class="mix">
+        <div><b>Cancérologie</b><span>16 · rang A</span></div>
+        <div><b>Pneumologie</b><span>8 · rang A</span></div>
+        <div><b>À revoir en premier</b><span>6</span></div>
+      </div>
+      <button class="btn inv">Commencer</button>
+      <button class="btn q" style="color:#fff">Personnaliser la session</button>
+    </div>
+    <div class="pad"><div class="sec">Cette semaine</div>
+    <div class="week"><div class="t"><b></b>L</div><div><b></b>M</div><div><b></b>M</div><div><b></b>J</div><div><b></b>V</div><div><b></b>S</div><div><b></b>D</div></div></div>
+    <div class="pad"><div class="sec">Mes collèges</div></div>
+    <div class="rows">
+      <div class="row"><div class="sq"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8h10M9 21h6M8 3h8"/></svg></div><div><div class="t">Cancérologie</div><div class="m">177 fiches · 42 % maîtrisées</div><div class="rb"><i class="a" style="width:42%"></i><i class="b" style="width:14%"></i><i class="c" style="width:6%"></i></div></div><div class="chev"></div></div>
+      <div class="row"><div class="sq"><svg viewBox="0 0 24 24"><path d="M12 4v10M12 8c-3 0-6 3-6 8 0 2 1 3 2 3s2-1 2-3M12 8c3 0 6 3 6 8 0 2-1 3-2 3s-2-1-2-3"/></svg></div><div><div class="t">Pneumologie</div><div class="m">164 fiches · 18 % maîtrisées</div><div class="rb"><i class="a" style="width:18%"></i><i class="b" style="width:9%"></i><i class="c" style="width:4%"></i></div></div><div class="chev"></div></div>
+    </div>
+  </div>
+  <nav class="tab">
+    <a class="on"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Aujourd'hui</a>
+    <a><svg viewBox="0 0 24 24"><path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z"/></svg>Bibliothèque</a>
+    <a><svg viewBox="0 0 24 24"><rect x="4" y="12" width="4" height="8"/><rect x="10" y="6" width="4" height="14"/><rect x="16" y="9" width="4" height="11"/></svg>Progression</a>
+    <a><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profil</a>
+  </nav>
+</div></div></div>
+
+<!-- 2 DRILL -->
+<div><div class="cap">2 · Drill — touche l'écran pour le retourner, glisse pour juger</div>
+<div class="phone"><div class="scr">
+  <div class="dwrap" id="c-stage">
+    <div class="verdict l">À revoir</div><div class="verdict r">Maîtrisé</div>
+    <div class="dcard" id="c-card">
+      <div class="dface front">
+        <div class="status" style="position:absolute;top:0;left:0;right:0;color:#fff"><span>9:41</span><span class="r">●●●●<i></i></span></div>
+        <div class="dtop"><div class="x">✕</div><div class="c"><b>3 / 24</b>Session du jour</div><div></div></div>
+        <div class="dprog"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="dmeta"><span class="badge">A</span><span>Cancérologie · vaccination</span></div>
+        <div class="dq">Quel est le schéma vaccinal contre HPV (Gardasil 9) recommandé en France ?</div>
+        <div class="dhint">Touche pour voir la réponse</div>
+      </div>
+      <div class="dface back">
+        <div class="status" style="position:absolute;top:0;left:0;right:0"><span>9:41</span><span class="r">●●●●<i></i></span></div>
+        <div class="dtop"><div class="x">✕</div><div class="c"><b>3 / 24</b>Session du jour</div><div></div></div>
+        <div class="dprog"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="dqs">Schéma vaccinal HPV (Gardasil 9) recommandé en France</div>
+        <div class="dans">Filles et garçons dès 11 ans : 2 doses entre 11 et 14 ans, 3 doses entre 15 et 19 ans. Rattrapage jusqu'à 26 ans pour les HSH. Prise en charge à 65 % par l'Assurance maladie.</div>
+        <div class="dhint">Glisse à droite si tu maîtrises, à gauche pour revoir</div>
+        <div class="vbar" id="c-vbar"><button class="rv" data-v="l">À revoir</button><button data-v="m">Bien</button><button class="ok" data-v="r">Maîtrisé</button></div>
+      </div>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- 3 FIN -->
+<div><div class="cap">3 · Fin de session</div>
+<div class="phone"><div class="scr">
+  <div class="status" style="color:#fff"><span>9:41</span><span class="r">●●●●<i></i></span></div>
+  <div class="body" style="padding-bottom:30px;display:flex;flex-direction:column">
+    <div class="endblock">
+      <div class="sub" style="color:rgba(242,245,243,.7)">Session terminée · 19 min</div>
+      <div class="num" style="margin-top:10px"><span class="count" data-to="18">0</span><span style="font-size:40px;letter-spacing:-.02em;opacity:.6">/24</span></div>
+      <div style="font-size:20px;font-weight:600;margin-top:6px">maîtrisées</div>
+      <div style="margin-top:22px;height:22px;display:flex;gap:3px;border-radius:var(--rs);overflow:hidden"><i style="display:block;width:75%;background:#fff"></i><i style="display:block;width:16.6%;background:rgba(255,255,255,.55)"></i><i style="display:block;width:8.4%;background:var(--review)"></i></div>
+    </div>
+    <div class="stats"><div class="m"><b>18</b><span>maîtrisées</span></div><div class="g"><b>4</b><span>bien</span></div><div class="r"><b>2</b><span>à revoir</span></div></div>
+    <div class="pad"><div class="sec">Consolidé aujourd'hui</div><div style="font-size:16px;color:var(--ink2);line-height:1.5">Vaccination HPV, dépistage du cancer colorectal, classification TNM du poumon.</div>
+    <div class="sec">Prochaine session</div><div style="font-size:16px;color:var(--ink2)">Demain · 22 fiches · Pneumologie en priorité</div></div>
+    <div class="pad" style="margin-top:auto;display:grid;gap:6px;padding-top:24px"><button class="btn">Terminer</button><button class="btn q">Refaire les 2 à revoir</button></div>
+  </div>
+</div></div></div>
+
+<!-- 4 PROGRESSION -->
+<div><div class="cap">4 · Progression</div>
+<div class="phone"><div class="scr">
+  <div class="status"><span>9:41</span><span class="r">●●●●<i></i></span></div>
+  <div class="body">
+    <div class="pad"><div class="lt">31 %</div><div class="sub">de tes 341 fiches sont maîtrisées</div></div>
+    <div class="big" style="margin-top:22px">
+      <div class="rb" style="height:28px;margin:0"><i class="a" style="width:31%"></i><i class="b" style="width:12%"></i><i class="c" style="width:5%"></i></div>
+      <div class="leg"><span><i style="background:var(--mastered)"></i>104 maîtrisées</span><span><i style="background:var(--good)"></i>40 bien</span><span><i style="background:var(--review)"></i>17 à revoir</span><span><i style="background:var(--unseen)"></i>180 non vues</span></div>
+    </div>
+    <div class="big" style="margin-top:28px"><div class="h"><b>Cette semaine</b><span>112 fiches</span></div>
+      <div class="bars"><i class="on" style="height:60%"></i><i class="on" style="height:80%"></i><i class="on" style="height:45%"></i><i class="on" style="height:100%"></i><i class="on" style="height:70%"></i><i style="height:12%"></i><i style="height:12%"></i></div>
+      <div class="bars-l"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div></div>
+    <div class="big" style="margin-top:28px"><div class="h"><b>Cancérologie</b><span>42 %</span></div><div class="rb"><i class="a" style="width:42%"></i><i class="b" style="width:14%"></i><i class="c" style="width:6%"></i></div><div class="leg"><span>74 · 25 · 11 · 67 non vues</span></div></div>
+    <div class="big" style="margin-top:18px"><div class="h"><b>Pneumologie</b><span>18 %</span></div><div class="rb"><i class="a" style="width:18%"></i><i class="b" style="width:9%"></i><i class="c" style="width:4%"></i></div><div class="leg"><span>30 · 15 · 6 · 113 non vues</span></div></div>
+    <div class="pad"><div class="sec">Par rang</div></div>
+    <div class="rows">
+      <div class="row" style="grid-template-columns:auto 1fr auto"><span class="badge">A</span><div class="rb" style="margin:0"><i class="a" style="width:48%"></i><i class="b" style="width:16%"></i><i class="c" style="width:7%"></i></div><div class="r">48 %</div></div>
+      <div class="row" style="grid-template-columns:auto 1fr auto"><span class="badge b">B</span><div class="rb" style="margin:0"><i class="a" style="width:22%"></i><i class="b" style="width:10%"></i><i class="c" style="width:4%"></i></div><div class="r">22 %</div></div>
+      <div class="row" style="grid-template-columns:auto 1fr auto"><span class="badge c">C</span><div class="rb" style="margin:0"><i class="a" style="width:6%"></i><i class="b" style="width:3%"></i></div><div class="r">6 %</div></div>
+    </div>
+    <div class="pad"><div class="sec">Planning</div></div>
+    <div class="rows"><div class="row"><div class="sq"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18"/></svg></div><div><div class="t">21 sept. → 21 oct.</div><div class="m">30 min par jour · jour 1 sur 30 · à jour</div></div><div class="chev"></div></div></div>
+  </div>
+  <nav class="tab">
+    <a><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Aujourd'hui</a>
+    <a><svg viewBox="0 0 24 24"><path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z"/></svg>Bibliothèque</a>
+    <a class="on"><svg viewBox="0 0 24 24"><rect x="4" y="12" width="4" height="8"/><rect x="10" y="6" width="4" height="14"/><rect x="16" y="9" width="4" height="11"/></svg>Progression</a>
+    <a><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profil</a>
+  </nav>
+</div></div></div>
+
+<!-- 5 BIBLIOTHÈQUE -->
+<div><div class="cap">5 · Bibliothèque</div>
+<div class="phone"><div class="scr">
+  <div class="status"><span>9:41</span><span class="r">●●●●<i></i></span></div>
+  <div class="body">
+    <div class="pad"><div class="lt">Bibliothèque</div></div>
+    <div class="srch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Un item, un signe, une dose…</div>
+    <div class="pad"><div class="sec">Mes collèges</div></div>
+    <div class="rows">
+      <div class="row"><div class="sq"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8h10M9 21h6M8 3h8"/></svg></div><div><div class="t">Cancérologie</div><div class="m">CNEC · 177 fiches · 32 items</div></div><div class="chev"></div></div>
+      <div class="row"><div class="sq"><svg viewBox="0 0 24 24"><path d="M12 4v10M12 8c-3 0-6 3-6 8 0 2 1 3 2 3s2-1 2-3M12 8c3 0 6 3 6 8 0 2-1 3-2 3s-2-1-2-3"/></svg></div><div><div class="t">Pneumologie</div><div class="m">CEP · 164 fiches · 28 items</div></div><div class="chev"></div></div>
+    </div>
+    <div class="pad"><div class="sec">Catalogue · 38 collèges</div></div>
+    <div class="rows">
+      <div class="row"><div class="sq g"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m20 20-5.5-5.5"/></svg></div><div><div class="t" style="font-weight:500;color:var(--ink2)">Anatomie pathologique</div><div class="m">CoPath</div></div><span style="color:var(--accent);font-size:14px;font-weight:600">Importer</span></div>
+      <div class="row"><div class="sq g"><svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M9 7V5h6v2M12 11v5M9.5 13.5h5"/></svg></div><div><div class="t" style="font-weight:500;color:var(--ink2)">Anesthésie-Réanimation</div><div class="m">SFAR</div></div><span style="color:var(--accent);font-size:14px;font-weight:600">Importer</span></div>
+      <div class="row"><div class="sq g"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg></div><div><div class="t" style="font-weight:500;color:var(--ink2)">Cardiologie</div><div class="m">SFC</div></div><span style="color:var(--accent);font-size:14px;font-weight:600">Importer</span></div>
+      <div class="row"><div class="sq g"><svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M9 7V5h6v2M12 11v5M9.5 13.5h5"/></svg></div><div><div class="t" style="font-weight:500;color:var(--ink2)">Chirurgie générale, viscérale et digestive</div><div class="m">CFCVD</div></div><span style="color:var(--accent);font-size:14px;font-weight:600">Importer</span></div>
+      <div class="row"><div class="sq g"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></div><div><div class="t" style="font-weight:500;color:var(--ink2)">Dermatologie</div><div class="m">CEDEF</div></div><span style="color:var(--accent);font-size:14px;font-weight:600">Importer</span></div>
+    </div>
+  </div>
+  <nav class="tab">
+    <a><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Aujourd'hui</a>
+    <a class="on"><svg viewBox="0 0 24 24"><path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z"/></svg>Bibliothèque</a>
+    <a><svg viewBox="0 0 24 24"><rect x="4" y="12" width="4" height="8"/><rect x="10" y="6" width="4" height="14"/><rect x="16" y="9" width="4" height="11"/></svg>Progression</a>
+    <a><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profil</a>
+  </nav>
+</div></div></div>
+
+<!-- 6 DÉTAIL COLLÈGE -->
+<div><div class="cap">6 · Détail collège (items avec titres)</div>
+<div class="phone"><div class="scr">
+  <div class="status" style="color:#fff"><span>9:41</span><span class="r">●●●●<i></i></span></div>
+  <div class="body">
+    <div class="block" style="padding-bottom:22px">
+      <div class="sub" style="color:rgba(242,245,243,.75)">‹ Bibliothèque</div>
+      <div class="lt" style="font-size:40px">Cancérologie</div>
+      <div class="sub">CNEC · 177 fiches · 32 items</div>
+      <div style="margin-top:18px;height:14px;display:flex;border-radius:var(--rs);overflow:hidden;background:rgba(255,255,255,.18)"><i style="display:block;width:42%;background:#fff"></i><i style="display:block;width:14%;background:rgba(255,255,255,.55)"></i><i style="display:block;width:6%;background:var(--review)"></i></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;opacity:.8;margin-top:8px"><span>74 maîtrisées</span><span>25 bien</span><span>11 à revoir</span><span>67 non vues</span></div>
+    </div>
+    <div class="seg"><span class="on">Tous</span><span>Rang A</span><span>Rang B</span><span>Rang C</span></div>
+    <div class="rows" style="margin-top:8px">
+      <div class="row"><span class="badge">A</span><div><div class="t">Tumeurs du testicule</div><div class="m">Item 310 · 6 fiches</div><div class="rb" style="height:6px"><i class="a" style="width:60%"></i><i class="b" style="width:20%"></i></div></div><div class="chev"></div></div>
+      <div class="row"><span class="badge">A</span><div><div class="t">Tumeurs vésicales</div><div class="m">Item 311 · 5 fiches</div><div class="rb" style="height:6px"><i class="a" style="width:30%"></i><i class="c" style="width:20%"></i></div></div><div class="chev"></div></div>
+      <div class="row"><span class="badge">A</span><div><div class="t">Tumeurs du rein</div><div class="m">Item 312 · 4 fiches</div><div class="rb" style="height:6px"></div></div><div class="chev"></div></div>
+      <div class="row"><span class="badge">A</span><div><div class="t">Tumeurs de la prostate</div><div class="m">Item 314 · 7 fiches</div><div class="rb" style="height:6px"><i class="a" style="width:100%"></i></div></div><div class="chev"></div></div>
+      <div class="row"><span class="badge b">B</span><div><div class="t">Cancer du col utérin</div><div class="m">Item 300 · 5 fiches</div><div class="rb" style="height:6px"><i class="b" style="width:40%"></i></div></div><div class="chev"></div></div>
+    </div>
+    <div style="height:70px"></div>
+    <div style="position:absolute;left:22px;right:22px;bottom:100px"><button class="btn acc">Réviser ce collège · 32 fiches</button></div>
+  </div>
+  <nav class="tab">
+    <a><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Aujourd'hui</a>
+    <a class="on"><svg viewBox="0 0 24 24"><path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z"/></svg>Bibliothèque</a>
+    <a><svg viewBox="0 0 24 24"><rect x="4" y="12" width="4" height="8"/><rect x="10" y="6" width="4" height="14"/><rect x="16" y="9" width="4" height="11"/></svg>Progression</a>
+    <a><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profil</a>
+  </nav>
+</div></div></div>
+
+</div>
+
+<script>
+(function(){
+  requestAnimationFrame(function(){ setTimeout(function(){
+    document.querySelectorAll('.count').forEach(function(el){ var to=+el.getAttribute('data-to'), t0=performance.now(); function step(t){ var k=Math.min(1,(t-t0)/900); k=1-Math.pow(1-k,3); el.textContent=Math.round(to*k); if(k<1) requestAnimationFrame(step); } requestAnimationFrame(step); });
+  },80); });
+  var card=document.getElementById('c-card'), stage=document.getElementById('c-stage'), vbar=document.getElementById('c-vbar');
+  if(!card) return;
+  var vl=stage.querySelector('.verdict.l'), vr=stage.querySelector('.verdict.r');
+  var flipped=false, sx=0, dx=0, dragging=false, moved=false;
+  function flip(){ flipped=!flipped; card.classList.toggle('flipped',flipped); if(navigator.vibrate) navigator.vibrate(8); }
+  function setDrag(x){ var w=stage.clientWidth; var r=x/w; card.style.transform='translateX('+x+'px) rotate('+(r*6)+'deg) rotateY(180deg)'; vr.style.opacity=Math.min(1,Math.max(0,(x-40)/80)); vl.style.opacity=Math.min(1,Math.max(0,(-x-40)/80)); }
+  function reset(){ card.classList.remove('drag'); card.style.transform=''; vr.style.opacity=0; vl.style.opacity=0; }
+  function exit(dir){ card.classList.add('exit'); var w=stage.clientWidth; card.style.transform='translateX('+(dir*w*1.2)+'px) rotate('+(dir*12)+'deg) rotateY(180deg)'; if(navigator.vibrate) navigator.vibrate(dir>0?[10,30,10]:20); setTimeout(function(){ card.classList.remove('exit','flipped','drag'); flipped=false; card.style.transition='none'; card.style.transform='scale(.97)'; card.style.opacity='0'; requestAnimationFrame(function(){ requestAnimationFrame(function(){ card.style.transition=''; card.style.transform=''; card.style.opacity='1'; }); }); vr.style.opacity=0; vl.style.opacity=0; var n=card.querySelectorAll('.dprog'); n.forEach(function(p){ var i=p.querySelector('i:not(.on)'); if(i) i.classList.add('on'); }); },300); }
+  card.addEventListener('pointerdown',function(e){ if(!flipped) return; if(e.target.closest('button')) return; dragging=true; moved=false; sx=e.clientX; card.setPointerCapture(e.pointerId); card.classList.add('drag'); });
+  card.addEventListener('pointermove',function(e){ if(!dragging) return; dx=e.clientX-sx; if(Math.abs(dx)>4) moved=true; setDrag(dx); });
+  function up(){ if(!dragging) return; dragging=false; var w=stage.clientWidth; if(Math.abs(dx)>w*.35){ exit(dx>0?1:-1); } else { reset(); } dx=0; }
+  card.addEventListener('pointerup',up); card.addEventListener('pointercancel',up);
+  card.addEventListener('click',function(e){ if(e.target.closest('button')) return; if(moved){ moved=false; return; } if(!flipped) flip(); });
+  vbar.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation(); var v=b.getAttribute('data-v'); if(v==='m'){ exit(0); } else exit(v==='r'?1:-1); }); });
+})();
+</script>

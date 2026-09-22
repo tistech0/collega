@@ -1,0 +1,302 @@
+<title>Audit UX Collega</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --paper:#F4F5F7; --card:#FFFFFF; --ink:#15181D; --muted:#5B6470; --line:#DADEE5; --soft:#ECEEF2;
+    --accent:#1F4D6B; --accent-soft:#DDE9F1;
+    --blk:#B3261E; --blk-soft:#F8E1DF; --gen:#9A6A12; --gen-soft:#F7EBD2; --cos:#5B6470; --cos-soft:#E6E8EC;
+    --ok:#2E7D5B; --ok-soft:#DDEFE6;
+    --display:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --paper:#121417; --card:#1B1E23; --ink:#ECEEF1; --muted:#A3ABB6; --line:#2E333B; --soft:#242830;
+    --accent:#8FBCDD; --accent-soft:#1E3140;
+    --blk:#F0847B; --blk-soft:#3C1F1D; --gen:#E4B65C; --gen-soft:#3A2E14; --cos:#A3ABB6; --cos-soft:#2A2E35;
+    --ok:#7CC9A6; --ok-soft:#1B3328;
+  }}
+  :root[data-theme="dark"]{
+    --paper:#121417; --card:#1B1E23; --ink:#ECEEF1; --muted:#A3ABB6; --line:#2E333B; --soft:#242830;
+    --accent:#8FBCDD; --accent-soft:#1E3140;
+    --blk:#F0847B; --blk-soft:#3C1F1D; --gen:#E4B65C; --gen-soft:#3A2E14; --cos:#A3ABB6; --cos-soft:#2A2E35;
+    --ok:#7CC9A6; --ok-soft:#1B3328;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:24px 64px}
+  .wrap{max-width:720px;margin:0 auto}
+  h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+  h1{font-size:2rem;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+  h2{font-size:1.35rem;font-weight:700;letter-spacing:-.01em;margin-top:48px;padding-top:24px;border-top:1px solid var(--line)}
+  h3{font-size:1.05rem;font-weight:700;margin-top:28px}
+  p{margin:.6rem 0}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+  .lede{color:var(--muted);font-size:1.02rem;max-width:60ch}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px;font-size:.88rem;color:var(--muted)}
+  .meta b{color:var(--ink);font-weight:600}
+  /* totals */
+  .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
+  .tot{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .tot .n{font-family:var(--display);font-size:2rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .tot .l{font-size:.78rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono)}
+  .tot.b .n{color:var(--blk)} .tot.g .n{color:var(--gen)} .tot.c .n{color:var(--cos)}
+  /* toc */
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .toc a{font-size:.85rem;text-decoration:none;color:var(--accent);background:var(--accent-soft);padding:6px 11px;border-radius:999px;font-weight:500}
+  .toc a:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  /* chips */
+  .sev{display:inline-flex;align-items:center;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;white-space:nowrap;font-weight:500}
+  .sev.b{background:var(--blk-soft);color:var(--blk)} .sev.g{background:var(--gen-soft);color:var(--gen)} .sev.c{background:var(--cos-soft);color:var(--cos)} .sev.ok{background:var(--ok-soft);color:var(--ok)}
+  .ref{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+  /* findings */
+  .fl{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px}
+  .fl li{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .fl li .t{font-weight:600;line-height:1.4}
+  .fl li .d{color:var(--muted);font-size:.93rem;margin-top:3px}
+  .fl li .ref{display:block;margin-top:6px}
+  .fl li.b{border-left:3px solid var(--blk)} .fl li.g{border-left:3px solid var(--gen)} .fl li.c{border-left:3px solid var(--cos)}
+  /* screen header */
+  .scr{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .scr .src{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+  .states{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .st{font-size:.78rem;padding:4px 9px;border-radius:6px;border:1px solid var(--line);background:var(--soft);color:var(--muted)}
+  .st.ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+  .st.raw{background:var(--gen-soft);color:var(--gen);border-color:transparent}
+  .st.no{background:var(--blk-soft);color:var(--blk);border-color:transparent}
+  .st.na{opacity:.7}
+  /* table */
+  .tw{overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:560px}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500;background:var(--soft)}
+  tr:last-child td{border-bottom:0}
+  td .st{display:inline-block}
+  /* keep list */
+  .keep{display:grid;gap:8px;margin-top:14px}
+  .keep div{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--ok);border-radius:10px;padding:12px 14px}
+  .keep b{font-weight:600}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:.85rem;color:var(--muted)}
+  .note{background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:.93rem;margin-top:14px}
+  .note b{color:var(--accent)}
+  code{font-family:var(--mono);font-size:.85em;background:var(--soft);padding:1px 5px;border-radius:4px}
+  @media (max-width:480px){ .totals{grid-template-columns:1fr 1fr 1fr;gap:6px} .tot{padding:10px 10px} .tot .n{font-size:1.6rem} h1{font-size:1.7rem} }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Refonte UX/UI · étape 2 · branche feat/redesign-ux-ui</div>
+  <h1 style="margin-top:8px">Audit UX Collega</h1>
+  <p class="lede">Écarts entre l'app installée sur l'iPhone (build main, 21 sept. 2026) et le spec UX d'avril, lus à travers les 10 heuristiques de Nielsen (NN/g), les Laws of UX et les Human Interface Guidelines iOS. Classement : bloquant (empêche de comprendre ou d'agir), gênant (coûte du temps ou de la confiance), cosmétique (trahit le manque de finition).</p>
+  <div class="meta">
+    <span><b>19</b> captures</span>
+    <span><b>8</b> écrans lus dans le code (non capturés)</span>
+    <span><b>16</b> routes auditées</span>
+    <span>Réf. spec : <b>ux-design-specification.md</b> (26 avr.)</span>
+  </div>
+
+  <div class="totals">
+    <div class="tot b"><div class="n">20</div><div class="l">Bloquant</div></div>
+    <div class="tot g"><div class="n">37</div><div class="l">Gênant</div></div>
+    <div class="tot c"><div class="n">13</div><div class="l">Cosmétique</div></div>
+  </div>
+
+  <nav class="toc" aria-label="Sections">
+    <a href="#synth">Synthèse</a><a href="#transv">Transversal</a><a href="#entree">Entrée</a><a href="#home">Accueil</a><a href="#colleges">Collèges</a><a href="#detail">Détail collège</a><a href="#item">Détail item</a><a href="#drill">Drill</a><a href="#fin">Fin de session</a><a href="#search">Recherche</a><a href="#planning">Planning</a><a href="#profil">Profil</a><a href="#import">Import</a><a href="#paywall">Paywall &amp; légal</a><a href="#etats">Matrice des états</a><a href="#garde">Ce qui marche</a>
+  </nav>
+
+  <h2 id="synth">Synthèse en six constats</h2>
+  <p>Les écrans fonctionnent, mais l'app n'a pas encore de <em>système</em> : chaque écran a été construit avec le composant le plus proche sous la main. Le résultat se lit d'un coup d'œil sur le rendu, et c'est précisément ce que le cadrage veut faire disparaître.</p>
+  <ol>
+    <li><b>Material 3 sur iOS.</b> Tab bar à pilule, cases à cocher carrées, onglets soulignés, barre d'app qui se teinte au scroll, spinners : neuf composants Material sur une app qui se veut « à côté de Things 3 ». C'est l'écart n°1 avec la cible HIG et avec le brief « pas de Material pur ».</li>
+    <li><b>Aucun langage de composants.</b> Cinq styles de sélecteur pour le même geste (filtrer / choisir), trois styles de header, deux graisses pour le même texte de carte, deux vocabulaires d'icônes. Chaque écran a l'air venu d'une app différente.</li>
+    <li><b>Les états ne sont pas dessinés.</b> Erreur = <code>e.toString()</code> affiché tel quel sur cinq écrans ; hors-ligne = rien (sauf un toast sur Recherche) ; chargement = barre Material ; vide = phrase nue. Le spec exigeait « pourquoi + quoi faire » pour chaque vide.</li>
+    <li><b>La progression n'a pas de maison ni de grammaire.</b> Quatre représentations différentes (barre verte + tick rouge, « 0 % · 0 fiches », donut, barre teal pleine pour 0/3), aucune légende, et le détail d'un collège de 177 fiches ouvre sur « 0 % maîtrisé · 0 fiches ».</li>
+    <li><b>Le vert est partout, donc rien ne ressort.</b> Boutons, badges, liens, icônes, texte secondaire, chips, pilule de nav, surlignage : un seul ton pour dix rôles. Le rouge sert à la fois à « À revoir », à « Se déconnecter » et à un tick de progression inexpliqué.</li>
+    <li><b>L'espace n'est pas maîtrisé.</b> Drill : 55 % d'écran vide sous la carte ; Recherche vide : 90 % ; Planning : 45 % ; cartes d'items de 130 px pour une ligne. Ce n'est ni de la respiration voulue, ni du contenu.</li>
+  </ol>
+  <div class="note"><b>Ce que ça implique pour le spec v2 :</b> avant tout écran, un système (tokens, 8 composants de base, 4 états par écran, une seule grammaire de progression). Les écarts par écran ci-dessous sont l'input de la section « parcours et hiérarchie » du spec.</div>
+
+  <h2 id="transv">Écarts transversaux</h2>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Composants Material 3 natifs sur une cible iOS</div><div class="d"><code>NavigationBar</code> (pilule verte), <code>Checkbox</code> (planning), <code>Switch</code> (profil), <code>TabBar</code> (détail item), <code>AppBar</code> qui se teinte au scroll (« CANCÉROLOGIE », « Profil »), <code>LinearProgressIndicator</code> / <code>CircularProgressIndicator</code>, <code>IconButton</code>, <code>FilterChip</code>. Les étudiants sur iPhone attendent une tab bar, des toggles, un segmented control, un large title.</div><span class="ref">HIG · Jakob's Law · NN/g #4 cohérence et standards · brief « pas de Material pur »</span></div></li>
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Cinq styles pour un même geste (choisir / filtrer)</div><div class="d">Boutons plein/outline (Collèges), pilules <code>FilterChip</code> (Détail collège), <code>ChoiceChip</code> (Planning), carrés outlined A/B/C (Profil), <code>TabBar</code> soulignée (Détail item). Trois styles de header : large title 400 (« Collèges », « Profil »), bandeau teinté majuscules (« CANCÉROLOGIE »), titre centré + ✕ (drill). Deux graisses pour la même carte (démo 400 / drill 700).</div><span class="ref">NN/g #4 · Law of Similarity</span></div></li>
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Erreurs techniques affichées à l'utilisateur</div><div class="d"><code>ErrorView</code> = <code>Text('Erreur : $message')</code>, et <code>e.toString()</code> brut sur Accueil, Détail collège, Détail item, Drill, Import en cours. Toasts d'erreur titrés « Erreur » (login). Aucune erreur ne dit quoi faire.</div><span class="ref">NN/g #9 aider à reconnaître et corriger les erreurs · spec « rassurant par défaut »</span></div></li>
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Hors-ligne non conçu</div><div class="d">Le spec promet « offline pour tout ce qui est révision ». Aucun écran ne montre son état hors-ligne : Recherche affiche un toast puis reste vide ; Accueil / Collèges dépendent du réseau pour le catalogue sans le dire ; aucune bannière, aucun mode dégradé visible.</div><span class="ref">NN/g #1 visibilité de l'état du système</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Une seule couleur pour dix rôles</div><div class="d">Le vert <code>#1B6B3A</code> sert de primaire, de badge rang A, de lien, d'icône, de surlignage, de fond de pilule, de texte secondaire (teal). Le rouge sert à « À revoir », « Se déconnecter » et au tick de progression. Rien n'est saillant, donc le CTA ne l'est pas non plus.</div><span class="ref">Von Restorff · NN/g #8 esthétique minimaliste</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Quatre grammaires de progression, zéro légende</div><div class="d">Barre verte + segment rouge (Accueil, Collèges), « 0 % maîtrisé · 0 fiches » + barre vide (Détail collège), donut (fin de session), barre teal pleine pour « 0/3 reimports » (Profil). Le rouge de la barre n'est expliqué nulle part. Le spec prévoyait une barre 4 segments Maîtrisé / Bien / À revoir / Non vues.</div><span class="ref">Spec § Mes Collèges · NN/g #6 reconnaissance plutôt que rappel</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Typographie sans échelle</div><div class="d">Inter seul, mais « Collèges » / « Profil » en 400 (défaut AppBar), « Créer un compte » en 700, « Progression globale » en 600 : trois titres de même niveau, trois graisses. Chiffres non tabulaires (« 2 / 8 fiches », « 1/3 fiches » : deux formats). Pas de style pour les grands nombres hors la hero.</div><span class="ref">Spec § Système typographique</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Zones d'action hors de portée du pouce</div><div class="d">✕ du drill, crayon « modifier », refresh du détail collège, barre de recherche : tout en haut d'un iPhone 6,1". Le lien « Configurer mon planning → » est un ghost sous la hero. Aucun retour haptique sur aucune action (évaluer, retourner, valider).</div><span class="ref">Fitts · HIG reachability · spec « feedback haptique au tap »</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Vocabulaire instable</div><div class="d">« Charger » (Collèges) / « Choisir un PDF » (Import) / « importé » (badges) / « reimports » (Profil, anglais) ; « Configurer mon planning » / « Modifier le planning » / « Générer mon planning » ; « Rang A » / « RA » / « R$rang » ; « Item 310 » sans titre. Labels de développeur exposés : « Rangs (vide = tous) », « Nombre de fiches (0 = toutes) ».</div><span class="ref">NN/g #2 correspondance avec le monde réel</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">Deux familles d'icônes</div><div class="d">Icônes Material (<code>home</code>, <code>school</code>, <code>person</code>, <code>edit</code>, <code>bookmark</code>, <code>refresh</code>) à côté d'icônes de spécialités au trait fin (seringue, poumons, cœur, loupe). Deux épaisseurs, deux géométries.</div><span class="ref">Law of Similarity</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">Nom « AppMédecine » sur cinq écrans</div><div class="d">Login, inscription, démo, paywall (« AppMédecine Premium »). Aucun wordmark, aucun logo, aucune icône d'app sur les écrans d'entrée. Décision de cadrage : Collega.</div><span class="ref">Cadrage Q2</span></div></li>
+  </ul>
+
+  <h2 id="entree">Entrée : démo, login, inscription</h2>
+  <div class="scr"><h3 style="margin-top:0">Découvrez AppMédecine (démo)</h3><span class="src">/demo · capturé</span></div>
+  <ul class="fl">
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Deux CTA ambigus au pied de l'écran</div><div class="d">« Essayer la démo » (plein) et « Accéder directement » (lien) : accéder à quoi ? C'est le login. Décision de cadrage : login en premier, démo en secondaire.</div><span class="ref">NN/g #2 · cadrage Q8</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">La carte de démo tronque la valeur qu'elle veut montrer</div><div class="d">« Quels sont les signes cliniques de … », « Quel biomarqueur clé pour le diag… » : les trois lignes qui doivent donner envie sont coupées. 55 % de l'écran est vide en dessous.</div><span class="ref">NN/g #8</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">Rang A (vert) et Rang B (teal) presque indiscernables sur fond blanc</div><span class="ref">WCAG non-dépendance à la couleur</span></div></li>
+  </ul>
+  <div class="scr"><h3>Connexion</h3><span class="src">/auth/login · capturé</span></div>
+  <ul class="fl">
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Pas de « mot de passe oublié », pas d'autofill iOS</div><div class="d">Aucun <code>autofillHints</code> sur les champs : pas de proposition Trousseau / Face ID. Un beta-testeur qui oublie son mot de passe n'a aucune issue dans l'app.</div><span class="ref">HIG · NN/g #3 contrôle et liberté</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Erreur de connexion = toast « Erreur » + message serveur</div><div class="d">Pas d'erreur inline sous le champ, pas de distinction identifiants faux / réseau absent / compte non invité.</div><span class="ref">NN/g #9</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">Trois liens texte identiques (« Créer un compte », « Retour à la démo ») et 55 % de vide</div><div class="d">Aucune identité : ni wordmark, ni ancrage visuel, titre 700 sur sous-titre teal.</div><span class="ref">Spec « wow à la première ouverture »</span></div></li>
+  </ul>
+  <div class="scr"><h3>Créer un compte</h3><span class="src">/auth/register · capturé</span></div>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Formulaire complet pour une inscription fermée</div><div class="d">Le backend renvoie <code>403 REGISTRATION_DISABLED</code> ; l'app affiche un toast puis renvoie à la démo. L'utilisateur a saisi email + mot de passe pour rien et ne sait pas pourquoi. Décision de cadrage : écran retiré, mention « Beta privée · accès sur invitation » sur le login.</div><span class="ref">NN/g #1 · #5 prévention des erreurs · cadrage Q6/Q15</span></div></li>
+  </ul>
+
+  <h2 id="home">Accueil</h2>
+  <div class="scr"><span class="src">/home · 2 captures (17:36 sans SafeArea, 20:53 corrigée)</span></div>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">L'écran n'a pas de tête</div><div class="d">Ni titre, ni date, ni salutation, ni indication du jour de planning (« jour 3 sur 30 »). L'écran commence par un champ de recherche : la première chose lue est une invitation à quitter la Home.</div><span class="ref">Spec « Où j'en suis toujours visible » · NN/g #1</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Le même composant, deux rendus : chips A B C</div><div class="d">Dans la hero, A B C sont trois pilules vertes identiques (= rangs de la session). Dans les cartes en dessous, A vert / B teal / C blanc (= rangs disponibles ? actifs ?). Rien ne dit si ce sont des filtres ou des indicateurs.</div><span class="ref">NN/g #4 · affordance</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">« Configurer mon planning → » : l'action structurante est un lien ghost</div><div class="d">Le planning est ce qui rend la session « du jour » ; il est relégué sous la hero, sans état (dates, avancement, retard). Après génération, le libellé devient « Modifier le planning » : toujours sans montrer le planning.</div><span class="ref">Spec Flow 4 · NN/g #1</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">« Mes collèges récents » duplique l'onglet Collèges</div><div class="d">Mêmes cartes, même barre, même ambiguïté ; la Home ne montre rien que Collèges ne montre déjà. Barre verte + segment rouge sans légende.</div><span class="ref">NN/g #8</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Crayon sans label pour « personnaliser la session »</div><div class="d">Icône <code>edit</code> seule, en haut à droite de la hero. Le spec voulait « Modifier » en texte, visible. La sheet ouverte expose des labels de dev (« Rangs (vide = tous) »).</div><span class="ref">NN/g #6 · spec § Accueil</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">« 2 min » sans contexte, « 8 fiches » sans rang ni item</div><div class="d">La hero dit le collège et le volume, pas le contenu (quels items, quel rang effectif après personnalisation).</div><span class="ref">Spec « X fiches · Rang A · Cardiologie »</span></div></li>
+  </ul>
+  <div class="states"><span class="st ok">Chargement : skeleton hero</span><span class="st raw">Erreur : e.toString()</span><span class="st ok">Vide : « Voir les collèges »</span><span class="st ok">Génération : « Tes fiches arrivent… »</span><span class="st no">Hors-ligne : absent</span></div>
+
+  <h2 id="colleges">Collèges</h2>
+  <div class="scr"><span class="src">/colleges · 4 captures (Tous, Importés, Non-importés)</span></div>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Les collèges de l'étudiant sont noyés dans le catalogue de 40</div><div class="d">Tri alphabétique : Cancérologie est 3e, Pneumologie hors écran. Par défaut « Tous » ; l'étudiant doit filtrer « Importés » à chaque visite pour retrouver les siens. Pas de section « Mes collèges » en tête, pas de recherche dans la liste.</div><span class="ref">Hick · NN/g #7 flexibilité et efficacité</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Trois signaux redondants pour « non importé »</div><div class="d">Fond gris-vert + titre grisé + badge « Non-importé » + bouton « Charger » : quatre codes pour un état, alors que les cartes importées (tapables) n'ont ni chevron ni bouton. L'affordance est inversée : le non-tapable a l'air actif.</div><span class="ref">NN/g #8 · affordance</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Filtre à trois valeurs en boutons plein/outline</div><div class="d">Un segmented control iOS fait exactement cela ; ici trois boutons de même poids qu'un CTA, dont un plein qui ressemble à une action.</div><span class="ref">HIG segmented control</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">Titre « Collèges » en 400, « Mes collèges récents » en 600 sur la Home</div><span class="ref">Échelle typo</span></div></li>
+  </ul>
+  <div class="states"><span class="st ok">Chargement : skeleton</span><span class="st raw">Erreur : ErrorView brut</span><span class="st ok">Vide filtré : dessiné</span><span class="st no">Hors-ligne : absent</span></div>
+
+  <h2 id="detail">Détail collège</h2>
+  <div class="scr"><span class="src">/colleges/:ref · 1 capture (Cancérologie)</span></div>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Un collège de 177 fiches s'ouvre sur « 0 % maîtrisé · 0 fiches »</div><div class="d">Le résumé compte les fiches vues, la liste en dessous en montre des dizaines : le premier message contredit l'écran. Le spec voulait « Progression globale » comme mise en contexte ; ici c'est une démotivation.</div><span class="ref">NN/g #1 · spec § Détail collège</span></div></li>
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Items sans titre : « Item 310 », « Item 311 »…</div><div class="d">Le code affiche <code>chapterTitle</code> s'il existe ; il est nul pour ce collège. Le titre d'item est la seule information qui permet de choisir : c'est un trou de données (génération) à traiter avant ou avec la refonte.</div><span class="ref">NN/g #2 · backend card_generator</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Cartes de 130 px pour une ligne et une barre vide</div><div class="d">Sept cartes visibles au lieu de quinze lignes ; la barre grise vide par item répète « rien » sept fois.</div><span class="ref">NN/g #8</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Aucun moyen de réviser le collège depuis cet écran</div><div class="d">Le drill se lance depuis la Home (session) ou depuis un item. Pas de « Réviser Cancérologie · Rang A ».</div><span class="ref">Spec Flow 2 · NN/g #7</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Icône refresh sans label = réimport (consomme un quota)</div><div class="d">Un dialogue confirme ensuite, mais l'icône universelle « rafraîchir » suggère « recharger la liste », pas « relancer un OCR limité à 2 par collège ».</div><span class="ref">NN/g #5 · Flow 5</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">Header bandeau teinté + « CANCÉROLOGIE » en capitales, badge « RA » abrégé, filtres pilules (3e style)</div><span class="ref">NN/g #4</span></div></li>
+  </ul>
+  <div class="states"><span class="st raw">Chargement : Linear Material</span><span class="st raw">Erreur : e.toString()</span><span class="st raw">Vide : « Aucune fiche disponible. »</span><span class="st na">Hors-ligne : fiches locales, non signalé</span></div>
+
+  <h2 id="item">Détail item</h2>
+  <div class="scr"><span class="src">/colleges/:ref/items/:id · lu dans le code (item_detail_screen.dart)</span></div>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Icône bookmark sans aucune action</div><div class="d"><code>actions: [Icon(Icons.bookmark_outline)]</code> : un contrôle qui ne fait rien. Affordance mensongère sur l'écran de contenu principal.</div><span class="ref">NN/g #4 · #5</span></div></li>
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">« Supprimer » (destructif) à côté de « Régénérer » dans le même dialogue</div><div class="d">Pouce bas → feedback enregistré immédiatement (irréversible) → dialogue Annuler / Régénérer / Supprimer. Un tap de travers supprime une fiche. Le spec séparait le signalement de la décision.</div><span class="ref">NN/g #5 prévention · HIG destructive actions (sheet + confirmation)</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Trois composants de trois familles empilés</div><div class="d"><code>TabBar</code> Material (Rang A/B/C), strip horizontal de mini-cartes (radius 4, bord gauche coloré), <code>ShadAccordion</code>. Le strip duplique la liste juste en dessous.</div><span class="ref">NN/g #4 · #8</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Pouces haut/bas Material dans chaque fiche dépliée</div><div class="d">Deux <code>IconButton</code> alignés à droite sous chaque réponse ; l'état « déjà noté » n'est visible que par la couleur du pouce.</div><span class="ref">WCAG couleur seule</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">Barre « Lancer le drill · N fiches » : bon principe, mais collée sur fond d'écran sans séparation ni safe area explicite</div><span class="ref">Spec § Détail item ✓</span></div></li>
+  </ul>
+  <div class="states"><span class="st raw">Chargement : Linear</span><span class="st raw">Erreur : e.toString()</span><span class="st raw">Vide : « Aucune fiche pour ce rang. »</span><span class="st na">Hors-ligne : local, non signalé</span></div>
+
+  <h2 id="drill">Drill (recto / verso)</h2>
+  <div class="scr"><span class="src">/drill et /demo/drill · 4 captures</span></div>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Rien n'indique qu'il faut taper la carte pour la retourner</div><div class="d">Recto : carte, question, 55 % de vide. L'invite « Tapoter pour voir la réponse » du spec est absente. Un nouvel utilisateur reste devant la question.</div><span class="ref">NN/g #6 · #10 aide · spec § Mode Drill</span></div></li>
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">La question disparaît au verso</div><div class="d">L'étudiant évalue « Filles et garçons dès 11 ans : 2 doses… » sans voir la question. Le spec exigeait un rappel de la question en bandeau au-dessus de la réponse.</div><span class="ref">Charge cognitive · spec § Drill verso</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Deux boutons primaires : « À revoir » rouge plein et « Maîtrisé » vert plein</div><div class="d">Le rouge plein en haut attire l'œil en premier (le spec le voulait en bordure). Trois boutons de 56 px = 200 px d'écran pour un geste qui pourrait être un swipe (décision de cadrage : swipe + boutons).</div><span class="ref">Von Restorff · Fitts · cadrage Q13</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Rang affiché deux fois (header + carte), titre de collège centré entre ✕ et badge</div><div class="d">Le header porte trois informations de poids égal ; la progression « 2 / 8 fiches » est en label 12 px.</div><span class="ref">NN/g #8</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Mode définition : champ de saisie + « Évaluer » + hint apparaissent sous la carte</div><div class="d">Un second flux (saisir une définition, feedback sémantique en bannière) dans le même écran, sans transition ni distinction visuelle. Non capturé, lu dans le code.</div><span class="ref">NN/g #4</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">✕ quitte la session sans confirmation ni récap</div><div class="d">Les évaluations sont sauvées par fiche (rien n'est perdu), mais l'utilisateur ne le sait pas et n'a aucun bilan partiel.</div><span class="ref">NN/g #3 · #1</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">Démo en 400 / drill réel en 700 ; « 1/3 fiches » vs « 2 / 8 fiches »</div><span class="ref">NN/g #4</span></div></li>
+  </ul>
+  <div class="states"><span class="st raw">Chargement : Linear</span><span class="st raw">Erreur : e.toString()</span><span class="st no">Vide (0 fiche) : non géré visuellement</span><span class="st ok">Hors-ligne : fonctionne (local)</span></div>
+
+  <h2 id="fin">Fin de session</h2>
+  <div class="scr"><span class="src">_DrillEndScreen · lu dans le code</span></div>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">L'utilisateur doit déclarer lui-même « Session terminée ✓ » sur l'écran de fin de session</div><div class="d">Un bouton outline marque le planning comme fait. Ne pas le taper = la session du jour reste « à faire » sur la Home. L'app sait que la session est finie ; elle demande quand même.</div><span class="ref">Tesler · NN/g #1 · #5</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Jusqu'à quatre boutons empilés dont deux primaires</div><div class="d">« Recommencer les erreurs » (plein) + « Nouvelle recherche » (plein, si venu de la recherche) + « Session terminée ✓ » + « Retour à l'accueil ». Le spec : un primaire, un secondaire.</div><span class="ref">Spec § Hiérarchie des boutons</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Pas de célébration, pas de « prochaine session : date », pas de points forts / à consolider</div><div class="d">Titre « Session terminée » en 22 px, donut, trois compteurs. Le moment de récompense du spec (reward loop, méta-cognition) n'existe pas.</div><span class="ref">Spec § Fin de session · Peak-end rule</span></div></li>
+  </ul>
+
+  <h2 id="search">Recherche</h2>
+  <div class="scr"><span class="src">/search · 2 captures (vide, « alcool »)</span></div>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Les résultats ne permettent pas de juger la pertinence</div><div class="d">Extrait = le mot surligné seul (« alcool », « alcoolique ») sans phrase autour ; « Item 290 · Cancérologie » sans titre d'item. Cinq résultats = cinq cartes identiques. Le flow Tom (« BNP → item IC en 2 s ») est impossible.</div><span class="ref">Spec Flow 2 · § Recherche « extrait contextuel »</span></div></li>
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">État initial : 90 % d'écran vide, sans aide</div><div class="d">Aucune recherche récente, aucun exemple (« BNP », « Gardasil »), aucune explication de ce qui est cherchable (items, signes, doses). Le placeholder est la seule aide.</div><span class="ref">NN/g #6 · #10 · spec § États vides</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Cinq boutons primaires « Réviser l'item » à l'écran</div><div class="d">Un CTA plein par carte + bordure gauche verte sur toutes les cartes (même rang) : le codage couleur ne code rien. Cartes de 200 px pour trois lignes.</div><span class="ref">Spec « un seul primaire par écran »</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Hors-ligne : toast puis écran vide</div><div class="d">« La recherche nécessite une connexion internet » disparaît ; rien ne reste à l'écran pour l'expliquer.</div><span class="ref">NN/g #1</span></div></li>
+  </ul>
+  <div class="states"><span class="st raw">Chargement : à vérifier (non capturé)</span><span class="st raw">Erreur : toast</span><span class="st ok">Aucun résultat : phrase du spec ✓</span><span class="st raw">Hors-ligne : toast seul</span></div>
+
+  <h2 id="planning">Planning</h2>
+  <div class="scr"><span class="src">/planning/config · 1 capture</span></div>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">On configure un planning qu'on ne voit jamais</div><div class="d">Aucun aperçu avant « Générer » (fiches / jour, jours nécessaires, faisable ou non), aucun écran de planning après (calendrier, semaine, retard). Le seul reflet est la hero de la Home.</div><span class="ref">NN/g #1 · spec Flow 4 « aperçu : X fiches · ~Y min »</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Collèges décochés par défaut</div><div class="d">L'étudiant a importé deux collèges ; il doit les cocher. Un défaut « tous les importés » supprime l'étape.</div><span class="ref">Defaults · Hick</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Composants Material : cases carrées, champs date outlined, 6 chips dont 2 orphelines</div><div class="d">Un iPhone attend des lignes avec coche, un date picker natif, un stepper ou un slider pour la durée. 45 % de vide entre le formulaire et le CTA.</div><span class="ref">HIG</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">Trois verbes pour la même action</div><div class="d">« Configurer mon planning » (Home), « Générer mon planning » (CTA), « Modifier le planning » (Home après).</div><span class="ref">NN/g #4</span></div></li>
+  </ul>
+  <div class="states"><span class="st raw">Chargement : via collegesProvider</span><span class="st no">Erreur : non dessinée</span><span class="st raw">Vide : phrase nue</span><span class="st na">Hors-ligne : local</span></div>
+
+  <h2 id="profil">Profil</h2>
+  <div class="scr"><span class="src">/profile · 2 captures</span></div>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Rangs par défaut A / B / C : impossible de voir lesquels sont actifs</div><div class="d">Trois carrés outlined identiques. L'état sélectionné n'a aucun rendu distinct sur la capture.</div><span class="ref">NN/g #1 · WCAG</span></div></li>
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">Hiérarchie destructive inversée</div><div class="d">« Supprimer mon compte » en outline vert (habillé en secondaire), « Se déconnecter » en rouge plein juste dessous. Le geste irréversible est le moins signalé ; le geste bénin est le plus alarmant.</div><span class="ref">NN/g #5 · HIG destructive</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">« Abonnement · Inactif » avec une barre teal pleine et « 0/3 reimports »</div><div class="d">Barre pleine pour zéro : contresens. « Gérer mon abonnement » alors qu'il n'y en a pas. « reimports » en anglais. Badge « Bêta » sans explication.</div><span class="ref">NN/g #2 · #1</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">« Prénom : — » : une donnée manquante affichée comme valeur</div><div class="d">Le tiret n'invite pas à compléter ; « Modifier » est un bouton outline sous une ligne vide.</div><span class="ref">NN/g #6</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Tout est carte</div><div class="d">Cinq cartes blanches empilées de même radius et même ombre : Compte, Abonnement, Préférences, Rappel, Application. iOS regroupe en listes insetGrouped ; ici la hiérarchie est plate.</div><span class="ref">« Not everything is a card » · HIG lists</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">« Rappel quotidien » : un toggle sans heure ; « Fiches max par session » : stepper « – Toutes + » avec « – » grisé</div><div class="d">Le rappel ne dit pas quand ; le stepper mélange un mot et des nombres.</div><span class="ref">NN/g #1</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">Header « Profil » 400 qui devient bandeau teinté au scroll (Material)</div><span class="ref">HIG</span></div></li>
+  </ul>
+  <div class="states"><span class="st raw">Chargement : Circular Material</span><span class="st raw">Erreur : « Erreur de chargement »</span><span class="st na">Vide : n/a</span><span class="st no">Hors-ligne : absent</span></div>
+
+  <h2 id="import">Import PDF et import en cours</h2>
+  <div class="scr"><span class="src">/colleges/:ref/import et /import/progress · lus dans le code</span></div>
+  <ul class="fl">
+    <li class="b"><span class="sev b">Bloquant</span><div><div class="t">L'écran d'import ne dit pas quoi importer ni ce qui va se passer</div><div class="d">Icône 64 px + nom + éditeur + « Choisir un PDF ». Rien sur : le PDF officiel attendu, la taille max (500 MB), la durée (minutes), le quota de réimport restant, le fait que l'upload continue en arrière-plan. Six erreurs possibles (trop gros, déjà en cours, expiré, introuvable, interrompu, générique) en toasts destructifs.</div><span class="ref">NN/g #1 · #10 · spec Flow 3/5</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Fin d'import : toast « Fiches générées avec succès ! » puis redirection forcée vers la liste</div><div class="d"><code>context.go('/colleges')</code> : l'utilisateur atterrit sur le catalogue de 40, pas sur le collège prêt, ni sur une proposition de première session.</div><span class="ref">Spec Flow 1 « fiches prêtes → session proposée »</span></div></li>
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Les fiches n'arrivent pas « au fil de l'eau »</div><div class="d">Le spec transformait l'attente en anticipation (fiches progressives). L'écran est un stepper bloquant ; l'app le sait pourtant (SSE de génération).</div><span class="ref">Spec § Émotions « impatience productive »</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">Bannière vert pâle Material, stepper avec <code>CircularProgressIndicator</code>, bouton « Fermer et continuer » outline</div><span class="ref">HIG</span></div></li>
+  </ul>
+  <div class="states"><span class="st raw">Chargement : Circular</span><span class="st raw">Erreur : « Erreur: $e »</span><span class="st na">Vide : n/a</span><span class="st raw">Hors-ligne : toast « interrompu »</span></div>
+
+  <h2 id="paywall">Paywall, CGU, confidentialité</h2>
+  <div class="scr"><span class="src">/paywall, /legal/* · lus dans le code</span></div>
+  <ul class="fl">
+    <li class="g"><span class="sev g">Gênant</span><div><div class="t">Paywall sans bénéfices, avec quatre actions dont trois ghost</div><div class="d">« AppMédecine Premium », un prix, « S'abonner », « Restaurer mes achats », « Retour à la démo » (depuis un compte connecté ?), « Gérer mon abonnement » (qu'on n'a pas). Aucune liste de ce que l'abonnement donne.</div><span class="ref">NN/g #1 · App Store Review 3.1</span></div></li>
+    <li class="c"><span class="sev c">Cosmétique</span><div><div class="t">CGU / Confidentialité : Markdown brut sous AppBar Material</div><div class="d">Aligner typo, marges et header sur le système v2 ; contenu inchangé.</div><span class="ref">Cadrage Q12</span></div></li>
+  </ul>
+
+  <h2 id="etats">Matrice des états manquants</h2>
+  <p class="lede">Ce que chaque écran montre aujourd'hui dans ses quatre états. Le spec v2 devra dessiner chaque case rouge et orange.</p>
+  <div class="legend"><span class="st ok">dessiné</span><span class="st raw">brut / technique</span><span class="st no">absent</span><span class="st na">n/a ou local</span></div>
+  <div class="tw"><table>
+    <thead><tr><th>Écran</th><th>Vide</th><th>Chargement</th><th>Erreur</th><th>Hors-ligne</th></tr></thead>
+    <tbody>
+      <tr><td>Login</td><td><span class="st na">n/a</span></td><td><span class="st raw">bouton</span></td><td><span class="st raw">toast « Erreur »</span></td><td><span class="st no">absent</span></td></tr>
+      <tr><td>Accueil</td><td><span class="st ok">Voir les collèges</span></td><td><span class="st ok">skeleton</span></td><td><span class="st raw">e.toString()</span></td><td><span class="st no">absent</span></td></tr>
+      <tr><td>Collèges</td><td><span class="st ok">filtré</span></td><td><span class="st ok">skeleton</span></td><td><span class="st raw">ErrorView</span></td><td><span class="st no">absent</span></td></tr>
+      <tr><td>Détail collège</td><td><span class="st raw">phrase nue</span></td><td><span class="st raw">Linear</span></td><td><span class="st raw">e.toString()</span></td><td><span class="st na">local</span></td></tr>
+      <tr><td>Détail item</td><td><span class="st raw">phrase nue</span></td><td><span class="st raw">Linear</span></td><td><span class="st raw">e.toString()</span></td><td><span class="st na">local</span></td></tr>
+      <tr><td>Drill</td><td><span class="st no">absent</span></td><td><span class="st raw">Linear</span></td><td><span class="st raw">e.toString()</span></td><td><span class="st ok">local</span></td></tr>
+      <tr><td>Fin de session</td><td><span class="st na">n/a</span></td><td><span class="st na">n/a</span></td><td><span class="st no">absent</span></td><td><span class="st ok">local</span></td></tr>
+      <tr><td>Recherche</td><td><span class="st no">initial vide</span> <span class="st ok">0 résultat</span></td><td><span class="st raw">à vérifier</span></td><td><span class="st raw">toast</span></td><td><span class="st raw">toast seul</span></td></tr>
+      <tr><td>Planning</td><td><span class="st raw">phrase nue</span></td><td><span class="st raw">hérité</span></td><td><span class="st no">absent</span></td><td><span class="st na">local</span></td></tr>
+      <tr><td>Profil</td><td><span class="st raw">« — »</span></td><td><span class="st raw">Circular</span></td><td><span class="st raw">phrase nue</span></td><td><span class="st no">absent</span></td></tr>
+      <tr><td>Import</td><td><span class="st na">n/a</span></td><td><span class="st raw">Linear</span></td><td><span class="st raw">6 toasts</span></td><td><span class="st raw">toast</span></td></tr>
+      <tr><td>Import en cours</td><td><span class="st na">n/a</span></td><td><span class="st raw">Circular</span></td><td><span class="st raw">« Erreur: $e »</span></td><td><span class="st no">absent</span></td></tr>
+      <tr><td>Paywall</td><td><span class="st na">n/a</span></td><td><span class="st raw">ShadProgress</span></td><td><span class="st raw">dialogue « Erreur »</span></td><td><span class="st no">absent</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="garde">Ce qui marche et qu'on garde</h2>
+  <div class="keep">
+    <div><b>La hero « session du jour »</b> — un tap pour réviser, nombre de fiches en display, session pré-calculée. Le principe « zéro décision » est là ; c'est le rendu et le contexte (rang, items, jour du planning) qui manquent.</div>
+    <div><b>Le drill 3 niveaux</b> — recto/verso, réinsertion des « à revoir » (une fois, toast 2 s), progression « n / total », sauvegarde par fiche. Le modèle mental Anki est respecté.</div>
+    <div><b>La fonction planning</b> — période + disponibilité + collèges, recalcul automatique, session du jour. À restyler et à rendre visible, pas à repenser (cadrage Q4).</div>
+    <div><b>Les skeletons</b> de la Home et de Collèges — les deux seuls états de chargement dessinés ; à généraliser.</div>
+    <div><b>La barre « Lancer le drill · N fiches »</b> du détail item et le stepper 4 étapes de l'import — bons principes, mauvais habillage.</div>
+    <div><b>Les icônes de spécialités</b> (seringue, poumons, cœur, loupe) — la seule touche d'identité médicale de l'app ; à conserver dans la refonte, en une seule famille.</div>
+    <div><b>La phrase d'état vide de la recherche</b> (« Aucun résultat pour "x" — essaie un autre mot ») — conforme au spec, ton juste.</div>
+  </div>
+
+  <p style="margin-top:40px;color:var(--muted);font-size:.9rem">Prochaine étape : spec UX v2 (parcours, hiérarchie, états) à partir de ces écarts et du cadrage — sans toucher au code.</p>
+</div>
