@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:collega_app/core/ui/theme/cg_theme.dart';
+import 'package:collega_app/core/ui/tokens/cg_type.dart';
 
 import 'cg_fonts.dart';
 
@@ -68,8 +69,11 @@ class CgGoldenFrame extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => ColoredBox(
-        color: CgTheme.of(context).colors.ground,
-        child: child,
-      );
+  Widget build(BuildContext context) {
+    final c = CgTheme.of(context).colors;
+    return ColoredBox(
+      color: c.ground,
+      child: DefaultTextStyle(style: CgType.body.copyWith(color: c.ink), child: child),
+    );
+  }
 }

@@ -4,6 +4,8 @@ import 'package:widgetbook/widgetbook.dart';
 import 'package:collega_app/core/ui/gallery/cg_tokens_page.dart';
 import 'package:collega_app/core/ui/theme/cg_theme.dart';
 
+import 'use_cases/cg_button_use_cases.dart';
+
 void main() => runApp(const CollegaWidgetbook());
 
 /// Catalogue Collega UI : chaque composant y a une entrée couvrant ses variantes
@@ -33,6 +35,12 @@ class CollegaWidgetbook extends StatelessWidget {
                 ),
               ],
             ),
+          ],
+        ),
+        WidgetbookFolder(
+          name: 'Composants',
+          children: [
+            cgButtonComponent,
           ],
         ),
       ],
