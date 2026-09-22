@@ -1,0 +1,39 @@
+---
+type: "Decision"
+title: "Référentiel item_titles : titres d'items partagés entre collèges (official > plus fréquent > plus ancien)"
+description: "Story 8.0 : table globale item titles item number, label, source extracted|official, occurrences . Tout titre valide extrait à l'import is valid title : majuscule initiale, ≥60 % lettres, pas d'auteur Pr/Dr, pas de méta"
+resource: "collega_backend/app/services/ocr/item_titles.py"
+tags: ["session-learning", "story-8.0", "referentiel", "item_titles", "decision"]
+timestamp: "2026-09-22T18:19:55.553Z"
+x-kage-id: "repo:git-github-com-tistech0-collega:decision:r-f-rentiel-item-titles-titres-ditems-partag-s-entre-coll-ges-official-plus-fr-q"
+x-kage-type: "decision"
+x-kage-status: "approved"
+x-kage-scope: "repo"
+x-kage-visibility: "team"
+x-kage-verified: "unverified"
+x-kage-paths: ["collega_backend/app/services/ocr/item_titles.py", "collega_backend/app/models/item_title.py", "collega_backend/app/workers/ocr_worker.py", "collega_backend/alembic/versions/015_add_item_titles.py"]
+---
+
+# Référentiel item_titles : titres d'items partagés entre collèges (official > plus fréquent > plus ancien)
+
+> Story 8.0 : table globale item titles item number, label, source extracted|official, occurrences . Tout titre valide …
+
+Story 8.0 : table globale item_titles (item_number, label, source extracted|official, occurrences). Tout titre valide extrait à l'import (is_valid_title : majuscule initiale, ≥60 % lettres, pas d'auteur Pr/Dr, pas de méta « objectif/rang/rubrique », pas d'intertitre Introduction/Épidémiologie…) y entre via record_title, qui complète aussi rétroactivement les items NULL/"" de ce numéro dans TOUS les collèges de TOUS les utilisateurs — un faux titre se propage partout, d'où un filtre strict. Cascade dans ocr_worker._resolve_title : titre extrait → lookup_title → NULL + warning (jamais ""). record_title est entièrement en savepoints (begin_nested) pour ne jamais empoisonner la transaction d'import. ensure_title = variante non incrémentale pour les rattrapages rejouables. record_official_title (source official) corrige un trou/une extraction ratée et remplace les titres extraits. Ordre des sources d'extraction : OBJECTIFS N° > sommaire (seulement entrées « Chapitre N : ») > ligne d'en-tête de la 1re page (ignorée si en-tête courant répété sur la page suivante).
+Evidence: Migration 015 validée sur Postgres 16 ; savepoint IntegrityError testé sur asyncpg ; revue adversariale (5 problèmes corrigés).
+
+## Verification
+
+Migration 015 validée sur Postgres 16 ; savepoint IntegrityError testé sur asyncpg ; revue adversariale (5 problèmes corrigés).
+
+# Citations
+
+[1] explicit_capture (2026-09-22T18:19:55.553Z)
+
+## Kage state
+
+Machine state for lossless round-trip; OKF consumers can ignore it.
+
+```json kage-state
+{"schema_version":2,"id":"repo:git-github-com-tistech0-collega:decision:r-f-rentiel-item-titles-titres-ditems-partag-s-entre-coll-ges-official-plus-fr-q","title":"Référentiel item_titles : titres d'items partagés entre collèges (official > plus fréquent > plus ancien)","summary":"Story 8.0 : table globale item titles item number, label, source extracted|official, occurrences . Tout titre valide extrait à l'import is valid title : majuscule initiale, ≥60 % lettres, pas d'auteur Pr/Dr, pas de méta","body":"Story 8.0 : table globale item_titles (item_number, label, source extracted|official, occurrences). Tout titre valide extrait à l'import (is_valid_title : majuscule initiale, ≥60 % lettres, pas d'auteur Pr/Dr, pas de méta « objectif/rang/rubrique », pas d'intertitre Introduction/Épidémiologie…) y entre via record_title, qui complète aussi rétroactivement les items NULL/\"\" de ce numéro dans TOUS les collèges de TOUS les utilisateurs — un faux titre se propage partout, d'où un filtre strict. Cascade dans ocr_worker._resolve_title : titre extrait → lookup_title → NULL + warning (jamais \"\"). record_title est entièrement en savepoints (begin_nested) pour ne jamais empoisonner la transaction d'import. ensure_title = variante non incrémentale pour les rattrapages rejouables. record_official_title (source official) corrige un trou/une extraction ratée et remplace les titres extraits. Ordre des sources d'extraction : OBJECTIFS N° > sommaire (seulement entrées « Chapitre N : ») > ligne d'en-tête de la 1re page (ignorée si en-tête courant répété sur la page suivante).\nEvidence: Migration 015 validée sur Postgres 16 ; savepoint IntegrityError testé sur asyncpg ; revue adversariale (5 problèmes corrigés).","type":"decision","scope":"repo","visibility":"team","sensitivity":"internal","status":"approved","confidence":0.7,"tags":["session-learning","story-8.0","referentiel","item_titles","decision"],"paths":["collega_backend/app/services/ocr/item_titles.py","collega_backend/app/models/item_title.py","collega_backend/app/workers/ocr_worker.py","collega_backend/alembic/versions/015_add_item_titles.py"],"stack":[],"source_refs":[{"kind":"explicit_capture","captured_at":"2026-09-22T18:19:55.553Z"}],"context":{"fact":"Story 8.0 : table globale item_titles (item_number, label, source extracted|official, occurrences). Tout titre valide extrait à l'import (is_valid_title : majuscule initiale, ≥60 % lettres, pas d'auteur Pr/Dr, pas de méta « objectif/rang/rubrique », pas d'intertitre Introduction/Épidémiologie…) y entre via record_title, qui complète aussi rétroactivement les items NULL/\"\" de ce numéro dans TOUS les collèges de TOUS les utilisateurs — un faux titre se propage partout, d'où un filtre strict. Cascade dans ocr_worker._resolve_title : titre extrait → lookup_title → NULL + warning (jamais \"\"). record_title est entièrement en savepoints (begin_nested) pour ne jamais empoisonner la transaction d'import. ensure_title = variante non incrémentale pour les rattrapages rejouables. record_official_title (source official) corrige un trou/une extraction ratée et remplace les titres extraits. Ordre des sources d'extraction : OBJECTIFS N° > sommaire (seulement entrées « Chapitre N : ») > ligne d'en-tête de la 1re page (ignorée si en-tête courant répété sur la page suivante).\nEvidence: Migration 015 validée sur Postgres 16 ; savepoint IntegrityError testé sur asyncpg ; revue adversariale (5 problèmes corrigés).","verification":"Migration 015 validée sur Postgres 16 ; savepoint IntegrityError testé sur asyncpg ; revue adversariale (5 problèmes corrigés)."},"freshness":{"ttl_days":365,"last_verified_at":"2026-09-22T18:19:55.553Z","path_fingerprints":[{"path":"collega_backend/app/services/ocr/item_titles.py","sha256":"7bba2a02dc4313d2eddb1ddbcf40bf0bf36cd6b1a23cea7af5f828b3312a0392","size":8005},{"path":"collega_backend/app/models/item_title.py","sha256":"8285294d7107e4ea1686e9ba913e1d765ce3955656c24e701e6daf2469dd1bdb","size":1594},{"path":"collega_backend/app/workers/ocr_worker.py","sha256":"e5aeffb32e8482b3871b8cb6ba5ba75b983074185122c26c50eccb09256c251c","size":12499},{"path":"collega_backend/alembic/versions/015_add_item_titles.py","sha256":"d8ffc9d2a4403619f77b47c83c32dcd6df008679e45d6fe99dd7671fb41254d4","size":4926}],"path_fingerprint_policy":"source_hash_staleness","verification":"repo_local_agent_capture"},"edges":[],"quality":{"reviewer":"repo-local-agent","votes_up":0,"votes_down":0,"uses_30d":0,"reports_stale":0,"review_boundary":"git_or_pr","promotion_requires_review":true,"discovery_tokens":4000,"discovery_tokens_estimated":true,"score":100,"reasons":["high-value memory type","has source evidence","grounded to repo paths","tagged","concise but substantive","actionable rationale or verification"],"risks":[],"duplicate_candidates":[],"stale_reasons":[],"estimated_tokens_saved":303},"created_at":"2026-09-22T18:19:55.553Z","updated_at":"2026-09-22T18:19:55.553Z","author_branch":"feat/redesign-ux-ui"}
+```
+
