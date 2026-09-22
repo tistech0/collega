@@ -54,23 +54,31 @@ afin de choisir quoi réviser sans ouvrir la fiche.
   **quand** l'OCR détecte l'item, **alors** `chapter_title` vaut « Tumeurs du
   testicule » (tirets, deux-points, points et sauts de ligne acceptés comme
   séparateurs ; casse d'origine conservée ; 200 caractères max).
-- **Étant donné** un en-tête sans titre exploitable, **quand** l'item est créé,
-  **alors** le titre est repris du **référentiel officiel des items ECN**
-  (table statique `item_number → titre`, 367 entrées, versionnée dans le repo).
-- **Étant donné** ni en-tête ni entrée de référentiel, **quand** l'item est
-  créé, **alors** l'item est enregistré avec `chapter_title = NULL` **et** un
-  log `warning` nommant le collège et le numéro ; ce cas doit être nul sur les
-  collèges de beta.
-- **Étant donné** la base de production actuelle, **quand** la migration
-  s'exécute, **alors** tout item existant dont `chapter_title` est vide ou nul
-  reçoit son titre depuis le référentiel officiel, sans réimport ni appel
-  Claude.
-- **Étant donné** l'API `/v1/colleges/{id}` et la recherche, **quand** un item
-  est renvoyé, **alors** `chapter_title` est présent pour tous les items des
-  collèges de beta.
-- **Étant donné** l'app, **quand** elle synchronise les items, **alors** le
-  titre est stocké en local et affiché ; le repli « Item 310 » n'apparaît que
-  si le titre est nul.
+- **Étant donné** un titre extrait valide (5 à 200 caractères, au moins deux mots, pas
+  majoritairement numérique), **quand** l'item est enregistré, **alors** le couple
+  `item_number → titre` est aussi enregistré dans un **référentiel partagé**
+  (table globale `item_titles`, une ligne par numéro d'item et par libellé observé,
+  avec un compteur d'occurrences) ; un titre qui ne passe pas le filtre n'y entre pas.
+- **Étant donné** un en-tête sans titre exploitable, **quand** l'item est créé, **alors**
+  son titre est repris du référentiel partagé par correspondance de numéro — le libellé
+  **le plus fréquent** l'emporte, à égalité le plus ancien.
+- **Étant donné** ni en-tête ni entrée au référentiel, **quand** l'item est créé, **alors**
+  l'item est enregistré avec `chapter_title = NULL` **et** un log `warning` nommant le
+  collège et le numéro ; l'item sera complété automatiquement au prochain import d'un
+  collège qui fournit ce titre.
+- **Étant donné** la base de production actuelle, **quand** la migration s'exécute,
+  **alors** le référentiel est d'abord peuplé depuis les titres déjà présents en base,
+  puis tout item dont `chapter_title` est vide ou nul reçoit le titre correspondant à son
+  numéro — sans réimport ni appel Claude. CNEC et CEP se complètent mutuellement.
+- **Étant donné** l'API `/v1/colleges/{id}` et la recherche, **quand** un item est renvoyé,
+  **alors** `chapter_title` est présent pour tous les items des collèges de beta.
+- **Étant donné** l'app, **quand** elle synchronise les items, **alors** le titre est stocké
+  en local et affiché ; le repli « Item 310 » n'apparaît que si le titre est nul.
+
+**Note d'architecture** : le référentiel est alimenté par l'extraction, pas fourni au
+départ — les items de l'ECN étant universels, ce qu'un collège a bien scanné bénéficie à
+tous les autres. Si une liste officielle est récupérée plus tard, elle s'injecte dans la
+même table avec une priorité supérieure (source `official` > source `extracted`).
 
 **Tasks**
 
@@ -78,19 +86,22 @@ afin de choisir quoi réviser sans ouvrir la fiche.
       reste de la ligne d'en-tête après `_ITEM_HEADER_PATTERN`, nettoyage
       (séparateurs, numéro de page, majuscules parasites) ; conserver
       `_CHAPTER_PATTERN` en second recours.
-- [ ] T2 — Ajouter `app/data/ecn_items.py` (ou JSON) : référentiel officiel
-      `item_number → titre` + accesseur testé.
-- [ ] T3 — Chaîner les sources dans `ocr_worker.py` : en-tête → référentiel →
-      NULL + warning.
-- [ ] T4 — Migration Alembic : backfill des items existants depuis le
-      référentiel ; idempotente, sans data loss.
-- [ ] T5 — Contrainte de non-régression : test qui échoue si un item est créé
-      avec un titre vide alors que le référentiel en contient un.
+- [ ] T2 — Table `item_titles` (numéro, libellé, source `extracted`/`official`,
+      occurrences, dates) + service d'écriture (filtre de validité) et de lecture
+      (libellé le plus fréquent, `official` prioritaire).
+- [ ] T3 — Chaîner les sources dans `ocr_worker.py` : en-tête → référentiel partagé →
+      NULL + warning ; alimenter le référentiel à chaque titre valide extrait.
+- [ ] T4 — Migration Alembic : créer `item_titles`, la peupler depuis les titres déjà en
+      base, puis backfiller les items sans titre par correspondance de numéro ;
+      idempotente, sans data loss.
+- [ ] T5 — Contrainte de non-régression : test qui échoue si un item est créé avec un
+      titre vide alors que le référentiel en contient un pour ce numéro.
 - [ ] T6 — App : afficher le titre partout où l'item est listé ; repli explicite
       si nul.
-- [ ] T7 — Tests backend ciblés (`pytest tests/services/test_item_detector.py`,
-      test de migration) + vérification sur la prod (CNEC et CEP : 100 % des
-      items titrés).
+- [ ] T7 — Tests backend ciblés (`pytest tests/services/test_item_detector.py`, tests du
+      service de référentiel : filtre de validité, libellé le plus fréquent, priorité
+      `official`, test de migration) + vérification sur la prod (CNEC et CEP : items
+      titrés, trous restants comptés et listés).
 
 ---
 

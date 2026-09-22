@@ -717,7 +717,7 @@ Règles : colonne unique toujours ; marge écran 20 pt ; aucun contenu sous la t
 Constat de l'audit : les items du collège CNEC s'affichent « Item 310 » parce que `chapterTitle` est nul en base. Toute la v2 (Bibliothèque, Détail collège, Recherche, Fin de session) suppose qu'un item a un titre lisible.
 
 - Le pipeline de génération doit produire un titre pour chaque item (`item_title` non nul, non vide).
-- Une migration doit renseigner les titres des collèges déjà importés (re-dérivation depuis le texte OCR conservé ou depuis le référentiel d'items officiel).
+- Les titres valides extraits alimentent un **référentiel partagé** `item_number → titre` (les items de l'ECN sont universels) ; un item sans titre exploitable est complété par correspondance de numéro, libellé le plus fréquent. Une migration peuple le référentiel depuis l'existant puis backfille les items sans titre — sans réimport ni appel Claude.
 - Contrainte de non-régression : un item sans titre ne doit plus pouvoir être créé.
 - Côté app : `chapterTitle` devient non nullable dans le modèle Drift ; à défaut, repli explicite « Item 310 · titre manquant » signalé en interne, jamais affiché tel quel en beta.
 
