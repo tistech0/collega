@@ -14,6 +14,7 @@ import 'package:collega_app/features/colleges/presentation/item_detail_screen.da
 import 'package:collega_app/features/demo/presentation/demo_drill_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_screen.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
+import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/drill/presentation/drill_screen.dart';
 import 'package:collega_app/features/legal/presentation/legal_screen.dart';
 import 'package:collega_app/features/planning/presentation/planning_config_screen.dart';
@@ -75,13 +76,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/drill',
         builder: (ctx, s) {
           final extra = s.extra;
-          if (extra is! DrillSessionParams) {
-            return Scaffold(
-              appBar: AppBar(),
-              body: const Center(child: Text('Paramètres manquants')),
-            );
-          }
-          return DrillScreen(params: extra);
+          final launch = extra is DrillLaunch
+              ? extra
+              : extra is DrillSessionParams
+                  ? DrillLaunch(params: extra)
+                  : null;
+          // Lien sans paramètres (deep link invalide) : retour à Aujourd'hui.
+          if (launch == null) return const TodayScreen();
+          return DrillScreen(launch: launch);
         },
       ),
       GoRoute(path: '/auth/register', builder: (ctx, s) => const AuthRegisterScreen()),

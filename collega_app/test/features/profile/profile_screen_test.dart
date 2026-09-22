@@ -75,11 +75,16 @@ class _FakeNotificationsService extends NotificationsService {
 }
 
 class _FakeRevisionPrefsNotifier extends RevisionPrefsNotifier {
+  static RevisionPrefs? lastSaved;
+
   @override
   Future<RevisionPrefs> build() async => const RevisionPrefs();
 
   @override
-  Future<void> save(RevisionPrefs prefs) async {}
+  Future<void> save(RevisionPrefs prefs) async {
+    lastSaved = prefs;
+    state = AsyncData(prefs);
+  }
 }
 
 class _FakeRevisionPrefsRepository extends RevisionPrefsRepository {
@@ -214,6 +219,22 @@ void main() {
       expect(find.text('A'), findsOneWidget);
       expect(find.text('B'), findsOneWidget);
       expect(find.text('C'), findsOneWidget);
+    });
+
+    testWidgets('chronomètre : trois choix, « Demander » enregistré (demande 8.4)', (tester) async {
+      _FakeRevisionPrefsNotifier.lastSaved = null;
+      tester.view.physicalSize = const Size(800, 2600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(_buildScreen());
+      await tester.pumpAndSettle();
+      final ask = find.text('Demander');
+      expect(find.text('Désactivé'), findsOneWidget);
+      expect(find.text('Activé'), findsOneWidget);
+      await tester.tap(ask);
+      await tester.pumpAndSettle();
+      expect(_FakeRevisionPrefsNotifier.lastSaved?.timerMode, TimerMode.ask);
+      expect(find.text('Durée par carte'), findsOneWidget, reason: 'la durée sert aussi au mode Demander');
     });
 
     testWidgets('_AppCard affiche les liens CGU et politique', (tester) async {

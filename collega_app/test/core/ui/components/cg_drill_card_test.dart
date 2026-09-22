@@ -517,6 +517,52 @@ void main() {
     });
   });
 
+  testWidgets('trailing : posé dans l’emplacement droit de l’en-tête, 44 pt (8.4, chronomètre)', (tester) async {
+    _phone(tester);
+    await tester.pumpWidget(cgTestApp(CgDrillCard(
+      question: _question, answer: _answer, rank: 'A', collegeName: 'Cancérologie',
+      index: 1, total: 3, onVerdict: (_) {}, onClose: () {},
+      trailing: const SizedBox(key: Key('slot')),
+    )));
+    final slot = tester.getRect(find.byKey(const Key('slot')));
+    final close = tester.getRect(find.byKey(CgDrillCard.closeKey));
+    expect(slot.center.dy, closeTo(close.center.dy, 1));
+    expect(slot.center.dx, greaterThan(_w / 2));
+  });
+
+  group('retours de revue 8.4', () {
+    testWidgets('mode définition : le clavier ne cache ni le champ ni son bouton', (tester) async {
+      _phone(tester);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 336);
+      await tester.pumpWidget(cgTestApp(CgDrillCard(
+        question: _question, answer: _answer, rank: 'A', collegeName: 'Cancérologie',
+        index: 1, total: 3, onVerdict: (_) {}, onClose: () {}, canFlip: false,
+        frontInput: const SizedBox(key: Key('input'), height: 100),
+      )));
+      await tester.pumpAndSettle();
+      expect(tester.getRect(find.byKey(const Key('input'))).bottom, lessThanOrEqualTo(_h - 336));
+    });
+
+    testWidgets('ouverture pendant un glissé du recto : le même doigt ne juge pas la réponse', (tester) async {
+      _phone(tester);
+      final verdicts = <CgVerdict>[];
+      final key = GlobalKey<CgDrillCardState>();
+      await tester.pumpWidget(cgTestApp(CgDrillCard(
+        key: key, question: _question, answer: _answer, rank: 'A', collegeName: 'Cancérologie',
+        index: 1, total: 3, onVerdict: verdicts.add, onClose: () {},
+      )));
+      final g = await tester.startGesture(const Offset(_w / 2, _h * 0.7));
+      await g.moveBy(const Offset(20, 0));
+      await tester.pump();
+      key.currentState!.flip(); // chrono expiré pendant le glissé
+      await tester.pumpAndSettle();
+      await g.moveBy(const Offset(_w * 0.6, 0));
+      await g.up();
+      await tester.pumpAndSettle();
+      expect(verdicts, isEmpty);
+    });
+  });
+
   group('retours de revue 8.2', () {
     testWidgets('balayage depuis le bord gauche : onClose (« Quitter ? »), jamais de verdict', (tester) async {
       _phone(tester);

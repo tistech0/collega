@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:collega_app/core/ui/components/cg_segmented.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -448,25 +450,21 @@ class _RevisionPrefsContent extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text('Chronomètre par carte', style: AppTypography.labelMedium()),
-            ),
-            ShadSwitch(
-              value: prefs.timerEnabled,
-              onChanged: (on) {
-                _persist(
-                  context,
-                  ref,
-                  prefs.copyWith(timerEnabled: on),
-                );
-              },
-            ),
-          ],
+        Text('Chronomètre par carte', style: AppTypography.labelMedium()),
+        const SizedBox(height: 8),
+        // Demande 8.4 : jamais, toujours, ou choisi au lancement de chaque session
+        // (et activable/désactivable pendant le drill).
+        CgSegmented<TimerMode>(
+          values: TimerMode.values,
+          labelOf: (m) => switch (m) {
+            TimerMode.off => 'Désactivé',
+            TimerMode.on => 'Activé',
+            TimerMode.ask => 'Demander',
+          },
+          selected: prefs.timerMode,
+          onChanged: (m) => _persist(context, ref, prefs.copyWith(timerMode: m)),
         ),
-        if (prefs.timerEnabled) ...[
+        if (prefs.timerMode != TimerMode.off) ...[
           const SizedBox(height: 8),
           Text('Durée par carte', style: AppTypography.labelMedium()),
           const SizedBox(height: 8),

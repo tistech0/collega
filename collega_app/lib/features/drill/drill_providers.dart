@@ -126,11 +126,15 @@ class DrillSessionNotifier
     ));
   }
 
-  void setSemanticFeedback(SemanticFeedback feedback) {
+  /// Retour d'évaluation d'une définition. Ignoré s'il arrive après le passage
+  /// à une autre fiche (réponse serveur lente, chrono expiré entre-temps).
+  void setSemanticFeedback(SemanticFeedback feedback, {String? cardId}) {
     final s = state.value;
-    if (s == null) return;
+    if (s == null || s.exitResult != null) return;
+    if (cardId != null && s.currentCard?.id != cardId) return;
     state = AsyncValue.data(s.copyWith(semanticFeedback: feedback));
   }
+
 
   /// Retourne `true` si la carte a été réinsérée plus loin dans la file.
   Future<bool> evaluate(DrillEvaluationResult result) async {
@@ -206,12 +210,18 @@ class DrillSessionNotifier
       requeued: false,
     );
     state = AsyncValue.data(next);
-    if (arg.isDailySession) unawaited(_persistDaily(next));
+    // « Refaire les à revoir » après la fin : entraînement hors session du jour,
+    // la file enregistrée (et la reprise) ne sont pas écrasées.
+    if (arg.isDailySession && !_replayingErrors) unawaited(_persistDaily(next));
   }
+
+  /// Vrai après « Refaire les à revoir » : plus rien n'est écrit dans la session du jour.
+  bool _replayingErrors = false;
 
   void restartWithErrors() {
     final s = state.value;
     if (s == null) return;
+    _replayingErrors = true;
     final errorCardIds = s.evaluations.entries
         .where((e) => e.value == DrillEvaluationResult.aRevoir)
         .map((e) => e.key)

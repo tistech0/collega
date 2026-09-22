@@ -57,10 +57,10 @@ void main() {
       final storage = _FakeSecureStorage();
       final repo = RevisionPrefsRepository(storage: storage);
       await repo.save(const RevisionPrefs(
-        timerEnabled: true,
+        timerMode: TimerMode.on,
         timerDurationSeconds: 60,
       ));
-      expect(storage.writtenValues['revision_prefs_timer_enabled'], 'true');
+      expect(storage.writtenValues['revision_prefs_timer_mode'], 'on');
       expect(
         storage.writtenValues['revision_prefs_timer_duration_seconds'],
         '60',
@@ -71,7 +71,7 @@ void main() {
       final storage = _FakeSecureStorage();
       final repo = RevisionPrefsRepository(storage: storage);
       await repo.save(const RevisionPrefs(
-        timerEnabled: true,
+        timerMode: TimerMode.on,
         timerDurationSeconds: 120,
       ));
       final prefs = await repo.load();
@@ -96,7 +96,7 @@ void main() {
       await repo.save(const RevisionPrefs(
         defaultRangs: ['A', 'B'],
         defaultMaxCards: 25,
-        timerEnabled: true,
+        timerMode: TimerMode.on,
         timerDurationSeconds: 60,
       ));
       final prefs = await repo.load();
@@ -104,6 +104,39 @@ void main() {
       expect(prefs.defaultMaxCards, 25);
       expect(prefs.timerEnabled, isTrue);
       expect(prefs.timerDurationSeconds, 60);
+    });
+  });
+
+  group('chronomètre : trois choix (demande utilisateur 8.4)', () {
+    test('« Demander à chaque session » : enregistré et relu', () async {
+      final storage = _FakeSecureStorage();
+      final repo = RevisionPrefsRepository(storage: storage);
+      await repo.save(const RevisionPrefs(timerMode: TimerMode.ask, timerDurationSeconds: 45));
+      final prefs = await repo.load();
+      expect(prefs.timerMode, TimerMode.ask);
+      expect(prefs.timerEnabled, isFalse, reason: 'ask ≠ activé : la session décide');
+      expect(prefs.timerDurationSeconds, 45);
+    });
+
+    test('migration : ancien réglage « activé » → on, sinon off', () async {
+      final on = await RevisionPrefsRepository(
+        storage: _FakeSecureStorage(initial: {'revision_prefs_timer_enabled': 'true'}),
+      ).load();
+      expect(on.timerMode, TimerMode.on);
+      final off = await RevisionPrefsRepository(
+        storage: _FakeSecureStorage(initial: {'revision_prefs_timer_enabled': 'false'}),
+      ).load();
+      expect(off.timerMode, TimerMode.off);
+    });
+
+    test('le nouveau réglage prime sur l’ancien', () async {
+      final prefs = await RevisionPrefsRepository(
+        storage: _FakeSecureStorage(initial: {
+          'revision_prefs_timer_enabled': 'true',
+          'revision_prefs_timer_mode': 'ask',
+        }),
+      ).load();
+      expect(prefs.timerMode, TimerMode.ask);
     });
   });
 }

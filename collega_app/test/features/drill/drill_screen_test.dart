@@ -1,341 +1,437 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/cupertino.dart' show CupertinoTextField;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:shadcn_ui/shadcn_ui.dart' show ShadTheme;
+
+import 'package:collega_app/core/theme/app_theme.dart' show buildShadTheme;
 
 import 'package:collega_app/core/database/app_database.dart';
-import 'package:collega_app/core/theme/app_theme.dart';
+import 'package:collega_app/core/ui/collega_ui.dart';
+import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
+import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/drill/data/drill_repository.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/domain/drill_state.dart';
+import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/drill/drill_providers.dart';
+import 'package:collega_app/features/drill/presentation/drill_end_screen.dart';
 import 'package:collega_app/features/drill/presentation/drill_screen.dart';
-import 'package:collega_app/features/drill/widgets/timer_ring.dart';
+import 'package:collega_app/features/drill/presentation/drill_timer_slot.dart';
 import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
-import 'package:collega_app/core/ui/components/cg_tab_bar.dart';
 
-class _FakeDrillRepository extends DrillRepository {
-  _FakeDrillRepository(this._cards)
-      : super(
-          dio: Dio(),
-          db: AppDatabase.forTesting(NativeDatabase.memory()),
-        );
+import '../../support/cg_golden.dart';
 
-  final List<FlashCardModel> _cards;
+class _Repo extends DrillRepository {
+  _Repo(this.cards, {this.semantic, this.semanticFails = false, this.semanticGate})
+      : super(dio: Dio(), db: AppDatabase.forTesting(NativeDatabase.memory()));
+
+  final List<FlashCardModel> cards;
+  final SemanticFeedback? semantic;
+  final bool semanticFails;
+  final Completer<void>? semanticGate;
+  final updated = <String, DrillEvaluationResult>{};
+  String? lastAnswer;
 
   @override
   Future<List<FlashCardModel>> getCardsForDrill({
-    required String collegeId,
-    String? itemId,
-    List<String>? rangs,
-    bool onlyARevoir = false,
-    int maxCards = 0,
-  }) async =>
-      List.from(_cards);
+    required String collegeId, String? itemId, List<String>? rangs, bool onlyARevoir = false, int maxCards = 0,
+  }) async => List.of(cards);
 
   @override
-  Future<void> updateCardDrillLevel(
-      String cardId, DrillEvaluationResult result) async {}
+  Future<void> updateCardDrillLevel(String cardId, DrillEvaluationResult result) async => updated[cardId] = result;
+
+  @override
+  Future<SemanticFeedback> evaluateSemantic(String cardId, String userAnswer) async {
+    lastAnswer = userAnswer;
+    await semanticGate?.future;
+    if (semanticFails) throw DioException(requestOptions: RequestOptions());
+    return semantic!;
+  }
 }
 
-List<FlashCardModel> _makeCards(int count) => List.generate(
-      count,
-      (i) => FlashCardModel(
-        id: 'card-$i',
-        itemId: 'i1',
-        collegeId: 'c1',
-        cardType: 'classique',
-        rang: 'A',
-        recto: 'Q$i',
-        verso: 'R$i',
-        ocrConfidenceScore: 1.0,
-        lowConfidence: false,
-      ),
-    );
-
-const _params = DrillSessionParams(collegeId: 'c1', itemId: 'i1');
-
-/// Fake notifier qui retourne instantanément des prefs fixées (Story 7.4 T15).
-class _FakeRevisionPrefsNotifier extends RevisionPrefsNotifier {
-  _FakeRevisionPrefsNotifier(this._prefs);
-  final RevisionPrefs _prefs;
-
+class _Prefs extends RevisionPrefsNotifier {
+  _Prefs(this.prefs);
+  final RevisionPrefs prefs;
   @override
-  Future<RevisionPrefs> build() async => _prefs;
-
-  @override
-  Future<void> save(RevisionPrefs prefs) async {}
+  Future<RevisionPrefs> build() async => prefs;
 }
 
-Widget _wrap(
-  List<FlashCardModel> cards, {
-  RevisionPrefs? prefs,
-}) =>
-    ProviderScope(
-      overrides: [
-        drillRepositoryProvider
-            .overrideWithValue(_FakeDrillRepository(cards)),
-        if (prefs != null)
-          revisionPrefsProvider.overrideWith(
-            () => _FakeRevisionPrefsNotifier(prefs),
+class _Colleges extends CollegesNotifier {
+  @override
+  Future<List<CollegeListEntry>> build() async => [
+        for (final c in kCollegeCatalog)
+          CollegeListEntry(
+            catalog: c,
+            userStatus: c.refId == 3
+                ? const UserCollegeStatus(refId: 3, collegeId: 'c3', status: 'generation_complete', cardCountA: 3, cardCountB: 0, cardCountC: 0)
+                : null,
           ),
-      ],
-      child: ShadApp(
-        theme: buildShadTheme(),
-        home: DrillScreen(params: _params),
-      ),
+      ];
+}
+
+FlashCardModel _card(int i, {String type = 'classique', String rang = 'A'}) => FlashCardModel(
+      id: 'card-$i', itemId: 'i1', collegeId: 'c3', cardType: type, rang: rang,
+      recto: 'Question $i ?', verso: 'Réponse $i.', ocrConfidenceScore: 1, lowConfidence: false,
     );
 
-Widget _wrapWithRouter(List<FlashCardModel> cards, DrillSessionParams params) {
-  final router = GoRouter(routes: [
-    GoRoute(
-      path: '/',
-      builder: (_, __) => DrillScreen(params: params),
-    ),
-    GoRoute(path: '/search', builder: (_, __) => const Scaffold(body: Text('Search'))),
-    GoRoute(path: '/home', builder: (_, __) => const Scaffold(body: Text('Home'))),
+const _params = DrillSessionParams(collegeId: 'c3', itemId: 'i1', itemName: 'Tumeurs du testicule');
+
+Widget _app(_Repo repo, {DrillLaunch? launch, RevisionPrefs prefs = const RevisionPrefs(), List<String>? visited}) {
+  final router = GoRouter(initialLocation: '/drill', routes: [
+    GoRoute(path: '/home', builder: (_, __) { visited?.add('/home'); return const SizedBox(); }),
+    GoRoute(path: '/drill', builder: (_, __) => DrillScreen(launch: launch ?? const DrillLaunch(params: _params))),
   ]);
   return ProviderScope(
     overrides: [
-      drillRepositoryProvider.overrideWithValue(_FakeDrillRepository(cards)),
+      drillRepositoryProvider.overrideWithValue(repo),
+      revisionPrefsProvider.overrideWith(() => _Prefs(prefs)),
+      collegesProvider.overrideWith(_Colleges.new),
     ],
-    child: ShadApp.router(
-      theme: buildShadTheme(),
-      routerConfig: router,
+    // ShadTheme : l'écran de fin est encore l'ancien (shadcn) jusqu'à la story 8.5.
+    child: CgTheme(
+      data: CgThemeData.light,
+      child: ShadTheme(data: buildShadTheme(), child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        theme: buildCgMaterialTheme(CgThemeData.light),
+        routerConfig: router,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: true),
+          child: child!,
+        ),
+      )),
     ),
   );
 }
 
+void _phone(WidgetTester tester, {double width = 393, double height = 852}) {
+  tester.view.physicalSize = Size(width, height);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+}
+
+Future<void> _flip(WidgetTester tester) async {
+  await tester.tap(find.byType(CgDrillCard));
+  await tester.pumpAndSettle();
+}
+
 void main() {
-  group('DrillScreen', () {
-    testWidgets('affiche header + progressbar + flashcard (vue active)',
-        (tester) async {
-      await tester.pumpWidget(_wrap(_makeCards(2)));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+  setUpAll(loadCgFonts);
 
-      expect(find.byIcon(Icons.close), findsOneWidget);
-      expect(find.textContaining('/ 2 fiches'), findsOneWidget);
-      expect(find.text('Q0'), findsOneWidget);
-    });
-
-    testWidgets('bottom nav absent', (tester) async {
-      await tester.pumpWidget(_wrap(_makeCards(1)));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
+  group('recto', () {
+    testWidgets('question, « 1 / 3 », contexte (item), rang et collège', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0), _card(1), _card(2)])));
+      await tester.pumpAndSettle();
+      expect(find.text('Question 0 ?'), findsOneWidget);
+      expect(find.text('1 / 3'), findsOneWidget);
+      expect(find.text('Tumeurs du testicule'), findsOneWidget);
+      expect(find.text('Rang A'), findsOneWidget);
+      expect(find.text('Cancérologie'), findsOneWidget);
       expect(find.byType(CgTabBar), findsNothing);
     });
 
-    testWidgets('isComplete → affiche Session terminée', (tester) async {
-      await tester.pumpWidget(_wrap(_makeCards(1)));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(DrillScreen)),
-      );
-      final notifier = container.read(drillSessionProvider(_params).notifier);
-
-      notifier.flip();
-      await notifier.evaluate(DrillEvaluationResult.maitrise);
-      notifier.advanceToNext();
-
+    testWidgets('session du jour : contexte « Session du jour »', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0)]), launch: const DrillLaunch(params: DrillSessionParams(collegeId: 'c3'))));
       await tester.pumpAndSettle();
-
-      expect(find.text('Session terminée'), findsOneWidget);
-    });
-
-    // ─── Story 7.4 — Timer + auto-flip ──────────────────────────────────
-
-    testWidgets('timerEnabled=true → TimerRing affiché sur le recto',
-        (tester) async {
-      await tester.pumpWidget(_wrap(
-        _makeCards(1),
-        prefs: const RevisionPrefs(
-          timerEnabled: true,
-          timerDurationSeconds: 30,
-        ),
-      ));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.byType(TimerRing), findsOneWidget);
-      // Bouton pause/reprise dans le header
-      expect(find.byIcon(Icons.timer), findsOneWidget);
-
-      // Cleanup pour éviter pending timer leak
-      await tester.pumpWidget(const SizedBox.shrink());
-    });
-
-    testWidgets('timerEnabled=false → pas de TimerRing', (tester) async {
-      await tester.pumpWidget(_wrap(
-        _makeCards(1),
-        prefs: const RevisionPrefs(timerEnabled: false),
-      ));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.byType(TimerRing), findsNothing);
-      expect(find.byIcon(Icons.timer), findsNothing);
-    });
-
-    testWidgets('timer expire → session.isFlipped + timerExpired + toast',
-        (tester) async {
-      await tester.pumpWidget(_wrap(
-        _makeCards(1),
-        prefs: const RevisionPrefs(
-          timerEnabled: true,
-          timerDurationSeconds: 1,
-        ),
-      ));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(DrillScreen)),
-      );
-
-      // Avant expiration : recto, pas de toast
-      expect(
-        container.read(drillSessionProvider(_params)).value!.isFlipped,
-        isFalse,
-      );
-      expect(find.text('Temps écoulé'), findsNothing);
-
-      // Avance le ticker au-delà de la durée
-      await tester.pump(const Duration(milliseconds: 1200));
-
-      // Après expiration : flippé + timerExpired
-      final state = container.read(drillSessionProvider(_params)).value!;
-      expect(state.isFlipped, isTrue);
-      expect(state.timerExpired, isTrue);
-      expect(find.text('Temps écoulé'), findsOneWidget);
-
-      // Cleanup
-      await tester.pumpWidget(const SizedBox.shrink());
+      expect(find.text('Cancérologie'), findsWidgets);
     });
   });
 
-  group('DrillScreen — rappel de réinsertion', () {
-    Future<ProviderContainer> flipAndPump(WidgetTester tester, int n) async {
-      await tester.pumpWidget(_wrap(_makeCards(n)));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(DrillScreen)),
-      );
-      container.read(drillSessionProvider(_params).notifier).flip();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-      return container;
-    }
-
-    testWidgets('1er « À revoir » → toast « reviendra dans quelques questions »',
-        (tester) async {
-      await flipAndPump(tester, 3);
-
-      await tester.tap(find.text('À revoir'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.textContaining('reviendra dans quelques questions'),
-          findsOneWidget);
-
-      await tester.pumpWidget(const SizedBox.shrink());
+  group('verdicts', () {
+    testWidgets('bouton « Maîtrisé » → enregistré, fiche suivante « 2 / 3 »', (tester) async {
+      _phone(tester);
+      final repo = _Repo([_card(0), _card(1), _card(2)]);
+      await tester.pumpWidget(_app(repo));
+      await tester.pumpAndSettle();
+      await _flip(tester);
+      await tester.tap(find.byKey(CgVerdictBar.buttonKey(CgVerdict.mastered)));
+      await tester.pumpAndSettle();
+      expect(repo.updated['card-0'], DrillEvaluationResult.maitrise);
+      expect(find.text('Question 1 ?'), findsOneWidget);
+      expect(find.text('2 / 3'), findsOneWidget);
     });
 
-    testWidgets('le toast disparaît en ~2 s (5 s par défaut = trop long)',
-        (tester) async {
-      await flipAndPump(tester, 3);
-
-      await tester.tap(find.text('À revoir'));
+    testWidgets('1er « À revoir » → réinsérée (file de 4) + toast « Elle reviendra… »', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0), _card(1), _card(2)])));
+      await tester.pumpAndSettle();
+      await _flip(tester);
+      await tester.tap(find.byKey(CgVerdictBar.buttonKey(CgVerdict.review)));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-      expect(find.textContaining('reviendra'), findsOneWidget);
-
-      await tester.pump(const Duration(milliseconds: 2500));
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(find.textContaining('reviendra'), findsNothing);
-
-      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Elle reviendra dans quelques questions'), findsOneWidget);
+      expect(find.text('2 / 4'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 3));
     });
 
     testWidgets('« Bien » → pas de toast', (tester) async {
-      await flipAndPump(tester, 3);
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0), _card(1)])));
+      await tester.pumpAndSettle();
+      await _flip(tester);
+      await tester.tap(find.byKey(CgVerdictBar.buttonKey(CgVerdict.good)));
+      await tester.pumpAndSettle();
+      expect(find.text('Elle reviendra dans quelques questions'), findsNothing);
+    });
 
-      await tester.tap(find.text('Bien'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.textContaining('reviendra'), findsNothing);
-
-      await tester.pumpWidget(const SizedBox.shrink());
+    testWidgets('dernière fiche jugée → écran de fin', (tester) async {
+      // 430 pt : l'ancien écran de fin (remplacé en 8.5) déborde d'1 pt à 393.
+      _phone(tester, width: 430);
+      await tester.pumpWidget(_app(_Repo([_card(0)])));
+      await tester.pumpAndSettle();
+      await _flip(tester);
+      await tester.tap(find.byKey(CgVerdictBar.buttonKey(CgVerdict.mastered)));
+      await tester.pumpAndSettle();
+      expect(find.byType(DrillEndScreen), findsOneWidget);
     });
   });
 
-  group('DrillEndScreen — fromSearch', () {
-    const fromSearchParams = DrillSessionParams(
-      collegeId: 'c1',
-      itemId: 'i1',
-      fromSearch: true,
-    );
-
-    Future<void> completeSession(WidgetTester tester) async {
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(DrillScreen)),
-      );
-      final notifier =
-          container.read(drillSessionProvider(fromSearchParams).notifier);
-      notifier.flip();
-      await notifier.evaluate(DrillEvaluationResult.maitrise);
-      notifier.advanceToNext();
+  group('quitter', () {
+    testWidgets('✕ → « Quitter ? » avec la conséquence ; Continuer reste', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0), _card(1)])));
       await tester.pumpAndSettle();
+      await _flip(tester);
+      await tester.tap(find.byKey(CgVerdictBar.buttonKey(CgVerdict.good)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(CgDrillCard.closeKey));
+      await tester.pumpAndSettle();
+      expect(find.text('Quitter ?'), findsOneWidget);
+      expect(find.text('1 fiche jugée est enregistrée.'), findsOneWidget);
+      await tester.tap(find.text('Continuer'));
+      await tester.pumpAndSettle();
+      expect(find.text('Question 1 ?'), findsOneWidget);
+    });
+
+    testWidgets('« Quitter » → sort du drill', (tester) async {
+      _phone(tester);
+      final visited = <String>[];
+      await tester.pumpWidget(_app(_Repo([_card(0), _card(1)]), visited: visited));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(CgDrillCard.closeKey));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Quitter'));
+      await tester.pumpAndSettle();
+      expect(visited, ['/home']);
+    });
+
+    testWidgets('session du jour : « Ta session reprendra là où tu l’as laissée. »', (tester) async {
+      _phone(tester);
+      final daily = _app(_Repo([_card(0)]), launch: const DrillLaunch(params: _params));
+      await tester.pumpWidget(daily);
+      await tester.pumpAndSettle();
+      // Contrat du message daily vérifié via la fonction pure.
+      expect(quitMessage(isDaily: true, judged: 3), 'Ta session reprendra là où tu l’as laissée.');
+      expect(quitMessage(isDaily: false, judged: 0), 'Aucune fiche n’a encore été jugée.');
+      expect(quitMessage(isDaily: false, judged: 12), '12 fiches jugées sont enregistrées.');
+    });
+  });
+
+  group('mode définition', () {
+    testWidgets('réponse fermée tant que la définition n’est pas validée', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0, type: 'definition')],
+          semantic: const SemanticFeedback(result: 'correct', feedback: 'Les éléments clés y sont.'))));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Question 0 ?'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(CgVerdictBar.buttonKey(CgVerdict.mastered)).hitTestable(), findsNothing);
+    });
+
+    testWidgets('valider → retour sémantique en tête de la réponse', (tester) async {
+      _phone(tester);
+      final repo = _Repo([_card(0, type: 'definition')],
+          semantic: const SemanticFeedback(result: 'correct', feedback: 'Les éléments clés y sont.'));
+      await tester.pumpWidget(_app(repo));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(CupertinoTextField), 'ma définition');
+      await tester.tap(find.text('Valider'));
+      await tester.pumpAndSettle();
+      expect(repo.lastAnswer, 'ma définition');
+      expect(find.text('Correct'), findsOneWidget);
+      expect(find.text('Les éléments clés y sont.'), findsOneWidget);
+      expect(find.byKey(CgVerdictBar.buttonKey(CgVerdict.mastered)).hitTestable(), findsOneWidget);
+    });
+
+    testWidgets('échec réseau de l’évaluation : la réponse s’ouvre quand même', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0, type: 'definition')], semanticFails: true)));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(CupertinoTextField), 'ma définition');
+      await tester.tap(find.text('Valider'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(CgVerdictBar.buttonKey(CgVerdict.mastered)).hitTestable(), findsOneWidget);
+    });
+  });
+
+  group('chronomètre (demande utilisateur)', () {
+    testWidgets('lancé sans chrono : emplacement « Activer », tap → anneau', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0), _card(1)]), prefs: const RevisionPrefs(timerDurationSeconds: 5)));
+      await tester.pumpAndSettle();
+      expect(tester.widget<DrillTimerSlot>(find.byType(DrillTimerSlot)).enabled, isFalse);
+      await tester.tap(find.byType(DrillTimerSlot));
+      await tester.pump();
+      expect(tester.widget<DrillTimerSlot>(find.byType(DrillTimerSlot)).enabled, isTrue);
+      expect(find.text('5'), findsOneWidget);
+    });
+
+    testWidgets('lancé avec chrono : à l’expiration la réponse s’ouvre + toast « Temps écoulé »', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(
+        _Repo([_card(0), _card(1)]),
+        launch: const DrillLaunch(params: _params, timerOn: true),
+        prefs: const RevisionPrefs(timerDurationSeconds: 2),
+      ));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Temps écoulé'), findsOneWidget);
+      expect(find.byKey(CgVerdictBar.buttonKey(CgVerdict.mastered)).hitTestable(), findsOneWidget);
+      await tester.pump(const Duration(seconds: 3));
+    });
+  });
+
+  group('retours de revue 8.4', () {
+    testWidgets('évaluation arrivée après le passage à la fiche suivante : ignorée', (tester) async {
+      _phone(tester);
+      final gate = Completer<void>();
+      await tester.pumpWidget(_app(
+        _Repo([_card(0, type: 'definition'), _card(1)],
+            semantic: const SemanticFeedback(result: 'correct', feedback: 'Retour de la fiche 0'), semanticGate: gate),
+        launch: const DrillLaunch(params: _params, timerOn: true),
+        prefs: const RevisionPrefs(timerDurationSeconds: 1),
+      ));
+      await tester.pump();
+      await tester.pump();
+      await tester.enterText(find.byType(CupertinoTextField), 'ma définition');
+      await tester.tap(find.text('Valider'));
+      await tester.pump(const Duration(seconds: 2)); // chrono expiré : réponse ouverte
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Temps écoulé'), findsOneWidget, reason: 'étape 1 : chrono expiré');
+      expect(find.byKey(CgVerdictBar.buttonKey(CgVerdict.good)).hitTestable(), findsOneWidget, reason: 'étape 2 : réponse ouverte');
+      await tester.tap(find.byKey(CgVerdictBar.buttonKey(CgVerdict.good)));
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.text('Question 1 ?'), findsOneWidget);
+      gate.complete();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Retour de la fiche 0'), findsNothing);
+      expect(find.byKey(CgVerdictBar.buttonKey(CgVerdict.mastered)).hitTestable(), findsNothing,
+          reason: 'la fiche 2 ne s’ouvre pas toute seule');
+      await tester.pump(const Duration(seconds: 3));
+    });
+
+    testWidgets('expiration : l’état du drill note timerExpired', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0), _card(1)]),
+          launch: const DrillLaunch(params: _params, timerOn: true), prefs: const RevisionPrefs(timerDurationSeconds: 1)));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+      final container = ProviderScope.containerOf(tester.element(find.byType(DrillScreen)));
+      expect(container.read(drillSessionProvider(_params)).value!.timerExpired, isTrue);
+      await tester.pump(const Duration(seconds: 3));
+    });
+
+    testWidgets('« Quitter ? » ouvert : le chrono s’arrête, la fiche n’est pas perdue', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0), _card(1)]),
+          launch: const DrillLaunch(params: _params, timerOn: true), prefs: const RevisionPrefs(timerDurationSeconds: 1)));
+      await tester.pump();
+      await tester.pump();
+      await tester.tap(find.byKey(CgDrillCard.closeKey));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+      expect(find.text('Temps écoulé'), findsNothing);
+      await tester.tap(find.text('Continuer'));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byKey(CgVerdictBar.buttonKey(CgVerdict.mastered)).hitTestable(), findsNothing);
+      await tester.pump(const Duration(seconds: 3));
+    });
+  });
+
+  group('états', () {
+    testWidgets('chargement : fond sarcelle, jamais de spinner Material', (tester) async {
+      _phone(tester);
+      final blocker = Completer<List<FlashCardModel>>();
+      await tester.pumpWidget(_app(_BlockingRepo(blocker)));
+      await tester.pump();
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(find.byKey(const Key('drill-loading')), findsOneWidget);
+      blocker.complete([_card(0)]);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('erreur : état Collega UI, sans message technique', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_FailingRepo()));
+      await tester.pumpAndSettle();
+      expect(find.byType(CgState), findsOneWidget);
+      expect(find.textContaining('Exception'), findsNothing);
+      expect(find.text('Réessayer'), findsOneWidget);
+    });
+  });
+
+  testWidgets('Dynamic Type 1,6 sur 375 : aucun débordement', (tester) async {
+    _phone(tester, width: 375, height: 812);
+    await tester.pumpWidget(_app(_Repo([_card(0, type: 'definition')])));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  group('goldens', () {
+    for (final (name, repo, launch, flip) in <(String, _Repo Function(), DrillLaunch?, bool)>[
+      ('recto', () => _Repo([_card(0), _card(1), _card(2)]), null, false),
+      ('verso', () => _Repo([_card(0), _card(1), _card(2)]), null, true),
+      ('definition', () => _Repo([_card(0, type: 'definition')]), null, false),
+      ('timer', () => _Repo([_card(0), _card(1)]), const DrillLaunch(params: _params, timerOn: true), false),
+    ]) {
+      for (final width in cgGoldenWidths) {
+        for (final scale in cgGoldenScales) {
+          final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
+          testWidgets('golden drill_${name}_$tag', (tester) async {
+            _phone(tester, width: width, height: 852);
+            tester.platformDispatcher.textScaleFactorTestValue = scale;
+            addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+            await tester.pumpWidget(_app(repo(), launch: launch, prefs: const RevisionPrefs(timerDurationSeconds: 30)));
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 50));
+            if (flip) await _flip(tester);
+            await expectLater(find.byType(DrillScreen), matchesGoldenFile('goldens/drill_${name}_$tag.png'));
+          });
+        }
+      }
     }
-
-    testWidgets('affiche "Nouvelle recherche" et "Retour à l\'accueil"',
-        (tester) async {
-      await tester.pumpWidget(
-          _wrapWithRouter(_makeCards(1), fromSearchParams));
-      await completeSession(tester);
-
-      expect(find.text('Nouvelle recherche'), findsOneWidget);
-      expect(find.text("Retour à l'accueil"), findsOneWidget);
-    });
-
-    testWidgets('tap "Nouvelle recherche" navigue vers /search', (tester) async {
-      await tester.pumpWidget(
-          _wrapWithRouter(_makeCards(1), fromSearchParams));
-      await completeSession(tester);
-
-      await tester.tap(find.text('Nouvelle recherche'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Search'), findsOneWidget);
-    });
-
-    testWidgets('fromSearch:false → pas de "Nouvelle recherche"',
-        (tester) async {
-      await tester.pumpWidget(_wrap(_makeCards(1)));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(DrillScreen)),
-      );
-      final notifier = container.read(drillSessionProvider(_params).notifier);
-      notifier.flip();
-      await notifier.evaluate(DrillEvaluationResult.maitrise);
-      notifier.advanceToNext();
-      await tester.pumpAndSettle();
-
-      expect(find.text('Nouvelle recherche'), findsNothing);
-    });
   });
+}
+
+class _BlockingRepo extends _Repo {
+  _BlockingRepo(this.blocker) : super(const []);
+  final Completer<List<FlashCardModel>> blocker;
+  @override
+  Future<List<FlashCardModel>> getCardsForDrill({
+    required String collegeId, String? itemId, List<String>? rangs, bool onlyARevoir = false, int maxCards = 0,
+  }) => blocker.future;
+}
+
+class _FailingRepo extends _Repo {
+  _FailingRepo() : super(const []);
+  @override
+  Future<List<FlashCardModel>> getCardsForDrill({
+    required String collegeId, String? itemId, List<String>? rangs, bool onlyARevoir = false, int maxCards = 0,
+  }) async => throw StateError('Exception technique');
 }

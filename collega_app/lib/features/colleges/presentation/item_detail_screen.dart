@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import 'package:go_router/go_router.dart';
 
 import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/core/utils/logger.dart';
@@ -14,6 +13,7 @@ import 'package:collega_app/features/colleges/domain/college_detail_models.dart'
 import 'package:collega_app/features/colleges/domain/item_title.dart';
 import 'package:collega_app/features/colleges/presentation/widgets/ocr_confidence_badge.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
+import 'package:collega_app/features/drill/drill_launcher.dart';
 
 class ItemDetailScreen extends ConsumerWidget {
   const ItemDetailScreen({
@@ -437,7 +437,7 @@ class _FlashcardStrip extends StatelessWidget {
   }
 }
 
-class DrillLaunchBar extends StatelessWidget {
+class DrillLaunchBar extends ConsumerWidget {
   const DrillLaunchBar({
     super.key,
     required this.cardCount,
@@ -452,7 +452,7 @@ class DrillLaunchBar extends StatelessWidget {
   final String? itemName;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       padding: const EdgeInsets.fromLTRB(
@@ -464,16 +464,13 @@ class DrillLaunchBar extends StatelessWidget {
       child: ShadButton(
         onPressed: cardCount == 0
             ? null
-            : () => context.push(
-                  '/drill',
-                  extra: DrillSessionParams(
+            : () => launchDrill(context, ref, DrillSessionParams(
                     collegeId: collegeId,
                     itemId: itemId,
                     itemName: itemName,
-                  ),
-                ),
+                  )),
         width: double.infinity,
-        child: Text('Lancer le drill · $cardCount fiches'),
+        child: Text('Réviser cet item · $cardCount fiches'),
       ),
     );
   }

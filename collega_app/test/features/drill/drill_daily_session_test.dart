@@ -133,4 +133,27 @@ void main() {
       expect(requeued, isFalse);
     });
   });
+
+  test('« refaire les à revoir » après la fin : la file du jour enregistrée n’est pas écrasée (revue 8.4)', () async {
+    final repo = DailySessionRepository(db);
+    await repo.getOrBuild(day: today, budget: 10);
+    final params = DrillSessionParams.daily(today);
+    await container.read(drillSessionProvider(params).future);
+    final notifier = container.read(drillSessionProvider(params).notifier);
+    for (final r in [DrillEvaluationResult.aRevoir, DrillEvaluationResult.bien, DrillEvaluationResult.bien,
+                     DrillEvaluationResult.aRevoir]) {
+      await notifier.evaluate(r);
+      notifier.advanceToNext();
+    }
+    await pumpEventQueue();
+    final saved = await repo.find(today);
+    expect(saved!.isCompleted, isTrue);
+    notifier.restartWithErrors();
+    await notifier.evaluate(DrillEvaluationResult.maitrise);
+    notifier.advanceToNext();
+    await pumpEventQueue();
+    final after = await repo.find(today);
+    expect(after!.cardIds, saved.cardIds);
+    expect(after.position, saved.position);
+  });
 }

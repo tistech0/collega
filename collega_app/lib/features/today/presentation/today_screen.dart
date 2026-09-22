@@ -7,6 +7,7 @@ import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/core/utils/epoch_day.dart';
 import 'package:collega_app/core/utils/fr_dates.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
+import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/shell/tab_reselect.dart';
 import 'package:collega_app/features/today/domain/daily_session_builder.dart';
 import 'package:collega_app/features/today/presentation/today_customize_sheet.dart';
@@ -71,7 +72,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
   }
 
   Future<void> _start(TodayReady state) async {
-    await context.push('/drill', extra: DrillSessionParams.daily(state.session.day));
+    await launchDrill(context, ref, DrillSessionParams.daily(state.session.day));
     // Au retour : progression, semaine et collèges ont pu changer.
     if (mounted) ref.invalidate(todayProvider);
   }

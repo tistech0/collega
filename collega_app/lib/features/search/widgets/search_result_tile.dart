@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -6,9 +7,10 @@ import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/item_title.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
+import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/search/domain/search_result.dart';
 
-class SearchResultTile extends StatelessWidget {
+class SearchResultTile extends ConsumerWidget {
   const SearchResultTile({super.key, required this.result});
   final SearchResult result;
 
@@ -33,7 +35,7 @@ class SearchResultTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final Widget card = Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -81,16 +83,13 @@ class SearchResultTile extends StatelessWidget {
               const SizedBox(height: 12),
               ShadButton(
                 size: ShadButtonSize.sm,
-                onPressed: () => context.push(
-                  '/drill',
-                  extra: DrillSessionParams(
+                onPressed: () => launchDrill(context, ref, DrillSessionParams(
                     collegeId: result.collegeId,
                     itemId: result.itemId,
                     itemName: 'Item ${result.itemNumber} · $_collegeName',
                     rangs: const ['A'],
                     fromSearch: true,
-                  ),
-                ),
+                  )),
                 child: const Text("Réviser l'item"),
               ),
             ],

@@ -11,6 +11,8 @@ import 'package:collega_app/features/colleges/domain/drill_stats.dart';
 import 'package:collega_app/features/today/data/daily_session_repository.dart';
 import 'package:collega_app/features/today/presentation/today_screen.dart';
 import 'package:collega_app/features/today/today_providers.dart';
+import 'package:collega_app/features/profile/domain/revision_prefs.dart';
+import 'package:collega_app/features/profile/profile_providers.dart';
 
 import '../../support/cg_golden.dart';
 
@@ -59,6 +61,11 @@ TodayReady _ready({
       planningDays: planningDay == null ? null : 30,
     );
 
+class _Prefs extends RevisionPrefsNotifier {
+  @override
+  Future<RevisionPrefs> build() async => const RevisionPrefs();
+}
+
 class _Fixed extends TodayNotifier {
   _Fixed(this.value);
   final TodayState value;
@@ -96,7 +103,10 @@ Widget _app(TodayNotifier Function() notifier, {List<String>? visited, double te
     GoRoute(path: '/search', builder: (_, __) { visited?.add('/search'); return const SizedBox(); }),
   ]);
   return ProviderScope(
-    overrides: [todayProvider.overrideWith(notifier)],
+    overrides: [
+      todayProvider.overrideWith(notifier),
+      revisionPrefsProvider.overrideWith(_Prefs.new),
+    ],
     child: CgTheme(
       data: CgThemeData.light,
       child: WidgetsApp.router(

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:collega_app/core/theme/app_theme.dart';
+import 'package:collega_app/features/profile/domain/revision_prefs.dart';
+import 'package:collega_app/features/profile/profile_providers.dart';
 import 'package:collega_app/features/search/domain/search_result.dart';
 import 'package:collega_app/features/search/widgets/search_result_tile.dart';
 
@@ -28,6 +30,11 @@ SearchResult _makeResult({
   );
 }
 
+class _Prefs extends RevisionPrefsNotifier {
+  @override
+  Future<RevisionPrefs> build() async => const RevisionPrefs();
+}
+
 Widget _wrap(Widget child) {
   final router = GoRouter(routes: [
     GoRoute(path: '/', builder: (_, __) => Scaffold(body: child)),
@@ -42,6 +49,7 @@ Widget _wrap(Widget child) {
         builder: (_, __) => const Scaffold(body: Text('Search'))),
   ]);
   return ProviderScope(
+    overrides: [revisionPrefsProvider.overrideWith(_Prefs.new)],
     child: ShadApp.router(
       theme: buildShadTheme(),
       routerConfig: router,

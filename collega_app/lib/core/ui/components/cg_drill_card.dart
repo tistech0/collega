@@ -57,6 +57,7 @@ class CgDrillCard extends StatefulWidget {
     this.canFlip = true,
     this.onFlip,
     this.cardKey,
+    this.trailing,
     this.initiallyFlipped = false,
     this.debugDragOffset,
   });
@@ -97,6 +98,9 @@ class CgDrillCard extends StatefulWidget {
   /// change, la carte repart au recto — même si la question est identique (fiche
   /// « à revoir » réinsérée juste derrière elle-même, nouvel essai).
   final Object? cardKey;
+
+  /// Emplacement droit de l'en-tête (44 pt), en miroir du ✕ : chronomètre (8.4).
+  final Widget? trailing;
 
   /// Ouvre directement au verso, sans animation (reprise, planches).
   final bool initiallyFlipped;
@@ -301,6 +305,10 @@ class CgDrillCardState extends State<CgDrillCard> with TickerProviderStateMixin 
       _open = true;
       _settle.stop();
       _offset = Offset.zero;
+      // Un doigt posé sur le recto (glissé en cours) ne jugera pas la réponse
+      // ouverte sous lui (chrono expiré, définition validée) : il doit se relever.
+      _pointer = null;
+      _axis = null;
     });
     if (_questionScroll.hasClients) _questionScroll.jumpTo(0);
     _flip.forward();
@@ -486,10 +494,12 @@ class CgDrillCardState extends State<CgDrillCard> with TickerProviderStateMixin 
   Widget build(BuildContext context) {
     final c = CgTheme.of(context).colors;
     final padding = MediaQuery.paddingOf(context);
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     return LayoutBuilder(builder: (context, box) {
       _size = box.biggest;
       final sheetTop = box.maxHeight * _sheetTopFraction;
-      final frontBottom = padding.bottom + CgSpace.s5;
+      // Clavier ouvert (mode définition) : le recto remonte au-dessus de lui.
+      final frontBottom = math.max(padding.bottom + CgSpace.s5, keyboard + CgSpace.s3);
       // Au verso, la zone de la question s'arrête au-dessus de la feuille.
       final bannerInset = math.max(0.0, box.maxHeight - frontBottom - sheetTop + CgSpace.s3);
       return Listener(
@@ -594,7 +604,7 @@ class CgDrillCardState extends State<CgDrillCard> with TickerProviderStateMixin 
             ]),
           ),
         ),
-        const SizedBox(width: CgSpace.tapTarget),
+        SizedBox.square(dimension: CgSpace.tapTarget, child: Center(child: widget.trailing)),
       ]),
     );
   }

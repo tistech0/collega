@@ -1,23 +1,29 @@
 import 'package:flutter/foundation.dart';
 
+/// Chronomètre par fiche : jamais, toujours, ou choisi au lancement de chaque session.
+enum TimerMode { off, on, ask }
+
 @immutable
 class RevisionPrefs {
   const RevisionPrefs({
     this.defaultRangs,
     this.defaultMaxCards = 0,
-    this.timerEnabled = false,
+    this.timerMode = TimerMode.off,
     this.timerDurationSeconds = 30,
   });
 
   final List<String>? defaultRangs;
   final int defaultMaxCards;
-  final bool timerEnabled;
+  final TimerMode timerMode;
   final int timerDurationSeconds;
+
+  /// Chrono actif d'office (le mode « demander » laisse la session décider).
+  bool get timerEnabled => timerMode == TimerMode.on;
 
   RevisionPrefs copyWith({
     Object? defaultRangs = _absent,
     int? defaultMaxCards,
-    bool? timerEnabled,
+    TimerMode? timerMode,
     int? timerDurationSeconds,
   }) {
     return RevisionPrefs(
@@ -25,7 +31,7 @@ class RevisionPrefs {
           ? this.defaultRangs
           : defaultRangs as List<String>?,
       defaultMaxCards: defaultMaxCards ?? this.defaultMaxCards,
-      timerEnabled: timerEnabled ?? this.timerEnabled,
+      timerMode: timerMode ?? this.timerMode,
       timerDurationSeconds: timerDurationSeconds ?? this.timerDurationSeconds,
     );
   }
