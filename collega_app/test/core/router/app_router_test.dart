@@ -14,8 +14,10 @@ import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/data/colleges_repository.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/demo/presentation/demo_screen.dart';
-import 'package:collega_app/features/home/home_providers.dart';
-import 'package:collega_app/features/home/presentation/home_screen.dart';
+import 'package:collega_app/core/ui/components/cg_state.dart';
+import 'package:collega_app/core/ui/components/cg_tab_bar.dart';
+import 'package:collega_app/features/today/presentation/today_screen.dart';
+import 'package:collega_app/features/today/today_providers.dart';
 
 class _FakeAuthNotifier extends AuthNotifier {
   _FakeAuthNotifier(this._authState);
@@ -25,12 +27,9 @@ class _FakeAuthNotifier extends AuthNotifier {
   Future<AuthState> build() async => _authState;
 }
 
-class _FakeHomeNotifier extends HomeNotifier {
-  _FakeHomeNotifier(this._fixedState);
-  final HomeState _fixedState;
-
+class _FakeTodayNotifier extends TodayNotifier {
   @override
-  Future<HomeState> build() async => _fixedState;
+  Future<TodayState> build() async => const TodayNoCollege();
 }
 
 class _FakeCollegesRepository extends CollegesRepository {
@@ -51,7 +50,7 @@ Widget _buildApp(AuthState authState, AppDatabase db) {
   return ProviderScope(
     overrides: [
       authProvider.overrideWith(() => _FakeAuthNotifier(authState)),
-      homeProvider.overrideWith(() => _FakeHomeNotifier(const HomeEmpty())),
+      todayProvider.overrideWith(_FakeTodayNotifier.new),
       collegesRepositoryProvider
           .overrideWithValue(_FakeCollegesRepository()),
       databaseProvider.overrideWithValue(db),
@@ -67,7 +66,7 @@ Widget _buildApp(AuthState authState, AppDatabase db) {
 
 void main() {
   group('AppRouter — Story 7.1 R3 (redirect /demo si authentifié)', () {
-    testWidgets('AC3: user authentifié sur /demo → HomeScreen rendu',
+    testWidgets('AC3: user authentifié sur /demo → Aujourd’hui rendu',
         (tester) async {
       final db = AppDatabase.forTesting(NativeDatabase.memory());
       addTearDown(db.close);
@@ -79,8 +78,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      // AC3 : HomeScreen rendu (les providers Home sont mockés).
-      expect(find.byType(HomeScreen), findsOneWidget);
+      // AC3 : Aujourd'hui rendu (provider mocké).
+      expect(find.byType(TodayScreen), findsOneWidget);
       // AC4 : DemoScreen ne doit jamais avoir été monté (pas de flash).
       expect(find.byType(DemoScreen), findsNothing);
     });
@@ -96,7 +95,53 @@ void main() {
 
       // Pas de redirect → DemoScreen affiché.
       expect(find.byType(DemoScreen), findsOneWidget);
-      expect(find.byType(HomeScreen), findsNothing);
+      expect(find.byType(TodayScreen), findsNothing);
+    });
+  });
+
+  group('Story 8.3 — shell 4 onglets', () {
+    Future<void> signedIn(WidgetTester tester) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      tester.view.physicalSize = const Size(393, 852);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(_buildApp(AuthState(user: _authedUser), db));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    testWidgets('tab bar : Aujourd’hui · Bibliothèque · Progression · Profil (pas de Recherche)', (tester) async {
+      await signedIn(tester);
+      expect(find.byType(CgTabBar), findsOneWidget);
+      for (final label in ['Aujourd’hui', 'Bibliothèque', 'Progression', 'Profil']) {
+        expect(find.descendant(of: find.byType(CgTabBar), matching: find.text(label)), findsOneWidget, reason: label);
+      }
+      expect(find.descendant(of: find.byType(CgTabBar), matching: find.text('Recherche')), findsNothing);
+    });
+
+    testWidgets('onglet Progression : état vide en attendant la story 8.8', (tester) async {
+      await signedIn(tester);
+      await tester.tap(find.descendant(of: find.byType(CgTabBar), matching: find.text('Progression')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(CgState), findsOneWidget);
+      expect(find.text('Ta première session remplira cette page'), findsOneWidget);
+    });
+
+    testWidgets('/progress protégé : non connecté → démo', (tester) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      await tester.pumpWidget(_buildApp(const AuthState(), db));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      final container = ProviderScope.containerOf(tester.element(find.byType(DemoScreen)));
+      container.read(routerProvider).go('/progress');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(DemoScreen), findsOneWidget);
+      expect(find.text('Progression'), findsNothing);
     });
   });
 }

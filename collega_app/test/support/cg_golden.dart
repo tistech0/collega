@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:collega_app/core/ui/theme/cg_theme.dart';
 import 'package:collega_app/core/ui/tokens/cg_type.dart';
 
+export 'cg_fonts.dart';
 import 'cg_fonts.dart';
 
 /// Largeurs iPhone du spec (SE/mini · 15/16 · Pro Max) et échelles de texte (1,0 / 1,6).

@@ -8,6 +8,7 @@ import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/drill/data/drill_repository.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/domain/drill_state.dart';
+import 'package:collega_app/features/today/data/daily_session_repository.dart';
 
 final drillRepositoryProvider = Provider<DrillRepository>(
   (ref) => DrillRepository(
@@ -26,6 +27,7 @@ class DrillSessionNotifier
   @override
   Future<DrillSessionState> build(DrillSessionParams arg) async {
     final repo = ref.read(drillRepositoryProvider);
+    if (arg.isDailySession) return _buildDaily(repo, arg.dailySessionDay!);
     final cards = await repo.getCardsForDrill(
       collegeId: arg.collegeId,
       itemId: arg.itemId,
@@ -38,6 +40,65 @@ class DrillSessionNotifier
     }
     final queue = List.generate(cards.length, (i) => i);
     return DrillSessionState(cards: cards, queue: queue);
+  }
+
+  /// Session du jour : file figée (réinsertions comprises) reprise à sa position.
+  Future<DrillSessionState> _buildDaily(DrillRepository repo, int day) async {
+    final session = await DailySessionRepository(ref.read(databaseProvider)).find(day);
+    if (session == null || session.cardIds.isEmpty) {
+      return const DrillSessionState(cards: [], queue: [], isComplete: true);
+    }
+    final unique = <String>[];
+    for (final id in session.cardIds) {
+      if (!unique.contains(id)) unique.add(id);
+    }
+    final cards = await repo.getCardsByIds(unique);
+    final indexOf = {for (var i = 0; i < cards.length; i++) cards[i].id: i};
+    // Une fiche supprimée depuis (régénération) sort simplement de la file.
+    final queue = [for (final id in session.cardIds) if (indexOf[id] != null) indexOf[id]!];
+    final position = session.position.clamp(0, queue.length);
+    // Une fiche présente deux fois dans la file a déjà été réinsérée : la règle
+    // « une seule réinsertion » tient aussi après une reprise.
+    final seen = <String>{};
+    final requeued = <String, DrillEvaluationResult>{
+      for (final id in session.cardIds)
+        if (!seen.add(id)) id: DrillEvaluationResult.aRevoir,
+    };
+    return DrillSessionState(
+      cards: cards,
+      queue: queue,
+      currentQueuePos: position,
+      evaluatedCount: position,
+      evaluations: requeued,
+      isComplete: queue.isEmpty || position >= queue.length,
+    );
+  }
+
+  // — Session du jour : persistance (story 8.3) —
+
+  DailySessionRepository get _daily => DailySessionRepository(ref.read(databaseProvider));
+
+  static const _levelOf = {
+    DrillEvaluationResult.aRevoir: 'a_revoir',
+    DrillEvaluationResult.bien: 'bien',
+    DrillEvaluationResult.maitrise: 'maitrise',
+  };
+
+  /// File et position enregistrées à chaque fiche ; clôture automatique à la
+  /// dernière (plus de bouton « Session terminée »).
+  Future<void> _persistDaily(DrillSessionState s) async {
+    final day = arg.dailySessionDay!;
+    try {
+      await _daily.saveProgress(
+        day: day,
+        queue: [for (final i in s.queue) s.cards[i].id],
+        position: s.currentQueuePos,
+      );
+      // Aujourd'hui se recalcule au retour du drill (TodayScreen), pas d'ici.
+      if (s.isComplete) await _daily.complete(day);
+    } catch (e) {
+      AppLogger.error('session du jour : enregistrement impossible', tag: 'Drill', error: e);
+    }
   }
 
   void flip() {
@@ -106,6 +167,18 @@ class DrillSessionNotifier
         Map<String, DrillEvaluationResult>.from(s.evaluations)
           ..[card.id] = result;
 
+    if (arg.isDailySession) {
+      unawaited(_daily
+          .recordVerdict(
+            day: arg.dailySessionDay!,
+            cardId: card.id,
+            collegeId: card.collegeId,
+            rang: card.rang,
+            drillLevel: _levelOf[result]!,
+          )
+          .catchError((Object e) => AppLogger.error('recordVerdict failed', error: e)));
+    }
+
     state = AsyncValue.data(s.copyWith(
       queue: newQueue,
       evaluations: newEvals,
@@ -123,7 +196,7 @@ class DrillSessionNotifier
     if (s == null || s.isComplete) return;
     final nextPos = s.currentQueuePos + 1;
     final isComplete = nextPos >= s.queue.length;
-    state = AsyncValue.data(s.copyWith(
+    final next = s.copyWith(
       currentQueuePos: nextPos,
       isFlipped: false,
       exitResult: null,
@@ -131,7 +204,9 @@ class DrillSessionNotifier
       isComplete: isComplete,
       timerExpired: false,
       requeued: false,
-    ));
+    );
+    state = AsyncValue.data(next);
+    if (arg.isDailySession) unawaited(_persistDaily(next));
   }
 
   void restartWithErrors() {

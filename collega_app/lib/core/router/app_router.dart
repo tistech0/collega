@@ -13,14 +13,15 @@ import 'package:collega_app/features/colleges/presentation/import_progress_scree
 import 'package:collega_app/features/colleges/presentation/item_detail_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_drill_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_screen.dart';
-import 'package:collega_app/features/home/presentation/home_screen.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/presentation/drill_screen.dart';
 import 'package:collega_app/features/legal/presentation/legal_screen.dart';
 import 'package:collega_app/features/planning/presentation/planning_config_screen.dart';
 import 'package:collega_app/features/profile/presentation/profile_screen.dart';
 import 'package:collega_app/features/search/presentation/search_screen.dart';
-import 'package:collega_app/shared/widgets/bottom_nav_bar.dart';
+import 'package:collega_app/features/progress/progress_screen.dart';
+import 'package:collega_app/features/shell/app_shell.dart';
+import 'package:collega_app/features/today/presentation/today_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authAsync = ref.watch(authProvider);
@@ -47,6 +48,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isProtected = state.matchedLocation.startsWith('/home') ||
           state.matchedLocation.startsWith('/colleges') ||
           state.matchedLocation.startsWith('/search') ||
+          state.matchedLocation.startsWith('/progress') ||
           state.matchedLocation.startsWith('/profile') ||
           state.matchedLocation.startsWith('/drill') ||
           state.matchedLocation.startsWith('/planning');
@@ -114,10 +116,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
+      // Recherche : hors onglets, plein écran (sheet en story 8.10).
+      GoRoute(path: '/search', builder: (ctx, s) => const SearchScreen()),
       ShellRoute(
-        builder: (context, state, child) => _AppShell(child: child),
+        builder: (context, state, child) => AppShell(location: state.uri.path, child: child),
         routes: [
-          GoRoute(path: '/home', builder: (ctx, s) => const HomeScreen()),
+          GoRoute(path: '/home', builder: (ctx, s) => const TodayScreen()),
+          GoRoute(path: '/progress', builder: (ctx, s) => const ProgressScreen()),
           GoRoute(path: '/colleges', builder: (ctx, s) => const CollegesScreen()),
           GoRoute(
             path: '/colleges/:ref_id',
@@ -132,39 +137,9 @@ final routerProvider = Provider<GoRouter>((ref) {
               itemId: s.pathParameters['item_id']!,
             ),
           ),
-          GoRoute(path: '/search', builder: (ctx, s) => const SearchScreen()),
           GoRoute(path: '/profile', builder: (ctx, s) => const ProfileScreen()),
         ],
       ),
     ],
   );
 });
-
-class _AppShell extends StatelessWidget {
-  const _AppShell({required this.child});
-  final Widget child;
-
-  int _tabIndex(BuildContext context) {
-    final path = GoRouterState.of(context).uri.path;
-    if (path.startsWith('/colleges')) return 1;
-    if (path.startsWith('/search')) return 2;
-    if (path.startsWith('/profile')) return 3;
-    return 0;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _tabIndex(context),
-        onTap: (i) {
-          const paths = ['/home', '/colleges', '/search', '/profile'];
-          context.go(paths[i]);
-        },
-      ),
-    );
-  }
-}
-
-

@@ -123,5 +123,21 @@ void main() {
               tomorrowDate.millisecondsSinceEpoch ~/ 86400000);
       expect(tomorrow, isNotEmpty);
     });
-  });
+  
+    test('décaler deux sessions du même jour : pas de collision d’identifiant (story 8.3)', () async {
+      final db = _makeDb();
+      addTearDown(db.close);
+      final repo = PlanningRepository(db: db);
+      final today = DateTime.now().toUtc();
+      final todayDate = DateTime.utc(today.year, today.month, today.day);
+      await repo.saveSessions([
+        _session(configId: 'cfg1', date: todayDate),
+        _session(id: 's2', configId: 'cfg1', date: todayDate),
+      ]);
+      await repo.postponeSession('s1');
+      await repo.postponeSession('s2');
+      final pending = (await db.select(db.planningSessions).get()).where((s) => s.status == 'pending');
+      expect(pending, hasLength(2));
+    });
+});
 }

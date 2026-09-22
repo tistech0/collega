@@ -148,7 +148,7 @@ development_status:
   8-0-titres-items-referentiel: done                     # [2026-09-22 déployée : migration 015 + rattrapage PDF → 44/44 items titrés en prod ; bugs détection CNEC corrigés (une page/item, sommaire, 313) ; .dockerignore]
   8-1-tokens-theme-fondation: done                       # [2026-09-22 tokens + contraste testé (ink3/rankB/rankC ajustés), police embarquée, CgTheme + Material neutralisé, wordmark SVG, Widgetbook web, goldens 3×2]
   8-2-composants-collega-ui: done                       # [2026-09-22 14 composants + goldens 3×2 + Widgetbook ; 444 tests ; revue adversariale : 9 correctifs (balayage retour iOS = verdict, clavier définition, carte figée, toasts…)]
-  8-3-shell-aujourdhui: in-progress
+  8-3-shell-aujourdhui: review                         # [2026-09-22 implémentée + revue (17 correctifs) + backend déployé ; en attente de validation visuelle iPhone]
   8-4-drill: backlog
   8-5-fin-de-session: backlog
   8-6-bibliotheque: backlog

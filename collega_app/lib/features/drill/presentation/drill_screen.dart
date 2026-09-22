@@ -12,7 +12,6 @@ import 'package:collega_app/features/drill/drill_providers.dart';
 import 'package:collega_app/features/drill/widgets/drill_evaluation_bar.dart';
 import 'package:collega_app/features/drill/widgets/timer_ring.dart';
 import 'package:collega_app/features/generation/widgets/flash_card_widget.dart';
-import 'package:collega_app/features/planning/planning_providers.dart';
 import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
 
@@ -373,8 +372,6 @@ class _DrillEndScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final summary =
         DrillSessionSummary.fromEvaluations(session.evaluations);
-    final planningAsync = ref.watch(planningProvider);
-    final todaySession = planningAsync.valueOrNull?.todaySession;
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.screenMargin),
@@ -427,46 +424,21 @@ class _DrillEndScreen extends ConsumerWidget {
           if (params.fromSearch) ...[
             const SizedBox(height: 8),
             ShadButton(
-              onPressed: () => context.go('/search'),
+              // La recherche est hors onglets : elle remplace le drill et garde un retour.
+              onPressed: () => context.pushReplacement('/search'),
               width: double.infinity,
               child: const Text('Nouvelle recherche'),
             ),
-            if (todaySession != null) ...[
-              const SizedBox(height: 8),
-              ShadButton.outline(
-                onPressed: () async {
-                  await ref
-                      .read(planningProvider.notifier)
-                      .markTodayCompleted();
-                  if (context.mounted) context.go('/home');
-                },
-                width: double.infinity,
-                child: const Text('Session terminée ✓'),
-              ),
-            ],
             const SizedBox(height: 8),
             ShadButton.outline(
-              onPressed: () => context.go('/home'),
+              onPressed: () => _leave(context),
               width: double.infinity,
               child: const Text("Retour à l'accueil"),
             ),
           ] else ...[
-            if (todaySession != null) ...[
-              const SizedBox(height: 8),
-              ShadButton.outline(
-                onPressed: () async {
-                  await ref
-                      .read(planningProvider.notifier)
-                      .markTodayCompleted();
-                  if (context.mounted) context.go('/home');
-                },
-                width: double.infinity,
-                child: const Text('Session terminée ✓'),
-              ),
-            ],
             const SizedBox(height: 8),
             ShadButton.outline(
-              onPressed: () => context.go('/home'),
+              onPressed: () => _leave(context),
               width: double.infinity,
               child: const Text("Retour à l'accueil"),
             ),
@@ -571,5 +543,15 @@ class _StatCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Quitte le drill : retour à l'écran d'origine (Aujourd'hui se recalcule au
+/// retour ; la session du jour est déjà close automatiquement, story 8.3).
+void _leave(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go('/home');
   }
 }

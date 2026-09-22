@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/features/drill/data/drill_repository.dart';
-import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/domain/drill_state.dart';
 
 AppDatabase _makeDb() => AppDatabase.forTesting(NativeDatabase.memory());

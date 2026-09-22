@@ -17,7 +17,7 @@ import 'package:collega_app/features/drill/presentation/drill_screen.dart';
 import 'package:collega_app/features/drill/widgets/timer_ring.dart';
 import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
-import 'package:collega_app/shared/widgets/bottom_nav_bar.dart';
+import 'package:collega_app/core/ui/components/cg_tab_bar.dart';
 
 class _FakeDrillRepository extends DrillRepository {
   _FakeDrillRepository(this._cards)
@@ -129,7 +129,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.byType(BottomNavBar), findsNothing);
+      expect(find.byType(CgTabBar), findsNothing);
     });
 
     testWidgets('isComplete → affiche Session terminée', (tester) async {

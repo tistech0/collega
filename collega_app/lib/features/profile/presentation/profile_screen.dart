@@ -10,7 +10,7 @@ import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 import 'package:collega_app/features/auth/data/revenuecat_service.dart';
 import 'package:collega_app/features/auth/paywall_providers.dart';
-import 'package:collega_app/features/home/home_providers.dart';
+import 'package:collega_app/features/today/today_providers.dart';
 import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
 
@@ -393,8 +393,7 @@ class _RevisionPrefsContent extends ConsumerWidget {
       );
       await _persist(context, ref, updated);
       if (!context.mounted) return;
-      ref.read(homeSessionConfigProvider.notifier).reset();
-      ref.invalidate(homeProvider);
+      ref.invalidate(todayProvider);
     }
 
     Future<void> updateMaxCards(int value) async {
@@ -404,8 +403,7 @@ class _RevisionPrefsContent extends ConsumerWidget {
         prefs.copyWith(defaultMaxCards: value < 0 ? 0 : value),
       );
       if (!context.mounted) return;
-      ref.read(homeSessionConfigProvider.notifier).reset();
-      ref.invalidate(homeProvider);
+      ref.invalidate(todayProvider);
     }
 
     return Column(

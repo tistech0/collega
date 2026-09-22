@@ -54,6 +54,7 @@ def _make_card(item_id, college_id, user_id, card_id=None, rang="A", card_type="
         verso="Incapacité du coeur à assurer le débit nécessaire.",
         ocr_confidence_score=0.9,
         low_confidence=False,
+        user_feedback=None,
     )
 
 

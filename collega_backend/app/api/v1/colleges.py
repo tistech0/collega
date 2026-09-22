@@ -741,6 +741,53 @@ async def list_college_items(
     return ItemsListResponseWrapped(data=data, total=len(data))
 
 
+@router.get("/colleges/{college_id}/cards", response_model=CardsListResponseWrapped)
+async def list_college_cards(
+    college_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> CardsListResponseWrapped:
+    """Toutes les flashcards d'un collège (story 8.3).
+
+    L'app les synchronise en local d'un seul appel : la session du jour mêle les
+    collèges et doit fonctionner hors-ligne, sans attendre l'ouverture de chaque item.
+    Triées item, rang puis card_type pour un ordre stable.
+    """
+    college = await db.get(College, college_id)
+    if college is None or college.user_id != current_user.id:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "COLLEGE_NOT_FOUND", "message": "College not found"},
+        )
+    if college.status != "generation_complete":
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "GENERATION_NOT_COMPLETE", "message": "Generation not yet complete"},
+        )
+
+    cards_result = await db.execute(
+        select(FlashCard)
+        .where(FlashCard.college_id == college_id)
+        .order_by(FlashCard.item_id, FlashCard.rang, FlashCard.card_type)
+    )
+    data = [
+        FlashCardData(
+            id=str(c.id),
+            item_id=str(c.item_id),
+            college_id=str(c.college_id),
+            card_type=c.card_type,
+            rang=c.rang,
+            recto=c.recto,
+            verso=c.verso,
+            ocr_confidence_score=c.ocr_confidence_score,
+            low_confidence=c.low_confidence,
+            user_feedback=c.user_feedback,
+        )
+        for c in cards_result.scalars().all()
+    ]
+    return CardsListResponseWrapped(data=data, total=len(data))
+
+
 @router.get("/colleges/{college_id}/items/{item_id}/cards", response_model=CardsListResponseWrapped)
 async def list_item_cards(
     college_id: uuid.UUID,
@@ -785,6 +832,7 @@ async def list_item_cards(
             verso=c.verso,
             ocr_confidence_score=c.ocr_confidence_score,
             low_confidence=c.low_confidence,
+            user_feedback=c.user_feedback,
         )
         for c in cards
     ]

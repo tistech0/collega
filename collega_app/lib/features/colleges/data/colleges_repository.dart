@@ -11,9 +11,15 @@ class CollegesRepository {
     try {
       final response = await dio.get<Map<String, dynamic>>('/v1/colleges');
       final body = response.data;
-      if (body == null) {
-        AppLogger.error('getUserColleges: null response body', tag: 'CollegesRepository');
-        return [];
+      if (body == null || body['data'] is! List) {
+        // Jamais « aucun collège » sur une réponse anormale : le cache hors-ligne
+        // (story 8.3) serait vidé.
+        AppLogger.error('getUserColleges: réponse inattendue', tag: 'CollegesRepository');
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+        );
       }
       final list = body['data'] as List<dynamic>;
       return list

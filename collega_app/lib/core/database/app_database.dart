@@ -7,22 +7,28 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'tables/college_import_table.dart';
+import 'tables/daily_sessions_table.dart';
 import 'tables/flash_cards_table.dart';
 import 'tables/items_table.dart';
 import 'tables/pending_uploads_table.dart';
 import 'tables/planning_configs_table.dart';
 import 'tables/planning_sessions_table.dart';
+import 'tables/review_log_table.dart';
+import 'tables/user_colleges_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [CollegeImports, Items, FlashCards, PlanningConfigs, PlanningSessions, PendingUploads])
+@DriftDatabase(tables: [
+  CollegeImports, Items, FlashCards, PlanningConfigs, PlanningSessions, PendingUploads,
+  DailySessions, ReviewLog, UserColleges,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -54,6 +60,12 @@ class AppDatabase extends _$AppDatabase {
             // Story 7.11 : reprise d'upload par morceaux
             await m.createTable(pendingUploads);
           }
+          if (from < 7) {
+            // Story 8.3 : session du jour figée + journal des verdicts
+            await m.createTable(dailySessions);
+            await m.createTable(reviewLog);
+            await m.createTable(userColleges);
+          }
         },
       );
 
@@ -65,6 +77,9 @@ class AppDatabase extends _$AppDatabase {
       await delete(planningConfigs).go();
       await delete(planningSessions).go();
       await delete(pendingUploads).go();
+      await delete(dailySessions).go();
+      await delete(reviewLog).go();
+      await delete(userColleges).go();
     });
   }
 

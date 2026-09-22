@@ -7,7 +7,10 @@ import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/auth/data/auth_repository.dart';
+import 'package:collega_app/features/auth/data/local_data_owner.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
+import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/today/today_providers.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepository(
@@ -47,6 +50,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<void> register(String email, String password) async {
     state = const AsyncLoading();
     final result = await ref.read(authRepositoryProvider).register(email, password);
+    if (result.user != null) await _claimLocalData(result.user!.id);
     state = AsyncData(result);
     if (result.errorMessage != null) {
       AppLogger.warning('Register error: ${result.errorMessage}', tag: 'AuthNotifier');
@@ -59,6 +63,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<void> login(String email, String password) async {
     state = const AsyncLoading();
     final result = await ref.read(authRepositoryProvider).login(email, password);
+    if (result.user != null) await _claimLocalData(result.user!.id);
     state = AsyncData(result);
     if (result.errorMessage != null) {
       AppLogger.warning('Login error: ${result.errorMessage}', tag: 'AuthNotifier');
@@ -72,7 +77,23 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     state = const AsyncLoading();
     await ref.read(authRepositoryProvider).logout();
     _rcLogOut();
+    // Données en mémoire oubliées (le compte suivant ne les voit jamais) ; la base
+    // locale, elle, n'est vidée que si un autre compte se connecte (LocalDataOwner).
+    ref.invalidate(collegesProvider);
+    ref.invalidate(todayProvider);
     state = const AsyncData(AuthState());
+  }
+
+  /// Revue 8.3 : un autre compte sur l'appareil → base locale vidée avant d'afficher
+  /// quoi que ce soit. Borné dans le temps : la connexion n'est jamais bloquée.
+  Future<void> _claimLocalData(String userId) async {
+    try {
+      await LocalDataOwner(storage: ref.read(secureStorageProvider), db: ref.read(databaseProvider))
+          .claim(userId)
+          .timeout(_kLocalWipeStepTimeout);
+    } catch (e) {
+      AppLogger.error('LocalDataOwner.claim failed', tag: 'AuthNotifier', error: e);
+    }
   }
 
   Future<String?> updateProfile({

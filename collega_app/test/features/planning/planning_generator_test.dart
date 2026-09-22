@@ -49,21 +49,21 @@ void main() {
     });
 
     test('génère N sessions pour N jours avec cardsPerDay correct', () {
-      // 30 min → 30*5=150 → clamp(5,100) = 100
-      // 250 cartes → 3 sessions de 100 cartes/j (3 jours nécessaires)
+      // Story 8.3 — convention unique « 1 fiche ≈ 50 s » : 30 min → 36 fiches/j
+      // 100 cartes → 3 sessions de 36 cartes/j (3 jours nécessaires)
       final cards = List.generate(
-          250, (i) => _card(id: 'c$i', collegeId: 'c1', rang: 'A'));
+          100, (i) => _card(id: 'c$i', collegeId: 'c1', rang: 'A'));
       final sessions = PlanningGenerator.generate(
         config: _config(dailyMinutes: 30, days: 3),
         allCards: cards,
       );
       expect(sessions.length, 3);
       for (final s in sessions) {
-        expect(s.maxCards, 100);
+        expect(s.maxCards, 36);
       }
     });
 
-    test('cardsPerDay clampé entre 5 et 100 (min)', () {
+    test('cardsPerDay : même convention que la session du jour (1 fiche ≈ 50 s), au moins 1', () {
       final cfg = PlanningConfig(
         id: 'cfg',
         collegeIds: ['c1'],
@@ -72,10 +72,10 @@ void main() {
         dailyMinutes: 1,
         createdAt: DateTime.utc(2026, 1, 1),
       );
-      expect(cfg.cardsPerDay, 5);
+      expect(cfg.cardsPerDay, 1);
     });
 
-    test('cardsPerDay clampé entre 5 et 100 (max)', () {
+    test('cardsPerDay : 60 min → 72 fiches (maquette : 24 fiches · 20 min)', () {
       final cfg = PlanningConfig(
         id: 'cfg',
         collegeIds: ['c1'],
@@ -84,7 +84,7 @@ void main() {
         dailyMinutes: 60,
         createdAt: DateTime.utc(2026, 1, 1),
       );
-      expect(cfg.cardsPerDay, 100);
+      expect(cfg.cardsPerDay, 72);
     });
 
     test('tri des cartes : Rang A avant Rang B, a_revoir avant new', () {
@@ -119,7 +119,7 @@ void main() {
         collegeIds: ['c1'],
         startDate: DateTime.utc(2026, 1, 1),
         endDate: DateTime.utc(2026, 1, 5),
-        dailyMinutes: 1, // 5 cards/day → 4 sessions to cover 20 cards
+        dailyMinutes: 4, // 4 min ≈ 5 fiches/jour (1 fiche ≈ 50 s) → 4 sessions pour 20 fiches
         createdAt: DateTime.utc(2026, 1, 1),
       );
       final sessions = PlanningGenerator.generate(

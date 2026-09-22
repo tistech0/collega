@@ -50,6 +50,14 @@ class DrillRepository {
     return models;
   }
 
+  /// Fiches par ids, dans l'ordre demandé (ids absents de Drift ignorés).
+  Future<List<FlashCardModel>> getCardsByIds(List<String> ids) async {
+    if (ids.isEmpty) return const [];
+    final rows = await (db.select(db.flashCards)..where((t) => t.id.isIn(ids))).get();
+    final byId = {for (final r in rows) r.id: rowToModel(r)};
+    return [for (final id in ids) if (byId[id] != null) byId[id]!];
+  }
+
   Future<void> updateCardDrillLevel(
       String cardId, DrillEvaluationResult result) async {
     final existing = await (db.select(db.flashCards)

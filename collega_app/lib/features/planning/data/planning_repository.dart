@@ -93,9 +93,10 @@ class PlanningRepository {
       if (existing.isEmpty) break;
       nextDay++;
     }
-    final newId =
-        '${row.planningConfigId}-postponed-${row.sessionDateEpochDay}';
-    await db.into(db.planningSessions).insert(
+    // Unique par session d'origine ET jour de destination : deux sessions du même
+    // jour décalées ne se percutent plus (story 8.3).
+    final newId = '${row.id}-postponed-$nextDay';
+    await db.into(db.planningSessions).insertOnConflictUpdate(
       PlanningSessionsCompanion.insert(
         id: newId,
         planningConfigId: row.planningConfigId,
