@@ -49,7 +49,9 @@ class DrillScreen extends ConsumerWidget {
 }
 
 /// Conséquence écrite de « Quitter ? » (spec § Feedback — Décision).
-String quitMessage({required bool isDaily, required int judged}) {
+String quitMessage({required bool isDaily, required int judged, bool replaying = false}) {
+  // « Refaire les à revoir » : la session du jour est close, rien n'est à reprendre.
+  if (replaying) return 'Ta session du jour est déjà enregistrée.';
   if (isDaily) return 'Ta session reprendra là où tu l’as laissée.';
   if (judged == 0) return 'Aucune fiche n’a encore été jugée.';
   if (judged == 1) return '1 fiche jugée est enregistrée.';
@@ -142,7 +144,11 @@ class _DrillActiveState extends ConsumerState<_DrillActive> {
     final quit = await showCgDialogSheet(
       context,
       title: 'Quitter ?',
-      message: quitMessage(isDaily: _params.isDailySession, judged: widget.session.evaluatedCount),
+      message: quitMessage(
+        isDaily: _params.isDailySession,
+        judged: widget.session.evaluatedCount,
+        replaying: widget.session.replayingErrors,
+      ),
       confirmLabel: 'Quitter',
       cancelLabel: 'Continuer',
     );

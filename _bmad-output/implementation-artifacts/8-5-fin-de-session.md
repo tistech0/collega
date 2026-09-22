@@ -1,6 +1,6 @@
 # Story 8.5 : Fin de session (pic de la Peak-end rule)
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -20,6 +20,14 @@ afin de finir sur une satisfaction nette et brève, sans rien avoir à déclarer
 
 ## Tâches
 
-- [ ] T1 `DrillSessionSummary` enrichi : durée, items consolidés (titres depuis Drift), prochaine session.
-- [ ] T2 `DrillEndScreen` Collega UI (remplace l'ancien écran shadcn) + tests + goldens.
+- [x] T1 `DrillSessionSummary` enrichi : durée, items consolidés (titres depuis Drift), prochaine session.
+- [x] T2 `DrillEndScreen` Collega UI (remplace l'ancien écran shadcn) + tests + goldens.
 - [ ] T3 Revue adversariale, build iPhone (validation 8.4 + 8.5 ensemble : le drill et sa fin forment un seul parcours).
+
+## Dev Agent Record
+
+### Completion Notes List
+
+- `DrillEndScreen` Collega UI : bloc sarcelle (durée, score qui roule de 0 à N, barre segmentée qui s'étend), 3 stats à filet, « Ce que tu as consolidé » (titres dédoublonnés par item), « Prochaine session » (budget de demain, session du jour seulement), Terminer / Refaire / Retour à la recherche, haptique succès.
+- **Revue adversariale — correctifs** : bilan de la session du jour reconstruit depuis `review_log` à la reprise (plus de score partiel après quitter/reprendre) ; « refaire les à revoir » n'écrit plus dans le journal du jour ; titres d'items facultatifs (hors-ligne n'empêche pas la session) ; durée depuis l'ouverture du drill, format « 1 h 12 » au-delà d'une heure, calculée une fois ; fiches disparues (réimport) → session close + état « Aucune fiche à réviser » sans score 0/0 ni haptique ; pluriels (« Refaire la fiche à revoir », « 1 fiche maîtrisée sur 2 ») ; « maîtrisées » lu une seule fois par VoiceOver ; budget de demain = réglage (plus la taille de la session du jour) ; Aujourd'hui observé seulement pour la session du jour ; « Terminer » depuis la recherche recalcule Aujourd'hui ; message « Quitter ? » adapté pendant la reprise des erreurs ; `CollegeDetailRepository.syncItemsToDrift` délègue au synchroniseur commun.
+- Tests : drill + today 231 verts, colleges/search/profile/core 590 verts, shell/planning/demo/auth/generation 63 verts ; goldens session du jour / drill d'item 3×2.

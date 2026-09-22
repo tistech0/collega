@@ -80,9 +80,17 @@ class DrillSessionState {
     this.isComplete = false,
     this.timerExpired = false,
     this.requeued = false,
+    this.startedAt,
+    this.replayingErrors = false,
   });
 
+  /// « Refaire les à revoir » après la fin : entraînement hors session du jour.
+  final bool replayingErrors;
+
   final List<FlashCardModel> cards;
+
+  /// Début du drill (session du jour : son premier démarrage) — durée de la fin de session.
+  final DateTime? startedAt;
   final List<int> queue;
   final int currentQueuePos;
   final int evaluatedCount;
@@ -118,6 +126,8 @@ class DrillSessionState {
     bool? requeued,
   }) {
     return DrillSessionState(
+      startedAt: startedAt,
+      replayingErrors: replayingErrors,
       cards: cards ?? this.cards,
       queue: queue ?? this.queue,
       currentQueuePos: currentQueuePos ?? this.currentQueuePos,

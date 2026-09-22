@@ -235,6 +235,16 @@ class DailySessionRepository {
         ));
   }
 
+  /// Dernier verdict du jour par fiche (reprise : le bilan compte aussi ce qui a
+  /// été jugé avant l'interruption).
+  Future<Map<String, String>> lastVerdicts(int day) async {
+    final rows = await (db.select(db.reviewLog)
+          ..where((t) => t.day.equals(day))
+          ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+        .get();
+    return {for (final r in rows) r.cardId: r.drillLevel};
+  }
+
   /// Verdicts d'un jour, par niveau.
   Future<Map<String, int>> verdictCounts(int day) async {
     final rows = await (db.select(db.reviewLog)..where((t) => t.day.equals(day))).get();

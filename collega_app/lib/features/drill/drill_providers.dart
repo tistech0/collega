@@ -39,7 +39,7 @@ class DrillSessionNotifier
       return const DrillSessionState(cards: [], queue: [], isComplete: true);
     }
     final queue = List.generate(cards.length, (i) => i);
-    return DrillSessionState(cards: cards, queue: queue);
+    return DrillSessionState(cards: cards, queue: queue, startedAt: DateTime.now());
   }
 
   /// Session du jour : file figée (réinsertions comprises) reprise à sa position.
@@ -57,20 +57,32 @@ class DrillSessionNotifier
     // Une fiche supprimée depuis (régénération) sort simplement de la file.
     final queue = [for (final id in session.cardIds) if (indexOf[id] != null) indexOf[id]!];
     final position = session.position.clamp(0, queue.length);
-    // Une fiche présente deux fois dans la file a déjà été réinsérée : la règle
-    // « une seule réinsertion » tient aussi après une reprise.
-    final seen = <String>{};
-    final requeued = <String, DrillEvaluationResult>{
-      for (final id in session.cardIds)
-        if (!seen.add(id)) id: DrillEvaluationResult.aRevoir,
+    if (queue.isEmpty) {
+      // Fiches disparues (réimport) : la session est close, Aujourd'hui ne la
+      // repropose pas en boucle.
+      if (!session.isCompleted) await _daily.complete(day);
+      return DrillSessionState(cards: const [], queue: const [], isComplete: true, startedAt: DateTime.now());
+    }
+    // Bilan et règle « une seule réinsertion » : derniers verdicts du jour, y compris
+    // ceux d'avant l'interruption (le journal fait foi, revue 8.5).
+    final logged = await _daily.lastVerdicts(day);
+    const fromLevel = {
+      'a_revoir': DrillEvaluationResult.aRevoir,
+      'bien': DrillEvaluationResult.bien,
+      'maitrise': DrillEvaluationResult.maitrise,
     };
     return DrillSessionState(
       cards: cards,
       queue: queue,
       currentQueuePos: position,
       evaluatedCount: position,
-      evaluations: requeued,
-      isComplete: queue.isEmpty || position >= queue.length,
+      evaluations: {
+        for (final c in cards)
+          if (fromLevel[logged[c.id]] != null) c.id: fromLevel[logged[c.id]]!,
+      },
+      isComplete: position >= queue.length,
+      // Durée affichée en fin de session : depuis l'ouverture de ce drill.
+      startedAt: DateTime.now(),
     );
   }
 
@@ -171,7 +183,7 @@ class DrillSessionNotifier
         Map<String, DrillEvaluationResult>.from(s.evaluations)
           ..[card.id] = result;
 
-    if (arg.isDailySession) {
+    if (arg.isDailySession && !_replayingErrors) {
       unawaited(_daily
           .recordVerdict(
             day: arg.dailySessionDay!,
@@ -234,6 +246,8 @@ class DrillSessionNotifier
         .toList();
     if (errorIndices.isEmpty) return;
     state = AsyncValue.data(DrillSessionState(
+      startedAt: DateTime.now(),
+      replayingErrors: true,
       cards: s.cards,
       queue: errorIndices,
       evaluatedCount: 0,

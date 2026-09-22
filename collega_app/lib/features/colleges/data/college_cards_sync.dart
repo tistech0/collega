@@ -40,3 +40,24 @@ Future<void> syncCollegeCards(AppDatabase db, String collegeId, List<FlashCardMo
         .go();
   });
 }
+
+/// Items (titres, rangs) d'un collège, sans toucher aux autres collèges (story 8.5).
+Future<void> syncItemsToDrift(AppDatabase db, String collegeId, List<ItemModel> items) async {
+  await db.batch((batch) {
+    batch.insertAllOnConflictUpdate(
+      db.items,
+      [
+        for (final item in items)
+          ItemsCompanion.insert(
+            id: item.id,
+            collegeId: collegeId,
+            itemNumber: item.itemNumber,
+            rang: item.rang,
+            chapterTitle: Value(item.chapterTitle),
+            ocrConfidenceScore: Value(item.ocrConfidenceScore),
+            lowConfidence: Value(item.lowConfidence),
+          ),
+      ],
+    );
+  });
+}

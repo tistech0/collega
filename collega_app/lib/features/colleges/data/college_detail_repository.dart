@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
+import 'package:collega_app/features/colleges/data/college_cards_sync.dart' as sync_items;
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
 
@@ -104,26 +105,8 @@ class CollegeDetailRepository {
         .toList();
   }
 
-  Future<void> syncItemsToDrift(
-      String collegeId, List<ItemModel> items) async {
-    await db.batch((batch) {
-      batch.insertAllOnConflictUpdate(
-        db.items,
-        items.map(
-          (item) => ItemsCompanion.insert(
-            id: item.id,
-            collegeId: collegeId,
-            itemNumber: item.itemNumber,
-            rang: item.rang,
-            chapterTitle: Value(item.chapterTitle),
-            ocrConfidenceScore:
-                Value(item.ocrConfidenceScore),
-            lowConfidence: Value(item.lowConfidence),
-          ),
-        ),
-      );
-    });
-  }
+  Future<void> syncItemsToDrift(String collegeId, List<ItemModel> items) =>
+      sync_items.syncItemsToDrift(db, collegeId, items);
 
   Future<void> syncCardsToDrift(List<FlashCardModel> cards) async {
     await db.batch((batch) {

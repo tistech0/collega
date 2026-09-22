@@ -150,7 +150,7 @@ development_status:
   8-2-composants-collega-ui: done                       # [2026-09-22 14 composants + goldens 3×2 + Widgetbook ; 444 tests ; revue adversariale : 9 correctifs (balayage retour iOS = verdict, clavier définition, carte figée, toasts…)]
   8-3-shell-aujourdhui: done                           # [2026-09-22 validée sur iPhone (semaine actualisée) ; reprise couverte par tests]
   8-4-drill: review                                    # [2026-09-22 drill plein écran + chrono 3 choix (demande utilisateur) + revue (7 correctifs) ; validation iPhone groupée avec 8.5]
-  8-5-fin-de-session: in-progress
+  8-5-fin-de-session: review
   8-6-bibliotheque: backlog
   8-7-detail-college: backlog
   8-8-progression: backlog

@@ -66,6 +66,8 @@ void main() {
     List<UserCollegeStatus> statuses = const [],
     Object? collegesError,
     Map<String, List<FlashCardModel>> server = const {},
+    Map<String, List<ItemModel>> items = const {},
+    bool itemsFail = false,
     bool offline = false,
     RevisionPrefs prefs = const RevisionPrefs(),
   }) {
@@ -73,6 +75,12 @@ void main() {
       databaseProvider.overrideWithValue(db),
       collegesProvider.overrideWith(() => _Colleges(statuses, error: collegesError)),
       revisionPrefsProvider.overrideWith(() => _Prefs(prefs)),
+      collegeItemsFetcherProvider.overrideWithValue((id) async {
+        if (offline || itemsFail) {
+          throw DioException(requestOptions: RequestOptions(), type: DioExceptionType.connectionError);
+        }
+        return items[id] ?? const [];
+      }),
       collegeCardsFetcherProvider.overrideWithValue((id) async {
         if (offline) {
           throw DioException(requestOptions: RequestOptions(), type: DioExceptionType.connectionError);
@@ -122,6 +130,37 @@ void main() {
     expect(state.mix.firstWhere((m) => m.collegeName == 'Cancérologie').count, 2);
     expect(state.colleges, hasLength(2));
     expect((await db.select(db.flashCards).get()), hasLength(3));
+  });
+
+  test('synchro : les items (titres) sont aussi enregistrés localement (fin de session, 8.5)', () async {
+    final c = container(
+      statuses: [_status(3, 'c3', a: 1)],
+      server: {'c3': [_card('a', 'c3')]},
+      items: {'c3': [const ItemModel(id: 'i-a', collegeId: 'c3', itemNumber: 310, rang: 'A',
+          chapterTitle: 'Tumeurs du testicule', ocrConfidenceScore: 0.9, lowConfidence: false,
+          cardCountA: 1, cardCountB: 0, cardCountC: 0)]},
+    );
+    await c.read(todayProvider.future);
+    final rows = await db.select(db.items).get();
+    expect(rows.single.chapterTitle, 'Tumeurs du testicule');
+  });
+
+  test('échec du seul appel items : les fiches sont quand même enregistrées (revue 8.5)', () async {
+    final c = container(statuses: [_status(3, 'c3', a: 2)], server: {'c3': [_card('a', 'c3'), _card('b', 'c3')]}, itemsFail: true);
+    final state = await c.read(todayProvider.future) as TodayReady;
+    expect(state.cardCount, 2);
+  });
+
+  test('budget de demain : celui du jour sans personnalisation (revue 8.5)', () async {
+    final c = container(
+      statuses: [_status(3, 'c3', a: 30)],
+      server: {'c3': [for (var i = 0; i < 30; i++) _card('n$i', 'c3')]},
+    );
+    await c.read(todayProvider.future);
+    await c.read(todayProvider.notifier).customize(maxCards: 12);
+    final state = await c.read(todayProvider.future) as TodayReady;
+    expect(state.budget, 12);
+    expect(state.tomorrowBudget, 24);
   });
 
   test('hors-ligne : la session se construit depuis les fiches locales', () async {

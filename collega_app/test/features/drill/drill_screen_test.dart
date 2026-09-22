@@ -7,9 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_ui/shadcn_ui.dart' show ShadTheme;
 
-import 'package:collega_app/core/theme/app_theme.dart' show buildShadTheme;
 
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/ui/collega_ui.dart';
@@ -27,6 +25,7 @@ import 'package:collega_app/features/drill/presentation/drill_screen.dart';
 import 'package:collega_app/features/drill/presentation/drill_timer_slot.dart';
 import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
+import 'package:collega_app/features/today/today_providers.dart';
 
 import '../../support/cg_golden.dart';
 
@@ -56,6 +55,11 @@ class _Repo extends DrillRepository {
     if (semanticFails) throw DioException(requestOptions: RequestOptions());
     return semantic!;
   }
+}
+
+class _Today extends TodayNotifier {
+  @override
+  Future<TodayState> build() async => const TodayNoCollege();
 }
 
 class _Prefs extends RevisionPrefsNotifier {
@@ -92,14 +96,14 @@ Widget _app(_Repo repo, {DrillLaunch? launch, RevisionPrefs prefs = const Revisi
   ]);
   return ProviderScope(
     overrides: [
+      todayProvider.overrideWith(_Today.new),
       drillRepositoryProvider.overrideWithValue(repo),
       revisionPrefsProvider.overrideWith(() => _Prefs(prefs)),
       collegesProvider.overrideWith(_Colleges.new),
     ],
-    // ShadTheme : l'écran de fin est encore l'ancien (shadcn) jusqu'à la story 8.5.
     child: CgTheme(
       data: CgThemeData.light,
-      child: ShadTheme(data: buildShadTheme(), child: MaterialApp.router(
+      child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         theme: buildCgMaterialTheme(CgThemeData.light),
         routerConfig: router,
@@ -107,7 +111,7 @@ Widget _app(_Repo repo, {DrillLaunch? launch, RevisionPrefs prefs = const Revisi
           data: MediaQuery.of(context).copyWith(disableAnimations: true),
           child: child!,
         ),
-      )),
+      ),
     ),
   );
 }
@@ -185,8 +189,7 @@ void main() {
     });
 
     testWidgets('dernière fiche jugée → écran de fin', (tester) async {
-      // 430 pt : l'ancien écran de fin (remplacé en 8.5) déborde d'1 pt à 393.
-      _phone(tester, width: 430);
+      _phone(tester);
       await tester.pumpWidget(_app(_Repo([_card(0)])));
       await tester.pumpAndSettle();
       await _flip(tester);
@@ -234,6 +237,7 @@ void main() {
       expect(quitMessage(isDaily: true, judged: 3), 'Ta session reprendra là où tu l’as laissée.');
       expect(quitMessage(isDaily: false, judged: 0), 'Aucune fiche n’a encore été jugée.');
       expect(quitMessage(isDaily: false, judged: 12), '12 fiches jugées sont enregistrées.');
+      expect(quitMessage(isDaily: true, judged: 2, replaying: true), 'Ta session du jour est déjà enregistrée.');
     });
   });
 

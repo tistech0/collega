@@ -5,6 +5,7 @@ import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/utils/epoch_day.dart';
 import 'package:collega_app/core/utils/logger.dart';
+import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/data/college_cards_sync.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
@@ -70,9 +71,10 @@ class TodayReady extends TodayState {
     required this.verdicts,
     required this.budget,
     required this.sessionCollegeIds,
+    int? tomorrowBudget,
     this.planningDay,
     this.planningDays,
-  });
+  }) : _tomorrowBudget = tomorrowBudget;
 
   final DateTime date;
   final DailySession session;
@@ -91,6 +93,10 @@ class TodayReady extends TodayState {
 
   /// Budget du jour (planning, préférence ou 24) : base de « Personnaliser ».
   final int budget;
+
+  /// Budget de demain : sans la personnalisation d'aujourd'hui (fin de session).
+  int get tomorrowBudget => _tomorrowBudget ?? budget;
+  final int? _tomorrowBudget;
 
   /// Collèges de la session (réglages personnalisés, sinon planning, sinon tous
   /// les collèges prêts) : cochés à l'ouverture de « Personnaliser ».
@@ -128,6 +134,13 @@ Future<List<FlashCardModel>> fetchCollegeCards(Dio dio, String collegeId) async 
   }
   return list.map((e) => FlashCardModel.fromJson(e as Map<String, dynamic>)).toList();
 }
+
+/// Items d'un collège (`GET /v1/colleges/{id}/items`) : titres pour la fin de session.
+typedef CollegeItemsFetcher = Future<List<ItemModel>> Function(String collegeId);
+
+final collegeItemsFetcherProvider = Provider<CollegeItemsFetcher>(
+  (ref) => ref.read(collegeDetailRepositoryProvider).getItems,
+);
 
 final dailySessionRepositoryProvider = Provider<DailySessionRepository>(
   (ref) => DailySessionRepository(ref.read(databaseProvider)),
@@ -237,6 +250,7 @@ class TodayNotifier extends AsyncNotifier<TodayState> {
       colleges: colleges,
       verdicts: await repo.verdictCounts(session.day),
       budget: session.settings?.budget ?? budget,
+      tomorrowBudget: budget,
       sessionCollegeIds: session.settings?.collegeIds ?? defaultCollegeIds,
       planningDay: planningDay,
       planningDays: planningDays,
@@ -246,11 +260,19 @@ class TodayNotifier extends AsyncNotifier<TodayState> {
   /// Synchronise toutes les fiches des collèges prêts. Hors-ligne : on garde le local.
   Future<void> _syncCards(Iterable<String> collegeIds) async {
     final fetch = ref.read(collegeCardsFetcherProvider);
+    final fetchItems = ref.read(collegeItemsFetcherProvider);
     final db = ref.read(databaseProvider);
     await Future.wait([
       for (final id in collegeIds.where((id) => !_synced.contains(id)))
-        fetch(id).then((cards) async {
-          await syncCollegeCards(db, id, cards);
+        // Items facultatifs (titres de fin de session) : leur échec n'empêche
+        // jamais d'enregistrer les fiches (revue 8.5).
+        Future.wait([
+          fetch(id),
+          fetchItems(id).catchError((Object _) => const <ItemModel>[]),
+        ]).then((results) async {
+          await syncCollegeCards(db, id, results[0] as List<FlashCardModel>);
+          final items = results[1] as List<ItemModel>;
+          if (items.isNotEmpty) await syncItemsToDrift(db, id, items);
           _synced.add(id);
         }).catchError((Object e) {
           if (e is! DioException) AppLogger.error('sync fiches $id', tag: 'Today', error: e);

@@ -125,6 +125,8 @@ void main() {
       final repo = DailySessionRepository(db);
       final s = await repo.getOrBuild(day: today, budget: 10);
       final first = s.cardIds.first;
+      // Avant l'interruption : 1er « à revoir » (journalisé) → réinsérée.
+      await repo.recordVerdict(day: today, cardId: first, collegeId: 'c1', rang: 'A', drillLevel: 'a_revoir');
       await repo.saveProgress(day: today, queue: [first, s.cardIds[1], first, s.cardIds[2]], position: 2);
       final params = DrillSessionParams.daily(today);
       final state = await container.read(drillSessionProvider(params).future);
@@ -155,5 +157,64 @@ void main() {
     final after = await repo.find(today);
     expect(after!.cardIds, saved.cardIds);
     expect(after.position, saved.position);
+  });
+
+  group('revue 8.5', () {
+    test('reprise : le bilan reprend les verdicts d’avant la reprise (review_log)', () async {
+      final repo = DailySessionRepository(db);
+      final session = await repo.getOrBuild(day: today, budget: 10);
+      final params = DrillSessionParams.daily(today);
+      await container.read(drillSessionProvider(params).future);
+      final notifier = container.read(drillSessionProvider(params).notifier);
+      await notifier.evaluate(DrillEvaluationResult.maitrise);
+      notifier.advanceToNext();
+      await notifier.evaluate(DrillEvaluationResult.bien);
+      notifier.advanceToNext();
+      await pumpEventQueue();
+
+      container.invalidate(drillSessionProvider(params)); // l'étudiante quitte puis reprend
+      final resumed = await container.read(drillSessionProvider(params).future);
+      expect(resumed.evaluations[session.cardIds[0]], DrillEvaluationResult.maitrise);
+      expect(resumed.evaluations[session.cardIds[1]], DrillEvaluationResult.bien);
+      expect(resumed.evaluations, hasLength(2));
+    });
+
+    test('« refaire les à revoir » : rien n’est ajouté au journal du jour', () async {
+      final repo = DailySessionRepository(db);
+      await repo.getOrBuild(day: today, budget: 10);
+      final params = DrillSessionParams.daily(today);
+      await container.read(drillSessionProvider(params).future);
+      final notifier = container.read(drillSessionProvider(params).notifier);
+      for (final r in [DrillEvaluationResult.aRevoir, DrillEvaluationResult.bien, DrillEvaluationResult.bien,
+                       DrillEvaluationResult.aRevoir]) {
+        await notifier.evaluate(r);
+        notifier.advanceToNext();
+      }
+      await pumpEventQueue();
+      final before = await repo.verdictCounts(today);
+      notifier.restartWithErrors();
+      expect(container.read(drillSessionProvider(params)).value!.replayingErrors, isTrue);
+      await notifier.evaluate(DrillEvaluationResult.maitrise);
+      await pumpEventQueue();
+      expect(await repo.verdictCounts(today), before);
+    });
+
+    test('durée : comptée depuis l’ouverture du drill, pas depuis le premier démarrage', () async {
+      final repo = DailySessionRepository(db);
+      final s = await repo.getOrBuild(day: today, budget: 10);
+      await repo.saveProgress(day: today, queue: s.cardIds, position: 1);
+      final state = await container.read(drillSessionProvider(DrillSessionParams.daily(today)).future);
+      expect(DateTime.now().difference(state.startedAt!).inSeconds, lessThan(5));
+    });
+
+    test('fiches disparues (réimport) : session close, pas de boucle', () async {
+      final repo = DailySessionRepository(db);
+      await repo.getOrBuild(day: today, budget: 10);
+      await (db.delete(db.flashCards)).go();
+      final state = await container.read(drillSessionProvider(DrillSessionParams.daily(today)).future);
+      expect(state.isComplete, isTrue);
+      await pumpEventQueue();
+      expect((await repo.find(today))!.isCompleted, isTrue);
+    });
   });
 }
