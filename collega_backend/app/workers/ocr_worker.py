@@ -143,6 +143,10 @@ async def _run_ocr(
     college.total_pages = total_pages
     college.status = CollegeStatus.processing
     college.ocr_page_progress = start_page
+    # Nouvel import : l'avancement de la génération précédente ne s'affiche plus (8.13).
+    college.generation_items_done = 0
+    college.generation_items_total = None
+    college.generation_cards = 0
     job.status = "processing"
     await record_job_event(db, job.id, "ocr_started", total=total_pages)
     await db.commit()

@@ -40,50 +40,15 @@ def make_user(
 
 
 class TestRegister:
-    async def test_register_success(self, client: AsyncClient, mock_db):
-        new_user = make_user()
-
-        def _refresh_user(u):
-            u.id = new_user.id
-            u.is_beta = False
-            u.is_subscribed = False
-
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None))
-        )
-        mock_db.add = MagicMock()
-        mock_db.commit = AsyncMock()
-        mock_db.refresh = AsyncMock(side_effect=_refresh_user)
-
+    async def test_inscription_fermee_beta_privee(self, client: AsyncClient, mock_db):
+        """Beta privée : comptes créés à la main, l'inscription répond 403 (spec v2)."""
         resp = await client.post(
             "/v1/auth/register",
-            json={"email": "new@example.com", "password": "password123"},
+            json={"email": "new@example.com", "password": "motdepasse123"},
         )
-        assert resp.status_code == 201
-        body = resp.json()
-        assert "access_token" in body["data"]
-        assert "refresh_token" in body["data"]
-        assert body["data"]["token_type"] == "bearer"
-
-    async def test_register_duplicate_email(self, client: AsyncClient, mock_db):
-        existing = make_user(email="taken@example.com")
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=existing))
-        )
-
-        resp = await client.post(
-            "/v1/auth/register",
-            json={"email": "taken@example.com", "password": "password123"},
-        )
-        assert resp.status_code == 409
-        assert resp.json()["detail"]["code"] == "EMAIL_ALREADY_EXISTS"
-
-    async def test_register_password_too_short(self, client: AsyncClient, mock_db):
-        resp = await client.post(
-            "/v1/auth/register",
-            json={"email": "short@example.com", "password": "abc"},
-        )
-        assert resp.status_code == 422
+        assert resp.status_code == 403
+        assert resp.json()["detail"]["code"] == "REGISTRATION_DISABLED"
+        mock_db.add.assert_not_called()
 
     async def test_register_invalid_email(self, client: AsyncClient, mock_db):
         resp = await client.post(

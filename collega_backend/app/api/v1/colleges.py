@@ -627,6 +627,7 @@ async def stream_college_progress(
 
     async def event_generator():  # type: ignore[return]
         last_progress = -1
+        last_generation: tuple[int, int, int] | None = None
         ocr_complete_emitted = False
         loop = asyncio.get_event_loop()
         start_time = loop.time()
@@ -655,6 +656,19 @@ async def stream_college_progress(
                     event = {"event": "card_generation_started", "data": {"college_id": str(college_id)}}
                     yield f"data: {json.dumps(event)}\n\n"
                     last_emit = now
+
+                # Story 8.13 : fiches générées au fil des items (seulement pendant la génération).
+                total = getattr(c, "generation_items_total", None)
+                if c.status == "ocr_complete" and total is not None:
+                    current = (c.generation_items_done, total, c.generation_cards)
+                    if current != last_generation:
+                        last_generation = current
+                        event = {
+                            "event": "generation_progress",
+                            "data": {"items_done": current[0], "items_total": current[1], "cards": current[2]},
+                        }
+                        yield f"data: {json.dumps(event)}\n\n"
+                        last_emit = now
 
                 if c.status == "generation_complete":
                     event = {"event": "generation_complete", "data": {"college_id": str(college_id)}}
