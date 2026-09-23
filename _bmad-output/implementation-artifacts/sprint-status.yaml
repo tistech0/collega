@@ -144,7 +144,7 @@ development_status:
   # Document : _bmad-output/planning-artifacts/epic-8-refonte-ux-ui.md
   # Spec : _bmad-output/planning-artifacts/ux-design-specification-v2.md
   # ─────────────────────────────────────────────────────────
-  epic-8: in-progress
+  epic-8: done
   8-0-titres-items-referentiel: done                     # [2026-09-22 déployée : migration 015 + rattrapage PDF → 44/44 items titrés en prod ; bugs détection CNEC corrigés (une page/item, sommaire, 313) ; .dockerignore]
   8-1-tokens-theme-fondation: done                       # [2026-09-22 tokens + contraste testé (ink3/rankB/rankC ajustés), police embarquée, CgTheme + Material neutralisé, wordmark SVG, Widgetbook web, goldens 3×2]
   8-2-composants-collega-ui: done                       # [2026-09-22 14 composants + goldens 3×2 + Widgetbook ; 444 tests ; revue adversariale : 9 correctifs (balayage retour iOS = verdict, clavier définition, carte figée, toasts…)]
@@ -160,5 +160,5 @@ development_status:
   8-12-entree-login-demo: done                     # [2026-09-23 validée iPhone avec 8.13 (+ envoi en cours visible dans la Bibliothèque)]
   8-13-import: done
   8-14-profil-paywall-cgu: done                    # [2026-09-23 validée iPhone ; revue : 6 correctifs (/me inter-comptes, rappel DST, permission, paywall) ; éditeur Matthis Lesur]
-  8-15-retrait-shadcn-accessibilite: in-progress
+  8-15-retrait-shadcn-accessibilite: done         # [2026-09-23 validée iPhone ; shadcn + thème v1 retirés, ink2/ink3 ≥ 4,5:1, a11y testée sur 5 écrans ; revue : transitions onglets, fond des pages]
   epic-8-retrospective: optional

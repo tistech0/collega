@@ -1,6 +1,6 @@
 # Story 8.15 : Retrait de shadcn_ui, VoiceOver, contrastes
 
-Status: in-progress
+Status: done
 
 ## Story
 
