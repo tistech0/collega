@@ -267,6 +267,13 @@ class DailySessionRepository {
     return {for (final r in rows) r.read(db.reviewLog.day)!: r.read(count)!};
   }
 
+  /// Outil de test (build `COLLEGA_TEST_TOOLS`) : oublie la session du jour et
+  /// son bilan, comme si elle n'avait pas encore été faite.
+  Future<void> resetDay(int day) => db.transaction(() async {
+        await (db.delete(db.dailySessions)..where((t) => t.day.equals(day))).go();
+        await (db.delete(db.reviewLog)..where((t) => t.day.equals(day) & t.daily.equals(true))).go();
+      });
+
   /// Jours (inclus) dont la session du jour a été terminée.
   Future<Set<int>> completedDays({required int from, required int to}) async {
     final rows = await (db.select(db.dailySessions)

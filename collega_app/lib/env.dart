@@ -12,3 +12,7 @@ const String revenueCatApiKey = '0f4aaa288ed5cc241dee937ffacd8bdd6605680e9a4a87c
 // Vide → aucun header envoyé (OK sur le LAN, KO via le tunnel Cloudflare).
 const String cfAccessClientId = String.fromEnvironment('CF_ACCESS_CLIENT_ID');
 const String cfAccessClientSecret = String.fromEnvironment('CF_ACCESS_CLIENT_SECRET');
+
+// Outils de test (réinitialiser la session du jour…) : seulement dans les builds
+// de validation (`--dart-define=COLLEGA_TEST_TOOLS=true`), jamais publiés.
+const bool kTestTools = bool.fromEnvironment('COLLEGA_TEST_TOOLS');

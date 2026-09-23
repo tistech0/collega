@@ -136,6 +136,20 @@ void main() {
       expect(await repo.completedDays(from: today - 6, to: today), {today});
     });
 
+    test('resetDay (outil de test) : la session du jour et son bilan repartent de zéro', () async {
+      await seed(2);
+      await repo.getOrBuild(day: today, budget: 2);
+      await repo.recordVerdict(day: today, cardId: 'x', collegeId: 'c1', rang: 'A', drillLevel: 'maitrise');
+      await repo.recordVerdict(
+          day: today, cardId: 'y', collegeId: 'c1', rang: 'A', drillLevel: 'bien', daily: false);
+      await repo.complete(today);
+      await repo.resetDay(today);
+      expect(await repo.find(today), isNull);
+      expect(await repo.verdictCounts(today), isEmpty);
+      expect(await repo.completedDays(from: today, to: today), isEmpty);
+      expect((await repo.weekCounts(from: today, to: today))[today], 1, reason: 'les autres révisions restent');
+    });
+
     test('journal hors session du jour (8.8) : compté dans la semaine, pas dans le bilan du jour', () async {
       await repo.recordVerdict(day: today, cardId: 'x', collegeId: 'c1', rang: 'A', drillLevel: 'maitrise');
       await repo.recordVerdict(

@@ -11,7 +11,9 @@ import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/planning/domain/planning_summary.dart';
 import 'package:collega_app/features/planning/planning_providers.dart';
+import 'package:collega_app/env.dart';
 import 'package:collega_app/features/today/data/daily_session_repository.dart';
+import 'package:collega_app/features/today/today_providers.dart';
 
 /// Jours du planning dont la session du jour a été faite (calendrier), et si la
 /// session d'aujourd'hui est commencée (on ne décale plus une session entamée).
@@ -386,6 +388,18 @@ class _PlanningScreenState extends ConsumerState<PlanningScreen> {
             label: 'Décaler aujourd’hui',
             variant: CgButtonVariant.quiet,
             onPressed: _busy ? null : () => _run(ref.read(planningProvider.notifier).postponeToday),
+          ),
+        if (kTestTools)
+          CgButton(
+            label: 'Test : réinitialiser la session du jour',
+            variant: CgButtonVariant.quiet,
+            onPressed: _busy
+                ? null
+                : () => _run(() async {
+                      await DailySessionRepository(ref.read(databaseProvider)).resetDay(today);
+                      ref.invalidate(planningDaysProvider);
+                      ref.invalidate(todayProvider);
+                    }),
           ),
         CgButton(
           label: 'Planifier à nouveau',
