@@ -41,7 +41,7 @@ class TestClaudeClientGenerateCards:
 
             client = ClaudeClient()
             item = make_item()
-            result = await client.generate_cards_for_item(item)
+            result = await client.generate_cards(item.item_number, item.rang, item.ocr_text or "")
 
         assert len(result.cards) == 2
         assert result.cards[0].card_type == "classique"
@@ -60,7 +60,7 @@ class TestClaudeClientGenerateCards:
 
             client = ClaudeClient()
             item = make_item(ocr_text=None)
-            result = await client.generate_cards_for_item(item)
+            result = await client.generate_cards(item.item_number, item.rang, item.ocr_text or "")
 
         assert result.cards == []
         assert result.input_tokens == 0
@@ -75,7 +75,7 @@ class TestClaudeClientGenerateCards:
 
             client = ClaudeClient()
             item = make_item(ocr_text="")
-            result = await client.generate_cards_for_item(item)
+            result = await client.generate_cards(item.item_number, item.rang, item.ocr_text or "")
 
         assert result.cards == []
         assert result.input_tokens == 0
@@ -94,7 +94,7 @@ class TestClaudeClientGenerateCards:
 
             client = ClaudeClient()
             item = make_item()
-            result = await client.generate_cards_for_item(item)
+            result = await client.generate_cards(item.item_number, item.rang, item.ocr_text or "")
 
         assert result.cards == []
         assert result.input_tokens == 42
@@ -111,7 +111,7 @@ class TestClaudeClientGenerateCards:
 
             client = ClaudeClient()
             item = make_item()
-            result = await client.generate_cards_for_item(item)
+            result = await client.generate_cards(item.item_number, item.rang, item.ocr_text or "")
 
         assert len(result.cards) == 1
         assert result.cards[0].card_type == "classique"
@@ -131,4 +131,39 @@ class TestClaudeClientGenerateCards:
             item = make_item()
 
             with pytest.raises(_anthropic.APIError):
-                await client.generate_cards_for_item(item)
+                await client.generate_cards(item.item_number, item.rang, item.ocr_text or "")
+
+
+async def test_generate_cards_from_text_uses_versioned_model():
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock
+
+    from app.services.generation import claude_client as cc
+
+    client = cc.ClaudeClient()
+    response = SimpleNamespace(
+        usage=SimpleNamespace(input_tokens=100, output_tokens=20),
+        content=[SimpleNamespace(text='{"flashcards":[{"type":"classique","recto":"Q ?","verso":"R"}]}')],
+    )
+    client._client = SimpleNamespace(messages=SimpleNamespace(create=AsyncMock(return_value=response)))
+
+    result = await client.generate_cards(304, "B", "Texte {avec} accolades")
+
+    assert [c.recto for c in result.cards] == ["Q ?"]
+    assert (result.input_tokens, result.output_tokens) == (100, 20)
+    kwargs = client._client.messages.create.await_args.kwargs
+    assert kwargs["model"] == cc.GENERATION_MODEL
+    assert "Texte {avec} accolades" in kwargs["messages"][0]["content"]
+    assert cc.GENERATION_VERSION == "claude-sonnet-4-6:p1"
+
+
+async def test_blank_text_makes_no_call():
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock
+
+    from app.services.generation import claude_client as cc
+
+    client = cc.ClaudeClient()
+    client._client = SimpleNamespace(messages=SimpleNamespace(create=AsyncMock()))
+    result = await client.generate_cards(1, "A", "   ")
+    assert result.cards == [] and client._client.messages.create.await_count == 0

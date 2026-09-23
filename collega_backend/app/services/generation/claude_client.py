@@ -11,6 +11,12 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+GENERATION_MODEL = "claude-sonnet-4-6"
+# Incrémenter à chaque changement de GENERATION_PROMPT : les items déjà vus seront
+# régénérés (clé des item_generations = empreinte + version), sans effacer les anciennes.
+PROMPT_VERSION = "p1"
+GENERATION_VERSION = f"{GENERATION_MODEL}:{PROMPT_VERSION}"
+
 GENERATION_PROMPT = """
 Tu es un expert en fiches de révision médicale ECNi.
 Génère des flashcards à partir du texte OCR suivant pour l'Item {item_number} (Rang {rang}).
@@ -65,7 +71,7 @@ class FlashCardData:
 
 @dataclass
 class CardGenResult:
-    """Résultat d'un appel `generate_cards_for_item` : fiches + usage tokens.
+    """Résultat d'un appel `generate_cards` : fiches + usage tokens.
 
     L'usage est porté par le résultat (et non un état partagé) pour qu'il
     *survive* à un échec de parsing JSON : l'appel API a déjà facturé les tokens
@@ -98,23 +104,21 @@ class ClaudeClient:
             raise ValueError(f"No JSON object in Claude response: {text!r}")
         return json.loads(text[start:end])
 
-    async def generate_cards_for_item(self, item) -> CardGenResult:
-        if not item.ocr_text:
-            logger.warning("Item %s has no ocr_text — skipping Claude call", item.id)
+    async def generate_cards(self, item_number: int, rang: str, text: str) -> CardGenResult:
+        """Génère les fiches d'un item à partir de son texte (sortie d'origine,
+        stockée dans item_generations par le pipeline)."""
+        if not text.strip():
+            logger.warning("Item %s sans texte — pas d'appel Claude", item_number)
             return CardGenResult(cards=[], input_tokens=0, output_tokens=0)
 
-        # Escape braces in OCR text to prevent str.format() KeyError/IndexError
-        safe_ocr_text = item.ocr_text.replace("{", "{{").replace("}", "}}")
-        prompt = GENERATION_PROMPT.format(
-            item_number=item.item_number,
-            rang=item.rang,
-            ocr_text=safe_ocr_text,
-        )
+        # str.format n'interprète pas les accolades des valeurs insérées : le texte
+        # est transmis tel quel (l'ancien échappement « { → {{ » l'altérait).
+        prompt = GENERATION_PROMPT.format(item_number=item_number, rang=rang, ocr_text=text)
 
         # anthropic.APIError se propage (pas de réponse → aucun usage à compter,
         # le worker marquera le job 'failed').
         response = await self._client.messages.create(
-            model="claude-sonnet-4-6",
+            model=GENERATION_MODEL,
             max_tokens=2000,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -135,7 +139,7 @@ class ClaudeClient:
             # AttributeError : content[0] peut être un bloc non-texte (refus/thinking)
             # sans `.text` → dégrader en cards=[] avec usage préservé (cf. ask_json qui
             # garde déjà ce cas), plutôt que de laisser l'exception crasher l'item.
-            logger.error("Failed to parse Claude response for item %s: %s", item.id, exc)
+            logger.error("Failed to parse Claude response for item %s: %s", item_number, exc)
             return CardGenResult(cards=[], input_tokens=input_tokens, output_tokens=output_tokens)
 
         cards: list[FlashCardData] = []
@@ -154,33 +158,31 @@ class ClaudeClient:
         self,
         card,
         item,
+        source_text: str,
         user_note: str | None,
     ) -> "FlashCardData | None":
         """Régénère une seule fiche avec le feedback utilisateur en contexte."""
         from app.schemas.college import FlashCardData as FlashCardDataSchema
 
-        if not item.ocr_text:
+        if not source_text.strip():
             logger.warning(
-                "Item %s has no ocr_text — cannot regenerate card %s", item.id, card.id
+                "Item %s sans texte source — impossible de régénérer la fiche %s", item.id, card.id
             )
             return None
 
-        safe_ocr_text = item.ocr_text.replace("{", "{{").replace("}", "}}")
-        safe_note = (user_note or "Aucun commentaire spécifique").replace("{", "{{").replace("}", "}}")
-
         prompt = REGENERATION_PROMPT.format(
             card_type=card.card_type,
-            recto=card.recto.replace("{", "{{").replace("}", "}}"),
-            verso=card.verso.replace("{", "{{").replace("}", "}}"),
+            recto=card.recto,
+            verso=card.verso,
             item_number=item.item_number,
             rang=item.rang,
-            user_note=safe_note,
-            ocr_text=safe_ocr_text,
+            user_note=user_note or "Aucun commentaire spécifique",
+            ocr_text=source_text,
         )
 
         try:
             response = await self._client.messages.create(
-                model="claude-sonnet-4-6",
+                model=GENERATION_MODEL,
                 max_tokens=500,
                 messages=[{"role": "user", "content": prompt}],
             )
