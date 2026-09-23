@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
-import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/utils/epoch_day.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
@@ -14,6 +13,9 @@ import 'package:collega_app/features/planning/planning_providers.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
 import 'package:collega_app/features/today/data/daily_session_repository.dart';
 import 'package:collega_app/features/today/domain/daily_session_builder.dart';
+
+export 'package:collega_app/features/colleges/colleges_detail_providers.dart'
+    show CollegeCardsFetcher, collegeCardsFetcherProvider, fetchCollegeCards;
 
 // ─── État ─────────────────────────────────────────────────────────────────────
 
@@ -110,30 +112,6 @@ class TodayReady extends TodayState {
 }
 
 // ─── Dépendances ──────────────────────────────────────────────────────────────
-
-/// Récupère toutes les fiches d'un collège (`GET /v1/colleges/{id}/cards`).
-typedef CollegeCardsFetcher = Future<List<FlashCardModel>> Function(String collegeId);
-
-final collegeCardsFetcherProvider = Provider<CollegeCardsFetcher>((ref) {
-  final dio = ref.read(apiClientProvider).dio;
-  return (collegeId) => fetchCollegeCards(dio, collegeId);
-});
-
-/// Une réponse sans liste `data` est une erreur, jamais « aucune fiche » : la
-/// synchronisation effacerait sinon toutes les fiches locales du collège.
-Future<List<FlashCardModel>> fetchCollegeCards(Dio dio, String collegeId) async {
-  final response = await dio.get<Map<String, dynamic>>('/v1/colleges/$collegeId/cards');
-  final list = response.data?['data'];
-  if (list is! List) {
-    throw DioException(
-      requestOptions: response.requestOptions,
-      response: response,
-      type: DioExceptionType.badResponse,
-      message: 'Réponse inattendue pour les fiches du collège $collegeId',
-    );
-  }
-  return list.map((e) => FlashCardModel.fromJson(e as Map<String, dynamic>)).toList();
-}
 
 /// Items d'un collège (`GET /v1/colleges/{id}/items`) : titres pour la fin de session.
 typedef CollegeItemsFetcher = Future<List<ItemModel>> Function(String collegeId);

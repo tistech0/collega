@@ -14,7 +14,9 @@ import 'package:collega_app/core/upload/upload_models.dart';
 import 'package:collega_app/core/upload/upload_providers.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/env.dart';
+import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/colleges/data/college_cards_sync.dart';
 import 'package:collega_app/features/colleges/data/college_import_repository.dart';
 import 'package:collega_app/features/colleges/domain/import_models.dart';
 
@@ -269,10 +271,27 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
         _updateDriftProgress(collegeId, current.ocrProgress, current.totalPages, 'ocr_complete');
       case 'generation_complete':
         state = AsyncValue.data(ImportComplete(collegeId: collegeId));
-        ref.invalidate(collegesProvider);
+        _onGenerationComplete(collegeId);
       case 'generation_failed':
         state = const AsyncValue.data(ImportError(message: 'generation_failed'));
     }
+  }
+
+  /// Fiches prêtes (import ou réimport, même `college_id`) : la liste, le détail
+  /// et les fiches locales repartent du serveur. Sans cela le détail et le drill
+  /// resteraient sur les fiches supprimées par le réimport (revue 8.7).
+  void _onGenerationComplete(String collegeId) {
+    ref.invalidate(collegesProvider);
+    final db = ref.read(databaseProvider);
+    unawaited(ref.read(collegeCardsFetcherProvider)(collegeId).then((cards) async {
+      await syncCollegeCards(db, collegeId, cards);
+    }).catchError((Object e) {
+      AppLogger.warning('fiches du collège $collegeId après import : $e', tag: 'CollegeImportNotifier');
+    }).whenComplete(() {
+      // Le détail (s'il est ouvert) recharge items et fiches. Pas d'invalidate :
+      // en debug, invalider un provider jamais lu le construit (appel réseau inutile).
+      if (!_disposed) ref.read(collegeDataVersionProvider(collegeId).notifier).state++;
+    }));
   }
 
   void _updateDriftProgress(String collegeId, int page, int? total, String status) {
@@ -320,7 +339,7 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
           await _connectSse(collegeId);
         case 'generation_complete':
           state = AsyncValue.data(ImportComplete(collegeId: collegeId));
-          ref.invalidate(collegesProvider);
+          _onGenerationComplete(collegeId);
         case 'failed':
           state = const AsyncValue.data(ImportError(message: 'generation_failed'));
       }

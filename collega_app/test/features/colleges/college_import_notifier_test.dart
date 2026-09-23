@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
+import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_client.dart';
 import 'package:collega_app/core/network/api_providers.dart';
@@ -350,6 +352,48 @@ void main() {
 
         // Pas de _connectSse appelé → refresh non déclenché
         expect(apiClient.refreshCalls, 0);
+      },
+    );
+    test(
+      'import (ou réimport) terminé → les nouvelles fiches du collège arrivent dans Drift (revue 8.7)',
+      () async {
+        final repo = _FakeCollegeImportRepository(
+          statusOverride: CollegeStatusResponse(
+            collegeId: 'college-uuid-15',
+            refId: 15,
+            status: 'generation_complete',
+            ocrProgress: 0,
+          ),
+        );
+        final db = _makeInMemoryDb();
+        addTearDown(db.close);
+        final fetched = Completer<void>();
+        final container = ProviderContainer(
+          overrides: [
+            collegeImportRepositoryProvider.overrideWithValue(repo),
+            secureStorageProvider.overrideWithValue(const FlutterSecureStorage()),
+            databaseProvider.overrideWithValue(db),
+            apiClientProvider.overrideWithValue(_FakeApiClient()),
+            collegeCardsFetcherProvider.overrideWithValue((id) async {
+              if (!fetched.isCompleted) scheduleMicrotask(fetched.complete);
+              return [
+                FlashCardModel(
+                  id: 'new-1', itemId: 'i1', collegeId: id, cardType: 'qa', rang: 'A',
+                  recto: 'Q', verso: 'R', ocrConfidenceScore: 0.9, lowConfidence: false,
+                ),
+              ];
+            }),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await container.read(collegeImportProvider.notifier).reconnectIfActive('college-uuid-15');
+        await fetched.future;
+        await pumpEventQueue();
+        final ids = (await db.select(db.flashCards).get()).map((c) => c.id);
+        expect(ids, ['new-1']);
+        expect(container.read(collegeDataVersionProvider('college-uuid-15')), 1,
+            reason: 'le détail ouvert se recharge');
       },
     );
     test(

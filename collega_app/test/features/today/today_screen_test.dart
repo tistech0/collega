@@ -98,7 +98,7 @@ Widget _app(TodayNotifier Function() notifier, {List<String>? visited, double te
   final router = GoRouter(routes: [
     GoRoute(path: '/', builder: (_, __) => TodayScreen(now: () => _date)),
     GoRoute(path: '/colleges', builder: (_, __) { visited?.add('/colleges'); return const SizedBox(); }),
-    GoRoute(path: '/colleges/:ref', builder: (_, s) { visited?.add('/colleges/${s.pathParameters['ref']}'); return const SizedBox(); }),
+    GoRoute(path: '/home/colleges/:ref', builder: (_, s) { visited?.add('/home/colleges/${s.pathParameters['ref']}'); return const SizedBox(); }),
     GoRoute(path: '/drill', builder: (_, s) { visited?.add('/drill'); return const SizedBox(); }),
     GoRoute(path: '/search', builder: (_, __) { visited?.add('/search'); return const SizedBox(); }),
   ]);
@@ -267,7 +267,7 @@ void main() {
       expect(find.text('164 fiches à découvrir'), findsOneWidget);
       await tester.tap(find.text('Pneumologie').last);
       await tester.pumpAndSettle();
-      expect(visited, ['/colleges/34']);
+      expect(visited, ['/home/colleges/34']);
     });
   });
 

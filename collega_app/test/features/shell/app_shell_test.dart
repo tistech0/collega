@@ -22,6 +22,13 @@ class _Legacy extends StatelessWidget {
       );
 }
 
+/// Écran Collega UI : réserve lui-même la tab bar (CgPage.reserveTabBar).
+class _Migrated extends StatelessWidget {
+  const _Migrated();
+  @override
+  Widget build(BuildContext context) => const SizedBox.expand(key: Key('migrated'));
+}
+
 Widget _app(String initial, {List<int>? reselected}) {
   final router = GoRouter(initialLocation: initial, routes: [
     ShellRoute(
@@ -32,8 +39,11 @@ Widget _app(String initial, {List<int>? reselected}) {
           r?.addListener(() => reselected?.add(r.index));
           return const SizedBox.expand();
         })),
-        GoRoute(path: '/colleges', builder: (_, __) => const _Legacy()),
-        GoRoute(path: '/colleges/3', builder: (_, __) => const _Legacy()),
+        GoRoute(path: '/colleges', builder: (_, __) => const _Migrated()),
+        GoRoute(path: '/colleges/3', builder: (_, __) => const _Migrated()),
+        GoRoute(path: '/colleges/3/items/i1', builder: (_, __) => const _Legacy()),
+        GoRoute(path: '/home/colleges/3', builder: (_, __) => const _Migrated()),
+        GoRoute(path: '/home/colleges/3/items/i1', builder: (_, __) => const _Legacy()),
         GoRoute(path: '/progress', builder: (_, __) => const SizedBox.expand()),
         GoRoute(path: '/profile', builder: (_, __) => const SizedBox.expand()),
       ],
@@ -54,12 +64,34 @@ void main() {
 
   testWidgets('écran non migré : sa barre du bas reste au-dessus de la tab bar et tapable', (tester) async {
     phone(tester);
-    await tester.pumpWidget(_app('/colleges/3'));
+    await tester.pumpWidget(_app('/colleges/3/items/i1'));
     await tester.pumpAndSettle();
     final launch = tester.getRect(find.byKey(const Key('launch')));
     const capsuleTop = 844 - 34 - CgSpace.tabBarBottom - CgSpace.tabBarHeight;
     expect(launch.bottom, lessThanOrEqualTo(capsuleTop));
     await tester.tap(find.byKey(const Key('launch'))); // atteint le bouton, pas la tab bar
+  });
+
+  for (final path in ['/colleges', '/colleges/3']) {
+    testWidgets('Bibliothèque et détail collège (8.6/8.7) : pleine hauteur, safe area intacte ($path)', (tester) async {
+      phone(tester);
+      await tester.pumpWidget(_app(path));
+      await tester.pumpAndSettle();
+      // Sinon la place de la tab bar est réservée deux fois (revue 8.6, bloquant).
+      expect(tester.getRect(find.byKey(const Key('migrated'))).bottom, 844);
+      final context = tester.element(find.byKey(const Key('migrated')));
+      expect(MediaQuery.paddingOf(context).bottom, 34);
+    });
+  }
+
+  testWidgets('collège ouvert depuis Aujourd’hui : onglet Aujourd’hui actif, item non migré protégé', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(_app('/home/colleges/3/items/i1'));
+    await tester.pumpAndSettle();
+    expect(AppShell.indexOf('/home/colleges/3'), 0);
+    final launch = tester.getRect(find.byKey(const Key('launch')));
+    const capsuleTop = 844 - 34 - CgSpace.tabBarBottom - CgSpace.tabBarHeight;
+    expect(launch.bottom, lessThanOrEqualTo(capsuleTop));
   });
 
   testWidgets('onglet actif re-tapé : signal « remonter en haut »', (tester) async {
@@ -78,7 +110,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Bibliothèque'));
     await tester.pumpAndSettle();
-    final router = GoRouter.of(tester.element(find.byType(_Legacy)));
+    final router = GoRouter.of(tester.element(find.byType(_Migrated)));
     expect(router.routerDelegate.currentConfiguration.uri.path, '/colleges');
   });
 }

@@ -16,6 +16,7 @@ class _FakeCollegesRepository extends CollegesRepository {
 
   final List<UserCollegeStatus> _result;
   bool offline;
+  bool serverError = false;
 
   @override
   Future<List<UserCollegeStatus>> getUserColleges() async {
@@ -23,6 +24,12 @@ class _FakeCollegesRepository extends CollegesRepository {
       throw DioException(
         requestOptions: RequestOptions(path: '/v1/colleges'),
         type: DioExceptionType.connectionError,
+      );
+    }
+    if (serverError) {
+      throw DioException(
+        requestOptions: RequestOptions(path: '/v1/colleges'),
+        type: DioExceptionType.badResponse,
       );
     }
     return _result;
@@ -103,6 +110,30 @@ void main() {
       final cancero = entries.firstWhere((e) => e.catalog.refId == 3);
       expect(cancero.isGenerationComplete, isTrue);
       expect(cancero.userStatus!.totalCards, 10);
+      expect(offline.read(collegesProvider.notifier).isOffline, isTrue,
+          reason: 'la Bibliothèque affiche « Hors connexion »');
+    });
+
+    test('erreur serveur (500) : cache servi mais pas « hors connexion »', () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final repo = _FakeCollegesRepository(result: [imported]);
+      final online = _makeContainer(repo, db: db);
+      await online.read(collegesProvider.future);
+      online.dispose();
+      repo.serverError = true;
+      final c = _makeContainer(repo, db: db);
+      addTearDown(c.dispose);
+      final entries = await c.read(collegesProvider.future);
+      expect(entries.firstWhere((e) => e.catalog.refId == 3).isImported, isTrue);
+      expect(c.read(collegesProvider.notifier).isOffline, isFalse);
+    });
+
+    test('liste fraîche du serveur → pas hors-ligne', () async {
+      final container = _makeContainer(_FakeCollegesRepository(result: [imported]));
+      addTearDown(container.dispose);
+      await container.read(collegesProvider.future);
+      expect(container.read(collegesProvider.notifier).isOffline, isFalse);
     });
 
     test('sans cache, l’échec réseau remonte (l’écran affiche son état d’erreur)', () async {

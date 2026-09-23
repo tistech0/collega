@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import 'package:collega_app/core/ui/foundation/cg_icon.dart';
 import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/features/colleges/colleges_import_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
@@ -96,7 +97,7 @@ class _CollegeImportScreenState extends ConsumerState<CollegeImportScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: AppSpacing.sectionSpacing),
-            Icon(_catalogEntry.icon, size: 64, color: AppColors.primary),
+            CgIcon(_catalogEntry.icon, size: 64, color: AppColors.primary),
             const SizedBox(height: AppSpacing.sectionSpacing),
             Text(
               _catalogEntry.name,

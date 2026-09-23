@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
+import 'package:collega_app/core/network/network_errors.dart';
 import 'package:collega_app/features/colleges/data/colleges_repository.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
@@ -14,9 +15,16 @@ final collegesRepositoryProvider = Provider<CollegesRepository>(
 );
 
 class CollegesNotifier extends AsyncNotifier<List<CollegeListEntry>> {
+  bool _offline = false;
+
+  /// La dernière liste vient du cache local parce que le réseau manque : la
+  /// Bibliothèque affiche « Hors connexion » (pas sur une erreur serveur).
+  bool get isOffline => _offline;
+
   @override
   Future<List<CollegeListEntry>> build() async {
-    final imported = await _loadUserColleges();
+    final (imported, offline) = await _loadUserColleges();
+    _offline = offline;
     final importedByRefId = {for (final s in imported) s.refId: s};
     return kCollegeCatalog
         .map(
@@ -32,7 +40,7 @@ class CollegesNotifier extends AsyncNotifier<List<CollegeListEntry>> {
 extension on CollegesNotifier {
   /// Réseau d'abord (et mise en cache), sinon derniers collèges connus (hors-ligne).
   /// Sans cache, l'erreur réseau remonte : l'écran affiche son état d'erreur.
-  Future<List<UserCollegeStatus>> _loadUserColleges() async {
+  Future<(List<UserCollegeStatus>, bool)> _loadUserColleges() async {
     final db = ref.read(databaseProvider);
     try {
       final fresh = await ref.read(collegesRepositoryProvider).getUserColleges();
@@ -50,11 +58,11 @@ extension on CollegesNotifier {
                 ),
             ]));
       });
-      return fresh;
-    } on DioException {
+      return (fresh, false);
+    } on DioException catch (e) {
       final cached = await db.select(db.userColleges).get();
       if (cached.isEmpty) rethrow;
-      return [
+      return ([
         for (final r in cached)
           UserCollegeStatus(
             refId: r.refId,
@@ -64,7 +72,7 @@ extension on CollegesNotifier {
             cardCountB: r.cardCountB,
             cardCountC: r.cardCountC,
           ),
-      ];
+      ], isNetworkUnreachable(e));
     }
   }
 }

@@ -126,19 +126,24 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/home', builder: (ctx, s) => const TodayScreen()),
           GoRoute(path: '/progress', builder: (ctx, s) => const ProgressScreen()),
           GoRoute(path: '/colleges', builder: (ctx, s) => const CollegesScreen()),
-          GoRoute(
-            path: '/colleges/:ref_id',
-            builder: (ctx, s) => CollegeDetailScreen(
-              refId: int.parse(s.pathParameters['ref_id']!),
+          // Détail collège et item : sous /colleges (Bibliothèque) ou sous /home
+          // (ouvert depuis Aujourd'hui : l'onglet actif et le retour suivent).
+          for (final base in ['/colleges', '/home/colleges']) ...[
+            GoRoute(
+              path: '$base/:ref_id',
+              builder: (ctx, s) => CollegeDetailScreen(
+                refId: int.parse(s.pathParameters['ref_id']!),
+                fromToday: base.startsWith('/home'),
+              ),
             ),
-          ),
-          GoRoute(
-            path: '/colleges/:ref_id/items/:item_id',
-            builder: (ctx, s) => ItemDetailScreen(
-              refId: int.parse(s.pathParameters['ref_id']!),
-              itemId: s.pathParameters['item_id']!,
+            GoRoute(
+              path: '$base/:ref_id/items/:item_id',
+              builder: (ctx, s) => ItemDetailScreen(
+                refId: int.parse(s.pathParameters['ref_id']!),
+                itemId: s.pathParameters['item_id']!,
+              ),
             ),
-          ),
+          ],
           GoRoute(path: '/profile', builder: (ctx, s) => const ProfileScreen()),
         ],
       ),

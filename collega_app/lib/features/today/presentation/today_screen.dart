@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/core/utils/epoch_day.dart';
 import 'package:collega_app/core/utils/fr_dates.dart';
+import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/shell/tab_reselect.dart';
@@ -163,7 +164,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
               CgListRow(
                 title: college.name,
                 subtitle: _collegeSubtitle(college),
-                leading: const CgRowIcon(CgIcons.library),
+                leading: CgRowIcon(collegeCatalogEntry(college.refId)?.icon ?? CgIcons.library),
                 trailing: CgRowTrailing.chevron,
                 progress: CgRankBar(
                   mastered: college.stats.maitrise,
@@ -172,7 +173,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                   unseen: college.stats.notSeen,
                 ),
                 // push : le détail garde son retour vers Aujourd'hui.
-                onTap: () => context.push('/colleges/${college.refId}'),
+                onTap: () => context.push('/home/colleges/${college.refId}'),
               ),
           ]),
         ],

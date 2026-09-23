@@ -17,11 +17,12 @@ class AppShell extends StatefulWidget {
 
   static const paths = ['/home', '/colleges', '/progress', '/profile'];
 
-  /// Écrans pas encore migrés vers Collega UI (8.6, 8.14) : leur Scaffold ne
-  /// connaît pas la tab bar flottante. Leur contenu s'arrête au-dessus de la
-  /// capsule (un simple padding MediaQuery ne suffit pas : une barre posée en
-  /// bottomNavigationBar sans SafeArea finirait sous la capsule, intapable).
-  static const _legacyPaths = ['/colleges', '/profile'];
+  /// Écrans pas encore migrés vers Collega UI (détail d'item 8.11, Profil 8.14) :
+  /// leur Scaffold ne connaît pas la tab bar flottante. Leur contenu s'arrête
+  /// au-dessus de la capsule (un simple padding MediaQuery ne suffit pas : une
+  /// barre posée en bottomNavigationBar sans SafeArea finirait sous la capsule,
+  /// intapable). Les écrans migrés la réservent eux-mêmes (`CgPage.reserveTabBar`).
+  static final _legacyPattern = RegExp(r'^/(profile|(home/)?colleges/[^/]+/items/)');
 
   static int indexOf(String location) {
     for (var i = paths.length - 1; i >= 0; i--) {
@@ -56,7 +57,7 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final legacy = AppShell._legacyPaths.any(widget.location.startsWith);
+    final legacy = AppShell._legacyPattern.hasMatch(widget.location);
     Widget content = widget.child;
     if (legacy) {
       content = Padding(

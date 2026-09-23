@@ -42,15 +42,25 @@ AppDatabase _makeInMemoryDb() {
   return AppDatabase.forTesting(NativeDatabase.memory());
 }
 
-ProviderContainer _makeContainer(_FakeCollegeDetailRepository repo) {
+ProviderContainer _makeContainer(
+  _FakeCollegeDetailRepository repo, {
+  AppDatabase? db,
+  CollegeCardsFetcher? cards,
+}) {
   return ProviderContainer(
     overrides: [
       collegeDetailRepositoryProvider.overrideWithValue(repo),
       secureStorageProvider.overrideWithValue(const FlutterSecureStorage()),
-      databaseProvider.overrideWithValue(_makeInMemoryDb()),
+      databaseProvider.overrideWithValue(db ?? _makeInMemoryDb()),
+      collegeCardsFetcherProvider.overrideWithValue(cards ?? (_) async => const []),
     ],
   );
 }
+
+FlashCardModel _card(String id, String itemId) => FlashCardModel(
+      id: id, itemId: itemId, collegeId: 'college-1', cardType: 'qa', rang: 'A',
+      recto: 'Q', verso: 'R', ocrConfidenceScore: 0.9, lowConfidence: false,
+    );
 
 const _testItem = ItemModel(
   id: 'item-1',
@@ -138,6 +148,45 @@ void main() {
       final loaded = result as CollegeDetailLoaded;
       expect(loaded.items.length, 1);
       expect(loaded.items.first.id, 'item-drift-1');
+    });
+
+    test('DioException sans cache Drift → l’erreur réseau remonte (pas « aucune fiche »)', () async {
+      final repo = _FakeCollegeDetailRepository(
+        throwOnGetItems: DioException(
+          requestOptions: RequestOptions(path: '/v1/colleges/college-1/items'),
+          type: DioExceptionType.connectionError,
+        ),
+      );
+      final container = _makeContainer(repo);
+      addTearDown(container.dispose);
+      await expectLater(
+        container.read(collegeDetailProvider('college-1').future),
+        throwsA(isA<DioException>()),
+      );
+    });
+
+    test('en ligne : les fiches du collège sont synchronisées dans Drift avant l’affichage (revue 8.7)', () async {
+      final db = _makeInMemoryDb();
+      addTearDown(db.close);
+      final container = _makeContainer(
+        _FakeCollegeDetailRepository(itemsResult: [_testItem]),
+        db: db,
+        cards: (_) async => [_card('k1', 'item-1'), _card('k2', 'item-1')],
+      );
+      addTearDown(container.dispose);
+      await container.read(collegeDetailProvider('college-1').future);
+      final local = await db.select(db.flashCards).get();
+      expect(local.map((c) => c.id), unorderedEquals(['k1', 'k2']));
+    });
+
+    test('fiches injoignables mais items reçus : le détail s’affiche quand même', () async {
+      final container = _makeContainer(
+        _FakeCollegeDetailRepository(itemsResult: [_testItem]),
+        cards: (_) async => throw DioException(requestOptions: RequestOptions(path: '/cards')),
+      );
+      addTearDown(container.dispose);
+      final result = await container.read(collegeDetailProvider('college-1').future);
+      expect(result, isA<CollegeDetailLoaded>());
     });
   });
 }
