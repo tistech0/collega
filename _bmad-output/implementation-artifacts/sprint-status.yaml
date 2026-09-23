@@ -151,8 +151,8 @@ development_status:
   8-3-shell-aujourdhui: done                           # [2026-09-22 validée sur iPhone (semaine actualisée) ; reprise couverte par tests]
   8-4-drill: done                                    # [2026-09-22 drill plein écran + chrono 3 choix (demande utilisateur) + revue (7 correctifs) ; validation iPhone groupée avec 8.5]
   8-5-fin-de-session: done              # [2026-09-23 validée sur iPhone avec 8.4]
-  8-6-bibliotheque: review                            # [2026-09-23 livrée avec 8.7 (demande utilisateur) + revue adversariale corrigée]
-  8-7-detail-college: review
+  8-6-bibliotheque: done                              # [2026-09-23 validée iPhone avec 8.7]
+  8-7-detail-college: done
   8-8-progression: backlog
   8-9-planning: backlog
   8-10-recherche: backlog

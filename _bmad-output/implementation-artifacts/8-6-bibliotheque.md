@@ -1,6 +1,6 @@
 # Story 8.6 : Bibliothèque (maquette 5) — livrée avec la 8.7
 
-Status: review
+Status: done
 
 > Regroupée avec la 8.7 (Détail collège) à la demande de l'utilisateur (2026-09-23) :
 > un seul parcours, une seule validation iPhone.

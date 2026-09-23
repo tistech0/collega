@@ -1,6 +1,6 @@
 # Story 8.7 : Détail collège (maquette 6) — livrée avec la 8.6
 
-Status: review
+Status: done
 
 ## Story
 
