@@ -401,6 +401,28 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('balayage retour depuis le bord gauche : « Quitter ? », jamais de verdict', (tester) async {
+    _phone(tester);
+    final repo = _Repo([_card(0), _card(1)]);
+    await tester.pumpWidget(_app(repo));
+    await tester.pumpAndSettle();
+    await tester.dragFrom(const Offset(4, 500), const Offset(260, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('Quitter ?'), findsOneWidget);
+  });
+
+  testWidgets('accessibilité au verso : réponse et verdicts (8.15)', (tester) async {
+    _phone(tester);
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(_app(_Repo([_card(0), _card(1)])));
+    await tester.pumpAndSettle();
+    await _flip(tester);
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
   testWidgets('Dynamic Type 1,6 sur 375 : aucun débordement', (tester) async {
     _phone(tester, width: 375, height: 812);
     await tester.pumpWidget(_app(_Repo([_card(0, type: 'definition')])));

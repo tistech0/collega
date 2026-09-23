@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart' show CupertinoScrollbar;
+import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:collega_app/core/ui/components/cg_verdict_bar.dart';
@@ -312,6 +313,8 @@ class CgDrillCardState extends State<CgDrillCard> with TickerProviderStateMixin 
     });
     if (_questionScroll.hasClients) _questionScroll.jumpTo(0);
     _flip.forward();
+    // VoiceOver : le focus reste sur la question ; la réponse est dite tout de suite.
+    SemanticsService.announce('Réponse : ${widget.answer}', Directionality.of(context));
     widget.onFlip?.call();
   }
 

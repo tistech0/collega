@@ -47,6 +47,14 @@ double _inlineTitleOpacity(WidgetTester tester) =>
     tester.widget<AnimatedOpacity>(find.byKey(const ValueKey('cg-page-inline-title'))).opacity;
 
 void main() {
+  testWidgets('CgPage peint son fond : l’écran dessous ne transparaît pas pendant un glissement (8.15)',
+      (tester) async {
+    await _pumpScreen(tester, CgPage(title: 'Titre', children: _rows(2)));
+    final root = find.descendant(of: find.byType(CgPage), matching: find.byType(ColoredBox)).first;
+    expect(tester.widget<ColoredBox>(root).color, c.ground);
+    expect(tester.getSize(root), _screen);
+  });
+
   group('CgHeader.large', () {
     testWidgets('titre titleL ink, sous-titre bodyS ink2, trailing 44 × 44', (tester) async {
       await tester.pumpWidget(cgTestApp(const Align(

@@ -22,4 +22,4 @@ lisibles ; en tant que développeur, plus aucune trace du design system v1.
 
 - [x] T1 Garde-fou + retrait shadcn / thème v1 / orphelins ; `MaterialApp.router` ; tests routeur
 - [x] T2 Guidelines d'accessibilité sur les 5 écrans cœur + correctifs
-- [ ] T3 Contrastes des tokens + goldens ; revue adversariale ; build iPhone
+- [x] T3 Contrastes des tokens + goldens ; revue adversariale ; build iPhone

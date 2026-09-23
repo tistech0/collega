@@ -76,17 +76,26 @@ void main() {
       expect(rect.bottom, _screen.height - CgSpace.tabBarBottom - 34);
     });
 
-    testWidgets('fond surface à 78 % + flou σ 24 + ombre douce', (tester) async {
+    testWidgets('fond surface à 90 % (libellés lisibles, revue 8.15) + flou σ 24 + ombre douce', (tester) async {
       await _pumpBar(tester);
       final box = tester.widget<DecoratedBox>(
         find.descendant(of: _capsule, matching: find.byKey(const ValueKey('cg-tab-fill'))),
       );
       final deco = box.decoration as BoxDecoration;
-      expect(deco.color, c.surface.withValues(alpha: 0.78));
+      expect(deco.color, c.surface.withValues(alpha: 0.9));
       final shadowBox = tester.widget<DecoratedBox>(_capsule);
       expect((shadowBox.decoration as BoxDecoration).boxShadow, isNotEmpty);
       final blur = tester.widget<BackdropFilter>(find.descendant(of: _capsule, matching: find.byType(BackdropFilter)));
       expect(blur.filter, ImageFilter.blur(sigmaX: 24, sigmaY: 24));
+    });
+
+    testWidgets('accessibilité : onglets étiquetés, 44 pt, libellés contrastés (8.15)', (tester) async {
+      final handle = tester.ensureSemantics();
+      await _pumpBar(tester, current: 1);
+      await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      handle.dispose();
     });
 
     testWidgets('4 cellules : icône 22 + libellé tab ; actif accent, inactifs ink3', (tester) async {

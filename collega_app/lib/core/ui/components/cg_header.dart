@@ -408,7 +408,9 @@ class _CgPageState extends State<CgPage> {
       ]),
     );
 
-    return Column(children: [
+    // La page peint son fond : pendant un glissement (push, retour par balayage),
+    // l'écran dessous ne transparaît pas à travers la liste.
+    return ColoredBox(color: c.ground, child: Column(children: [
       Expanded(
         child: Stack(children: [
           Positioned.fill(child: scroll),
@@ -428,6 +430,6 @@ class _CgPageState extends State<CgPage> {
             ),
           ),
         ),
-    ]);
+    ]));
   }
 }

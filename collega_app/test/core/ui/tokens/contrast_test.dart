@@ -1,6 +1,7 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:collega_app/core/ui/components/cg_tab_bar.dart';
 import 'package:collega_app/core/ui/tokens/cg_colors.dart';
 import 'package:collega_app/core/ui/tokens/contrast.dart';
 
@@ -34,6 +35,13 @@ void main() {
     ('ground / ink (toast)', c.ground, c.ink, 4.5),
     ('ink2 / soft (segmented, recherche)', c.ink2, c.soft, 4.5),
   ];
+
+  test('tab bar translucide : libellé inactif ≥ 4,5:1 au-dessus du contenu le plus sombre', () {
+    for (final under in [c.ink, c.accent, c.review]) {
+      final fill = Color.alphaBlend(c.surface.withValues(alpha: CgTabBar.fillAlpha), under);
+      expect(contrastRatio(c.ink3, fill), greaterThanOrEqualTo(4.5), reason: '$under');
+    }
+  });
 
   test('ink2 et ink3 restent deux niveaux distincts (≥ 1,4:1 entre eux)', () {
     expect(contrastRatio(c.ink2, c.ink3), greaterThanOrEqualTo(1.4));

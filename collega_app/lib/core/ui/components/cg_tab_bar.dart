@@ -20,7 +20,7 @@ class CgTabItem {
 }
 
 /// Navigation principale (spec v2 § CgTabBar) : capsule flottante, `surface` à
-/// 78 % + flou, pastille `accentSoft` qui glisse sous l'onglet actif.
+/// 90 % + flou, pastille `accentSoft` qui glisse sous l'onglet actif.
 ///
 /// À poser en bas d'un `Stack` (`Positioned(left: 0, right: 0, bottom: 0)`) :
 /// la barre porte elle-même ses marges et la safe area basse. Masquée dans le
@@ -55,7 +55,9 @@ class CgTabBar extends StatelessWidget {
       CgSpace.tabBarHeight + CgSpace.tabBarBottom + MediaQuery.paddingOf(context).bottom;
 
   /// Matière de la capsule (maquette `.tab`).
-  static const _fillAlpha = 0.78;
+  /// Opacité du fond : libellés inactifs (`ink3`) ≥ 4,5:1 même au-dessus du
+  /// contenu le plus sombre qui défile dessous (revue 8.15).
+  static const fillAlpha = 0.9;
   static const _blurSigma = 24.0;
   static const _shadowAlpha = 0.16;
   static const _shadowBlur = 30.0;
@@ -132,7 +134,7 @@ class CgTabBar extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
           child: DecoratedBox(
             key: const ValueKey('cg-tab-fill'),
-            decoration: BoxDecoration(color: c.surface.withValues(alpha: _fillAlpha)),
+            decoration: BoxDecoration(color: c.surface.withValues(alpha: fillAlpha)),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: _innerPadding),
               child: Stack(children: [

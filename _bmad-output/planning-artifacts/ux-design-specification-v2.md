@@ -405,7 +405,7 @@ Maquette de référence : `directions-v2/direction-d-fusion.html`.
 | `danger` / `warning` | `#B8352B` / `#D9822B` |
 | Police | Instrument Sans (Google Fonts, `google_fonts`) |
 | Rayons | `r-s` 10 pt, `r-l` 20 pt ; boutons 14 pt |
-| Tab bar | Capsule flottante, `surface` à 78 % + flou, 64 pt, 24 pt des bords |
+| Tab bar | Capsule flottante, `surface` à 90 % + flou (libellés inactifs ≥ 4,5:1, 8.15), 64 pt, 24 pt des bords |
 
 Contrastes à vérifier à la génération des tokens : `ink` sur `ground` ≈ 13:1, `ink2` sur `ground` ≈ 5.4:1, `accent` sur `ground` ≈ 6.2:1, `accent-ink` sur `accent` ≈ 6.9:1, `review` sur `ground` ≈ 3.1:1 (réservé aux surfaces et aux textes ≥ 18 pt ; en texte courant, utiliser `#9A5A16`).
 
@@ -524,7 +524,7 @@ flowchart TD
 **Rôle** : toute action. **Variantes** : `primary` (fond `accent`, texte `accent-ink`), `secondary` (fond `surface`, contour `line`), `quiet` (texte `accent`, sans fond), `destructive` (texte `danger`, réservé aux sheets), `inverse` (fond `accent-ink` sur bloc sarcelle). **Tailles** : 54 pt plein, 44 pt compact. **États** : repos, pressé (échelle .97, 150 ms), désactivé (`ink3`), chargement (spinner remplace le libellé, largeur figée). **Règle** : un `primary` par écran, ancré en bas s'il y a une action. **A11y** : libellé = verbe ; `Semantics(button: true)`.
 
 #### CgTabBar
-**Rôle** : navigation Aujourd'hui · Bibliothèque · Progression · Profil. **Anatomie** : capsule flottante 64 pt, 24 pt des bords, `surface` à 78 % + flou, 4 cellules icône + libellé 10,5 pt. **États** : onglet actif (icône et libellé `accent`, pastille `accent-soft`), inactif (`ink3`), masquée (drill, import en cours, sheets plein écran). **Comportement** : se réduit en pastille d'icônes au scroll vers le bas, se redéploie au scroll vers le haut (iOS 26) ; haptique léger au changement. **A11y** : `Semantics(selected)`, libellés lus.
+**Rôle** : navigation Aujourd'hui · Bibliothèque · Progression · Profil. **Anatomie** : capsule flottante 64 pt, 24 pt des bords, `surface` à 90 % + flou, 4 cellules icône + libellé 10,5 pt. **États** : onglet actif (icône et libellé `accent`, pastille `accent-soft`), inactif (`ink3`), masquée (drill, import en cours, sheets plein écran). **Comportement** : se réduit en pastille d'icônes au scroll vers le bas, se redéploie au scroll vers le haut (iOS 26) ; haptique léger au changement. **A11y** : `Semantics(selected)`, libellés lus.
 
 #### CgHeader
 **Rôle** : tête d'onglet. **Anatomie** : large title 34/700 + sous-titre `ink2` 15 (date, contexte) + action optionnelle à droite (44 × 44). **Variantes** : `large` (onglets), `inline` (titre 17/600 centré, écrans poussés), `back` (« ‹ Bibliothèque » en `accent`). **Comportement** : le large title se réduit en `inline` au scroll.

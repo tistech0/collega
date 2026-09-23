@@ -38,7 +38,6 @@ dependencies:
   flutter_svg: ^2.2.0 # wordmark + illustrations d'états (Collega UI, story 8.1)
 
   # Animations
-  flutter_animate: ^4.5.0
 
   # Secure storage (JWT tokens — Keychain iOS)
   flutter_secure_storage: ^9.2.2

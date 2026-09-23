@@ -82,10 +82,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(path: '/splash', builder: (ctx, s) => const _Splash()),
+      GoRoute(path: '/splash', pageBuilder: (ctx, s) => _instant(s, const _Splash())),
       // Ancienne adresse du planning (story 8.9 : sous Progression).
       GoRoute(path: '/planning/config', redirect: (ctx, s) => '/progress/planning'),
-      GoRoute(path: '/welcome', builder: (ctx, s) => const WelcomeScreen()),
+      GoRoute(path: '/welcome', pageBuilder: (ctx, s) => _instant(s, const WelcomeScreen())),
       GoRoute(path: '/demo', builder: (ctx, s) => const DemoScreen()),
       // Anciens liens (8.12) : la démo est un seul écran ; l'inscription est fermée.
       GoRoute(path: '/demo/drill', redirect: (ctx, s) => '/demo'),
@@ -105,7 +105,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(path: '/auth/login', builder: (ctx, s) => const AuthLoginScreen()),
-      GoRoute(path: '/paywall', builder: (ctx, s) => const PaywallScreen()),
+      GoRoute(path: '/paywall', pageBuilder: (ctx, s) => _instant(s, const PaywallScreen())),
       // Story 7.4 AC #9 — documents légaux bundlés (option B).
       GoRoute(
         path: '/legal/cgu',
@@ -138,11 +138,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Recherche : sheet depuis Aujourd'hui / Bibliothèque (story 8.10) ; ancien lien.
       GoRoute(path: '/search', redirect: (ctx, s) => '/home'),
       ShellRoute(
-        builder: (context, state, child) => AppShell(location: state.uri.path, child: child),
+        // Le cadre des onglets ne glisse jamais : seuls les écrans poussés dedans le font.
+        pageBuilder: (context, state, child) => _instant(state, AppShell(location: state.uri.path, child: child)),
         routes: [
-          GoRoute(path: '/home', builder: (ctx, s) => const TodayScreen()),
-          GoRoute(path: '/progress', builder: (ctx, s) => const ProgressScreen()),
-          GoRoute(path: '/colleges', builder: (ctx, s) => const CollegesScreen()),
+          GoRoute(path: '/home', pageBuilder: (ctx, s) => _instant(s, const TodayScreen())),
+          GoRoute(path: '/progress', pageBuilder: (ctx, s) => _instant(s, const ProgressScreen())),
+          GoRoute(path: '/colleges', pageBuilder: (ctx, s) => _instant(s, const CollegesScreen())),
           // Détail collège et item : sous l'onglet d'où ils sont ouverts
           // (Bibliothèque, Aujourd'hui, Progression) — onglet actif et retour suivent.
           for (final origin in CollegeDetailOrigin.values) ...[
@@ -164,7 +165,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ],
           GoRoute(path: '/progress/planning', builder: (ctx, s) => const PlanningScreen()),
-          GoRoute(path: '/profile', builder: (ctx, s) => const ProfileScreen()),
+          GoRoute(path: '/profile', pageBuilder: (ctx, s) => _instant(s, const ProfileScreen())),
         ],
       ),
     ],
@@ -172,6 +173,11 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.onDispose(router.dispose);
   return router;
 });
+
+/// Racines d'onglet et écrans d'entrée : remplacés sans glissement (un onglet iOS
+/// ne pousse pas d'écran) ; les écrans empilés gardent la transition iOS et le
+/// retour par balayage.
+Page<void> _instant(GoRouterState state, Widget child) => NoTransitionPage<void>(key: state.pageKey, child: child);
 
 /// Fond de l'app pendant la relecture de la session (quelques millisecondes).
 class _Splash extends StatelessWidget {

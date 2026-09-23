@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:collega_app/core/notifications/notifications_service.dart';
 import 'package:collega_app/core/router/app_router.dart';
-import 'package:collega_app/core/ui/theme/cg_theme.dart';
+import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/profile/domain/reminder_sync.dart';
 
@@ -44,6 +44,7 @@ class App extends ConsumerWidget {
           cupertinoOverrideTheme: buildCgCupertinoTheme(CgThemeData.light),
         ),
         routerConfig: router,
+        builder: collegaAppBuilder,
         debugShowCheckedModeBanner: false,
         // App en français uniquement : sélecteur de date iOS, libellés système.
         locale: const Locale('fr', 'FR'),
@@ -57,3 +58,10 @@ class App extends ConsumerWidget {
     );
   }
 }
+
+/// Texte courant Collega pour tout `Text` sans style explicite : sous MaterialApp,
+/// il hériterait sinon du style d'alerte (rouge, souligné jaune).
+Widget collegaAppBuilder(BuildContext context, Widget? child) => DefaultTextStyle(
+      style: CgType.body.copyWith(color: CgTheme.of(context).colors.ink),
+      child: child ?? const SizedBox.shrink(),
+    );

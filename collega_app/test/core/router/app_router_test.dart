@@ -17,6 +17,9 @@ import 'package:collega_app/features/auth/presentation/welcome_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_screen.dart';
 import 'package:collega_app/core/ui/components/cg_tab_bar.dart';
 import 'package:collega_app/features/today/presentation/today_screen.dart';
+import 'package:collega_app/features/planning/presentation/planning_screen.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageTransition;
+import 'package:collega_app/features/colleges/presentation/colleges_screen.dart';
 import 'package:collega_app/features/today/today_providers.dart';
 
 class _FakeAuthNotifier extends AuthNotifier {
@@ -78,6 +81,44 @@ Widget _buildApp(AuthState authState, AppDatabase db, {AuthNotifier Function()? 
 }
 
 void main() {
+  testWidgets('8.15 : changer d’onglet est immédiat (pas de glissement d’écran poussé)', (tester) async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(db.close);
+    await tester.pumpWidget(_buildApp(AuthState(user: _authedUser), db));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(TodayScreen), findsOneWidget);
+    final router = ProviderScope.containerOf(tester.element(find.byType(TodayScreen))).read(routerProvider);
+
+    router.go('/colleges');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(find.byType(TodayScreen), findsNothing);
+    expect(find.byType(CollegesScreen), findsOneWidget);
+    final x = tester.getTopLeft(find.byType(CollegesScreen)).dx;
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.getTopLeft(find.byType(CollegesScreen)).dx, x, reason: "déjà à sa place");
+  });
+
+  testWidgets('8.15 : un écran poussé dans un onglet garde la transition iOS (retour par balayage)', (tester) async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(db.close);
+    await tester.pumpWidget(_buildApp(AuthState(user: _authedUser), db));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    final router = ProviderScope.containerOf(tester.element(find.byType(TodayScreen))).read(routerProvider);
+    router.go('/progress');
+    await tester.pump();
+    router.push('/progress/planning');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(
+      find.ancestor(of: find.byType(PlanningScreen), matching: find.byType(CupertinoPageTransition)),
+      findsOneWidget,
+    );
+    await tester.pump(const Duration(seconds: 1));
+  });
+
   group('AppRouter — Story 7.1 R3 (redirect /demo si authentifié)', () {
     testWidgets('AC3: user authentifié sur /demo → Aujourd’hui rendu',
         (tester) async {

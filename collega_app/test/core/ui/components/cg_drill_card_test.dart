@@ -159,6 +159,24 @@ void main() {
       expect(flips, 1);
     });
 
+    testWidgets('verso : la réponse est annoncée à VoiceOver (revue 8.15)', (tester) async {
+      _phone(tester);
+      final announced = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
+        SystemChannels.accessibility,
+        (message) async {
+          final map = message as Map<dynamic, dynamic>;
+          if (map['type'] == 'announce') announced.add((map['data'] as Map<dynamic, dynamic>)['message'] as String);
+        },
+      );
+      addTearDown(() => tester.binding.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null));
+      await tester.pumpWidget(_card());
+      await tester.tap(find.text(_question));
+      await tester.pumpAndSettle();
+      expect(announced, ['Réponse : $_answer']);
+    });
+
     testWidgets('canFlip: false empêche le tap ; flip() public retourne quand même', (tester) async {
       _phone(tester);
       var flips = 0;
