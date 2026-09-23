@@ -39,6 +39,7 @@ def _make_college(user_id, status="processing", progress=3):
         generation_items_done=0,
         generation_items_total=None,
         generation_cards=0,
+        generation_preview=None,
     )
 
 
@@ -95,7 +96,7 @@ class TestStreamGenerationProgress:
         from app.main import app
 
         app.dependency_overrides[get_current_user] = lambda: user
-        steps = [(0, 3, 0), (1, 3, 5), (1, 3, 5), (3, 3, 14)]
+        steps = [(0, 3, 0, None), (1, 3, 5, '["Q1 ?"]'), (1, 3, 5, '["Q1 ?"]'), (3, 3, 14, '["Q3 ?", "Q2 ?"]')]
         polls = {"n": 0}
 
         class _Session:
@@ -103,7 +104,12 @@ class TestStreamGenerationProgress:
                 i = polls["n"]
                 polls["n"] += 1
                 if i < len(steps):
-                    college.generation_items_done, college.generation_items_total, college.generation_cards = steps[i]
+                    (
+                        college.generation_items_done,
+                        college.generation_items_total,
+                        college.generation_cards,
+                        college.generation_preview,
+                    ) = steps[i]
                 else:
                     college.status = "generation_complete"
                 return college
@@ -125,8 +131,8 @@ class TestStreamGenerationProgress:
         progress = [e["data"] for e in events if e["event"] == "generation_progress"]
         # Émis seulement quand ça change (le 3e poll identique ne réémet pas).
         assert progress == [
-            {"items_done": 0, "items_total": 3, "cards": 0},
-            {"items_done": 1, "items_total": 3, "cards": 5},
-            {"items_done": 3, "items_total": 3, "cards": 14},
+            {"items_done": 0, "items_total": 3, "cards": 0, "preview": []},
+            {"items_done": 1, "items_total": 3, "cards": 5, "preview": ["Q1 ?"]},
+            {"items_done": 3, "items_total": 3, "cards": 14, "preview": ["Q3 ?", "Q2 ?"]},
         ]
         assert events[-1]["event"] == "generation_complete"

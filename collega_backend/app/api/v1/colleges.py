@@ -611,6 +611,17 @@ async def get_college_status(
     )
 
 
+def _preview(raw: str | None) -> list[str]:
+    """Aperçu des dernières fiches (JSON en base) ; illisible → vide."""
+    if not raw:
+        return []
+    try:
+        value = json.loads(raw)
+    except ValueError:
+        return []
+    return [q for q in value if isinstance(q, str)] if isinstance(value, list) else []
+
+
 @router.get("/colleges/{college_id}/stream")
 async def stream_college_progress(
     college_id: uuid.UUID,
@@ -627,7 +638,7 @@ async def stream_college_progress(
 
     async def event_generator():  # type: ignore[return]
         last_progress = -1
-        last_generation: tuple[int, int, int] | None = None
+        last_generation: tuple[int, int, int, str | None] | None = None
         ocr_complete_emitted = False
         loop = asyncio.get_event_loop()
         start_time = loop.time()
@@ -658,14 +669,19 @@ async def stream_college_progress(
                     last_emit = now
 
                 # Story 8.13 : fiches générées au fil des items (seulement pendant la génération).
-                total = getattr(c, "generation_items_total", None)
+                total = c.generation_items_total
                 if c.status == "ocr_complete" and total is not None:
-                    current = (c.generation_items_done, total, c.generation_cards)
+                    current = (c.generation_items_done, total, c.generation_cards, c.generation_preview)
                     if current != last_generation:
                         last_generation = current
                         event = {
                             "event": "generation_progress",
-                            "data": {"items_done": current[0], "items_total": current[1], "cards": current[2]},
+                            "data": {
+                                "items_done": current[0],
+                                "items_total": current[1],
+                                "cards": current[2],
+                                "preview": _preview(current[3]),
+                            },
                         }
                         yield f"data: {json.dumps(event)}\n\n"
                         last_emit = now

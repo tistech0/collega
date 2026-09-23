@@ -311,12 +311,15 @@ class TestGenerationProgress:
 
         calls = []
 
-        async def reporter(cid, *, items_done, items_total, cards):
-            calls.append((cid, items_done, items_total, cards))
+        async def reporter(cid, *, items_done, items_total, cards, preview=()):
+            calls.append((cid, items_done, items_total, cards, list(preview)))
 
         generator = CardGenerator(progress_reporter=reporter)
         two_cards = CardGenResult(
-            cards=[FlashCardData(card_type="classique", recto="Q?", verso="R")] * 2,
+            cards=[
+                FlashCardData(card_type="classique", recto="Q1 ?", verso="R"),
+                FlashCardData(card_type="classique", recto="Q2 ?", verso="R"),
+            ],
             input_tokens=1,
             output_tokens=1,
         )
@@ -325,11 +328,12 @@ class TestGenerationProgress:
                 with patch.object(generator._claude, "generate_cards_for_item", new=AsyncMock(return_value=two_cards)):
                     await generator.generate_for_college(db, college_id, job.id, "/f.pdf")
 
+        # Aperçu : questions des 3 dernières fiches générées, la plus récente d'abord.
         assert calls == [
-            (college_id, 0, 3, 0),
-            (college_id, 1, 3, 2),
-            (college_id, 2, 3, 4),
-            (college_id, 3, 3, 6),
+            (college_id, 0, 3, 0, []),
+            (college_id, 1, 3, 2, ["Q2 ?", "Q1 ?"]),
+            (college_id, 2, 3, 4, ["Q2 ?", "Q1 ?", "Q2 ?"]),
+            (college_id, 3, 3, 6, ["Q2 ?", "Q1 ?", "Q2 ?"]),
         ]
 
     async def test_un_echec_de_publication_n_arrete_pas_la_generation(self):
@@ -342,7 +346,7 @@ class TestGenerationProgress:
         scalars_result = MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[make_item(1)]))))
         db.execute = AsyncMock(return_value=scalars_result)
 
-        async def failing(cid, *, items_done, items_total, cards):
+        async def failing(cid, *, items_done, items_total, cards, preview=()):
             raise RuntimeError("db down")
 
         generator = CardGenerator(progress_reporter=failing)

@@ -147,6 +147,7 @@ async def _run_ocr(
     college.generation_items_done = 0
     college.generation_items_total = None
     college.generation_cards = 0
+    college.generation_preview = None
     job.status = "processing"
     await record_job_event(db, job.id, "ocr_started", total=total_pages)
     await db.commit()
