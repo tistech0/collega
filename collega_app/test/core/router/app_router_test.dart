@@ -3,11 +3,10 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/router/app_router.dart';
-import 'package:collega_app/core/theme/app_theme.dart';
+import 'package:collega_app/core/ui/theme/cg_theme.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
@@ -70,8 +69,8 @@ Widget _buildApp(AuthState authState, AppDatabase db, {AuthNotifier Function()? 
       databaseProvider.overrideWithValue(db),
     ],
     child: Consumer(builder: (ctx, ref, _) {
-      return ShadApp.router(
-        theme: buildShadTheme(),
+      return MaterialApp.router(
+        theme: buildCgMaterialTheme(CgThemeData.light),
         routerConfig: ref.watch(routerProvider),
       );
     }),
@@ -123,7 +122,7 @@ void main() {
       expect(find.byType(DemoScreen), findsOneWidget);
       router.go('/auth/register');
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(seconds: 1)); // fin de la transition de page
       expect(find.byType(WelcomeScreen), findsOneWidget, reason: 'ancien lien : retour à l’entrée');
     });
   });

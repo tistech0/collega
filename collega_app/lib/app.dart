@@ -1,11 +1,9 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'package:collega_app/core/notifications/notifications_service.dart';
 import 'package:collega_app/core/router/app_router.dart';
-import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/core/ui/theme/cg_theme.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/profile/domain/reminder_sync.dart';
@@ -36,14 +34,15 @@ class App extends ConsumerWidget {
       }
     });
 
-    // Collega UI (story 8.1) : CgTheme au-dessus des routes, Material réduit à un
-    // conteneur technique. Les écrans shadcn gardent leurs couleurs jusqu'à leur
-    // migration (8.3 → 8.14).
+    // Collega UI : CgTheme au-dessus des routes ; MaterialApp n'est qu'un conteneur
+    // technique (localisations, Navigator), neutralisé par le thème Collega.
     return CgTheme(
       data: CgThemeData.light,
-      child: ShadApp.router(
+      child: MaterialApp.router(
         title: 'Collega',
-        theme: buildShadTheme(),
+        theme: buildCgMaterialTheme(CgThemeData.light).copyWith(
+          cupertinoOverrideTheme: buildCgCupertinoTheme(CgThemeData.light),
+        ),
         routerConfig: router,
         debugShowCheckedModeBanner: false,
         // App en français uniquement : sélecteur de date iOS, libellés système.
@@ -54,9 +53,6 @@ class App extends ConsumerWidget {
           GlobalCupertinoLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
         ],
-        materialThemeBuilder: (context, theme) => neutralizeMaterial(theme).copyWith(
-          cupertinoOverrideTheme: buildCgCupertinoTheme(CgThemeData.light),
-        ),
       ),
     );
   }
