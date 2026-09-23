@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>b3uyfcgyw</task-id>\n<tool-use-id>toolu_018ee8xHne3Xy2E4S4KKoNfb</tool-use-id>\n<output-file>/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tasks/b3uyfcgyw.output</output-file>\n<status>failed</status>\n<summary>Background command \"cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" &amp;&amp; ./tool/run_device.sh --release -d 00008110-000115D43499801E --dart-define=COLLEGA_TEST_TOOLS=true &gt; /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log 2&gt;&amp;1\" failed with exit code 2</summary>\n</task-notification>",
+  "summary": "<task-notification> <task-id>b3uyfcgyw</task-id> <tool-use-id>toolu_018ee8xHne3Xy2E4S4KKoNfb</tool-use-id> <output-file>/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tasks/b3uyfcgy",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "07795cc315811b9c36b8d1d5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T09:16:32.676Z",
+  "stored_at": "2026-09-23T09:16:32.677Z",
+  "low_signal": true
+}
