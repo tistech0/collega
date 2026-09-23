@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && for d in test/features/profile test/features/auth test/features/legal test/features/shell test/core/router; do echo \"== $d\"; flutter test $d 2>&1 | tail -4; done",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && for d in test/features/profile test/features/auth test/features/legal test/features/shell test/core/router; do echo \"== $d\"; flutter test $d 2>&1 | tail -4; done: rift échoue mais serveur OK → state quand même reset (best-effort) 00:03 +29: /Users/lesurma",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && for d in test/features/profile test/features/auth test/features/legal test/features/shell test/core/router; do echo \"== $d\"; flutter test $d 2>&1 | tail -4; done: rift échoue mais serveur OK → state quand même reset (best-effort) 00:03 +29: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/auth/auth_providers_test.dart: (tearDownAll) 00:03 +29: loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/auth/entry_screens_test.dart 00:03 +29: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/auth/entry_screens_test.dart: (setUpAll) 00:03 +29: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/auth/entry_screens_test.dart: écran de marque wordmark, « Se connecter » (primaire), « Essayer la démo », beta privée 00:03 +30: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/auth/paywall_screen_test.dart: marque, bénéfices, prix du Store, un seul primaire « S’abonner » 00:03 +31: /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/features/auth",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c4c16b4e93c38dc21e329a8b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:45:03.192Z",
+  "stored_at": "2026-09-23T10:45:03.193Z"
+}

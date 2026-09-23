@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rnE \"shadcn|google_fonts|GoogleFonts|app_theme|ErrorView|DrillEvaluationBar|drill_evaluation_bar|error_view|Shad[A-Z]\" --include=*.dart --include=*.yaml --include=*.sh --include=*.rb --include=Podfile* --include=*.lock . ../scripts ../tools 2>/dev/null | grep -v \"^./build\\|\\.dart_tool\" | head -40; ls widgetbook; ls ios",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rnE \"shadcn|google_fonts|GoogleFonts|app_theme|ErrorView|DrillEvaluationBar|drill_evaluation_bar|error_view|Shad[A-Z]\" --include=*.dart --include=*.yaml --include=*.sh --include=*.rb --include=Podfile* --include=*.lock . ../scripts ../tools 2>/dev/n",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rnE \"shadcn|google_fonts|GoogleFonts|app_theme|ErrorView|DrillEvaluationBar|drill_evaluation_bar|error_view|Shad[A-Z]\" --include=*.dart --include=*.yaml --include=*.sh --include=*.rb --include=Podfile* --include=*.lock . ../scripts ../tools 2>/dev/null | grep -v \"^./build\\|\\.dart_tool\" | head -40; ls widgetbook; ls ios: (eval):1: no matches found: --include=*.dart README.md analysis_options.yaml build lib pubspec.lock pubspec.yaml test web Flutter Podfile Podfile.lock Pods Runner Runner.xcodeproj Runner.xcworkspace RunnerTests",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9499136857628883d93a301f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:08:10.694Z",
+  "stored_at": "2026-09-23T12:08:10.694Z"
+}

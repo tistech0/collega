@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 3995afb -- collega_app/test/features/auth/auth_providers_test.dart collega_app/test/features/auth/auth_repository_test.dart | grep \"^+\" | head -100; grep -n \"testWidgets\\|test(\" collega_app/test/features/profile/profile_screen_test.dart | head -50",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 3995afb -- collega_app/test/features/auth/auth_providers_test.dart collega_app/test/features/auth/auth_repository_test.dart | grep \"^+\" | head -100; grep -n \"testWidgets\\|test(\" collega_app/test/features/profile/profile_screen_test.dart | head -50: r puis re",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 3995afb -- collega_app/test/features/auth/auth_providers_test.dart collega_app/test/features/auth/auth_repository_test.dart | grep \"^+\" | head -100; grep -n \"testWidgets\\|test(\" collega_app/test/features/profile/profile_screen_test.dart | head -50: r puis renoncer (sheet fermée) : rien n’est envoyé', (tester) async { 396: testWidgets('échec : l’interrupteur reste éteint et on le dit', (tester) async { 408: testWidgets('éteindre : rappel supprimé côté serveur', (tester) async { 421: testWidgets('CGU et Confidentialité s’ouvrent', (tester) async { 430: testWidgets('« Se déconnecter » neutre (secondaire), jamais rouge', (tester) async { 444: testWidgets('« Supprimer mon compte » : action sheet avec la conséquence, puis suppression', (tester) async { 456: testWidgets('abonné : l’action sheet rappelle d’annuler l’abonnement dans Réglages', (tester) async { 465: testWidgets('suppression en échec : dit honnêtement, session gardée', (tester) async { 479: testWidgets('Dynamic Type 1,6 sur 375 : aucun débordement', (tester) async { 487: test('aucun widget Material ni shadcn', () { 497: testWidgets('golden profile_beta_$tag', (tester) async {",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b5ecb0921b25e6840c1ea22a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:45:14.723Z",
+  "stored_at": "2026-09-23T10:45:14.724Z"
+}

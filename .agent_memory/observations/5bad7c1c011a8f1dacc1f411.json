@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; which kage; kage doctor --help 2>&1 | head -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; which kage; kage doctor --help 2>&1 | head -30: id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f-29717d15.md: no repo-grounded source reference found Recall smoke test: # Kage Context Query: how do I run tests ## Relevant Code Graph 1. [route] PATCH /a",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; which kage; kage doctor --help 2>&1 | head -30: id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f-29717d15.md: no repo-grounded source reference found Recall smoke test: # Kage Context Query: how do I run tests ## Relevant Code Graph 1. [route] PATCH /arq.create_pool -> collega_backend/tests/api/test_admin_ocr.py:179 2. [route] GET /protected -> collega_backend/tests/api/test_require_subscription.py:26 3. [route] PATCH /app.services.ocr.ocr_processor.OcrProcessor._extract_with_pdfplumber -> collega_backend/tests/services/test_ocr_processor.py:32 1. [symbol] class RunnerTests in collega_app/ios/RunnerTests/RunnerTests.swift:5 2. [symbol] test test_truncated_running_header_is_ignored in collega_backend/tests/services/test_item_detector.py:419 3. [symbol] function run in collega_backend/scripts/backfill_item_titles.py:69 4. [symbol] class TestRunningHeadersAndToc in collega_backend/tests/services/test_item_detector.py:360",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5bad7c1c011a8f1dacc1f411",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:45:57.867Z",
+  "stored_at": "2026-09-23T15:45:57.868Z"
+}

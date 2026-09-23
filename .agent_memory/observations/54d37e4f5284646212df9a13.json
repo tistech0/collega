@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 40,80p lib/features/shell/app_shell.dart; sed -n 405,430p lib/core/ui/components/cg_header.dart; grep -rn \"class CgPage\" -A5 lib/core/ui | head; grep -rln \"CgPage(\" lib/features | head -20",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 40,80p lib/features/shell/app_shell.dart; sed -n 405,430p lib/core/ui/components/cg_header.dart; grep -rn \"class CgPage\" -A5 lib/c",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "54d37e4f5284646212df9a13",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:12:12.633Z",
+  "stored_at": "2026-09-23T12:12:12.633Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"class CgGoldenFrame\" -A30 lib test | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"class CgGoldenFrame\" -A30 lib test | head -40: test/support/cg_golden.dart:67:class CgGoldenFrame extends StatelessWidget { test/support/cg_golden.dart-68- const CgGoldenFrame({super.key, required this.child}); test/support/cg_golden.dart-69- test",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"class CgGoldenFrame\" -A30 lib test | head -40: test/support/cg_golden.dart:67:class CgGoldenFrame extends StatelessWidget { test/support/cg_golden.dart-68- const CgGoldenFrame({super.key, required this.child}); test/support/cg_golden.dart-69- test/support/cg_golden.dart-70- final Widget child; test/support/cg_golden.dart-71- test/support/cg_golden.dart-72- @override test/support/cg_golden.dart-73- Widget build(BuildContext context) { test/support/cg_golden.dart-74- final c = CgTheme.of(context).colors; test/support/cg_golden.dart-75- return ColoredBox( test/support/cg_golden.dart-76- color: c.ground, test/support/cg_golden.dart-77- child: DefaultTextStyle(style: CgType.body.copyWith(color: c.ink), child: child), test/support/cg_golden.dart-78- ); test/support/cg_golden.dart-79- } test/support/cg_golden.dart-80-}",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5b700776d6113b0b8f823274",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:09:43.089Z",
+  "stored_at": "2026-09-23T12:09:43.090Z"
+}

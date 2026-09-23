@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"](\\|@\\|http\" assets/legal/*.md | head; git -C .. show 3995afb -- collega_app/assets | head -60; git -C .. show 3995afb^:collega_app/lib/features/legal/presentation/legal_screen.dart | grep -n \"onTapLink\\|launch\"",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"](\\|@\\|http\" assets/legal/*.md | head; git -C .. show 3995afb -- collega_app/assets | head -60; git -C .. show 3995afb^:collega_app/lib/features/legal/presentation/legal_screen.dart | grep -n \"onTapLink\\|launch\": ement des fiches de révision stru",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"](\\|@\\|http\" assets/legal/*.md | head; git -C .. show 3995afb -- collega_app/assets | head -60; git -C .. show 3995afb^:collega_app/lib/features/legal/presentation/legal_screen.dart | grep -n \"onTapLink\\|launch\": ement des fiches de révision structurées (recto/verso) à l'aide d'une intelligence artificielle ; @@ -68,7 +68,7 @@ abonnement payant mensuel, géré via les services d'achat in-app d'Apple et de en cours, depuis les **Réglages iOS → Apple ID → Abonnements**. - En cas de résiliation, tu conserves l'accès jusqu'à la date de fin de la période payée. -Aucun remboursement n'est traité directement par AppMédecine — toute demande passe par les canaux +Aucun remboursement n'est traité directement par Collega — toute demande passe par les canaux officiels d'Apple. --- diff --git a/collega_app/assets/legal/privacy.md b/collega_app/assets/legal/privacy.md index dc1893c..707dc0f 100644 --- a/collega_app/assets/legal/privacy.md +++ b/collega_app/assets/legal/privacy.md @@ -2,7 +2,7 @@ **Version : 2026-05-22** -La présente politique décrit comment **AppMédecine** (« l'Application ») collecte, traite et",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "25617d1b9d22d83daf322dbd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:44:16.546Z",
+  "stored_at": "2026-09-23T10:44:16.546Z"
+}

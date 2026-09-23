@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rnE \"shadcn|google_fonts|GoogleFonts|app_theme|ErrorView|DrillEvaluationBar|drill_evaluation_bar|error_view|Shad[A-Z]\" lib test widgetbook/lib widgetbook/test widgetbook/pubspec.yaml pubspec.yaml ios/Podfile.lock integration_test tool 2>/dev/null | head -40; grep -rnE \"shadcn|google_fonts|app_theme\" ../scripts ../.github ../Makefile 2>/dev/null | head",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rnE \"shadcn|google_fonts|GoogleFonts|app_theme|ErrorView|DrillEvaluationBar|drill_evaluation_bar|error_view|Shad[A-Z]\" lib test w",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "124866f34a23b7af35efd79b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:08:13.750Z",
+  "stored_at": "2026-09-23T12:08:13.751Z"
+}

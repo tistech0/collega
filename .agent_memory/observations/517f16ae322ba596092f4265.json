@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"Widget _app\" -A25 test/features/today/today_screen_test.dart | head -40; grep -rln \"MaterialApp\\|WidgetsApp\\|CupertinoApp\" test/features | head -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"Widget _app\" -A25 test/features/today/today_screen_test.dart | head -40; grep -rln \"MaterialApp\\|WidgetsApp\\|CupertinoApp\" test/features | head -30: e(child: child!), 122- ), 123- ), 124- ), 125- ); 126-} test/features/demo/demo_screen_test.dart te",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"Widget _app\" -A25 test/features/today/today_screen_test.dart | head -40; grep -rln \"MaterialApp\\|WidgetsApp\\|CupertinoApp\" test/features | head -30: e(child: child!), 122- ), 123- ), 124- ), 125- ); 126-} test/features/demo/demo_screen_test.dart test/features/drill/drill_launcher_test.dart test/features/drill/drill_screen_test.dart test/features/progress/progress_screen_test.dart test/features/today/today_screen_test.dart test/features/drill/drill_end_screen_test.dart test/features/auth/paywall_screen_test.dart test/features/colleges/import_progress_screen_test.dart test/features/shell/app_shell_test.dart test/features/colleges/colleges_screen_test.dart test/features/profile/profile_screen_test.dart test/features/search/search_sheet_test.dart test/features/auth/entry_screens_test.dart test/features/colleges/college_detail_screen_test.dart test/features/colleges/item_detail_screen_test.dart test/features/colleges/college_import_screen_test.dart test/features/planning/planning_screen_test.dart test/features/legal/legal_screen_test.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "517f16ae322ba596092f4265",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:09:37.919Z",
+  "stored_at": "2026-09-23T12:09:37.920Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"const CgPage\" -A25 lib/core/ui/layout/cg_page.dart 2>/dev/null | head -40 || grep -rn \"class CgPage\" lib/core/ui; sed -n 85,125p lib/core/ui/components/cg_sheet.dart; grep -n \"static const\" lib/core/ui/foundation/cg_icon*.dart | sed 's/=.*//' | tr -s ' ' | head -80; grep -n \"package_info\\|url_launcher\\|flutter_markdown\" pubspec.yaml; sed -n 60,80p lib/core/router/app_router.dart; sed -n 105,120p lib/core/router/app_router.dart",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"const CgPage\" -A25 lib/core/ui/layout/cg_page.dart 2>/dev/null | head -40 || grep -rn \"class CgPage\" lib/core/ui; sed -n 85,12",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "73b798a266e69cb3cca858ad",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:29:21.166Z",
+  "stored_at": "2026-09-23T10:29:21.166Z"
+}

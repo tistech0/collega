@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"Future<AuthState> refreshFromMe\\|await Future.wait\\|_handleTokenResponse(\\|monthlyMax = meData\" lib/features/auth/data/auth_repository.dart; grep -n \"_clearAllTokens() async\" lib/core/network/api_client.dart; grep -n \"Future<void> refreshProfile\\|state = AsyncData(result);\" lib/features/auth/auth_providers.dart; grep -n \"if (state?.errorMessage\" lib/features/auth/presentation/paywall_screen.dart; grep -n \"Future<void> logout\" lib/features/auth/auth_providers.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"Future<AuthState> refreshFromMe\\|await Future.wait\\|_handleTokenResponse(\\|monthlyMax = meData\" lib/features/auth/data/auth_repository.dart; grep -n \"_clearAllTokens() async\" lib/core/network/api_client.dart; grep -n \"Future<void> refreshProfile\\",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"Future<AuthState> refreshFromMe\\|await Future.wait\\|_handleTokenResponse(\\|monthlyMax = meData\" lib/features/auth/data/auth_repository.dart; grep -n \"_clearAllTokens() async\" lib/core/network/api_client.dart; grep -n \"Future<void> refreshProfile\\|state = AsyncData(result);\" lib/features/auth/auth_providers.dart; grep -n \"if (state?.errorMessage\" lib/features/auth/presentation/paywall_screen.dart; grep -n \"Future<void> logout\" lib/features/auth/auth_providers.dart: 36: return _handleTokenResponse(response.data!['data'] as Map<String, dynamic>, email); 48: return _handleTokenResponse(response.data!['data'] as Map<String, dynamic>, email); 105: await Future.wait([ 126: Future<AuthState> refreshFromMe() async { 147: await Future.wait([ 196: await Future.wait([ 277: Future<AuthState> _handleTokenResponse( 304: monthlyMax = meData['monthly_reloads_max'] as int? ?? 3; 311: await Future.wait([ 111: Future<void> _clearAllTokens() async { 55: state = AsyncData(result); 69: state = AsyncData(result); 114: state = AsyncData(result); 125: Future<void> refreshProfile() async { 129: state = AsyncData(result); 63: if (state?.errorMessage != null) ...[ 78: Future<void> logout() async {",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f697855c0e9b72715c9d67a7",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:46:23.907Z",
+  "stored_at": "2026-09-23T10:46:23.908Z"
+}

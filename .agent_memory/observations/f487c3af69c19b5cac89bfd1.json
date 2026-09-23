@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ./tool/run_device.sh --release -d 00008110-000115D43499801E --dart-define=COLLEGA_TEST_TOOLS=true > \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log\" 2>&1",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ./tool/run_device.sh --release -d 00008110-000115D43499801E --dart-define=COLLEGA_TEST_TOOLS=true > \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log\" 2>&1: bm9fhfp5w Session cwd ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ./tool/run_device.sh --release -d 00008110-000115D43499801E --dart-define=COLLEGA_TEST_TOOLS=true > \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log\" 2>&1: bm9fhfp5w Session cwd remains /Users/lesurmatthis/dev/projet perso/collega; directory changes made by the backgrounded command do not apply to subsequent commands.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f487c3af69c19b5cac89bfd1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T11:54:49.550Z",
+  "stored_at": "2026-09-23T11:54:49.550Z"
+}

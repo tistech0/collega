@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn \"monthly_max\\|monthly_reloads\" collega_backend/app --include=*.py | head; grep -n \"monthly\\|fromJson\\|json\\[\" collega_app/lib/features/auth/domain/auth_state.dart collega_app/lib/features/auth/data/auth_repository.dart | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn \"monthly_max\\|monthly_reloads\" collega_backend/app --include=*.py | head; grep -n \"monthly\\|fromJson\\|json\\[\" collega_app/lib/features/auth/domain/auth_state.dart collega_app/lib/features/auth/data/auth_repository.dart | head -20: /features/auth/data/auth_re",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn \"monthly_max\\|monthly_reloads\" collega_backend/app --include=*.py | head; grep -n \"monthly\\|fromJson\\|json\\[\" collega_app/lib/features/auth/domain/auth_state.dart collega_app/lib/features/auth/data/auth_repository.dart | head -20: /features/auth/data/auth_repository.dart:88: monthlyReloads: int.tryParse(monthlyReloadsStr ?? '0') ?? 0, collega_app/lib/features/auth/data/auth_repository.dart:89: monthlyMax: int.tryParse(monthlyMaxStr ?? '3') ?? 3, collega_app/lib/features/auth/data/auth_repository.dart:129: final monthlyReloads = data['monthly_reloads'] as int? ?? 0; collega_app/lib/features/auth/data/auth_repository.dart:130: final monthlyMax = data['monthly_reloads_max'] as int? ?? 3; collega_app/lib/features/auth/data/auth_repository.dart:138: _storage.write(key: _kMonthlyReloads, value: monthlyReloads.toString()), collega_app/lib/features/auth/data/auth_repository.dart:139: _storage.write(key: _kMonthlyMax, value: monthlyMax.toString()), collega_app/lib/features/auth/data/auth_repository.dart:154: monthlyReloads: monthlyReloads, collega_app/lib/features/auth/data/auth_repository.dart:155: monthlyMax: monthlyMax,",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ca9d18ab1032a1762f7e1fcc",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:28:35.513Z",
+  "stored_at": "2026-09-23T10:28:35.513Z"
+}

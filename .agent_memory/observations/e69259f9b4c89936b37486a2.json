@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 1,57p _bmad-output/implementation-artifacts/8-14-profil-paywall-cgu.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 1,57p _bmad-output/implementation-artifacts/8-14-profil-paywall-cgu.md:  monthlyResetAt`, `AuthNotifier.refreshProfile()` et `setReminderHour()` - [ ] T3 `ProfileScreen` Collega UI (+ sheet profil, rangs, fiches, rappel, suppression) + tests + goldens - [ ] T4",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 1,57p _bmad-output/implementation-artifacts/8-14-profil-paywall-cgu.md:  monthlyResetAt`, `AuthNotifier.refreshProfile()` et `setReminderHour()` - [ ] T3 `ProfileScreen` Collega UI (+ sheet profil, rangs, fiches, rappel, suppression) + tests + goldens - [ ] T4 `PaywallScreen` Collega UI + tests + goldens - [ ] T5 `LegalScreen` Collega UI + tests + goldens - [ ] T6 Shell : Profil hors legacy ; revue adversariale ; déploiement serveur ; build iPhone ## Dev Notes - Composants : `CgPage`, `CgListGroup(variant: inset)`, `CgListRow` (`value`, `check`, `custom` + `CupertinoSwitch`), `CgSectionTitle`, `CgSegmented`, `CgField`, `showCgSheet`, `showCgActionSheet`, `showCgToast`, `CgBadge.beta`, `CgButton`. - Heure du rappel : le serveur stocke une heure UTC ; l'app convertit avec le décalage du jour (`DateTime(y, m, d, h).toUtc().hour`), affiche l'heure locale. - `refreshFromMe` échoue → `AuthState(errorMessage)` sans user : ne **jamais** l'appliquer (déconnecterait).",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e69259f9b4c89936b37486a2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:46:00.804Z",
+  "stored_at": "2026-09-23T10:46:00.804Z"
+}

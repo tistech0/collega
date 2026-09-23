@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components\" && cat -n cg_list_row.dart | sed -n 40,330p",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components\" && cat -n cg_list_row.dart | sed -n 40,330p: 304 pressedBleed: inset ? 0 : CgSpace.gutter, 305 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: rows), 306 ); 307 final body = inset",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components\" && cat -n cg_list_row.dart | sed -n 40,330p: 304 pressedBleed: inset ? 0 : CgSpace.gutter, 305 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: rows), 306 ); 307 final body = inset 308 ? DecoratedBox( 309 key: const ValueKey('cg-list-inset'), 310 decoration: BoxDecoration(color: c.surface, borderRadius: CgRadius.lAll), 311 child: ClipRRect(borderRadius: CgRadius.lAll, child: column), 312 ) 313 : column; 314 if (header == null) return body; 315 return Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [ 316 Padding( 317 padding: EdgeInsets.symmetric(horizontal: inset ? CgSpace.rowInset : 0), 318 child: CgSectionTitle(header!), 319 ), 320 body, 321 ]); 322 } 323 } 324 325 class _Separator extends StatelessWidget { 326 const _Separator({required this.color, required this.indent}); 327 328 final Color color; 329 final double indent; 330",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2dfb6c7a4966274650d435dc",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:43:17.559Z",
+  "stored_at": "2026-09-23T10:43:17.560Z"
+}

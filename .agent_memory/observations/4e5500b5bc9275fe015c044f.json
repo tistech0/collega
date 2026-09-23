@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && git show 18c6a25 -- pubspec.lock widgetbook/pubspec.lock | grep -E '^[-+]  [a-z_]+:' ; grep -n \"path_provider\\|lucide\\|flutter_animate\\|universal_image\" pubspec.yaml ios/Podfile.lock pubspec.lock | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && git show 18c6a25 -- pubspec.lock widgetbook/pubspec.lock | grep -E '^[-+]  [a-z_]+:' ; grep -n \"path_provider\\|lucide\\|flutter_animate\\|universal_image\" pubspec.yaml ios/Podfile.lock pubspec.lock | head -20: ndation (0.0.1): ios/Podfile.lock:90: - path_pr",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && git show 18c6a25 -- pubspec.lock widgetbook/pubspec.lock | grep -E '^[-+]  [a-z_]+:' ; grep -n \"path_provider\\|lucide\\|flutter_animate\\|universal_image\" pubspec.yaml ios/Podfile.lock pubspec.lock | head -20: ndation (0.0.1): ios/Podfile.lock:90: - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`) ios/Podfile.lock:118: path_provider_foundation: ios/Podfile.lock:119: :path: \".symlinks/plugins/path_provider_foundation/darwin\" ios/Podfile.lock:135: path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564 pubspec.lock:345: flutter_animate: pubspec.lock:348: name: flutter_animate pubspec.lock:680: path_provider: pubspec.lock:683: name: path_provider pubspec.lock:688: path_provider_android: pubspec.lock:691: name: path_provider_android pubspec.lock:696: path_provider_foundation: pubspec.lock:699: name: path_provider_foundation pubspec.lock:704: path_provider_linux: pubspec.lock:707: name: path_provider_linux pubspec.lock:712: path_provider_platform_interface: pubspec.lock:715: name: path_provider_platform_interface pubspec.lock:720: path_provider_windows:",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4e5500b5bc9275fe015c044f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:08:19.214Z",
+  "stored_at": "2026-09-23T12:08:19.214Z"
+}

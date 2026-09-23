@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"context.go(\\|context.push(\\|\\.go(\\|\\.push(\" lib | grep -v \"^lib/core/router\" | head -50",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"context.go(\\|context.push(\\|\\.go(\\|\\.push(\" lib | grep -v \"^lib/core/router\" | head -50: /data/planning_repository.dart:48: await db.delete(db.planningConfigs).go(); lib/features/planning/data/planning_repository.dart:89: await (db.delete(db.plann",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"context.go(\\|context.push(\\|\\.go(\\|\\.push(\" lib | grep -v \"^lib/core/router\" | head -50: /data/planning_repository.dart:48: await db.delete(db.planningConfigs).go(); lib/features/planning/data/planning_repository.dart:89: await (db.delete(db.planningSessions)..where((t) => t.id.equals('$configId-postponed-$day'))).go(); lib/features/colleges/presentation/item_detail_screen.dart:105: context.go('${origin.base}/$refId'); lib/features/colleges/presentation/college_detail_screen.dart:106: router.go('/colleges'); lib/features/colleges/presentation/college_detail_screen.dart:107: WidgetsBinding.instance.addPostFrameCallback((_) => router.push('/colleges/$refId/import')); lib/features/colleges/presentation/college_detail_screen.dart:120: onAction: () => context.push('/colleges/$refId/import'), lib/features/colleges/presentation/college_detail_screen.dart:129: onAction: () => context.push( lib/features/colleges/presentation/college_detail_screen.dart:142: context.go(origin.tabRoot);",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4d8de65bc3ac8392591c867b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:10:31.281Z",
+  "stored_at": "2026-09-23T12:10:31.281Z"
+}

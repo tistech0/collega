@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad/fix_packets.py; sed -i '' 's/^for prefix, (reps, extra_paths, drop_stack) in FIXES.items():/import os\\nfor prefix, (reps, extra_paths, drop_stack) in FIXES.items():\\n    if os.environ.get(\"ONLY\") and not prefix.startswith(os.environ[\"ONLY\"]): continue/' $S; ls .agent_memory/packets | wc -l; ONLY=convention-rate-limit python3 $S; ls .agent_memory/packets | wc -l; ls -t .agent_memory/packets | head -2",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad/fix_packets.py; sed -i '' 's/^for prefix, (reps, extra_paths, drop_stack) in FIXES.items():/import os\\nfor prefix, (reps, extra_paths, drop_stack) in ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad/fix_packets.py; sed -i '' 's/^for prefix, (reps, extra_paths, drop_stack) in FIXES.items():/import os\\nfor prefix, (reps, extra_paths, drop_stack) in FIXES.items():\\n    if os.environ.get(\"ONLY\") and not prefix.startswith(os.environ[\"ONLY\"]): continue/' $S; ls .agent_memory/packets | wc -l; ONLY=convention-rate-limit python3 $S; ls .agent_memory/packets | wc -l; ls -t .agent_memory/packets | head -2: 48 convention-rate-limit-login -> 0 Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/convention-rate-limit-login-5-min-via-slowapi-redis-1fdbbbc4.md Repo-local memory is written immediately. Promotion to org/global still requires explicit review. 49 convention-rate-limit-login-5-min-via-slowapi-redis-1fdbbbc4.md workflow-change-memory-main-c83865fd.md",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "78504deed6bbe7a717bd72cd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:53:15.631Z",
+  "stored_at": "2026-09-23T15:53:15.631Z"
+}

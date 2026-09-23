@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n -i \"transition\\|balayage\\|swipe back\\|glisser depuis le bord\\|push\" _bmad-output/planning-artifacts/ux-design-specification-v2.md | head -20; grep -n -i \"transition\\|MaterialApp\\|swipe\\|balayage\" _bmad-output/implementation-artifacts/8-15-retrait-shadcn-accessibilite.md | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n -i \"transition\\|balayage\\|swipe back\\|glisser depuis le bord\\|push\" _bmad-output/planning-artifacts/ux-design-specification-v2.md | head -20; grep -n -i \"transition\\|MaterialApp\\|swipe\\|balayage\" _bmad-output/implementation-artifacts/8-15-retrait-shadcn-accessi",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n -i \"transition\\|balayage\\|swipe back\\|glisser depuis le bord\\|push\" _bmad-output/planning-artifacts/ux-design-specification-v2.md | head -20; grep -n -i \"transition\\|MaterialApp\\|swipe\\|balayage\" _bmad-output/implementation-artifacts/8-15-retrait-shadcn-accessibilite.md | head: he dans la feuille au-dessus de la réponse. **États** : recto, verso, drag (avec verdict), sortie, chargement (skeleton de carte), fin (transition vers le récap). **A11y** : `Semantics(label: 'Fiche rang A, Cancérologie. Question : …', hint: 'Touche pour voir la réponse')` ; les trois boutons restent le chemin VoiceOver ; `reduceMotion` → fondu 150 ms à la place des glissements. 626:- Pousser : Bibliothèque → Détail collège → Détail item ; Progression → Planning ; retour par balayage, titre « ‹ Parent ». 629:- Transitions : pousser = glissement natif ; drill depuis Aujourd'hui = le bloc de la hero s'étend en écran sarcelle (350 ms) ; fin de session → Aujourd'hui = fondu 250 ms. 13: `MaterialApp.router` technique thémé par `buildCgMaterialTheme` + `CgTheme` ; widgets orphelins v1 supprimés 23:- [x] T1 Garde-fou + retrait shadcn / thème v1 / orphelins ; `MaterialApp.router` ; tests routeur",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "76a2ab0cac4f3bafaee7c691",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:13:15.990Z",
+  "stored_at": "2026-09-23T12:13:15.990Z"
+}

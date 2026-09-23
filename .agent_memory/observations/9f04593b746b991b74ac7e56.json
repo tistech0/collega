@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/features/auth/auth_providers.dart lib/features/auth/data/auth_repository.dart lib/core/router/app_router.dart | head -700",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/features/auth/auth_providers.dart lib/features/auth/data/auth_repository.dart lib/core/router/app_router.dart | head -700: ocation.startsWith('/demo/') || state.matchedLocation == '/welcome'; if (isAuth && isDemoRoute) { return hasAccess ? '/home'",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/features/auth/auth_providers.dart lib/features/auth/data/auth_repository.dart lib/core/router/app_router.dart | head -700: ocation.startsWith('/demo/') || state.matchedLocation == '/welcome'; if (isAuth && isDemoRoute) { return hasAccess ? '/home' : '/paywall'; } if (state.fullPath == null || state.fullPath == '/') { return isAuth ? (hasAccess ? '/home' : '/paywall') : '/welcome'; } final isProtected = state.matchedLocation.startsWith('/home') || state.matchedLocation.startsWith('/colleges') || state.matchedLocation.startsWith('/progress') || state.matchedLocation.startsWith('/profile') || state.matchedLocation.startsWith('/drill') || state.matchedLocation.startsWith('/planning'); if (!isAuth && (isProtected || state.matchedLocation == '/paywall')) return '/welcome'; if (isAuth && !hasAccess && isProtected) return '/paywall'; if (isAuth && hasAccess && state.matchedLocation == '/paywall') return '/home'; final isAuthRoute = state.matchedLocation.startsWith('/auth'); if (isAuth && isAuthRoute) return '/home';",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9f04593b746b991b74ac7e56",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:42:25.252Z",
+  "stored_at": "2026-09-23T10:42:25.253Z"
+}

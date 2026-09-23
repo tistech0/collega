@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "f=$(ls -d ~/.pub-cache/hosted/pub.dev/shadcn_ui-0.19.3); sed -n 726,750p $f/lib/src/app.dart; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"DefaultTextStyle\" lib | head -20",
+  "summary": "f=$(ls -d ~/.pub-cache/hosted/pub.dev/shadcn_ui-0.19.3); sed -n 726,750p $f/lib/src/app.dart; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"DefaultTextStyle\" lib | head -20: s the child of AnimatedTheme // then there is no Context separating them, and the // widget.builder() will not find the",
+  "text": "f=$(ls -d ~/.pub-cache/hosted/pub.dev/shadcn_ui-0.19.3); sed -n 726,750p $f/lib/src/app.dart; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"DefaultTextStyle\" lib | head -20: s the child of AnimatedTheme // then there is no Context separating them, and the // widget.builder() will not find the theme. Therefore, we // surround widget.builder with yet another builder so that // a context separates them and Theme.of() correctly // resolves to the theme we passed to AnimatedTheme. return widget.builder!(context, child); }, ) : child ?? const SizedBox.shrink(), ); } Widget _buildApp(BuildContext context) { final mTheme = materialTheme(context); lib/core/ui/gallery/cg_tokens_page.dart:22: child: DefaultTextStyle( lib/core/ui/foundation/cg_icon.dart:87: final c = color ?? DefaultTextStyle.of(context).style.color ?? CgTheme.of(context).colors.ink; lib/core/ui/components/cg_drill_card.dart:516: child: DefaultTextStyle( lib/core/ui/components/cg_drill_card.dart:695: child: AnimatedDefaultTextStyle( lib/core/ui/components/cg_drill_card.dart:843: child: DefaultTextStyle(",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "91143e777ad492db500cb023",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:09:09.299Z",
+  "stored_at": "2026-09-23T12:09:09.299Z"
+}

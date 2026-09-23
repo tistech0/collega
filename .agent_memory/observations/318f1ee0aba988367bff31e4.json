@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_tab_bar_test.dart 2>&1 | tr '\\r' '\\n' | grep -aE \"\\[E\\]\" | grep -v golden | sort -u; grep -rn \"flutter_animate\" lib test widgetbook/lib | head -2; sed -i '' '/^  flutter_animate:/d' pubspec.yaml; grep -n \"flutter_animate\" pubspec.yaml; flutter pub get 2>&1 | tail -1; cd .. && grep -n \"78 %\" _bmad-output/planning-artifacts/ux-design-specification-v2.md | head -3",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_tab_bar_test.dart 2>&1 | tr '\\r' '\\n' | grep -aE \"\\[E\\]\" | grep -v golden | sort -u; grep -rn \"flutter_animate\" lib test widgetbook/lib | head -2; sed -i '' '/^  flutter_animate:/d' pubspec.yaml; grep -n \"flutter_an",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_tab_bar_test.dart 2>&1 | tr '\\r' '\\n' | grep -aE \"\\[E\\]\" | grep -v golden | sort -u; grep -rn \"flutter_animate\" lib test widgetbook/lib | head -2; sed -i '' '/^  flutter_animate:/d' pubspec.yaml; grep -n \"flutter_animate\" pubspec.yaml; flutter pub get 2>&1 | tail -1; cd .. && grep -n \"78 %\" _bmad-output/planning-artifacts/ux-design-specification-v2.md | head -3: Try `flutter pub outdated` for more information. 408:| Tab bar | Capsule flottante, `surface` à 78 % + flou, 64 pt, 24 pt des bords | 527:**Rôle** : navigation Aujourd'hui · Bibliothèque · Progression · Profil. **Anatomie** : capsule flottante 64 pt, 24 pt des bords, `surface` à 78 % + flou, 4 cellules icône + libellé 10,5 pt. **États** : onglet actif (icône et libellé `accent`, pastille `accent-soft`), inactif (`ink3`), masquée (drill, import en cours, sheets plein écran). **Comportement** : se réduit en pastille d'icônes au scroll vers le bas, se redéploie au scroll vers le haut (iOS 26) ; haptique léger au changement. **A11y** : `Semantics(selected)`, libellés lus.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "318f1ee0aba988367bff31e4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:19:15.778Z",
+  "stored_at": "2026-09-23T12:19:15.778Z"
+}

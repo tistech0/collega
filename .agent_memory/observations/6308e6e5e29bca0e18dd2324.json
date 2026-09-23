@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "f=$(ls -d ~/.pub-cache/hosted/pub.dev/shadcn_ui-0.19.3); sed -n 726,750p $f/lib/src/app.dart; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"DefaultTextStyle\" lib | head -20",
+  "summary": "About to run: f=$(ls -d ~/.pub-cache/hosted/pub.dev/shadcn_ui-0.19.3); sed -n 726,750p $f/lib/src/app.dart; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"DefaultTextStyle\" lib | head -20",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6308e6e5e29bca0e18dd2324",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:09:08.898Z",
+  "stored_at": "2026-09-23T12:09:08.898Z"
+}

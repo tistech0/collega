@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd ~/.pub-cache/hosted/pub.dev/flutter_markdown-0.7.7+1/lib/src && sed -n 380,395p widget.dart; sed -n 470,540p style_sheet.dart; grep -n \"kFallbackStyle\" -A12 widget.dart | head -30",
+  "summary": "cd ~/.pub-cache/hosted/pub.dev/flutter_markdown-0.7.7+1/lib/src && sed -n 380,395p widget.dart; sed -n 470,540p style_sheet.dart; grep -n \"kFallbackStyle\" -A12 widget.dart | head -30: lockAlign: other.codeblockAlign, textScaleFactor: other.textScaleFactor, superscriptFontFeatureTag: other.superscriptFontFeatureTag, // ",
+  "text": "cd ~/.pub-cache/hosted/pub.dev/flutter_markdown-0.7.7+1/lib/src && sed -n 380,395p widget.dart; sed -n 470,540p style_sheet.dart; grep -n \"kFallbackStyle\" -A12 widget.dart | head -30: lockAlign: other.codeblockAlign, textScaleFactor: other.textScaleFactor, superscriptFontFeatureTag: other.superscriptFontFeatureTag, // Only one of textScaler and textScaleFactor can be passed. If // other.textScaleFactor is non-null, then the sheet was created with a // textScaleFactor and the textScaler was derived from that, so should be // ignored so that the textScaleFactor continues to be set. textScaler: other.textScaleFactor == null ? other.textScaler : null, 389: kFallbackStyle(context, widget.styleSheetTheme); 390- final MarkdownStyleSheet styleSheet = 391- fallbackStyleSheet.merge(widget.styleSheet); 392- 393- _disposeRecognizers(); 394- 395- final md.Document document = md.Document( 396- blockSyntaxes: widget.blockSyntaxes, 397- inlineSyntaxes: widget.inlineSyntaxes, 398- extensionSet: widget.extensionSet ?? md.ExtensionSet.gitHubFlavored, 399- encodeHtml: false, 400- ); 401-",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8bbc3de9c2d7f063b4754771",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:44:11.659Z",
+  "stored_at": "2026-09-23T10:44:11.659Z"
+}

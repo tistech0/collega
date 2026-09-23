@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 3995afb --stat | head -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 3995afb --stat | head -60: 16.png | Bin 0 -> 109571 bytes .../features/legal/goldens/legal_cgu_430_10.png | Bin 0 -> 128591 bytes .../features/legal/goldens/legal_cgu_430_16.png | Bin 0 -> 113688 bytes .../test/features/legal/legal_screen_test.dart | 137 +++",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 3995afb --stat | head -60: 16.png | Bin 0 -> 109571 bytes .../features/legal/goldens/legal_cgu_430_10.png | Bin 0 -> 128591 bytes .../features/legal/goldens/legal_cgu_430_16.png | Bin 0 -> 113688 bytes .../test/features/legal/legal_screen_test.dart | 137 +++ .../profile/goldens/profile_beta_375_10.png | Bin 0 -> 56583 bytes .../profile/goldens/profile_beta_375_16.png | Bin 0 -> 58256 bytes .../profile/goldens/profile_beta_393_10.png | Bin 0 -> 57010 bytes .../profile/goldens/profile_beta_393_16.png | Bin 0 -> 58443 bytes .../profile/goldens/profile_beta_430_10.png | Bin 0 -> 57305 bytes .../profile/goldens/profile_beta_430_16.png | Bin 0 -> 60643 bytes .../test/features/profile/profile_screen_test.dart | 604 +++++++---- .../test/features/profile/reminder_time_test.dart | 23 + .../test/features/shell/app_shell_test.dart | 30 +- collega_backend/app/api/v1/auth.py | 14 +- collega_backend/tests/api/test_auth.py | 43 +",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "dbbbf48511e88b230fc532a5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:42:21.871Z",
+  "stored_at": "2026-09-23T10:42:21.872Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"Semantics(\\|liveRegion\\|excludeSemantics\\|semanticsLabel\\|ExcludeSemantics\\|SemanticsService\" lib/core/ui/components/cg_drill_card.dart lib/core/ui/components/cg_toast.dart lib/features/drill lib/core/ui/components/cg_verdict_bar.dart lib/core/ui/components/cg_header.dart lib/core/ui/components/cg_page.dart 2>/dev/null | head -40; ls lib/core/ui/components",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"Semantics(\\|liveRegion\\|excludeSemantics\\|semanticsLabel\\|ExcludeSemantics\\|SemanticsService\" lib/core/ui/components/cg_drill_card.dart lib/core/ui/components/cg_toast.dart lib/features/drill lib/core/ui/components/cg_verdict_bar.dart lib/core/ui/",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"Semantics(\\|liveRegion\\|excludeSemantics\\|semanticsLabel\\|ExcludeSemantics\\|SemanticsService\" lib/core/ui/components/cg_drill_card.dart lib/core/ui/components/cg_toast.dart lib/features/drill lib/core/ui/components/cg_verdict_bar.dart lib/core/ui/components/cg_header.dart lib/core/ui/components/cg_page.dart 2>/dev/null | head -40; ls lib/core/ui/components: ation/drill_timer_slot.dart:99: return Semantics( lib/features/drill/presentation/drill_timer_slot.dart:103: excludeSemantics: true, lib/features/drill/presentation/drill_screen.dart:277: child: MergeSemantics( lib/features/drill/presentation/drill_screen.dart:302: child: Semantics( lib/core/ui/components/cg_header.dart:90: child: Semantics( lib/core/ui/components/cg_header.dart:143: child: Semantics( lib/core/ui/components/cg_header.dart:173: child: ExcludeSemantics(excluding: !_titleVisible, child: child), lib/core/ui/components/cg_header.dart:219: return Semantics( lib/core/ui/components/cg_header.dart:223: excludeSemantics: true, cg_badge.dart cg_button.dart cg_drill_card.dart cg_field.dart cg_header.dart cg_illustrations.dart cg_list_row.dart cg_rank_bar.dart cg_ring.dart cg_segmented.dart cg_sheet.dart cg_skeleton.dart cg_state.dart cg_tab_bar.dart cg_toast.dart cg_verdict_bar.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1d5b8a42cb7ec7d3f3341a91",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:11:44.515Z",
+  "stored_at": "2026-09-23T12:11:44.516Z"
+}

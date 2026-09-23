@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 3995afb -- collega_app/lib/features/auth collega_app/lib/env.dart collega_app/lib/features/profile/domain collega_app/lib/features/shell collega_backend/app",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 3995afb -- collega_app/lib/features/auth collega_app/lib/env.dart collega_app/lib/features/profile/domain collega_app/lib/features/shell collega_backend/app: user)): + # Quota du mois en cours : le compteur stocké n'est remis à zéro qu'au + # prochain réimpo",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 3995afb -- collega_app/lib/features/auth collega_app/lib/env.dart collega_app/lib/features/profile/domain collega_app/lib/features/shell collega_backend/app: user)): + # Quota du mois en cours : le compteur stocké n'est remis à zéro qu'au + # prochain réimport ; passé la date, il n'est plus le bon (Profil, story 8.14). + now = datetime.now(timezone.utc) + reset_at = current_user.monthly_reloads_reset_at + if reset_at is None or now >= reset_at: + monthly_reloads, reset_at = 0, next_month_reset(now) + else: + monthly_reloads = current_user.monthly_reloads return { \"data\": { \"id\": str(current_user.id), @@ -106,8 +116,10 @@ async def get_me(current_user: User = Depends(get_current_user)): \"first_name\": current_user.first_name, \"year_group\": current_user.year_group, \"faculty\": current_user.faculty, - \"monthly_reloads\": current_user.monthly_reloads, + \"monthly_reloads\": monthly_reloads, \"monthly_reloads_max\": settings.monthly_reloads_max, + \"monthly_reloads_reset_at\": reset_at.isoformat(), + \"reminder_hour_utc\": current_user.reminder_hour_utc, } }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4a6fdaec0f310a52dc40b775",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:42:24.402Z",
+  "stored_at": "2026-09-23T10:42:24.403Z",
+  "low_signal": true
+}

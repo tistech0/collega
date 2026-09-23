@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 770,830p lib/core/ui/components/cg_drill_card.dart; grep -n \"announce\\|liveRegion\" lib/core/ui/components/cg_drill_card.dart lib/features/drill -r",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 770,830p lib/core/ui/components/cg_drill_card.dart; grep -n \"announce\\|liveRegion\" lib/core/ui/components/cg_drill_card.dart lib/features/drill -r: izedBox(width: CgSpace.s2), Flexible( child: Text( widget.collegeName, maxLines: 1, overflow: TextOver",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 770,830p lib/core/ui/components/cg_drill_card.dart; grep -n \"announce\\|liveRegion\" lib/core/ui/components/cg_drill_card.dart lib/features/drill -r: izedBox(width: CgSpace.s2), Flexible( child: Text( widget.collegeName, maxLines: 1, overflow: TextOverflow.ellipsis, style: CgType.meta.copyWith(color: c.accentInk.withValues(alpha: _metaTextAlpha)), ), ), ]); } Widget _sheet(CgColors c, double bottomPadding, double height) { final t = CgMotion.out.transform(_flip.value); final slide = _reduced ? 0.0 : (1 - t) * height * _sheetHiddenFraction; final opacity = (_reduced ? _flip.value : 1.0) * (1 - _exit.value); final transform = Matrix4.translationValues(_offset.dx, _offset.dy + slide, 0)..rotateZ(dragRotation); return IgnorePointer( ignoring: !_open || _exiting, child: ExcludeSemantics( excluding: !_open, child: Listener( onPointerDown: (_) => _downOnSheet = true, child: Opacity( key: CgDrillCard.sheetKey, opacity: opacity, child: Transform( alignment: Alignment.center, transform: transform, child: DecoratedBox( decoration: BoxDecoration(",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f1b0eb28697446d8f52f6122",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:13:04.546Z",
+  "stored_at": "2026-09-23T12:13:04.547Z"
+}

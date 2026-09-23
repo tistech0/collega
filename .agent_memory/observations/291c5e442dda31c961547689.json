@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 60,90p lib/core/ui/components/cg_verdict_bar.dart; sed -n 85,120p lib/core/ui/components/cg_sheet.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 60,90p lib/core/ui/components/cg_verdict_bar.dart; sed -n 85,120p lib/core/ui/components/cg_sheet.dart: ns). La feuille se ferme avant l'appel du callback, qui peut donc /// enchaîner sur une confirmation ([showCgDialogSheet]). Future<void> showCgAct",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 60,90p lib/core/ui/components/cg_verdict_bar.dart; sed -n 85,120p lib/core/ui/components/cg_sheet.dart: ns). La feuille se ferme avant l'appel du callback, qui peut donc /// enchaîner sur une confirmation ([showCgDialogSheet]). Future<void> showCgActionSheet( BuildContext context, { String? title, String? message, required List<CgSheetAction> actions, String cancelLabel = 'Annuler', }) { return showCupertinoModalPopup<void>( context: context, barrierColor: CgTheme.of(context).colors.scrim, builder: (sheetContext) => CupertinoActionSheet( title: title == null ? null : Text(title), message: message == null ? null : Text(message), actions: [ for (final action in actions) CupertinoActionSheetAction( isDestructiveAction: action.destructive, onPressed: () { Navigator.of(sheetContext).pop(); action.onPressed(); }, child: Text(action.label), ), ], cancelButton: CupertinoActionSheetAction( isDefaultAction: true, onPressed: () => Navigator.of(sheetContext).pop(), child: Text(cancelLabel), ), ), ); }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "291c5e442dda31c961547689",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:09:33.448Z",
+  "stored_at": "2026-09-23T12:09:33.448Z"
+}

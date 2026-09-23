@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n 20,70p pubspec.yaml; (flutter analyze 2>&1 | tail -15); (cd widgetbook && flutter analyze 2>&1 | tail -15)",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n 20,70p pubspec.yaml; (flutter analyze 2>&1 | tail -15); (cd widgetbook && flutter analyze 2>&1 | tail -15): 0 Analyzing collega_app... info • The parameter name 'collegeId' doesn't match the name 'arg' in the overridden method • lib/features/colleg",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n 20,70p pubspec.yaml; (flutter analyze 2>&1 | tail -15); (cd widgetbook && flutter analyze 2>&1 | tail -15): 0 Analyzing collega_app... info • The parameter name 'collegeId' doesn't match the name 'arg' in the overridden method • lib/features/colleges/colleges_detail_providers.dart:77:43 • avoid_renaming_method_parameters info • The parameter name 'compositeKey' doesn't match the name 'arg' in the overridden method • lib/features/colleges/colleges_detail_providers.dart:150:45 • avoid_renaming_method_parameters info • The local variable '_ok' starts with an underscore • test/features/drill/drill_repository_test.dart:176:26 • no_leading_underscores_for_local_identifiers info • The import of 'package:flutter/services.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter_test/flutter_test.dart' • test/features/search/search_sheet_test.dart:9:8 • unnecessary_import 4 issues found. (ran in 4.5s) Analyzing widgetbook... No issues found! (ran in 1.0s)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9ea8b004adcbf85a74ac21aa",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:08:35.755Z",
+  "stored_at": "2026-09-23T12:08:35.756Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 18c6a25 -- collega_app/lib/app.dart collega_app/pubspec.yaml collega_app/test/core && git show HEAD -- collega_app/lib collega_app/test | head -400; git show HEAD --stat | tail -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 18c6a25 -- collega_app/lib/app.dart collega_app/pubspec.yaml collega_app/test/core && git show HEAD -- collega_app/lib collega_app/test | head -400; git show HEAD --stat | tail -30: i/components/goldens/cg_segmented_393_10.png b/collega_app/test/core/ui/comp",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 18c6a25 -- collega_app/lib/app.dart collega_app/pubspec.yaml collega_app/test/core && git show HEAD -- collega_app/lib collega_app/test | head -400; git show HEAD --stat | tail -30: i/components/goldens/cg_segmented_393_10.png b/collega_app/test/core/ui/components/goldens/cg_segmented_393_10.png index 2dab7b1..64f1713 100644 Binary files a/collega_app/test/core/ui/components/goldens/cg_segmented_393_10.png and b/collega_app/test/core/ui/components/goldens/cg_segmented_393_10.png differ diff --git a/collega_app/test/core/ui/components/goldens/cg_segmented_393_16.png b/collega_app/test/core/ui/components/goldens/cg_segmented_393_16.png index e4b3237..8014aa0 100644 Binary files a/collega_app/test/core/ui/components/goldens/cg_segmented_393_16.png and b/collega_app/test/core/ui/components/goldens/cg_segmented_393_16.png differ diff --git a/collega_app/test/core/ui/components/goldens/cg_segmented_430_10.png b/collega_app/test/core/ui/components/goldens/cg_segmented_430_10.png index 91dc194..d6dcc2f 100644 Binary files a/collega_app/test/core/ui/components/goldens/cg_seg",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "393f3af1bef18aa0bb8bef3b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:08:01.384Z",
+  "stored_at": "2026-09-23T12:08:01.385Z"
+}

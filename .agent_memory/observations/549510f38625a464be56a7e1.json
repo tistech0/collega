@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 40,52p lib/features/colleges/presentation/item_detail_screen.dart; sed -n 180,195p lib/features/drill/presentation/drill_screen.dart; cat /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tasks/bv8qynhau.output | grep -E \"^==|All tests passed|Some tests failed|\\+[0-9]+ -[0-9]+\" | tr '\\r' '\\n' | grep -E \"==|passed|failed\" | tail -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 40,52p lib/features/colleges/presentation/item_detail_screen.dart; sed -n 180,195p lib/features/drill/presentation/drill_screen.dart; cat /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tasks/",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 40,52p lib/features/colleges/presentation/item_detail_screen.dart; sed -n 180,195p lib/features/drill/presentation/drill_screen.dart; cat /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tasks/bv8qynhau.output | grep -E \"^==|All tests passed|Some tests failed|\\+[0-9]+ -[0-9]+\" | tr '\\r' '\\n' | grep -E \"==|passed|failed\" | tail -20: echerche la rouvre. onPopInvokedWithResult: (didPop, _) { if (didPop && fromSearch) _reopenSearch(context); }, child: CgPage( title: title, subtitle: subtitle, backLabel: fromSearch ? 'Recherche' : collegeName, onBack: () => _back(context), bottomAction: bottomAction, final feedback = session.semanticFeedback; final canFlip = !isDefinition || feedback != null || session.timerExpired; return PopScope( canPop: false, onPopInvokedWithResult: (didPop, _) { if (!didPop) _confirmQuit(); }, child: CgDrillCard( key: _card, cardKey: '${card.id}#${session.currentQueuePos}', question: card.recto, answer: card.verso, rank: card.rang, collegeName: collegeName, index: session.currentQueuePos + 1, == today 00:07 +95: All tests passed! == drill 00:09 +139: All tests passed! == progress 00:04 +38: All tests passed! == profile 00:08 +49: All tests passed! == colleges 00:14 +224: All tests passed! == shell",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "549510f38625a464be56a7e1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:12:32.302Z",
+  "stored_at": "2026-09-23T12:12:32.302Z"
+}

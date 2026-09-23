@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 75,140p lib/features/legal/presentation/legal_screen.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 75,140p lib/features/legal/presentation/legal_screen.dart: gType.bodyS.copyWith(color: c.ink, backgroundColor: c.soft), h1: CgType.title.copyWith(color: c.ink), h2: CgType.head.copyWith(color: c.ink), h2Padding: const EdgeInsets.only(top: CgSpace.s5)",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 75,140p lib/features/legal/presentation/legal_screen.dart: gType.bodyS.copyWith(color: c.ink, backgroundColor: c.soft), h1: CgType.title.copyWith(color: c.ink), h2: CgType.head.copyWith(color: c.ink), h2Padding: const EdgeInsets.only(top: CgSpace.s5), h3: body.copyWith(fontWeight: FontWeight.w600), h3Padding: const EdgeInsets.only(top: CgSpace.s3), listBullet: body.copyWith(color: c.ink2), listIndent: CgSpace.s5, blockSpacing: CgSpace.s3, horizontalRuleDecoration: BoxDecoration(border: Border(top: BorderSide(color: c.line))), tableHead: CgType.bodyS.copyWith(color: c.ink, fontWeight: FontWeight.w600), tableBody: CgType.bodyS.copyWith(color: c.ink), tableBorder: TableBorder.all(color: c.line), tableCellsPadding: const EdgeInsets.all(CgSpace.s2), blockquote: body.copyWith(color: c.ink2), blockquoteDecoration: BoxDecoration(border: Border(left: BorderSide(color: c.line, width: 3))), blockquotePadding: const EdgeInsets.only(left: CgSpace.s3), ); } }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7ffef4c1a7e00e32fcd18fb2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:11:09.095Z",
+  "stored_at": "2026-09-23T12:11:09.095Z"
+}

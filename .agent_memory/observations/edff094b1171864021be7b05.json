@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory\" && python3 - <<'EOF'\np=\"project_redesign_ux_2026_09.md\"\ns=open(p).read()\ns=s.replace('8.0→8.14 faites et validées iPhone, reste 8.15 (retrait shadcn, VoiceOver, contrastes)','epic 8 TERMINÉE (8.0→8.15 validées iPhone le 2026-09-23), reste merge dans main (accord utilisateur requis)')\ns=s.replace(\"Reste : **8.15** (retrait shadcn_ui + app_theme v1, VoiceOver 5 écrans cœur, contrastes/goldens) puis rétro epic 8 et merge.\",\"8.15 validée le 2026-09-23 (shadcn retiré, ink2 #454D4C / ink3 #60645E, a11y test… [+588 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory\" && python3 - <<'EOF'\np=\"project_redesign_ux_2026_09.md\"\ns=open(p).read()\ns=s.replace('8.0→8.14 faites et validées iPhone, reste 8.15 (retrait shadcn, VoiceOver, contrastes)','epic 8 TERMINÉE (8.0→8.15 validées iPhone le 2026-0",
+  "text": "cd \"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory\" && python3 - <<'EOF'\np=\"project_redesign_ux_2026_09.md\"\ns=open(p).read()\ns=s.replace('8.0→8.14 faites et validées iPhone, reste 8.15 (retrait shadcn, VoiceOver, contrastes)','epic 8 TERMINÉE (8.0→8.15 validées iPhone le 2026-09-23), reste merge dans main (accord utilisateur requis)')\ns=s.replace(\"Reste : **8.15** (retrait shadcn_ui + app_theme v1, VoiceOver 5 écrans cœur, contrastes/goldens) puis rétro epic 8 et merge.\",\"8.15 validée le 2026-09-23 (shadcn retiré, ink2 #454D4C / ink3 #60645E, a11y testée). **Epic 8 terminée** ; reste : merge `feat/redesign-ux-ui` → `main` (demander avant), rétro optionnelle, test hors LAN toujours en attente. La prod tourne déjà sur les images serveur de la branche.\")\nopen(p,\"w\").write(s)\np=\"MEMORY.md\"\ns=open(p).read()\nimport re\ns=re.sub(r\"- \\[Refonte UX/UI 2026-09\\].*\\n\",\"- [Refonte UX/UI 2026-09](project_redesign_ux_2026_09.md) — branche `feat/redesign-ux-ui` : epic 8 TERMINÉE et validée iPhone (2026-09-23) ; reste merge dans main (demander) ; autonomie totale, bugs corrigés sans backlog\\n\",s)\nopen(p,\"w\").write(s)\nEOF\ngrep -n Refonte MEMORY.md: 11:- [Refonte UX/UI 2026-09](project_redesign_ux_2026_09.md) — branche `feat/redesign-ux-ui` : epic 8 TERMINÉE et validée iPhone (2026-09-23) ; reste merge dans main (demander) ; autonomie totale, bugs corrigés sans backlog",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "edff094b1171864021be7b05",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T14:42:14.297Z",
+  "stored_at": "2026-09-23T14:42:14.298Z"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "`kage_context`",
+  "summary": "`kage_context`",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "620132aa8b79a4bf4dd00068",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:43:23.082Z",
+  "stored_at": "2026-09-23T15:43:23.082Z",
+  "low_signal": true
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && r() { kage reverify --packet \"repo:git-github-com-tistech0-collega:$1\" --evidence \"$2\" 2>&1 | tail -1; }\nr gotcha:routeur-gorouter-unique-refreshlistenable-ne-jamais-le-recr-er-sur-un-changement \"app_router : _Splash affiche le logo ; routeur unique + refreshListenable inchangés ; router 9 verts\"\nr convention:shell-plus-aucun-cran-legacy-chaque-cran-donglet-r-serve-la-tab-bar-lui-m-me-179 \"profile_screen : logo sur la ligne Version ; CgPage(reserveTabBar) inchangé ; shell 11 verts\"\nr gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-hom… [+132 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && r() { kage reverify --packet \"repo:git-github-com-tistech0-collega:$1\" --evidence \"$2\" 2>&1 | tail -1; } r gotcha:routeur-gorouter-unique-refreshli",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1909d19a0068bce46083669e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:40:03.020Z",
+  "stored_at": "2026-09-23T15:40:03.021Z"
+}

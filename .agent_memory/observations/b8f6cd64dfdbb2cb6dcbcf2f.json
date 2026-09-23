@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 123,130p lib/core/ui/components/cg_list_row.dart; sed -n 264,272p lib/features/today/presentation/today_screen.dart; sed -n 240,256p lib/features/drill/presentation/drill_end_screen.dart; grep -rn \"MarkdownBody\\|Markdown(\" lib | head; grep -rn \"styleSheet\" lib | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 123,130p lib/core/ui/components/cg_list_row.dart; sed -n 264,272p lib/features/today/presentation/today_screen.dart; sed -n 240,256p lib/features/drill/presentation/drill_end_screen.dart; grep -rn \"MarkdownBody\\|Markdown(\" lib | head; grep -rn \"style",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 123,130p lib/core/ui/components/cg_list_row.dart; sed -n 264,272p lib/features/today/presentation/today_screen.dart; sed -n 240,256p lib/features/drill/presentation/drill_end_screen.dart; grep -rn \"MarkdownBody\\|Markdown(\" lib | head; grep -rn \"styleSheet\" lib | head:  ); final started = session.isStarted; final total = session.cardIds.length; final remaining = total - session.position; /// Chiffre qui roule de 0 à la valeur (une fois) ; valeur directe en mouvement réduit. class _CountUp extends StatelessWidget { const _CountUp({required this.value, required this.style}); final int value; final TextStyle style; @override Widget build(BuildContext context) { return TweenAnimationBuilder<double>( tween: Tween(begin: 0, end: value.toDouble()), duration: CgMotion.resolve(context, CgMotion.ringFill), curve: CgMotion.out, builder: (context, v, _) => Text('${v.round()}', style: style), ); } lib/features/legal/presentation/legal_screen.dart:82: MarkdownBody( lib/features/legal/presentation/legal_screen.dart:84: styleSheet: _styleSheet(context), lib/features/legal/presentation/legal_screen.dart:111: static MarkdownStyleSheet _styleSheet(BuildContext context) {",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b8f6cd64dfdbb2cb6dcbcf2f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:10:08.022Z",
+  "stored_at": "2026-09-23T12:10:08.022Z"
+}

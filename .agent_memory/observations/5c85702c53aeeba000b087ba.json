@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "pour commencer ca cest fix normalement a verifier mais avec la refonte qui vient dettre fait - 1 mémoire mise de côté comme périmée : le rail ShadProgress qui prenait colorScheme.secondary. Il faut la revérifier, ou la remplacer si le code a changé.",
+  "summary": "pour commencer ca cest fix normalement a verifier mais avec la refonte qui vient dettre fait - 1 mémoire mise de côté comme périmée : le rail ShadProgress qui prenait colorScheme.secondary. Il faut la revérifier, ou la remplacer si le code ",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5c85702c53aeeba000b087ba",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:44:37.624Z",
+  "stored_at": "2026-09-23T15:44:37.625Z",
+  "low_signal": true
+}

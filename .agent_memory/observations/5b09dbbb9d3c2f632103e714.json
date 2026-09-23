@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "f=/Users/lesurmatthis/.pub-cache/hosted/pub.dev/go_router-14.8.1; sed -n 320,375p $f/lib/src/builder.dart; grep -rn \"pageBuilderForAppType\\|_pageBuilderForAppType\" $f/lib/src/builder.dart | head -3; grep -n \"pageBuilderForWidgetApp\" -A20 $f/lib/src/pages/custom_transition_page.dart | head -30",
+  "summary": "About to run: f=/Users/lesurmatthis/.pub-cache/hosted/pub.dev/go_router-14.8.1; sed -n 320,375p $f/lib/src/builder.dart; grep -rn \"pageBuilderForAppType\\|_pageBuilderForAppType\" $f/lib/src/builder.dart | head -3; g",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5b09dbbb9d3c2f632103e714",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:10:18.536Z",
+  "stored_at": "2026-09-23T12:10:18.536Z"
+}

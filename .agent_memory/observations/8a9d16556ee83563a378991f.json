@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/ && python3 - <<'EOF'\nimport re\ndef sub(f,old,new):\n    s=open(f).read(); assert old in s,(f,old[:40]); open(f,'w').write(s.replace(old,new))\nf='project_redesign_ux_2026_09.md'\nsub(f,\"**How to apply :** travailler uniquement sur `feat/redesign-ux-ui` ; toute\",\"**How to apply :** la branche est mergée, on travaille désormais depuis `main` (nouvelle branche par chantier) ; toute\")\nsub(f,\"(voir [[project_upload_debug_2026_09]] et le packet Kage `gotcha-flutter-test-complet-*`)\",\"(packet Kage `gotcha-tests-… [+3733 chars truncated]",
+  "summary": "About to run: cd /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/ && python3 - <<'EOF' import re def sub(f,old,new): s=open(f).read(); assert old in s,(f,old[:40]); open(f,'",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8a9d16556ee83563a378991f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:47:43.498Z",
+  "stored_at": "2026-09-23T15:47:43.499Z"
+}

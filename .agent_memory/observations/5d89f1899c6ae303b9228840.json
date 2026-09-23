@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 50,80p collega_app/lib/core/notifications/notifications_service.dart; grep -n \"@router\\|def \\|hour\" collega_backend/app/api/v1/notifications.py | head -30; grep -rn \"reminder\" collega_backend/app/models/*.py collega_backend/app/api/v1/auth.py collega_backend/app/schemas/*.py | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 50,80p collega_app/lib/core/notifications/notifications_service.dart; grep -n \"@router\\|def \\|hour\" collega_backend/app/api/v1/notifications.py | head -30; grep -rn \"reminder\" collega_backend/app/models/*.py collega_backend/app/api/v1/auth.py collega_backend/a",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 50,80p collega_app/lib/core/notifications/notifications_service.dart; grep -n \"@router\\|def \\|hour\" collega_backend/app/api/v1/notifications.py | head -30; grep -rn \"reminder\" collega_backend/app/models/*.py collega_backend/app/api/v1/auth.py collega_backend/app/schemas/*.py | head: xception catch (e) { AppLogger.error('Échec clearReminder', tag: 'NotificationsService', error: e); rethrow; } } Future<void> _registerToken(String token) async { try { await dio.post<void>( 22: def validate_token_format(cls, v: str) -> str: 28:@router.post(\"/notifications/apns-token\") 29:async def register_apns_token( 40: hour_utc: int 42: @field_validator(\"hour_utc\") 44: def validate_hour(cls, v: int) -> int: 46: raise ValueError(\"hour_utc doit être entre 0 et 23\") 50:@router.post(\"/notifications/reminder\") 52:async def set_reminder( 58: current_user.reminder_hour_utc = body.hour_utc 60: return {\"data\": {\"reminder_enabled\": True, \"hour_utc\": body.hour_utc}} 63:@router.delete(\"/notifications/reminder\") 65:async def clear_reminder( 70: current_user.reminder_hour_utc = None collega_backend/app/models/user.py:36: reminder_hour_utc: Mapped[int | None] = mapped_column(Integer, nullable=True)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5d89f1899c6ae303b9228840",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:28:30.489Z",
+  "stored_at": "2026-09-23T10:28:30.489Z",
+  "low_signal": true
+}

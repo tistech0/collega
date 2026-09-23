@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && f=$(grep -l '\"id\":\"repo:git-github-com-tistech0-collega:gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-17901124' .agent_memory/packets/*.md | head -1); python3 -c \"\nimport re,json,sys;s=open('$f').read();j=json.loads(s.split('\\`\\`\\`json kage-state')[1].split('\\`\\`\\`')[0]);print(j['body'])\"",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && f=$(grep -l '\"id\":\"repo:git-github-com-tistech0-collega:gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-17901124' .agent_memory/packets/*.md | head -1); python3 -c \"\nimport re,json,sys;s=open('$f').read();j=json.loads(s.split('\\`\\`\\`jso",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && f=$(grep -l '\"id\":\"repo:git-github-com-tistech0-collega:gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-17901124' .agent_memory/packets/*.md | head -1); python3 -c \"\nimport re,json,sys;s=open('$f').read();j=json.loads(s.split('\\`\\`\\`json kage-state')[1].split('\\`\\`\\`')[0]);print(j['body'])\": Les tests test/features/home (home_notifier, home_screen) ont été supprimés avec l'écran Home en story 8.3 (remplacé par Aujourd'hui, test/features/today). Convention du projet : ne jamais lancer `flutter test` global, toujours par dossiers ciblés (ex. `flutter test test/features/drill test/features/today`, puis colleges/search/profile/core, puis shell/planning/demo/auth/generation). Il n'existe pas de dossier test/features/item_detail : le passer à flutter test compte comme un échec de chargement. Verified by: ls collega_app/test/features ; runs ciblés du 2026-09-22 (231 + 590 + 63 verts)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4e33dee258d2c3dfcd46e24c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:43:23.680Z",
+  "stored_at": "2026-09-23T10:43:23.680Z",
+  "low_signal": true
+}

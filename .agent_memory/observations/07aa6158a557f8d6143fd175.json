@@ -1,0 +1,17 @@
+{
+  "type": "file_change",
+  "tool": "Artifact",
+  "path": "/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/logos/project/canvas.json",
+  "command": "",
+  "summary": "Artifact: https://claude.ai/artifact/AzfohLZCuBCmMX3sG8Qmam /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/logos/project/canvas.json 50ef8eac-743e-432c-80ea-7d988f5e9ebe Collega — logos owner 1790175463-bd93 0.2.47 connected",
+  "text": "https://claude.ai/artifact/AzfohLZCuBCmMX3sG8Qmam /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/logos/project/canvas.json 50ef8eac-743e-432c-80ea-7d988f5e9ebe Collega — logos owner 1790175463-bd93 0.2.47 connected",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "07aa6158a557f8d6143fd175",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T14:57:44.901Z",
+  "stored_at": "2026-09-23T14:57:44.902Z",
+  "low_signal": true
+}

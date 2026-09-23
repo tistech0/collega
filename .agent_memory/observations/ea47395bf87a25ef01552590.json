@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 1,80p lib/core/ui/tokens/cg_type.dart; grep -rn \"decoration\\|inherit\" lib/core/ui/tokens/cg_type.dart",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 1,80p lib/core/ui/tokens/cg_type.dart; grep -rn \"decoration\\|inherit\" lib/core/ui/tokens/cg_type.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ea47395bf87a25ef01552590",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:09:23.730Z",
+  "stored_at": "2026-09-23T12:09:23.731Z"
+}

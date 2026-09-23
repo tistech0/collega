@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"PopScope\\|WillPopScope\\|canPop\\|onPopInvoked\" lib | head; sed -n 40,120p lib/features/drill/presentation/drill_screen.dart; sed -n 60,90p lib/features/drill/drill_launcher.dart",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"PopScope\\|WillPopScope\\|canPop\\|onPopInvoked\" lib | head; sed -n 40,120p lib/features/drill/presentation/drill_screen.dart; sed",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "fcdf677b53c17388eba2f9bb",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:10:36.015Z",
+  "stored_at": "2026-09-23T12:10:36.015Z"
+}

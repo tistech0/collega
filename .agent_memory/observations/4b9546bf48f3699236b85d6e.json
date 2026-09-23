@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_supersede",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_supersede: [{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:gotcha:shadcn-ui-shadprogress-le-rail-prend-colorscheme-secondary-vert-chez-nous-barre-\",\\n \"replacement_packet_id\": \"repo:git-github-c",
+  "text": "[{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:gotcha:shadcn-ui-shadprogress-le-rail-prend-colorscheme-secondary-vert-chez-nous-barre-\",\\n \"replacement_packet_id\": \"repo:git-github-com-tistech0-collega:decision:shadcn-ui-et-le-th-me-v1-retir-s-story-8-15-plus-de-shadprogress-garde-fou-no-v1\",\\n \"reason\": \"shadcn_ui et app_theme.dart retirés en story 8.15 (18c6a25) ; le piège ne peut plus se produire\",\\n \"old_packet\": {\\n \"schema_version\": 2,\\n \"id\": \"repo:git-github-com-tistech0-collega:gotcha:shadcn-ui-shadprogress-le-rail-prend-colorscheme-secondary-vert-chez-nous-barre-\",\\n \"title\": \"shadcn_ui ShadProgress : le rail prend colorScheme.secondary (vert chez nous) → barre « pleine » et faux spinners verts\",\\n \"summary\": \"Dans shadcn ui 0.19.3 lib/src/components/progress.dart:37 39 , le fond de ShadProgress est backgroundColor ?? progressTheme.backgroundColor ?? colorScheme.secondary. Notre secondary est 0xFF3D6B5E vert foncé : une barre\",\\n \"body\": \"Dans shadcn_ui 0.19.3 (lib/src/components/progress.dart:37-39), le fond de ShadProgress est backgroundColor ?? progress",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4b9546bf48f3699236b85d6e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:45:17.837Z",
+  "stored_at": "2026-09-23T15:45:17.837Z",
+  "low_signal": true
+}

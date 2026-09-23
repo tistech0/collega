@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_supersede",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_supersede: [{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:convention:shell-seul-profil-reste-legacy-d-tail-coll-ge-item-sous-longlet-dorigine-college\",\\n \"replacement_packet_id\": \"repo:git-gith",
+  "text": "[{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:convention:shell-seul-profil-reste-legacy-d-tail-coll-ge-item-sous-longlet-dorigine-college\",\\n \"replacement_packet_id\": \"repo:git-github-com-tistech0-collega:convention:shell-plus-aucun-cran-legacy-chaque-cran-donglet-r-serve-la-tab-bar-lui-m-me-179\",\\n \"reason\": \"Story 8.14 : le Profil est en Collega UI, le mode legacy du shell est supprimé.\",\\n \"old_packet\": {\\n \"schema_version\": 2,\\n \"id\": \"repo:git-github-com-tistech0-collega:convention:shell-seul-profil-reste-legacy-d-tail-coll-ge-item-sous-longlet-dorigine-college\",\\n \"title\": \"Shell : seul Profil reste legacy ; détail collège/item sous l\\'onglet d\\'origine (CollegeDetailOrigin)\",\\n \"summary\": \"Depuis 8.11, AppShell. legacyPattern ne contient plus que /profile Scaffold jusqu\\'en 8.14 : tout écran migré en CgPage reserveTabBar: true doit en sortir, sinon la tab bar est réservée deux fois. Les détails collège et i\",\\n \"body\": \"Depuis 8.11, `AppShell._legacyPattern` ne contient plus que `/profile` (Scaffold jusqu\\'en 8.14) : tout écran migré en `CgPage(reserveTabBar",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0ba69979ac76971d8d210704",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:43:08.984Z",
+  "stored_at": "2026-09-23T10:43:08.984Z",
+  "low_signal": true
+}

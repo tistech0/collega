@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage reverify --packet repo:git-github-com-tistech0-collega:gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-17901124 --evidence \"profile_screen_test réécrit en 8.14 (Collega UI) ; convention par dossiers inchangée ; nouveau dossier test/features/legal ; profile 43, auth 73, legal 12, shell 11 verts\" 2>&1 | tail -1; grep -n \"refreshListenable\\|ref.listen(authProvider\" collega_app/lib/core/router/app_router.dart | head -3; kage reverify --packet repo:git-github-com-tistech0-collega:gotcha:routeur-gorouter-unique-… [+259 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage reverify --packet repo:git-github-com-tistech0-collega:gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-17901124 --evidence \"profile_screen_test réécrit en 8.14 (Collega UI) ; convention par dossiers inchangée ; nouveau dossier test",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage reverify --packet repo:git-github-com-tistech0-collega:gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-17901124 --evidence \"profile_screen_test réécrit en 8.14 (Collega UI) ; convention par dossiers inchangée ; nouveau dossier test/features/legal ; profile 43, auth 73, legal 12, shell 11 verts\" 2>&1 | tail -1; grep -n \"refreshListenable\\|ref.listen(authProvider\" collega_app/lib/core/router/app_router.dart | head -3; kage reverify --packet repo:git-github-com-tistech0-collega:gotcha:routeur-gorouter-unique-refreshlistenable-ne-jamais-le-recr-er-sur-un-changement --evidence \"auth_providers only gained refreshProfile/setReminderHour (state updates keep the user); routerProvider still single GoRouter with refreshListenable; test/core/router 7 green\" 2>&1 | tail -1: evidence recorded for changed path(s): collega_app/test/features/profile/profile_screen_test.dart 28:/// connexion réévalue les redirections (`refreshListenable`) au lieu de recréer 33: ref.listen(authProvider, (_, __) => authChanges.value++); 40: refreshListenable: authChanges, evidence recorded for changed path(s): collega_app/lib/features/auth/auth_providers.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "12db03c91ce96e5b407903ad",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:43:29.338Z",
+  "stored_at": "2026-09-23T10:43:29.338Z"
+}

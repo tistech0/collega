@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "f=$(ls -d ~/.pub-cache/hosted/pub.dev/shadcn_ui-0.19.3); sed -n 600,730p $f/lib/src/app.dart; sed -n 750,800p $f/lib/src/app.dart",
+  "summary": "About to run: f=$(ls -d ~/.pub-cache/hosted/pub.dev/shadcn_ui-0.19.3); sed -n 600,730p $f/lib/src/app.dart; sed -n 750,800p $f/lib/src/app.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2858af39f5cb7303f89d55c0",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:08:56.521Z",
+  "stored_at": "2026-09-23T12:08:56.521Z"
+}

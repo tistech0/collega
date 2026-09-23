@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; ls lib/core/ui/foundation lib/core/ui; grep -rn \"ColoredBox\\|color: c.ground\\|colors.ground\" lib/core/ui lib/features/shell lib/features/*/presentation/*.dart lib/features/*/*.dart | head -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; ls lib/core/ui/foundation lib/core/ui; grep -rn \"ColoredBox\\|color: c.ground\\|colors.ground\" lib/core/ui lib/features/shell lib/features/*/presentation/*.dart lib/features/*/*.dart | head -30: tion/welcome_screen.dart:20: color: c.ground, lib/core/ui/compon",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; ls lib/core/ui/foundation lib/core/ui; grep -rn \"ColoredBox\\|color: c.ground\\|colors.ground\" lib/core/ui lib/features/shell lib/features/*/presentation/*.dart lib/features/*/*.dart | head -30: tion/welcome_screen.dart:20: color: c.ground, lib/core/ui/components/cg_header.dart:390: color: c.ground.withValues(alpha: _barFillAlpha), lib/core/ui/components/cg_header.dart:419: ColoredBox( lib/core/ui/components/cg_header.dart:420: color: c.ground, lib/features/colleges/presentation/import_progress_screen.dart:125: return ColoredBox( lib/features/colleges/presentation/import_progress_screen.dart:126: color: c.ground, lib/features/drill/presentation/drill_screen.dart:296: return ColoredBox( lib/features/drill/presentation/drill_screen.dart:339: return ColoredBox( lib/features/drill/presentation/drill_screen.dart:340: color: c.ground, lib/features/profile/presentation/profile_screen.dart:487: ColoredBox(color: c.soft), lib/features/profile/presentation/profile_screen.dart:491: child: ColoredBox(color: c.accent), lib/features/auth/presentation/paywall_screen.dart:39: return ColoredBox(",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8bdae77e3fdf0f88951d3271",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:12:09.617Z",
+  "stored_at": "2026-09-23T12:12:09.617Z"
+}

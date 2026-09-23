@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd ~/.pub-cache/hosted/pub.dev/flutter_markdown-0.7.7+1/lib/src && grep -n \"fallback\\|merge(widget.styleSheet\\|kFallbackStyle\" widget.dart | head; grep -n \"pPadding\\|listBulletPadding\\|h1Padding\" style_sheet.dart | head -20; sed -n 980,995p builder.dart",
+  "summary": "cd ~/.pub-cache/hosted/pub.dev/flutter_markdown-0.7.7+1/lib/src && grep -n \"fallback\\|merge(widget.styleSheet\\|kFallbackStyle\" widget.dart | head; grep -n \"pPadding\\|listBulletPadding\\|h1Padding\" style_sheet.dart | head -20; sed -n 980,995p builder.dart: g: const EdgeInsets.only(right: 4), 177: pPadding: EdgeInsets.zer",
+  "text": "cd ~/.pub-cache/hosted/pub.dev/flutter_markdown-0.7.7+1/lib/src && grep -n \"fallback\\|merge(widget.styleSheet\\|kFallbackStyle\" widget.dart | head; grep -n \"pPadding\\|listBulletPadding\\|h1Padding\" style_sheet.dart | head -20; sed -n 980,995p builder.dart: g: const EdgeInsets.only(right: 4), 177: pPadding: EdgeInsets.zero, 186: h1Padding: EdgeInsets.zero, 228: listBulletPadding: const EdgeInsets.only(right: 4), 283: pPadding: EdgeInsets.zero, 290: h1Padding: EdgeInsets.zero, 312: listBulletPadding: const EdgeInsets.only(right: 4), 349: EdgeInsets? pPadding, 352: EdgeInsets? h1Padding, 372: EdgeInsets? listBulletPadding, 416: pPadding: pPadding ?? this.pPadding, 419: h1Padding: h1Padding ?? this.h1Padding, 439: listBulletPadding: listBulletPadding ?? this.listBulletPadding, 484: pPadding: other.pPadding, 487: h1Padding: other.h1Padding, } return WrapAlignment.start; } EdgeInsets _textPaddingForBlockTag(String? blockTag) { switch (blockTag) { case 'p': return styleSheet.pPadding!; case 'h1': return styleSheet.h1Padding!; case 'h2': return styleSheet.h2Padding!; case 'h3': return styleSheet.h3Padding!; case 'h4': return styleSheet.h4Padding!;",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a0e361d3c906472e113cb2e7",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:44:09.115Z",
+  "stored_at": "2026-09-23T10:44:09.115Z"
+}

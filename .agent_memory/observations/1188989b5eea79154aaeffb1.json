@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && f=$(grep -l '\"id\":\"repo:git-github-com-tistech0-collega:gotcha:collega-ui-police-embarqu-e-goldens-widgetbook-web-contrastes-du-spec-corrig-s-1' .agent_memory/packets/*.md | head -1); python3 -c \"\nimport json;s=open('$f').read();j=json.loads(s.split('\\`\\`\\`json kage-state')[1].split('\\`\\`\\`')[0]);print(j['id']);print(j['body'])\"",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && f=$(grep -l '\"id\":\"repo:git-github-com-tistech0-collega:gotcha:collega-ui-police-embarqu-e-goldens-widgetbook-web-contrastes-du-spec-corrig-s-1' .agent_memory/packets/*.md | head -1); python3 -c \"\nimport json;s=open('$f').read();j=json.loads(s.split('\\`\\`\\`json kage-",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && f=$(grep -l '\"id\":\"repo:git-github-com-tistech0-collega:gotcha:collega-ui-police-embarqu-e-goldens-widgetbook-web-contrastes-du-spec-corrig-s-1' .agent_memory/packets/*.md | head -1); python3 -c \"\nimport json;s=open('$f').read();j=json.loads(s.split('\\`\\`\\`json kage-state')[1].split('\\`\\`\\`')[0]);print(j['id']);print(j['body'])\": s et REGARDER le PNG à 1,6× (mots coupés, troncatures). (3) Widgetbook vit dans collega_app/widgetbook (paquet séparé, widgetbook 3.15.0 compatible Flutter 3.27) et cible le WEB : le build macOS/iOS échoue au pod install à cause des plugins de l'app ; les polices d'un paquet racine ne sont pas exposées aux paquets dépendants → widgetbook/pubspec redéclare la famille avec ../assets/fonts. (4) Les hex du spec v2 violaient ses propres seuils : ink3 → #838880, rankB → #4C696D, rankC → #64635B, texte sur review = ink (onReview) ; test/core/ui/tokens/contrast_test.dart fait foi. (5) ShadApp.router n'a pas cupertinoThemeBuilder : accent Cupertino via ThemeData.cupertinoOverrideTheme dans materialThemeBuilder. (6) Flutter 3.27 : pas de Color.toARGB32 (utiliser .value). Evidence: flutter test test/core : 88 verts ; widgetbook flutter build web OK, build macos KO (pods) ; goldens inspectés à 1,6×.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1188989b5eea79154aaeffb1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:08:00.629Z",
+  "stored_at": "2026-09-23T12:08:00.629Z",
+  "low_signal": true
+}

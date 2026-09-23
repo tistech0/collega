@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -i '' 's/expect(c.ink2, const Color(0xFF5B6664));/expect(c.ink2, const Color(0xFF454D4C));\\n      expect(c.ink3, const Color(0xFF60645E));/' collega_app/test/core/ui/tokens/tokens_test.dart && grep -n \"5B6664\\|838880\\|9A9E97\" _bmad-output/planning-artifacts/ux-design-specification-v2.md | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -i '' 's/expect(c.ink2, const Color(0xFF5B6664));/expect(c.ink2, const Color(0xFF454D4C));\\n      expect(c.ink3, const Color(0xFF60645E));/' collega_app/test/core/ui/tokens/tokens_test.dart && grep -n \"5B6664\\|838880\\|9A9E97\" _bmad-output/planning-artifacts/ux-de",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -i '' 's/expect(c.ink2, const Color(0xFF5B6664));/expect(c.ink2, const Color(0xFF454D4C));\\n      expect(c.ink3, const Color(0xFF60645E));/' collega_app/test/core/ui/tokens/tokens_test.dart && grep -n \"5B6664\\|838880\\|9A9E97\" _bmad-output/planning-artifacts/ux-design-specification-v2.md | head: 390:- **Palette** : celle de Bloc — `ground` pierre `#ECEAE3`, `surface` `#F7F6F2`, `ink` `#17201F`, `ink2` `#5B6664`, `ink3` `#9A9E97`, `line` `#D9D6CC`, `accent` sarcelle `#0E5E63`, `accent-soft` `#D5E6E4` ; états `mastered` `#0E5E63`, `good` `#6FA8A2`, `review` `#D9822B`, `unseen` `#D9D6CC` ; `danger` `#B8352B`. Le sarcelle est l'héritier assombri du vert v1 : la continuité de marque est conservée, l'usage devient rare. 401:| `ink` / `ink2` / `ink3` / `line` | `#17201F` / `#5B6664` / `#9A9E97` / `#D9D6CC` |",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "fe5a12c6f1f08d182320f042",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:02:08.258Z",
+  "stored_at": "2026-09-23T12:02:08.258Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; for d in today drill progress profile colleges shell; do echo \"== $d\"; flutter test test/features/$d 2>&1 | tail -2; done; flutter test test/core 2>&1 | tail -2",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; for d in today drill progress profile colleges shell; do echo \"== $d\"; flutter test test/features/$d 2>&1 | tail -2; done; flutter test test/core 2>&1 | tail -2: bv8qynhau Session cwd remains /Users/lesurmatthis/dev/projet perso/collega; directory changes m",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; for d in today drill progress profile colleges shell; do echo \"== $d\"; flutter test test/features/$d 2>&1 | tail -2; done; flutter test test/core 2>&1 | tail -2: bv8qynhau Session cwd remains /Users/lesurmatthis/dev/projet perso/collega; directory changes made by the backgrounded command do not apply to subsequent commands.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f068c67ba5d043aaa8b74fb1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:11:39.906Z",
+  "stored_at": "2026-09-23T12:11:39.907Z"
+}

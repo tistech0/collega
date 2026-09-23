@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; kage help --all 2>&1 | grep -iE \"learn|supersede|archive|retire|forget|remove\"; git status --short .agent_memory | grep -v \"^ M\" | head",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\"; kage help --all 2>&1 | grep -iE \"learn|supersede|archive|retire|forget|remove\"; git status --short .agent_memory | grep -v \"^ M\" | head",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0e71f60521bcbaab2900a045",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:52:08.101Z",
+  "stored_at": "2026-09-23T15:52:08.101Z"
+}

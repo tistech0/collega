@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && f=_bmad-output/implementation-artifacts/sprint-status.yaml && sed -i '' -e 's/^  epic-8: in-progress/  epic-8: done/' -e 's/^  8-15-retrait-shadcn-accessibilite: in-progress/  8-15-retrait-shadcn-accessibilite: done         # [2026-09-23 validée iPhone ; shadcn + thème v1 retirés, ink2\\/ink3 ≥ 4,5:1, a11y testée sur 5 écrans ; revue : transitions onglets, fond des pages]/' $f && sed -i '' 's/^Status: in-progress/Status: done/' _bmad-output/implementation-artifacts/8-15-retrait-shadcn-accessibilite.md && grep -n \"epic-8:\\|8-15\" $f && git add… [+333 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && f=_bmad-output/implementation-artifacts/sprint-status.yaml && sed -i '' -e 's/^ epic-8: in-progress/ epic-8: done/' -e 's/^ 8-15-retrait-shadcn-acc",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "582e75b7d2707954b387fa92",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T14:42:09.017Z",
+  "stored_at": "2026-09-23T14:42:09.017Z"
+}

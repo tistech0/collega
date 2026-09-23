@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 3995afb -- collega_app/test/features/auth/auth_providers_test.dart collega_app/test/features/auth/auth_repository_test.dart | grep \"^+\" | head -100; grep -n \"testWidgets\\|test(\" collega_app/test/features/profile/profile_screen_test.dart | head -50",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show 3995afb -- collega_app/test/features/auth/auth_providers_test.dart collega_app/test/features/auth/auth_repository_test.dart | grep \"^+\" | ",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "248e9031f08c3ac443a0695e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:45:14.354Z",
+  "stored_at": "2026-09-23T10:45:14.355Z"
+}

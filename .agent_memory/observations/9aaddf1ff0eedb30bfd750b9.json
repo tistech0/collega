@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; python3 - <<'EOF'\ndef L(h):\n  r=[int(h[i:i+2],16)/255 for i in (0,2,4)]\n  r=[x/12.92 if x<=0.03928 else ((x+0.055)/1.055)**2.4 for x in r]\n  return 0.2126*r[0]+0.7152*r[1]+0.0722*r[2]\ndef cr(a,b):\n  a,b=L(a),L(b); return (max(a,b)+0.05)/(min(a,b)+0.05)\nbgs=dict(ground='ECEAE3',surface='F7F6F2',soft='E2E0D8',accentSoft='D5E6E4',rankBSoft='DDE3E3',line='D9D6CC',unseen='D9D6CC',good='6FA8A2',review='D9822B')\nfor fg,h in [('ink2','454D4C'),('ink3','60645E'),('accent','0E5E63'),('reviewInk','9A5A16'),('danger','B8352B'),('rankB','4C696D… [+147 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; python3 - <<'EOF'\ndef L(h):\n  r=[int(h[i:i+2],16)/255 for i in (0,2,4)]\n  r=[x/12.92 if x<=0.03928 else ((x+0.055)/1.055)**2.4 for x in r]\n  return 0.2126*r[0]+0.7152*r[1]+0.0722*r[2]\ndef cr(a,b):\n  a,b=L(a),L(b); return (max(a,b)+0.05)/(min(a,b)+0.05)\nbgs=",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; python3 - <<'EOF'\ndef L(h):\n  r=[int(h[i:i+2],16)/255 for i in (0,2,4)]\n  r=[x/12.92 if x<=0.03928 else ((x+0.055)/1.055)**2.4 for x in r]\n  return 0.2126*r[0]+0.7152*r[1]+0.0722*r[2]\ndef cr(a,b):\n  a,b=L(a),L(b); return (max(a,b)+0.05)/(min(a,b)+0.05)\nbgs=dict(ground='ECEAE3',surface='F7F6F2',soft='E2E0D8',accentSoft='D5E6E4',rankBSoft='DDE3E3',line='D9D6CC',unseen='D9D6CC',good='6FA8A2',review='D9822B')\nfor fg,h in [('ink2','454D4C'),('ink3','60645E'),('accent','0E5E63'),('reviewInk','9A5A16'),('danger','B8352B'),('rankB','4C696D'),('rankC','64635B')]:\n  print(fg, {k:round(cr(h,v),2) for k,v in bgs.items()})\nEOF\ngrep -rn \"ink3\" lib | grep -v \"lib/core/ui/tokens/\" | head -60: /features/planning/presentation/planning_screen.dart:621: color: isDone ? c.accentInk : (day < today ? c.ink3 : c.ink), lib/features/planning/presentation/planning_screen.dart:624: decorationColor: c.ink3, lib/features/search/presentation/search_sheet.dart:190: leading: CgIcon(CgIcons.clock, size: _iconSize, color: c.ink3), lib/features/search/presentation/search_sheet.dart:214: leading: CgIcon(CgIcons.search, size: _iconSize, color: c.ink3), lib/features/profile/presentation/profile_screen.dart:500:/// Précision sous un groupe (spec v2 : `meta` `ink3`). lib/features/profile/presentation/profile_screen.dart:511: child: Text(text, style: CgType.meta.copyWith(color: c.ink3)), lib/features/colleges/presentation/colleges_screen.dart:282: color: c.ink3, lib/features/colleges/presentation/colleges_screen.dart:285: Expanded(child: Text(_placeholder, style: CgType.body.copyWith(color: c.ink3))),",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9aaddf1ff0eedb30bfd750b9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:11:20.975Z",
+  "stored_at": "2026-09-23T12:11:20.975Z"
+}

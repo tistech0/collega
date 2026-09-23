@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && r() { kage reverify --packet \"repo:git-github-com-tistech0-collega:$1\" --evidence \"$2\" 2>&1 | tail -1; }\nr gotcha:routeur-gorouter-unique-refreshlistenable-ne-jamais-le-recr-er-sur-un-changement \"app_router : _Splash affiche le logo ; routeur unique + refreshListenable inchangés ; router 9 verts\"\nr convention:shell-plus-aucun-cran-legacy-chaque-cran-donglet-r-serve-la-tab-bar-lui-m-me-179 \"profile_screen : logo sur la ligne Version ; CgPage(reserveTabBar) inchangé ; shell 11 verts\"\nr gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-hom… [+132 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && r() { kage reverify --packet \"repo:git-github-com-tistech0-collega:$1\" --evidence \"$2\" 2>&1 | tail -1; }\nr gotcha:routeur-gorouter-unique-refreshlistenable-ne-jamais-le-recr-er-sur-un-changement \"app_router : _Splash affiche le logo ; routeur unique + refreshListenab",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && r() { kage reverify --packet \"repo:git-github-com-tistech0-collega:$1\" --evidence \"$2\" 2>&1 | tail -1; }\nr gotcha:routeur-gorouter-unique-refreshlistenable-ne-jamais-le-recr-er-sur-un-changement \"app_router : _Splash affiche le logo ; routeur unique + refreshListenable inchangés ; router 9 verts\"\nr convention:shell-plus-aucun-cran-legacy-chaque-cran-donglet-r-serve-la-tab-bar-lui-m-me-179 \"profile_screen : logo sur la ligne Version ; CgPage(reserveTabBar) inchangé ; shell 11 verts\"\nr gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-17901124 \"profile_screen_test : attente du logo ajoutée ; convention par dossiers inchangée ; profile 49 verts\": evidence recorded for changed path(s): collega_app/lib/core/router/app_router.dart evidence recorded for changed path(s): collega_app/lib/features/profile/presentation/profile_screen.dart evidence recorded for changed path(s): collega_app/test/features/profile/profile_screen_test.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c7638b5e0ca7a203a6763122",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:40:04.439Z",
+  "stored_at": "2026-09-23T15:40:04.440Z"
+}

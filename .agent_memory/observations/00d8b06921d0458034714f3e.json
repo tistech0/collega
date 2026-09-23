@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_refresh",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_refresh: [{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"generated_at\": \"2026-09-23T15:54:11.855Z\",\\n \"quiet_refresh\": false,\\n \"index\": {\\n \"projectDir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"packets\": 52,\\n \"migrated\": 0,\\n \"indexe",
+  "text": "[{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"generated_at\": \"2026-09-23T15:54:11.855Z\",\\n \"quiet_refresh\": false,\\n \"index\": {\\n \"projectDir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"packets\": 52,\\n \"migrated\": 0,\\n \"indexes\": [\\n \".agent_memory/indexes/catalog.json\",\\n \".agent_memory/indexes/by-path.json\",\\n \".agent_memory/indexes/by-tag.json\",\\n \".agent_memory/indexes/by-type.json\",\\n \".agent_memory/indexes/vector-local.json\",\\n \".agent_memory/indexes/docs-index.json\",\\n \".agent_memory/indexes/structural.json\",\\n \".agent_memory/indexes/graph.json\",\\n \".agent_memory/indexes/code-graph.json\"\\n ],\\n \"policyPath\": \"AGENTS.md\"\\n },\\n \"validation\": {\\n \"ok\": true,\\n \"errors\": [],\\n \"warnings\": [\\n \".agent_memory/packets/repo_map-collega-repo-overview-cf8b6e00.md: low memory quality score 54\"\\n ]\\n },\\n \"metrics\": {\\n \"schema_version\": 1,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"repo_key\": \"git-github-com-tistech0-collega\",\\n \"generated_at\": \"2026-09-23T15:54:11.591Z\",\\n \"code_graph\": {\\n \"files\": 765,\\n \"symbols\": 2666,\\n \"imports\": 1626,\\n \"calls\": 5526,\\n \"routes\": 132,\\n \"tests\": ",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "00d8b06921d0458034714f3e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:54:12.300Z",
+  "stored_at": "2026-09-23T15:54:12.300Z",
+  "low_signal": true
+}

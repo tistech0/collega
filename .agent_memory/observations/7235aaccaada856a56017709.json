@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "pgrep -fl \"run_device.sh --release\" | wc -l; L=\"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log\"; sleep 5; until grep -qE \"Flutter run key commands|Error running|Could not\" \"$L\"; do sleep 5; done; grep -E \"Flutter run key commands|Locked|Error running\" \"$L\" | head -2",
+  "summary": "About to run: pgrep -fl \"run_device.sh --release\" | wc -l; L=\"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log\"; sleep 5; until grep -qE \"",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7235aaccaada856a56017709",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:25:01.378Z",
+  "stored_at": "2026-09-23T12:25:01.379Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_context",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_context: [{'type': 'text', 'text': '# Kage Context\\n\\nQuery: état actuel du projet et prochain sujet : refonte infra/back\\n\\n## Relevant Code Graph\\n1. [route] DELETE /account -> collega_backend/app/api/v1/auth.py:150\\n2. [route] DELETE /account -> collega_backend/app/api/v1/auth.py:150\\n3. [route] GET /coll",
+  "text": "[{'type': 'text', 'text': '# Kage Context\\n\\nQuery: état actuel du projet et prochain sujet : refonte infra/back\\n\\n## Relevant Code Graph\\n1. [route] DELETE /account -> collega_backend/app/api/v1/auth.py:150\\n2. [route] DELETE /account -> collega_backend/app/api/v1/auth.py:150\\n3. [route] GET /colleges -> collega_backend/app/api/v1/colleges.py:69\\n1. [symbol] class PurchasedProductsFetcher in collega_app/ios/Pods/RevenueCat/Sources/OfflineEntitlements/PurchasedProductsFetcher.swift:28\\n2. [symbol] class GetProductEntitlementMappingOperation in collega_app/ios/Pods/RevenueCat/Sources/Networking/Operations/GetProductEntitlementMappingOperation.swift:16\\n3. [symbol] class GetWebBillingProductsOperation in collega_app/ios/Pods/RevenueCat/Sources/Networking/Operations/GetWebBillingProductsOperation.swift:16\\n4. [symbol] class GetWebOfferingProductsOperation in collega_app/ios/Pods/RevenueCat/Sources/Networking/Operations/GetWebOfferingProductsOperation.swift:16\\n5. [symbol] function handleTestProductNotAvailableForPurchase in collega_app/ios/Pods/RevenueCat/Sources/Purchasing/Purchases/PurchasesOrchestrator.swift:2136\\n1. [test] test_get_me_quota_du_mois_en_cours_et_rappel in collega_b",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2ae2c467b1a7731dbe530b5d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:43:30.104Z",
+  "stored_at": "2026-09-23T15:43:30.104Z"
+}

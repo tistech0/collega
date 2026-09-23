@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/ && grep -ln \"billing/revenuecat\" *.md && sed -i '' 's#/v1/billing/revenuecat#/v1/webhooks/revenuecat#g' *.md && grep -rn \"webhooks/revenuecat\" *.md",
+  "summary": "About to run: cd /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/ && grep -ln \"billing/revenuecat\" *.md && sed -i '' 's#/v1/billing/revenuecat#/v1/webhooks/revenuecat#g' *.m",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "56bf131aa5b0127c5236c4f6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:51:01.269Z",
+  "stored_at": "2026-09-23T15:51:01.270Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"withValues\\|withOpacity\\|alpha\\|blur\\|color:\" lib/core/ui/components/cg_tab_bar.dart | head -20; sed -n 600,630p lib/features/planning/presentation/planning_screen.dart; sed -n 245,270p lib/features/progress/progress_screen.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"withValues\\|withOpacity\\|alpha\\|blur\\|color:\" lib/core/ui/components/cg_tab_bar.dart | head -20; sed -n 600,630p lib/features/planning/presentation/planning_screen.dart; sed -n 245,270p lib/features/progress/progress_screen.dart: ayBorder : _border",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"withValues\\|withOpacity\\|alpha\\|blur\\|color:\" lib/core/ui/components/cg_tab_bar.dart | head -20; sed -n 600,630p lib/features/planning/presentation/planning_screen.dart; sed -n 245,270p lib/features/progress/progress_screen.dart: ayBorder : _border, ), ), child: Text( '${date.day}', style: CgType.label.copyWith( color: isDone ? c.accentInk : (day < today ? c.ink3 : c.ink), fontWeight: isToday ? FontWeight.w700 : null, decoration: isPostponed ? TextDecoration.lineThrough : TextDecoration.none, decorationColor: c.ink3, fontFeatures: const [FontFeature.tabularFigures()], ), ), ), ), ), child: Align( alignment: Alignment.bottomCenter, child: Container( width: _barWidth, height: max == 0 || d.count == 0 ? _minBar : _minBar + (_height - _minBar) * d.count / max, decoration: BoxDecoration( color: d.count == 0 ? c.unseen : c.accent, borderRadius: const BorderRadius.vertical(top: _radius, bottom: _radius), ), ), ), ), const SizedBox(height: CgSpace.s1), Text( frWeekdayInitial(d.date), style: CgType.label.copyWith( color: d.isToday ? c.accent : c.ink3, fontWeight: d.isToday ? FontWeight.w700 : null, ), ), ]), ), ), ]); } }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0de012a14869e94cc502c1a6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:11:25.694Z",
+  "stored_at": "2026-09-23T12:11:25.694Z"
+}

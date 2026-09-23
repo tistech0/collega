@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker logs --since 40m collega-api-1 2>&1 | grep -E \"import|upload|parts|/colleges\" | tail -30'",
+  "summary": "ssh nas 'docker logs --since 40m collega-api-1 2>&1 | grep -E \"import|upload|parts|/colleges\" | tail -30': import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/5 HTTP/1.1\" 204 No Content INFO: 172.26.0.4:40662 - \"PUT /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/7 HTTP/1.1\" 204 No Content INFO: 172.26.0.4",
+  "text": "ssh nas 'docker logs --since 40m collega-api-1 2>&1 | grep -E \"import|upload|parts|/colleges\" | tail -30': import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/5 HTTP/1.1\" 204 No Content INFO: 172.26.0.4:40662 - \"PUT /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/7 HTTP/1.1\" 204 No Content INFO: 172.26.0.4:40676 - \"PUT /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/6 HTTP/1.1\" 204 No Content INFO: 172.26.0.4:40682 - \"PUT /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/1 HTTP/1.1\" 204 No Content INFO: 172.26.0.4:40684 - \"PUT /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/3 HTTP/1.1\" 204 No Content INFO: 172.26.0.4:40686 - \"PUT /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/4 HTTP/1.1\" 204 No Content INFO: 172.26.0.4:40688 - \"PUT /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/2 HTTP/1.1\" 204 No Content INFO: 172.26.0.4:43710 - \"GET /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055 HTTP/1.1\" 200 OK",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d9401f9736e80a1ab23f7f0f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:14:47.486Z",
+  "stored_at": "2026-09-23T10:14:47.486Z"
+}

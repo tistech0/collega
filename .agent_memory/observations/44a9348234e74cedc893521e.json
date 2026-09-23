@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "Agent",
+  "path": "",
+  "command": "",
+  "summary": "Agent: async_launched a7c318520ddf33a4a Adversarial review story 8.15 claude-opus-5-5[1m] You are an adversarial reviewer for a Flutter (Riverpod 2, go_router 14) iOS app \"Collega\" (French). Repo: /Users/lesurmatthis/dev/projet perso/collega, app in collega_app/. Review the last two commits of branch feat/",
+  "text": "async_launched a7c318520ddf33a4a Adversarial review story 8.15 claude-opus-5-5[1m] You are an adversarial reviewer for a Flutter (Riverpod 2, go_router 14) iOS app \"Collega\" (French). Repo: /Users/lesurmatthis/dev/projet perso/collega, app in collega_app/. Review the last two commits of branch feat/redesign-ux-ui: `git show 18c6a25` (story 8.15: removal of shadcn_ui + google_fonts + v1 theme app_theme.dart, orphan widgets; lib/app.dart now MaterialApp.router themed with buildCgMaterialTheme from lib/core/ui/theme/cg_theme.dart) and `git show HEAD` (accessibility guideline tests on 5 core screens + ink2/ink3 color token change in lib/core/ui/tokens/cg_colors.dart). Story: _bmad-output/implementation-artifacts/8-15-retrait-shadcn-accessibilite.md. Spec: _bmad-output/planning-artifacts/ux-design-specification-v2.md (Accessibilité). Hunt for REAL defects only: - Regressions from replacing ShadApp.router with MaterialApp.router: anything that relied on ShadTheme/ShadToaster/Shad* inherited widgets, default text style/DefaultTextStyle, Material ancestors (e.g. CupertinoTextField/CgField selection toolbar, MarkdownBody needing Theme, Overlay/ScaffoldMessenger), page transitions (iOS swipe",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "44a9348234e74cedc893521e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:07:55.392Z",
+  "stored_at": "2026-09-23T12:07:55.392Z"
+}

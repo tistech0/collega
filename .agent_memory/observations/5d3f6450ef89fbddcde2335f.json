@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat -n lib/features/legal/presentation/legal_screen.dart; sed -n 105,125p lib/core/router/app_router.dart; head -20 assets/legal/cgu.md; head -8 assets/legal/privacy.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat -n lib/features/legal/presentation/legal_screen.dart; sed -n 105,125p lib/core/router/app_router.dart; head -20 assets/legal/cgu.md; head -8 assets/legal/privacy.md: ilisant l'Application, tu acceptes les présentes Conditions Générales d'Utilisation (",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat -n lib/features/legal/presentation/legal_screen.dart; sed -n 105,125p lib/core/router/app_router.dart; head -20 assets/legal/cgu.md; head -8 assets/legal/privacy.md: ilisant l'Application, tu acceptes les présentes Conditions Générales d'Utilisation (« CGU »). --- ## 1. Objet du service Collega est une application mobile (iOS) qui permet : - d'importer un PDF de collège médical et d'en générer automatiquement des fiches de révision structurées (recto/verso) à l'aide d'une intelligence artificielle ; - de réviser ces fiches en mode drill (auto-évaluation : à revoir / bien / maîtrisé) ; - de suivre sa progression collège par collège, rang par rang ; - de recevoir des rappels de révision et des notifications push lorsque la génération est terminée. # Politique de Confidentialité **Version : 2026-05-22** La présente politique décrit comment **Collega** (« l'Application ») collecte, traite et protège tes données personnelles conformément au Règlement Général sur la Protection des Données (RGPD — Règlement UE 2016/679) et à la loi Informatique et Libertés.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5d3f6450ef89fbddcde2335f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:43:54.256Z",
+  "stored_at": "2026-09-23T10:43:54.256Z"
+}

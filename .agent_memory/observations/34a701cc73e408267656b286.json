@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "docker ps | grep -q collega-test-redis || docker run -d --rm --name collega-test-redis -p 6379:6379 redis:7-alpine >/dev/null; sleep 1; docker exec collega-test-redis redis-cli FLUSHALL; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && REDIS_URL=redis://localhost:6379/0 .venv/bin/python -m pytest tests/api/test_auth.py -q 2>&1 | tail -5",
+  "summary": "docker ps | grep -q collega-test-redis || docker run -d --rm --name collega-test-redis -p 6379:6379 redis:7-alpine >/dev/null; sleep 1; docker exec collega-test-redis redis-cli FLUSHALL; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && REDIS_URL=redis://localhost:6379/0 .venv/bin/python -m pytest te",
+  "text": "docker ps | grep -q collega-test-redis || docker run -d --rm --name collega-test-redis -p 6379:6379 redis:7-alpine >/dev/null; sleep 1; docker exec collega-test-redis redis-cli FLUSHALL; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && REDIS_URL=redis://localhost:6379/0 .venv/bin/python -m pytest tests/api/test_auth.py -q 2>&1 | tail -5: OK /Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/lib/python3.14/site-packages/slowapi/extension.py:717: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead if asyncio.iscoroutinefunction(func): -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html 20 passed, 6 warnings in 1.72s",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "34a701cc73e408267656b286",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:45:08.173Z",
+  "stored_at": "2026-09-23T10:45:08.174Z"
+}

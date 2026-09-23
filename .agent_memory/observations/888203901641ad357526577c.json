@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"style =\\|final style\\|titleStyle =\\|numeralStyle =\\|textStyle =\\|placeholderStyle =\" lib/core/ui/components/cg_button.dart lib/core/ui/components/cg_list_row.dart lib/features/drill/presentation/drill_end_screen.dart lib/features/today/presentation/today_screen.dart lib/core/ui/components/cg_field.dart; sed -n 275,300p lib/features/search/presentation/search_sheet.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"style =\\|final style\\|titleStyle =\\|numeralStyle =\\|textStyle =\\|placeholderStyle =\" lib/core/ui/components/cg_button.dart lib/core/ui/components/cg_list_row.dart lib/features/drill/presentation/drill_end_screen.dart lib/features/today/presentation",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"style =\\|final style\\|titleStyle =\\|numeralStyle =\\|textStyle =\\|placeholderStyle =\" lib/core/ui/components/cg_button.dart lib/core/ui/components/cg_list_row.dart lib/features/drill/presentation/drill_end_screen.dart lib/features/today/presentation/today_screen.dart lib/core/ui/components/cg_field.dart; sed -n 275,300p lib/features/search/presentation/search_sheet.dart:  : CgType.body).copyWith(color: widget.enabled ? c.ink : c.ink3); lib/core/ui/components/cg_field.dart:139: final placeholderStyle = textStyle.copyWith(color: c.ink3, overflow: TextOverflow.ellipsis); } @override Widget build(BuildContext context) { final c = CgTheme.of(context).colors; final excerpt = window(this.excerpt); final spans = <InlineSpan>[]; var last = 0; for (final m in _mark.allMatches(excerpt)) { if (m.start > last) spans.add(TextSpan(text: excerpt.substring(last, m.start))); spans.add(TextSpan( text: m.group(1), style: TextStyle(backgroundColor: c.accentSoft, color: c.ink, fontWeight: FontWeight.w600), )); last = m.end; } if (last < excerpt.length) spans.add(TextSpan(text: excerpt.substring(last))); return Text.rich( TextSpan(children: spans), style: CgType.bodyS.copyWith(color: c.ink2), maxLines: maxLines, overflow: maxLines == null ? null : TextOverflow.ellipsis, ); } }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "888203901641ad357526577c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:10:03.002Z",
+  "stored_at": "2026-09-23T12:10:03.002Z"
+}

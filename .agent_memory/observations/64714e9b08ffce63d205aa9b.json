@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "lq version est cqhrger ?",
+  "summary": "lq version est cqhrger ?",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "64714e9b08ffce63d205aa9b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:11:40.121Z",
+  "stored_at": "2026-09-23T10:11:40.121Z",
+  "low_signal": true
+}

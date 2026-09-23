@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "f=/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tool-results/bj96t5j9v.txt; grep -o \"== test[^ ]*\" $f; tr '\\r' '\\n' < $f | grep -E \"All tests passed|Some tests failed|tests? failed|\\[E\\]\" | head -20",
+  "summary": "f=/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tool-results/bj96t5j9v.txt; grep -o \"== test[^ ]*\" $f; tr '\\r' '\\n' < $f | grep -E \"All tests passed|Some tests failed|tests? failed|\\[E\\]\" | head -20: == test/features/profile == test/features/auth ",
+  "text": "f=/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tool-results/bj96t5j9v.txt; grep -o \"== test[^ ]*\" $f; tr '\\r' '\\n' < $f | grep -E \"All tests passed|Some tests failed|tests? failed|\\[E\\]\" | head -20: == test/features/profile == test/features/auth == test/features/legal == test/features/shell == test/core/router 00:05 +43: All tests passed! 00:04 +73: All tests passed! 00:03 +12: All tests passed! 00:02 +11: All tests passed! 00:04 +7: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "841f49ed7cc33eab19bb2a0a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:45:11.496Z",
+  "stored_at": "2026-09-23T10:45:11.497Z"
+}

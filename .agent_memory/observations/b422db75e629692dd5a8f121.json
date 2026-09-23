@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker exec collega-db-1 sh -c \"psql -U \\$POSTGRES_USER -d \\$POSTGRES_DB -c \\\"select c.college_ref_id, c.status, c.ocr_page_progress, c.total_pages, c.generation_items_done, c.generation_items_total, c.generation_cards, c.updated_at from colleges c order by c.updated_at desc nulls last limit 5;\\\" -c \\\"select status, created_at, error_message from generation_jobs order by created_at desc limit 5;\\\"\"' 2>&1 | head -30",
+  "summary": "ssh nas 'docker exec collega-db-1 sh -c \"psql -U \\$POSTGRES_USER -d \\$POSTGRES_DB -c \\\"select c.college_ref_id, c.status, c.ocr_page_progress, c.total_pages, c.generation_items_done, c.generation_items_total, c.generation_cards, c.updated_at from colleges c order by c.updated_at desc nulls last limit 5;\\\" -c \\\"select s",
+  "text": "ssh nas 'docker exec collega-db-1 sh -c \"psql -U \\$POSTGRES_USER -d \\$POSTGRES_DB -c \\\"select c.college_ref_id, c.status, c.ocr_page_progress, c.total_pages, c.generation_items_done, c.generation_items_total, c.generation_cards, c.updated_at from colleges c order by c.updated_at desc nulls last limit 5;\\\" -c \\\"select status, created_at, error_message from generation_jobs order by created_at desc limit 5;\\\"\"' 2>&1 | head -30: college_ref_id | status | ocr_page_progress | total_pages | generation_items_done | generation_items_total | generation_cards | updated_at ----------------+---------------------+-------------------+-------------+-----------------------+------------------------+------------------+------------------------------- 3 | generation_complete | 436 | 436 | 0 | | 0 | 2026-09-21 15:28:53.994502+00 34 | generation_complete | 355 | 355 | 0 | | 0 | 2026-09-21 13:54:36.769606+00 (2 rows) status | created_at | error_message ---------------------+-------------------------------+--------------- generation_complete | 2026-09-21 15:26:08.065058+00 | generation_complete | 2026-09-21 13:53:08.944766+00 | (2 rows)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b422db75e629692dd5a8f121",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:14:42.514Z",
+  "stored_at": "2026-09-23T10:14:42.515Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/theme/cg_theme.dart; git show 18c6a25^:collega_app/lib/core/theme/app_theme.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/theme/cg_theme.dart; git show 18c6a25^:collega_app/lib/core/theme/app_theme.dart: ver: Color(0xFFFFFFFF), popoverForeground: Color(0xFF1A1C1A), primary: Color(0xFF1B6B3A), primaryForeground: Color(0xFFFFFFFF), secondary: Color(0xFF3D6B5E),",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/theme/cg_theme.dart; git show 18c6a25^:collega_app/lib/core/theme/app_theme.dart: ver: Color(0xFFFFFFFF), popoverForeground: Color(0xFF1A1C1A), primary: Color(0xFF1B6B3A), primaryForeground: Color(0xFFFFFFFF), secondary: Color(0xFF3D6B5E), secondaryForeground: Color(0xFFFFFFFF), muted: Color(0xFFF1F5F2), mutedForeground: Color(0xFF6B7C6E), accent: Color(0xFFB7F2C8), accentForeground: Color(0xFF1B6B3A), destructive: Color(0xFFBA1A1A), destructiveForeground: Color(0xFFFFFFFF), border: Color(0xFFE2EAE4), input: Color(0xFFE2EAE4), ring: Color(0xFF1B6B3A), selection: Color(0xFFB7F2C8), ), progressTheme: const ShadProgressTheme( color: AppColors.primary, backgroundColor: AppColors.progressTrack, ), textTheme: ShadTextTheme.fromGoogleFont(GoogleFonts.inter).copyWith( h2: AppTypography.displayMedium(), h3: AppTypography.titleLarge(), large: AppTypography.titleMedium(), p: AppTypography.bodyLarge(), small: AppTypography.bodyMedium(), muted: AppTypography.labelMedium(), ), ); }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "edec121ccf1efc77574b25e2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:08:38.687Z",
+  "stored_at": "2026-09-23T12:08:38.687Z"
+}

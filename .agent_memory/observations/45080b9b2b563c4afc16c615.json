@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; kage help --all 2>&1 | grep -iE \"pending|reject|review|approve|verify|prune|delete|archive\"",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; kage help --all 2>&1 | grep -iE \"pending|reject|review|approve|verify|prune|delete|archive\": kage setup verify-agent --agent <agent> --project <dir> [--json] kage verify --project <dir> [--id <packet-id>] [--json] kage slots delete --project <dir> --label <label> [--js",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; kage help --all 2>&1 | grep -iE \"pending|reject|review|approve|verify|prune|delete|archive\": kage setup verify-agent --agent <agent> --project <dir> [--json] kage verify --project <dir> [--id <packet-id>] [--json] kage slots delete --project <dir> --label <label> [--json] kage reverify --project <dir> --packet <id> [--json] kage reviewers --project <dir> [--targets a,b] [--changed-files a,b] [--json] kage review-artifact --project <dir> kage review --project <dir>",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "45080b9b2b563c4afc16c615",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:47:06.558Z",
+  "stored_at": "2026-09-23T15:47:06.558Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 100,200p collega_app/lib/features/auth/data/auth_repository.dart; grep -rn \"monthly_reloads_max\\|reminder_hour_utc\\|def get_me\\|/me\\\"\" collega_backend/app | head",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 100,200p collega_app/lib/features/auth/data/auth_repository.dart; grep -rn \"monthly_reloads_max\\|reminder_hour_utc\\|def get_me\\|/me\\\"\" colle",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3a33db486513deb4b45462b5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:28:37.963Z",
+  "stored_at": "2026-09-23T10:28:37.963Z"
+}

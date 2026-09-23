@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && r() { kage reverify --packet \"repo:git-github-com-tistech0-collega:$1\" --evidence \"$2\" 2>&1 | tail -1; }\nr convention:shell-plus-aucun-cran-legacy-chaque-cran-donglet-r-serve-la-tab-bar-lui-m-me-179 \"profile_screen: correctifs rappel/dates seulement ; CgPage(reserveTabBar) et TabReselectScrollMixin inchangés ; shell 11 verts\"\nr decision:acc-s-backend-via-tunnel-cloudflare-service-token-dans-lapp-heartbeat-sse-limite \"api_client: _clearAllTokens efface aussi rappel/quota ; en-têtes CF Access inchangés ; core/network 4 verts\"\nr gotcha:prod-col… [+705 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && r() { kage reverify --packet \"repo:git-github-com-tistech0-collega:$1\" --evidence \"$2\" 2>&1 | tail -1; }\nr convention:shell-plus-aucun-cran-legacy-chaque-cran-donglet-r-serve-la-tab-bar-lui-m-me-179 \"profile_screen: correctifs rappel/dates seulement ; CgPage(reserveT",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && r() { kage reverify --packet \"repo:git-github-com-tistech0-collega:$1\" --evidence \"$2\" 2>&1 | tail -1; }\nr convention:shell-plus-aucun-cran-legacy-chaque-cran-donglet-r-serve-la-tab-bar-lui-m-me-179 \"profile_screen: correctifs rappel/dates seulement ; CgPage(reserveTabBar) et TabReselectScrollMixin inchangés ; shell 11 verts\"\nr decision:acc-s-backend-via-tunnel-cloudflare-service-token-dans-lapp-heartbeat-sse-limite \"api_client: _clearAllTokens efface aussi rappel/quota ; en-têtes CF Access inchangés ; core/network 4 verts\"\nr gotcha:prod-collegatest-2-chemins-r-seau-le-chemin-public-est-bloqu-par-cloudflare-acce \"api_client: seul _clearAllTokens complété ; chemins réseau inchangés\"\nr gotcha:collega-ui-police-embarqu-e-goldens-widgetbook-web-contrastes-du-spec-corrig-s-1 \"app.dart: ajout du recalage du rappel au login ; CgTheme/polices inchangés ; goldens verts\"\nr gotcha:routeur-gorouter-unique-refreshlistenable-ne-jamais-le-recr-er-sur-un-changement \"auth_providers: garde de compte dans refreshProfile, invalidation paywall au logout ; routeur unique inchangé ; router 7 verts\"\nr gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-17901124 \"profile_screen_test étendu (48) ; convention par dossiers inchangée\": evidence recorded for changed path(s): collega_app/lib/features/profile/presentation/profile_screen.dart evidence recorded for changed path(s): collega_app/lib/core/network/api_client.dart evidence recorded for changed path(s): collega_app/lib/core/network/api_client.dart evidence recorded for changed path(s): collega_app/lib/app.dart evidence recorded for changed path(s): collega_app/lib/features/auth/auth_providers.dart evidence recorded for changed path(s): collega_app/test/features/profile/profile_screen_test.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "234a69c44b87c24962a78256",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:52:40.580Z",
+  "stored_at": "2026-09-23T10:52:40.580Z"
+}

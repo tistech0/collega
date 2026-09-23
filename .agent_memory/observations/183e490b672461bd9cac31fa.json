@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"requestPermissionsAndRegister\\|notificationsServiceProvider).reset\\|\\.reset()\" lib | grep -v \"^lib/core/notifications\" | head; grep -n \"onRefresh\" -A15 lib/core/ui/components/cg_header.dart | head -40; grep -rn \"ShellRoute\" lib/core/router/app_router.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"requestPermissionsAndRegister\\|notificationsServiceProvider).reset\\|\\.reset()\" lib | grep -v \"^lib/core/notifications\" | head; grep -n \"onRefresh\" -A15 lib/core/ui/components/cg_header.dart | head -40; grep -rn \"ShellRoute\" lib/core/router/app_r",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"requestPermissionsAndRegister\\|notificationsServiceProvider).reset\\|\\.reset()\" lib | grep -v \"^lib/core/notifications\" | head; grep -n \"onRefresh\" -A15 lib/core/ui/components/cg_header.dart | head -40; grep -rn \"ShellRoute\" lib/core/router/app_router.dart: Refresh; 292- 293- /// Pour remonter en haut au re-tap de l'onglet actif. 294- final ScrollController? controller; 295- 296- @override 297- State<CgPage> createState() => _CgPageState(); 298-} 299- 300-class _CgPageState extends State<CgPage> { 301- /// Espace entre la barre (44 pt) et le large title : 44 + 4 = 48 (`beforeLargeTitle`). 302- static const _largeTitleGap = CgSpace.beforeLargeTitle - CgHeader._barHeight; 303- 304- /// Barre réduite : `ground` translucide sur flou (matière iOS). 305- static const _barFillAlpha = 0.86; 306- static const _barBlurSigma = 20.0; -- 353: if (widget.onRefresh != null) CupertinoSliverRefreshControl(onRefresh: widget.onRefresh), 354- SliverPadding( 355- padding: EdgeInsets.fromLTRB(side, _largeTitleGap, side, listBottom), 356- sliver: SliverList( 357- delegate: SliverChildListDelegate([ 358- CgHeader._( lib/core/router/app_router.dart:140: ShellRoute(",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "183e490b672461bd9cac31fa",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:45:57.250Z",
+  "stored_at": "2026-09-23T10:45:57.250Z"
+}

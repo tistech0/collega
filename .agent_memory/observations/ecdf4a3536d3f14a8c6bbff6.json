@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show HEAD --stat | grep -v png; git show HEAD -- '*.dart' ':!*cg_colors.dart' | head -300",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show HEAD --stat | grep -v png; git show HEAD -- '*.dart' ':!*cg_colors.dart' | head -300: 4 --- a/collega_app/test/features/today/today_screen_test.dart +++ b/collega_app/test/features/today/today_screen_test.dart @@ -364,6 +364,17 @@ void main() { expect(find.t",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show HEAD --stat | grep -v png; git show HEAD -- '*.dart' ':!*cg_colors.dart' | head -300: 4 --- a/collega_app/test/features/today/today_screen_test.dart +++ b/collega_app/test/features/today/today_screen_test.dart @@ -364,6 +364,17 @@ void main() { expect(find.text('Session décalée à demain'), findsNothing); }); + testWidgets('accessibilité : cibles étiquetées, 44 pt, contraste du texte (8.15)', (tester) async { + final handle = tester.ensureSemantics(); + _phone(tester); + await tester.pumpWidget(_app(() => _Fixed(_ready()))); + await tester.pumpAndSettle(); + await expectLater(tester, meetsGuideline(labeledTapTargetGuideline)); + await expectLater(tester, meetsGuideline(iOSTapTargetGuideline)); + await expectLater(tester, meetsGuideline(textContrastGuideline)); + handle.dispose(); + }); + testWidgets('Dynamic Type 1,6 sur 375 : aucun débordement', (tester) async { _phone(tester, width: 375, height: 812); await tester.pumpWidget(_app(() => _Fixed(_ready()), textScale: 1.6));",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ecdf4a3536d3f14a8c6bbff6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:08:06.631Z",
+  "stored_at": "2026-09-23T12:08:06.632Z"
+}

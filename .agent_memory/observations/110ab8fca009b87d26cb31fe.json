@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show --stat 18c6a25 | head -80 && git show --stat HEAD | head -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show --stat 18c6a25 | head -80 && git show --stat HEAD | head -60: omponents/goldens/cg_header_375_16.png | Bin 55302 -> 55336 bytes .../ui/components/goldens/cg_header_393_10.png | Bin 43063 -> 43073 bytes .../ui/components/goldens/cg_header_393_16.png | Bin 558",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git show --stat 18c6a25 | head -80 && git show --stat HEAD | head -60: omponents/goldens/cg_header_375_16.png | Bin 55302 -> 55336 bytes .../ui/components/goldens/cg_header_393_10.png | Bin 43063 -> 43073 bytes .../ui/components/goldens/cg_header_393_16.png | Bin 55846 -> 55888 bytes .../ui/components/goldens/cg_header_430_10.png | Bin 43578 -> 43604 bytes .../ui/components/goldens/cg_header_430_16.png | Bin 55989 -> 56047 bytes .../ui/components/goldens/cg_list_row_375_10.png | Bin 70905 -> 71919 bytes .../ui/components/goldens/cg_list_row_375_16.png | Bin 107590 -> 109050 bytes .../ui/components/goldens/cg_list_row_393_10.png | Bin 70701 -> 71697 bytes .../ui/components/goldens/cg_list_row_393_16.png | Bin 106445 -> 107853 bytes .../ui/components/goldens/cg_list_row_430_10.png | Bin 71662 -> 72718 bytes .../ui/components/goldens/cg_list_row_430_16.png | Bin 105771 -> 107095 bytes .../core/ui/components/goldens/cg_page_375_10.png | Bin 69280 -> 69440 bytes",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "110ab8fca009b87d26cb31fe",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:07:58.372Z",
+  "stored_at": "2026-09-23T12:07:58.372Z"
+}

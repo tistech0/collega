@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n 1,40p lib/core/ui/brand/cg_wordmark.dart | head -40; ls assets assets/* | head -30; ls ios/Runner/Assets.xcassets/AppIcon.appiconset | head -5",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n 1,40p lib/core/ui/brand/cg_wordmark.dart | head -40; ls assets assets/* | head -30; ls ios/Runner/Assets.xcassets/AppIcon.appico",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "18b0483cea1da0c93cda4403",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T14:46:05.072Z",
+  "stored_at": "2026-09-23T14:46:05.072Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Monitor",
+  "path": "",
+  "command": "until grep -qE \"Installing and launching|Error running application|Could not run build\" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log 2>/dev/null; do sleep 10; done; sleep 25; grep -E \"Installing|Error running|key commands|unlocked\" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log | tail -3",
+  "summary": "until grep -qE \"Installing and launching|Error running application|Could not run build\" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log 2>/dev/null; do sleep 10; done; sleep 25; grep -E \"Installing|Error running|key commands|unlocked\" /private",
+  "text": "until grep -qE \"Installing and launching|Error running application|Could not run build\" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log 2>/dev/null; do sleep 10; done; sleep 25; grep -E \"Installing|Error running|key commands|unlocked\" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log | tail -3: b1sc9xsav",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "dddd618519e19ccedf39e4b9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:06:35.915Z",
+  "stored_at": "2026-09-23T10:06:35.916Z"
+}

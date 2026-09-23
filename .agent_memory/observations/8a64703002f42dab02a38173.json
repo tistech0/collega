@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"ground\\|ColoredBox\\|DecoratedBox\" lib/features/colleges/presentation/college_import_screen.dart lib/features/auth/presentation/auth_login_screen.dart lib/features/demo/presentation/demo_screen.dart | head; git log --oneline -3 -- lib/features/legal/presentation/legal_screen.dart; git show 8985d71 --stat | tail -5; git show 8985d71 | grep \"^[-+]\" | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"ground\\|ColoredBox\\|DecoratedBox\" lib/features/colleges/presentation/college_import_screen.dart lib/features/auth/presentation/auth_login_screen.dart lib/features/demo/presentation/demo_screen.dart | head; git log --oneline -3 -- lib/features/legal",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"ground\\|ColoredBox\\|DecoratedBox\" lib/features/colleges/presentation/college_import_screen.dart lib/features/auth/presentation/auth_login_screen.dart lib/features/demo/presentation/demo_screen.dart | head; git log --oneline -3 -- lib/features/legal/presentation/legal_screen.dart; git show 8985d71 --stat | tail -5; git show 8985d71 | grep \"^[-+]\" | head -40: ildren, + // Hors onglets : rien ne peint le fond sous la page (sinon noir sur iPhone). + return ColoredBox( + color: CgTheme.of(context).colors.ground, + child: CgPage( + title: widget.document.title, + backLabel: 'Retour', + onBack: _back, + children: children, + ), --- a/collega_app/test/features/legal/legal_screen_test.dart +++ b/collega_app/test/features/legal/legal_screen_test.dart + testWidgets('fond de page Collega (hors onglets, rien ne le peint dessous)', (tester) async { + _phone(tester); + await _openFromProfile(tester, LegalDocument.privacy); + // Posé par l'écran lui-même (le cadre des tests peint aussi le fond). + final boxes = tester.widgetList<ColoredBox>(find.descendant( + of: find.byType(LegalScreen), + matching: find.ancestor(of: find.byType(CgPage), matching: find.byType(ColoredBox)), + )); + expect(boxes.map((b) => b.color), contains(CgColors.light.ground)); + }); +",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8a64703002f42dab02a38173",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:12:23.373Z",
+  "stored_at": "2026-09-23T12:12:23.374Z"
+}

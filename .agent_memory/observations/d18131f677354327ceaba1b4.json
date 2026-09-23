@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "f=/Users/lesurmatthis/.pub-cache/hosted/pub.dev/go_router-14.8.1; sed -n 320,375p $f/lib/src/builder.dart; grep -rn \"pageBuilderForAppType\\|_pageBuilderForAppType\" $f/lib/src/builder.dart | head -3; grep -n \"pageBuilderForWidgetApp\" -A20 $f/lib/src/pages/custom_transition_page.dart | head -30",
+  "summary": "f=/Users/lesurmatthis/.pub-cache/hosted/pub.dev/go_router-14.8.1; sed -n 320,375p $f/lib/src/builder.dart; grep -rn \"pageBuilderForAppType\\|_pageBuilderForAppType\" $f/lib/src/builder.dart | head -3; grep -n \"pageBuilderForWidgetApp\" -A20 $f/lib/src/pages/custom_transition_page.dart | head -30: nId: restorationId, child",
+  "text": "f=/Users/lesurmatthis/.pub-cache/hosted/pub.dev/go_router-14.8.1; sed -n 320,375p $f/lib/src/builder.dart; grep -rn \"pageBuilderForAppType\\|_pageBuilderForAppType\" $f/lib/src/builder.dart | head -3; grep -n \"pageBuilderForWidgetApp\" -A20 $f/lib/src/pages/custom_transition_page.dart | head -30: nId: restorationId, child: child, ); _errorBuilderForAppType = (BuildContext c, GoRouterState s) => ErrorScreen(s.error); } } assert(_pageBuilderForAppType != null); assert(_errorBuilderForAppType != null); } /// builds the page based on app type, i.e. MaterialApp vs. CupertinoApp Page<Object?> _buildPlatformAdapterPage( BuildContext context, GoRouterState state, Widget child, ) { // build the page based on app type _cacheAppType(context); return _pageBuilderForAppType!( key: state.pageKey, /Users/lesurmatthis/.pub-cache/hosted/pub.dev/go_router-14.8.1/lib/src/builder.dart:319: _PageBuilderForAppType? _pageBuilderForAppType; /Users/lesurmatthis/.pub-cache/hosted/pub.dev/go_router-14.8.1/lib/src/builder.dart:325: if (_pageBuilderForAppType == null) { /Users/lesurmatthis/.pub-cache/hosted/pub.dev/go_router-14.8.1/lib/src/builder.dart:333: _pageBuilderForAppType = pageBuilderForMaterialApp;",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d18131f677354327ceaba1b4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:10:18.942Z",
+  "stored_at": "2026-09-23T12:10:18.943Z"
+}

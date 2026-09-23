@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n 1,50p lib/core/notifications/notifications_service.dart; grep -rn \"requestPermissionsAndRegister\\|notificationsServiceProvider\" lib | grep -v \"^lib/core/notifications\" ; sed -n 100,120p lib/core/network/api_client.dart; grep -n \"_handleTokenResponse\" -A40 lib/features/auth/data/auth_repository.dart | sed -n 1,60p | grep -v \"^--$\" | tail -45",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n 1,50p lib/core/notifications/notifications_service.dart; grep -rn \"requestPermissionsAndRegister\\|notificationsServiceProvider\" ",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "103e3a51c4edbc9b1f3e998b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:46:59.658Z",
+  "stored_at": "2026-09-23T10:46:59.658Z"
+}

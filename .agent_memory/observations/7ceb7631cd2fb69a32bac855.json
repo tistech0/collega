@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; git show --stat 18c6a25 | head -40; ls collega_app/lib/core/ui/; grep -rln \"class Cg.*Progress\\|class Cg.*Spinner\\|class Cg.*Bar\\b\" collega_app/lib/core/ui",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; git show --stat 18c6a25 | head -40; ls collega_app/lib/core/ui/; grep -rln \"class Cg.*Progress\\|class Cg.*Spinner\\|class Cg.*Bar\\b\" collega_app/lib/core/ui: lite.md | 25 +++++ collega_app/lib/app.dart | 18 ++-- collega_app/lib/core/theme/app_theme.dart | 82 -----------",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; git show --stat 18c6a25 | head -40; ls collega_app/lib/core/ui/; grep -rln \"class Cg.*Progress\\|class Cg.*Spinner\\|class Cg.*Bar\\b\" collega_app/lib/core/ui: lite.md | 25 +++++ collega_app/lib/app.dart | 18 ++-- collega_app/lib/core/theme/app_theme.dart | 82 ----------------- .../drill/widgets/drill_evaluation_bar.dart | 65 ------------- collega_app/lib/shared/widgets/error_view.dart | 14 --- collega_app/pubspec.lock | 64 ------------- collega_app/pubspec.yaml | 2 - .../core/cleanup/no_v1_design_system_test.dart | 33 +++++++ collega_app/test/core/router/app_router_test.dart | 9 +- collega_app/test/core/theme/app_theme_test.dart | 29 ------ .../features/drill/drill_evaluation_bar_test.dart | 101 --------------------- collega_app/widgetbook/pubspec.lock | 72 --------------- 12 files changed, 69 insertions(+), 445 deletions(-) brand collega_ui.dart components foundation gallery theme tokens collega_app/lib/core/ui/components/cg_rank_bar.dart collega_app/lib/core/ui/components/cg_tab_bar.dart collega_app/lib/core/ui/components/cg_verdict_bar.dart",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7ceb7631cd2fb69a32bac855",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:44:51.418Z",
+  "stored_at": "2026-09-23T15:44:51.419Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"PopScope\\|WillPopScope\\|canPop\\|onPopInvoked\" lib | head; sed -n 40,120p lib/features/drill/presentation/drill_screen.dart; sed -n 60,90p lib/features/drill/drill_launcher.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"PopScope\\|WillPopScope\\|canPop\\|onPopInvoked\" lib | head; sed -n 40,120p lib/features/drill/presentation/drill_screen.dart; sed -n 60,90p lib/features/drill/drill_launcher.dart: rDurationSeconds > 0; if (prefs.timerMode == TimerMode.ask) { final c",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rn \"PopScope\\|WillPopScope\\|canPop\\|onPopInvoked\" lib | head; sed -n 40,120p lib/features/drill/presentation/drill_screen.dart; sed -n 60,90p lib/features/drill/drill_launcher.dart: rDurationSeconds > 0; if (prefs.timerMode == TimerMode.ask) { final choice = await showCgSheet<bool>( context, title: 'Chronomètre pour cette session ?', builder: (sheetContext) => _TimerChoice(seconds: prefs.timerDurationSeconds), ); if (choice == null || !context.mounted) return null; timerOn = choice; } ref.invalidate(drillSessionProvider(params)); return (closed: context.push('/drill', extra: DrillLaunch(params: params, timerOn: timerOn))); } class _TimerChoice extends StatelessWidget { const _TimerChoice({required this.seconds}); final int seconds; @override Widget build(BuildContext context) { final c = CgTheme.of(context).colors; void choose(bool on) => Navigator.of(context, rootNavigator: true).pop(on); return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [ Padding( padding: const EdgeInsets.symmetric(horizontal: CgSpace.gutter),",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ede14e5dee4ef52a32acf41e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:10:36.353Z",
+  "stored_at": "2026-09-23T12:10:36.353Z"
+}

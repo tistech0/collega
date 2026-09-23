@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker exec collega-db-1 sh -c \"psql -U \\$POSTGRES_USER -d \\$POSTGRES_DB -c \\\"select c.college_ref_id, c.status, c.ocr_page_progress, c.total_pages, c.generation_items_done, c.generation_items_total, c.generation_cards, c.updated_at from colleges c order by c.updated_at desc nulls last limit 5;\\\" -c \\\"select status, created_at, error_message from generation_jobs order by created_at desc limit 5;\\\"\"' 2>&1 | head -30",
+  "summary": "About to run: ssh nas 'docker exec collega-db-1 sh -c \"psql -U \\$POSTGRES_USER -d \\$POSTGRES_DB -c \\\"select c.college_ref_id, c.status, c.ocr_page_progress, c.total_pages, c.generation_items_done, c.generation_item",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "daf250283ba02a4db816ceab",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:14:41.827Z",
+  "stored_at": "2026-09-23T10:14:41.827Z"
+}

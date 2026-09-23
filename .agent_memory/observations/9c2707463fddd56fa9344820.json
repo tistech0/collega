@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker logs --since 40m collega-api-1 2>&1 | grep -E \"b9b54f29|/colleges/12|complete\" | tail -12; docker exec collega-db-1 sh -c \"psql -U \\$POSTGRES_USER -d \\$POSTGRES_DB -c \\\"select college_ref_id, status, ocr_page_progress, total_pages, generation_items_done, generation_items_total, generation_cards from colleges where college_ref_id=12;\\\"\"'",
+  "summary": "ssh nas 'docker logs --since 40m collega-api-1 2>&1 | grep -E \"b9b54f29|/colleges/12|complete\" | tail -12; docker exec collega-db-1 sh -c \"psql -U \\$POSTGRES_USER -d \\$POSTGRES_DB -c \\\"select college_ref_id, status, ocr_page_progress, total_pages, generation_items_done, generation_items_total, generation_cards from col",
+  "text": "ssh nas 'docker logs --since 40m collega-api-1 2>&1 | grep -E \"b9b54f29|/colleges/12|complete\" | tail -12; docker exec collega-db-1 sh -c \"psql -U \\$POSTGRES_USER -d \\$POSTGRES_DB -c \\\"select college_ref_id, status, ocr_page_progress, total_pages, generation_items_done, generation_items_total, generation_cards from colleges where college_ref_id=12;\\\"\"': 4 No Content INFO: 172.26.0.4:40684 - \"PUT /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/3 HTTP/1.1\" 204 No Content INFO: 172.26.0.4:40686 - \"PUT /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/4 HTTP/1.1\" 204 No Content INFO: 172.26.0.4:40688 - \"PUT /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055/parts/2 HTTP/1.1\" 204 No Content INFO: 172.26.0.4:43710 - \"GET /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055 HTTP/1.1\" 200 OK INFO: 172.26.0.4:43716 - \"POST /v1/colleges/import/b9b54f29-3fcf-4d2b-9131-49947841e055/complete HTTP/1.1\" 202 Accepted college_ref_id | status | ocr_page_progress | total_pages | generation_items_done | generation_items_total | generation_cards ----------------+------------+-------------------+-------------+-----------------------+------------------------+------------------ 12 | processing | 130 | 439 | 0 | | 0 (1 row)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9c2707463fddd56fa9344820",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:15:17.073Z",
+  "stored_at": "2026-09-23T10:15:17.074Z"
+}

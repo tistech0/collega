@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 40,80p lib/features/shell/app_shell.dart; sed -n 405,430p lib/core/ui/components/cg_header.dart; grep -rn \"class CgPage\" -A5 lib/core/ui | head; grep -rln \"CgPage(\" lib/features | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 40,80p lib/features/shell/app_shell.dart; sed -n 405,430p lib/core/ui/components/cg_header.dart; grep -rn \"class CgPage\" -A5 lib/core/ui | head; grep -rln \"CgPage(\" lib/features | head -20: /gallery/cg_header_gallery.dart-62- lib/core/ui/components/c",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; sed -n 40,80p lib/features/shell/app_shell.dart; sed -n 405,430p lib/core/ui/components/cg_header.dart; grep -rn \"class CgPage\" -A5 lib/core/ui | head; grep -rln \"CgPage(\" lib/features | head -20: /gallery/cg_header_gallery.dart-62- lib/core/ui/components/cg_header.dart:259:class CgPage extends StatefulWidget { lib/core/ui/components/cg_header.dart-260- const CgPage({ lib/core/ui/components/cg_header.dart-261- super.key, lib/core/ui/components/cg_header.dart-262- required this.title, lib/features/progress/progress_screen.dart lib/features/today/presentation/today_screen.dart lib/features/auth/presentation/auth_login_screen.dart lib/features/colleges/presentation/item_detail_screen.dart lib/features/colleges/presentation/college_detail_screen.dart lib/features/colleges/presentation/import_progress_screen.dart lib/features/colleges/presentation/colleges_screen.dart lib/features/profile/presentation/profile_screen.dart lib/features/legal/presentation/legal_screen.dart lib/features/colleges/presentation/college_import_screen.dart lib/features/planning/presentation/planning_screen.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d0f8505ce23687df29096fdc",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:12:13.143Z",
+  "stored_at": "2026-09-23T12:12:13.144Z"
+}

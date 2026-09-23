@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -m1 \"x-kage-id\" .agent_memory/packets/decision-shadcn-ui-et-le-th-me-v1-retir-s-story-8-15-plus-de-shadprogress-garde-fou-no-v1-1a1fcba2.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -m1 \"x-kage-id\" .agent_memory/packets/decision-shadcn-ui-et-le-th-me-v1-retir-s-story-8-15-plus-de-shadprogress-garde-fou-no-v1-1a1fcba2.md: x-kage-id: \"repo:git-github-com-tistech0-collega:decision:shadcn-ui-et-le-th-me-v1-retir-s-story-8-15-plus-de-shadprogress-",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -m1 \"x-kage-id\" .agent_memory/packets/decision-shadcn-ui-et-le-th-me-v1-retir-s-story-8-15-plus-de-shadprogress-garde-fou-no-v1-1a1fcba2.md: x-kage-id: \"repo:git-github-com-tistech0-collega:decision:shadcn-ui-et-le-th-me-v1-retir-s-story-8-15-plus-de-shadprogress-garde-fou-no-v1\"",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f0762937be2859db6c58ece1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:45:12.226Z",
+  "stored_at": "2026-09-23T15:45:12.226Z"
+}

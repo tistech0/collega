@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat -n lib/features/auth/paywall_providers.dart | sed -n 1,120p; sed -n 60,200p lib/core/router/app_router.dart | grep -n \"legal\\|paywall\\|GoRoute(\\|path:\"",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat -n lib/features/auth/paywall_providers.dart | sed -n 1,120p; sed -n 60,200p lib/core/router/app_router.dart | grep -n \"legal\\|paywa",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6a9611e537925469b3d349d8",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:43:37.246Z",
+  "stored_at": "2026-09-23T10:43:37.246Z"
+}

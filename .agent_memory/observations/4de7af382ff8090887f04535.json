@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ls lib/core/network/ && cat lib/core/network/api_client.dart 2>/dev/null | head -250; grep -rn \"forceLogoutSignal\" lib | head",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ls lib/core/network/ && cat lib/core/network/api_client.dart 2>/dev/null | head -250; grep -rn \"forceLogoutSignal\" lib | head",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4de7af382ff8090887f04535",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:42:53.031Z",
+  "stored_at": "2026-09-23T10:42:53.032Z"
+}

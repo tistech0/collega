@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rnE \"shadcn|google_fonts|GoogleFonts|app_theme|ErrorView|DrillEvaluationBar|drill_evaluation_bar|error_view|Shad[A-Z]\" lib test widgetbook/lib widgetbook/test widgetbook/pubspec.yaml pubspec.yaml ios/Podfile.lock integration_test tool 2>/dev/null | head -40; grep -rnE \"shadcn|google_fonts|app_theme\" ../scripts ../.github ../Makefile 2>/dev/null | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rnE \"shadcn|google_fonts|GoogleFonts|app_theme|ErrorView|DrillEvaluationBar|drill_evaluation_bar|error_view|Shad[A-Z]\" lib test widgetbook/lib widgetbook/test widgetbook/pubspec.yaml pubspec.yaml ios/Podfile.lock integration_test tool 2>/dev/null | ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rnE \"shadcn|google_fonts|GoogleFonts|app_theme|ErrorView|DrillEvaluationBar|drill_evaluation_bar|error_view|Shad[A-Z]\" lib test widgetbook/lib widgetbook/test widgetbook/pubspec.yaml pubspec.yaml ios/Podfile.lock integration_test tool 2>/dev/null | head -40; grep -rnE \"shadcn|google_fonts|app_theme\" ../scripts ../.github ../Makefile 2>/dev/null | head: 'aucun widget Material ni shadcn', () { test/features/colleges/college_import_screen_test.dart:288: expect(src, isNot(contains('shadcn_ui'))); test/features/search/search_sheet_test.dart:347: test('aucun widget Material ni shadcn', () { test/features/search/search_sheet_test.dart:350: expect(src, isNot(contains('shadcn_ui'))); test/features/profile/profile_screen_test.dart:542: test('aucun widget Material ni shadcn', () { test/features/profile/profile_screen_test.dart:545: expect(src, isNot(contains('shadcn_ui'))); test/features/planning/planning_screen_test.dart:380: test('aucun widget Material ni shadcn', () { test/features/planning/planning_screen_test.dart:383: expect(src, isNot(contains('shadcn_ui'))); test/features/legal/legal_screen_test.dart:151: test('aucun widget Material ni shadcn', () { test/features/legal/legal_screen_test.dart:154: expect(src, isNot(contains('shadcn_ui')));",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "88d136cce86526f7cd732534",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:08:14.140Z",
+  "stored_at": "2026-09-23T12:08:14.141Z"
+}

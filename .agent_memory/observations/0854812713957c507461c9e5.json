@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ls collega_app/lib/core/theme/ collega_app/test/core/theme/ 2>&1; grep -rln \"shadcn_ui\" collega_app/lib | head; grep -n shadcn collega_app/pubspec.yaml; git log --oneline --diff-filter=D -- collega_app/lib/core/theme/app_theme.dart | head -3; grep -rn \"ProgressIndicator\\|progressTrack\\|Progress(\" collega_app/lib | head -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ls collega_app/lib/core/theme/ collega_app/test/core/theme/ 2>&1; grep -rln \"shadcn_ui\" collega_app/lib | head; grep -n shadcn collega_app/pubspec.yaml; git log --oneline --diff-filter=D -- collega_app/lib/core/theme/app_theme.dart | head -3; grep -rn \"ProgressIndicato",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ls collega_app/lib/core/theme/ collega_app/test/core/theme/ 2>&1; grep -rln \"shadcn_ui\" collega_app/lib | head; grep -n shadcn collega_app/pubspec.yaml; git log --oneline --diff-filter=D -- collega_app/lib/core/theme/app_theme.dart | head -3; grep -rn \"ProgressIndicator\\|progressTrack\\|Progress(\" collega_app/lib | head -30: art:194: Future<void> saveProgress({required int day, required List<String> queue, required int position}) async { collega_app/lib/features/colleges/colleges_import_providers.dart:162: void _onUploadProgress(double p) { collega_app/lib/features/colleges/colleges_import_providers.dart:287: _updateDriftProgress(collegeId, page, total, status); collega_app/lib/features/colleges/colleges_import_providers.dart:298: _updateDriftProgress(collegeId, current.ocrProgress, current.totalPages, 'ocr_complete'); collega_app/lib/features/colleges/colleges_import_providers.dart:324: void _updateDriftProgress(String collegeId, int page, int? total, String status) { collega_app/lib/features/colleges/presentation/college_import_screen.dart:192: _UploadProgress(progress: progress), collega_app/lib/features/colleges/presentation/college_import_screen.dart:246: const _UploadProgress({required this.progress});",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0854812713957c507461c9e5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:44:47.860Z",
+  "stored_at": "2026-09-23T15:44:47.861Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; git status --short | grep -v \"^ M\\|^M \\|^D \\|^ D\" | grep -v observations | head -20; git status --short | grep -v \".agent_memory\" | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; git status --short | grep -v \"^ M\\|^M \\|^D \\|^ D\" | grep -v observations | head -20; git status --short | grep -v \".agent_memory\" | head: ?? .agent_memory/packets/code_explanation-chronom-tre-du-drill-3-modes-et-launchdrill-point-dentr-e-unique-30355180.md ?? .agent_me",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; git status --short | grep -v \"^ M\\|^M \\|^D \\|^ D\" | grep -v observations | head -20; git status --short | grep -v \".agent_memory\" | head: ?? .agent_memory/packets/code_explanation-chronom-tre-du-drill-3-modes-et-launchdrill-point-dentr-e-unique-30355180.md ?? .agent_memory/packets/convention-docs-d-sactiv-et-post-v1-auth-register-bloqu-en-403-746ea530.md ?? .agent_memory/packets/convention-rate-limit-login-5-min-via-slowapi-redis-7e992825.md ?? .agent_memory/packets/decision-shadcn-ui-et-le-th-me-v1-retir-s-story-8-15-plus-de-shadprogress-garde-fou-no-v1-1a1fcba2.md ?? .agent_memory/packets/gotcha-collega-ui-8-2-r-gles-dassemblage-des-composants-pour-les-crans-f3c8b7d2.md ?? .agent_memory/packets/gotcha-profil-me-rappel-quotidien-et-quota-pi-ges-8-14-2d47f0a8.md ?? .agent_memory/packets/gotcha-tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-10b95ec1.md",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c685b828f7e91b0c82bcbaa5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:56:01.442Z",
+  "stored_at": "2026-09-23T15:56:01.443Z"
+}

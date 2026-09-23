@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; kage help --all 2>&1 | grep -iE \"learn|supersede|archive|retire|forget|remove\"; git status --short .agent_memory | grep -v \"^ M\" | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; kage help --all 2>&1 | grep -iE \"learn|supersede|archive|retire|forget|remove\"; git status --short .agent_memory | grep -v \"^ M\" | head: son] kage learn --project <dir> --learning <text> [--personal] [--title <title>] [--type <type>] [--evidence <text>] [--verified-by ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; kage help --all 2>&1 | grep -iE \"learn|supersede|archive|retire|forget|remove\"; git status --short .agent_memory | grep -v \"^ M\" | head: son] kage learn --project <dir> --learning <text> [--personal] [--title <title>] [--type <type>] [--evidence <text>] [--verified-by <text>] [--tags a,b] [--paths a,b] [--graph-nodes a,b] [--discovery-tokens <n>] [--allow-missing-paths] D .agent_memory/pending/bug_fix-pasted-content-id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f-29717d15.md ?? .agent_memory/observations/01ca6747a4e97ee27bfbc352.json ?? .agent_memory/observations/01e8fa463bfb66679d69aa9d.json ?? .agent_memory/observations/026015cc75ce639c374d49ad.json ?? .agent_memory/observations/02659472ff56fb2f927372d2.json ?? .agent_memory/observations/0358b17d77219b3a1844521a.json ?? .agent_memory/observations/04c76e4c942e978b966f06f2.json ?? .agent_memory/observations/053d025bcde9b6000f91d90d.json ?? .agent_memory/observations/062f2cf5801e112025a0fa30.json ?? .agent_memory/observations/07aa6158a557f8d6143fd175.json",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7d954670ca840afadfd81bb2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:52:08.898Z",
+  "stored_at": "2026-09-23T15:52:08.899Z"
+}

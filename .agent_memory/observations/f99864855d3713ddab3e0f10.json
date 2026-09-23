@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; cat > $S/push_overlap_test.dart <<'EOF'\nimport 'package:flutter/material.dart';\nimport 'package:flutter_test/flutter_test.dart';\nimport 'package:go_router/go_router.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\n\nvoid main() {\n  testWidgets('push in shell: transparent pages overlap during transition', (tester) async {\n    final router = GoRouter(initialLocation: '/colleges', routes: [\n      Shell… [+963 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; cat > $S/push_overlap_test.dart <<'EOF'\nimport 'package:flutter/material.dart';\nimport 'package:flutter_test/flutter_test.dart';\nimport '",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; cat > $S/push_overlap_test.dart <<'EOF'\nimport 'package:flutter/material.dart';\nimport 'package:flutter_test/flutter_test.dart';\nimport 'package:go_router/go_router.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\n\nvoid main() {\n  testWidgets('push in shell: transparent pages overlap during transition', (tester) async {\n    final router = GoRouter(initialLocation: '/colleges', routes: [\n      ShellRoute(builder: (c, s, child) => ColoredBox(color: const Color(0xFFECEAE3), child: child), routes: [\n        GoRoute(path: '/colleges', builder: (_, __) => const Align(alignment: Alignment.topLeft, child: Text('LIST', textDirection: TextDirection.ltr))),\n        GoRoute(path: '/colleges/1', builder: (_, __) => const Align(alignment: Alignment.topLeft, child: Text('DETAIL', textDirection: TextDirection.ltr))),\n      ]),\n    ]);\n    await tester.pumpWidget(MaterialApp.router(theme: buildCgMaterialTheme(CgThemeData.light), routerConfig: router));\n    await tester.pumpAndSettle();\n    router.push('/colleges/1');\n    await tester.pump();\n    await tester.pump(const Duration(milliseconds: 150));\n    // ignore: avoid_print\n    print('LIST x=${tester.getTopLeft(find.text('LIST')).dx} DETAIL x=${tester.getTopLeft(find.text('DETAIL')).dx}');\n    await tester.pumpAndSettle();\n  });\n}\nEOF\nflutter test $S/push_overlap_test.dart 2>&1 | grep -E \"LIST|passed|failed\": LIST x=-245.28111934661862 DETAIL x=46.12319469451904 00:06 +1: push in shell: transparent pages overlap during transition 00:06 +1: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f99864855d3713ddab3e0f10",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:12:51.697Z",
+  "stored_at": "2026-09-23T12:12:51.698Z"
+}

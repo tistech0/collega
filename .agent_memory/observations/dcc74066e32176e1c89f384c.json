@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"Alpha\\s*=\" lib/core/ui/components/cg_drill_card.dart; grep -n \"_metaTextAlpha\\|_bannerTextAlpha\\|_secondaryTextAlpha\\|_verdictTextAlpha\" lib/core/ui/components/cg_drill_card.dart | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"Alpha\\s*=\" lib/core/ui/components/cg_drill_card.dart; grep -n \"_metaTextAlpha\\|_bannerTextAlpha\\|_secondaryTextAlpha\\|_verdictTextAlpha\" lib/core/ui/components/cg_drill_card.dart | head -20: 194: static const _railAlpha = 0.22; 195: static const _b",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"Alpha\\s*=\" lib/core/ui/components/cg_drill_card.dart; grep -n \"_metaTextAlpha\\|_bannerTextAlpha\\|_secondaryTextAlpha\\|_verdictTextAlpha\" lib/core/ui/components/cg_drill_card.dart | head -20: 194: static const _railAlpha = 0.22; 195: static const _badgeAlpha = 0.18; 196: static const _secondaryTextAlpha = 0.75; 197: static const _metaTextAlpha = 0.85; 198: static const _bannerTextAlpha = 0.9; 201: static const _shadowAlpha = 0.18; 196: static const _secondaryTextAlpha = 0.75; 197: static const _metaTextAlpha = 0.85; 198: static const _bannerTextAlpha = 0.9; 578: child: CgIcon(CgIcons.close, color: c.accentInk.withValues(alpha: _metaTextAlpha)), 602: style: CgType.meta.copyWith(color: c.accentInk.withValues(alpha: _secondaryTextAlpha)), 668: color: c.accentInk.withValues(alpha: _bannerTextAlpha), 676: ? _secondaryTextAlpha 805: style: CgType.meta.copyWith(color: c.accentInk.withValues(alpha: _metaTextAlpha)),",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "dcc74066e32176e1c89f384c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:11:51.943Z",
+  "stored_at": "2026-09-23T12:11:51.943Z"
+}

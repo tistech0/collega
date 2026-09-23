@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker logs --since 40m collega-api-1 2>&1 | grep -E \"b9b54f29|/colleges/12|complete\" | tail -12; docker exec collega-db-1 sh -c \"psql -U \\$POSTGRES_USER -d \\$POSTGRES_DB -c \\\"select college_ref_id, status, ocr_page_progress, total_pages, generation_items_done, generation_items_total, generation_cards from colleges where college_ref_id=12;\\\"\"'",
+  "summary": "About to run: ssh nas 'docker logs --since 40m collega-api-1 2>&1 | grep -E \"b9b54f29|/colleges/12|complete\" | tail -12; docker exec collega-db-1 sh -c \"psql -U \\$POSTGRES_USER -d \\$POSTGRES_DB -c \\\"select college_",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4fa29d5562d1c091de67e96f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:15:16.438Z",
+  "stored_at": "2026-09-23T10:15:16.439Z"
+}

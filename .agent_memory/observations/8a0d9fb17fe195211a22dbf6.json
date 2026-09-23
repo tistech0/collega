@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat -n lib/features/auth/paywall_providers.dart | sed -n 1,120p; sed -n 60,200p lib/core/router/app_router.dart | grep -n \"legal\\|paywall\\|GoRoute(\\|path:\"",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat -n lib/features/auth/paywall_providers.dart | sed -n 1,120p; sed -n 60,200p lib/core/router/app_router.dart | grep -n \"legal\\|paywall\\|GoRoute(\\|path:\": GoRoute(path: '/auth/login', builder: (ctx, s) => const AuthLoginScreen()), 49: GoRoute(path: '/pa",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat -n lib/features/auth/paywall_providers.dart | sed -n 1,120p; sed -n 60,200p lib/core/router/app_router.dart | grep -n \"legal\\|paywall\\|GoRoute(\\|path:\": GoRoute(path: '/auth/login', builder: (ctx, s) => const AuthLoginScreen()), 49: GoRoute(path: '/paywall', builder: (ctx, s) => const PaywallScreen()), 51: GoRoute( 52: path: '/legal/cgu', 55: GoRoute( 56: path: '/legal/privacy', 60: GoRoute( 61: path: '/colleges/:ref_id/import', 66: GoRoute( 67: path: '/colleges/:ref_id/import/progress', 80: GoRoute(path: '/search', redirect: (ctx, s) => '/home'), 84: GoRoute(path: '/home', builder: (ctx, s) => const TodayScreen()), 85: GoRoute(path: '/progress', builder: (ctx, s) => const ProgressScreen()), 86: GoRoute(path: '/colleges', builder: (ctx, s) => const CollegesScreen()), 90: GoRoute( 91: path: '${origin.base}/:ref_id', 97: GoRoute( 98: path: '${origin.base}/:ref_id/items/:item_id', 107: GoRoute(path: '/progress/planning', builder: (ctx, s) => const PlanningScreen()), 108: GoRoute(path: '/profile', builder: (ctx, s) => const ProfileScreen()),",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8a0d9fb17fe195211a22dbf6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:43:37.547Z",
+  "stored_at": "2026-09-23T10:43:37.547Z"
+}

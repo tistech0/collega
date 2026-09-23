@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -n -i \"quota\\|monthly\\|réimport\" collega_app/lib/features/colleges/presentation/college_import_screen.dart | head -20; grep -rn \"monthly_reloads_reset_at\" collega_backend/app | grep -v \"models\" | head -5",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -n -i \"quota\\|monthly\\|réimport\" collega_app/lib/features/colleges/presentation/college_import_screen.dart | head -20; grep -rn \"monthly_reloads_reset_at\" collega_backend/app | grep -v \"models\" | head -5: dCount + 1}/${limitsValue.collegeReloadMax} · ' 153: '${l",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -n -i \"quota\\|monthly\\|réimport\" collega_app/lib/features/colleges/presentation/college_import_screen.dart | head -20; grep -rn \"monthly_reloads_reset_at\" collega_backend/app | grep -v \"models\" | head -5: dCount + 1}/${limitsValue.collegeReloadMax} · ' 153: '${limitsValue.monthlyReloads + 1}/${limitsValue.monthlyMax} ce mois'; 158: : limitsValue.isMonthlyLimitReached 159: ? importErrorMessage('monthly_reload_limit:${limitsValue.monthlyResetAt}', reimport: true) 167: subtitle: isReimport ? 'Réimporter le PDF' : 'Importer le PDF', 187: (CgIcons.refresh, quota), collega_backend/app/schemas/admin.py:184: monthly_reloads_reset_at: str | None collega_backend/app/static/admin/index.html:622: <tr><th>Reset quota le</th><td>${fmtDate(data.monthly_reloads_reset_at)}</td></tr> collega_backend/app/api/v1/colleges.py:129: current_user.monthly_reloads_reset_at is None collega_backend/app/api/v1/colleges.py:130: or now >= current_user.monthly_reloads_reset_at collega_backend/app/api/v1/colleges.py:133: monthly_reset_at = _next_month_reset(now) if is_month_reset else current_user.monthly_reloads_reset_at",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3a897094fc62b632a4b9547d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:28:45.855Z",
+  "stored_at": "2026-09-23T10:28:45.855Z"
+}

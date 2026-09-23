@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"pageBuilder\\|Page(\\|parentNavigatorKey\\|fullscreenDialog\\|GoRoute(\\|StatefulShellRoute\\|ShellRoute\" lib/core/router/app_router.dart | head -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"pageBuilder\\|Page(\\|parentNavigatorKey\\|fullscreenDialog\\|GoRoute(\\|StatefulShellRoute\\|ShellRoute\" lib/core/router/app_router.dart | head -60: builder: (ctx, s) => const DemoScreen()), 91: GoRoute(path: '/demo/drill', redirect: (ctx, s) => '/demo'",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -n \"pageBuilder\\|Page(\\|parentNavigatorKey\\|fullscreenDialog\\|GoRoute(\\|StatefulShellRoute\\|ShellRoute\" lib/core/router/app_router.dart | head -60: builder: (ctx, s) => const DemoScreen()), 91: GoRoute(path: '/demo/drill', redirect: (ctx, s) => '/demo'), 92: GoRoute(path: '/auth/register', redirect: (ctx, s) => '/welcome'), 93: GoRoute( 107: GoRoute(path: '/auth/login', builder: (ctx, s) => const AuthLoginScreen()), 108: GoRoute(path: '/paywall', builder: (ctx, s) => const PaywallScreen()), 110: GoRoute( 114: GoRoute( 119: GoRoute( 125: GoRoute( 139: GoRoute(path: '/search', redirect: (ctx, s) => '/home'), 140: ShellRoute( 143: GoRoute(path: '/home', builder: (ctx, s) => const TodayScreen()), 144: GoRoute(path: '/progress', builder: (ctx, s) => const ProgressScreen()), 145: GoRoute(path: '/colleges', builder: (ctx, s) => const CollegesScreen()), 149: GoRoute( 156: GoRoute( 166: GoRoute(path: '/progress/planning', builder: (ctx, s) => const PlanningScreen()), 167: GoRoute(path: '/profile', builder: (ctx, s) => const ProfileScreen()),",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "42b961f9f54a80832b500b97",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:10:12.010Z",
+  "stored_at": "2026-09-23T12:10:12.011Z"
+}

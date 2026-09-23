@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_refresh",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_refresh: [{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"generated_at\": \"2026-09-23T12:26:24.079Z\",\\n \"quiet_refresh\": true,\\n \"index\": {\\n \"projectDir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"packets\": 46,\\n \"migrated\": 0,\\n \"indexes",
+  "text": "[{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"generated_at\": \"2026-09-23T12:26:24.079Z\",\\n \"quiet_refresh\": true,\\n \"index\": {\\n \"projectDir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"packets\": 46,\\n \"migrated\": 0,\\n \"indexes\": [\\n \".agent_memory/indexes/catalog.json\",\\n \".agent_memory/indexes/by-path.json\",\\n \".agent_memory/indexes/by-tag.json\",\\n \".agent_memory/indexes/by-type.json\",\\n \".agent_memory/indexes/vector-local.json\",\\n \".agent_memory/indexes/docs-index.json\",\\n \".agent_memory/indexes/structural.json\",\\n \".agent_memory/indexes/graph.json\",\\n \".agent_memory/indexes/code-graph.json\"\\n ],\\n \"policyPath\": \"AGENTS.md\"\\n },\\n \"validation\": {\\n \"ok\": true,\\n \"errors\": [],\\n \"warnings\": [\\n \".agent_memory/packets/gotcha-shadcn-ui-shadprogress-le-rail-prend-colorscheme-secondary-vert-chez-nous-barre--06414cf9.md: none of the referenced paths exist in this repo: collega_app/lib/core/theme/app_theme.dart, collega_app/test/core/theme/app_theme_test.dart\",\\n \".agent_memory/packets/repo_map-collega-repo-overview-cf8b6e00.md: low memory quality score 54\",\\n \".agent_memory/pending/bug_fix-pasted-content-id-656b-",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7d0a08ca5a5d2932cee7d874",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T12:26:24.404Z",
+  "stored_at": "2026-09-23T12:26:24.404Z",
+  "low_signal": true
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/.agent_memory\"; ls; ls pending; python3 - <<'EOF'\nimport json,re,glob,os\nfor f in sorted(glob.glob('packets/*.md')):\n    s=open(f).read()\n    m=re.search(r'```json kage-state\\n(.*?)\\n```',s,re.S)\n    d=json.loads(m.group(1))\n    q=d.get('quality',{})\n    missing=[p for p in d.get('paths',[]) if not os.path.exists('../'+p)]\n    print(f\"{d['status'][:4]} stale={q.get('stale',False)!s:5} {d['type'][:5]} {d['title'][:90]}\")\n    if q.get('stale'): print('    reasons:',q.get('stale_reasons'))\n    if missing: print('    MISSING:',missing)\nEOF",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/.agent_memory\"; ls; ls pending; python3 - <<'EOF' import json,re,glob,os for f in sorted(glob.glob('packets/*.md')): s=open(f).read() m=re.search(r'```",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "08d6b70aa3987819ddd3baa4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:46:02.804Z",
+  "stored_at": "2026-09-23T15:46:02.804Z"
+}

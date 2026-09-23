@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; f=$(ls .agent_memory/packets/ | grep -i shadprogress); echo $f; cat \".agent_memory/packets/$f\"; grep -rn \"ShadProgress\\|LinearProgressIndicator\\|CircularProgressIndicator\" collega_app/lib | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; f=$(ls .agent_memory/packets/ | grep -i shadprogress); echo $f; cat \".agent_memory/packets/$f\"; grep -rn \"ShadProgress\\|LinearProgressIndicator\\|CircularProgressIndicator\" collega_app/lib | head -40: epo-local-agent\",\"votes_up\":0,\"votes_down\":0,\"uses_30d\":3,\"reports_st",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; f=$(ls .agent_memory/packets/ | grep -i shadprogress); echo $f; cat \".agent_memory/packets/$f\"; grep -rn \"ShadProgress\\|LinearProgressIndicator\\|CircularProgressIndicator\" collega_app/lib | head -40: epo-local-agent\",\"votes_up\":0,\"votes_down\":0,\"uses_30d\":3,\"reports_stale\":1,\"review_boundary\":\"git_or_pr\",\"promotion_requires_review\":true,\"discovery_tokens\":8000,\"discovery_tokens_estimated\":true,\"score\":100,\"reasons\":[\"high-value memory type\",\"has source evidence\",\"grounded to repo paths\",\"tagged\",\"concise but substantive\",\"actionable rationale or verification\"],\"risks\":[],\"duplicate_candidates\":[],\"estimated_tokens_saved\":247,\"total_uses\":3,\"reverified_at\":\"2026-09-23T10:05:29.197Z\",\"stale\":true,\"stale_reasons\":[\"user or agent reported this memory stale\",\"all referenced paths are missing: collega_app/lib/core/theme/app_theme.dart, collega_app/test/core/theme/app_theme_test.dart\"],\"suggested_action\":\"update\",\"last_accessed_at\":\"2026-09-22T18:38:48.733Z\"},\"created_at\":\"2026-09-21T18:48:59.987Z\",\"updated_at\":\"2026-09-23T12:26:29.633Z\",\"author_branch\":\"feat/story-7.11-upload-chunked\"} ```",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a8805680d33a982754dd30fa",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T15:44:44.228Z",
+  "stored_at": "2026-09-23T15:44:44.228Z",
+  "low_signal": true
+}

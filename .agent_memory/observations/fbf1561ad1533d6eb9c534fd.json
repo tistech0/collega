@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components\" && grep -n \"loading\\|onPressed\" cg_button.dart | head -30; grep -n \"Future<T?> showCgSheet\\|showCgActionSheet\\|class CgSheetAction\\|onPressed\\|pop(\" cg_sheet.dart | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components\" && grep -n \"loading\\|onPressed\" cg_button.dart | head -30; grep -n \"Future<T?> showCgSheet\\|showCgActionSheet\\|class CgSheetAction\\|onPressed\\|pop(\" cg_sheet.dart | head -40: bel, 111: onTap: _enabled ? widget.onPressed : null, 117: on",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components\" && grep -n \"loading\\|onPressed\" cg_button.dart | head -30; grep -n \"Future<T?> showCgSheet\\|showCgActionSheet\\|class CgSheetAction\\|onPressed\\|pop(\" cg_sheet.dart | head -40: bel, 111: onTap: _enabled ? widget.onPressed : null, 117: onTap: _enabled ? widget.onPressed : null, 15:/// Action d'une [showCgActionSheet]. `destructive` : texte rouge natif. 17:class CgSheetAction { 18: const CgSheetAction({required this.label, required this.onPressed, this.destructive = false}); 21: final VoidCallback onPressed; 31:/// `Navigator.of(context, rootNavigator: true).pop(valeur)` (la sheet est 33:Future<T?> showCgSheet<T>( 76: onConfirm: () => Navigator.of(routeContext).pop(true), 77: onCancel: () => Navigator.of(routeContext).pop(false), 88:Future<void> showCgActionSheet( 105: onPressed: () { 106: Navigator.of(sheetContext).pop(); 107: action.onPressed(); 114: onPressed: () => Navigator.of(sheetContext).pop(), 155: onPressed: onConfirm, 158: secondary: CgButton(label: cancelLabel, onPressed: onCancel, variant: CgButtonVariant.quiet), 290: if (isCurrent) navigator?.pop();",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "fbf1561ad1533d6eb9c534fd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T10:43:28.229Z",
+  "stored_at": "2026-09-23T10:43:28.229Z"
+}
