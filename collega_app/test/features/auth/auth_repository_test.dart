@@ -218,19 +218,64 @@ void main() {
       expect(stored.reminderHourUtc, 6);
     });
 
+    test('refreshFromMe d’un autre compte (réponse tardive) : rien n’est écrit', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 't', 'user_id': 'autre', 'user_email': 'b@b.fr'});
+      final repo = AuthRepository(dio: _makeScriptedDio(_ScriptedAdapter([me(reminder: 6)])), storage: storage);
+
+      final result = await repo.refreshFromMe();
+      expect(result.user, isNull);
+      expect(storage.writtenKeys, isEmpty);
+    });
+
+    test('refreshFromMe après déconnexion : rien n’est réécrit', () async {
+      final storage = _FakeSecureStorage();
+      final repo = AuthRepository(dio: _makeScriptedDio(_ScriptedAdapter([me(reminder: 6)])), storage: storage);
+      expect((await repo.refreshFromMe()).user, isNull);
+      expect(storage.writtenKeys, isEmpty);
+    });
+
+    test('connexion : rappel et renouvellement du compte connecté (jamais ceux du précédent)', () async {
+      final storage = _FakeSecureStorage(initial: {'reminder_hour_utc': '9', 'reminder_local_hour': '11'});
+      final repo = AuthRepository(
+        dio: _makeScriptedDio(_ScriptedAdapter([
+          {'data': {'access_token': 'a', 'refresh_token': 'r', 'is_beta': true, 'is_subscribed': false}},
+          me(reminder: null),
+        ])),
+        storage: storage,
+      );
+      final user = (await repo.login('a@b.fr', 'x')).user!;
+      expect(user.reminderHourUtc, isNull);
+      expect(user.monthlyResetAt, DateTime.utc(2026, 10, 1));
+      final stored = (await repo.loadStoredUser()).user!;
+      expect(stored.reminderHourUtc, isNull);
+      expect(stored.reminderLocalHour, isNull);
+    });
+
+    test('saveReminderHour : heure locale choisie gardée (changement d’heure)', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 't', 'user_id': 'u', 'user_email': 'a@b.fr'});
+      final repo = AuthRepository(dio: Dio(), storage: storage);
+      await repo.saveReminderHour(6, localHour: 8);
+      final stored = (await repo.loadStoredUser()).user!;
+      expect(stored.reminderHourUtc, 6);
+      expect(stored.reminderLocalHour, 8);
+    });
+
     test('saveReminderHour(null) : rappel éteint au prochain démarrage', () async {
       final storage = _FakeSecureStorage(initial: {
         'access_token': 't', 'user_id': 'u', 'user_email': 'a@b.fr', 'reminder_hour_utc': '6',
+        'reminder_local_hour': '8',
       });
       final repo = AuthRepository(dio: Dio(), storage: storage);
       await repo.saveReminderHour(null);
-      expect((await repo.loadStoredUser()).user!.reminderHourUtc, isNull);
+      final stored = (await repo.loadStoredUser()).user!;
+      expect(stored.reminderHourUtc, isNull);
+      expect(stored.reminderLocalHour, isNull);
     });
 
     test('logout oublie le rappel et la date de renouvellement', () async {
       final storage = _FakeSecureStorage();
       await AuthRepository(dio: Dio(), storage: storage).logout();
-      expect(storage.deletedKeys, containsAll(['reminder_hour_utc', 'monthly_reset_at']));
+      expect(storage.deletedKeys, containsAll(['reminder_hour_utc', 'reminder_local_hour', 'monthly_reset_at']));
     });
   });
 

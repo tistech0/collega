@@ -7,6 +7,7 @@ import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/auth/data/auth_repository.dart';
+import 'package:collega_app/features/auth/paywall_providers.dart';
 import 'package:collega_app/features/auth/data/local_data_owner.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
@@ -85,6 +86,8 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     ref.invalidate(todayProvider);
     ref.invalidate(searchNotifierProvider);
     ref.invalidate(searchRecentsProvider);
+    // Message d'achat d'une session passée : jamais montré au compte suivant.
+    ref.invalidate(paywallProvider);
     state = const AsyncData(AuthState());
   }
 
@@ -105,6 +108,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     String? yearGroup,
     String? faculty,
   }) async {
+    _localWrites++;
     final result = await ref.read(authRepositoryProvider).updateProfile(
       firstName: firstName,
       yearGroup: yearGroup,
@@ -120,22 +124,34 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     return null;
   }
 
+  /// Écritures locales du compte (profil, rappel) : un `/me` parti avant l'une
+  /// d'elles rapporterait l'ancien état.
+  int _localWrites = 0;
+
   /// Profil ouvert ou tiré pour rafraîchir (story 8.14) : relit `/me` (quota du
   /// mois, rappel). Un échec ne touche à rien : jamais de déconnexion ici.
   Future<void> refreshProfile() async {
+    final startedFor = state.valueOrNull?.user?.id;
+    final writes = _localWrites;
+    if (startedFor == null) return;
     final result = await ref.read(authRepositoryProvider).refreshFromMe();
-    if (_disposed || result.user == null) return;
-    if (state.valueOrNull?.user == null) return; // déconnectée entre-temps
+    final current = state.valueOrNull?.user;
+    if (_disposed || result.user == null || current == null) return;
+    // Autre compte entre-temps, ou modification locale plus récente : on garde l'affiché.
+    if (current.id != startedFor || result.user!.id != startedFor || writes != _localWrites) return;
     state = AsyncData(result);
   }
 
   /// Rappel quotidien réglé côté serveur : mémorisé pour le prochain démarrage.
-  Future<void> setReminderHour(int? hourUtc) async {
-    await ref.read(authRepositoryProvider).saveReminderHour(hourUtc);
+  Future<void> setReminderHour(int? hourUtc, {int? localHour}) async {
+    _localWrites++;
+    await ref.read(authRepositoryProvider).saveReminderHour(hourUtc, localHour: localHour);
     final current = state.valueOrNull;
     final user = current?.user;
     if (_disposed || current == null || user == null) return;
-    state = AsyncData(current.copyWith(user: user.copyWith(reminderHourUtc: hourUtc)));
+    state = AsyncData(current.copyWith(
+      user: user.copyWith(reminderHourUtc: hourUtc, reminderLocalHour: hourUtc == null ? null : localHour),
+    ));
   }
 
   /// Supprime le compte (backend) puis exécute le wipe local **dans l'ordre** :

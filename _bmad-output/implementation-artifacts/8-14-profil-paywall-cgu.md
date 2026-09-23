@@ -12,9 +12,8 @@ révision et mon rappel ; un paywall qui dit ce que l'abonnement donne ; des CGU
 1. **Profil** (onglet, Collega UI, plus aucune carte shadcn / Material) : `CgPage` « Profil », groupes `CgListGroup.inset`
    avec intertitres :
    - **Compte** : prénom (ou « Ajoute ton prénom » en invitation, jamais « — »), email ; tap → sheet « Modifier le profil »
-     (prénom requis, année, faculté ; erreurs inline ; « Enregistrer »). Badge `CgBadge.beta` avec explication
-     « Accès offert pendant la beta privée ».
-   - **Abonnement** : abonné → « Collega Premium · actif », renouvellement / résiliation datés, « Gérer mon abonnement » ;
+     (prénom requis, année, faculté ; erreurs inline ; « Enregistrer »).
+   - **Accès** : beta → « Beta privée » + `CgBadge.beta`, « Accès offert pendant la beta privée » ; abonné → « Collega Premium · actif », renouvellement / résiliation datés, « Gérer mon abonnement » ;
      beta sans abonnement → pas de « Gérer » (on n'a rien à gérer). **Réimports ce mois : « 0 sur 3 »**, barre vide à 0,
      pleine à 3/3, « se renouvelle le 1er octobre » (jamais « reimports »).
    - **Révision** : rangs par défaut = trois lignes cochables A / B / C (état visible sans la couleur : coche), au moins un ;
@@ -42,10 +41,10 @@ révision et mon rappel ; un paywall qui dit ce que l'abonnement donne ; des CGU
 ## Tâches
 
 - [x] T1 Serveur `/me` : quota du mois en cours, date de renouvellement, heure du rappel (+ tests)
-- [ ] T2 App : `AuthUser.reminderHourUtc / monthlyResetAt`, `AuthNotifier.refreshProfile()` et `setReminderHour()`
-- [ ] T3 `ProfileScreen` Collega UI (+ sheet profil, rangs, fiches, rappel, suppression) + tests + goldens
-- [ ] T4 `PaywallScreen` Collega UI + tests + goldens
-- [ ] T5 `LegalScreen` Collega UI + tests + goldens
+- [x] T2 App : `AuthUser.reminderHourUtc / monthlyResetAt`, `AuthNotifier.refreshProfile()` et `setReminderHour()`
+- [x] T3 `ProfileScreen` Collega UI (+ sheet profil, rangs, fiches, rappel, suppression) + tests + goldens
+- [x] T4 `PaywallScreen` Collega UI + tests + goldens
+- [x] T5 `LegalScreen` Collega UI + tests + goldens
 - [ ] T6 Shell : Profil hors legacy ; revue adversariale ; déploiement serveur ; build iPhone
 
 ## Dev Notes

@@ -14,6 +14,7 @@ class AuthUser {
     this.monthlyMax = 3,
     this.monthlyResetAt,
     this.reminderHourUtc,
+    this.reminderLocalHour,
   });
 
   final String id;
@@ -32,6 +33,9 @@ class AuthUser {
   /// Rappel quotidien (heure UTC côté serveur) ; `null` = rappel éteint.
   final int? reminderHourUtc;
 
+  /// Heure locale choisie pour le rappel (le décalage UTC change deux fois par an).
+  final int? reminderLocalHour;
+
   AuthUser copyWith({
     String? id,
     String? email,
@@ -44,6 +48,7 @@ class AuthUser {
     int? monthlyMax,
     Object? monthlyResetAt = _absent,
     Object? reminderHourUtc = _absent,
+    Object? reminderLocalHour = _absent,
   }) {
     return AuthUser(
       id: id ?? this.id,
@@ -57,6 +62,7 @@ class AuthUser {
       monthlyMax: monthlyMax ?? this.monthlyMax,
       monthlyResetAt: identical(monthlyResetAt, _absent) ? this.monthlyResetAt : monthlyResetAt as DateTime?,
       reminderHourUtc: identical(reminderHourUtc, _absent) ? this.reminderHourUtc : reminderHourUtc as int?,
+      reminderLocalHour: identical(reminderLocalHour, _absent) ? this.reminderLocalHour : reminderLocalHour as int?,
     );
   }
 

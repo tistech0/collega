@@ -16,25 +16,25 @@ class NotificationsService {
 
   ApnsPushConnectorOnly? _connector;
 
-  Future<void> requestPermissionsAndRegister() async {
-    if (defaultTargetPlatform != TargetPlatform.iOS) return;
-    if (_connector != null) return; // déjà initialisé
-
-    _connector = ApnsPushConnectorOnly();
-    _connector!.configureApns(
-      onLaunch: _onNotificationTap,
-      onResume: _onNotificationTap,
-      onMessage: (message) async {
-        AppLogger.info('Notification reçue (foreground)', tag: 'NotificationsService');
-      },
-    );
-
-    await _connector!.requestNotificationPermissions();
-
-    _connector!.token.addListener(() {
-      final token = _connector!.token.value;
-      if (token != null) _registerToken(token);
-    });
+  /// Configure APNs (une fois) puis demande l'autorisation ; `true` si les
+  /// notifications sont permises (iOS ne redemande pas une décision déjà prise).
+  Future<bool> requestPermissionsAndRegister() async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return true;
+    if (_connector == null) {
+      final connector = _connector = ApnsPushConnectorOnly();
+      connector.configureApns(
+        onLaunch: _onNotificationTap,
+        onResume: _onNotificationTap,
+        onMessage: (message) async {
+          AppLogger.info('Notification reçue (foreground)', tag: 'NotificationsService');
+        },
+      );
+      connector.token.addListener(() {
+        final token = connector.token.value;
+        if (token != null) _registerToken(token);
+      });
+    }
+    return _connector!.requestNotificationPermissions();
   }
 
   Future<void> _onNotificationTap(ApnsRemoteMessage message) async {

@@ -8,6 +8,7 @@ import 'package:collega_app/core/router/app_router.dart';
 import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/core/ui/theme/cg_theme.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
+import 'package:collega_app/features/profile/domain/reminder_sync.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -20,7 +21,15 @@ class App extends ConsumerWidget {
       final wasAuth = previous?.valueOrNull?.isAuthenticated == true;
       final isAuth = authState.valueOrNull?.isAuthenticated == true;
       if (isAuth) {
-        ref.read(notificationsServiceProvider).requestPermissionsAndRegister();
+        final notifications = ref.read(notificationsServiceProvider);
+        notifications.requestPermissionsAndRegister();
+        // Changement d'heure depuis le réglage du rappel : l'heure locale reste la bonne.
+        resyncReminderOffset(
+          user: authState.valueOrNull!.user!,
+          notifications: notifications,
+          auth: ref.read(authProvider.notifier),
+          now: DateTime.now(),
+        );
       } else if (wasAuth && !isAuth) {
         // P10: reset du connecteur APNs au logout pour que le prochain user puisse s'enregistrer
         ref.read(notificationsServiceProvider).reset();

@@ -29,3 +29,6 @@ String frShortDate(DateTime d) => '${_frDay(d)} ${kFrMonthsShort[d.month - 1]}';
 
 /// « jeudi 1er octobre ».
 String frLongDate(DateTime d) => '${frWeekday(d)} ${_frDay(d)} ${frMonth(d)}';
+
+/// « 1er octobre » (renouvellements, échéances).
+String frDayMonth(DateTime d) => '${_frDay(d)} ${frMonth(d)}';

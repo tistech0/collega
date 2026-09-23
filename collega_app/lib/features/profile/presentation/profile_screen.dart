@@ -160,8 +160,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with TabReselectS
       final subtitle = end == null
           ? 'Actif'
           : info!.willRenew
-              ? 'Se renouvelle le ${frShortDate(end.toLocal())}'
-              : 'Résilié · accès jusqu’au ${frShortDate(end.toLocal())}';
+              ? 'Se renouvelle le ${frDayMonth(end.toLocal())}'
+              : 'Résilié · accès jusqu’au ${frDayMonth(end.toLocal())}';
       return [
         CgListRow(title: 'Collega Premium', subtitle: subtitle, leading: const CgRowIcon(CgIcons.sparkle)),
         CgListRow(
@@ -188,7 +188,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with TabReselectS
     final reset = user.monthlyResetAt;
     return CgListRow(
       title: 'Réimports ce mois',
-      subtitle: reset == null ? null : 'Se renouvelle le ${frShortDate(reset.toLocal())}',
+      subtitle: reset == null ? null : 'Se renouvelle le ${frDayMonth(reset.toLocal())}',
       trailing: CgRowTrailing.value,
       value: '$used sur $max',
       progress: ProfileQuotaBar(fraction: max > 0 ? used / max : 0),
@@ -207,9 +207,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with TabReselectS
             title: 'Rang $r',
             // Largeur commune : les titres restent alignés (A, B, C n'ont pas la même chasse).
             leading: ExcludeSemantics(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: _rankBadgeWidth),
-                child: Align(widthFactor: 1, child: CgBadge.rank(r, short: true)),
+              child: SizedBox(
+                width: MediaQuery.textScalerOf(context).scale(_rankBadgeWidth),
+                child: Center(child: CgBadge.rank(r, short: true)),
               ),
             ),
             trailing: CgRowTrailing.check,
@@ -330,7 +330,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with TabReselectS
         CgListRow(
           title: 'Heure',
           trailing: CgRowTrailing.value,
-          value: reminderLabel(reminderLocalHour(serverHour, DateTime.now())),
+          value: reminderLabel(user.reminderLocalHour ?? reminderLocalHour(serverHour, DateTime.now())),
           onTap: () => _setReminder(user, true),
         ),
     ];
@@ -354,8 +354,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with TabReselectS
 
     final now = DateTime.now();
     final current = user.reminderHourUtc;
+    final changing = current != null;
     setState(() => _reminderPending = true);
-    final localHour = await _pickHour(current == null ? _defaultReminderHour : reminderLocalHour(current, now));
+    final localHour = await _pickHour(
+      current == null ? _defaultReminderHour : user.reminderLocalHour ?? reminderLocalHour(current, now),
+    );
     if (!mounted) return;
     if (localHour == null) {
       setState(() => _reminderPending = null);
@@ -363,12 +366,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with TabReselectS
     }
     final utc = reminderUtcHour(localHour, now);
     try {
-      await notifications.requestPermissionsAndRegister();
+      // Notifications refusées : un rappel réglé ne sonnerait jamais.
+      if (!await notifications.requestPermissionsAndRegister()) {
+        if (mounted) {
+          showCgToast(context, 'Autorise les notifications de Collega dans Réglages pour recevoir ton rappel.');
+        }
+        return;
+      }
       await notifications.setReminder(utc);
-      await auth.setReminderHour(utc);
+      await auth.setReminderHour(utc, localHour: localHour);
     } catch (e) {
-      AppLogger.warning('Rappel non activé', tag: 'ProfileScreen', error: e);
-      if (mounted) showCgToast(context, 'Le rappel n’a pas pu être activé. Réessaie dans un instant.');
+      AppLogger.warning('Rappel non réglé', tag: 'ProfileScreen', error: e);
+      if (mounted) {
+        showCgToast(
+          context,
+          changing
+              ? 'Le rappel n’a pas pu être modifié. Réessaie dans un instant.'
+              : 'Le rappel n’a pas pu être activé. Réessaie dans un instant.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _reminderPending = null);
     }

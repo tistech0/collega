@@ -59,10 +59,13 @@ class _Auth extends AuthNotifier {
     return null;
   }
 
+  static final reminders = <(int?, int?)>[];
+
   @override
-  Future<void> setReminderHour(int? hourUtc) async {
+  Future<void> setReminderHour(int? hourUtc, {int? localHour}) async {
+    reminders.add((hourUtc, localHour));
     final current = state.valueOrNull!.user!;
-    state = AsyncData(AuthState(user: current.copyWith(reminderHourUtc: hourUtc)));
+    state = AsyncData(AuthState(user: current.copyWith(reminderHourUtc: hourUtc, reminderLocalHour: localHour)));
   }
 
   @override
@@ -77,9 +80,13 @@ class _Notifications extends NotificationsService {
 
   static final calls = <String>[];
   static bool fail = false;
+  static bool granted = true;
 
   @override
-  Future<void> requestPermissionsAndRegister() async => calls.add('permission');
+  Future<bool> requestPermissionsAndRegister() async {
+    calls.add('permission');
+    return granted;
+  }
 
   @override
   Future<void> setReminder(int hourUtc) async {
@@ -179,6 +186,8 @@ void main() {
     _Auth.updates.clear();
     _Notifications.calls.clear();
     _Notifications.fail = false;
+    _Notifications.granted = true;
+    _Auth.reminders.clear();
     _Prefs.initial = const RevisionPrefs();
     _Prefs.saved.clear();
     _RevenueCat.manage = 0;
@@ -254,7 +263,7 @@ void main() {
       _RevenueCat.info = RevenueCatSubscriptionInfo(expirationDate: DateTime(2026, 10, 12), willRenew: true);
       await _open(tester);
       expect(find.text('Collega Premium'), findsOneWidget);
-      expect(find.text('Se renouvelle le 12 oct.'), findsOneWidget);
+      expect(find.text('Se renouvelle le 12 octobre'), findsOneWidget);
       await tester.tap(find.text('Gérer mon abonnement'));
       await tester.pumpAndSettle();
       expect(_RevenueCat.manage, 1);
@@ -265,7 +274,7 @@ void main() {
       _Auth.user = _beta.copyWith(isBeta: false, isSubscribed: true);
       _RevenueCat.info = RevenueCatSubscriptionInfo(expirationDate: DateTime(2026, 10, 12), willRenew: false);
       await _open(tester);
-      expect(find.text('Résilié · accès jusqu’au 12 oct.'), findsOneWidget);
+      expect(find.text('Résilié · accès jusqu’au 12 octobre'), findsOneWidget);
     });
 
     testWidgets('réimports : « 0 sur 3 », barre vide, renouvellement daté', (tester) async {
@@ -274,7 +283,7 @@ void main() {
       await _open(tester);
       expect(find.text('Réimports ce mois'), findsOneWidget);
       expect(find.text('0 sur 3'), findsOneWidget);
-      expect(find.text('Se renouvelle le 1er oct.'), findsOneWidget);
+      expect(find.text('Se renouvelle le 1er octobre'), findsOneWidget);
       expect(tester.widget<ProfileQuotaBar>(find.byType(ProfileQuotaBar)).fraction, 0);
       expect(find.textContaining('reimport'), findsNothing);
     });
@@ -378,6 +387,41 @@ void main() {
       await tester.pumpAndSettle();
       final utc = reminderUtcHour(8, DateTime.now());
       expect(_Notifications.calls, ['permission', 'set:$utc']);
+      expect(_Auth.reminders, [(utc, 8)]);
+      expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).value, isTrue);
+      expect(find.text('08:00'), findsOneWidget);
+    });
+
+    testWidgets('notifications refusées : rien n’est réglé, on dit où les autoriser', (tester) async {
+      _phone(tester);
+      _Notifications.granted = false;
+      await _open(tester);
+      await tester.tap(find.byType(CupertinoSwitch));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(CgButton, 'Valider'));
+      await tester.pumpAndSettle();
+      expect(_Notifications.calls, ['permission']);
+      expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).value, isFalse);
+      expect(find.text('Autorise les notifications de Collega dans Réglages pour recevoir ton rappel.'), findsOneWidget);
+    });
+
+    testWidgets('heure locale choisie affichée (même après un changement d’heure)', (tester) async {
+      _phone(tester);
+      _Auth.user = _beta.copyWith(reminderHourUtc: 3, reminderLocalHour: 8);
+      await _open(tester);
+      expect(find.text('08:00'), findsOneWidget);
+    });
+
+    testWidgets('changer l’heure en échec : « modifié », l’ancien rappel reste', (tester) async {
+      _phone(tester);
+      _Notifications.fail = true;
+      _Auth.user = _beta.copyWith(reminderHourUtc: 6, reminderLocalHour: 8);
+      await _open(tester);
+      await tester.tap(find.text('Heure'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(CgButton, 'Valider'));
+      await tester.pumpAndSettle();
+      expect(find.text('Le rappel n’a pas pu être modifié. Réessaie dans un instant.'), findsOneWidget);
       expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).value, isTrue);
       expect(find.text('08:00'), findsOneWidget);
     });

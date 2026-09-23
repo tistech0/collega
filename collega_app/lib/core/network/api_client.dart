@@ -116,6 +116,10 @@ class ApiClient {
       _storage.delete(key: _kUserEmail),
       _storage.delete(key: _kIsBeta),
       _storage.delete(key: _kIsSubscribed),
+      // Rappel et quota : jamais relus pour le compte suivant.
+      _storage.delete(key: 'reminder_hour_utc'),
+      _storage.delete(key: 'reminder_local_hour'),
+      _storage.delete(key: 'monthly_reset_at'),
     ]);
   }
 
