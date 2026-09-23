@@ -26,6 +26,7 @@ const _rangs = ['A', 'B', 'C'];
 const _maxCardsChoices = [0, 10, 20, 30, 50];
 const _timerDurations = [15, 30, 60, 120];
 const _rankBadgeWidth = 28.0;
+const _versionLogo = 36.0;
 
 /// Profil (story 8.14, spec v2 § Profil) : compte, accès, révision, rappel,
 /// application ; se déconnecter (neutre) et supprimer le compte (action sheet).
@@ -111,7 +112,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with TabReselectS
             trailing: CgRowTrailing.chevron,
             onTap: () => context.push('/legal/privacy'),
           ),
-          const CgListRow(title: 'Version', trailing: CgRowTrailing.value, value: kAppVersion),
+          const CgListRow(
+            title: 'Version',
+            leading: CgLogo(size: _versionLogo),
+            trailing: CgRowTrailing.value,
+            value: kAppVersion,
+          ),
         ]),
         const SizedBox(height: CgSpace.section),
         CgButton(

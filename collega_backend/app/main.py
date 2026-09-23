@@ -79,7 +79,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="AppMédecine API",
+    title="Collega API",
     version="0.3.0",
     docs_url=None,
     redoc_url=None,

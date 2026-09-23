@@ -10,6 +10,7 @@ class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   static const _wordmarkHeight = 56.0;
+  static const _logoSize = 96.0;
   static const _rise = 12.0;
 
   @override
@@ -30,7 +31,7 @@ class WelcomeScreen extends StatelessWidget {
                   child: Center(
                     child: SingleChildScrollView(
                       child: Column(mainAxisSize: MainAxisSize.min, children: [
-                        // Le wordmark monte et apparaît, une fois ; direct en mouvement réduit.
+                        // Le logo et le wordmark montent et apparaissent, une fois ; direct en mouvement réduit.
                         TweenAnimationBuilder<double>(
                           tween: Tween(begin: 0, end: 1),
                           duration: CgMotion.resolve(context, CgMotion.ringFill),
@@ -39,7 +40,11 @@ class WelcomeScreen extends StatelessWidget {
                             opacity: t,
                             child: Transform.translate(offset: Offset(0, (1 - t) * _rise), child: child),
                           ),
-                          child: const CgWordmark(height: _wordmarkHeight),
+                          child: const Column(mainAxisSize: MainAxisSize.min, children: [
+                            CgLogo(size: _logoSize),
+                            SizedBox(height: CgSpace.s5),
+                            CgWordmark(height: _wordmarkHeight),
+                          ]),
                         ),
                         const SizedBox(height: CgSpace.s4),
                         Text(

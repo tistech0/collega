@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import 'package:collega_app/core/ui/brand/cg_logo.dart';
 import 'package:collega_app/core/ui/brand/cg_wordmark.dart';
 import 'package:collega_app/core/ui/theme/cg_theme.dart';
 import 'package:collega_app/core/ui/tokens/cg_colors.dart';
@@ -24,7 +25,7 @@ class CgTokensPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CgWordmark(height: 36),
+            const Row(children: [CgLogo(size: 48), SizedBox(width: CgSpace.s3), CgWordmark(height: 36)]),
             const SizedBox(height: CgSpace.related),
             Text('Collega UI · tokens v2', style: CgType.bodyS.copyWith(color: c.ink2)),
             _Section('Palette', children: [

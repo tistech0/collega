@@ -121,7 +121,11 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
         bottomAction: CgButton(label: 'Se connecter', loading: _submitting, onPressed: _submit),
         children: [
           const SizedBox(height: CgSpace.s5),
-          const Align(alignment: Alignment.centerLeft, child: CgWordmark(height: _wordmarkHeight)),
+          const Row(children: [
+            CgLogo(size: _logoSize),
+            SizedBox(width: CgSpace.s3),
+            CgWordmark(height: _wordmarkHeight),
+          ]),
           const SizedBox(height: CgSpace.s5),
           AutofillGroup(
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -187,6 +191,7 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
 
   static const _iconSize = 18.0;
   static const _wordmarkHeight = 32.0;
+  static const _logoSize = 44.0;
   static const _invalidEmail = 'Cet email n’est pas valide.';
   static final _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 }

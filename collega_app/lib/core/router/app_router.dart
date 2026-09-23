@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:collega_app/core/ui/brand/cg_logo.dart';
 import 'package:collega_app/core/ui/theme/cg_theme.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/auth/presentation/auth_login_screen.dart';
@@ -184,5 +185,11 @@ class _Splash extends StatelessWidget {
   const _Splash();
 
   @override
-  Widget build(BuildContext context) => ColoredBox(color: CgTheme.of(context).colors.ground);
+  Widget build(BuildContext context) => ColoredBox(
+        color: CgTheme.of(context).colors.ground,
+        // Même logo, même place que l'écran de lancement iOS : aucun saut.
+        child: const Center(child: CgLogo(size: _launchLogo)),
+      );
+
+  static const _launchLogo = 120.0;
 }

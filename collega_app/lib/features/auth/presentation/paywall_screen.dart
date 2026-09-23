@@ -103,6 +103,7 @@ class _BrandBlock extends StatelessWidget {
   const _BrandBlock();
 
   static const _wordmarkHeight = 28.0;
+  static const _logoSize = 44.0;
 
   @override
   Widget build(BuildContext context) {
@@ -111,11 +112,11 @@ class _BrandBlock extends StatelessWidget {
       padding: const EdgeInsets.all(CgSpace.s6),
       decoration: BoxDecoration(color: c.accent, borderRadius: CgRadius.lAll),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Semantics(
-          label: 'Collega',
-          excludeSemantics: true,
-          child: CgWordmark(height: _wordmarkHeight, color: c.accentInk),
-        ),
+        Row(children: [
+          const CgLogo(size: _logoSize),
+          const SizedBox(width: CgSpace.s3),
+          CgWordmark(height: _wordmarkHeight, color: c.accentInk),
+        ]),
         const SizedBox(height: CgSpace.s5),
         Semantics(
           header: true,

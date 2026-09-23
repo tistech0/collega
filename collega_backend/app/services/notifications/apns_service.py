@@ -66,8 +66,8 @@ class APNsNotificationService(NotificationService):
             message={
                 "aps": {
                     "alert": {
-                        "title": "Fiches prêtes !",
-                        "body": "Tes fiches sont disponibles dans AppMédecine",
+                        "title": "Fiches prêtes",
+                        "body": "Tes fiches t’attendent dans Collega.",
                     },
                     "sound": "default",
                     "badge": 1,
@@ -94,8 +94,8 @@ class APNsNotificationService(NotificationService):
             message={
                 "aps": {
                     "alert": {
-                        "title": "AppMédecine",
-                        "body": "C'est l'heure de réviser !",
+                        "title": "Collega",
+                        "body": "Ta session du jour t’attend.",
                     },
                     "sound": "default",
                 },

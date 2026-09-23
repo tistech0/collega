@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:collega_app/core/ui/brand/cg_logo.dart';
 import 'package:collega_app/core/ui/brand/cg_wordmark.dart';
 import 'package:collega_app/core/ui/gallery/cg_tokens_page.dart';
 
@@ -18,6 +19,7 @@ void main() {
     expect(find.text('accent'), findsOneWidget);
     expect(find.textContaining('#0E5E63'), findsWidgets);
     expect(find.byType(CgWordmark), findsOneWidget);
+    expect(find.byType(CgLogo), findsOneWidget);
   });
 
   group('goldens', () {

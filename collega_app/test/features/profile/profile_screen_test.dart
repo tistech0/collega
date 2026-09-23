@@ -462,10 +462,11 @@ void main() {
   });
 
   group('application et compte', () {
-    testWidgets('CGU et Confidentialité s’ouvrent', (tester) async {
+    testWidgets('CGU et Confidentialité s’ouvrent ; version avec le logo', (tester) async {
       _phone(tester);
       final visited = <String>[];
       await _open(tester, visited: visited);
+      expect(find.descendant(of: _row('Version'), matching: find.byType(CgLogo)), findsOneWidget);
       await tester.tap(find.text('Conditions générales d’utilisation'));
       await tester.pumpAndSettle();
       expect(visited, ['/legal/cgu']);

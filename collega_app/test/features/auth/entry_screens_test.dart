@@ -76,6 +76,7 @@ void main() {
       await tester.pumpWidget(_app('/welcome', visited: visited));
       await tester.pumpAndSettle();
       expect(find.byType(CgWordmark), findsOneWidget);
+      expect(find.byType(CgLogo), findsOneWidget);
       expect(find.text('Beta privée · accès sur invitation'), findsOneWidget);
       final primaries = tester.widgetList<CgButton>(find.byType(CgButton)).where((b) => b.variant == CgButtonVariant.primary);
       expect(primaries.map((b) => b.label), ['Se connecter']);
@@ -127,11 +128,12 @@ void main() {
       expect(find.text('Beta privée · accès sur invitation'), findsOneWidget);
     });
 
-    testWidgets('wordmark sur la connexion', (tester) async {
+    testWidgets('logo et wordmark sur la connexion', (tester) async {
       _phone(tester);
       await tester.pumpWidget(_app('/auth/login'));
       await tester.pumpAndSettle();
       expect(find.byType(CgWordmark), findsOneWidget);
+      expect(find.byType(CgLogo), findsOneWidget);
     });
 
     testWidgets('email mal formé : dit sous le champ, sans appel', (tester) async {

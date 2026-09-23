@@ -3,6 +3,7 @@
 /// `import 'package:collega_app/core/ui/collega_ui.dart';`
 library;
 
+export 'brand/cg_logo.dart';
 export 'brand/cg_wordmark.dart';
 export 'foundation/cg_haptics.dart';
 export 'foundation/cg_icon.dart';

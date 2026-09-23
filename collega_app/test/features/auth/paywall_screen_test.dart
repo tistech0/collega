@@ -122,6 +122,7 @@ void main() {
     await tester.pumpWidget(_app());
     await tester.pumpAndSettle();
     expect(find.byType(CgWordmark), findsOneWidget);
+    expect(find.byType(CgLogo), findsOneWidget);
     expect(find.text('Collega Premium'), findsOneWidget);
     expect(find.byType(CgListRow), findsNWidgets(4));
     expect(find.text('9,99 €'), findsOneWidget);
