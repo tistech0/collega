@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Diffs des goldens en échec (flutter test)
+**/test/**/failures/
