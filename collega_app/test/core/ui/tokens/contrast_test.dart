@@ -15,8 +15,10 @@ void main() {
     ('ink / surface', c.ink, c.surface, 7),
     ('ink2 / ground', c.ink2, c.ground, 4.5),
     ('ink2 / surface', c.ink2, c.surface, 4.5),
-    ('ink3 / ground (désactivé, ≥ 3:1)', c.ink3, c.ground, 3),
-    ('ink3 / surface', c.ink3, c.surface, 3),
+    // 8.15 : ink3 porte du texte (intertitres, valeurs, précisions, onglets) → 4,5:1.
+    ('ink3 / ground (texte tertiaire)', c.ink3, c.ground, 4.5),
+    ('ink3 / surface', c.ink3, c.surface, 4.5),
+    ('ink3 / soft (placeholder de recherche)', c.ink3, c.soft, 4.5),
     ('accent / ground (texte)', c.accent, c.ground, 4.5),
     ('accent / surface (texte)', c.accent, c.surface, 4.5),
     ('accentInk / accent (bouton primaire, drill)', c.accentInk, c.accent, 4.5),
@@ -32,6 +34,10 @@ void main() {
     ('ground / ink (toast)', c.ground, c.ink, 4.5),
     ('ink2 / soft (segmented, recherche)', c.ink2, c.soft, 4.5),
   ];
+
+  test('ink2 et ink3 restent deux niveaux distincts (≥ 1,4:1 entre eux)', () {
+    expect(contrastRatio(c.ink2, c.ink3), greaterThanOrEqualTo(1.4));
+  });
 
   for (final (name, fg, bg, min) in pairs) {
     test('$name ≥ $min:1', () {

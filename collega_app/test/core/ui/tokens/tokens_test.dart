@@ -16,7 +16,8 @@ void main() {
       expect(c.surface, const Color(0xFFF7F6F2));
       expect(c.soft, const Color(0xFFE2E0D8));
       expect(c.ink, const Color(0xFF17201F));
-      expect(c.ink2, const Color(0xFF5B6664));
+      expect(c.ink2, const Color(0xFF454D4C));
+      expect(c.ink3, const Color(0xFF60645E));
       expect(c.line, const Color(0xFFD9D6CC));
     });
     test('accent sarcelle unique', () {

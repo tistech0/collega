@@ -8,7 +8,8 @@ import 'package:flutter/painting.dart';
 /// référence une couleur brute — tout passe par ces rôles.
 ///
 /// Écarts au spec, imposés par ses propres seuils de contraste (test
-/// `contrast_test.dart`) : `ink3` #9A9E97 → #838880 (2,26 → 3,01:1),
+/// `contrast_test.dart`) : `ink3` #9A9E97 → #60645E (texte tertiaire ≥ 4,5:1 sur
+/// ground, surface et soft, story 8.15 ; `ink2` #5B6664 → #454D4C pour rester distinct),
 /// `rankB` #4C6A6E → #4C696D, `rankC` #8B8A80 → #64635B (texte de badge
 /// ≥ 4,5:1), et le texte posé sur `review` est `ink` (le blanc ne fait que 2,9:1).
 @immutable
@@ -100,8 +101,8 @@ class CgColors {
     surface: Color(0xFFF7F6F2),
     soft: Color(0xFFE2E0D8),
     ink: Color(0xFF17201F),
-    ink2: Color(0xFF5B6664),
-    ink3: Color(0xFF838880),
+    ink2: Color(0xFF454D4C),
+    ink3: Color(0xFF60645E),
     line: Color(0xFFD9D6CC),
     accent: Color(0xFF0E5E63),
     accentSoft: Color(0xFFD5E6E4),

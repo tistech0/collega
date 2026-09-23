@@ -390,6 +390,17 @@ void main() {
     });
   });
 
+  testWidgets('accessibilité : cibles étiquetées, 44 pt, contraste du texte (8.15)', (tester) async {
+    final handle = tester.ensureSemantics();
+    _phone(tester);
+    await tester.pumpWidget(_app(_Repo([_card(0), _card(1)])));
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
+
   testWidgets('Dynamic Type 1,6 sur 375 : aucun débordement', (tester) async {
     _phone(tester, width: 375, height: 812);
     await tester.pumpWidget(_app(_Repo([_card(0, type: 'definition')])));

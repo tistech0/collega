@@ -387,7 +387,7 @@ Trois directions ont été maquettées en HTML interactif (6 écrans chacune, dr
 Maquette de référence : `directions-v2/direction-d-fusion.html`.
 
 - **Structure** : celle de Feuille — large title, listes à filets, cartes réservées à ce qu'on manipule, capsule flottante iOS 26 claire.
-- **Palette** : celle de Bloc — `ground` pierre `#ECEAE3`, `surface` `#F7F6F2`, `ink` `#17201F`, `ink2` `#5B6664`, `ink3` `#9A9E97`, `line` `#D9D6CC`, `accent` sarcelle `#0E5E63`, `accent-soft` `#D5E6E4` ; états `mastered` `#0E5E63`, `good` `#6FA8A2`, `review` `#D9822B`, `unseen` `#D9D6CC` ; `danger` `#B8352B`. Le sarcelle est l'héritier assombri du vert v1 : la continuité de marque est conservée, l'usage devient rare.
+- **Palette** : celle de Bloc — `ground` pierre `#ECEAE3`, `surface` `#F7F6F2`, `ink` `#17201F`, `ink2` `#454D4C`, `ink3` `#60645E` (ajustés en 8.15 : tout texte ≥ 4,5:1), `line` `#D9D6CC`, `accent` sarcelle `#0E5E63`, `accent-soft` `#D5E6E4` ; états `mastered` `#0E5E63`, `good` `#6FA8A2`, `review` `#D9822B`, `unseen` `#D9D6CC` ; `danger` `#B8352B`. Le sarcelle est l'héritier assombri du vert v1 : la continuité de marque est conservée, l'usage devient rare.
 - **Typographie** : Instrument Sans, seule famille, chiffres tabulaires. Échelle de la Fondation visuelle.
 - **Drill** : écran entier sarcelle (la « page de couleur ») ; au tap, la question remonte en bandeau et **la réponse glisse par le bas** sur une feuille pierre (variante 2a) ; swipe gauche/droite avec prévisualisation du verdict, trois boutons dans la feuille. Pas de rotation 3D.
 - **Fin de session** : haut en bloc sarcelle (score `18/24` qui s'incrémente, barre blanche), bas Feuille (stats à filets, consolidé, prochaine session, un bouton primaire).
@@ -398,7 +398,7 @@ Maquette de référence : `directions-v2/direction-d-fusion.html`.
 | Token | Valeur |
 |---|---|
 | `ground` / `surface` / `soft` | `#ECEAE3` / `#F7F6F2` / `#E2E0D8` |
-| `ink` / `ink2` / `ink3` / `line` | `#17201F` / `#5B6664` / `#9A9E97` / `#D9D6CC` |
+| `ink` / `ink2` / `ink3` / `line` | `#17201F` / `#454D4C` / `#60645E` / `#D9D6CC` |
 | `accent` / `accent-soft` / `accent-ink` | `#0E5E63` / `#D5E6E4` / `#F2F5F3` |
 | `rank-a` / `rank-b` / `rank-c` | `#0E5E63` / `#4C6A6E` / `#8B8A80` |
 | `state-mastered` / `good` / `review` / `unseen` | `#0E5E63` / `#6FA8A2` / `#D9822B` / `#D9D6CC` |
