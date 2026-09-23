@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'for s in backup-nas backup-dumps backup-check backup-verify connect-npm-networks daily-recap; do echo \"=== $s ===\"; cat /boot/config/plugins/user.scripts/scripts/$s/name 2>/dev/null; echo; sed -E \"s/((PASS|PASSWORD|TOKEN|SECRET|KEY|WEBHOOK)[A-Z_]*=)[^ ]*/\\1<masqué>/Ig; s#(https?://)[^ \\\"]*#\\1<masqué>#g\" /boot/config/plugins/user.scripts/scripts/$s/script 2>/dev/null | head -120; done' 2>&1",
+  "summary": "ssh nas 'for s in backup-nas backup-dumps backup-check backup-verify connect-npm-networks daily-recap; do echo \"=== $s ===\"; cat /boot/config/plugins/user.scripts/scripts/$s/name 2>/dev/null; echo; sed -E \"s/((PASS|PASSWORD|TOKEN|SECRET|KEY|WEBHOOK)[A-Z_]*=)[^ ]*/\\1<masqué>/Ig; s#(https?://)[^ \\\"]*#\\1<masqué>#g\" /boot/",
+  "text": "ssh nas 'for s in backup-nas backup-dumps backup-check backup-verify connect-npm-networks daily-recap; do echo \"=== $s ===\"; cat /boot/config/plugins/user.scripts/scripts/$s/name 2>/dev/null; echo; sed -E \"s/((PASS|PASSWORD|TOKEN|SECRET|KEY|WEBHOOK)[A-Z_]*=)[^ ]*/\\1<masqué>/Ig; s#(https?://)[^ \\\"]*#\\1<masqué>#g\" /boot/config/plugins/user.scripts/scripts/$s/script 2>/dev/null | head -120; done' 2>&1: ut cocher les trois filtres a la fois : on dedoublonne sur # le nom, en gardant la forme annotee (nom(12x)) quand elle existe. Telegram rend # en police proportionnelle : une liste qui se repete devient illisible. PB=$(printf \"%s\" \"${DOWN}${SICK}${LOOP}\" | tr \" \" \"\\n\" | grep -v \"^$\" \\ | awk '{n=$0; sub(/\\([0-9]+x\\)$/,\"\",n); if(!(n in best) || $0 ~ /x\\)$/) best[n]=$0} END{for(k in best) printf \"%s \", best[k]}') if [ -z \"${PB// }\" ]; then line \"$OK\" \"Docker $UP actifs\" else line \"$WARN\" \"Docker $UP actifs\"; sub \"probleme : ${PB% }\"; fi # --- Sauvegarde (meme methode que backup-check) ------------------------------ if docker ps --format '{{.Names}}' 2>/dev/null | grep -qix kopia; then LAST=$(docker exec kopia kopia snapshot list --all --json 2>/dev/null \\ | grep -o '\"startTime\":\"[^\"]*\"' | cut -d'\"' -f4 | sort | tail -1) if [ -n \"$LAST\" ]; then TS=$(date -d \"$LAST\" +%s 2>/dev/null || echo 0)",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "759850a03e9a36d58cff24a6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:02.972Z",
+  "stored_at": "2026-09-23T16:14:02.973Z"
+}

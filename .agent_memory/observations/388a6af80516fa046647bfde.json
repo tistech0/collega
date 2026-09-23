@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad/pytest.txt",
+  "summary": "cat /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad/pytest.txt: DEV mode: Insecure config values: SECRET_KEY (must be ≥ 32 chars), CLAUDE_API_KEY (invalid format — expected sk-ant-…) — DO NOT deploy as-is. ERROR: usage: python -m pytest [options] [fil",
+  "text": "cat /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad/pytest.txt: DEV mode: Insecure config values: SECRET_KEY (must be ≥ 32 chars), CLAUDE_API_KEY (invalid format — expected sk-ant-…) — DO NOT deploy as-is. ERROR: usage: python -m pytest [options] [file_or_dir] [file_or_dir] [...] python -m pytest: error: unrecognized arguments: --timeout inifile: /Users/lesurmatthis/dev/projet perso/collega/collega_backend/pyproject.toml rootdir: /Users/lesurmatthis/dev/projet perso/collega/collega_backend .venv/bin/python -m pytest -q -p no:cacheprovider --timeout 120 2>&1 1.63s user 0.21s system 98% cpu 1.860 total tail -40 0.00s user 0.00s system 0% cpu 1.859 total",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "388a6af80516fa046647bfde",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:37.889Z",
+  "stored_at": "2026-09-23T16:15:37.890Z"
+}

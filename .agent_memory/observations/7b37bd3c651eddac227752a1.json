@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && .venv/bin/pip list 2>/dev/null | grep -iE \"fastapi|starlette|jose|ecdsa|rsa|cryptography|passlib|bcrypt|multipart|slowapi|limits|uvicorn|sqlalchemy|asyncpg|anthropic|pdfplumber|pdfminer|pillow|pdf2image|httpx|h11|pydantic|arq|redis|aioapns|jinja|setuptools|pip \" ; ls .venv/bin | grep -i audit; which pip-audit; ls poetry.lock 2>/dev/null",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && .venv/bin/pip list 2>/dev/null | grep -iE \"fastapi|starlette|jose|ecdsa|rsa|cryptography|passlib|bcrypt|multipart|slowapi|limits|uv",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7b37bd3c651eddac227752a1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:52.191Z",
+  "stored_at": "2026-09-23T16:14:52.192Z"
+}

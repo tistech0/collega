@@ -1,0 +1,40 @@
+---
+type: "Convention"
+title: "Surface API réduite : /docs, /redoc et /openapi.json (en prod) désactivés, POST /v1/auth/register en 403"
+description: "Durcissement du backend collega : 1 Swagger et ReDoc sont désactivés docs url=None , redoc url=None dans le constructeur FastAPI de collega backend/app/main.py ; depuis le chantier 0 2026 09 23 , le schéma OpenAPI est au"
+resource: "collega_backend/app/main.py"
+tags: ["session-learning", "security", "openapi", "register", "chantier-0"]
+timestamp: "2026-09-23T16:42:39.007Z"
+x-kage-id: "repo:git-github-com-tistech0-collega:convention:surface-api-r-duite-docs-redoc-et-openapi-json-en-prod-d-sactiv-s-post-v1-auth-r"
+x-kage-type: "convention"
+x-kage-status: "approved"
+x-kage-scope: "repo"
+x-kage-visibility: "team"
+x-kage-verified: "unverified"
+x-kage-paths: ["collega_backend/app/main.py", "collega_backend/app/api/v1/auth.py", "collega_backend/app/api/v1/admin.py", "collega_backend/tests/core/test_app_setup.py"]
+---
+
+# Surface API réduite : /docs, /redoc et /openapi.json (en prod) désactivés, POST /v1/auth/register en 403
+
+> Durcissement du backend collega : 1 Swagger et ReDoc sont désactivés docs url=None , redoc url=None dans le construct…
+
+Durcissement du backend collega : (1) Swagger et ReDoc sont désactivés (`docs_url=None`, `redoc_url=None` dans le constructeur FastAPI de collega_backend/app/main.py) ; depuis le chantier 0 (2026-09-23), le schéma OpenAPI est aussi caché en production via `openapi_url=openapi_url_for(settings.environment)` (None si ENVIRONMENT=production, `/openapi.json` en dev) — il listait toutes les routes /v1/admin. La prod a ENVIRONMENT=production dans le .env du NAS depuis le 2026-09-23 ; /openapi.json y répond 404. (2) L'inscription publique est fermée : `POST /v1/auth/register` lève une HTTPException 403 `{"code": "REGISTRATION_DISABLED"}` (collega_backend/app/api/v1/auth.py). Le seul point d'onboarding est `POST /v1/admin/users` (console admin, Basic Auth), qui ne réactive jamais le register public.
+Evidence: tests/core/test_app_setup.py::test_openapi_schema_hidden_in_production vert ; en prod (image 2083f55) urlopen http://localhost:8000/openapi.json → HTTP 404 ; auth.py register → 403 REGISTRATION_DISABLED.
+Verified by: pytest tests/core + vérification dans le conteneur collega-api-1, 2026-09-23
+
+## Verification
+
+tests/core/test_app_setup.py::test_openapi_schema_hidden_in_production vert ; en prod (image 2083f55) urlopen http://localhost:8000/openapi.json → HTTP 404 ; auth.py register → 403 REGISTRATION_DISABLED.
+
+# Citations
+
+[1] explicit_capture (2026-09-23T16:42:39.007Z)
+
+## Kage state
+
+Machine state for lossless round-trip; OKF consumers can ignore it.
+
+```json kage-state
+{"schema_version":2,"id":"repo:git-github-com-tistech0-collega:convention:surface-api-r-duite-docs-redoc-et-openapi-json-en-prod-d-sactiv-s-post-v1-auth-r","title":"Surface API réduite : /docs, /redoc et /openapi.json (en prod) désactivés, POST /v1/auth/register en 403","summary":"Durcissement du backend collega : 1 Swagger et ReDoc sont désactivés docs url=None , redoc url=None dans le constructeur FastAPI de collega backend/app/main.py ; depuis le chantier 0 2026 09 23 , le schéma OpenAPI est au","body":"Durcissement du backend collega : (1) Swagger et ReDoc sont désactivés (`docs_url=None`, `redoc_url=None` dans le constructeur FastAPI de collega_backend/app/main.py) ; depuis le chantier 0 (2026-09-23), le schéma OpenAPI est aussi caché en production via `openapi_url=openapi_url_for(settings.environment)` (None si ENVIRONMENT=production, `/openapi.json` en dev) — il listait toutes les routes /v1/admin. La prod a ENVIRONMENT=production dans le .env du NAS depuis le 2026-09-23 ; /openapi.json y répond 404. (2) L'inscription publique est fermée : `POST /v1/auth/register` lève une HTTPException 403 `{\"code\": \"REGISTRATION_DISABLED\"}` (collega_backend/app/api/v1/auth.py). Le seul point d'onboarding est `POST /v1/admin/users` (console admin, Basic Auth), qui ne réactive jamais le register public.\nEvidence: tests/core/test_app_setup.py::test_openapi_schema_hidden_in_production vert ; en prod (image 2083f55) urlopen http://localhost:8000/openapi.json → HTTP 404 ; auth.py register → 403 REGISTRATION_DISABLED.\nVerified by: pytest tests/core + vérification dans le conteneur collega-api-1, 2026-09-23","type":"convention","scope":"repo","visibility":"team","sensitivity":"internal","status":"approved","confidence":0.7,"tags":["session-learning","security","openapi","register","chantier-0"],"paths":["collega_backend/app/main.py","collega_backend/app/api/v1/auth.py","collega_backend/app/api/v1/admin.py","collega_backend/tests/core/test_app_setup.py"],"stack":[],"source_refs":[{"kind":"explicit_capture","captured_at":"2026-09-23T16:42:39.007Z"}],"context":{"fact":"Durcissement du backend collega : (1) Swagger et ReDoc sont désactivés (`docs_url=None`, `redoc_url=None` dans le constructeur FastAPI de collega_backend/app/main.py) ; depuis le chantier 0 (2026-09-23), le schéma OpenAPI est aussi caché en production via `openapi_url=openapi_url_for(settings.environment)` (None si ENVIRONMENT=production, `/openapi.json` en dev) — il listait toutes les routes /v1/admin. La prod a ENVIRONMENT=production dans le .env du NAS depuis le 2026-09-23 ; /openapi.json y répond 404. (2) L'inscription publique est fermée : `POST /v1/auth/register` lève une HTTPException 403 `{\"code\": \"REGISTRATION_DISABLED\"}` (collega_backend/app/api/v1/auth.py). Le seul point d'onboarding est `POST /v1/admin/users` (console admin, Basic Auth), qui ne réactive jamais le register public.\nEvidence: tests/core/test_app_setup.py::test_openapi_schema_hidden_in_production vert ; en prod (image 2083f55) urlopen http://localhost:8000/openapi.json → HTTP 404 ; auth.py register → 403 REGISTRATION_DISABLED.\nVerified by: pytest tests/core + vérification dans le conteneur collega-api-1, 2026-09-23","verification":"tests/core/test_app_setup.py::test_openapi_schema_hidden_in_production vert ; en prod (image 2083f55) urlopen http://localhost:8000/openapi.json → HTTP 404 ; auth.py register → 403 REGISTRATION_DISABLED."},"freshness":{"ttl_days":365,"last_verified_at":"2026-09-23T16:42:39.007Z","path_fingerprints":[{"path":"collega_backend/app/main.py","sha256":"5974c95e097acb18ba83fcfff3016daf34f24e8e6d9de71127b1426866e69000","size":4624},{"path":"collega_backend/app/api/v1/auth.py","sha256":"13c19d4ed3a63dcd4368f8e4cc959df76589c87c6823f426e9c82769e71bb275","size":6166},{"path":"collega_backend/app/api/v1/admin.py","sha256":"6e950ec42522fe51f1093e8fd0d996e30168e9475af09effd099c974b9ffec4c","size":36071},{"path":"collega_backend/tests/core/test_app_setup.py","sha256":"eaa5fc22352dcdeb7240a5c8b2b94fd9b7fc3d739c08f44e1f4c59749dc9d534","size":705}],"path_fingerprint_policy":"source_hash_staleness","verification":"repo_local_agent_capture"},"edges":[{"relation":"supersedes","to":"repo:git-github-com-tistech0-collega:convention:docs-d-sactiv-et-post-v1-auth-register-bloqu-en-403-1790178811463","evidence":"Remplacé après le chantier 0 (2083f55) : comportement mis à jour","created_at":"2026-09-23T16:43:08.687Z"}],"quality":{"reviewer":"repo-local-agent","votes_up":0,"votes_down":0,"uses_30d":0,"reports_stale":0,"review_boundary":"git_or_pr","promotion_requires_review":true,"discovery_tokens":2000,"discovery_tokens_estimated":true,"score":100,"reasons":["high-value memory type","has source evidence","grounded to repo paths","tagged","concise but substantive","actionable rationale or verification"],"risks":[],"duplicate_candidates":[],"stale_reasons":[],"estimated_tokens_saved":277},"created_at":"2026-09-23T16:42:39.007Z","updated_at":"2026-09-23T16:43:08.687Z","author_branch":"feat/chantier-0-exploitation"}
+```
+

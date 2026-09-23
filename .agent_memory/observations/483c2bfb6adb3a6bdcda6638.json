@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && export DATABASE_URL=\"postgresql+asyncpg://postgres:audit@localhost:55432/collega\"; .venv/bin/python -c \"from alembic.config import main; main(argv=['upgrade','head'])\" 2>&1 | tail -3; echo \"--- check\"; .venv/bin/python -c \"from alembic.config import main; main(argv=['check'])\" 2>&1 | tail -25",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && export DATABASE_URL=\"postgresql+asyncpg://postgres:audit@localhost:55432/collega\"; .venv/bin/python -c \"from alembic.config import ",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "483c2bfb6adb3a6bdcda6638",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:10.975Z",
+  "stored_at": "2026-09-23T16:16:10.976Z"
+}

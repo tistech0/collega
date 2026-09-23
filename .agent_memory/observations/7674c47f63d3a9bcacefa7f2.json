@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rnE \"177|2 ?min ?46|436\" .agent_memory/packets _bmad-output/implementation-artifacts 2>/dev/null | grep -viE \"line|0x|#[0-9a-f]\" | head -10; ls ~/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/; grep -rnE \"177|436|2 ?min\" ~/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/*.md | head",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rnE \"177|2 ?min ?46|436\" .agent_memory/packets _bmad-output/implementation-artifacts 2>/dev/null | grep -viE \"line|0x|#[0-9a-f]\" | head -10; ",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7674c47f63d3a9bcacefa7f2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:03.435Z",
+  "stored_at": "2026-09-23T16:15:03.436Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/workers/ocr_worker.py app/services/ocr/ocr_processor.py app/services/ocr/__init__.py app/services/ocr/confidence_scorer.py",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/workers/ocr_worker.py app/services/ocr/ocr_processor.py app/services/ocr/__init__.py app/services/ocr/confidence_scorer.",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5f338457069888a7cd6ad547",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:35.136Z",
+  "stored_at": "2026-09-23T16:13:35.137Z"
+}

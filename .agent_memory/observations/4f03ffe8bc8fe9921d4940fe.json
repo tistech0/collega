@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh -o ConnectTimeout=10 nas 'cd /mnt/user/appdata/compose-stacks/collega && ls -la && echo ---COMPOSE--- && cat docker-compose.yml; echo ---PS---; docker ps -a --format \"table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.Ports}}\" | grep -i -E \"collega|cloudflared|npm|proxy|NAMES\"' 2>&1",
+  "summary": "ssh -o ConnectTimeout=10 nas 'cd /mnt/user/appdata/compose-stacks/collega && ls -la && echo ---COMPOSE--- && cat docker-compose.yml; echo ---PS---; docker ps -a --format \"table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.Ports}}\" | grep -i -E \"collega|cloudflared|npm|proxy|NAMES\"' 2>&1:  timeout: 3s retries: 5 networks: - ",
+  "text": "ssh -o ConnectTimeout=10 nas 'cd /mnt/user/appdata/compose-stacks/collega && ls -la && echo ---COMPOSE--- && cat docker-compose.yml; echo ---PS---; docker ps -a --format \"table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.Ports}}\" | grep -i -E \"collega|cloudflared|npm|proxy|NAMES\"' 2>&1:  timeout: 3s retries: 5 networks: - collega_net restart: unless-stopped volumes: pdf_storage: driver: local driver_opts: type: none device: /mnt/user/appdata/collega/pdfs o: bind networks: collega_net: driver: bridge ---PS--- NAMES IMAGE STATUS PORTS collega-api-1 tistech0/collega-backend:latest Up 35 minutes collega-migrate-1 tistech0/collega-backend:latest Exited (0) 35 minutes ago collega-worker-1 tistech0/collega-backend:latest Up 35 minutes CloudflaredTunnel cloudflare/cloudflared:latest Up 45 hours collega-redis-1 redis:7-alpine Up 2 days (healthy) 6379/tcp docker-socket-proxy tecnativa/docker-socket-proxy Up 3 weeks 2375/tcp collega-db-1 postgres:16-alpine Up 5 weeks (healthy) 5432/tcp Nginx-Proxy-Manager-Official jc21/nginx-proxy-manager Up 5 weeks 0.0.0.0:80-81->80-81/tcp, [::]:80-81->80-81/tcp, 0.0.0.0:443->443/tcp, [::]:443->443/tcp, 0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4f03ffe8bc8fe9921d4940fe",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:34.765Z",
+  "stored_at": "2026-09-23T16:13:34.765Z"
+}

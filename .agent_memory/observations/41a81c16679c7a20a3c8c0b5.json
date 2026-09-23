@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; git status --short . | grep -v \"^??\" | head -3; docker info >/dev/null 2>&1 || orb start; docker build --platform linux/amd64 -t tistech0/collega-backend:latest -t tistech0/collega-backend:2083f55 . 2>&1 | tail -3",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; git status --short . | grep -v \"^??\" | head -3; docker info >/dev/null 2>&1 || orb start; docker build --platform linux/amd64 -t tist",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "41a81c16679c7a20a3c8c0b5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:39:05.652Z",
+  "stored_at": "2026-09-23T16:39:05.652Z"
+}

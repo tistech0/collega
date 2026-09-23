@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && export DATABASE_URL=\"postgresql+asyncpg://postgres:audit@localhost:55432/collega\"; .venv/bin/python -m alembic upgrade head 2>&1 | tail -3; echo \"--- check\"; .venv/bin/python -m alembic check 2>&1 | tail -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && export DATABASE_URL=\"postgresql+asyncpg://postgres:audit@localhost:55432/collega\"; .venv/bin/python -m alembic upgrade head 2>&1 | tail -3; echo \"--- check\"; .venv/bin/python -m alembic check 2>&1 | tail -20: /Users/lesurmatthis/dev/projet perso/colle",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && export DATABASE_URL=\"postgresql+asyncpg://postgres:audit@localhost:55432/collega\"; .venv/bin/python -m alembic upgrade head 2>&1 | tail -3; echo \"--- check\"; .venv/bin/python -m alembic check 2>&1 | tail -20: /Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/bin/python: No module named alembic.__main__; 'alembic' is a package and cannot be directly executed --- check /Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/bin/python: No module named alembic.__main__; 'alembic' is a package and cannot be directly executed",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "46e2e5478475e364f3775697",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:07.897Z",
+  "stored_at": "2026-09-23T16:16:07.898Z"
+}

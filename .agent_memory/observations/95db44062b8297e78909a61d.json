@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'grep -E \"^\\[|^(name|device|status|fsType|slots)=\" /var/local/emhttp/disks.ini | paste - - - - - 2>/dev/null | grep -v DISK_NP | head -12; echo ---; grep -E \"shareUseCache|shareCachePool\" /boot/config/shares/nas-backup.cfg 2>/dev/null; ls -d /mnt/cache/nas-backup /mnt/disk*/nas-backup 2>/dev/null; losetup -a 2>/dev/null | grep -i docker' 2>&1",
+  "summary": "About to run: ssh nas 'grep -E \"^\\[|^(name|device|status|fsType|slots)=\" /var/local/emhttp/disks.ini | paste - - - - - 2>/dev/null | grep -v DISK_NP | head -12; echo ---; grep -E \"shareUseCache|shareCachePool\" /boo",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "95db44062b8297e78909a61d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:00.771Z",
+  "stored_at": "2026-09-23T16:16:00.772Z"
+}

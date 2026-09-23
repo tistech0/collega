@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rln \"<mark>\\|flutter_html\\|webview\\|Markdown(\" lib | head; grep -n \"flutter_html\\|webview\\|markdown\" pubspec.yaml",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rln \"<mark>\\|flutter_html\\|webview\\|Markdown(\" lib | head; grep -n \"flutter_html\\|webview\\|markdown\" pubspec.yaml: lib/features/search/presentation/search_sheet.dart 58: flutter_markdown: ^0.7.5",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rln \"<mark>\\|flutter_html\\|webview\\|Markdown(\" lib | head; grep -n \"flutter_html\\|webview\\|markdown\" pubspec.yaml: lib/features/search/presentation/search_sheet.dart 58: flutter_markdown: ^0.7.5",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "71b80fc183c14141aff22200",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:15.618Z",
+  "stored_at": "2026-09-23T16:16:15.619Z"
+}

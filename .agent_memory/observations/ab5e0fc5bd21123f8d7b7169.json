@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,93p app/workers/cleanup_worker.py | grep -nE \"def |delete|update|hours|days|timedelta|unlink|where\"",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,93p app/workers/cleanup_worker.py | grep -nE \"def |delete|update|hours|days|timedelta|unlink|where\": :from datetime import datetime, timedelta, timezone 12:from sqlalchemy import update as sql_update 25:async def cleanup_ocr_text(ctx: dict) -",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,93p app/workers/cleanup_worker.py | grep -nE \"def |delete|update|hours|days|timedelta|unlink|where\": :from datetime import datetime, timedelta, timezone 12:from sqlalchemy import update as sql_update 25:async def cleanup_ocr_text(ctx: dict) -> None: 27: cutoff = datetime.now(timezone.utc) - timedelta(hours=24) 31: .where(GenerationJob.status == \"generation_complete\") 32: .where(GenerationJob.updated_at < cutoff) 38: .where(GenerationJob.status.in_([\"pending\", \"processing\", \"ocr_complete\"])) 42: sql_update(Item) 43: .where(Item.college_id.in_(completed_jobs_subq)) 44: .where(~Item.college_id.in_(active_jobs_subq)) 45: .where(Item.ocr_text.is_not(None)) 52:async def reset_monthly_reloads(ctx: dict) -> None: 64: grace_period = timedelta(hours=1) 67: sql_update(User) 68: .where(User.monthly_reloads_reset_at.is_not(None)) 69: .where(User.monthly_reloads_reset_at <= now - grace_period) 79:async def cleanup_stale_uploads(ctx: dict) -> int: 86: stale = set(store.stale_dirs(timedelta(hours=24)))",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ab5e0fc5bd21123f8d7b7169",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:51.450Z",
+  "stored_at": "2026-09-23T16:14:51.451Z"
+}

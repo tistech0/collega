@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "docker rm -f audit-pg-tmp >/dev/null && echo removed; cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/implementation-artifacts\" && grep -n \"A[0-9]\\b\\|A10\" epic-mvp-retro-2026-05-19.md | head -40; wc -l deferred-work.md",
+  "summary": "docker rm -f audit-pg-tmp >/dev/null && echo removed; cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/implementation-artifacts\" && grep -n \"A[0-9]\\b\\|A10\" epic-mvp-retro-2026-05-19.md | head -40; wc -l deferred-work.md: uants beta) :** A6 (SSE token gel), A7 (JWT non-révocable), dark mode, multi-tester, h",
+  "text": "docker rm -f audit-pg-tmp >/dev/null && echo removed; cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/implementation-artifacts\" && grep -n \"A[0-9]\\b\\|A10\" epic-mvp-retro-2026-05-19.md | head -40; wc -l deferred-work.md: uants beta) :** A6 (SSE token gel), A7 (JWT non-révocable), dark mode, multi-tester, hash-sharing v2, ~80 items du `deferred-work.md`. 241:Lors de la sauvegarde, vérification croisée avec la mémoire `project_security.md` (2026-05-08) et l'inspection des décorateurs `@limiter.limit` actuels. Plusieurs items de l'inventaire A1-A10 étaient déjà adressés : 245:| A2 backend rate limit DELETE /account | ✅ `@limiter.limit(\"3/minute\")` présent dans `auth.py:136`. Reste seulement le wrapping Flutter try/catch/rollback. | 246:| ~~A8 register/login rate limit~~ | ✅ `/register` retourne 403 par design ; `/login` a `@limiter.limit(\"5/minute\")` (auth.py:34). **Item retiré du plan.** | 251:- Lot 3 (Rate limits) réduit à **A3 uniquement** : surcharger `key_func=user_id` au niveau du décorateur search (sans toucher au limiter global, qui doit rester sur IP pour les autres endpoints). 251 deferred-work.md",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e61538bcb447d71afc656b19",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:52.781Z",
+  "stored_at": "2026-09-23T16:16:52.782Z"
+}

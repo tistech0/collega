@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "A=$(\"/Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/bin/python\" -c \"import arq,os;print(os.path.dirname(arq.__file__))\"); grep -n \"ConnectionError\\|RedisError\\|retry_on\\|conn_retries\\|def main\\|async def _poll_iteration\\|async def async_run\" $A/worker.py $A/connections.py | head -20; S=\"/Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/lib/python3.14/site-packages/slowapi/extension.py\"; grep -n \"swallow_errors\\|in_memory_fallback_enabled\" \"$S\" | head -6",
+  "summary": "A=$(\"/Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/bin/python\" -c \"import arq,os;print(os.path.dirname(arq.__file__))\"); grep -n \"ConnectionError\\|RedisError\\|retry_on\\|conn_retries\\|def main\\|async def _poll_iteration\\|async def async_run\" $A/worker.py $A/connections.py | head -20; S=\"/Users/lesur",
+  "text": "A=$(\"/Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/bin/python\" -c \"import arq,os;print(os.path.dirname(arq.__file__))\"); grep -n \"ConnectionError\\|RedisError\\|retry_on\\|conn_retries\\|def main\\|async def _poll_iteration\\|async def async_run\" $A/worker.py $A/connections.py | head -20; S=\"/Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/lib/python3.14/site-packages/slowapi/extension.py\"; grep -n \"swallow_errors\\|in_memory_fallback_enabled\" \"$S\" | head -6: ollega_backend/.venv/lib/python3.14/site-packages/arq/connections.py:290: settings.conn_retries - retry, /Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/lib/python3.14/site-packages/arq/worker.py:320: async def async_run(self) -> None: /Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/lib/python3.14/site-packages/arq/worker.py:349: async def main(self) -> None: /Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/lib/python3.14/site-packages/arq/worker.py:377: async def _poll_iteration(self) -> None: 116: * **swallow_errors**: whether to swallow errors when hitting a rate limit. 120: * **in_memory_fallback_enabled**: simply falls back to in memory storage 140: swallow_errors: bool = False, 142: in_memory_fallback_enabled: bool = False, 169: self._in_memory_fallback_enabled = ( 170: in_memory_fallback_enabled or len(in_memory_fallback) > 0",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3bdb2e040b903d89fedfe85b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:17:34.662Z",
+  "stored_at": "2026-09-23T16:17:34.663Z"
+}

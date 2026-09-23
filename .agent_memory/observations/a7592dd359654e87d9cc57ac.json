@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker exec kopia kopia policy show /source 2>/dev/null | sed -n \"/Ignore rules/,/Read ignore/p\" | grep -i -E \"collega|pdf|compose\"; echo ---KOPIAIGNORE---; ls -la /mnt/user/appdata/collega/.kopiaignore /mnt/user/appdata/.kopiaignore 2>&1; echo ---LASTSNAP---; docker exec kopia kopia snapshot list /source --max-results=2 2>/dev/null | tail -3; echo ---SIZES---; grep -E \"collega-db-1 ->\" /mnt/user/nas-backup/backup.log | wc -l; grep -n \"collega-db-1 -> 64K\" /mnt/user/nas-backup/backup.log' 2>&1",
+  "summary": "About to run: ssh nas 'docker exec kopia kopia policy show /source 2>/dev/null | sed -n \"/Ignore rules/,/Read ignore/p\" | grep -i -E \"collega|pdf|compose\"; echo ---KOPIAIGNORE---; ls -la /mnt/user/appdata/collega/.",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a7592dd359654e87d9cc57ac",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:25.872Z",
+  "stored_at": "2026-09-23T16:14:25.873Z"
+}

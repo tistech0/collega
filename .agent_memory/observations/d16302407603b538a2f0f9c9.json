@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'which dig nslookup host 2>/dev/null; curl --version | head -1'",
+  "summary": "ssh nas 'which dig nslookup host 2>/dev/null; curl --version | head -1': /usr/bin/dig /usr/bin/nslookup /usr/bin/host curl 8.21.0 (x86_64-pc-linux-gnu) libcurl/8.21.0 OpenSSL/3.5.7 zlib/1.3.2 brotli/1.2.0 zstd/1.5.7 c-ares/1.34.6 libidn2/2.3.8 libpsl/0.22.0 libssh2/1.11.1 nghttp2/1.69.0 ngtcp2/1.24.0 nghttp3/1.17.0 mit",
+  "text": "ssh nas 'which dig nslookup host 2>/dev/null; curl --version | head -1': /usr/bin/dig /usr/bin/nslookup /usr/bin/host curl 8.21.0 (x86_64-pc-linux-gnu) libcurl/8.21.0 OpenSSL/3.5.7 zlib/1.3.2 brotli/1.2.0 zstd/1.5.7 c-ares/1.34.6 libidn2/2.3.8 libpsl/0.22.0 libssh2/1.11.1 nghttp2/1.69.0 ngtcp2/1.24.0 nghttp3/1.17.0 mit-krb5/1.22.2 OpenLDAP/2.6.13",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d16302407603b538a2f0f9c9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:40:48.803Z",
+  "stored_at": "2026-09-23T16:40:48.804Z"
+}

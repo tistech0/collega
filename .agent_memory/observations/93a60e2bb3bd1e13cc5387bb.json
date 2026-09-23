@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && echo ---tracked; git ls-files | grep -vE '^(app|tests|alembic)/' ; echo ---ignored-check; git check-ignore -v collega_dump.sql .env; echo ---pip; .venv/bin/python -m pip list 2>/dev/null | grep -iE 'ruff|mypy|pyright|pytest|cov|bcrypt|passlib|jose|fastapi|pydantic|sqlalchemy|anthropic|arq|redis'",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && echo ---tracked; git ls-files | grep -vE '^(app|tests|alembic)/' ; echo ---ignored-check; git check-ignore -v collega_dump.sql .env",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "93a60e2bb3bd1e13cc5387bb",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:09.840Z",
+  "stored_at": "2026-09-23T16:13:09.840Z"
+}

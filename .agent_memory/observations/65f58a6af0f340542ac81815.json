@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 944,972p app/api/v1/admin.py; grep -rn \"admin_user\\|Depends(get_admin_user)\" app/api/v1/admin.py | head -3; grep -n \"dependencies=\\|APIRouter\" app/api/v1/*.py",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 944,972p app/api/v1/admin.py; grep -rn \"admin_user\\|Depends(get_admin_user)\" app/api/v1/admin.py | head -3; grep -n \"depende",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "65f58a6af0f340542ac81815",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:02.856Z",
+  "stored_at": "2026-09-23T16:15:02.856Z"
+}

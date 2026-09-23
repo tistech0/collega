@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 25,70p app/deps.py; echo ---; grep -rn \"@router\\.\\(get\\|post\\|put\\|patch\\|delete\\)\" app/api | grep -vc response_model; grep -rn \"@router\\.\\(get\\|post\\|put\\|patch\\|delete\\)\" app/api | grep -c response_model; echo; grep -rn \"def .*) -> dict\\|-> dict:\" app/api | wc -l",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 25,70p app/deps.py; echo ---; grep -rn \"@router\\.\\(get\\|post\\|put\\|patch\\|delete\\)\" app/api | grep -vc response_model; grep ",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5c2332088f091a1fd96ae5c1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:40.189Z",
+  "stored_at": "2026-09-23T16:14:40.190Z"
+}

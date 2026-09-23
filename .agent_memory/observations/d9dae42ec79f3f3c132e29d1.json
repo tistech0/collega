@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'ls /mnt/user/appdata/uptimekuma/; for f in /mnt/user/appdata/uptimekuma/*.db /mnt/user/appdata/uptimekuma/*/*.db; do [ -f \"$f\" ] && echo \"$f collega=$(grep -a -c -i collega \"$f\") matthislesur=$(grep -a -c -i matthislesur \"$f\")\"; done; docker ps --format \"{{.Names}} {{.Status}}\" | grep -i kuma; echo ---APILOGS---; docker logs --tail 15 collega-api-1 2>&1 | cut -c1-200; echo ---WORKERLOGS---; docker logs --tail 10 collega-worker-1 2>&1 | cut -c1-200; echo ---REDIS---; docker logs --tail 5 collega-redis-1 2>&1 | cut -c1-160; ls -la /mnt/user/appdata/collega/redis' 2>&1",
+  "summary": "About to run: ssh nas 'ls /mnt/user/appdata/uptimekuma/; for f in /mnt/user/appdata/uptimekuma/*.db /mnt/user/appdata/uptimekuma/*/*.db; do [ -f \"$f\" ] && echo \"$f collega=$(grep -a -c -i collega \"$f\") matthislesur",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d9dae42ec79f3f3c132e29d1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:41.705Z",
+  "stored_at": "2026-09-23T16:14:41.706Z"
+}

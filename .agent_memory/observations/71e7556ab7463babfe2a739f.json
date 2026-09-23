@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat pyproject.toml Dockerfile .gitignore .dockerignore; git ls-files | grep -E 'collega_dump|\\.env$|seed_dev|Caddyfile|lock'; ls .venv/bin | grep -iE 'python|ruff|mypy|pyright|pytest|coverage|pre-commit'; .venv/bin/python --version; ls ../.pre-commit-config.yaml .pre-commit-config.yaml 2>&1; ls ../.github/workflows 2>&1; find app tests -name '*.pyc' | sed 's/.*\\.\\(cpython-[0-9]*\\).*/\\1/' | sort | uniq -c",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat pyproject.toml Dockerfile .gitignore .dockerignore; git ls-files | grep -E 'collega_dump|\\.env$|seed_dev|Caddyfile|lock'; ls .venv/bin | grep -iE 'python|ruff|mypy|pyright|pytest|coverage|pre-commit'; .venv/bin/python --version; ls ../.pre-commit-",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat pyproject.toml Dockerfile .gitignore .dockerignore; git ls-files | grep -E 'collega_dump|\\.env$|seed_dev|Caddyfile|lock'; ls .venv/bin | grep -iE 'python|ruff|mypy|pyright|pytest|coverage|pre-commit'; .venv/bin/python --version; ls ../.pre-commit-config.yaml .pre-commit-config.yaml 2>&1; ls ../.github/workflows 2>&1; find app tests -name '*.pyc' | sed 's/.*\\.\\(cpython-[0-9]*\\).*/\\1/' | sort | uniq -c: ck* ./ RUN pip install --no-cache-dir poetry \\ && poetry config virtualenvs.create false \\ && poetry install --without dev --no-root --no-interaction --no-ansi COPY . . CMD [\"uvicorn\", \"app.main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"] # Environnement .env .venv/ __pycache__/ *.pyc *.pyo # Build dist/ *.egg-info/ # Tests .pytest_cache/ .coverage htmlcov/ # Alembic # (versions/ est versionné) # IDE .idea/ .vscode/ # Ne jamais embarquer secrets, dumps ni environnement local dans l'image (publique sur Docker Hub) .env .env.* !.env.example !.env.nas.example *.sql *.db .venv .pytest_cache **/__pycache__ tests docs Caddyfile Caddyfile.prod seed_dev.py pytest python python3 python3.14 Python 3.14.3 ls: ../.pre-commit-config.yaml: No such file or directory ls: .pre-commit-config.yaml: No such file or directory ls: ../.github/workflows: No such file or directory 70 cpython-311 131 cpython-314",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "71e7556ab7463babfe2a739f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:04.858Z",
+  "stored_at": "2026-09-23T16:13:04.859Z"
+}

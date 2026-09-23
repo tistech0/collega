@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "jen une cest ca Terminaraid: Collega : API en panne\nLAN (NPM) : HTTP 503, db:ok,redis:error. public (Cloudflare) : HTTP 503, db:ok,redis:error. Logs : docker logs collega-api-1",
+  "summary": "jen une cest ca Terminaraid: Collega : API en panne LAN (NPM) : HTTP 503, db:ok,redis:error. public (Cloudflare) : HTTP 503, db:ok,redis:error. Logs : docker logs collega-api-1",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "285f1bd9760a0a23051af046",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:46:50.082Z",
+  "stored_at": "2026-09-23T16:46:50.083Z",
+  "low_signal": true
+}

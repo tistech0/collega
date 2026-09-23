@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 944,972p app/api/v1/admin.py; grep -rn \"admin_user\\|Depends(get_admin_user)\" app/api/v1/admin.py | head -3; grep -n \"dependencies=\\|APIRouter\" app/api/v1/*.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 944,972p app/api/v1/admin.py; grep -rn \"admin_user\\|Depends(get_admin_user)\" app/api/v1/admin.py | head -3; grep -n \"dependencies=\\|APIRouter\" app/api/v1/*.py: Router, Depends, HTTPException, Request app/api/v1/auth.py:24:router = APIRouter(tag",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 944,972p app/api/v1/admin.py; grep -rn \"admin_user\\|Depends(get_admin_user)\" app/api/v1/admin.py | head -3; grep -n \"dependencies=\\|APIRouter\" app/api/v1/*.py: Router, Depends, HTTPException, Request app/api/v1/auth.py:24:router = APIRouter(tags=[\"auth\"]) app/api/v1/notifications.py:6:from fastapi import APIRouter, Depends, Request app/api/v1/notifications.py:14:router = APIRouter(tags=[\"notifications\"]) app/api/v1/drill.py:7:from fastapi import APIRouter, Depends, HTTPException app/api/v1/drill.py:16:router = APIRouter(tags=[\"drill\"]) app/api/v1/health.py:1:from fastapi import APIRouter app/api/v1/health.py:3:router = APIRouter() app/api/v1/flash_cards.py:7:from fastapi import APIRouter, Depends, HTTPException, Request app/api/v1/flash_cards.py:24:router = APIRouter(tags=[\"flash-cards\"]) app/api/v1/search.py:6:from fastapi import APIRouter, Depends, Query, Request app/api/v1/search.py:16:router = APIRouter() app/api/v1/tester.py:10:from fastapi import APIRouter, Depends, HTTPException app/api/v1/tester.py:38:router = APIRouter(tags=[\"tester\"])",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7ab881f76af5544bea1120db",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:03.372Z",
+  "stored_at": "2026-09-23T16:15:03.373Z"
+}

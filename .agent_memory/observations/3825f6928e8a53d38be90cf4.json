@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls test.db 2>&1; grep -rn \"execute.side_effect\\|execute = AsyncMock(side_effect\" tests | wc -l; grep -rln \"execute.side_effect\\|side_effect=\\[\" tests | xargs -I{} sh -c 'echo \"$(grep -c \"side_effect\" {}) {}\"' | sort -rn | head -8; grep -rn \"sqlite_db\\|make_sqlite\\|aiosqlite\" tests --include=*.py -l | wc -l; ls tests/api tests/services tests/workers tests/fakes tests/fixtures | head -80; find tests -name '*.py' | xargs wc -l | tail -1",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls test.db 2>&1; grep -rn \"execute.side_effect\\|execute = AsyncMock(side_effect\" tests | wc -l; grep -rln \"execute.side_effect\\|side_effect=\\[\" tests | xargs -I{} sh -c 'echo \"$(grep -c \"side_effect\" {}) {}\"' | sort -rn | head -8; grep -rn \"sqlite_db\\",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls test.db 2>&1; grep -rn \"execute.side_effect\\|execute = AsyncMock(side_effect\" tests | wc -l; grep -rln \"execute.side_effect\\|side_effect=\\[\" tests | xargs -I{} sh -c 'echo \"$(grep -c \"side_effect\" {}) {}\"' | sort -rn | head -8; grep -rn \"sqlite_db\\|make_sqlite\\|aiosqlite\" tests --include=*.py -l | wc -l; ls tests/api tests/services tests/workers tests/fakes tests/fixtures | head -80; find tests -name '*.py' | xargs wc -l | tail -1: t_colleges_reimport.py test_colleges_stream.py test_flash_cards.py test_health.py test_lifespan_apns.py test_reminder.py test_require_subscription.py test_search.py test_tester_colleges.py test_tester_feedback.py test_tester_items.py test_tester_summary.py tests/fakes: __init__.py __pycache__ fake_redis.py tests/fixtures: __init__.py sample_ecni.pdf tests/services: __init__.py __pycache__ test_apns_copy.py test_card_generator.py test_chunked_upload_store.py test_claude_client.py test_confidence_scorer.py test_hash_sharing.py test_item_detector.py test_item_titles.py test_job_events.py test_ocr_processor.py test_search_excerpt.py test_token_cost.py test_token_usage_capture.py tests/workers: __init__.py __pycache__ test_apns_singleton.py test_cleanup_uploads.py test_cleanup_worker.py test_daily_reminder_worker.py test_generation_worker.py test_monthly_reset.py test_ocr_worker.py 8169 total",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3825f6928e8a53d38be90cf4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:23.698Z",
+  "stored_at": "2026-09-23T16:14:23.699Z"
+}

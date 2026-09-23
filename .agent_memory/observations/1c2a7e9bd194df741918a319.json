@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'grep -nE \"telegram|TELEGRAM|send|notify|source|secrets\" /boot/config/plugins/user.scripts/scripts/backup-check/script | head -20; ls /boot/config/secrets 2>/dev/null | sed \"s/.*/[fichier] &/\"'",
+  "summary": "ssh nas 'grep -nE \"telegram|TELEGRAM|send|notify|source|secrets\" /boot/config/plugins/user.scripts/scripts/backup-check/script | head -20; ls /boot/config/secrets 2>/dev/null | sed \"s/.*/[fichier] &/\"': : notify \"Depot de sauvegarde a ${LISIBLE} Go\" \"Le budget de ${R2_BUDGET_GB} Go est depasse (${PCT}%)${DELTA}. Cout R",
+  "text": "ssh nas 'grep -nE \"telegram|TELEGRAM|send|notify|source|secrets\" /boot/config/plugins/user.scripts/scripts/backup-check/script | head -20; ls /boot/config/secrets 2>/dev/null | sed \"s/.*/[fichier] &/\"': : notify \"Depot de sauvegarde a ${LISIBLE} Go\" \"Le budget de ${R2_BUDGET_GB} Go est depasse (${PCT}%)${DELTA}. Cout R2 estime : ${COUT} \\$ par mois. Soit tu remontes R2_BUDGET_GB dans backup-check si c'est voulu, soit tu retires des sources.\" \"alert\" 160: notify \"Depot de sauvegarde a ${PCT}% du budget\" \"Le depot pese ${LISIBLE} Go sur un budget de ${R2_BUDGET_GB} Go${DELTA}. Au-dela, R2 devient payant (0,015 \\$ par Go et par mois).\" \"warning\" 178: notify \"Dumps de bases non verifies depuis ${AGE_D} j\" \"backup-verify n'a rien ecrit depuis ${AGE_D} jours (seuil ${MAX_VERIFY_D} j). La restaurabilite des bases n'est plus prouvee. Verifier la planification du dimanche 04:30.\" \"alert\" 185: notify \"Dumps de bases jamais verifies\" \"Le journal $VERIFY_LOG n'existe pas : backup-verify n'a jamais produit de resultat.\" \"alert\" [fichier] homepage.env [fichier] kopia_password [fichier] r2_credentials",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1c2a7e9bd194df741918a319",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:33:14.304Z",
+  "stored_at": "2026-09-23T16:33:14.304Z"
+}

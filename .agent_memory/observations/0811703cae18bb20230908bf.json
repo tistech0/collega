@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/claude_client.py; cat -n app/services/notifications/apns_service.py | sed -n 1,174p | grep -n \"timeout\\|retry\\|async def\\|except\\|APNs(\"",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/claude_client.py; cat -n app/services/notifications/apns_service.py | sed -n 1,174p | grep -n \"timeout\\|retry\\|async def\\|except\\|APNs(\": ot recto or not verso: 200 return None 201 return FlashCardDataSchema( 202 id=str(",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/claude_client.py; cat -n app/services/notifications/apns_service.py | sed -n 1,174p | grep -n \"timeout\\|retry\\|async def\\|except\\|APNs(\": ot recto or not verso: 200 return None 201 return FlashCardDataSchema( 202 id=str(card.id), 203 item_id=str(card.item_id), 204 college_id=str(card.college_id), 205 card_type=data.get(\"type\", card.card_type), 206 rang=card.rang, 207 recto=recto, 208 verso=verso, 209 ocr_confidence_score=card.ocr_confidence_score, 210 low_confidence=card.low_confidence, 211 ) 15: 15 async def send_generation_complete( 20: 20 async def send_daily_reminder(self, apns_token: str | None) -> None: ... 22: 22 async def close(self) -> None: 28: 28 async def send_generation_complete( 36: 36 async def send_daily_reminder(self, apns_token: str | None) -> None: 46: 46 self._apns = APNs( 54: 54 async def send_generation_complete( 87: 87 async def send_daily_reminder(self, apns_token: str | None) -> None: 109: 109 async def close(self) -> None: 130: 130 except Exception as exc: # pragma: no cover - cleanup non bloquant",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0811703cae18bb20230908bf",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:34.151Z",
+  "stored_at": "2026-09-23T16:14:34.151Z"
+}

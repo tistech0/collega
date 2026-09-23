@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && .venv/bin/pip show arq 2>/dev/null | head -2; A=$(.venv/bin/python -c \"import arq,os;print(os.path.dirname(arq.__file__))\"); grep -n \"def get_kwargs\" -A8 $A/worker.py; grep -n \"max_tries\\|retry_jobs\\|expires_extra_ms\\|in_progress_key\\|def handle_sig\\|job_completion_wait\\|CancelledError\" $A/worker.py | head -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && .venv/bin/pip show arq 2>/dev/null | head -2; A=$(.venv/bin/python -c \"import arq,os;print(os.path.dirname(arq.__file__))\"); grep -n \"def get_kwargs\" -A8 $A/worker.py; grep -n \"max_tries\\|retry_jobs\\|expires_extra_ms\\|in_progress_key\\|def handle_sig\\|",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && .venv/bin/pip show arq 2>/dev/null | head -2; A=$(.venv/bin/python -c \"import arq,os;print(os.path.dirname(arq.__file__))\"); grep -n \"def get_kwargs\" -A8 $A/worker.py; grep -n \"max_tries\\|retry_jobs\\|expires_extra_ms\\|in_progress_key\\|def handle_sig\\|job_completion_wait\\|CancelledError\" $A/worker.py | head -60: .max_tries if function.max_tries is None else function.max_tries 550: if job_try > max_tries: 552: logger.warning('%6.2fs ! %s max retries %d exceeded', t, ref, max_tries) 561: JobExecutionFailed(f'max {max_tries} retries exceeded'), 600: except (Exception, asyncio.CancelledError) as e: 610: except (Exception, asyncio.CancelledError) as e: 613: if self.retry_jobs and isinstance(e, Retry): 619: elif job_id in self.aborting_tasks and isinstance(e, asyncio.CancelledError): 625: elif self.retry_jobs and isinstance(e, (asyncio.CancelledError, RetryJob)): 694: in_progress_key = in_progress_key_prefix + job_id 696: delete_keys += [in_progress_key] 698: tr.pexpire(in_progress_key, to_ms(keep_in_progress)) 717: in_progress_key_prefix + job_id, 817: self._job_completion_wait, 833: def handle_sig_wait_for_completion(self, signum: Signals) -> None: 852: def handle_sig(self, signum: Signals) -> None:",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7ac33c35156a7fa78162771b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:02.127Z",
+  "stored_at": "2026-09-23T16:13:02.127Z"
+}

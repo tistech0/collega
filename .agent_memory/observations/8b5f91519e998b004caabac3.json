@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "pourtant dans lapp il y a des pouces gerer pour chaque item et auestion ca devrais etre appeler a ce moment la ? et sinon on retirer la page testeur et on garde lapi",
+  "summary": "pourtant dans lapp il y a des pouces gerer pour chaque item et auestion ca devrais etre appeler a ce moment la ? et sinon on retirer la page testeur et on garde lapi",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8b5f91519e998b004caabac3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:30:14.060Z",
+  "stored_at": "2026-09-23T16:30:14.060Z",
+  "low_signal": true
+}

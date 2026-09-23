@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'grep -nE \"^(normal|warning|alert|system|docker_notify|unraidos)=\" /boot/config/plugins/dynamix/dynamix.cfg; grep -n \"\\[notify\\]\" -A20 /boot/config/plugins/dynamix/dynamix.cfg | head -25; grep -nE \"IMPORTANCE|normal|LEVEL\" /boot/config/plugins/dynamix/notifications/agents/Telegram.sh | head'",
+  "summary": "About to run: ssh nas 'grep -nE \"^(normal|warning|alert|system|docker_notify|unraidos)=\" /boot/config/plugins/dynamix/dynamix.cfg; grep -n \"\\[notify\\]\" -A20 /boot/config/plugins/dynamix/dynamix.cfg | head -25; grep",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "da4afeb4c244aa6a0f345cac",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:46:55.397Z",
+  "stored_at": "2026-09-23T16:46:55.397Z"
+}

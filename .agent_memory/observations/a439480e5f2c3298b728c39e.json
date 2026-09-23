@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker inspect kopia -f \"{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}\"'",
+  "summary": "About to run: ssh nas 'docker inspect kopia -f \"{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}\"'",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a439480e5f2c3298b728c39e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:48:35.890Z",
+  "stored_at": "2026-09-23T16:48:35.890Z",
+  "low_signal": true
+}

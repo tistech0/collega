@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; grep -rn -E \"is_production|environment ==|\\.environment|ENVIRONMENT\" app --include=*.py | grep -v \"^app/core/config.py:8\" | head -20; sed -n 80,130p app/core/config.py",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; grep -rn -E \"is_production|environment ==|\\.environment|ENVIRONMENT\" app --include=*.py | grep -v \"^app/core/config.py:8\" | head -20;",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e737224065d8ed4d91328815",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:41.811Z",
+  "stored_at": "2026-09-23T16:15:41.811Z"
+}

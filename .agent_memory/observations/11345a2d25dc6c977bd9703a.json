@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && for f in app/models/{college,item,flash_card,generation_job,generation_job_event,user,item_title}.py; do echo \"== $f\"; grep -nE \"Column|mapped_column|Index|index=|UniqueConstraint|ForeignKey|__table_args__|Text|JSON\" $f; done; echo; grep -rnE \"create_index|Index\\(|op.execute|unique=True|gin|to_tsvector\" alembic/versions/*.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && for f in app/models/{college,item,flash_card,generation_job,generation_job_event,user,item_title}.py; do echo \"== $f\"; grep -nE \"Column|mapped_column|Index|index=|UniqueConstraint|ForeignKey|__table_args__|Text|JSON\" $f; done; echo; grep -rnE \"create_",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && for f in app/models/{college,item,flash_card,generation_job,generation_job_event,user,item_title}.py; do echo \"== $f\"; grep -nE \"Column|mapped_column|Index|index=|UniqueConstraint|ForeignKey|__table_args__|Text|JSON\" $f; done; echo; grep -rnE \"create_index|Index\\(|op.execute|unique=True|gin|to_tsvector\" alembic/versions/*.py: _and_unique_processing.py:73: op.create_index( alembic/versions/012_atomic_quota_and_unique_processing.py:77: unique=True, alembic/versions/013_add_generation_job_events.py:29: op.create_index( alembic/versions/010_add_gin_index_flash_cards_fts.py:17: op.execute(\"COMMIT\") alembic/versions/010_add_gin_index_flash_cards_fts.py:18: op.execute(\"\"\" alembic/versions/010_add_gin_index_flash_cards_fts.py:21: USING GIN (to_tsvector('french', coalesce(recto, '') || ' ' || coalesce(verso, ''))) alembic/versions/010_add_gin_index_flash_cards_fts.py:26: op.execute(\"COMMIT\") alembic/versions/010_add_gin_index_flash_cards_fts.py:27: op.execute(\"DROP INDEX CONCURRENTLY IF EXISTS idx_flash_cards_fts\") alembic/versions/015_add_item_titles.py:17:from sqlalchemy.engine import Connection alembic/versions/015_add_item_titles.py:123: op.create_index(\"ix_item_titles_item_number\", \"item_titles\", [\"item_number\"])",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "11345a2d25dc6c977bd9703a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:20.225Z",
+  "stored_at": "2026-09-23T16:14:20.226Z"
+}

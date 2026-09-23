@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/implementation-artifacts\" && grep -n -i \"redis\\|pool\\|timeout\\|retry\\|race\\|stuck\\|bloqu\\|verrou\\|lock\\|sse\\|shutdown\\|purge\\|/tmp\\|arq\" deferred-work.md | head -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/implementation-artifacts\" && grep -n -i \"redis\\|pool\\|timeout\\|retry\\|race\\|stuck\\|bloqu\\|verrou\\|lock\\|sse\\|shutdown\\|purge\\|/tmp\\|arq\" deferred-work.md | head -60: ck de l'`except` d'`ocr_worker` (`app/workers/ocr_worker.py:63-70`) est un pattern PRÉ-EXIST",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/implementation-artifacts\" && grep -n -i \"redis\\|pool\\|timeout\\|retry\\|race\\|stuck\\|bloqu\\|verrou\\|lock\\|sse\\|shutdown\\|purge\\|/tmp\\|arq\" deferred-work.md | head -60: ck de l'`except` d'`ocr_worker` (`app/workers/ocr_worker.py:63-70`) est un pattern PRÉ-EXISTANT explicitement conservé par la story 7.7. Durcissement possible si besoin : isoler l'écriture d'event dans un savepoint (`db.begin_nested()`). 251:- **`generate_cards_for_item` — réponse Claude tronquée non signalée** (`app/services/generation/claude_client.py:118,127`) — `max_tokens=2000` sans vérification de `response.stop_reason`. Une réponse coupée (`stop_reason=\"max_tokens\"`) produit un JSON invalide → `cards=[]` silencieux, mais les tokens **sont facturés** et comptés dans le coût. Aucun signal côté admin pour distinguer « Claude a renvoyé du garbage » d'une « génération tronquée ». Pré-existant (le `max_tokens` précède la story 7.8), hors périmètre 7.8. Durcissement possible : logger un warning distinct si `stop_reason == \"max_tokens\"`, ou exposer un compteur d'items tronqués sur le job.",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "dfad284d18ae0f9103f80628",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:17:03.525Z",
+  "stored_at": "2026-09-23T16:17:03.525Z"
+}

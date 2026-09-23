@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && wc -c app/services/billing/__init__.py; grep -n \"^@router\\|^async def\\|^def \" app/api/v1/admin.py app/api/v1/tester.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && wc -c app/services/billing/__init__.py; grep -n \"^@router\\|^async def\\|^def \" app/api/v1/admin.py app/api/v1/tester.py: et_usage( app/api/v1/admin.py:944:@router.get(\"/config\", response_model=ConfigResponseWrapped) app/api/v1/admin.py:945:async def ge",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && wc -c app/services/billing/__init__.py; grep -n \"^@router\\|^async def\\|^def \" app/api/v1/admin.py app/api/v1/tester.py: et_usage( app/api/v1/admin.py:944:@router.get(\"/config\", response_model=ConfigResponseWrapped) app/api/v1/admin.py:945:async def get_config( app/api/v1/admin.py:957:@router.patch(\"/config\", response_model=ConfigResponseWrapped) app/api/v1/admin.py:958:async def update_config( app/api/v1/tester.py:41:@router.get(\"/colleges\", response_model=CollegesListResponse) app/api/v1/tester.py:42:async def list_colleges( app/api/v1/tester.py:86:@router.get(\"/colleges/{college_id}/items\", response_model=CollegeItemsResponse) app/api/v1/tester.py:87:async def get_college_items( app/api/v1/tester.py:156:@router.post(\"/flash-cards/{card_id}/feedback\", response_model=FeedbackResponseWrapped) app/api/v1/tester.py:157:async def submit_feedback( app/api/v1/tester.py:203:@router.get(\"/colleges/{college_id}/summary\", response_model=CollegeSummaryResponse) app/api/v1/tester.py:204:async def get_college_summary(",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1158ec1fe1a2ae79b6f8eccc",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:48.546Z",
+  "stored_at": "2026-09-23T16:14:48.546Z"
+}

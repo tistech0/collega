@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"unlink\\|os.remove\\|rmtree\" app | grep -v \"api/v1/colleges.py\\|chunked_upload\" ; sed -n 60,93p app/workers/cleanup_worker.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"unlink\\|os.remove\\|rmtree\" app | grep -v \"api/v1/colleges.py\\|chunked_upload\" ; sed -n 60,93p app/workers/cleanup_worker.py: ly_reloads_reset_at <= now - grace_period) .values( monthly_reloads=0, monthly_reloads_reset_at=next_month_reset(now",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"unlink\\|os.remove\\|rmtree\" app | grep -v \"api/v1/colleges.py\\|chunked_upload\" ; sed -n 60,93p app/workers/cleanup_worker.py: ly_reloads_reset_at <= now - grace_period) .values( monthly_reloads=0, monthly_reloads_reset_at=next_month_reset(now), ) ) await db.commit() logger.info(\"Reset monthly reloads for %d users\", result.rowcount) async def cleanup_stale_uploads(ctx: dict) -> int: \"\"\"Supprime les dossiers uploads/{id} sans clé Redis (upload terminé/abandonné) ou > 24 h. Story 7.11 — filet de sécurité disque au-dessus du TTL Redis. Renvoie le nombre de dossiers purgés.\"\"\" store = ChunkedUploadStore(ctx[\"redis\"], Path(settings.pdf_storage_path)) base = Path(settings.pdf_storage_path) / \"uploads\" if not base.exists(): return 0 stale = set(store.stale_dirs(timedelta(hours=24))) removed = 0 for d in sorted(p for p in base.iterdir() if p.is_dir()): if d in stale or await store.get(d.name) is None: shutil.rmtree(d, ignore_errors=True) removed += 1 logger.info(\"Purged %d stale chunked uploads\", removed) return removed",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "cf3f1592a90984019a27deee",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:17.633Z",
+  "stored_at": "2026-09-23T16:14:17.634Z"
+}

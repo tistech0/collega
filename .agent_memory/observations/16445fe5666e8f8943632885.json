@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 300,330p app/static/admin/index.html; sed -n 480,500p app/static/admin/index.html; sed -n 610,630p app/static/admin/index.html; sed -n 705,730p app/static/admin/index.html; sed -n 755,770p app/static/admin/index.html; sed -n 805,820p app/static/admin/index.html; sed -n 920,1005p app/static/admin/index.html",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 300,330p app/static/admin/index.html; sed -n 480,500p app/static/admin/index.html; sed -n 610,630p app/static/admin/index.html; sed -n 705,730p app/static/admin/index.html; sed -n 755,770p app/static/admin/index.html; sed -n 805,820p app/static",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 300,330p app/static/admin/index.html; sed -n 480,500p app/static/admin/index.html; sed -n 610,630p app/static/admin/index.html; sed -n 705,730p app/static/admin/index.html; sed -n 755,770p app/static/admin/index.html; sed -n 805,820p app/static/admin/index.html; sed -n 920,1005p app/static/admin/index.html: cost-eur\").textContent = \"€ \" + data.cost_eur.toFixed(2); document.getElementById(\"kpi-cost-in\").textContent = fmtNumber(data.input_tokens); document.getElementById(\"kpi-cost-out\").textContent = fmtNumber(data.output_tokens); const table = document.getElementById(\"cost-users-table\"); const empty = document.getElementById(\"cost-users-empty\"); const body = document.getElementById(\"cost-users-body\"); body.innerHTML = \"\"; if (!data.by_user.length) { table.style.display = \"none\"; empty.style.display = \"block\"; } else { empty.style.display = \"none\"; data.by_user.forEach(u => { const tr = document.createElement(\"tr\"); tr.innerHTML = ` <td>${escapeHtml(u.email)}</td> <td>${fmtNumber(u.input_tokens)}</td> <td>${fmtNumber(u.output_tokens)}</td> <td>€ ${u.cost_eur.toFixed(4)}</td>`; body.appendChild(tr); }); table.style.display = \"\"; } loader.style.display = \"none\"; content.style.display = \"block\";",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "16445fe5666e8f8943632885",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:24.455Z",
+  "stored_at": "2026-09-23T16:13:24.455Z"
+}

@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; sed -n 1,80p collega_backend/app/api/v1/billing.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; sed -n 1,80p collega_backend/app/api/v1/billing.py: ALID_SIGNATURE\", \"message\": \"Invalid or missing Authorization\"}, ) event_type = payload.event.type if event_type not in _ACTIVE_EVENTS and event_type not in _INACTIVE_EVENTS: logger.info(\"RevenueCat event ignored: %s\"",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; sed -n 1,80p collega_backend/app/api/v1/billing.py: ALID_SIGNATURE\", \"message\": \"Invalid or missing Authorization\"}, ) event_type = payload.event.type if event_type not in _ACTIVE_EVENTS and event_type not in _INACTIVE_EVENTS: logger.info(\"RevenueCat event ignored: %s\", event_type) return {\"data\": {\"status\": \"ignored\"}} try: user_id = uuid.UUID(payload.event.app_user_id) except ValueError: raise HTTPException( status_code=422, detail={\"code\": \"INVALID_USER_ID\", \"message\": \"app_user_id is not a valid UUID\"}, ) from app.models.user import User user = await db.get(User, user_id) if user is None: raise HTTPException( status_code=404, detail={\"code\": \"USER_NOT_FOUND\", \"message\": f\"User {user_id} not found\"}, ) user.is_subscribed = event_type in _ACTIVE_EVENTS await db.commit() logger.info(\"User %s is_subscribed=%s via event %s\", user_id, user.is_subscribed, event_type) return {\"data\": {\"status\": \"updated\", \"is_subscribed\": user.is_subscribed}}",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "08492e2a4f9bd5a4b377ca72",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:06:22.045Z",
+  "stored_at": "2026-09-23T16:06:22.045Z",
+  "low_signal": true
+}

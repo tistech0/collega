@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"pdf_path\\|pdf_file\" app/workers/ocr_worker.py app/workers/generation_worker.py app/services/generation/card_generator.py | head -30; sed -n 1,24p app/workers/cleanup_worker.py; sed -n 60,89p app/workers/settings.py; grep -rn \"pdf\\|NFR9\\|RGPD\\|delete_account\\|suppression\" ../_bmad-output/implementation-artifacts/deferred-work.md | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"pdf_path\\|pdf_file\" app/workers/ocr_worker.py app/workers/generation_worker.py app/services/generation/card_generator.py | head -30; sed -n 1,24p app/workers/cleanup_worker.py; sed -n 60,89p app/workers/settings.py; grep -rn \"pdf\\|NFR9\\|RGPD\\",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"pdf_path\\|pdf_file\" app/workers/ocr_worker.py app/workers/generation_worker.py app/services/generation/card_generator.py | head -30; sed -n 1,24p app/workers/cleanup_worker.py; sed -n 60,89p app/workers/settings.py; grep -rn \"pdf\\|NFR9\\|RGPD\\|delete_account\\|suppression\" ../_bmad-output/implementation-artifacts/deferred-work.md | head -40: 5-10) ../_bmad-output/implementation-artifacts/deferred-work.md:192:- Durée de vie de `pdf_path` à travers la queue ARQ — aucune garantie que le fichier existe quand le job est dépilé ; à traiter via object storage ou URL signée dans une story dédiée ../_bmad-output/implementation-artifacts/deferred-work.md:195:- Test manquant : vérifier que `cleanup_ocr_text` ne touche pas aux `flash_cards` (AC#4 NFR9) dans `test_cleanup_worker.py` ../_bmad-output/implementation-artifacts/deferred-work.md:202:- PDF ouvert N+1 fois dans `OcrProcessor` (`count_pages` + une ouverture par page) — optimisation perf future, garder un contexte pdfplumber ouvert sur toute la boucle ../_bmad-output/implementation-artifacts/deferred-work.md:203:- Cap score pdfplumber (max 0.95 × ratio) vs pytesseract (moyenne brute, peut atteindre 1.0) — incohérence de scoring à normaliser dans une future story de raffinement OCR",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "cc1fbbd56d6ccad247a5cfea",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:23.086Z",
+  "stored_at": "2026-09-23T16:14:23.087Z"
+}

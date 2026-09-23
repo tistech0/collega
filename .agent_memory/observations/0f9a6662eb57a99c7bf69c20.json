@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'set -e; docker network create --internal collega-restore-net >/dev/null\ndocker run -d --name collega-restore-test --network collega-restore-net --network-alias db -e POSTGRES_HOST_AUTH_METHOD=trust postgres:16-alpine >/dev/null\nfor i in $(seq 1 30); do docker exec collega-restore-test pg_isready -U postgres -q && break; sleep 1; done\nzcat /mnt/user/nas-backup/dumps/collega-db-1.sql.gz | docker exec -i collega-restore-test psql -U postgres -q -o /dev/null 2>&1 | grep -c ERROR || true\nE=\"-e DATABASE_URL=postgresql+asyncpg://postgres@db:5432/collega -e REDIS_URL=redis://localhost:6379/0… [+1027 chars truncated]",
+  "summary": "About to run: ssh nas 'set -e; docker network create --internal collega-restore-net >/dev/null docker run -d --name collega-restore-test --network collega-restore-net --network-alias db -e POSTGRES_HOST_AUTH_METHOD",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0f9a6662eb57a99c7bf69c20",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:48:21.178Z",
+  "stored_at": "2026-09-23T16:48:21.179Z"
+}

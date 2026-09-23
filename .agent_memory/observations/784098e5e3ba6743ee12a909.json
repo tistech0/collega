@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'awk \"/^\\[\\\"cache\\\"\\]/,/^\\[\\\"flash\\\"\\]/\" /var/local/emhttp/disks.ini | grep -E \"^(name|device|slots|fsType|status)=\"; ls /mnt/cache/nas-backup 2>/dev/null | head' 2>&1",
+  "summary": "About to run: ssh nas 'awk \"/^\\[\\\"cache\\\"\\]/,/^\\[\\\"flash\\\"\\]/\" /var/local/emhttp/disks.ini | grep -E \"^(name|device|slots|fsType|status)=\"; ls /mnt/cache/nas-backup 2>/dev/null | head' 2>&1",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "784098e5e3ba6743ee12a909",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:04.409Z",
+  "stored_at": "2026-09-23T16:16:04.409Z"
+}

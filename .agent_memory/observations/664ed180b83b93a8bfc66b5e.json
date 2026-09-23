@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; grep -rn -E \"is_prod|environment\" app | grep -v \"^app/core/config.py\" | head; sed -n 130,160p app/core/config.py; ssh nas 'docker logs collega-api-1 2>&1 | grep -c -i \"DEV mode\"; docker logs collega-api-1 2>&1 | grep -i \"DEV mode\" | head -2 | cut -c1-200'",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; grep -rn -E \"is_prod|environment\" app | grep -v \"^app/core/config.py\" | head; sed -n 130,160p app/core/config.py; ssh nas 'docker log",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "664ed180b83b93a8bfc66b5e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:45.722Z",
+  "stored_at": "2026-09-23T16:15:45.723Z"
+}

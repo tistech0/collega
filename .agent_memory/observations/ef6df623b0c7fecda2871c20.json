@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"CollegeStatus.failed\\|status = \\\"failed\\\"\\|status=\\\"failed\\\"\\|\\.status = CollegeStatus\" app | grep -v \"^app/schemas\"; echo ---; grep -n \"def \\|failed\\|arq\\|abort\\|rmtree\\|unlink\" app/api/v1/admin.py | head -120",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"CollegeStatus.failed\\|status = \\\"failed\\\"\\|status=\\\"failed\\\"\\|\\.status = CollegeStatus\" app | grep -v \"^app/schemas\"; ech",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ef6df623b0c7fecda2871c20",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:15.131Z",
+  "stored_at": "2026-09-23T16:14:15.132Z"
+}

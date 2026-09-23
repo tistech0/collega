@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls -a; git log --oneline | wc -l; .venv 2>/dev/null; cd collega_backend && .venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | grep -E \"Warning\" | sed 's/.*: \\([A-Za-z]*Warning\\).*/\\1/' | sort | uniq -c",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls -a; git log --oneline | wc -l; .venv 2>/dev/null; cd collega_backend && .venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | grep -E \"Warning\" | sed 's/.*: \\([A-Za-z]*Warning\\).*/\\1/' | sort | uniq -c: . .. .agent_memory .claude .git .gitattributes .gitignore ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls -a; git log --oneline | wc -l; .venv 2>/dev/null; cd collega_backend && .venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | grep -E \"Warning\" | sed 's/.*: \\([A-Za-z]*Warning\\).*/\\1/' | sort | uniq -c: . .. .agent_memory .claude .git .gitattributes .gitignore AGENTS.md ANAPATH 4e.pdf CANCERO 4e college (1).pdf CLAUDE.md PNEUMO 8e college.pdf README.md _bmad _bmad-output collega_app collega_backend docs install.md 109 1 DeprecationWarning 17 RuntimeWarning",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7422fe3451bdce70c0830a52",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:45.102Z",
+  "stored_at": "2026-09-23T16:15:45.103Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls test.db 2>&1; grep -rn \"execute.side_effect\\|execute = AsyncMock(side_effect\" tests | wc -l; grep -rln \"execute.side_effect\\|side_effect=\\[\" tests | xargs -I{} sh -c 'echo \"$(grep -c \"side_effect\" {}) {}\"' | sort -rn | head -8; grep -rn \"sqlite_db\\|make_sqlite\\|aiosqlite\" tests --include=*.py -l | wc -l; ls tests/api tests/services tests/workers tests/fakes tests/fixtures | head -80; find tests -name '*.py' | xargs wc -l | tail -1",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls test.db 2>&1; grep -rn \"execute.side_effect\\|execute = AsyncMock(side_effect\" tests | wc -l; grep -rln \"execute.side_effect\\|sid",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b93622ee68fe1ec341f1b68c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:22.694Z",
+  "stored_at": "2026-09-23T16:14:22.695Z"
+}

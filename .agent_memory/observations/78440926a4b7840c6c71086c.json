@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'cd /mnt/user/appdata/compose-stacks/collega && docker compose pull -q api 2>&1 | tail -2; echo \"pull NAS exit=$?\"; grep -c \"index.docker.io\\|https://index.docker.io/v1/\" /root/.docker/config.json'; echo \"--- anonyme depuis le Mac:\"; curl -s \"https://auth.docker.io/token?service=registry.docker.io&scope=repository:tistech0/collega-backend:pull\" | python3 -c \"import sys,json;t=json.load(sys.stdin)['token'];print('token ok')\" > /dev/null; T=$(/usr/bin/curl -s \"https://auth.docker.io/token?service=registry.docker.io&scope=repository:tistech0/collega-backend:pull\" | python3 -c \"import sys,… [+287 chars truncated]",
+  "summary": "About to run: ssh nas 'cd /mnt/user/appdata/compose-stacks/collega && docker compose pull -q api 2>&1 | tail -2; echo \"pull NAS exit=$?\"; grep -c \"index.docker.io\\|https://index.docker.io/v1/\" /root/.docker/config.",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "78440926a4b7840c6c71086c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T19:47:58.240Z",
+  "stored_at": "2026-09-23T19:47:58.240Z"
+}

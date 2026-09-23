@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'ls -l --time-style=+%F\\ %T /mnt/user/nas-backup/dumps/ | grep -i collega; L=$(ls /mnt/user/nas-backup/*verify*.log 2>/dev/null | head -1); echo \"log: $L\"; grep -n -i -B2 -A8 \"collega\" \"$L\" | tail -40'",
+  "summary": "ssh nas 'ls -l --time-style=+%F\\ %T /mnt/user/nas-backup/dumps/ | grep -i collega; L=$(ls /mnt/user/nas-backup/*verify*.log 2>/dev/null | head -1); echo \"log: $L\"; grep -n -i -B2 -A8 \"collega\" \"$L\" | tail -40': 879) 952-2026-09-13T02:30:31Z --- jellyfin -- 999-2026-09-20T02:30:18Z --- picsou-db 1000-2026-09-20T02:30:21",
+  "text": "ssh nas 'ls -l --time-style=+%F\\ %T /mnt/user/nas-backup/dumps/ | grep -i collega; L=$(ls /mnt/user/nas-backup/*verify*.log 2>/dev/null | head -1); echo \"log: $L\"; grep -n -i -B2 -A8 \"collega\" \"$L\" | tail -40': 879) 952-2026-09-13T02:30:31Z --- jellyfin -- 999-2026-09-20T02:30:18Z --- picsou-db 1000-2026-09-20T02:30:21Z OK picsou-db : 31 objets restaures sur 31, 1766 lignes sur 1766, 0 erreurs de rejeu 1001:2026-09-20T02:30:21Z --- collega-db-1 1002:2026-09-20T02:30:24Z OK collega-db-1 : 10 objets restaures sur 10, 5 lignes sur 5, 2 erreurs de rejeu 1003-2026-09-20T02:30:24Z --- jellystat-db 1004-2026-09-20T02:30:27Z OK jellystat-db : 16 objets restaures sur 16, 11300 lignes sur 11301, 0 erreurs de rejeu 1005-2026-09-20T02:30:27Z --- isley-db 1006-2026-09-20T02:30:31Z OK isley-db : 23 objets restaures sur 23, 1016302 lignes sur 1016302, 0 erreurs de rejeu 1007-2026-09-20T02:30:31Z === verification des dumps SQLite === 1008-2026-09-20T02:30:31Z --- vaultwarden 1009-2026-09-20T02:30:32Z OK vaultwarden : integrite ok, 29 tables sur 29, 883 lignes (vive : 883) 1010-2026-09-20T02:30:32Z --- jellyfin",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e52cc02885bd1d56caac6323",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:47:24.266Z",
+  "stored_at": "2026-09-23T16:47:24.266Z"
+}

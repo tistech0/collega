@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && find _bmad-output docs -maxdepth 2 -iname '*context*' -o -maxdepth 2 -iname 'architecture*' | head; git check-ignore -v docs _bmad-output 2>&1 | head; ls docs | head; cat AGENTS.md | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && find _bmad-output docs -maxdepth 2 -iname '*context*' -o -maxdepth 2 -iname 'architecture*' | head; git check-ignore -v docs _bmad-output 2>&1 | head; ls docs | head; cat AGENTS.md | head -20: dge Format (OKF) — markdown concept files under `.agent_memory/packets/`, ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && find _bmad-output docs -maxdepth 2 -iname '*context*' -o -maxdepth 2 -iname 'architecture*' | head; git check-ignore -v docs _bmad-output 2>&1 | head; ls docs | head; cat AGENTS.md | head -20: dge Format (OKF) — markdown concept files under `.agent_memory/packets/`, with Kage's verification metadata in OKF-legal `x-kage-*` frontmatter, readable by any OKF consumer. Use `kage okf migrate|lint|import` to work with OKF bundles. ## Automatic Recall Before making code changes, answering repo-specific implementation questions, debugging failures, or proposing architecture: 1. Call `kage_context` with `project_dir` and the task as `query`. This validates memory, recalls relevant packets, and queries both the code graph and knowledge graph in one call — replacing the old four-step validate/recall/code_graph/graph sequence. 2. Use returned memory only when it is relevant, source-backed, and not stale. 3. Prefer repo memory over public/community memory when they conflict. Do this without waiting for the user to ask. Kage should feel like ambient repo memory, not a manual search command.",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "03e83c39cdc0abc58e00e116",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:49.019Z",
+  "stored_at": "2026-09-23T16:15:49.019Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_backend/ops/nas/collega-health.sh",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_backend/ops/nas/collega-health.sh: #!/bin/bash\n# collega-health — surveille l'API Collega chaque minute (User Scripts, cron « * * * * * »).\n#\n# Deux chemins, sondés sur GET /health (qui vérifie aussi Postgres et Redis) :\n#   - LAN    : via Nginx Proxy Manager (",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_backend/ops/nas/collega-health.sh: #!/bin/bash\n# collega-health — surveille l'API Collega chaque minute (User Scripts, cron « * * * * * »).\n#\n# Deux chemins, sondés sur GET /health (qui vérifie aussi Postgres et Redis) :\n#   - LAN    : via Nginx Proxy Manager (IP LAN du NAS), le chemin de l'app à la maison ;\n#   - public : via Cloudflare (tunnel + Access, service token), le chemin hors LAN.\n#\n# Alerte Telegram (notify Unraid) DÈS qu'un chemin tombe — un 2e essai 10 s plus tard\n# évite l'alerte sur un redémarrage de quelques secondes — puis UN message au retour.\n# Rien entre les deux, et rien dans le récap du matin.\n#\n# Source v",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "16cc5250bade7c7f92c0d4aa",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:41:03.380Z",
+  "stored_at": "2026-09-23T16:41:03.380Z"
+}

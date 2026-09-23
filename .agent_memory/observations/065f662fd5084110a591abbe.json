@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rln \"sqlite_db\" tests | wc -l; grep -rn \"side_effect\" tests/api/test_colleges_reimport.py | head -5; grep -rn \"patch(\\\"app\\.\\|patch('app\\.\" tests | wc -l; grep -rn \"patch(\\\"app\\.\" tests | sed 's/.*patch(\"\\(app[^\"]*\\)\".*/\\1/' | sort | uniq -c | sort -rn | head -10",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rln \"sqlite_db\" tests | wc -l; grep -rn \"side_effect\" tests/api/test_colleges_reimport.py | head -5; grep -rn \"patch(\\\"app\\.\\|patch('app\\.\" tests | wc -l; grep -rn \"patch(\\\"app\\.\" tests | sed 's/.*patch(\"\\(app[^\"]*\\)\".*/\\1/' | sort | uniq -c | s",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rln \"sqlite_db\" tests | wc -l; grep -rn \"side_effect\" tests/api/test_colleges_reimport.py | head -5; grep -rn \"patch(\\\"app\\.\\|patch('app\\.\" tests | wc -l; grep -rn \"patch(\\\"app\\.\" tests | sed 's/.*patch(\"\\(app[^\"]*\\)\".*/\\1/' | sort | uniq -c | sort -rn | head -10: 1 tests/api/test_colleges_reimport.py:4:UPDATE atomique avec RETURNING. Le mock `db.execute.side_effect` chaîne : tests/api/test_colleges_reimport.py:71: side_effect=[ tests/api/test_colleges_reimport.py:105: side_effect=[ tests/api/test_colleges_reimport.py:141: side_effect=[ tests/api/test_colleges_reimport.py:181: side_effect=[ 94 16 app.workers.ocr_worker._ocr_processor 16 app.workers.ocr_worker._item_detector 11 app.api.v1.billing.settings 7 app.api.v1.admin.settings 6 app.services.generation.claude_client.anthropic.AsyncAnthropic 5 app.workers.ocr_worker.record_title 5 app.api.v1.colleges.Path.mkdir 4 app.workers.ocr_worker.lookup_title 4 app.workers.generation_worker.async_session_factory 4 app.workers.daily_reminder_worker.async_session_factory",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "065f662fd5084110a591abbe",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:27.458Z",
+  "stored_at": "2026-09-23T16:14:27.458Z"
+}

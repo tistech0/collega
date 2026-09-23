@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "docker exec audit-pg-tmp psql -U postgres -d collega -c \"select indexname, indexdef from pg_indexes where tablename in ('generation_jobs','colleges','flash_cards','items') order by 1;\" -c \"select conrelid::regclass, conname, pg_get_constraintdef(oid) from pg_constraint where contype in ('f','c','u') and conrelid::regclass::text in ('flash_cards','items','generation_jobs','generation_job_events','colleges') order by 1;\"",
+  "summary": "docker exec audit-pg-tmp psql -U postgres -d collega -c \"select indexname, indexdef from pg_indexes where tablename in ('generation_jobs','colleges','flash_cards','items') order by 1;\" -c \"select conrelid::regclass, conname, pg_get_constraintdef(oid) from pg_constraint where contype in ('f','c','u') and conrelid::regcl",
+  "text": "docker exec audit-pg-tmp psql -U postgres -d collega -c \"select indexname, indexdef from pg_indexes where tablename in ('generation_jobs','colleges','flash_cards','items') order by 1;\" -c \"select conrelid::regclass, conname, pg_get_constraintdef(oid) from pg_constraint where contype in ('f','c','u') and conrelid::regclass::text in ('flash_cards','items','generation_jobs','generation_job_events','colleges') order by 1;\":  (item_id) REFERENCES items(id) ON DELETE CASCADE flash_cards | flash_cards_college_id_fkey | FOREIGN KEY (college_id) REFERENCES colleges(id) ON DELETE CASCADE flash_cards | flash_cards_user_id_fkey | FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE flash_cards | ck_flash_cards_user_feedback | CHECK (((user_feedback)::text = ANY ((ARRAY['positive'::character varying, 'negative'::character varying])::text[]))) flash_cards | ck_flash_cards_card_type | CHECK (((card_type)::text = ANY ((ARRAY['classique'::character varying, 'definition'::character varying])::text[]))) flash_cards | ck_flash_cards_rang | CHECK (((rang)::text = ANY ((ARRAY['A'::character varying, 'B'::character varying, 'C'::character varying])::text[]))) generation_job_events | generation_job_events_generation_job_id_fkey | FOREIGN KEY (generation_job_id) REFERENCES generation_jobs(id) ON DELETE CASCADE (15 rows)",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "139a6b964c145d8181e36d3f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:44.938Z",
+  "stored_at": "2026-09-23T16:16:44.938Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_learn",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_learn: [{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/runbook-restauration-collega-prouv-e-dump-pg-dumpall-nocturne-2-erreurs-de-rejeu-normale-821d10ee.md\\nRepo-local memory is written immediately. Org/global promotion still requires",
+  "text": "[{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/runbook-restauration-collega-prouv-e-dump-pg-dumpall-nocturne-2-erreurs-de-rejeu-normale-821d10ee.md\\nRepo-local memory is written immediately. Org/global promotion still requires explicit review.'}]",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "18fcc67f1ef8156399f75733",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:49:15.541Z",
+  "stored_at": "2026-09-23T16:49:15.542Z"
+}

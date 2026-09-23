@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'ls -la /mnt/user/nas-backup/dumps/ | grep -i -E \"collega|total\"; echo ---LOG---; grep -i -E \"collega|=== (succes|echec|debut)|replication|instantane\" /mnt/user/nas-backup/backup.log | tail -25; echo ---VERIFY---; grep -i -E \"collega|ECHEC|OK\" /mnt/user/nas-backup/backup-verify.log | tail -15; echo ---KOPIA MOUNTS---; docker inspect -f \"{{range .Mounts}}{{.Source}}->{{.Destination}}{{println}}{{end}}\" kopia' 2>&1",
+  "summary": "ssh nas 'ls -la /mnt/user/nas-backup/dumps/ | grep -i -E \"collega|total\"; echo ---LOG---; grep -i -E \"collega|=== (succes|echec|debut)|replication|instantane\" /mnt/user/nas-backup/backup.log | tail -25; echo ---VERIFY---; grep -i -E \"collega|ECHEC|OK\" /mnt/user/nas-backup/backup-verify.log | tail -15; echo ---KOPIA MOU",
+  "text": "ssh nas 'ls -la /mnt/user/nas-backup/dumps/ | grep -i -E \"collega|total\"; echo ---LOG---; grep -i -E \"collega|=== (succes|echec|debut)|replication|instantane\" /mnt/user/nas-backup/backup.log | tail -25; echo ---VERIFY---; grep -i -E \"collega|ECHEC|OK\" /mnt/user/nas-backup/backup-verify.log | tail -15; echo ---KOPIA MOUNTS---; docker inspect -f \"{{range .Mounts}}{{.Source}}->{{.Destination}}{{println}}{{end}}\" kopia' 2>&1: es sur 22, 1234 lignes (vive : 1234) 2026-09-20T02:30:42Z OK cross-seed : integrite ok, 13 tables sur 13, 5459 lignes (vive : 5459) 2026-09-20T02:30:42Z OK homeassistant-zigbee : integrite ok, 35 tables sur 35, 1292 lignes (vive : 1292) 2026-09-20T02:30:43Z OK slskd-transfers : integrite ok, 2 tables sur 2, 21557 lignes (vive : 21557) 2026-09-20T02:30:43Z OK pixelstash : integrite ok, 2 tables sur 2, 8 lignes (vive : 8) 2026-09-20T02:30:45Z OK portainer : administrateur present, InstanceID a9585bf4-afb3-488f-8a8a-5f7b7e10b922 identique a la production ---KOPIA MOUNTS--- /mnt/user/Cloud->/cloud /mnt/user/appdata->/source /mnt/user/appdata/kopia/cache->/cache /mnt/user/nas-backup/kopia->/local /mnt/user/appdata/kopia->/config /var/lib/docker/volumes/59fb304369db0194d6f928afaf363f1f6f88868c3cd42c62ce17b8e1c9a1cb8b/_data->/backups /boot/config->/boot-config /mnt/user/nas-backup/dumps->/dumps",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2efbebef1641a290ac6704a1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:10.775Z",
+  "stored_at": "2026-09-23T16:14:10.776Z"
+}

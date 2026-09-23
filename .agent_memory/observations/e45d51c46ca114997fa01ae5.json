@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"text(\\|execute(f\\|\\.format(\\|literal_column\\|raw\" app --include=*.py | grep -v \"^.*#\" | head -30; cat -n app/services/search/full_text_search.py | sed -n 1,116p",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"text(\\|execute(f\\|\\.format(\\|literal_column\\|raw\" app --include=*.py | grep -v \"^.*#\" | head -30; cat -n app/services/sea",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e45d51c46ca114997fa01ae5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:43.016Z",
+  "stored_at": "2026-09-23T16:13:43.017Z"
+}

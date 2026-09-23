@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "ca me va et sans healthcheck.io et ne lajoute pas dans le message du matin juste des que ca ping plus un message directement sans attendre pour ca",
+  "summary": "ca me va et sans healthcheck.io et ne lajoute pas dans le message du matin juste des que ca ping plus un message directement sans attendre pour ca",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "61d25ee47e219c25cb753714",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:36:41.732Z",
+  "stored_at": "2026-09-23T16:36:41.733Z",
+  "low_signal": true
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n -i -E \"backup|sauvegarde|pg_dump\" _bmad-output/planning-artifacts/prd.md _bmad-output/planning-artifacts/epics.md _bmad-output/implementation-artifacts/epic-mvp-retro-2026-05-19.md | head -20; cat -n install.md | head -150",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n -i -E \"backup|sauvegarde|pg_dump\" _bmad-output/planning-artifacts/prd.md _bmad-output/planning-artifacts/epics.md _bmad-output/implementation",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "51463ab1b345f45fbc3ae466",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:29.415Z",
+  "stored_at": "2026-09-23T16:13:29.416Z"
+}

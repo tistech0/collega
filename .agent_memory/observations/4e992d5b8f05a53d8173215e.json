@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'grep -i \"collega\" /mnt/user/nas-backup/backup.log | tail -15; echo ---VERIFY---; grep -i collega /mnt/user/nas-backup/backup-verify.log | tail -6; echo ---POLICY---; docker exec kopia kopia policy show /source 2>/dev/null | grep -i -E -A25 \"ignore|retention\" | head -60' 2>&1",
+  "summary": "ssh nas 'grep -i \"collega\" /mnt/user/nas-backup/backup.log | tail -15; echo ---VERIFY---; grep -i collega /mnt/user/nas-backup/backup-verify.log | tail -6; echo ---POLICY---; docker exec kopia kopia policy show /source 2>/dev/null | grep -i -E -A25 \"ignore|retention\" | head -60' 2>&1: in/ /jellyseerr/db/db.sqlite3* /je",
+  "text": "ssh nas 'grep -i \"collega\" /mnt/user/nas-backup/backup.log | tail -15; echo ---VERIFY---; grep -i collega /mnt/user/nas-backup/backup-verify.log | tail -6; echo ---POLICY---; docker exec kopia kopia policy show /source 2>/dev/null | grep -i -E -A25 \"ignore|retention\" | head -60' 2>&1: in/ /jellyseerr/db/db.sqlite3* /jellystat-db/ /kopia/cache/ /lidarr/lidarr.db* /lidarr/logs.db* /maintainerr/data/maintainerr.sqlite* /n8n/database.sqlite* /navidrome/navidrome.db* /official-pihole/pihole/gravity.db* -- Read ignore rules from files: inherited from (global) .kopiaignore Scan one filesystem only: false inherited from (global) Error handling policy: Ignore file read errors: false inherited from (global) Ignore directory read errors: false inherited from (global) Ignore unknown types: true inherited from (global) Scheduling policy: Scheduled snapshots: None. Manual snapshot: false inherited from (global) Uploads: Max parallel snapshots (server/UI): 1 inherited from (global) Max parallel file reads: - inherited from (global) Parallel upload above size: 2.1 GB inherited from (global) Compression: Compressor: zstd inherited from (global) Compress files regardless of extensions.",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4e992d5b8f05a53d8173215e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:18.249Z",
+  "stored_at": "2026-09-23T16:14:18.250Z"
+}

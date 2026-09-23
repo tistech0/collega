@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -c \"def test_\" tests/api/test_colleges_stream.py tests/workers/test_ocr_worker.py tests/api/test_admin_job_stop.py tests/workers/test_cleanup_uploads.py; grep -rln \"postgres\\|asyncpg\" tests | head; grep -rn \"CancelledError\\|TimeoutError\" tests | head -5; sed -n 1,40p tests/sqlite_db.py | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -c \"def test_\" tests/api/test_colleges_stream.py tests/workers/test_ocr_worker.py tests/api/test_admin_job_stop.py tests/workers/test_cleanup_uploads.py; grep -rln \"postgres\\|asyncpg\" tests | head; grep -rn \"CancelledError\\|TimeoutError\" tests | ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -c \"def test_\" tests/api/test_colleges_stream.py tests/workers/test_ocr_worker.py tests/api/test_admin_job_stop.py tests/workers/test_cleanup_uploads.py; grep -rln \"postgres\\|asyncpg\" tests | head; grep -rn \"CancelledError\\|TimeoutError\" tests | head -5; sed -n 1,40p tests/sqlite_db.py | head -20: leges_stream.py:2 tests/api/test_admin_job_stop.py:7 tests/workers/test_cleanup_uploads.py:2 tests/workers/test_ocr_worker.py:16 tests/conftest.py tests/core/test_config_validators.py \"\"\"Session SQLite en mémoire avec le schéma complet — pour tester du SQL réel (story 8.0).\"\"\" from __future__ import annotations from collections.abc import AsyncIterator import pytest from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine import app.models # noqa: F401 — enregistre toutes les tables from app.core.database import Base @pytest.fixture async def sqlite_session() -> AsyncIterator[AsyncSession]: engine = create_async_engine(\"sqlite+aiosqlite:///:memory:\") async with engine.begin() as conn: await conn.run_sync(Base.metadata.create_all) factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False) async with factory() as session: yield session",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "557c9e4dadf8114af4a9bd21",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:18:12.256Z",
+  "stored_at": "2026-09-23T16:18:12.257Z"
+}

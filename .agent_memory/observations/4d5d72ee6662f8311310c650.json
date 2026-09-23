@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"user_id != current_user.id\" app | wc -l; grep -rn '\"COLLEGE_NOT_FOUND\"' app | wc -l; grep -rn '\"code\": \"' app | sed 's/.*\"code\": \"\\([A-Z_]*\\)\".*/\\1/' | sort | uniq -c | sort -rn | head; grep -rn \"except Exception\" app | wc -l; grep -rn \"get_event_loop()\" app",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"user_id != current_user.id\" app | wc -l; grep -rn '\"COLLEGE_NOT_FOUND\"' app | wc -l; grep -rn '\"code\": \"' app | sed 's/.*\"code\": \"\\([A-Z_]*\\)\".*/\\1/' | sort | uniq -c | sort -rn | head; grep -rn \"except Exception\" app | wc -l; grep -rn \"get_",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"user_id != current_user.id\" app | wc -l; grep -rn '\"COLLEGE_NOT_FOUND\"' app | wc -l; grep -rn '\"code\": \"' app | sed 's/.*\"code\": \"\\([A-Z_]*\\)\".*/\\1/' | sort | uniq -c | sort -rn | head; grep -rn \"except Exception\" app | wc -l; grep -rn \"get_event_loop()\" app: 7 14 14 COLLEGE_NOT_FOUND 7 USER_NOT_FOUND 5 INVALID_FILE_TYPE 4 TOKEN_EXPIRED 3 UNAUTHORIZED 3 JOB_IN_PROGRESS 3 GENERATION_NOT_COMPLETE 3 CARD_NOT_FOUND 2 QUEUE_UNAVAILABLE 2 JOB_NOT_FOUND 23 app/api/v1/colleges.py:643: loop = asyncio.get_event_loop()",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4d5d72ee6662f8311310c650",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:31.830Z",
+  "stored_at": "2026-09-23T16:15:31.831Z",
+  "low_signal": true
+}

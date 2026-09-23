@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker exec kopia kopia policy show /source 2>/dev/null | sed -n \"/Ignore rules/,/Read ignore/p\" | grep -i -E \"collega|pdf|compose\"; echo ---KOPIAIGNORE---; ls -la /mnt/user/appdata/collega/.kopiaignore /mnt/user/appdata/.kopiaignore 2>&1; echo ---LASTSNAP---; docker exec kopia kopia snapshot list /source --max-results=2 2>/dev/null | tail -3; echo ---SIZES---; grep -E \"collega-db-1 ->\" /mnt/user/nas-backup/backup.log | wc -l; grep -n \"collega-db-1 -> 64K\" /mnt/user/nas-backup/backup.log' 2>&1",
+  "summary": "ssh nas 'docker exec kopia kopia policy show /source 2>/dev/null | sed -n \"/Ignore rules/,/Read ignore/p\" | grep -i -E \"collega|pdf|compose\"; echo ---KOPIAIGNORE---; ls -la /mnt/user/appdata/collega/.kopiaignore /mnt/user/appdata/.kopiaignore 2>&1; echo ---LASTSNAP---; docker exec kopia kopia snapshot list /source --ma",
+  "text": "ssh nas 'docker exec kopia kopia policy show /source 2>/dev/null | sed -n \"/Ignore rules/,/Read ignore/p\" | grep -i -E \"collega|pdf|compose\"; echo ---KOPIAIGNORE---; ls -la /mnt/user/appdata/collega/.kopiaignore /mnt/user/appdata/.kopiaignore 2>&1; echo ---LASTSNAP---; docker exec kopia kopia snapshot list /source --max-results=2 2>/dev/null | tail -3; echo ---SIZES---; grep -E \"collega-db-1 ->\" /mnt/user/nas-backup/backup.log | wc -l; grep -n \"collega-db-1 -> 64K\" /mnt/user/nas-backup/backup.log' 2>&1: /collega/postgres/ /compose-stacks/trichome-analyzer/ ---KOPIAIGNORE--- ls: cannot access '/mnt/user/appdata/collega/.kopiaignore': No such file or directory ls: cannot access '/mnt/user/appdata/.kopiaignore': No such file or directory ---LASTSNAP--- root@kopia:/source 2026-09-22 01:30:53 UTC k1429f4221e2c0d4188a1038b64cdb6cb 6.4 GB drwxrwxrwx files:39972 dirs:9645 (latest-2,daily-2) 2026-09-23 01:30:37 UTC k6ed87f8157b8e6b34851706f3626e0d7 6.5 GB drwxrwxrwx files:40007 dirs:9659 (latest-1,daily-1,weekly-1,monthly-1) ---SIZES--- 50 2520:OK collega-db-1 -> 64K",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2840c651c99a639871020fdd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:27.256Z",
+  "stored_at": "2026-09-23T16:14:27.257Z"
+}

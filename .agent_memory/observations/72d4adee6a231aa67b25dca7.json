@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && echo ---tracked; git ls-files | grep -vE '^(app|tests|alembic)/' ; echo ---ignored-check; git check-ignore -v collega_dump.sql .env; echo ---pip; .venv/bin/python -m pip list 2>/dev/null | grep -iE 'ruff|mypy|pyright|pytest|cov|bcrypt|passlib|jose|fastapi|pydantic|sqlalchemy|anthropic|arq|redis'",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && echo ---tracked; git ls-files | grep -vE '^(app|tests|alembic)/' ; echo ---ignored-check; git check-ignore -v collega_dump.sql .env; echo ---pip; .venv/bin/python -m pip list 2>/dev/null | grep -iE 'ruff|mypy|pyright|pytest|cov|bcrypt|passlib|jose|fas",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && echo ---tracked; git ls-files | grep -vE '^(app|tests|alembic)/' ; echo ---ignored-check; git check-ignore -v collega_dump.sql .env; echo ---pip; .venv/bin/python -m pip list 2>/dev/null | grep -iE 'ruff|mypy|pyright|pytest|cov|bcrypt|passlib|jose|fastapi|pydantic|sqlalchemy|anthropic|arq|redis': ---tracked .dockerignore .env.example .env.nas.example .gitignore Caddyfile Caddyfile.prod Dockerfile alembic.ini docker-compose.prod.yml docker-compose.yml docs/deployment.md docs/sdk-gotchas.md pyproject.toml scripts/__init__.py scripts/backfill_item_titles.py scripts/chunked_upload.py seed_dev.py ---ignored-check .gitignore:4:collega_dump.sql collega_dump.sql collega_backend/.gitignore:2:.env .env ---pip anthropic 0.97.0 arq 0.28.0 bcrypt 3.2.2 fastapi 0.136.1 hiredis 3.3.1 passlib 1.7.4 pydantic 2.13.3 pydantic_core 2.46.3 pydantic-settings 2.14.0 pytest 9.0.3 pytest-asyncio 1.3.0 python-jose 3.5.0 redis 5.3.1 SQLAlchemy 2.0.49",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "72d4adee6a231aa67b25dca7",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:10.741Z",
+  "stored_at": "2026-09-23T16:13:10.742Z"
+}

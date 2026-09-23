@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ls collega_backend/app/static collega_backend/app/static/*; grep -n \"tester\" collega_backend/app/main.py collega_backend/app/deps.py collega_backend/app/core/config.py | head -20; grep -n \"@router\" collega_backend/app/api/v1/tester.py; grep -rln \"tester\\|TesterFeedback\\|feedback\" collega_backend/app collega_app/lib | grep -v static/ | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ls collega_backend/app/static collega_backend/app/static/*; grep -n \"tester\" collega_backend/app/main.py collega_backend/app/deps.py collega_backend/app/core/config.py | head -20; grep -n \"@router\" collega_backend/app/api/v1/tester.py; grep -rln \"tester\\|TesterFeedback",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ls collega_backend/app/static collega_backend/app/static/*; grep -n \"tester\" collega_backend/app/main.py collega_backend/app/deps.py collega_backend/app/core/config.py | head -20; grep -n \"@router\" collega_backend/app/api/v1/tester.py; grep -rln \"tester\\|TesterFeedback\\|feedback\" collega_backend/app collega_app/lib | grep -v static/ | head -20: ge_id}/summary\", response_model=CollegeSummaryResponse) collega_backend/app/main.py collega_backend/app/core/config.py collega_backend/app/deps.py collega_backend/app/models/__init__.py collega_backend/app/models/tester_feedback.py collega_backend/app/models/flash_card.py collega_backend/app/schemas/admin.py collega_backend/app/schemas/tester.py collega_backend/app/schemas/college.py collega_backend/app/api/v1/tester.py collega_backend/app/api/v1/admin.py collega_backend/app/api/v1/flash_cards.py collega_backend/app/api/v1/drill.py collega_backend/app/api/v1/colleges.py collega_backend/app/services/generation/claude_client.py collega_app/lib/core/ui/components/cg_drill_card.dart collega_app/lib/core/ui/components/cg_field.dart collega_app/lib/core/database/app_database.g.dart collega_app/lib/features/drill/drill_providers.dart collega_app/lib/features/drill/presentation/drill_screen.dart",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e4054eb39cbd44dc3188a837",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:28:33.501Z",
+  "stored_at": "2026-09-23T16:28:33.502Z"
+}

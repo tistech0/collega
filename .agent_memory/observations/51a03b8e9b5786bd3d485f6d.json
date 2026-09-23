@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd /private/tmp/claude-501/bundled-skills/2.1.280/bbcc1b83f012a26220adb5c529a9edb8/claude-api && grep -niE \"minimum cacheable|1024|2048|4096|0\\.1|1\\.25|write|read.*price|sonnet 4.6|haiku 4.5\" shared/prompt-caching.md | head -30; grep -niE \"50%|discount|sonnet-4-6|haiku\" shared/cost-optimization.md | head -20",
+  "summary": "cd /private/tmp/claude-501/bundled-skills/2.1.280/bbcc1b83f012a26220adb5c529a9edb8/claude-api && grep -niE \"minimum cacheable|1024|2048|4096|0\\.1|1\\.25|write|read.*price|sonnet 4.6|haiku 4.5\" shared/prompt-caching.md | head -30; grep -niE \"50%|discount|sonnet-4-6|haiku\" shared/cost-optimization.md | head -20: request, ",
+  "text": "cd /private/tmp/claude-501/bundled-skills/2.1.280/bbcc1b83f012a26220adb5c529a9edb8/claude-api && grep -niE \"minimum cacheable|1024|2048|4096|0\\.1|1\\.25|write|read.*price|sonnet 4.6|haiku 4.5\" shared/prompt-caching.md | head -30; grep -niE \"50%|discount|sonnet-4-6|haiku\" shared/cost-optimization.md | head -20: request, including cache reads and writes** - the discounts stack. The second-largest free lever after caching for unattended agent work - evaluation runs, backfills, scheduled jobs. 172:- **Price candidates in cost per completed task on your own traffic**, including the larger model at reduced effort - per-token price lists do not predict the ranking. In Anthropic's runs, Claude Fable 5 at `low` effort beat Claude Sonnet 5 on a deep-research benchmark while costing about 10% less per task; on a coding subset both models largely saturate, Claude Opus 5 matched Claude Fable 5 (91.7% versus 91.3%) at about 60% of its cost. For most agent workloads, start with Claude Opus 5. At the other end, Claude Haiku 4.5 answered knowledge questions at about a tenth of Claude Opus 5's cost per question at 63% accuracy versus 92% - it fits high-volume work with checkable outputs, not long agentic loops.",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "51a03b8e9b5786bd3d485f6d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:21.390Z",
+  "stored_at": "2026-09-23T16:15:21.390Z"
+}

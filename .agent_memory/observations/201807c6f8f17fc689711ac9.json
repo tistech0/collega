@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad; B=\"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; \"$B/.venv/bin/pip\" install -q --target $S/alib asyncpg 2>&1 | grep -v notice | tail -2; mkdir -p $S/run && cd $S/run && sed \"s#^script_location = alembic#script_location = $B/alembic#\" \"$B/alembic.ini\" > alembic.ini && export DATABASE_URL=\"postgresql+asyncpg://postgres:audit@localhost:55432/collega\" PYTHONPATH=\"$S/alib:$B\"; \"$B/.venv/bin/python\" -m alembic -c alembic.ini upgrade head 2>&1 | tail -4; echo \"--- c… [+76 chars truncated]",
+  "summary": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad; B=\"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; \"$B/.venv/bin/pip\" install -q --target $S/alib asyncpg 2>&1 | grep -v notice | tail -2; mkdir -p $S/run && cd $S/run && sed \"s#^script",
+  "text": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad; B=\"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; \"$B/.venv/bin/pip\" install -q --target $S/alib asyncpg 2>&1 | grep -v notice | tail -2; mkdir -p $S/run && cd $S/run && sed \"s#^script_location = alembic#script_location = $B/alembic#\" \"$B/alembic.ini\" > alembic.ini && export DATABASE_URL=\"postgresql+asyncpg://postgres:audit@localhost:55432/collega\" PYTHONPATH=\"$S/alib:$B\"; \"$B/.venv/bin/python\" -m alembic -c alembic.ini upgrade head 2>&1 | tail -4; echo \"--- check\"; \"$B/.venv/bin/python\" -m alembic -c alembic.ini check 2>&1 | tail -25:  in __init__ super().__init__(**__pydantic_self__.__class__._settings_build_values(sources, init_kwargs)) ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ File \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend/.venv/lib/python3.14/site-packages/pydantic/main.py\", line 263, in __init__ validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self) pydantic_core._pydantic_core.ValidationError: 2 validation errors for Settings redis_url Field required [type=missing, input_value={'database_url': 'postgre...ocalhost:55432/collega'}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/missing secret_key Field required [type=missing, input_value={'database_url': 'postgre...ocalhost:55432/collega'}, input_type=dict] For further information visit https://errors.pydantic.dev/2.13/v/missing",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "201807c6f8f17fc689711ac9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:31.490Z",
+  "stored_at": "2026-09-23T16:16:31.491Z"
+}

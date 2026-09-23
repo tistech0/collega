@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,130p tests/workers/test_generation_worker.py; sed -n 1,80p tests/conftest.py; ls tests/workers tests/services",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,130p tests/workers/test_generation_worker.py; sed -n 1,80p tests/conftest.py; ls tests/workers tests/services: tests qui appellent `get_notification_service()` sans request/ctx polluent l'instance globale et provoquent un test-flake selon l'o",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,130p tests/workers/test_generation_worker.py; sed -n 1,80p tests/conftest.py; ls tests/workers tests/services: tests qui appellent `get_notification_service()` sans request/ctx polluent l'instance globale et provoquent un test-flake selon l'ordre d'exécution pytest (cf. Story 7.4 review P5). \"\"\" from app.services.notifications import apns_service apns_service._service_instance = None yield apns_service._service_instance = None @pytest.fixture async def client(mock_db): tests/services: __init__.py __pycache__ test_apns_copy.py test_card_generator.py test_chunked_upload_store.py test_claude_client.py test_confidence_scorer.py test_hash_sharing.py test_item_detector.py test_item_titles.py test_job_events.py test_ocr_processor.py test_search_excerpt.py test_token_cost.py test_token_usage_capture.py tests/workers: __init__.py __pycache__ test_apns_singleton.py test_cleanup_uploads.py test_cleanup_worker.py test_daily_reminder_worker.py test_generation_worker.py test_monthly_reset.py test_ocr_worker.py",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "09a26172cdebadf9f9e286f8",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:23.721Z",
+  "stored_at": "2026-09-23T16:15:23.723Z"
+}

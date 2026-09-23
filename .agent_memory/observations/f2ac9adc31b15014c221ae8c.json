@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls -a | grep env; grep -o \"DATABASE_URL=[^:]*://[^@]*@\\?[^/]*\" .env 2>/dev/null | sed 's/:[^:@]*@/:***@/'; (docker ps --format '{{.Names}} {{.Ports}}' 2>&1 | head -5); (nc -z localhost 5432 && echo pg_up) ; (nc -z localhost 6379 && echo redis_up) ; true",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls -a | grep env; grep -o \"DATABASE_URL=[^:]*://[^@]*@\\?[^/]*\" .env 2>/dev/null | sed 's/:[^:@]*@/:***@/'; (docker ps --format '{{.",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f2ac9adc31b15014c221ae8c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:33.941Z",
+  "stored_at": "2026-09-23T16:15:33.941Z"
+}

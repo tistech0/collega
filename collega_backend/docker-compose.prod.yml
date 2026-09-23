@@ -15,9 +15,21 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
     volumes:
       - pdf_storage:/tmp/collega_pdfs
-    ports:
-      - "430:8000"
+    # Pas de "ports:" : NPM joint l'API par le réseau collega_net (port 430 retiré le 2026-08-14).
     env_file: .env
+    healthcheck:
+      # /health vérifie Postgres et Redis ; urlopen lève sur un 503 → exit ≠ 0.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=4)"]
+      interval: 30s
+      timeout: 6s
+      retries: 3
+      start_period: 20s
+    mem_limit: 1g
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -35,7 +47,19 @@ services:
     volumes:
       - pdf_storage:/tmp/collega_pdfs
     env_file: .env
+    healthcheck:
+      # La clé de santé arq est rafraîchie toutes les health_check_interval (60 s).
+      test: ["CMD", "arq", "--check", "app.workers.settings.WORKER_SETTINGS"]
+      interval: 60s
+      timeout: 20s
+      retries: 3
+      start_period: 30s
+    # OCR de PDF jusqu'à 500 Mo : borne pour ne pas affamer les autres services du NAS.
+    mem_limit: 4g
+    logging: *logging
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
       redis:

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"environ\\|DATABASE_URL\\|REDIS\" tests/conftest.py | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"environ\\|DATABASE_URL\\|REDIS\" tests/conftest.py | head: 9:os.environ.setdefault(\"DATABASE_URL\", \"sqlite+aiosqlite:///./test.db\") 10:os.environ.setdefault(\"REDIS_URL\", \"redis://localhost:6379/0\") 11:os.environ.setdefault(\"SECRET_KEY\", \"test-se",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"environ\\|DATABASE_URL\\|REDIS\" tests/conftest.py | head: 9:os.environ.setdefault(\"DATABASE_URL\", \"sqlite+aiosqlite:///./test.db\") 10:os.environ.setdefault(\"REDIS_URL\", \"redis://localhost:6379/0\") 11:os.environ.setdefault(\"SECRET_KEY\", \"test-secret-key-for-pytest-only\") 12:os.environ.setdefault(\"CLAUDE_API_KEY\", \"test-key\") 13:os.environ.setdefault(\"ADMIN_USERNAME\", \"admin\") 14:os.environ.setdefault(\"ADMIN_PASSWORD\", \"testpass\") 15:os.environ.setdefault(\"REVENUECAT_WEBHOOK_SECRET\", \"test-rc-secret\") 16:os.environ.setdefault(\"TESTER_USERNAME\", \"tester\") 17:os.environ.setdefault(\"TESTER_PASSWORD\", \"testpass\")",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a0ba593cd50d7dedcef468d9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:16.353Z",
+  "stored_at": "2026-09-23T16:15:16.353Z"
+}

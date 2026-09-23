@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; docker ps --format \"{{.Names}} {{.Ports}}\" 2>/dev/null | grep -i -E \"6379|5432\"; .venv/bin/python -m pytest -q -p no:cacheprovider --no-header 2>&1 | tail -8",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; docker ps --format \"{{.Names}} {{.Ports}}\" 2>/dev/null | grep -i -E \"6379|5432\"; .venv/bin/python -m pytest -q -p no:cacheprovider --no-header 2>&1 | tail -8: collega-test-redis 0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp tests/workers/test_ocr_worker.p",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; docker ps --format \"{{.Names}} {{.Ports}}\" 2>/dev/null | grep -i -E \"6379|5432\"; .venv/bin/python -m pytest -q -p no:cacheprovider --no-header 2>&1 | tail -8: collega-test-redis 0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp tests/workers/test_ocr_worker.py::TestTitleCascade::test_referential_failure_does_not_break_import /Users/lesurmatthis/dev/projet perso/collega/collega_backend/tests/workers/test_ocr_worker.py:441: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited result = await _run_ocr(self._db(added), make_college(), make_job(), \"/fake.pdf\") Enable tracemalloc to get traceback where the object was allocated. See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info. -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html 480 passed, 1 skipped, 27 warnings in 5.38s",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "aba93701df427aac9bc262d7",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:23.574Z",
+  "stored_at": "2026-09-23T16:15:23.575Z"
+}

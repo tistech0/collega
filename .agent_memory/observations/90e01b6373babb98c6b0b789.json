@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rhoE \".{120}(2 ?min ?46|177 fiches|436 pages).{200}\" .agent_memory/packets ~/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/ 2>/dev/null | sort -u | head -6",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rhoE \".{120}(2 ?min ?46|177 fiches|436 pages).{200}\" .agent_memory/packets ~/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/ 2>/dev/null | sort -u | head -6:  dossier uploads/ purgé), OCR 436 pages à ~3 pages/s, génération 23 items / 177 f",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rhoE \".{120}(2 ?min ?46|177 fiches|436 pages).{200}\" .agent_memory/packets ~/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/ 2>/dev/null | sort -u | head -6:  dossier uploads/ purgé), OCR 436 pages à ~3 pages/s, génération 23 items / 177 fiches, job total 2 min 46 s. Pour surveiller un import en prod sans identifiants : `ssh nas docker logs -f collega-api-1 | grep -E \\\"import/init|/parts/|/comp ine : fiches locales = items ouverts seulement + collegeDetailProvider figé\",\"summary\":\"Repro iPhone 2026 09 21 CANCERO 177 fiches : Home/Collèges montraient une barre de progression pleine sans gris alors que le détail affichait « 0 % maîtrisé · 0 fiches ». Deux causes. 1 Les flashCards ne sont écrites en\",\"body\":\"Repro iPhone kind\":\"explicit_capture\",\"captured_at\":\"2026-09-21T18:48:51.621Z\"}],\"context\":{\"fact\":\"Repro iPhone 2026-09-21 (CANCERO 177 fiches) : Home/Collèges montraient une barre de progression pleine (sans gris) alors que le détail affichait « 0 % maîtrisé · 0 fiches ». Deux causes. (1) Les flashCards ne sont écrites en local (Drift) que",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "90e01b6373babb98c6b0b789",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:07.576Z",
+  "stored_at": "2026-09-23T16:15:07.576Z",
+  "low_signal": true
+}

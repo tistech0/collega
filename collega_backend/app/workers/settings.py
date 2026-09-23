@@ -3,12 +3,17 @@ import ssl
 
 from arq.cron import cron
 
+from app.core.logging import configure_logging
 from app.core.redis import redis_settings
 from app.workers.cleanup_worker import cleanup_ocr_text, cleanup_stale_uploads, reset_monthly_reloads
 from app.workers.daily_reminder_worker import send_daily_reminders
 from app.workers.generation_worker import generate_college_cards
 from app.workers.ocr_worker import process_college_ocr
 
+configure_logging()
+# arq pose son propre handler sur le logger « arq » : sans ceci, chaque ligne
+# d'arq sortirait deux fois (son handler + celui de la racine).
+logging.getLogger("arq").propagate = False
 logger = logging.getLogger(__name__)
 
 
@@ -82,8 +87,12 @@ WORKER_SETTINGS = {
     "job_timeout": 7200,
     "keep_result": 3600,
     "retry_jobs": True,
-    "max_retries": 3,
+    # arq lit `max_tries` (défaut 5) ; l'ancienne clé `max_retries` était ignorée.
+    # Chaque relance d'une génération repaie Claude : 3 tentatives au plus.
+    "max_tries": 3,
     # Story 7.7 — sans ce flag, Job.abort() est ignoré par le worker et le job
     # continue malgré la demande d'annulation de l'endpoint Stop.
     "allow_abort_jobs": True,
+    # Clé lue par `arq --check` (healthcheck Docker du worker) ; défaut 3600 s.
+    "health_check_interval": 60,
 }
