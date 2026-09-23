@@ -12,6 +12,8 @@ class AuthUser {
     this.faculty,
     this.monthlyReloads = 0,
     this.monthlyMax = 3,
+    this.monthlyResetAt,
+    this.reminderHourUtc,
   });
 
   final String id;
@@ -24,6 +26,12 @@ class AuthUser {
   final int monthlyReloads;
   final int monthlyMax;
 
+  /// Renouvellement du quota de réimports (UTC) ; inconnu avant le premier `/me`.
+  final DateTime? monthlyResetAt;
+
+  /// Rappel quotidien (heure UTC côté serveur) ; `null` = rappel éteint.
+  final int? reminderHourUtc;
+
   AuthUser copyWith({
     String? id,
     String? email,
@@ -34,6 +42,8 @@ class AuthUser {
     Object? faculty = _absent,
     int? monthlyReloads,
     int? monthlyMax,
+    Object? monthlyResetAt = _absent,
+    Object? reminderHourUtc = _absent,
   }) {
     return AuthUser(
       id: id ?? this.id,
@@ -45,6 +55,8 @@ class AuthUser {
       faculty: identical(faculty, _absent) ? this.faculty : faculty as String?,
       monthlyReloads: monthlyReloads ?? this.monthlyReloads,
       monthlyMax: monthlyMax ?? this.monthlyMax,
+      monthlyResetAt: identical(monthlyResetAt, _absent) ? this.monthlyResetAt : monthlyResetAt as DateTime?,
+      reminderHourUtc: identical(reminderHourUtc, _absent) ? this.reminderHourUtc : reminderHourUtc as int?,
     );
   }
 

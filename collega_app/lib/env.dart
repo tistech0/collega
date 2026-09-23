@@ -16,3 +16,6 @@ const String cfAccessClientSecret = String.fromEnvironment('CF_ACCESS_CLIENT_SEC
 // Outils de test (réinitialiser la session du jour…) : seulement dans les builds
 // de validation (`--dart-define=COLLEGA_TEST_TOOLS=true`), jamais publiés.
 const bool kTestTools = bool.fromEnvironment('COLLEGA_TEST_TOOLS');
+
+// Version affichée dans le Profil (à tenir égale à `version:` du pubspec).
+const String kAppVersion = '1.0.0';

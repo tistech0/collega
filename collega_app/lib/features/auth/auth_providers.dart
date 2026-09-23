@@ -120,6 +120,24 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     return null;
   }
 
+  /// Profil ouvert ou tiré pour rafraîchir (story 8.14) : relit `/me` (quota du
+  /// mois, rappel). Un échec ne touche à rien : jamais de déconnexion ici.
+  Future<void> refreshProfile() async {
+    final result = await ref.read(authRepositoryProvider).refreshFromMe();
+    if (_disposed || result.user == null) return;
+    if (state.valueOrNull?.user == null) return; // déconnectée entre-temps
+    state = AsyncData(result);
+  }
+
+  /// Rappel quotidien réglé côté serveur : mémorisé pour le prochain démarrage.
+  Future<void> setReminderHour(int? hourUtc) async {
+    await ref.read(authRepositoryProvider).saveReminderHour(hourUtc);
+    final current = state.valueOrNull;
+    final user = current?.user;
+    if (_disposed || current == null || user == null) return;
+    state = AsyncData(current.copyWith(user: user.copyWith(reminderHourUtc: hourUtc)));
+  }
+
   /// Supprime le compte (backend) puis exécute le wipe local **dans l'ordre** :
   ///   1. `Purchases.logOut()` — RevenueCat (best-effort, try/catch + timeout)
   ///   2. `AppDatabase.deleteEverything()` — Drift (best-effort, try/catch + timeout)

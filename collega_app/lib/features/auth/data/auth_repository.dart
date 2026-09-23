@@ -16,6 +16,8 @@ const _kYearGroup = 'year_group';
 const _kFaculty = 'faculty';
 const _kMonthlyReloads = 'monthly_reloads';
 const _kMonthlyMax = 'monthly_max';
+const _kMonthlyResetAt = 'monthly_reset_at';
+const _kReminderHourUtc = 'reminder_hour_utc';
 
 class AuthRepository {
   AuthRepository({required Dio dio, required FlutterSecureStorage storage})
@@ -71,6 +73,8 @@ class AuthRepository {
       final faculty = await _storage.read(key: _kFaculty);
       final monthlyReloadsStr = await _storage.read(key: _kMonthlyReloads);
       final monthlyMaxStr = await _storage.read(key: _kMonthlyMax);
+      final monthlyResetAtStr = await _storage.read(key: _kMonthlyResetAt);
+      final reminderStr = await _storage.read(key: _kReminderHourUtc);
 
       if (accessToken == null || userId == null || email == null) {
         return const AuthState();
@@ -87,6 +91,8 @@ class AuthRepository {
           faculty: faculty,
           monthlyReloads: int.tryParse(monthlyReloadsStr ?? '0') ?? 0,
           monthlyMax: int.tryParse(monthlyMaxStr ?? '3') ?? 3,
+          monthlyResetAt: monthlyResetAtStr == null ? null : DateTime.tryParse(monthlyResetAtStr),
+          reminderHourUtc: reminderStr == null ? null : int.tryParse(reminderStr),
         ),
       );
     } catch (e) {
@@ -108,8 +114,14 @@ class AuthRepository {
       _storage.delete(key: _kFaculty),
       _storage.delete(key: _kMonthlyReloads),
       _storage.delete(key: _kMonthlyMax),
+      _storage.delete(key: _kMonthlyResetAt),
+      _storage.delete(key: _kReminderHourUtc),
     ]);
   }
+
+  /// Rappel quotidien mémorisé (l'interrupteur du Profil au prochain démarrage).
+  Future<void> saveReminderHour(int? hourUtc) =>
+      _storage.write(key: _kReminderHourUtc, value: hourUtc?.toString());
 
   Future<AuthState> refreshFromMe() async {
     try {
@@ -128,6 +140,9 @@ class AuthRepository {
       final faculty = data['faculty'] as String?;
       final monthlyReloads = data['monthly_reloads'] as int? ?? 0;
       final monthlyMax = data['monthly_reloads_max'] as int? ?? 3;
+      final resetAtStr = data['monthly_reloads_reset_at'] as String?;
+      final monthlyResetAt = resetAtStr == null ? null : DateTime.tryParse(resetAtStr);
+      final reminderHourUtc = data['reminder_hour_utc'] as int?;
 
       await Future.wait([
         _storage.write(key: _kIsSubscribed, value: isSubscribed.toString()),
@@ -137,6 +152,8 @@ class AuthRepository {
         _storage.write(key: _kFaculty, value: faculty),
         _storage.write(key: _kMonthlyReloads, value: monthlyReloads.toString()),
         _storage.write(key: _kMonthlyMax, value: monthlyMax.toString()),
+        _storage.write(key: _kMonthlyResetAt, value: monthlyResetAt?.toIso8601String()),
+        _storage.write(key: _kReminderHourUtc, value: reminderHourUtc?.toString()),
       ]);
 
       final userId = await _storage.read(key: _kUserId) ?? '';
@@ -153,6 +170,8 @@ class AuthRepository {
           faculty: faculty,
           monthlyReloads: monthlyReloads,
           monthlyMax: monthlyMax,
+          monthlyResetAt: monthlyResetAt,
+          reminderHourUtc: reminderHourUtc,
         ),
       );
     } on DioException catch (e) {
@@ -174,32 +193,12 @@ class AuthRepository {
       final isSubscribed = data['is_subscribed'] as bool;
       final isBeta = data['is_beta'] as bool;
 
-      final userId = await _storage.read(key: _kUserId) ?? '';
-      final email = await _storage.read(key: _kUserEmail) ?? '';
-      final firstName = await _storage.read(key: _kFirstName);
-      final yearGroup = await _storage.read(key: _kYearGroup);
-      final faculty = await _storage.read(key: _kFaculty);
-      final monthlyReloadsStr = await _storage.read(key: _kMonthlyReloads);
-      final monthlyMaxStr = await _storage.read(key: _kMonthlyMax);
-
       await Future.wait([
         _storage.write(key: _kIsSubscribed, value: isSubscribed.toString()),
         _storage.write(key: _kIsBeta, value: isBeta.toString()),
       ]);
-
-      return AuthState(
-        user: AuthUser(
-          id: userId,
-          email: email,
-          isBeta: isBeta,
-          isSubscribed: isSubscribed,
-          firstName: firstName,
-          yearGroup: yearGroup,
-          faculty: faculty,
-          monthlyReloads: int.tryParse(monthlyReloadsStr ?? '0') ?? 0,
-          monthlyMax: int.tryParse(monthlyMaxStr ?? '3') ?? 3,
-        ),
-      );
+      // Le reste du compte (profil, quota, rappel) tel que mémorisé.
+      return loadStoredUser();
     } on DioException catch (e) {
       AppLogger.error('refreshSubscriptionStatus failed', tag: 'AuthRepository', error: e);
       return const AuthState(errorMessage: 'Impossible de synchroniser le statut');

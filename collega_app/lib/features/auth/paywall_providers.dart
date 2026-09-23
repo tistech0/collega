@@ -5,6 +5,12 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/auth/data/revenuecat_service.dart';
 
+const kPaywallPurchaseFailed = 'L’achat n’a pas abouti. Réessaie dans un instant.';
+const kPaywallPurchaseSyncing =
+    'Achat reçu\u00A0: ton accès s’active dans un instant. S’il tarde, touche « Restaurer mes achats ».';
+const kPaywallNothingToRestore = 'Aucun abonnement actif à restaurer sur ce compte Apple.';
+const kPaywallRestoreFailed = 'La restauration n’a pas abouti. Réessaie dans un instant.';
+
 class PaywallState {
   const PaywallState({
     this.package,
@@ -64,20 +70,14 @@ class PaywallNotifier extends AsyncNotifier<PaywallState> {
       final hasAccess = ref.read(authProvider).valueOrNull?.hasAccess ?? false;
       state = AsyncData(currentState.copyWith(
         isLoading: false,
-        errorMessage: hasAccess
-            ? null
-            : 'Achat effectué, synchronisation en cours. Réessayez.',
+        errorMessage: hasAccess ? null : kPaywallPurchaseSyncing,
       ));
     } on PlatformException catch (e) {
-      final errorCode = PurchasesErrorHelper.getErrorCode(e);
-      final msg = errorCode == PurchasesErrorCode.purchaseCancelledError
-          ? 'Achat annulé'
-          : 'Achat impossible, réessayez';
-      state = AsyncData(currentState.copyWith(isLoading: false, errorMessage: msg));
+      // Annuler n'est pas une erreur : rien à dire.
+      final cancelled = PurchasesErrorHelper.getErrorCode(e) == PurchasesErrorCode.purchaseCancelledError;
+      state = AsyncData(currentState.copyWith(isLoading: false, errorMessage: cancelled ? null : kPaywallPurchaseFailed));
     } catch (_) {
-      state = AsyncData(
-        currentState.copyWith(isLoading: false, errorMessage: 'Achat impossible, réessayez'),
-      );
+      state = AsyncData(currentState.copyWith(isLoading: false, errorMessage: kPaywallPurchaseFailed));
     } finally {
       _purchasing = false;
     }
@@ -92,16 +92,17 @@ class PaywallNotifier extends AsyncNotifier<PaywallState> {
       final hasAccess = ref.read(authProvider).valueOrNull?.hasAccess ?? false;
       state = AsyncData(currentState.copyWith(
         isLoading: false,
-        errorMessage: hasAccess ? null : 'Aucun abonnement actif trouvé.',
+        errorMessage: hasAccess ? null : kPaywallNothingToRestore,
       ));
     } catch (_) {
-      state = AsyncData(
-        currentState.copyWith(
-          isLoading: false,
-          errorMessage: 'Restauration impossible, réessayez.',
-        ),
-      );
+      state = AsyncData(currentState.copyWith(isLoading: false, errorMessage: kPaywallRestoreFailed));
     }
+  }
+
+  /// Offre introuvable (réseau, Store) : on la redemande.
+  Future<void> retry() async {
+    state = const AsyncLoading<PaywallState>().copyWithPrevious(state);
+    state = await AsyncValue.guard(build);
   }
 
   Future<void> openSubscriptionManagement() =>

@@ -8,20 +8,6 @@ import 'package:collega_app/features/shell/tab_reselect.dart';
 
 import '../../support/cg_golden.dart';
 
-/// Écran « ancien » (Material) : barre d'action collée en bas, sans SafeArea —
-/// comme DrillLaunchBar du détail d'item (revue 8.3, bloquant).
-class _Legacy extends StatelessWidget {
-  const _Legacy();
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        body: const SizedBox.expand(),
-        bottomNavigationBar: SizedBox(
-          height: 56,
-          child: TextButton(key: const Key('launch'), onPressed: () {}, child: const Text('Réviser')),
-        ),
-      );
-}
-
 /// Écran Collega UI : réserve lui-même la tab bar (CgPage.reserveTabBar).
 class _Migrated extends StatelessWidget {
   const _Migrated();
@@ -48,7 +34,7 @@ Widget _app(String initial, {List<int>? reselected}) {
         GoRoute(path: '/progress/colleges/3/items/i1', builder: (_, __) => const _Migrated()),
         GoRoute(path: '/progress/planning', builder: (_, __) => const _Migrated()),
         GoRoute(path: '/progress', builder: (_, __) => const SizedBox.expand()),
-        GoRoute(path: '/profile', builder: (_, __) => const _Legacy()),
+        GoRoute(path: '/profile', builder: (_, __) => const _Migrated()),
       ],
     ),
   ]);
@@ -65,21 +51,11 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
-  testWidgets('écran non migré : sa barre du bas reste au-dessus de la tab bar et tapable', (tester) async {
-    phone(tester);
-    await tester.pumpWidget(_app('/profile'));
-    await tester.pumpAndSettle();
-    final launch = tester.getRect(find.byKey(const Key('launch')));
-    const capsuleTop = 844 - 34 - CgSpace.tabBarBottom - CgSpace.tabBarHeight;
-    expect(launch.bottom, lessThanOrEqualTo(capsuleTop));
-    await tester.tap(find.byKey(const Key('launch'))); // atteint le bouton, pas la tab bar
-  });
-
   for (final path in [
     '/colleges', '/colleges/3', '/colleges/3/items/i1', '/home/colleges/3/items/i1',
-    '/progress/colleges/3', '/progress/colleges/3/items/i1', '/progress/planning',
+    '/progress/colleges/3', '/progress/colleges/3/items/i1', '/progress/planning', '/profile',
   ]) {
-    testWidgets('écrans Collega UI (8.6 → 8.11) : pleine hauteur, safe area intacte ($path)', (tester) async {
+    testWidgets('écrans Collega UI (8.6 → 8.14) : pleine hauteur, safe area intacte ($path)', (tester) async {
       phone(tester);
       await tester.pumpWidget(_app(path));
       await tester.pumpAndSettle();

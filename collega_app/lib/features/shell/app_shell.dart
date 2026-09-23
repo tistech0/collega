@@ -17,13 +17,6 @@ class AppShell extends StatefulWidget {
 
   static const paths = ['/home', '/colleges', '/progress', '/profile'];
 
-  /// Écrans pas encore migrés vers Collega UI (Profil, story 8.14) :
-  /// leur Scaffold ne connaît pas la tab bar flottante. Leur contenu s'arrête
-  /// au-dessus de la capsule (un simple padding MediaQuery ne suffit pas : une
-  /// barre posée en bottomNavigationBar sans SafeArea finirait sous la capsule,
-  /// intapable). Les écrans migrés la réservent eux-mêmes (`CgPage.reserveTabBar`).
-  static final _legacyPattern = RegExp(r'^/profile');
-
   static int indexOf(String location) {
     for (var i = paths.length - 1; i >= 0; i--) {
       if (location.startsWith(paths[i])) return i;
@@ -57,21 +50,14 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final legacy = AppShell._legacyPattern.hasMatch(widget.location);
-    Widget content = widget.child;
-    if (legacy) {
-      content = Padding(
-        padding: EdgeInsets.only(bottom: CgTabBar.reservedHeight(context)),
-        child: MediaQuery.removePadding(context: context, removeBottom: true, child: content),
-      );
-    }
     return TabReselectScope(
       reselect: _reselect,
       child: CgTabBarScope(
         child: ColoredBox(
           color: CgTheme.of(context).colors.ground,
           child: Stack(children: [
-            Positioned.fill(child: content),
+            // Chaque écran d'onglet réserve lui-même la tab bar (`CgPage.reserveTabBar`).
+            Positioned.fill(child: widget.child),
             Positioned(
               left: 0,
               right: 0,

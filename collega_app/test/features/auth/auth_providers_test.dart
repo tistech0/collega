@@ -28,6 +28,14 @@ class _FakeAuthRepository extends AuthRepository {
   final AuthState _loginResult;
   final Future<AuthState> Function()? onDeleteAccount;
   final Future<void> Function()? onLogout;
+  AuthState? meResult;
+  final savedReminders = <int?>[];
+
+  @override
+  Future<AuthState> refreshFromMe() async => meResult ?? const AuthState(errorMessage: 'réseau');
+
+  @override
+  Future<void> saveReminderHour(int? hourUtc) async => savedReminders.add(hourUtc);
 
   @override
   Future<AuthState> loadStoredUser() async => _loadResult;
@@ -169,6 +177,46 @@ void main() {
       final state = container.read(authProvider).valueOrNull!;
       expect(state.isAuthenticated, isTrue);
       expect(state.user!.isBeta, isTrue);
+    });
+
+    test('refreshProfile : /me frais appliqué (quota, rappel)', () async {
+      final repo = _FakeAuthRepository(loadResult: const AuthState(user: _testUser))
+        ..meResult = const AuthState(user: AuthUser(
+          id: 'uid-1', email: 'test@example.com', isBeta: true, isSubscribed: false,
+          monthlyReloads: 1, reminderHourUtc: 6,
+        ));
+      final container = _makeContainer(repo);
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+
+      await container.read(authProvider.notifier).refreshProfile();
+
+      final user = container.read(authProvider).valueOrNull!.user!;
+      expect(user.monthlyReloads, 1);
+      expect(user.reminderHourUtc, 6);
+    });
+
+    test('refreshProfile en échec réseau : on garde la session affichée (jamais déconnectée)', () async {
+      final container = _makeContainer(_FakeAuthRepository(loadResult: const AuthState(user: _testUser)));
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+
+      await container.read(authProvider.notifier).refreshProfile();
+
+      expect(container.read(authProvider).valueOrNull!.user, _testUser);
+    });
+
+    test('setReminderHour : mémorisé et appliqué au compte', () async {
+      final repo = _FakeAuthRepository(loadResult: const AuthState(user: _testUser));
+      final container = _makeContainer(repo);
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+
+      await container.read(authProvider.notifier).setReminderHour(7);
+      expect(container.read(authProvider).valueOrNull!.user!.reminderHourUtc, 7);
+      await container.read(authProvider.notifier).setReminderHour(null);
+      expect(container.read(authProvider).valueOrNull!.user!.reminderHourUtc, isNull);
+      expect(repo.savedReminders, [7, null]);
     });
 
     test('logout → état non authentifié', () async {

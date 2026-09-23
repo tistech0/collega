@@ -2,7 +2,7 @@
 
 **Version : 2026-05-22**
 
-La présente politique décrit comment **AppMédecine** (« l'Application ») collecte, traite et
+La présente politique décrit comment **Collega** (« l'Application ») collecte, traite et
 protège tes données personnelles conformément au Règlement Général sur la Protection des Données
 (RGPD — Règlement UE 2016/679) et à la loi Informatique et Libertés.
 

@@ -194,6 +194,46 @@ void main() {
     });
   });
 
+  group('AuthRepository /me (story 8.14)', () {
+    Map<String, dynamic> me({int? reminder}) => {
+          'data': {
+            'id': 'u', 'email': 'a@b.fr', 'is_beta': true, 'is_subscribed': false,
+            'first_name': 'Léa', 'year_group': null, 'faculty': null,
+            'monthly_reloads': 1, 'monthly_reloads_max': 3,
+            'monthly_reloads_reset_at': '2026-10-01T00:00:00+00:00',
+            'reminder_hour_utc': reminder,
+          },
+        };
+
+    test('refreshFromMe : renouvellement du quota et heure du rappel, mémorisés pour un démarrage hors-ligne', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 't', 'user_id': 'u', 'user_email': 'a@b.fr'});
+      final repo = AuthRepository(dio: _makeScriptedDio(_ScriptedAdapter([me(reminder: 6)])), storage: storage);
+
+      final user = (await repo.refreshFromMe()).user!;
+      expect(user.monthlyResetAt, DateTime.utc(2026, 10, 1));
+      expect(user.reminderHourUtc, 6);
+
+      final stored = (await repo.loadStoredUser()).user!;
+      expect(stored.monthlyResetAt, DateTime.utc(2026, 10, 1));
+      expect(stored.reminderHourUtc, 6);
+    });
+
+    test('saveReminderHour(null) : rappel éteint au prochain démarrage', () async {
+      final storage = _FakeSecureStorage(initial: {
+        'access_token': 't', 'user_id': 'u', 'user_email': 'a@b.fr', 'reminder_hour_utc': '6',
+      });
+      final repo = AuthRepository(dio: Dio(), storage: storage);
+      await repo.saveReminderHour(null);
+      expect((await repo.loadStoredUser()).user!.reminderHourUtc, isNull);
+    });
+
+    test('logout oublie le rappel et la date de renouvellement', () async {
+      final storage = _FakeSecureStorage();
+      await AuthRepository(dio: Dio(), storage: storage).logout();
+      expect(storage.deletedKeys, containsAll(['reminder_hour_utc', 'monthly_reset_at']));
+    });
+  });
+
   group('AuthRepository.deleteAccount (Story 7.3 — safe delete)', () {
     test('pas de token → errorMessage explicite, pas de wipe', () async {
       final storage = _FakeSecureStorage();
