@@ -13,6 +13,8 @@ import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/core/upload/part_transport.dart';
 import 'package:collega_app/core/upload/upload_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/colleges/domain/import_models.dart';
+import 'package:collega_app/features/colleges/colleges_import_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/colleges/domain/drill_stats.dart';
@@ -96,6 +98,15 @@ final _stats = {
   'c34': const DrillStats(notSeen: 164),
 };
 
+/// Envoi en cours (reprise d'un upload par morceaux) vu par la Bibliothèque.
+class _Uploading extends CollegeImportNotifier {
+  static CollegeImportState value = const ImportIdle();
+  @override
+  Future<CollegeImportState> build() async => value;
+  @override
+  Future<void> resumePendingUpload() async {}
+}
+
 Widget _app(CollegesNotifier Function() notifier, {List<String>? visited, double textScale = 1}) {
   final router = GoRouter(routes: [
     GoRoute(path: '/', builder: (_, __) => const CollegesScreen()),
@@ -112,6 +123,7 @@ Widget _app(CollegesNotifier Function() notifier, {List<String>? visited, double
       databaseProvider.overrideWithValue(db),
       partTransportProvider.overrideWithValue(InMemoryPartTransport()),
       uploadCacheDirProvider.overrideWith((_) async => Directory.systemTemp),
+      collegeImportProvider.overrideWith(_Uploading.new),
     ],
     child: CgTheme(
       data: CgThemeData.light,
@@ -161,6 +173,22 @@ void main() {
       expect(find.text('CNEC · 177 fiches · 42 % maîtrisées'), findsOneWidget);
       expect(find.text('CEP · 164 fiches · à découvrir'), findsOneWidget);
       expect(find.byType(CgRankBar), findsNWidgets(2));
+    });
+
+    testWidgets('envoi repris en cours : le collège est dans « Mes collèges » avec l’envoi (pas « Importer »)',
+        (tester) async {
+      _phone(tester, height: 3000);
+      _Uploading.value = const ImportUploading(refId: 12, progress: 0.42);
+      addTearDown(() => _Uploading.value = const ImportIdle());
+      final visited = <String>[];
+      await tester.pumpWidget(_app(() => _Fixed(const []), visited: visited));
+      await tester.pumpAndSettle();
+      expect(find.text('SFH · envoi 42 %, reprend tout seul'), findsOneWidget);
+      expect(find.text('Catalogue · 38 collèges'), findsOneWidget);
+      expect(find.text('Importer'), findsNWidgets(38));
+      await tester.tap(find.text('Hématologie'));
+      await tester.pumpAndSettle();
+      expect(visited, ['/colleges/12/import']);
     });
 
     testWidgets('import en cours et import échoué sont dits, sans barre', (tester) async {

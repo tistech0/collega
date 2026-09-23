@@ -153,6 +153,8 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
       totalPages: null,
       status: 'pending',
     ));
+    // Le serveur connaît désormais le collège : la Bibliothèque le montre « import en cours ».
+    ref.invalidate(collegesProvider);
 
     await _connectSse(response.collegeId);
   }

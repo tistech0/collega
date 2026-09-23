@@ -8,6 +8,7 @@ import 'package:collega_app/features/colleges/colleges_import_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/colleges/domain/drill_stats.dart';
+import 'package:collega_app/features/colleges/domain/import_models.dart';
 import 'package:collega_app/features/search/presentation/search_sheet.dart';
 import 'package:collega_app/features/shell/tab_reselect.dart';
 
@@ -126,14 +127,23 @@ class _CollegesScreenState extends ConsumerState<CollegesScreen> with TabReselec
 
   List<Widget> _libraryChildren(List<CollegeListEntry> entries) {
     // Le catalogue est déjà alphabétique : l'ordre est conservé des deux côtés.
-    final mine = entries.where((e) => e.isImported).toList();
-    final catalog = entries.where((e) => !e.isImported).toList();
+    // PDF en cours d'envoi (reprise après fermeture) : le serveur ne connaît le
+    // collège qu'à la fin de l'envoi ; il est déjà « à moi », pas à importer.
+    final upload = ref.watch(collegeImportProvider).valueOrNull;
+    final uploading = upload is ImportUploading ? upload : null;
+    bool isUploading(CollegeListEntry e) =>
+        !e.isImported && uploading?.refId != null && e.catalog.refId == uploading!.refId;
+    final mine = entries.where((e) => e.isImported || isUploading(e)).toList();
+    final catalog = entries.where((e) => !e.isImported && !isUploading(e)).toList();
     return [
       const CgSectionTitle('Mes collèges'),
       if (mine.isEmpty)
         const _NoCollegeYet()
       else
-        CgListGroup(children: [for (final e in mine) _MyCollegeRow(entry: e)]),
+        CgListGroup(children: [
+          for (final e in mine)
+            if (e.isImported) _MyCollegeRow(entry: e) else _UploadingRow(entry: e, progress: uploading!.progress),
+        ]),
       if (catalog.isNotEmpty) ...[
         CgSectionTitle('Catalogue · ${catalog.length} ${catalog.length > 1 ? 'collèges' : 'collège'}'),
         CgListGroup(children: [
@@ -150,6 +160,27 @@ class _CollegesScreenState extends ConsumerState<CollegesScreen> with TabReselec
         ]),
       ],
     ];
+  }
+}
+
+/// PDF en cours d'envoi : l'écran d'import dit où en est l'envoi.
+class _UploadingRow extends StatelessWidget {
+  const _UploadingRow({required this.entry, required this.progress});
+
+  final CollegeListEntry entry;
+  final double? progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = progress;
+    final sent = p == null ? 'envoi en cours' : 'envoi ${(p.clamp(0.0, 1.0) * 100).floor()} %';
+    return CgListRow(
+      title: entry.catalog.name,
+      subtitle: '${entry.catalog.editor} · $sent, reprend tout seul',
+      leading: CgRowIcon(entry.catalog.icon),
+      trailing: CgRowTrailing.chevron,
+      onTap: () => context.push('/colleges/${entry.catalog.refId}/import'),
+    );
   }
 }
 

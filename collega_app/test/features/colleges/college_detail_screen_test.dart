@@ -114,6 +114,7 @@ const _limitsOk = ReloadLimits(
 class _Visit {
   final paths = <String>[];
   Object? drillExtra;
+  Object? progressExtra;
 }
 
 Widget _app({
@@ -155,6 +156,11 @@ Widget _app({
       GoRoute(path: '/home/colleges/:ref', builder: (_, s) => detailPage(s)),
       GoRoute(path: '/home/colleges/:ref/items/:item', builder: (_, s) {
         visit?.paths.add('/home/colleges/${s.pathParameters['ref']}/items/${s.pathParameters['item']}');
+        return const SizedBox();
+      }),
+      GoRoute(path: '/colleges/:ref/import/progress', builder: (_, s) {
+        visit?.paths.add('/colleges/${s.pathParameters['ref']}/import/progress');
+        visit?.progressExtra = s.extra;
         return const SizedBox();
       }),
       GoRoute(path: '/colleges/:ref/import', builder: (_, s) {
@@ -417,12 +423,17 @@ void main() {
   });
 
   group('états', () {
-    testWidgets('import en cours : « Les fiches arrivent »', (tester) async {
+    testWidgets('import en cours : « Les fiches arrivent » + « Suivre l’import »', (tester) async {
       _phone(tester);
-      await tester.pumpWidget(_app(status: _status('processing')));
+      final visit = _Visit();
+      await tester.pumpWidget(_app(status: _status('processing'), visit: visit));
       await tester.pumpAndSettle();
       expect(find.text('Les fiches arrivent'), findsOneWidget);
       expect(find.textContaining('Réviser'), findsNothing);
+      await tester.tap(find.text('Suivre l’import'));
+      await tester.pumpAndSettle();
+      expect(visit.paths, ['/colleges/3/import/progress']);
+      expect(visit.progressExtra, {'collegeId': 'c3', 'refId': 3, 'reimport': false});
     });
 
     testWidgets('import échoué : « Relancer l’import » ouvre l’import', (tester) async {

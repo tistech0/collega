@@ -121,10 +121,15 @@ class CollegeDetailScreen extends ConsumerWidget {
           )),
         ]),
       _ => page([
-          _centered(const CgState.empty(
+          _centered(CgState.empty(
             title: 'Les fiches arrivent',
             message: 'L’import de ce collège est en cours. Tu peux fermer Collega : tes fiches t’attendront.',
             illustration: CgIllustration.sheets,
+            actionLabel: 'Suivre l’import',
+            onAction: () => context.push(
+              '/colleges/$refId/import/progress',
+              extra: {'collegeId': status.collegeId, 'refId': refId, 'reimport': false},
+            ),
           )),
         ]),
     };

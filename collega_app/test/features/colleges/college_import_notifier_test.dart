@@ -19,6 +19,8 @@ import 'package:collega_app/core/upload/upload_api.dart';
 import 'package:collega_app/core/upload/upload_models.dart';
 import 'package:collega_app/core/upload/upload_providers.dart';
 import 'package:collega_app/features/colleges/colleges_import_providers.dart';
+import 'package:collega_app/features/colleges/domain/college_models.dart';
+import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/data/college_import_repository.dart';
 import 'package:collega_app/features/colleges/domain/import_models.dart';
 
@@ -138,6 +140,15 @@ Future<_FakeChunkedUploadService> _makeFakeChunkedService(AppDatabase db, {bool 
         ));
   }
   return _FakeChunkedUploadService(db: db, cacheDir: dir, pending: pending, uploadError: uploadError);
+}
+
+class _CountingColleges extends CollegesNotifier {
+  static int builds = 0;
+  @override
+  Future<List<CollegeListEntry>> build() async {
+    builds++;
+    return const [];
+  }
 }
 
 ProviderContainer _makeContainer(
@@ -642,6 +653,32 @@ void main() {
       expect(container.read(collegeImportProvider).valueOrNull, isA<ImportStreaming>());
       expect(fakeSvc.resumeCalls, 1);
       expect((await db.select(db.collegeImports).get()).single.refId, 15);
+    });
+
+    test('envoi accepté → la Bibliothèque se recharge (le collège existe côté serveur)', () async {
+      final repo = _FakeCollegeImportRepository();
+      final db = _makeInMemoryDb();
+      final fakeSvc = await _makeFakeChunkedService(db, pending: true);
+      _CountingColleges.builds = 0;
+      final container = ProviderContainer(overrides: [
+        collegeImportRepositoryProvider.overrideWithValue(repo),
+        secureStorageProvider.overrideWithValue(const FlutterSecureStorage()),
+        databaseProvider.overrideWithValue(db),
+        apiClientProvider.overrideWithValue(_FakeApiClient()),
+        chunkedUploadServiceProvider.overrideWith((ref) async => fakeSvc),
+        collegesProvider.overrideWith(_CountingColleges.new),
+      ]);
+      addTearDown(container.dispose);
+      final sub = container.listen(collegesProvider, (_, __) {});
+      addTearDown(sub.close);
+      await container.read(collegesProvider.future);
+      expect(_CountingColleges.builds, 1);
+
+      await container.read(collegeImportProvider.future);
+      await container.read(collegeImportProvider.notifier).resumePendingUpload();
+      await container.read(collegesProvider.future);
+
+      expect(_CountingColleges.builds, 2);
     });
 
     test('resumePendingUpload sans ligne → état inchangé, resume non appelé', () async {
