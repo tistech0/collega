@@ -18,10 +18,18 @@ from app.api.v1.health import router as health_router
 from app.api.v1.notifications import router as notifications_router
 from app.api.v1.search import router as search_router
 from app.api.v1.tester import router as tester_router
+from app.core.config import settings
 from app.core.database import engine
 from app.core.limiter import limiter
+from app.core.logging import configure_logging
 
+configure_logging()
 logger = logging.getLogger(__name__)
+
+
+def openapi_url_for(environment: str) -> str | None:
+    # Le schéma liste toutes les routes, admin comprises : caché en production.
+    return None if environment == "production" else "/openapi.json"
 
 
 @asynccontextmanager
@@ -38,7 +46,6 @@ async def lifespan(app: FastAPI):
         # la MÊME instance que `app.state` — évite la création d'une 2e
         # instance APNs parallèle qui défait l'objectif singleton.
         apns_service._service_instance = app.state.notification_service
-        from app.core.config import settings
 
         logger.info(
             "Notification service initialized (type=%s, sandbox=%s)",
@@ -83,6 +90,7 @@ app = FastAPI(
     version="0.3.0",
     docs_url=None,
     redoc_url=None,
+    openapi_url=openapi_url_for(settings.environment),
     lifespan=lifespan,
 )
 app.state.limiter = limiter
