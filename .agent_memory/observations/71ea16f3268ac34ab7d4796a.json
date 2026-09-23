@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 356,372p ux-design-specification-v2.md; sed -n 515,535p ux-design-specification-v2.md; sed -n 565,585p ux-design-specification-v2.md; sed -n 623,631p ux-design-specification-v2.md; grep -n \"Adaptation et accessibilit\" ux-design-specification-v2.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 356,372p ux-design-specification-v2.md; sed -n 515,535p ux-design-specification-v2.md; sed -n 565,585p ux-design-specification-v2.md; sed -n 623,631p ux-design-specification-v2.md; grep -n \"Adaptation et accessibilit\" ux-design-",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 356,372p ux-design-specification-v2.md; sed -n 515,535p ux-design-specification-v2.md; sed -n 565,585p ux-design-specification-v2.md; sed -n 623,631p ux-design-specification-v2.md; grep -n \"Adaptation et accessibilit\" ux-design-specification-v2.md: condary « Fermer » | | Paywall | Bloc `accent`, liste de bénéfices (CgListRow), prix, CgButton primary, quiet ×2 | | CGU / Confidentialité | CgHeader back, texte Markdown aux styles `body` | ## Patterns UX de cohérence ### Navigation - Tab bar : 4 onglets, capsule flottante, masquée dans le drill, l'import en cours et les sheets plein écran. L'onglet actif re-tapé remonte en haut. - Pousser : Bibliothèque → Détail collège → Détail item ; Progression → Planning ; retour par balayage, titre « ‹ Parent ». - Modal : Recherche (sheet plein), Personnaliser (sheet moitié), Quitter le drill (dialog), destructif (action sheet). - Plein écran : Drill, Import en cours, Fin de session — sortie explicite. - Transitions : pousser = glissement natif ; drill depuis Aujourd'hui = le bloc de la hero s'étend en écran sarcelle (350 ms) ; fin de session → Aujourd'hui = fondu 250 ms. ### Formulaires et saisie",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "71ea16f3268ac34ab7d4796a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:01.297Z",
+  "stored_at": "2026-09-22T18:37:01.297Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_ring.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  bool shouldRepaint(CgRingPainter old) =>\n      old.progress != progress || old.track != track || old.arc != arc || old.strokeWidth != strokeWidth;\"\"\",\"\"\"  bool shouldRepaint(CgRingPainter oldDelegate) =>\n      oldDelegate.progress != progress ||\n      oldDelegate.track != track ||\n      oldDelegate.arc != arc ||\n      oldDelegate.strokeWidth != strokeWidth;\"\"\")\nopen(p,'w').write(s)\nEOF\nflutter analyze lib/core/ui/components/cg_{ring,rank_b… [+375 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_ring.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  bool shouldRepaint(CgRingPainter old) =>\n      old.progress != progress || old.track != track || old.arc != arc || old.strokeWidth != strokeWidth;\"\"\",\"\"\"  bool sho",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_ring.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  bool shouldRepaint(CgRingPainter old) =>\n      old.progress != progress || old.track != track || old.arc != arc || old.strokeWidth != strokeWidth;\"\"\",\"\"\"  bool shouldRepaint(CgRingPainter oldDelegate) =>\n      oldDelegate.progress != progress ||\n      oldDelegate.track != track ||\n      oldDelegate.arc != arc ||\n      oldDelegate.strokeWidth != strokeWidth;\"\"\")\nopen(p,'w').write(s)\nEOF\nflutter analyze lib/core/ui/components/cg_{ring,rank_bar,skeleton,toast}.dart lib/core/ui/gallery/cg_{ring,rank_bar,skeleton,toast}_gallery.dart test/core/ui/components/cg_{ring,rank_bar,skeleton,toast}_test.dart 2>&1 | tail -1; flutter test test/core/ui/components/cg_ring_test.dart 2>&1 | grep -oE \"\\+[0-9]+: All tests passed!\"; git status --short -- lib/core/ui test/core/ui widgetbook | grep -E \"ring|rank_bar|skeleton|toast\": 30_16.png ?? test/core/ui/components/goldens/cg_skeleton_375_10.png ?? test/core/ui/components/goldens/cg_skeleton_375_16.png ?? test/core/ui/components/goldens/cg_skeleton_393_10.png ?? test/core/ui/components/goldens/cg_skeleton_393_16.png ?? test/core/ui/components/goldens/cg_skeleton_430_10.png ?? test/core/ui/components/goldens/cg_skeleton_430_16.png ?? test/core/ui/components/goldens/cg_toast_375_10.png ?? test/core/ui/components/goldens/cg_toast_375_16.png ?? test/core/ui/components/goldens/cg_toast_393_10.png ?? test/core/ui/components/goldens/cg_toast_393_16.png ?? test/core/ui/components/goldens/cg_toast_430_10.png ?? test/core/ui/components/goldens/cg_toast_430_16.png ?? widgetbook/lib/use_cases/cg_rank_bar_use_cases.dart ?? widgetbook/lib/use_cases/cg_ring_use_cases.dart ?? widgetbook/lib/use_cases/cg_skeleton_use_cases.dart ?? widgetbook/lib/use_cases/cg_toast_use_cases.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1cf3611786964229507ad42d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:46:01.470Z",
+  "stored_at": "2026-09-22T18:46:01.471Z"
+}

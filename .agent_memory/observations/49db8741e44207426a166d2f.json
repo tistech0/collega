@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_list_row_test.dart --update-goldens >/dev/null 2>&1; for f in list_row header tab_bar; do flutter test -r expanded test/core/ui/components/cg_${f}_test.dart 2>&1 | grep -E \"All tests passed|Some tests failed|\\[E\\]\" | cut -c1-200; done; flutter analyze lib/core/ui test/core/ui 2>&1 | tail -8; cd widgetbook && flutter analyze 2>&1 | tail -8",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_list_row_test.dart --update-goldens >/dev/null 2>&1; for f in list_row header tab_bar; do flutt",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "49db8741e44207426a166d2f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:48:26.275Z",
+  "stored_at": "2026-09-22T18:48:26.276Z"
+}

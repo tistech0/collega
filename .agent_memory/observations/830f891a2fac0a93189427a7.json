@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad\" && sed -i '' -e 's|<div class=\"tot b\"><div class=\"n\">17</div>|<div class=\"tot b\"><div class=\"n\">20</div>|' -e 's|<div class=\"tot g\"><div class=\"n\">31</div>|<div class=\"tot g\"><div class=\"n\">37</div>|' -e 's|<div class=\"tot c\"><div class=\"n\">12</div>|<div class=\"tot c\"><div class=\"n\">13</div>|' audit-ux-collega.html && grep -o 'class=\"n\">[0-9]*' audit-ux-collega.html",
+  "summary": "About to run: cd \"/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad\" && sed -i '' -e 's|<div class=\"tot b\"><div class=\"n\">17</div>|<div class=\"tot ",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "830f891a2fac0a93189427a7",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:20:54.575Z",
+  "stored_at": "2026-09-21T19:20:54.576Z"
+}

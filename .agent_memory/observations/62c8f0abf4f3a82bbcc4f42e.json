@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/*.dart lib/core/ui/theme/cg_theme.dart lib/core/ui/foundation/cg_icon.dart lib/core/ui/foundation/cg_haptics.dart test/support/cg_golden.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/*.dart lib/core/ui/theme/cg_theme.dart lib/core/ui/foundation/cg_icon.dart lib/core/ui/foundation/cg_haptics.dart test/support/cg_golden.dart: thème Collega UI, échelle de texte, animations réduites. Widget cgTestApp(Widget child, {",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/*.dart lib/core/ui/theme/cg_theme.dart lib/core/ui/foundation/cg_icon.dart lib/core/ui/foundation/cg_haptics.dart test/support/cg_golden.dart: thème Collega UI, échelle de texte, animations réduites. Widget cgTestApp(Widget child, {double textScale = 1, bool disableAnimations = false}) { return CgTheme( data: CgThemeData.light, child: MaterialApp( debugShowCheckedModeBanner: false, theme: buildCgMaterialTheme(CgThemeData.light), home: Builder(builder: (context) { return MediaQuery( data: MediaQuery.of(context).copyWith( textScaler: TextScaler.linear(textScale), disableAnimations: disableAnimations, ), child: CgGoldenFrame(child: child), ); }), ), ); } /// Cadre repérable par les goldens (fond `ground`). class CgGoldenFrame extends StatelessWidget { const CgGoldenFrame({super.key, required this.child}); final Widget child; @override Widget build(BuildContext context) { final c = CgTheme.of(context).colors; return ColoredBox( color: c.ground, child: DefaultTextStyle(style: CgType.body.copyWith(color: c.ink), child: child), ); } }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "62c8f0abf4f3a82bbcc4f42e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:36:38.431Z",
+  "stored_at": "2026-09-22T18:36:38.431Z"
+}

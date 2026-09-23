@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "Artifact",
+  "path": "/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-b-nuit.html",
+  "command": "",
+  "summary": "About to run: Artifact",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d275bd5133c45e1670106ad6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:54:26.867Z",
+  "stored_at": "2026-09-21T19:54:26.867Z",
+  "low_signal": true
+}

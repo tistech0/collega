@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat test/core/theme/app_theme_test.dart | head -30; ls test/core; cat test/widget_test.dart | head -20; grep -rn \"golden\" test | head -3",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat test/core/theme/app_theme_test.dart | head -30; ls test/core; cat test/widget_test.dart | head -20; grep -rn \"golden\" test | head -",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f831fd1f9ca0096267dedb73",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:22:59.907Z",
+  "stored_at": "2026-09-22T18:22:59.908Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn \"chapter_title\" collega_backend/app | grep -v \"models/item.py\" | head -20; echo \"=== detection service\"; ls collega_backend/app/services/ collega_backend/app/services/*/ 2>/dev/null | head -30; echo \"=== flutter\"; grep -rn \"chapterTitle\" collega_app/lib | head -12",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn \"chapter_title\" collega_backend/app | grep -v \"models/item.py\" | head -20; echo \"=== detection service\"; ls collega_backend/app/services/ collega_backend/app/services/*/ 2>/dev/null | head -30; echo \"=== flutter\"; grep -rn \"chapterTitle\" collega_app/lib | he",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn \"chapter_title\" collega_backend/app | grep -v \"models/item.py\" | head -20; echo \"=== detection service\"; ls collega_backend/app/services/ collega_backend/app/services/*/ 2>/dev/null | head -30; echo \"=== flutter\"; grep -rn \"chapterTitle\" collega_app/lib | head -12: e/app_database.g.dart:423: late final GeneratedColumn<String> chapterTitle = GeneratedColumn<String>( collega_app/lib/core/database/app_database.g.dart:450: chapterTitle, collega_app/lib/core/database/app_database.g.dart:491: _chapterTitleMeta, collega_app/lib/core/database/app_database.g.dart:492: chapterTitle.isAcceptableOrUnknown( collega_app/lib/core/database/app_database.g.dart:493: data['chapter_title']!, _chapterTitleMeta)); collega_app/lib/core/database/app_database.g.dart:524: chapterTitle: attachedDatabase.typeMapping collega_app/lib/core/database/app_database.g.dart:544: final String? chapterTitle; collega_app/lib/core/database/app_database.g.dart:552: this.chapterTitle, collega_app/lib/core/database/app_database.g.dart:562: if (!nullToAbsent || chapterTitle != null) { collega_app/lib/core/database/app_database.g.dart:563: map['chapter_title'] = Variable<String>(chapterTitle);",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9be25381ce811287324348ed",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:23:09.432Z",
+  "stored_at": "2026-09-22T17:23:09.432Z"
+}

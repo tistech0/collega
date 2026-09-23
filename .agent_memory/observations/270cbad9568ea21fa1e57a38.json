@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && for f in cg_sheet cg_state; do flutter test test/core/ui/components/${f}_test.dart 2>&1 | tail -1 | grep -oE \"\\+[0-9]+.*(All tests passed|Some tests failed)\" | sed 's/.*\\(+[0-9]*\\).*: \\(.*\\)/\\1 \\2/'; done; flutter analyze lib/core/ui test/core/ui 2>&1 | grep -cE \"cg_sheet|cg_state|cg_illustr\"; grep -l \"material.dart\\|shadcn\" lib/core/ui/components/cg_sheet.dart lib/core/ui/components/cg_state.dart lib/core/ui/components/cg_illustrations.dart; (cd widgetbook && flutter analyze 2>&1 | tail -1)",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && for f in cg_sheet cg_state; do flutter test test/core/ui/components/${f}_test.dart 2>&1 | tail -1 | grep -oE \"\\+[0-9]+.*(All tests passed|Some tests failed)\" | sed 's/.*\\(+[0-9]*\\).*: \\(.*\\)/\\1 \\2/'; done; flutter analyze lib/core/ui test/core/ui 2>&1 | g",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && for f in cg_sheet cg_state; do flutter test test/core/ui/components/${f}_test.dart 2>&1 | tail -1 | grep -oE \"\\+[0-9]+.*(All tests passed|Some tests failed)\" | sed 's/.*\\(+[0-9]*\\).*: \\(.*\\)/\\1 \\2/'; done; flutter analyze lib/core/ui test/core/ui 2>&1 | grep -cE \"cg_sheet|cg_state|cg_illustr\"; grep -l \"material.dart\\|shadcn\" lib/core/ui/components/cg_sheet.dart lib/core/ui/components/cg_state.dart lib/core/ui/components/cg_illustrations.dart; (cd widgetbook && flutter analyze 2>&1 | tail -1): +25 All tests passed +16 All tests passed 0 No issues found! (ran in 0.8s)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "270cbad9568ea21fa1e57a38",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:47:01.739Z",
+  "stored_at": "2026-09-22T18:47:01.740Z"
+}

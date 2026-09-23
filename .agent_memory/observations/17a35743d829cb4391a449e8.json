@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; cd $S && python3 -m venv fvenv >/dev/null && fvenv/bin/pip -q install fonttools brotli 2>&1 | tail -1; curl -sL -o IS.ttf \"https://github.com/google/fonts/raw/main/ofl/instrumentsans/InstrumentSans%5Bwdth,wght%5D.ttf\"; curl -sL -o OFL.txt \"https://github.com/google/fonts/raw/main/ofl/instrumentsans/OFL.txt\"; ls -la IS.ttf OFL.txt; fvenv/bin/python -c \"\nfrom fontTools.ttLib import TTFont\nf=TTFont('IS.ttf'); print([ (a.axisTag,a.minValue,a.defaultValue,a.maxValue) for a in f['f… [+91 chars truncated]",
+  "summary": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; cd $S && python3 -m venv fvenv >/dev/null && fvenv/bin/pip -q install fonttools brotli 2>&1 | tail -1; curl -sL -o IS.ttf \"https://github.com/google/fonts/raw/main/ofl/instrumentsans/InstrumentSans%5B",
+  "text": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; cd $S && python3 -m venv fvenv >/dev/null && fvenv/bin/pip -q install fonttools brotli 2>&1 | tail -1; curl -sL -o IS.ttf \"https://github.com/google/fonts/raw/main/ofl/instrumentsans/InstrumentSans%5Bwdth,wght%5D.ttf\"; curl -sL -o OFL.txt \"https://github.com/google/fonts/raw/main/ofl/instrumentsans/OFL.txt\"; ls -la IS.ttf OFL.txt; fvenv/bin/python -c \"\nfrom fontTools.ttLib import TTFont\nf=TTFont('IS.ttf'); print([ (a.axisTag,a.minValue,a.defaultValue,a.maxValue) for a in f['fvar'].axes]); print(f['name'].getDebugName(1), f['name'].getDebugName(5))\"; head -3 OFL.txt: [notice] To update, run: /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/fvenv/bin/python3.14 -m pip install --upgrade pip -rw-r--r--@ 1 lesurmatthis wheel 194336 Sep 22 20:21 IS.ttf -rw-r--r--@ 1 lesurmatthis wheel 4403 Sep 22 20:21 OFL.txt [('wdth', 75.0, 100.0, 100.0), ('wght', 400.0, 400.0, 700.0)] Instrument Sans Version 1.000;gftools[0.9.28] Copyright 2022 The Instrument Sans Project Authors (https://github.com/Instrument/instrument-sans) This Font Software is licensed under the SIL Open Font License, Version 1.1.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "17a35743d829cb4391a449e8",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:21:48.370Z",
+  "stored_at": "2026-09-22T18:21:48.370Z"
+}

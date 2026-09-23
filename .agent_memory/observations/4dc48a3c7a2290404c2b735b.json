@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "je ne comrepdnd pas la remarque sur le referenciel ecn",
+  "summary": "je ne comrepdnd pas la remarque sur le referenciel ecn",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4dc48a3c7a2290404c2b735b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:41:40.477Z",
+  "stored_at": "2026-09-22T17:41:40.478Z",
+  "low_signal": true
+}

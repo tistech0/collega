@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter analyze lib/core/ui test/core/ui 2>&1 | tail -8; grep -lE \"material.dart|shadcn\" lib/core/ui/components/cg_ring.dart lib/core/ui/components/cg_rank_bar.dart lib/core/ui/components/cg_skeleton.dart lib/core/ui/components/cg_toast.dart; grep -nE \"Color\\(0x|Duration\\(\" lib/core/ui/components/cg_{ring,rank_bar,skeleton,toast}.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter analyze lib/core/ui test/core/ui 2>&1 | tail -8; grep -lE \"material.dart|shadcn\" lib/core/ui/components/cg_ring.dart lib/core/ui/components/cg_rank_bar.dart lib/core/ui/components/cg_skeleton.dart lib/core/ui/components/cg_toast.dart; grep -nE \"Co",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter analyze lib/core/ui test/core/ui 2>&1 | tail -8; grep -lE \"material.dart|shadcn\" lib/core/ui/components/cg_ring.dart lib/core/ui/components/cg_rank_bar.dart lib/core/ui/components/cg_skeleton.dart lib/core/ui/components/cg_toast.dart; grep -nE \"Color\\(0x|Duration\\(\" lib/core/ui/components/cg_{ring,rank_bar,skeleton,toast}.dart: ponents/cg_header_test.dart:282:45 • creation_with_non_type error • The name 'CgPageGallery' isn't a class • test/core/ui/components/cg_header_test.dart:283:43 • creation_with_non_type info • 'pipelineOwner' is deprecated and shouldn't be used. Interact with the pipelineOwner tree rooted at RendererBinding.rootPipelineOwner instead. Or instead of accessing the SemanticsOwner of any PipelineOwner interact with the SemanticsBinding directly. This feature was deprecated after v3.10.0-12.0.pre • test/core/ui/components/cg_sheet_test.dart:197:22 • deprecated_member_use error • Target of URI doesn't exist: 'package:collega_app/core/ui/gallery/cg_tab_bar_gallery.dart' • test/core/ui/components/cg_tab_bar_test.dart:9:8 • uri_does_not_exist error • The name 'CgTabBarGallery' isn't a class • test/core/ui/components/cg_tab_bar_test.dart:224:46 • creation_with_non_type 55 issues found. (ran in 2.4s)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1f2da000581b9512c9d8a3f9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:45:35.002Z",
+  "stored_at": "2026-09-22T18:45:35.002Z"
+}

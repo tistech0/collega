@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -n \"Item 3[0-9][0-9]\" collega_backend/app/services/ocr/item_detector.py | head -3; sed -n '/_ITEM_PATTERN\\|_HEADER_PATTERN/,+5p' collega_backend/app/services/ocr/item_detector.py | head -14",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -n \"Item 3[0-9][0-9]\" collega_backend/app/services/ocr/item_detector.py | head -3; sed -n '/_ITEM_PATTERN\\|_HEADER_PATTERN/,+5p' collega_backend/app/services/ocr/item_detector.py | head -14 completed",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -n \"Item 3[0-9][0-9]\" collega_backend/app/services/ocr/item_detector.py | head -3; sed -n '/_ITEM_PATTERN\\|_HEADER_PATTERN/,+5p' collega_backend/app/services/ocr/item_detector.py | head -14 completed",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2a8459d139d161d1c3022d1b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:23:30.520Z",
+  "stored_at": "2026-09-22T17:23:30.521Z"
+}

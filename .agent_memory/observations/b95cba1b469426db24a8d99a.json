@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_badge_gallery.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_badge_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_badge.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.d",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_badge_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_badge.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\nimport 'package:collega_app/core/ui/tokens/cg_type.dart';\n\n/// Planche de toutes les variantes et états de [CgBadge] (Widgetbook + goldens).\nclass CgBadgeGallery extends StatelessWidget {\n  const CgBadgeGallery({super.key});\n\n  @override\n  Widget build(BuildContext context) {\n    final c = CgTheme.of(context).colors;\n    void noop() {}\n    Widget caption(String text) => Padding",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b95cba1b469426db24a8d99a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:38:35.693Z",
+  "stored_at": "2026-09-22T18:38:35.693Z"
+}

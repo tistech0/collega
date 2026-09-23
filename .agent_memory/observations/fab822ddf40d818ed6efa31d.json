@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_field.dart'\ns=open(p).read()\nold=\"\"\"              child: multiline && widget.placeholder != null && _controller.text.isEmpty\n                  ? Stack(children: [\n                      _semantics(input),\n                      Positioned(\"\"\"\nnew=\"\"\"              // Multiligne : toujours un Stack (le champ garde sa place dans\n              // l'arbre, donc son focus, quand le placeholder disparaît).\n              child: multiline\n                  ? Stack(children: [… [+326 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_field.dart'\ns=open(p).read()\nold=\"\"\"              child: multiline && widget.placeholder != null && _controller.text.isEmpty\n                  ? Stack(children: [\n                      _semantics(input),\n    ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_field.dart'\ns=open(p).read()\nold=\"\"\"              child: multiline && widget.placeholder != null && _controller.text.isEmpty\n                  ? Stack(children: [\n                      _semantics(input),\n                      Positioned(\"\"\"\nnew=\"\"\"              // Multiligne : toujours un Stack (le champ garde sa place dans\n              // l'arbre, donc son focus, quand le placeholder disparaît).\n              child: multiline\n                  ? Stack(children: [\n                      _semantics(input),\n                      if (widget.placeholder != null && _controller.text.isEmpty)\n                        Positioned(\"\"\"\nassert old in s\ns=s.replace(old,new)\nopen(p,'w').write(s)\nEOF\ndart format -l 120 lib/core/ui/components/cg_field.dart >/dev/null; sed -n 215,250p lib/core/ui/components/cg_field.dart:  place dans // l'arbre, donc son focus, quand le placeholder disparaît). child: multiline ? Stack(children: [ _semantics(input), if (widget.placeholder != null && _controller.text.isEmpty) Positioned( top: 0, left: 0, right: 0, child: IgnorePointer( child: ExcludeSemantics( child: Padding( padding: padding, child: Text(widget.placeholder!, style: placeholderStyle, maxLines: widget.minLines), ), ), ), ), ]) : _semantics(input), ), if (password) _FieldAction( key: const ValueKey('cg-field-reveal'), icon: _revealed ? CgIcons.eyeOff : CgIcons.eye, color: c.ink2, size: _actionIconSize, semanticLabel: _revealed ? 'Masquer le mot de passe' : 'Afficher le mot de passe', onTap: widget.enabled ? () => setState(() => _revealed = !_revealed) : null, ), if (search && widget.enabled && _controller.text.isNotEmpty) _FieldAction( key: const ValueKey('cg-field-clear'), icon: CgIcons.clear, color: c.ink3,",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "fab822ddf40d818ed6efa31d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:44:37.446Z",
+  "stored_at": "2026-09-22T18:44:37.447Z"
+}

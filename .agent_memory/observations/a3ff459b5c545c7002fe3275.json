@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_drill_card_gallery.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_drill_card_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_drill_card.dart';\n\n/// États figés de la planche [CgDrillCardGallery].\nenum CgDrillCardGalleryState { recto, verso, dra",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_drill_card_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_drill_card.dart';\n\n/// États figés de la planche [CgDrillCardGallery].\nenum CgDrillCardGalleryState { recto, verso, drag }\n\n/// Planche de [CgDrillCard] (Widgetbook + goldens), écran plein : recto, verso,\n/// et verso en cours de glissé vers la gauche (étiquette « À revoir » pleine,\n/// rotation) grâce à `debugDragOffset`.\nclass CgDrillCardGallery extends StatelessWidget {\n  const CgDrillCardGallery({super.key, this.state = CgDrillCardGalleryState.recto});\n\n  final CgDrillCardGalleryState state;\n\n  /// Au",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a3ff459b5c545c7002fe3275",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:48:39.263Z",
+  "stored_at": "2026-09-22T18:48:39.263Z"
+}

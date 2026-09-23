@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -n \"Item 3[0-9][0-9]\" collega_backend/app/services/ocr/item_detector.py | head -3; sed -n '/_ITEM_PATTERN\\|_HEADER_PATTERN/,+5p' collega_backend/app/services/ocr/item_detector.py | head -14",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -n \"Item 3[0-9][0-9]\" collega_backend/app/services/ocr/item_detector.py | head -3; sed -n '/_ITEM_PATTERN\\|_HEADER_PATTERN/,+5p' collega_backe",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9e238f388b57226ad560e38a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:23:28.895Z",
+  "stored_at": "2026-09-22T17:23:28.895Z"
+}

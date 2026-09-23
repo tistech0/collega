@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_badge_test.dart --update-goldens 2>&1 | grep -E \"Error|Expected|Actual|failed|\\+[0-9]+.*:\" | tail -25",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_badge_test.dart --update-goldens 2>&1 | grep -E \"Error|Expected|Actual|failed|\\+[0-9]+.*:\" | tail -25:  00:03 +9: beta : « Beta » sur accentSoft, texte accent 00:03 +9: count : nombre sur soft, texte ink2 00:04 +9: ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_badge_test.dart --update-goldens 2>&1 | grep -E \"Error|Expected|Actual|failed|\\+[0-9]+.*:\" | tail -25:  00:03 +9: beta : « Beta » sur accentSoft, texte accent 00:03 +9: count : nombre sur soft, texte ink2 00:04 +9: count : nombre sur soft, texte ink2 00:04 +10: count : nombre sur soft, texte ink2 00:04 +10: Semantics (français) rang, ocr, beta, count 00:04 +11: Semantics (français) rang, ocr, beta, count 00:04 +11: goldens (setUpAll) 00:04 +11: goldens golden cg_badge 375_10 00:04 +12: goldens golden cg_badge 375_10 00:04 +12: goldens golden cg_badge 375_16 00:04 +13: goldens golden cg_badge 375_16 00:04 +13: goldens golden cg_badge 393_10 00:04 +14: goldens golden cg_badge 393_10 00:04 +14: goldens golden cg_badge 393_16 00:04 +15: goldens golden cg_badge 393_16 00:04 +15: goldens golden cg_badge 430_10 00:04 +16: goldens golden cg_badge 430_10 00:04 +16: goldens golden cg_badge 430_16 00:04 +17: goldens golden cg_badge 430_16 00:04 +17: goldens (tearDownAll) 00:04 +17: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "74c6630a001d7d52472231f2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:38:48.872Z",
+  "stored_at": "2026-09-22T18:38:48.872Z"
+}

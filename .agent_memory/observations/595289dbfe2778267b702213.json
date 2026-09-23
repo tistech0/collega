@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ls lib/core/ui/components lib/core/ui/gallery test/core/ui/components widgetbook/lib/use_cases; grep -rn \"1\\.6\\|twoLevel\\|_stack\" lib/core/ui/components | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ls lib/core/ui/components lib/core/ui/gallery test/core/ui/components widgetbook/lib/use_cases; grep -rn \"1\\.6\\|twoLevel\\|_stack\" lib/core/ui/components | head: lib/core/ui/components: cg_badge.dart cg_button.dart lib/core/ui/gallery: cg_badge_gallery.dar",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ls lib/core/ui/components lib/core/ui/gallery test/core/ui/components widgetbook/lib/use_cases; grep -rn \"1\\.6\\|twoLevel\\|_stack\" lib/core/ui/components | head: lib/core/ui/components: cg_badge.dart cg_button.dart lib/core/ui/gallery: cg_badge_gallery.dart cg_button_gallery.dart cg_tokens_page.dart test/core/ui/components: cg_badge_test.dart cg_button_test.dart cg_ring_test.dart goldens widgetbook/lib/use_cases: cg_badge_use_cases.dart cg_button_use_cases.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "595289dbfe2778267b702213",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:39:10.014Z",
+  "stored_at": "2026-09-22T18:39:10.015Z"
+}

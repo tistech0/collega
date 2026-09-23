@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_sheet_test.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      final node = tester.getSemantics(find.byKey(CgSheetPanel.handleKey));\n      tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.tap);\"\"\",\"\"\"      tester.semantics.tap(find.semantics.byLabel('Fermer'));\"\"\")\ns=s.replace(\"import 'package:flutter/semantics.dart';\\n\",\"\")\nopen(p,'w').write(s)\nEOF\nflutter analyze lib/core/ui test/core/ui 2>&1 | grep -E \"cg_sheet|cg_state|cg_illustr\"; flutter test test/co… [+115 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_sheet_test.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      final node = tester.getSemantics(find.byKey(CgSheetPanel.handleKey));\n      tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, Semantic",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_sheet_test.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      final node = tester.getSemantics(find.byKey(CgSheetPanel.handleKey));\n      tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.tap);\"\"\",\"\"\"      tester.semantics.tap(find.semantics.byLabel('Fermer'));\"\"\")\ns=s.replace(\"import 'package:flutter/semantics.dart';\\n\",\"\")\nopen(p,'w').write(s)\nEOF\nflutter analyze lib/core/ui test/core/ui 2>&1 | grep -E \"cg_sheet|cg_state|cg_illustr\"; flutter test test/core/ui/components/cg_sheet_test.dart --update-goldens 2>&1 | tail -1 | grep -o \"All tests passed\\|Some tests failed\": Some tests failed",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a362f48c15bcf208d5329bdf",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:46:20.091Z",
+  "stored_at": "2026-09-22T18:46:20.091Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Edit",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_skeleton.dart",
+  "summary": "changed /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_skeleton.dart: return ExcludeSemantics(\n      child: CgSkeletonPulse(\n        child: _Bone(\n          width: width ?? double.infinity,\n          height: height,\n          radi -> return ExcludeSemantics(\n      child: CgSkeletonPu",
+  "text": "changed /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_skeleton.dart: return ExcludeSemantics(\n      child: CgSkeletonPulse(\n        child: _Bone(\n          width: width ?? double.infinity,\n          height: height,\n          radi -> return ExcludeSemantics(\n      child: CgSkeletonPulse(\n        // Largeur imposée par un parent `stretch` : la forme garde la sienne,\n        // calée au début (sinon une ligne de 180 pt s'étire sur tout l'écran).\n        child: Align(\n          alignment: AlignmentDirectional.centerStart,\n          widthFactor: 1,\n          heightFactor: 1,\n          child: _Bone(\n            width: width ?? double.infinity,\n            height: height,\n            radius: radius,\n           ",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a704a4f05b5546dfb7d67292",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:00.296Z",
+  "stored_at": "2026-09-22T18:43:00.297Z"
+}

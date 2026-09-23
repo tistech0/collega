@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_sheet_test.dart --plain-name \"affiche poignée\" 2>&1 | grep -A25 \"EXCEPTION CAUGHT\" | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_sheet_test.dart --plain-name \"affiche poignée\" 2>&1 | grep -A25 \"EXCEPTION CAUGHT\" | head -40: ._settle (package:collega_app/core/ui/components/cg_sheet.dart:380:44) #9 _CgSheetDraggableState._settle (package:colleg",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_sheet_test.dart --plain-name \"affiche poignée\" 2>&1 | grep -A25 \"EXCEPTION CAUGHT\" | head -40: ._settle (package:collega_app/core/ui/components/cg_sheet.dart:380:44) #9 _CgSheetDraggableState._settle (package:collega_app/core/ui/components/cg_sheet.dart) #10 _CgSheetDraggableState.dispose (package:collega_app/core/ui/components/cg_sheet.dart:407:5) #11 StatefulElement.unmount (package:flutter/src/widgets/framework.dart:5840:11) #12 _InactiveElements._unmount (package:flutter/src/widgets/framework.dart:2078:13) #13 _InactiveElements._unmount.<anonymous closure> (package:flutter/src/widgets/framework.dart:2076:7) #14 ComponentElement.visitChildren (package:flutter/src/widgets/framework.dart:5683:14) #15 _InactiveElements._unmount (package:flutter/src/widgets/framework.dart:2074:13) #16 _InactiveElements._unmount.<anonymous closure> (package:flutter/src/widgets/framework.dart:2076:7) #17 SingleChildRenderObjectElement.visitChildren (package:flutter/src/widgets/framework.dart:6900:14)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e6009a096e69b2101d27dfc3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:42:55.702Z",
+  "stored_at": "2026-09-22T18:42:55.702Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_skeleton_test.dart 2>&1 | grep -E \"Error\" | head -3",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_skeleton_test.dart 2>&1 | grep -E \"Error\" | head -3: 00:00 +0: loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_skeleton_test.dart test/core/ui/components/cg_skeleton_test.",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_skeleton_test.dart 2>&1 | grep -E \"Error\" | head -3: 00:00 +0: loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_skeleton_test.dart test/core/ui/components/cg_skeleton_test.dart:4:8: Error: Error when reading 'lib/core/ui/components/cg_skeleton.dart': No such file or directory test/core/ui/components/cg_skeleton_test.dart:5:8: Error: Error when reading 'lib/core/ui/gallery/cg_skeleton_gallery.dart': No such file or directory test/core/ui/components/cg_skeleton_test.dart:33:36: Error: Undefined name 'CgSkeleton'.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b980d20ea75405f4bb96bf33",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:42:08.448Z",
+  "stored_at": "2026-09-22T18:42:08.449Z"
+}

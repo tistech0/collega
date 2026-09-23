@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s#^import 'package:flutter/widgets.dart';#import 'package:flutter/semantics.dart';\\nimport 'package:flutter/widgets.dart';#\" lib/core/ui/components/cg_list_row.dart && sed -i '' -e \"/hasSelectedState: true,/d\" -e \"s/node\\.hasAction(/node.getSemanticsData().hasAction(/\" test/core/ui/components/cg_list_row_test.dart && flutter test test/core/ui/components/cg_list_row_test.dart --update-goldens 2>&1 | grep -E \"Expected|Actual|Which|══╡|\\[E\\]|tests passed|Some tests|Error:|overflow\" | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s#^import 'package:flutter/widgets.dart';#import 'package:flutter/semantics.dart';\\nimport 'package:flutter/widgets.dart';#\" lib/core/ui/components/cg_list_row.dart && sed -i '' -e \"/hasSelectedState: true,/d\" -e \"s/node\\.hasAction(/node.getSem",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s#^import 'package:flutter/widgets.dart';#import 'package:flutter/semantics.dart';\\nimport 'package:flutter/widgets.dart';#\" lib/core/ui/components/cg_list_row.dart && sed -i '' -e \"/hasSelectedState: true,/d\" -e \"s/node\\.hasAction(/node.getSemanticsData().hasAction(/\" test/core/ui/components/cg_list_row_test.dart && flutter test test/core/ui/components/cg_list_row_test.dart --update-goldens 2>&1 | grep -E \"Expected|Actual|Which|══╡|\\[E\\]|tests passed|Some tests|Error:|overflow\" | head -40:  intertitre ink3 au-dessus, lu comme en-tête 00:02 +22: CgListGroup header : intertitre ink3 au-dessus, lu comme en-tête 00:02 +22: CgSectionTitle 13/600 ink3, marge haute section, basse related 00:02 +23: CgSectionTitle 13/600 ink3, marge haute section, basse related 00:02 +23: goldens (setUpAll) 00:02 +23: goldens golden cg_list_row 375_10 00:02 +24: goldens golden cg_list_row 375_10 00:02 +24: goldens golden cg_list_row 375_16 00:02 +25: goldens golden cg_list_row 375_16 00:02 +25: goldens golden cg_list_row 393_10 00:02 +26: goldens golden cg_list_row 393_10 00:02 +26: goldens golden cg_list_row 393_16 00:02 +27: goldens golden cg_list_row 393_16 00:02 +27: goldens golden cg_list_row 430_10 00:02 +28: goldens golden cg_list_row 430_10 00:02 +28: goldens golden cg_list_row 430_16 00:02 +29: goldens golden cg_list_row 430_16 00:02 +29: goldens (tearDownAll) 00:02 +29: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "96d2dbd8ceb69e1bfe279c5c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:41:46.053Z",
+  "stored_at": "2026-09-22T18:41:46.053Z"
+}

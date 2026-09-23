@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "bas en cascade cest bien  enregistrerment de tous les titre et avec apres les numero si jamais on a pas de titre on p[eut matcher",
+  "summary": "bas en cascade cest bien enregistrerment de tous les titre et avec apres les numero si jamais on a pas de titre on p[eut matcher",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1b1558e5a34a1dcb053d89d5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:44:00.639Z",
+  "stored_at": "2026-09-22T17:44:00.640Z",
+  "low_signal": true
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 545,553p _bmad-output/planning-artifacts/ux-design-specification-v2.md; cat collega_app/test/support/cg_fonts.dart | head -30; ls collega_app/test/core/ui/components/goldens; grep -n \"widgetbook\\|sdk\" collega_app/widgetbook/pubspec.yaml; git -C collega_app status --short . | head -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 545,553p _bmad-output/planning-artifacts/ux-design-specification-v2.md; cat collega_app/test/support/cg_fonts.dart | head -30; ls collega_app/test/core/ui/components/goldens; grep -n \"widgetbook\\|sdk\" collega_app/widgetbook/pubspec.yaml; git -C collega_app sta",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 545,553p _bmad-output/planning-artifacts/ux-design-specification-v2.md; cat collega_app/test/support/cg_fonts.dart | head -30; ls collega_app/test/core/ui/components/goldens; grep -n \"widgetbook\\|sdk\" collega_app/widgetbook/pubspec.yaml; git -C collega_app status --short . | head -30: e). **Règle** : jamais sans les chiffres à proximité ; les proportions sont sur le total de fiches, pas sur les vues. #### CgBadge import 'dart:io'; import 'package:flutter/services.dart'; import 'package:collega_app/core/ui/tokens/cg_type.dart'; /// Charge Instrument Sans (embarquée) dans le moteur de test : sans cela les /// goldens seraient rendus en Ahem (carrés noirs). Future<void> loadCgFonts() async { final loader = FontLoader(CgType.family); for (final w in ['Regular', 'Medium', 'SemiBold', 'Bold']) { final bytes = File('assets/fonts/InstrumentSans-$w.ttf').readAsBytesSync(); loader.addFont(Future.value(ByteData.view(bytes.buffer))); } await loader.load(); } cg_button_375_10.png cg_button_375_16.png cg_button_393_10.png cg_button_393_16.png cg_button_430_10.png cg_button_430_16.png 1:name: collega_widgetbook 7: sdk: ^3.6.0 11: sdk: flutter 12: widgetbook: ^3.15.0 18: sdk: flutter",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "24aee34d853680eb42c3f82f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:38.906Z",
+  "stored_at": "2026-09-22T18:37:38.906Z"
+}

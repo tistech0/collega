@@ -2,13 +2,13 @@
   "schema_version": 1,
   "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
   "branch": "feat/redesign-ux-ui",
-  "head": "c0a5c1f8968d6ea654ca2d4a38318aa98eb09adc",
+  "head": "74f1a91581c2520e3f6b99b96fd772a3ad9b5ad4",
   "merge_base": "6d0a0eeb566a8722ef1808e976422a0672fba8d3",
   "changed_files": [
     ".agent_memory/pending/bug_fix-pasted-content-id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f-29717d15.md"
   ],
-  "diff_stat": ".agent_memory/audit/events.jsonl              | 13 +++++++++++++\n .agent_memory/review/branch-summary-main.json | 21 ++++++++++++++-------\n .agent_memory/review/memory-review.md         | 89 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-----------------------\n 3 files changed, 93 insertions(+), 30 deletions(-)\n.agent_memory/pending/bug_fix-pasted-content-id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f-29717d15.md | untracked",
-  "generated_at": "2026-09-22T19:32:37.804Z",
+  "diff_stat": ".agent_memory/pending/bug_fix-pasted-content-id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f-29717d15.md | untracked",
+  "generated_at": "2026-09-22T21:28:49.567Z",
   "source": "git_diff",
   "repo_memory_written": true,
   "promotion_review_required": true

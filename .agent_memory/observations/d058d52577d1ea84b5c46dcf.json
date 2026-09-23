@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && for p in \"repo:git-github-com-tistech0-collega:gotcha:collega-ui-8-2-r-gles-dassemblage-des-composants-pour-les-crans-1790103744167\" \"repo:git-github-com-tistech0-collega:decision:drill-une-fiche-revoir-nest-r-ins-r-e-quune-fois-toast-2-s-la-2e-fois-elle-est-c\" \"repo:git-github-com-tistech0-collega:bug_fix:progression-coll-ge-les-fiches-locales-sont-d-sormais-toutes-synchronis-es-8-3-l\" \"repo:git-github-com-tistech0-collega:decision:session-du-jour-8-3-moteur-persistance-synchro-des-fiches-propri-taire-des-donn-\"; do kage reverify --packet \"… [+102 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && for p in \"repo:git-github-com-tistech0-collega:gotcha:collega-ui-8-2-r-gles-dassemblage-des-composants-pour-les-crans-1790103744167\" \"repo:git-github-com-tistech0-collega:decision:drill-une-fiche-revoir-nest-r-ins-r-e-quune-fois-toast-2-s-la-2e-fois-elle-est-c\" \"repo",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && for p in \"repo:git-github-com-tistech0-collega:gotcha:collega-ui-8-2-r-gles-dassemblage-des-composants-pour-les-crans-1790103744167\" \"repo:git-github-com-tistech0-collega:decision:drill-une-fiche-revoir-nest-r-ins-r-e-quune-fois-toast-2-s-la-2e-fois-elle-est-c\" \"repo:git-github-com-tistech0-collega:bug_fix:progression-coll-ge-les-fiches-locales-sont-d-sormais-toutes-synchronis-es-8-3-l\" \"repo:git-github-com-tistech0-collega:decision:session-du-jour-8-3-moteur-persistance-synchro-des-fiches-propri-taire-des-donn-\"; do kage reverify --packet \"$p\" --evidence \"flutter test drill/today/colleges/core verts après 8.5 (af02119)\" 2>&1 | tail -1; done: evidence recorded for changed path(s): collega_app/lib/core/ui/components/cg_drill_card.dart evidence recorded for changed path(s): collega_app/lib/features/drill/drill_providers.dart, collega_app/lib/features/drill/domain/drill_session_state.dart, collega_app/lib/features/drill/presentation/drill_screen.dart evidence recorded for changed path(s): collega_app/lib/features/colleges/data/college_cards_sync.dart, collega_app/lib/features/today/today_providers.dart evidence recorded for changed path(s): collega_app/lib/features/today/data/daily_session_repository.dart, collega_app/lib/features/today/today_providers.dart, collega_app/lib/features/colleges/data/college_cards_sync.dart, collega_app/lib/features/drill/drill_providers.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d058d52577d1ea84b5c46dcf",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T21:28:06.225Z",
+  "stored_at": "2026-09-22T21:28:06.226Z"
+}

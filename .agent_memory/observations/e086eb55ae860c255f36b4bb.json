@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_ring_test.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_ring_test.dart: import 'package:flutter/widgets.dart';\nimport 'package:flutter_test/flutter_test.dart';\n\nimport 'package:collega_app/core/ui/components/cg_ring.dart';\nimport 'package:collega_app/core/ui/gallery/cg_ring_gallery.dar",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_ring_test.dart: import 'package:flutter/widgets.dart';\nimport 'package:flutter_test/flutter_test.dart';\n\nimport 'package:collega_app/core/ui/components/cg_ring.dart';\nimport 'package:collega_app/core/ui/gallery/cg_ring_gallery.dart';\nimport 'package:collega_app/core/ui/tokens/cg_colors.dart';\nimport 'package:collega_app/core/ui/tokens/cg_motion.dart';\nimport 'package:collega_app/core/ui/tokens/cg_type.dart';\n\nimport '../../../support/cg_golden.dart';\n\nconst c = CgColors.light;\n\n/// Le peintre de l'anneau (valeur affichée à l'instant, couleurs, épaisseur).\nCgRingPainter _painter(WidgetTester tester) => tester\n",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e086eb55ae860c255f36b4bb",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:39:07.425Z",
+  "stored_at": "2026-09-22T18:39:07.425Z"
+}

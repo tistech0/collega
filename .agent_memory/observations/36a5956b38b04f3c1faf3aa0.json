@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_context",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_context: [{'type': 'text', 'text': '# Kage Context\\n\\nQuery: CgDrillCard CgVerdictBar Collega UI swipe drill card Flutter goldens\\n\\n## Relevant Code Graph\\n1. [route] POST /flash-cards/:card_id/evaluate-semantic -> collega_backend/app/api/v1/drill.py:28\\n2. [route] DELETE /flash-cards/:card_id -> collega_ba",
+  "text": "[{'type': 'text', 'text': '# Kage Context\\n\\nQuery: CgDrillCard CgVerdictBar Collega UI swipe drill card Flutter goldens\\n\\n## Relevant Code Graph\\n1. [route] POST /flash-cards/:card_id/evaluate-semantic -> collega_backend/app/api/v1/drill.py:28\\n2. [route] DELETE /flash-cards/:card_id -> collega_backend/app/api/v1/flash_cards.py:54\\n3. [route] DELETE /flash-cards/:card_id -> collega_backend/app/api/v1/flash_cards.py:54\\n1. [symbol] method registerWith in collega_app/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:17\\n2. [symbol] class DKImagePickerControllerBaseUIDelegate in collega_app/ios/Pods/DKImagePickerController/Sources/DKImagePickerController/DKImagePickerControllerBaseUIDelegate.swift:97\\n3. [symbol] class AppleReceiptBuilder in collega_app/ios/Pods/RevenueCat/Sources/LocalReceiptParsing/Builders/AppleReceiptBuilder.swift:17\\n4. [symbol] class ASN1ContainerBuilder in collega_app/ios/Pods/RevenueCat/Sources/LocalReceiptParsing/Builders/ASN1ContainerBuilder.swift:17\\n5. [symbol] class ASN1ObjectIdentifierBuilder in collega_app/ios/Pods/RevenueCat/Sources/LocalReceiptParsing/Builders/ASN1ObjectIdentifierBuilder.swift:17\\n1. [test] test_liste_cards",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "36a5956b38b04f3c1faf3aa0",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:37.926Z",
+  "stored_at": "2026-09-22T18:37:37.927Z"
+}

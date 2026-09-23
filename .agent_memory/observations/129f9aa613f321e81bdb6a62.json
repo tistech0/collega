@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_verdict_bar_use_cases.dart",
+  "command": "",
+  "summary": "About to run: Write",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "129f9aa613f321e81bdb6a62",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:50:22.509Z",
+  "stored_at": "2026-09-22T18:50:22.509Z",
+  "low_signal": true
+}

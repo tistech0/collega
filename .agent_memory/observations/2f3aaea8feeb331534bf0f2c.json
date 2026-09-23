@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"/^import 'package:flutter\\/foundation.dart' show visibleForTesting;$/d\" lib/core/ui/components/cg_drill_card.dart && flutter analyze lib/core/ui test/core/ui 2>&1 | tail -4 && grep -rn \"material.dart\\|shadcn\" lib/core/ui/components/cg_drill_card.dart lib/core/ui/components/cg_verdict_bar.dart; flutter test test/core/ui/components/cg_drill_card_test.dart 2>&1 | tr '\\r' '\\n' | tail -1; flutter test test/core/ui/components/cg_verdict_bar_test.dart 2>&1 | tr '\\r' '\\n' | tail -1",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"/^import 'package:flutter\\/foundation.dart' show visibleForTesting;$/d\" lib/core/ui/components/cg_drill_card.dart && flutter analyze lib/core/ui test/core/ui 2>&1 | tail -4 && grep -rn \"material.dart\\|shadcn\" lib/core/ui/components/cg_drill_car",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"/^import 'package:flutter\\/foundation.dart' show visibleForTesting;$/d\" lib/core/ui/components/cg_drill_card.dart && flutter analyze lib/core/ui test/core/ui 2>&1 | tail -4 && grep -rn \"material.dart\\|shadcn\" lib/core/ui/components/cg_drill_card.dart lib/core/ui/components/cg_verdict_bar.dart; flutter test test/core/ui/components/cg_drill_card_test.dart 2>&1 | tr '\\r' '\\n' | tail -1; flutter test test/core/ui/components/cg_verdict_bar_test.dart 2>&1 | tr '\\r' '\\n' | tail -1: info • 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g • lib/core/ui/gallery/cg_tokens_page.dart:82:16 • deprecated_member_use 1 issue found. (ran in 1.3s) 00:03 +51: All tests passed! 00:01 +13: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2f3aaea8feeb331534bf0f2c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:50:52.541Z",
+  "stored_at": "2026-09-22T18:50:52.542Z"
+}

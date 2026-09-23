@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_ring.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      CgRingSize.s => (56.0, 5.0, CgType.label.copyWith(fontWeight: FontWeight.w700)),\n      CgRingSize.m => (84.0, 7.0, CgType.head),\n      CgRingSize.l => (200.0, 14.0, CgType.display),\n    };\"\"\",\"\"\"      CgRingSize.s => (_diameterS, _strokeS, CgType.label.copyWith(fontWeight: FontWeight.w700)),\n      CgRingSize.m => (_diameterM, _strokeM, CgType.head),\n      CgRingSize.l => (_diameterL, _strokeL, CgType.display),\n    };\"\"\")\ns=s.replace(\"\"… [+625 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_ring.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      CgRingSize.s => (56.0, 5.0, CgType.label.copyWith(fontWeight: FontWeight.w700)),\n      CgRingSize.m => (84.0, 7.0, CgType.head),\n      CgRingSize.l => (200.0, ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_ring.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      CgRingSize.s => (56.0, 5.0, CgType.label.copyWith(fontWeight: FontWeight.w700)),\n      CgRingSize.m => (84.0, 7.0, CgType.head),\n      CgRingSize.l => (200.0, 14.0, CgType.display),\n    };\"\"\",\"\"\"      CgRingSize.s => (_diameterS, _strokeS, CgType.label.copyWith(fontWeight: FontWeight.w700)),\n      CgRingSize.m => (_diameterM, _strokeM, CgType.head),\n      CgRingSize.l => (_diameterL, _strokeL, CgType.display),\n    };\"\"\")\ns=s.replace(\"\"\"  static const _labelInset = CgSpace.s1;\n\"\"\",\"\"\"  static const _labelInset = CgSpace.s1;\n\n  /// Diamètres et épaisseurs de trait (spec v2 § CgRing).\n  static const _diameterS = 56.0;\n  static const _diameterM = 84.0;\n  static const _diameterL = 200.0;\n  static const _strokeS = 5.0;\n  static const _strokeM = 7.0;\n  static const _strokeL = 14.0;\n\n  /// La valeur est un chiffre : toujours tabulaire (`head` ne l'est pas).\n  static const _tabular = [FontFeature.tabularFigures()];\n\"\"\")\ns=s.replace(\"style: style.copyWith(color: c.ink),\",\"style: style.copyWith(color: c.ink, fontFeatures: _tabular),\")\nopen(p,'w').write(s)\nEOF completed",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "74978fedf8bad181f0e77e3e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:39:41.627Z",
+  "stored_at": "2026-09-22T18:39:41.628Z"
+}

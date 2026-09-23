@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_skeleton_use_cases.dart\" <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_skeleton.dart';\nimport 'package:collega_app/core/ui/gallery/cg_skeleton_gallery.dart';\n\nfinal WidgetbookComponent cgSkeletonComponent = WidgetbookComponent(\n  name: 'CgSkeleton',\n  useCases: [\n    WidgetbookUseCase(name: 'Planche (formes et liste)', builder: (_) => const CgSkeletonGallery()),\n    WidgetbookUseCase(\n      name: 'Interactif… [+506 chars truncated]",
+  "summary": "About to run: cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_skeleton_use_cases.dart\" <<'EOF' import 'package:flutter/widgets.dart'; import 'package:widgetbook/widgetboo",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "97e268a834974b94fa519908",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:19.151Z",
+  "stored_at": "2026-09-22T18:43:19.152Z"
+}

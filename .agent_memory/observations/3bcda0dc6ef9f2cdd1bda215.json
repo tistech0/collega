@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && mkdir -p lib/core/ui/foundation test/core/ui/foundation && cat > test/core/ui/foundation/cg_icon_test.dart <<'EOF'\nimport 'package:flutter/services.dart';\nimport 'package:flutter/widgets.dart';\nimport 'package:flutter_svg/flutter_svg.dart';\nimport 'package:flutter_test/flutter_test.dart';\n\nimport 'package:collega_app/core/ui/foundation/cg_haptics.dart';\nimport 'package:collega_app/core/ui/foundation/cg_icon.dart';\n\nvoid main() {\n  testWidgets('CgIcon : SVG trait, taille et couleur demandées, décoratif par défaut', (tester) async… [+2397 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && mkdir -p lib/core/ui/foundation test/core/ui/foundation && cat > test/core/ui/foundation/cg_icon_test.dart <<'EOF' import 'package:flut",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3bcda0dc6ef9f2cdd1bda215",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:31:26.306Z",
+  "stored_at": "2026-09-22T18:31:26.307Z"
+}

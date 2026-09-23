@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat test/core/ui/components/cg_button_test.dart widgetbook/lib/use_cases/cg_button_use_cases.dart test/support/cg_golden.dart test/core/ui/foundation/cg_icon_test.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat test/core/ui/components/cg_button_test.dart widgetbook/lib/use_cases/cg_button_use_cases.dart test/support/cg_golden.dart test/core/ui/foundation/cg_icon_test.dart: rThanOrEqualTo(20)); }); group('CgHaptics — un retour distinct par verdict (spec § Mou",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat test/core/ui/components/cg_button_test.dart widgetbook/lib/use_cases/cg_button_use_cases.dart test/support/cg_golden.dart test/core/ui/foundation/cg_icon_test.dart: rThanOrEqualTo(20)); }); group('CgHaptics — un retour distinct par verdict (spec § Mouvement et haptique)', () { late List<String> calls; setUp(() { calls = []; TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger .setMockMethodCallHandler(SystemChannels.platform, (call) async { if (call.method == 'HapticFeedback.vibrate') calls.add(call.arguments as String); return null; }); }); test('à revoir = impact moyen, bien = léger, maîtrisé = succès (lourd)', () async { await CgHaptics.review(); await CgHaptics.good(); await CgHaptics.mastered(); expect(calls, [ 'HapticFeedbackType.mediumImpact', 'HapticFeedbackType.lightImpact', 'HapticFeedbackType.heavyImpact', ]); }); test('sélection (onglet, segmented) et retournement', () async { await CgHaptics.selection(); await CgHaptics.flip(); expect(calls, ['HapticFeedbackType.selectionClick', 'HapticFeedbackType.lightImpact']); }); }); }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ecc3b6837c3a29469b0d277f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:15.340Z",
+  "stored_at": "2026-09-22T18:37:15.340Z"
+}

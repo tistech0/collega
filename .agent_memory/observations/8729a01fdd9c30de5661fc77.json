@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_header_gallery.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_header_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_button.dart';\nimport 'package:collega_app/core/ui/components/cg_header.dart';\nimport 'package:collega_app/core/ui/component",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_header_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_button.dart';\nimport 'package:collega_app/core/ui/components/cg_header.dart';\nimport 'package:collega_app/core/ui/components/cg_list_row.dart';\nimport 'package:collega_app/core/ui/foundation/cg_icon.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\n\n/// Planche de [CgHeader] (Widgetbook + goldens) : large (sous-titre, action,\n/// titre long) et inline (seul, avec retour, avec action).\nclass CgHeaderGallery extends StatelessWidget {\n",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8729a01fdd9c30de5661fc77",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:46:35.382Z",
+  "stored_at": "2026-09-22T18:46:35.383Z"
+}

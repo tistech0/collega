@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_refresh",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_refresh: [{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"generated_at\": \"2026-09-22T19:31:38.009Z\",\\n \"quiet_refresh\": true,\\n \"index\": {\\n \"projectDir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"packets\": 28,\\n \"migrated\": 0,\\n \"indexes",
+  "text": "[{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"generated_at\": \"2026-09-22T19:31:38.009Z\",\\n \"quiet_refresh\": true,\\n \"index\": {\\n \"projectDir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"packets\": 28,\\n \"migrated\": 0,\\n \"indexes\": [\\n \".agent_memory/indexes/catalog.json\",\\n \".agent_memory/indexes/by-path.json\",\\n \".agent_memory/indexes/by-tag.json\",\\n \".agent_memory/indexes/by-type.json\",\\n \".agent_memory/indexes/vector-local.json\",\\n \".agent_memory/indexes/docs-index.json\",\\n \".agent_memory/indexes/structural.json\",\\n \".agent_memory/indexes/graph.json\",\\n \".agent_memory/indexes/code-graph.json\"\\n ],\\n \"policyPath\": \"AGENTS.md\"\\n },\\n \"validation\": {\\n \"ok\": true,\\n \"errors\": [],\\n \"warnings\": [\\n \".agent_memory/packets/gotcha-flutter-test-complet-pas-vert-home-notifier-binding-home-screen-timer-blocage-ap-be1fd156.md: some referenced paths do not exist in this repo: collega_app/test/features/home/home_notifier_test.dart, collega_app/test/features/home/home_screen_test.dart\",\\n \".agent_memory/packets/repo_map-collega-repo-overview-cf8b6e00.md: low memory quality score 54\",\\n \".agent_memory/packets/workflow-chan",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e43f64695dd60319fb8e053b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T19:31:38.269Z",
+  "stored_at": "2026-09-22T19:31:38.269Z",
+  "low_signal": true
+}

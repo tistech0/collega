@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter analyze lib/core/ui/components/cg_{ring,rank_bar,skeleton,toast}.dart lib/core/ui/gallery/cg_{ring,rank_bar,skeleton,toast}_gallery.dart test/core/ui/components/cg_{ring,rank_bar,skeleton,toast}_test.dart 2>&1 | tail -3; for t in ring rank_bar skeleton toast; do printf \"$t: \"; flutter test test/core/ui/components/cg_${t}_test.dart 2>&1 | grep -oE \"\\+[0-9]+(: All tests passed!| -[0-9]+: Some tests failed)\" | tail -1; done",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter analyze lib/core/ui/components/cg_{ring,rank_bar,skeleton,toast}.dart lib/core/ui/gallery/cg_{ring,rank_bar,skeleton,toast}_gal",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1edd91aa8e79464c95b336e7",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:45:39.113Z",
+  "stored_at": "2026-09-22T18:45:39.113Z"
+}

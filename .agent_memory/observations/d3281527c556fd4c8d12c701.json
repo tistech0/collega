@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_drill_card_test.dart'\ns=open(p).read()\ns=s.replace(\"\"\".widgetList<Container>(find.descendant(\n            of: find.byKey(CgDrillCard.progressKey),\n            matching: find.byType(Container),\"\"\",\"\"\".widgetList<AnimatedContainer>(find.descendant(\n            of: find.byKey(CgDrillCard.progressKey),\n            matching: find.byType(AnimatedContainer),\"\"\")\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/components/cg_verdict_bar_test.dart 2>&1 | tail -5",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_drill_card_test.dart'\ns=open(p).read()\ns=s.replace(\"\"\".widgetList<Container>(find.descendant(\n            of: find.byKey(CgDrillCard.progressKey),\n            matching: find.byType(Container),\"\"\",\"\"\".widgetL",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_drill_card_test.dart'\ns=open(p).read()\ns=s.replace(\"\"\".widgetList<Container>(find.descendant(\n            of: find.byKey(CgDrillCard.progressKey),\n            matching: find.byType(Container),\"\"\",\"\"\".widgetList<AnimatedContainer>(find.descendant(\n            of: find.byKey(CgDrillCard.progressKey),\n            matching: find.byType(AnimatedContainer),\"\"\")\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/components/cg_verdict_bar_test.dart 2>&1 | tail -5: 00:01 +0 -1: loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_verdict_bar_test.dart [E] Failed to load \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_verdict_bar_test.dart\": Compilation failed for testPath=/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_verdict_bar_test.dart To run this test again: /Users/lesurmatthis/dev/app/flutter/bin/cache/dart-sdk/bin/dart test /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_verdict_bar_test.dart -p vm --plain-name 'loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_verdict_bar_test.dart' 00:01 +0 -1: Some tests failed.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d3281527c556fd4c8d12c701",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:42:50.957Z",
+  "stored_at": "2026-09-22T18:42:50.958Z"
+}

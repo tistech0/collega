@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; grep -i \"reserved\" $S/OFL.txt | head -3; A=\"/Users/lesurmatthis/dev/projet perso/collega/collega_app/assets/fonts\"; mkdir -p \"$A\"; cd $S && for w in 400:Regular 500:Medium 600:SemiBold 700:Bold; do fvenv/bin/fonttools varLib.instancer IS.ttf wdth=100 wght=${w%%:*} --static --update-name-table -o \"$A/InstrumentSans-${w##*:}.ttf\" 2>&1 | grep -v INFO | tail -1; done; cp OFL.txt \"$A/OFL.txt\"; ls -la \"$A\"",
+  "summary": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; grep -i \"reserved\" $S/OFL.txt | head -3; A=\"/Users/lesurmatthis/dev/projet perso/collega/collega_app/assets/fonts\"; mkdir -p \"$A\"; cd $S && for w in 400:Regular 500:Medium 600:SemiBold 700:Bold; do fv",
+  "text": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; grep -i \"reserved\" $S/OFL.txt | head -3; A=\"/Users/lesurmatthis/dev/projet perso/collega/collega_app/assets/fonts\"; mkdir -p \"$A\"; cd $S && for w in 400:Regular 500:Medium 600:SemiBold 700:Bold; do fvenv/bin/fonttools varLib.instancer IS.ttf wdth=100 wght=${w%%:*} --static --update-name-table -o \"$A/InstrumentSans-${w##*:}.ttf\" 2>&1 | grep -v INFO | tail -1; done; cp OFL.txt \"$A/OFL.txt\"; ls -la \"$A\": so/collega/collega_app/assets/fonts/InstrumentSans-Regular.ttf Saving instance font /Users/lesurmatthis/dev/projet perso/collega/collega_app/assets/fonts/InstrumentSans-Medium.ttf Saving instance font /Users/lesurmatthis/dev/projet perso/collega/collega_app/assets/fonts/InstrumentSans-SemiBold.ttf Saving instance font /Users/lesurmatthis/dev/projet perso/collega/collega_app/assets/fonts/InstrumentSans-Bold.ttf total 560 drwxr-xr-x@ 7 lesurmatthis staff 224 Sep 22 20:21 . drwxr-xr-x@ 4 lesurmatthis staff 128 Sep 22 20:21 .. -rw-r--r--@ 1 lesurmatthis staff 68680 Sep 22 20:21 InstrumentSans-Bold.ttf -rw-r--r--@ 1 lesurmatthis staff 68904 Sep 22 20:21 InstrumentSans-Medium.ttf -rw-r--r--@ 1 lesurmatthis staff 68648 Sep 22 20:21 InstrumentSans-Regular.ttf -rw-r--r--@ 1 lesurmatthis staff 68872 Sep 22 20:21 InstrumentSans-SemiBold.ttf -rw-r--r--@ 1 lesurmatthis staff 4403 Sep 22 20:21 OFL.txt",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "784c48a8a47a8ee45a198747",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:21:56.484Z",
+  "stored_at": "2026-09-22T18:21:56.484Z"
+}

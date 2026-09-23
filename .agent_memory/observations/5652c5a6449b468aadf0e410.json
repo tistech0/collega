@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; sed -i '' 's/college_ref/college_ref_id/g' $S/q1.sql; ssh nas 'docker exec -i collega-db-1 psql -U postgres -d collega' < $S/q1.sql 2>&1 | head -120",
+  "summary": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; sed -i '' 's/college_ref/college_ref_id/g' $S/q1.sql; ssh nas 'docker exec -i collega-db-1 psql -U postgres -d collega' < $S/q1.sql 2>&1 | head -120: --------------------------------------------------",
+  "text": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; sed -i '' 's/college_ref/college_ref_id/g' $S/q1.sql; ssh nas 'docker exec -i collega-db-1 psql -U postgres -d collega' < $S/q1.sql 2>&1 | head -120: ----------------------------------------------------------------------+------ 3 | 290 | | 3 | 291 | | 3 | 292 | | 3 | 293 | | 3 | 294 | | 3 | 295 | d'un malade atteint de cancer | 3 | 297 | | 3 | 298 | | 3 | 299 | | 3 | 300 | à l'hyperœstrogénie induite : en préménopause, elle favorise une exposition | 3 | 301 | | 3 | 302 | | 3 | 303 | | 3 | 304 | Pr Michel Ducreux1, Pr Serge Evrard2, Pr Françoise Mornex3, Pr Michel Rivoire4 | 3 | 305 | | 3 | 306 | | 3 | 307 | | 3 | 308 | | 3 | 309 | | 3 | 310 | | 3 | 311 | | 3 | 312 | | 3 | 314 | | 34 | 75 | | 34 | 110 | | 34 | 154 | | 34 | 159 | Les objectifs de rang B apparaissent en italique dans le texte | 34 | 186 | | 34 | 188 | | 34 | 203 | | 34 | 204 | | 34 | 205 | | 34 | 206 | | 34 | 207 | de ces objectifs | 34 | 208 | | 34 | 209 | | 34 | 210 | | 34 | 211 | | 34 | 226 | | 34 | 230 | | 34 | 309 | | 34 | 338 | | 34 | 359 | | 34 | 360 | | (44 rows)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5652c5a6449b468aadf0e410",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:48:35.689Z",
+  "stored_at": "2026-09-22T17:48:35.689Z"
+}

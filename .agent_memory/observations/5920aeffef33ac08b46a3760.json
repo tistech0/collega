@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls -la _bmad-output/planning-artifacts/ _bmad-output/planning-artifacts/screens/ 2>/dev/null; echo \"---THEME---\"; wc -l collega_app/lib/core/theme/app_theme.dart; echo \"---FEATURES---\"; ls collega_app/lib/features/; echo \"---PUBSPEC UI deps---\"; grep -E \"shadcn_ui|flutter_animate|google_fonts|lucide|flutter_svg|rive|lottie|widgetbook|golden\" collega_app/pubspec.yaml",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls -la _bmad-output/planning-artifacts/ _bmad-output/planning-artifacts/screens/ 2>/dev/null; echo \"---THEME---\"; wc -l collega_app/lib/core/theme/app_theme.dart; echo \"---FEATURES---\"; ls collega_app/lib/features/; echo \"---PUBSPEC UI deps---\"; grep -E \"shadcn_ui|fl",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls -la _bmad-output/planning-artifacts/ _bmad-output/planning-artifacts/screens/ 2>/dev/null; echo \"---THEME---\"; wc -l collega_app/lib/core/theme/app_theme.dart; echo \"---FEATURES---\"; ls collega_app/lib/features/; echo \"---PUBSPEC UI deps---\"; grep -E \"shadcn_ui|flutter_animate|google_fonts|lucide|flutter_svg|rive|lottie|widgetbook|golden\" collega_app/pubspec.yaml: 7:10 drill-verso.html -rw-r--r--@ 1 lesurmatthis staff 5890 Apr 26 15:27 drill.html -rw-r--r--@ 1 lesurmatthis staff 12904 Apr 26 17:09 home.html -rw-r--r--@ 1 lesurmatthis staff 7838 Apr 26 17:32 import-progress.html -rw-r--r--@ 1 lesurmatthis staff 11163 Apr 26 17:12 item-detail.html -rw-r--r--@ 1 lesurmatthis staff 10248 Apr 26 17:30 profile.html -rw-r--r--@ 1 lesurmatthis staff 10441 Apr 26 16:56 search.html -rw-r--r--@ 1 lesurmatthis staff 8355 Apr 26 17:31 session-personnalisation.html -rw-r--r--@ 1 lesurmatthis staff 8220 Apr 26 17:11 session-terminee.html ---THEME--- 82 collega_app/lib/core/theme/app_theme.dart ---FEATURES--- auth colleges demo drill generation home legal planning profile search ---PUBSPEC UI deps--- flutter_riverpod: ^2.6.1 riverpod_annotation: ^2.6.1 shadcn_ui: ^0.19.0 google_fonts: ^6.2.1 flutter_animate: ^4.5.0 riverpod_generator: ^2.6.5 riverpod_lint: ^2.6.5",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5920aeffef33ac08b46a3760",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:01:28.356Z",
+  "stored_at": "2026-09-21T19:01:28.357Z"
+}

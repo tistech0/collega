@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_context",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_context: [{'type': 'text', 'text': '# Kage Context\\n\\nQuery: Collega UI composants Flutter CgRing CgRankBar CgSkeleton CgToast goldens tests\\n\\n## Relevant Code Graph\\n1. [route] GET /protected -> collega_backend/tests/api/test_require_subscription.py:26\\n2. [route] PATCH /arq.create_pool -> collega_backend/",
+  "text": "[{'type': 'text', 'text': '# Kage Context\\n\\nQuery: Collega UI composants Flutter CgRing CgRankBar CgSkeleton CgToast goldens tests\\n\\n## Relevant Code Graph\\n1. [route] GET /protected -> collega_backend/tests/api/test_require_subscription.py:26\\n2. [route] PATCH /arq.create_pool -> collega_backend/tests/api/test_admin_ocr.py:179\\n3. [route] PATCH /app.workers.ocr_worker._item_detector -> collega_backend/tests/workers/test_ocr_worker.py:74\\n1. [symbol] function make_job in collega_backend/tests/api/test_admin_ocr.py:32\\n2. [symbol] class TestRequireSubscription in collega_backend/tests/api/test_require_subscription.py:36\\n3. [symbol] test test_422_for_invalid_uuid in collega_backend/tests/api/test_billing_webhook.py:204\\n4. [symbol] test test_liste_cards_triees_rang_puis_card_type in collega_backend/tests/api/test_colleges.py:233\\n5. [symbol] test test_set_reminder_minuit_ok in collega_backend/tests/api/test_reminder.py:78\\n1. [test] test_422_for_invalid_uuid in collega_backend/tests/api/test_billing_webhook.py:204\\n2. [test] test_liste_cards_triees_rang_puis_card_type in collega_backend/tests/api/test_colleges.py:233\\n3. [test] test_set_reminder_minuit_ok in collega_backend/tests/",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d3b4d45473cc21ec485eb373",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:38:49.171Z",
+  "stored_at": "2026-09-22T18:38:49.172Z"
+}

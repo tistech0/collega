@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_segmented_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | tail -3",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_segmented_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | tail -3: 00:02 +16: goldens golden cg_segmented 430_16 00:02 +16: goldens (tearDownAll) 00:02 +16: All tests passed!",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_segmented_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | tail -3: 00:02 +16: goldens golden cg_segmented 430_16 00:02 +16: goldens (tearDownAll) 00:02 +16: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b590eb3862765fcd8e22bdac",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:41:30.917Z",
+  "stored_at": "2026-09-22T18:41:30.918Z"
+}

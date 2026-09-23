@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_toast_test.dart'\ns=open(p).read()\nold=\"\"\"      await tester.pump(CgMotion.base);\n      final screen = tester.view.physicalSize.height / tester.view.devicePixelRatio;\"\"\"\nnew=\"\"\"      await tester.pump();\n      await tester.pump(CgMotion.base);\n      final screen = tester.view.physicalSize.height / tester.view.devicePixelRatio;\n      final safe = 34 / tester.view.devicePixelRatio;\"\"\"\nassert s.count(old)==2\ns=s.replace(old,new)\ns=s.replace(\"lessThanOrEqualTo(screen - 34 - cgToastTabBar… [+498 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='test/core/ui/components/cg_toast_test.dart' s=open(p).read() old=\"\"\" await tester.pump(CgMotion.base); final scree",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7fe06463a72a3aa52ba84838",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:45:11.036Z",
+  "stored_at": "2026-09-22T18:45:11.037Z"
+}

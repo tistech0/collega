@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_field_gallery.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_field_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_field.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.d",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_field_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_field.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\nimport 'package:collega_app/core/ui/tokens/cg_type.dart';\n\n/// Planche de toutes les variantes et états de [CgField] (Widgetbook + goldens).\nclass CgFieldGallery extends StatefulWidget {\n  const CgFieldGallery({super.key});\n\n  @override\n  State<CgFieldGallery> createState() => _CgFieldGalleryState();\n}\n\nclass _CgFieldGalleryState extends State<CgFieldGallery> {\n  final _passwor",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "932cd81e68b118e1d6f4fb89",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:28.677Z",
+  "stored_at": "2026-09-22T18:43:28.677Z"
+}

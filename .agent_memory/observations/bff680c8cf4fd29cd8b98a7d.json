@@ -1,0 +1,16 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-c-bloc.html",
+  "summary": "wrote /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-c-bloc.html: <title>Collega — Bloc</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;",
+  "text": "wrote /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-c-bloc.html: <title>Collega — Bloc</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap\">\n<style>\n  :root{\n    --ground:#ECEAE3; --surface:#F7F6F2; --ink:#17201F; --ink2:#5B6664; --ink3:#9A9E97; --line:#D9D6CC;\n    --accent:#0E5E63; --accent-soft:#D5E6E4; --accent-ink:#F2F5F3; --accent-deep:#0A474B;\n    --rank-a:#0E5E63; --rank-b:#4C6A6E; --rank-c:#8B8A80;\n    --mastered:#0E5E63; --good:#6FA8A2; --review:#D9822B; --unseen:#D9D6CC;\n    --danger:#B8352B; --warning:#D9822B;\n    --font:\"Br",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bff680c8cf4fd29cd8b98a7d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:54:11.870Z",
+  "stored_at": "2026-09-21T19:54:11.871Z",
+  "low_signal": true
+}

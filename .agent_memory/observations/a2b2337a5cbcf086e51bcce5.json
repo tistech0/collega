@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_state_gallery.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_state_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_illustrations.dart';\nimport 'package:collega_app/core/ui/components/cg_state.dart';\nimport 'package:collega_app/core/ui/them",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_state_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_illustrations.dart';\nimport 'package:collega_app/core/ui/components/cg_state.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\nimport 'package:collega_app/core/ui/tokens/cg_type.dart';\n\n/// Planche de [CgState] (Widgetbook + goldens) : vide, erreur, hors-ligne avec\n/// les copies du spec v2, puis les cinq illustrations.\nclass CgStateGallery extends StatelessWidget {\n  const CgStateGallery({super.key});\n\n  @override\n  Widget build(Bu",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a2b2337a5cbcf086e51bcce5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:44:58.935Z",
+  "stored_at": "2026-09-22T18:44:58.936Z"
+}

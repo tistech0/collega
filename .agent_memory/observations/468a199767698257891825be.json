@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_ring.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_ring.dart: import 'dart:math' as math;\n\nimport 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_motion.dart';\nimport 'package:collega_app/core/",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_ring.dart: import 'dart:math' as math;\n\nimport 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_motion.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\nimport 'package:collega_app/core/ui/tokens/cg_type.dart';\n\n/// `s` 56 pt (lignes), `m` 84 pt (tête de collège), `l` 200 pt (fin de session).\nenum CgRingSize { s, m, l }\n\n/// Anneau de progression (spec v2 § CgRing) : la part maîtrisée d'un collège\n/// ou d'une session. Rail `unseen`, arc `accent` (bouts ronds, départ en haut,\n/// sens horaire), valeur ",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "468a199767698257891825be",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:39:33.270Z",
+  "stored_at": "2026-09-22T18:39:33.270Z"
+}

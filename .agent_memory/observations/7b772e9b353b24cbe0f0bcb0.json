@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/components/cg_button.dart lib/core/ui/gallery/cg_button_gallery.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/components/cg_button.dart lib/core/ui/gallery/cg_button_gallery.dart: : 'Personnaliser la session', onPressed: noop, variant: CgButtonVariant.quiet), gap, CgButton(label: 'Supprimer la fiche', onPressed: noop, variant: CgButtonVariant.dest",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/components/cg_button.dart lib/core/ui/gallery/cg_button_gallery.dart: : 'Personnaliser la session', onPressed: noop, variant: CgButtonVariant.quiet), gap, CgButton(label: 'Supprimer la fiche', onPressed: noop, variant: CgButtonVariant.destructive), gap, const CgButton(label: 'Enregistrer', onPressed: null), gap, CgButton(label: 'Se connecter', onPressed: noop, loading: true), gap, CgButton(label: 'Importer', onPressed: noop, icon: CgIcons.upload), gap, Wrap(spacing: CgSpace.s3, runSpacing: CgSpace.s3, children: [ CgButton(label: 'Réessayer', onPressed: noop, size: CgButtonSize.compact, expand: false, variant: CgButtonVariant.secondary), CgButton(label: 'Importer', onPressed: noop, size: CgButtonSize.compact, expand: false, variant: CgButtonVariant.quiet), ]), gap, ColoredBox( color: c.accent, child: Padding( padding: const EdgeInsets.all(CgSpace.gutter), child: CgButton(label: 'Terminer', onPressed: noop, variant: CgButtonVariant.inverse), ), ), ]), ); } }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7b772e9b353b24cbe0f0bcb0",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:36:54.144Z",
+  "stored_at": "2026-09-22T18:36:54.144Z"
+}

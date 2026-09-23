@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_sheet_gallery.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_sheet_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_button.dart';\nimport 'package:collega_app/core/ui/components/cg_sheet.dart';\nimport 'package:collega_app/core/ui/theme/cg_th",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_sheet_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_button.dart';\nimport 'package:collega_app/core/ui/components/cg_sheet.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\nimport 'package:collega_app/core/ui/tokens/cg_type.dart';\n\n/// Planche de [CgSheetPanel] (Widgetbook + goldens) : sheet à pied, dialog,\n/// dialog destructif, chacun posé sur le voile `scrim`. L'action sheet est\n/// native (`CupertinoActionSheet`) : elle n'est montrée que dans Widgetbook.\nclass CgSheetGallery exten",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6f3de3f56a10ff35ba3aa86b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:42:25.351Z",
+  "stored_at": "2026-09-22T18:42:25.352Z"
+}

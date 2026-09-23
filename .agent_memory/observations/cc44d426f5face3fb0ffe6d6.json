@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "python3 - <<'EOF'\nimport colorsys\ndef lum(h):\n    h=h.lstrip('#'); r,g,b=[int(h[i:i+2],16)/255 for i in (0,2,4)]\n    f=lambda c: c/12.92 if c<=0.03928 else ((c+0.055)/1.055)**2.4\n    return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b)\ndef cr(a,b):\n    la,lb=sorted([lum(a),lum(b)],reverse=True); return (la+0.05)/(lb+0.05)\ndef darken(h, target, bgs):\n    h=h.lstrip('#'); r,g,b=[int(h[i:i+2],16)/255 for i in (0,2,4)]\n    H,L,S=colorsys.rgb_to_hls(r,g,b)\n    while L>0:\n        c=\"#%02X%02X%02X\"%tuple(round(x*255) for x in colorsys.hls_to_rgb(H,L,S))\n        if min(cr(c,bg) for bg in bgs)>=target: return c… [+698 chars truncated]",
+  "summary": "python3 - <<'EOF'\nimport colorsys\ndef lum(h):\n    h=h.lstrip('#'); r,g,b=[int(h[i:i+2],16)/255 for i in (0,2,4)]\n    f=lambda c: c/12.92 if c<=0.03928 else ((c+0.055)/1.055)**2.4\n    return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b)\ndef cr(a,b):\n    la,lb=sorted([lum(a),lum(b)],reverse=True); return (la+0.05)/(lb+0.05)\ndef da",
+  "text": "python3 - <<'EOF'\nimport colorsys\ndef lum(h):\n    h=h.lstrip('#'); r,g,b=[int(h[i:i+2],16)/255 for i in (0,2,4)]\n    f=lambda c: c/12.92 if c<=0.03928 else ((c+0.055)/1.055)**2.4\n    return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b)\ndef cr(a,b):\n    la,lb=sorted([lum(a),lum(b)],reverse=True); return (la+0.05)/(lb+0.05)\ndef darken(h, target, bgs):\n    h=h.lstrip('#'); r,g,b=[int(h[i:i+2],16)/255 for i in (0,2,4)]\n    H,L,S=colorsys.rgb_to_hls(r,g,b)\n    while L>0:\n        c=\"#%02X%02X%02X\"%tuple(round(x*255) for x in colorsys.hls_to_rgb(H,L,S))\n        if min(cr(c,bg) for bg in bgs)>=target: return c\n        L-=0.002\nc=darken(\"#8B8A80\",4.5,[\"#E2E0D8\",\"#ECEAE3\",\"#F7F6F2\"]); print(\"rankC\", c, [round(cr(c,b),2) for b in [\"#E2E0D8\",\"#ECEAE3\",\"#F7F6F2\"]])\nb=darken(\"#4C6A6E\",4.5,[\"#DDE3E3\",\"#ECEAE3\",\"#F7F6F2\"]); print(\"rankB\", b, [round(cr(b,x),2) for x in [\"#DDE3E3\",\"#ECEAE3\",\"#F7F6F2\"]])\nprint(\"accent on accentSoft\", round(cr(\"#0E5E63\",\"#D5E6E4\"),2), \"ink on soft\", round(cr(\"#17201F\",\"#E2E0D8\"),2), \"ink2 on soft\", round(cr(\"#5B6664\",\"#E2E0D8\"),2), \"reviewInk on soft\", round(cr(\"#9A5A16\",\"#E2E0D8\"),2))\nprint(\"white on review\", round(cr(\"#FFFFFF\",\"#D9822B\"),2), \"ink on review\", round(cr(\"#17201F\",\"#D9822B\"),2), \"white on ink\", round(cr(\"#FFFFFF\",\"#17201F\"),2), \"accentInk on accent 72%?\")\nEOF: rankC #64635B [4.57, 5.02, 5.58] rankB #4C696D [4.56, 4.92, 5.47] accent on accentSoft 5.81 ink on soft 12.58 ink2 on soft 4.5 reviewInk on soft 4.13 white on review 2.93 ink on review 5.68 white on ink 16.63 accentInk on accent 72%?",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "cc44d426f5face3fb0ffe6d6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:22:21.319Z",
+  "stored_at": "2026-09-22T18:22:21.319Z"
+}

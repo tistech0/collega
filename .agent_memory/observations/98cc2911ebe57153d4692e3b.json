@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_state_test.dart --update-goldens 2>&1 | grep -E \"\\[E\\]|Expected:|Actual:|Which:|: Some|All tests|Error:|overflowed\" | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_state_test.dart --update-goldens 2>&1 | grep -E \"\\[E\\]|Expected:|Actual:|Which:|: Some|All tests|Error:|overflowed\" | head -20: on posée d'emblée 00:01 +8: Semantics : titre en en-tête, illustration décorative 00:01",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_state_test.dart --update-goldens 2>&1 | grep -E \"\\[E\\]|Expected:|Actual:|Which:|: Some|All tests|Error:|overflowed\" | head -20: on posée d'emblée 00:01 +8: Semantics : titre en en-tête, illustration décorative 00:01 +9: Semantics : titre en en-tête, illustration décorative 00:01 +9: Dynamic Type 1,6 : aucun débordement sur 375 pt 00:01 +10: Dynamic Type 1,6 : aucun débordement sur 375 pt 00:01 +10: goldens (setUpAll) 00:01 +10: goldens golden cg_state 375_10 00:01 +11: goldens golden cg_state 375_10 00:01 +11: goldens golden cg_state 375_16 00:01 +12: goldens golden cg_state 375_16 00:01 +12: goldens golden cg_state 393_10 00:01 +13: goldens golden cg_state 393_10 00:01 +13: goldens golden cg_state 393_16 00:01 +14: goldens golden cg_state 393_16 00:01 +14: goldens golden cg_state 430_10 00:01 +15: goldens golden cg_state 430_10 00:01 +15: goldens golden cg_state 430_16 00:02 +15: goldens golden cg_state 430_16 00:02 +16: goldens golden cg_state 430_16 00:02 +16: goldens (tearDownAll) 00:02 +16: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "98cc2911ebe57153d4692e3b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:45:02.897Z",
+  "stored_at": "2026-09-22T18:45:02.897Z"
+}

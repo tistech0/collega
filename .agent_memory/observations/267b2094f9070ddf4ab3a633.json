@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat _bmad-output/implementation-artifacts/8-2-composants-collega-ui.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat _bmad-output/implementation-artifacts/8-2-composants-collega-ui.md: ink`, texte `ground` `bodyS`, une ligne (ellipse), en bas au-dessus de la tab bar, 2 s (`CgMotion.toast`), un seul à la fois (le suivant remplace), `SemanticsService.announce`. Fondu + montée 8 p",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat _bmad-output/implementation-artifacts/8-2-composants-collega-ui.md: ink`, texte `ground` `bodyS`, une ligne (ellipse), en bas au-dessus de la tab bar, 2 s (`CgMotion.toast`), un seul à la fois (le suivant remplace), `SemanticsService.announce`. Fondu + montée 8 pt (fondu seul si mouvement réduit). ## Tâches - [x] T0 Base : `CgIcons` (29 icônes de la maquette) + `CgIcon`, `CgHaptics` - [ ] T1 CgButton · T2 CgBadge · T3 CgField · T4 CgSegmented - [ ] T5 CgListRow/CgListGroup · T6 CgHeader/CgPage · T7 CgTabBar - [ ] T8 CgDrillCard · T9 CgVerdictBar - [ ] T10 CgRing · T11 CgRankBar · T12 CgSkeleton/CgToast - [ ] T13 CgSheet · T14 CgState (+ illustrations) - [ ] T15 Widgetbook : une entrée par composant, `widgetbook/lib/main.dart` · barrel `lib/core/ui/collega_ui.dart` - [ ] T16 Revue d'accessibilité (libellés, cibles 44 pt) + test « aucun import Material/shadcn dans components » ## Dev Agent Record ### Agent Model Used ### Completion Notes List ### File List",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "267b2094f9070ddf4ab3a633",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:36:34.548Z",
+  "stored_at": "2026-09-22T18:36:34.548Z"
+}

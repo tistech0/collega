@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_badge.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_badge.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/foundation/cg_icon.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_colors.dart';",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_badge.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/foundation/cg_icon.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_colors.dart';\nimport 'package:collega_app/core/ui/tokens/cg_radius.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\nimport 'package:collega_app/core/ui/tokens/cg_type.dart';\n\nenum _CgBadgeKind { rank, ocr, beta, count }\n\n/// Étiquette sémantique (spec v2 § CgBadge) : rang A/B/C, source OCR à\n/// vérifier, beta, compteur. Jamais seule pour porter une information :\n/// toujour",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0604ffc98a9f4daac44fc97f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:38:30.005Z",
+  "stored_at": "2026-09-22T18:38:30.005Z"
+}

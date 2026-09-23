@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 200,420p _bmad-output/planning-artifacts/prd.md | grep -vE \"^\\s*$\" | head -150; echo \"=== RETRO (head)\"; sed -n 1,80p _bmad-output/implementation-artifacts/epic-mvp-retro-2026-05-19.md; echo \"=== EPICS v1.1 headings\"; grep -nE \"^#{1,3} \" _bmad-output/planning-artifacts/epics-v1.1.md | head -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 200,420p _bmad-output/planning-artifacts/prd.md | grep -vE \"^\\s*$\" | head -150; echo \"=== RETRO (head)\"; sed -n 1,80p _bmad-output/implementation-artifacts/epic-mvp-retro-2026-05-19.md; echo \"=== EPICS v1.1 headings\"; grep -nE \"^#{1,3} \" _bmad-output/planning-",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 200,420p _bmad-output/planning-artifacts/prd.md | grep -vE \"^\\s*$\" | head -150; echo \"=== RETRO (head)\"; sed -n 1,80p _bmad-output/implementation-artifacts/epic-mvp-retro-2026-05-19.md; echo \"=== EPICS v1.1 headings\"; grep -nE \"^#{1,3} \" _bmad-output/planning-artifacts/epics-v1.1.md | head -60: ## Story 7.2 : Hardening Async Backend (Atomicité Quotas, Rate Limit User, Race OCR) 200:### Story 7.3 : Hardening RGPD Safe-Delete & Sécurité Config 252:### Story 7.4 : Chronomètre Drill + APNs Singleton + Docs 315:### Story 7.5 : Affinage du Prompt Persona Claude [DIFFÉRÉ] 355:## Dashboard Admin (Stories 7.6 → 7.8) 361:### Story 7.6 : Dashboard Admin — Onboarding & Gestion Users (Thème A) 395:### Story 7.7 : Dashboard Admin — Suivi & Contrôle des Imports (Thème B) 430:### Story 7.8 : Dashboard Admin — Qualité & Coût (Thème C, pont vers 7.5) 463:### Story 7.9 : Refonte Auth Console Admin — Session-Token (cookie httpOnly) [DIFFÉRÉ post-beta] 487:## Annexes 489:### A. Tâches opérationnelles parallèles (P3 — Project Lead) 497:### B. Items fermés sans story (à mettre à jour dans deferred-work.md) 504:### C. Items différés Phase 2 (post-beta, non bloquants) 514:### D. Mapping items → stories",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ba6816e901161c58534ea57f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:26:13.293Z",
+  "stored_at": "2026-09-21T19:26:13.294Z"
+}

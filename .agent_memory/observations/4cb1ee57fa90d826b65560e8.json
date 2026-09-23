@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_drill_card.dart'\ns=open(p).read()\ndef rep(a,b):\n    global s\n    assert a in s, a\n    s=s.replace(a,b)\nrep(\"\"\"import 'package:flutter/foundation.dart' show visibleForTesting;\n\"\"\",\"\"\"import 'package:flutter/cupertino.dart' show CupertinoScrollbar;\nimport 'package:flutter/foundation.dart' show visibleForTesting;\n\"\"\")\nrep(\"\"\"            ).createShader(rect),\n            child: scroll,\"\"\",\"\"\"            ).createShader(rect),\n            // Barre native, visible dès que la réponse défile… [+348 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_drill_card.dart'\ns=open(p).read()\ndef rep(a,b):\n    global s\n    assert a in s, a\n    s=s.replace(a,b)\nrep(\"\"\"import 'package:flutter/foundation.dart' show visibleForTesting;\n\"\"\",\"\"\"import 'package:flutter/cu",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_drill_card.dart'\ns=open(p).read()\ndef rep(a,b):\n    global s\n    assert a in s, a\n    s=s.replace(a,b)\nrep(\"\"\"import 'package:flutter/foundation.dart' show visibleForTesting;\n\"\"\",\"\"\"import 'package:flutter/cupertino.dart' show CupertinoScrollbar;\nimport 'package:flutter/foundation.dart' show visibleForTesting;\n\"\"\")\nrep(\"\"\"            ).createShader(rect),\n            child: scroll,\"\"\",\"\"\"            ).createShader(rect),\n            // Barre native, visible dès que la réponse défile : la suite existe.\n            child: CupertinoScrollbar(controller: _answerScroll, thumbVisibility: true, child: scroll),\"\"\")\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/components/cg_drill_card_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -E \"Expected|Actual|Which|\\[E\\]|Some tests|All tests|Error:|exception\" | sort -u | head -30: 00:03 +51: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4cb1ee57fa90d826b65560e8",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:50:07.631Z",
+  "stored_at": "2026-09-22T18:50:07.631Z"
+}

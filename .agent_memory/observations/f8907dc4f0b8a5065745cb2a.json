@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 652,720p ux-design-specification-v2.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 652,720p ux-design-specification-v2.md: il). - Passage VoiceOver manuel sur : Login, Aujourd'hui, Drill, Fin de session, Recherche — avant chaque build de beta. ## Prérequis et dépendances ### Story 0 — Titres d'items obligatoir",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 652,720p ux-design-specification-v2.md: il). - Passage VoiceOver manuel sur : Login, Aujourd'hui, Drill, Fin de session, Recherche — avant chaque build de beta. ## Prérequis et dépendances ### Story 0 — Titres d'items obligatoires (backend, avant tout travail UI) Constat de l'audit : les items du collège CNEC s'affichent « Item 310 » parce que `chapterTitle` est nul en base. Toute la v2 (Bibliothèque, Détail collège, Recherche, Fin de session) suppose qu'un item a un titre lisible. - Le pipeline de génération doit produire un titre pour chaque item (`item_title` non nul, non vide). - Les titres valides extraits alimentent un **référentiel partagé** `item_number → titre` (les items de l'ECN sont universels) ; un item sans titre exploitable est complété par correspondance de numéro, libellé le plus fréquent. Une migration peuple le référentiel depuis l'existant puis backfille les items sans titre — sans réimport ni appel Claude.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f8907dc4f0b8a5065745cb2a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:24.073Z",
+  "stored_at": "2026-09-22T18:37:24.073Z"
+}

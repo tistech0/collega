@@ -1,0 +1,17 @@
+{
+  "type": "file_change",
+  "tool": "Artifact",
+  "path": "/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-c-bloc.html",
+  "command": "",
+  "summary": "Artifact: https://claude.ai/artifact/BnhZw4AV61gBVzCDpqJvdx /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-c-bloc.html 575cdb67-001b-41cb-bc7b-16b5b301185b Collega — Bloc phone owner 1790020469-1aa6 0.0.0 arming",
+  "text": "https://claude.ai/artifact/BnhZw4AV61gBVzCDpqJvdx /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-c-bloc.html 575cdb67-001b-41cb-bc7b-16b5b301185b Collega — Bloc phone owner 1790020469-1aa6 0.0.0 arming",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7ea18903498c395c2814d068",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:54:30.866Z",
+  "stored_at": "2026-09-21T19:54:30.867Z",
+  "low_signal": true
+}

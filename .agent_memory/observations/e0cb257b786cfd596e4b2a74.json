@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n \"CgSheet\\|CgState\\|Les quatre états\\|Feedback\\|Hiérarchie des actions\\|Ton de voix\\|ton de voix\" ux-design-specification-v2.md | head -50",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n \"CgSheet\\|CgState\\|Les quatre états\\|Feedback\\|Hiérarchie des actions\\|Ton de voix\\|ton de voix\" ux-design-specification-v2.md | head -50: t.dialog` avec la conséquence écrite | « Quitter ? 12 fiches jugées sont enregistrées. »",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n \"CgSheet\\|CgState\\|Les quatre états\\|Feedback\\|Hiérarchie des actions\\|Ton de voix\\|ton de voix\" ux-design-specification-v2.md | head -50: t.dialog` avec la conséquence écrite | « Quitter ? 12 fiches jugées sont enregistrées. » | 610:| Limite (quota) | `CgSheet.dialog` : ce qui reste → la limite → la date | « Tes fiches restent. Ce collège a été retraité 2 fois, c'est le maximum. » | 614:### Les quatre états, obligatoires par écran 618:| Vide | `CgState.empty` : illustration, ce qui manque, l'action qui remplit. Copies figées : Aujourd'hui « Importe ton premier collège » ; Bibliothèque « Choisis un collège dans le catalogue » ; Recherche « Cherche un item, un signe, une dose » + 3 exemples ; Progression « Ta première session remplira cette page » ; Détail collège sans fiches « Les fiches arrivent » | 620:| Erreur | `CgState.error` plein écran si rien ne peut s'afficher ; sinon bandeau + contenu local conservé | 648:- Les quatre états de fiche ont chacun leur couleur et leur mot ; « non vues » est toujours compté et visible.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e0cb257b786cfd596e4b2a74",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:52.249Z",
+  "stored_at": "2026-09-22T18:37:52.250Z"
+}

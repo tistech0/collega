@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_segmented.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_segmented.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/foundation/cg_haptics.dart';\nimport 'package:collega_app/core/ui/foundation/cg_icon.dart';\nimport 'package:collega_app/core/ui/theme/cg_the",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_segmented.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/foundation/cg_haptics.dart';\nimport 'package:collega_app/core/ui/foundation/cg_icon.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_motion.dart';\nimport 'package:collega_app/core/ui/tokens/cg_radius.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\nimport 'package:collega_app/core/ui/tokens/cg_type.dart';\n\n/// Sélecteur de 2 à 4 valeurs exclusives (spec v2 § CgSegmented) : filtres\n/// « Tous / A / B / C », « Tous / Importés », durées de sess",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ab6dadf3d6a57b5207b0a692",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:40:12.635Z",
+  "stored_at": "2026-09-22T18:40:12.636Z"
+}

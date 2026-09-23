@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n -i -E \"badge|srch|\\.seg|segment|CgField|champ|search\" directions-v2/direction-d-fusion.html | head -80; echo ----; grep -n -i -E \"CgBadge|CgField|CgSegmented|segmented|badge|champ\" ux-design-specification-v2.md | head -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n -i -E \"badge|srch|\\.seg|segment|CgField|champ|search\" directions-v2/direction-d-fusion.html | head -80; echo ----; grep -n -i -E \"CgBadge|CgField|CgSegmented|segmented|badge|champ\" ux-design-specification-v2.md | head -60: es d",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n -i -E \"badge|srch|\\.seg|segment|CgField|champ|search\" directions-v2/direction-d-fusion.html | head -80; echo ----; grep -n -i -E \"CgBadge|CgField|CgSegmented|segmented|badge|champ\" ux-design-specification-v2.md | head -60: es dates, stepper Collega (– valeur +) pour les nombres bornés. 642:- Filtres = `CgSegmented` sous le header, jamais plus de 4 valeurs ; l'état vide filtré propose de revenir à « Tous ». 678:Règles : colonne unique toujours ; marge écran 20 pt ; aucun contenu sous la tab bar (padding bas = 64 + 22 + safe area) ; l'action primaire ancrée respecte la safe area du bas ; le clavier pousse le contenu et ne masque jamais le champ actif ni son bouton. 684:- Au-delà de 1,6× : les lignes passent en deux niveaux (titre puis valeur sous le titre), `CgSegmented` passe en liste de lignes à coche, `CgVerdictBar` passe en trois boutons empilés. 692:| Jamais la couleur seule | Rangs = lettre A/B/C ; verdicts = libellé + direction ; états de progression = couleur + mot + chiffre ; badge OCR = icône + texte | 693:| Cibles tactiles | ≥ 44 × 44 pt, y compris badges tapables, pouces de feedback, ✕ du drill |",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1bce0206a5e383b775750719",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:36:42.393Z",
+  "stored_at": "2026-09-22T18:36:42.394Z"
+}

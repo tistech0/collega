@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_field_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -E -A10 \"EXCEPTION CAUGHT\" | head -30; flutter test test/core/ui/components/cg_field_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]|All tests\" | sort -u",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_field_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -E -A10 \"EXCEPTION CAUGHT\" | head -30; flutter test test/core/ui/components/cg_field_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]|All tests\" | sort -u: 0",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_field_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -E -A10 \"EXCEPTION CAUGHT\" | head -30; flutter test test/core/ui/components/cg_field_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]|All tests\" | sort -u: 00:02 +21: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d013b8ec32a494d2bb5a8d9e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:44:52.659Z",
+  "stored_at": "2026-09-22T18:44:52.660Z"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "pour les 3 visuel jai un probleme sur le premier mock [Image #26] et le 3 4 5 6 il ne sont pas bien dimentioner",
+  "summary": "pour les 3 visuel jai un probleme sur le premier mock [Image #26] et le 3 4 5 6 il ne sont pas bien dimentioner",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "308c38aea027017fc07d62a4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:55:41.073Z",
+  "stored_at": "2026-09-21T19:55:41.073Z",
+  "low_signal": true
+}

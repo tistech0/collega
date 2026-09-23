@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat \"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_redesign_ux_2026_09.md\"",
+  "summary": "cat \"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_redesign_ux_2026_09.md\":  **attend la validation visuelle de l'utilisateur avant 8.4** (drill plein écran). Chaque story : revue adversariale par sous-agent, tous les correctifs appliqués avant d'avancer. Consigne util",
+  "text": "cat \"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/project_redesign_ux_2026_09.md\":  **attend la validation visuelle de l'utilisateur avant 8.4** (drill plein écran). Chaque story : revue adversariale par sous-agent, tous les correctifs appliqués avant d'avancer. Consigne utilisateur (2026-09-22) : enchaîner les stories en autonomie ; à chaque review, corriger tout bug/régression trouvé avant de passer à la suite (pas de backlog), sans demander. Validation visuelle iPhone par l'utilisateur à partir de 8.3. **How to apply :** travailler uniquement sur `feat/redesign-ux-ui` ; toute décision UI se vérifie d'abord dans `ux-design-specification-v2.md` (sections « Direction de design » pour les hex, « Patterns UX de cohérence » pour le contrat) ; tests par dossier ciblé, jamais la suite complète (voir [[project_upload_debug_2026_09]] et le packet Kage `gotcha-flutter-test-complet-*`) ; rebuild iPhone via `collega_app/tool/run_device.sh --release -d 00008110-000115D43499801E`.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1342e72bf435aa5aa7db90e7",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T07:10:37.047Z",
+  "stored_at": "2026-09-23T07:10:37.047Z"
+}

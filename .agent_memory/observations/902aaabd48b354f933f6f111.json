@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook\" && ls lib/use_cases/ && grep -rn \"knobs.list\\|knobs.string\" ~/.pub-cache/hosted/pub.dev/widgetbook-3.15*/lib/src/knobs/knobs_builder.dart 2>/dev/null | head -5; ls ~/.pub-cache/hosted/pub.dev/ | grep widgetbook",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook\" && ls lib/use_cases/ && grep -rn \"knobs.list\\|knobs.string\" ~/.pub-cache/hosted/pub.dev/widgetbook-3.15*/lib/src/knobs/knobs_bu",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "902aaabd48b354f933f6f111",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:45:46.346Z",
+  "stored_at": "2026-09-22T18:45:46.347Z"
+}

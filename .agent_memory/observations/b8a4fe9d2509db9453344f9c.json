@@ -1,0 +1,16 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-a-feuille.html",
+  "summary": "wrote /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-a-feuille.html: <title>Collega — Feuille</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap",
+  "text": "wrote /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-a-feuille.html: <title>Collega — Feuille</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap\">\n<style>\n  :root{\n    --ground:#F4F3EF; --surface:#FFFFFF; --ink:#1C1B18; --ink2:#5F5D56; --ink3:#9A978E; --line:#E3E1DA;\n    --accent:#2547E0; --accent-soft:#E4E9FC; --accent-ink:#FFFFFF;\n    --rank-a:#2547E0; --rank-b:#5F6B8A; --rank-c:#A8A594;\n    --mastered:#2547E0; --good:#8FA3F2; --review:#E0A32B; --unseen:#E3E1DA;\n    --danger:#C8322B; --warning:#E0A32B;\n    --font:\"Instrument Sans\",system-ui,-apple-system,\"Helvetica",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b8a4fe9d2509db9453344f9c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:49:08.469Z",
+  "stored_at": "2026-09-21T19:49:08.470Z",
+  "low_signal": true
+}

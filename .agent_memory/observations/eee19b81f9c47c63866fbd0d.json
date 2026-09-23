@@ -1,0 +1,17 @@
+{
+  "type": "file_change",
+  "tool": "Artifact",
+  "path": "/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-d-fusion.html",
+  "command": "",
+  "summary": "Artifact: https://claude.ai/artifact/MDTQWEs73TeHR5f5PSLkAB /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-d-fusion.html a3b3f8a3-ca86-4192-b5a4-a2bbaa3d8e68 Collega — Fusion phone owner 1790021299-749d 0.0.0 arming",
+  "text": "https://claude.ai/artifact/MDTQWEs73TeHR5f5PSLkAB /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-d-fusion.html a3b3f8a3-ca86-4192-b5a4-a2bbaa3d8e68 Collega — Fusion phone owner 1790021299-749d 0.0.0 arming",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "eee19b81f9c47c63866fbd0d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T20:08:20.671Z",
+  "stored_at": "2026-09-21T20:08:20.672Z",
+  "low_signal": true
+}

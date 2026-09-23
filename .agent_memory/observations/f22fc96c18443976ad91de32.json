@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_sheet_test.dart 2>&1 | grep -B2 -A6 \"Error:\" | head -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_sheet_test.dart 2>&1 | grep -B2 -A6 \"Error:\" | head -30: .dart test/core/ui/components/cg_sheet_test.dart:196:75: Error: Undefined name 'SemanticsAction'. tester.binding.pipelineOwner.semanticsOwner!.performAction(n",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_sheet_test.dart 2>&1 | grep -B2 -A6 \"Error:\" | head -30: .dart test/core/ui/components/cg_sheet_test.dart:196:75: Error: Undefined name 'SemanticsAction'. tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.tap); ^^^^^^^^^^^^^^^ 00:01 +0 -1: loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart [E] Failed to load \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart\": Compilation failed for testPath=/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart To run this test again: /Users/lesurmatthis/dev/app/flutter/bin/cache/dart-sdk/bin/dart test /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart -p vm --plain-name 'loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart'",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f22fc96c18443976ad91de32",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:42:43.567Z",
+  "stored_at": "2026-09-22T18:42:43.567Z"
+}

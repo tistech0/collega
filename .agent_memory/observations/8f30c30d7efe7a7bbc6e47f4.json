@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && for f in cg_sheet cg_state; do flutter test test/core/ui/components/${f}_test.dart 2>&1 | tail -1 | grep -oE \"\\+[0-9]+.*(All tests passed|Some tests failed)\" | sed 's/.*\\(+[0-9]*\\).*: \\(.*\\)/\\1 \\2/'; done; flutter analyze lib/core/ui test/core/ui 2>&1 | grep -cE \"cg_sheet|cg_state|cg_illustr\"; grep -l \"material.dart\\|shadcn\" lib/core/ui/components/cg_sheet.dart lib/core/ui/components/cg_state.dart lib/core/ui/components/cg_illustrations.dart; (cd widgetbook && flutter analyze 2>&1 | tail -1)",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && for f in cg_sheet cg_state; do flutter test test/core/ui/components/${f}_test.dart 2>&1 | tail -1 | grep -oE \"\\+[0-9]+.*(All tests pass",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8f30c30d7efe7a7bbc6e47f4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:46:50.703Z",
+  "stored_at": "2026-09-22T18:46:50.703Z"
+}

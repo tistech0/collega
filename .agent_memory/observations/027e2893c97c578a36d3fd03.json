@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n '/onRefresh : Cupertino/,/^    });/p' test/core/ui/components/cg_header_test.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n '/onRefresh : Cupertino/,/^    });/p' test/core/ui/components/cg_header_test.dart: testWidgets('onRefresh : CupertinoSliverRefreshControl ; sinon absent', (tester) async { await _pumpScreen(tester, CgPage(title: 'Aujourd’hui', onRefresh: () async {",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -n '/onRefresh : Cupertino/,/^    });/p' test/core/ui/components/cg_header_test.dart: testWidgets('onRefresh : CupertinoSliverRefreshControl ; sinon absent', (tester) async { await _pumpScreen(tester, CgPage(title: 'Aujourd’hui', onRefresh: () async {}, children: _rows(3))); expect(find.byType(CupertinoSliverRefreshControl), findsOneWidget); await _pumpScreen(tester, CgPage(title: 'Aujourd’hui', children: _rows(3))); expect(find.byType(CupertinoSliverRefreshControl), findsNothing); });",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "027e2893c97c578a36d3fd03",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:47:23.473Z",
+  "stored_at": "2026-09-22T18:47:23.473Z"
+}

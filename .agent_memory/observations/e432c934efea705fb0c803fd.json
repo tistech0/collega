@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_skeleton_test.dart'\ns=open(p).read()\ns=s.replace(\"_app(CgSkeleton.block(width: 120, height: 80), reduced: true)\",\"_app(Align(alignment: Alignment.topLeft, child: CgSkeleton.block(width: 120, height: 80)), reduced: true)\")\nopen(p,'w').write(s)\nEOF\ncat > lib/core/ui/gallery/cg_skeleton_gallery.dart <<'EOF'\nimport 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_skeleton.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:c… [+1570 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='test/core/ui/components/cg_skeleton_test.dart' s=open(p).read() s=s.replace(\"_app(CgSkeleton.block(width: 120, hei",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e432c934efea705fb0c803fd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:42:42.751Z",
+  "stored_at": "2026-09-22T18:42:42.752Z"
+}

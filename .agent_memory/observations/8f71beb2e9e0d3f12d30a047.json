@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n -A14 \"## Adaptation\\|### Adaptation\" ux-design-specification-v2.md | head -50; grep -n \"\\.tab\\b\\|\\.tab[ ,{.:]\\|\\.tabs\\|\\.lt\\b\\|\\.lt[ ,{.:]\\|\\.sub[ ,{.:]\\|\\.row[ ,{.:]\\|\\.ico[ ,{.:]\\|\\.chev\\|\\.sec[ ,{.:]\" directions-v2/direction-d-fusion.html | head -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n -A14 \"## Adaptation\\|### Adaptation\" ux-design-specification-v2.md | head -50; grep -n \"\\.tab\\b\\|\\.tab[ ,{.:]\\|\\.tabs\\|\\.lt\\b\\|\\.lt[ ,{.:]\\|\\.sub[ ,{.:]\\|\\.row[ ,{.:]\\|\\.ico[ ,{.:]\\|\\.chev\\|\\.sec[ ,{.:]\" directions-v2/direction",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n -A14 \"## Adaptation\\|### Adaptation\" ux-design-specification-v2.md | head -50; grep -n \"\\.tab\\b\\|\\.tab[ ,{.:]\\|\\.tabs\\|\\.lt\\b\\|\\.lt[ ,{.:]\\|\\.sub[ ,{.:]\\|\\.row[ ,{.:]\\|\\.ico[ ,{.:]\\|\\.chev\\|\\.sec[ ,{.:]\" directions-v2/direction-d-fusion.html | head -60: k3);margin:32px 0 8px} 46: .row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)} 47: .row:last-child{border-bottom:0} 48: .row .t{font-weight:600;font-size:17px} 49: .row .m{color:var(--ink2);font-size:14px;margin-top:1px;font-variant-numeric:tabular-nums} 50: .row .r{color:var(--ink3);font-size:15px;font-variant-numeric:tabular-nums} 51: .ico{width:36px;height:36px;border-radius:10px;background:var(--accent-soft);display:grid;place-items:center} 52: .ico svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round} 53: .ico.g{background:var(--soft)}.ico.g svg{stroke:var(--ink3)} 54: .chev{width:8px;height:8px;border-right:1.5px solid var(--ink3);border-bottom:1.5px solid var(--ink3);transform:rotate(-45deg)} 93: .block .sub{color:rgba(242,245,243,.72)}",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8f71beb2e9e0d3f12d30a047",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:05.071Z",
+  "stored_at": "2026-09-22T18:37:05.071Z"
+}

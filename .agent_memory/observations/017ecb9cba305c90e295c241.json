@@ -1,0 +1,16 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-d-fusion.html",
+  "summary": "wrote /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-d-fusion.html: <title>Collega — Fusion</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap\">",
+  "text": "wrote /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-d-fusion.html: <title>Collega — Fusion</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap\">\n<style>\n  :root{\n    --ground:#ECEAE3; --surface:#F7F6F2; --ink:#17201F; --ink2:#5B6664; --ink3:#9A9E97; --line:#D9D6CC; --soft:#E2E0D8;\n    --accent:#0E5E63; --accent-soft:#D5E6E4; --accent-ink:#F2F5F3;\n    --rank-a:#0E5E63; --rank-b:#4C6A6E; --rank-c:#8B8A80;\n    --mastered:#0E5E63; --good:#6FA8A2; --review:#D9822B; --unseen:#D9D6CC;\n    --danger:#B8352B; --warning:#D9822B;\n    --font:\"Instrument Sans\",system-ui,-apple-sy",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "017ecb9cba305c90e295c241",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T20:08:07.821Z",
+  "stored_at": "2026-09-21T20:08:07.821Z",
+  "low_signal": true
+}

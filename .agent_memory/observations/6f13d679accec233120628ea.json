@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_illustrations.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_illustrations.dart: import 'package:flutter/widgets.dart';\nimport 'package:flutter_svg/flutter_svg.dart';\n\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\n\n/// Les illustrations des états d'écran (spec v2 § CgState).\nenum",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_illustrations.dart: import 'package:flutter/widgets.dart';\nimport 'package:flutter_svg/flutter_svg.dart';\n\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\n\n/// Les illustrations des états d'écran (spec v2 § CgState).\nenum CgIllustration {\n  /// Feuillets empilés : rien d'importé, rien à réviser.\n  sheets,\n\n  /// Cercle interrompu : le serveur ne répond pas.\n  broken,\n\n  /// Ondes coupées : pas de connexion.\n  offline,\n\n  /// Loupe sur des lignes : aucun résultat.\n  search,\n\n  /// Anneau fermé coché : tout est fait.\n  done,\n}\n\n/// SVG au trait sur une grille 96, monochromes (colorés par [CgIllustrationAr",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6f13d679accec233120628ea",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:44:15.299Z",
+  "stored_at": "2026-09-22T18:44:15.300Z"
+}

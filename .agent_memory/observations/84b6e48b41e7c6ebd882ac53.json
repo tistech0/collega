@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_ring_use_cases.dart\" <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_ring.dart';\nimport 'package:collega_app/core/ui/gallery/cg_ring_gallery.dart';\n\nfinal WidgetbookComponent cgRingComponent = WidgetbookComponent(\n  name: 'CgRing',\n  useCases: [\n    WidgetbookUseCase(name: 'Planche (toutes tailles)', builder: (_) => const CgRingGallery()),\n    WidgetbookUseCase(\n      name: 'Interactif',\n      // Déplacer le c… [+768 chars truncated]",
+  "summary": "cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_ring_use_cases.dart\" <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_ring.dart';\nimport 'package:collega_app/core/ui/gallery/cg_ring_",
+  "text": "cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_ring_use_cases.dart\" <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_ring.dart';\nimport 'package:collega_app/core/ui/gallery/cg_ring_gallery.dart';\n\nfinal WidgetbookComponent cgRingComponent = WidgetbookComponent(\n  name: 'CgRing',\n  useCases: [\n    WidgetbookUseCase(name: 'Planche (toutes tailles)', builder: (_) => const CgRingGallery()),\n    WidgetbookUseCase(\n      name: 'Interactif',\n      // Déplacer le curseur anime l'arc de l'ancienne valeur à la nouvelle.\n      builder: (context) => Center(\n        child: CgRing(\n          value: context.knobs.double.slider(label: 'Valeur', initialValue: 0.42, min: 0, max: 1),\n          size: context.knobs.list(\n            label: 'Taille',\n            options: CgRingSize.values,\n            initialOption: CgRingSize.m,\n            labelBuilder: (v) => v.name,\n          ),\n          centerLabel: context.knobs.stringOrNull(label: 'Texte central', initialValue: null),\n          animate: context.knobs.boolean(label: 'Animé', initialValue: true),\n        ),\n      ),\n    ),\n  ],\n);\nEOF\ncd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook\" && flutter analyze lib/use_cases/cg_ring_use_cases.dart 2>&1 | tail -5: Analyzing cg_ring_use_cases.dart... No issues found! (ran in 0.8s)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "84b6e48b41e7c6ebd882ac53",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:40:10.375Z",
+  "stored_at": "2026-09-22T18:40:10.375Z"
+}

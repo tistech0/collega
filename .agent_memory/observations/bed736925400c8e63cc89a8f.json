@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | grep -v '^.. .agent_memory' | head -20; echo \"---\"; git checkout -b feat/redesign-ux-ui main 2>&1; git branch --show-current",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | grep -v '^.. .agent_memory' | head -20; echo \"---\"; git checkout -b feat/redesign-ux-ui main 2>&1; git branch --show-current: home-notifier-test-choue-binding-non-initialis-et-la-suite--fe089895.md M .agent_memory/packets/gotcha-prod-collegatest-",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | grep -v '^.. .agent_memory' | head -20; echo \"---\"; git checkout -b feat/redesign-ux-ui main 2>&1; git branch --show-current: home-notifier-test-choue-binding-non-initialis-et-la-suite--fe089895.md M .agent_memory/packets/gotcha-prod-collegatest-2-chemins-r-seau-le-chemin-public-est-bloqu-par-cloudflare-acce-4c9884ac.md M .agent_memory/packets/gotcha-shadcn-ui-shadprogress-le-rail-prend-colorscheme-secondary-vert-chez-nous-barre--06414cf9.md M .agent_memory/packets/repo_map-collega-repo-structure-0317f7c1.md M .agent_memory/packets/runbook-d-ployer-le-backend-en-prod-nas-unraid-build-amd64-push-docker-hub-compose-pull--0117012e.md M .agent_memory/packets/workflow-change-memory-feat-story-7-11-upload-chunked-1f26889e.md M .agent_memory/packets/workflow-change-memory-main-c83865fd.md M .agent_memory/packets/workflow-story-7-11-d-ploy-e-et-v-rifi-e-en-prod-wi-fi-cancero-411-mb-en-17-morceaux-177--8ba9bed7.md M .agent_memory/review/branch-summary-main.json M .agent_memory/review/memory-review.md feat/redesign-ux-ui",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bed736925400c8e63cc89a8f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:01:18.781Z",
+  "stored_at": "2026-09-21T19:01:18.781Z"
+}

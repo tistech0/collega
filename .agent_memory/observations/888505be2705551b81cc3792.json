@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_toast.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  late final Timer _timer = Timer(CgMotion.toast, _hide);\n\"\"\",\"\"\"  Timer? _timer;\n\"\"\")\ns=s.replace(\"\"\"    _controller.forward();\n    _timer; // démarre le compte à rebours\n\"\"\",\"\"\"    _controller.forward();\n    _timer = Timer(CgMotion.toast, _hide);\n\"\"\")\ns=s.replace(\"    _timer.cancel();\",\"    _timer?.cancel();\")\nopen(p,'w').write(s)\nEOF\ncat > lib/core/ui/gallery/cg_toast_gallery.dart <<'EOF'\nimport 'package:flutter/widgets.dart';\n\nimport 'p… [+987 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='lib/core/ui/components/cg_toast.dart' s=open(p).read() s=s.replace(\"\"\" late final Timer _timer = Timer(CgMotion.to",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "888505be2705551b81cc3792",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:44:53.833Z",
+  "stored_at": "2026-09-22T18:44:53.833Z"
+}

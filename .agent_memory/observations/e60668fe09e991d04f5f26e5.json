@@ -1,0 +1,17 @@
+{
+  "type": "file_change",
+  "tool": "Read",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts/ux-design-specification-v2.md",
+  "command": "",
+  "summary": "Read: text",
+  "text": "text",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e60668fe09e991d04f5f26e5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:47:58.772Z",
+  "stored_at": "2026-09-22T17:47:58.772Z",
+  "low_signal": true
+}

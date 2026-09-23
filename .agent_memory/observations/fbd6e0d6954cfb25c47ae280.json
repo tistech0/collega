@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -n \"class FlashCardData\" -A14 collega_backend/app/schemas/college.py; grep -n \"userFeedback\\|user_feedback\" collega_app/lib/features/colleges/domain/college_detail_models.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -n \"class FlashCardData\" -A14 collega_backend/app/schemas/college.py; grep -n \"userFeedback\\|user_feedback\" collega_app/lib/features/colleges/domain/college_detail_models.dart: 90:class FlashCardData(BaseModel): 91- id: str 92- item_id: str 93- college_id: str 9",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -n \"class FlashCardData\" -A14 collega_backend/app/schemas/college.py; grep -n \"userFeedback\\|user_feedback\" collega_app/lib/features/colleges/domain/college_detail_models.dart: 90:class FlashCardData(BaseModel): 91- id: str 92- item_id: str 93- college_id: str 94- card_type: str 95- rang: str 96- recto: str 97- verso: str 98- ocr_confidence_score: float 99- low_confidence: bool 100- user_feedback: str | None = None 101- 102- 103-class CardsListResponseWrapped(BaseModel): 104- data: list[FlashCardData] 53: this.userFeedback, 66: final String? userFeedback; 79: userFeedback: json['user_feedback'] as String?, 94: Object? userFeedback = _absent, 107: userFeedback: identical(userFeedback, _absent) ? this.userFeedback : userFeedback as String?,",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "fbd6e0d6954cfb25c47ae280",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:54:05.109Z",
+  "stored_at": "2026-09-22T18:54:05.109Z"
+}

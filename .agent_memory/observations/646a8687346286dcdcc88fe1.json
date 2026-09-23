@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/*.dart lib/core/ui/theme/cg_theme.dart lib/core/ui/foundation/*.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/*.dart lib/core/ui/theme/cg_theme.dart lib/core/ui/foundation/*.dart: f, 'refresh': refresh, 'calendar': calendar, 'clock': clock, 'bell': bell, 'lock': lock, 'logout': logout, 'sparkle': sparkle, }; } /// Icône Collega UI. Décorati",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/*.dart lib/core/ui/theme/cg_theme.dart lib/core/ui/foundation/*.dart: f, 'refresh': refresh, 'calendar': calendar, 'clock': clock, 'bell': bell, 'lock': lock, 'logout': logout, 'sparkle': sparkle, }; } /// Icône Collega UI. Décorative par défaut ; avec [semanticLabel], lue par VoiceOver. class CgIcon extends StatelessWidget { const CgIcon(this.svg, {super.key, this.size = 22, this.color, this.semanticLabel}); final String svg; final double size; /// Par défaut la couleur du texte ambiant. final Color? color; final String? semanticLabel; @override Widget build(BuildContext context) { final c = color ?? DefaultTextStyle.of(context).style.color ?? CgTheme.of(context).colors.ink; final picture = SvgPicture.string( svg, width: size, height: size, colorFilter: ColorFilter.mode(c, BlendMode.srcIn), ); if (semanticLabel == null) return ExcludeSemantics(child: picture); return Semantics(label: semanticLabel, image: true, excludeSemantics: true, child: picture); } }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "646a8687346286dcdcc88fe1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:16.290Z",
+  "stored_at": "2026-09-22T18:37:16.291Z"
+}

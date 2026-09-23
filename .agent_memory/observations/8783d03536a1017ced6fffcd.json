@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_supersede",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_supersede: [{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:gotcha:flutter-test-complet-home-notifier-test-choue-binding-non-initialis-et-la-suite-\",\\n \"replacement_packet_id\": \"repo:git-github-c",
+  "text": "[{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:gotcha:flutter-test-complet-home-notifier-test-choue-binding-non-initialis-et-la-suite-\",\\n \"replacement_packet_id\": \"repo:git-github-com-tistech0-collega:gotcha:flutter-test-complet-pas-vert-home-notifier-binding-home-screen-timer-blocage-ap\",\\n \"reason\": \"search_notifier_test n\\'était pas flaky (assertion périmée), corrigé en story 8.0\",\\n \"old_packet\": {\\n \"schema_version\": 2,\\n \"id\": \"repo:git-github-com-tistech0-collega:gotcha:flutter-test-complet-home-notifier-test-choue-binding-non-initialis-et-la-suite-\",\\n \"title\": \"flutter test complet : home_notifier_test échoue (binding non initialisé) et la suite peut rester bloquée après profile_screen_test\",\\n \"summary\": \"Sur main état 2026 09 21, avant et après la story 7.11 , flutter test complet n\\'est pas vert : test/features/home/home notifier test.dart 2 cas HomeReady échoue avec « Binding has not yet been initialized » MethodChannel\",\\n \"body\": \"Sur main (état 2026-09-21, avant et après la story 7.11), `flutter test` complet n\\'est pas vert : test/features/home/hom",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8783d03536a1017ced6fffcd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:20:15.442Z",
+  "stored_at": "2026-09-22T18:20:15.443Z",
+  "low_signal": true
+}

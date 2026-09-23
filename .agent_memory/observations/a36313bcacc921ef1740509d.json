@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"ocr_text\\s*=\\s*None\\|ocr_text = None\\|unlink\\|os.remove\\|rmtree\" app --include='*.py' | grep -v __pycache__ | head -20; ssh nas 'docker exec collega-api-1 sh -c \"ls -la /tmp/collega_pdfs | head; du -sh /tmp/collega_pdfs\"; docker exec collega-worker-1 sh -c \"ls -la /tmp/collega_pdfs | head\"'",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"ocr_text\\s*=\\s*None\\|ocr_text = None\\|unlink\\|os.remove\\|rmtree\" app --include='*.py' | grep -v __pycache__ | head -20; s",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a36313bcacc921ef1740509d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:48:45.350Z",
+  "stored_at": "2026-09-22T17:48:45.350Z"
+}

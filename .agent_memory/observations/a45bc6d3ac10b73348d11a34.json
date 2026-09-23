@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_tab_bar_test.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  group('goldens', () {\n    cgGoldenMatrix('cg_tab_bar', () => const CgTabBarGallery(), height: 844);\n  });\"\"\",\"\"\"  testWidgets('écran d’exemple : en fin de liste, la dernière ligne reste au-dessus de la tab bar', (tester) async {\n    tester.view.physicalSize = _screen;\n    tester.view.devicePixelRatio = 1;\n    addTearDown(tester.view.reset);\n    await tester.pumpWidget(cgTestApp(const CgTabBarGallery()));\n    await tester.fling(fin… [+740 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='test/core/ui/components/cg_tab_bar_test.dart' s=open(p).read() s=s.replace(\"\"\" group('goldens', () { cgGoldenMatri",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a45bc6d3ac10b73348d11a34",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:46:52.171Z",
+  "stored_at": "2026-09-22T18:46:52.171Z"
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "branch": "feat/redesign-ux-ui",
+  "head": "af021193cf546a3c637cc55afdd168ed944cf7a3",
+  "merge_base": "6d0a0eeb566a8722ef1808e976422a0672fba8d3",
+  "changed_files": [
+    ".agent_memory/packets/code_explanation-chronom-tre-du-drill-3-modes-et-launchdrill-point-dentr-e-unique-2080e271.md",
+    ".agent_memory/packets/decision-fin-de-session-le-bilan-de-la-session-du-jour-vient-de-review-log-pas-de-la-m-mo-7786cabe.md",
+    ".agent_memory/packets/workflow-change-memory-feat-redesign-ux-ui-5bac97b5.md",
+    ".agent_memory/pending/bug_fix-pasted-content-id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f-29717d15.md"
+  ],
+  "pending_packet_ids": [
+    "repo:git-github-com-tistech0-collega:bug_fix:pasted-content-id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f"
+  ],
+  "generated_at": "2026-09-22T21:27:58.794Z"
+}

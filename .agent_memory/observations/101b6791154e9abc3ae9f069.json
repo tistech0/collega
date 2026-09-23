@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts/directions-v2\" && grep -n -E \"\\.ring|\\.rb|\\.leg|class=\\\"ring|class=\\\"rb|class=\\\"leg|toast\" direction-d-fusion.html | head -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts/directions-v2\" && grep -n -E \"\\.ring|\\.rb|\\.leg|class=\\\"ring|class=\\\"rb|class=\\\"leg|toast\" direction-d-fusion.html | head -60: width:30%\"></i><i class=\"c\" style=\"width:20%\"></i></div></div><div class=\"chev\"></div></div> 356: <div class=\"ro",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts/directions-v2\" && grep -n -E \"\\.ring|\\.rb|\\.leg|class=\\\"ring|class=\\\"rb|class=\\\"leg|toast\" direction-d-fusion.html | head -60: width:30%\"></i><i class=\"c\" style=\"width:20%\"></i></div></div><div class=\"chev\"></div></div> 356: <div class=\"row\"><span class=\"badge\">A</span><div><div class=\"t\">Tumeurs du rein</div><div class=\"m\">Item 312 · 4 fiches</div><div class=\"rb\"></div></div><div class=\"chev\"></div></div> 357: <div class=\"row\"><span class=\"badge\">A</span><div><div class=\"t\">Tumeurs de la prostate</div><div class=\"m\">Item 314 · 7 fiches</div><div class=\"rb\"><i class=\"a\" style=\"width:100%\"></i></div></div><div class=\"chev\"></div></div> 358: <div class=\"row\"><span class=\"badge b\">B</span><div><div class=\"t\">Cancer du col utérin</div><div class=\"m\">Item 300 · 5 fiches</div><div class=\"rb\"><i class=\"b\" style=\"width:40%\"></i></div></div><div class=\"chev\"></div></div> 375: document.querySelectorAll('.ringfg').forEach(function(c){ var p=+c.getAttribute('data-p'); c.style.strokeDashoffset=(352-352*p/100).toFixed(1); });",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "101b6791154e9abc3ae9f069",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:34.580Z",
+  "stored_at": "2026-09-22T18:37:34.581Z"
+}

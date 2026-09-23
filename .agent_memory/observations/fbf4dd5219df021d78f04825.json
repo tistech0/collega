@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_drill_card.dart'\ns=open(p).read()\ndef rep(a,b):\n    global s\n    assert a in s, a\n    s=s.replace(a,b)\n# 1. meta fade\nrep(\"\"\"                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [\n                  _meta(c),\"\"\",\"\"\"                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [\n                  // L'étiquette de verdict prend la place de la ligne rang · collège.\n                  Opacity(opacity: 1 - _strongestPreview, chil… [+2693 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='lib/core/ui/components/cg_drill_card.dart' s=open(p).read() def rep(a,b): global s assert a in s, a s=s.replace(a,",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "fbf4dd5219df021d78f04825",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:49:42.631Z",
+  "stored_at": "2026-09-22T18:49:42.632Z"
+}

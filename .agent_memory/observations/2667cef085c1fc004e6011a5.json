@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook\" && sed -i '' 's|// La pulsation tourne ici ; elle se fige avec l.addon « Réduire les animations ».|// La pulsation tourne ici ; elle se fige quand « Réduire les animations » est actif.|' lib/use_cases/cg_skeleton_use_cases.dart && grep -n \"pulsation\" lib/use_cases/cg_skeleton_use_cases.dart\ncat > lib/use_cases/cg_toast_use_cases.dart <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_button.dart';\nimport 'package:collega_app/core/u… [+1068 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook\" && sed -i '' 's|// La pulsation tourne ici ; elle se fige avec l.addon « Réduire les animations ».|// La pulsation tourne ici ; elle se fige quand « Réduire les animations » est actif.|' lib/use_cases/cg_skeleton_use_cases.dart && grep -n \"pulsati",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook\" && sed -i '' 's|// La pulsation tourne ici ; elle se fige avec l.addon « Réduire les animations ».|// La pulsation tourne ici ; elle se fige quand « Réduire les animations » est actif.|' lib/use_cases/cg_skeleton_use_cases.dart && grep -n \"pulsation\" lib/use_cases/cg_skeleton_use_cases.dart\ncat > lib/use_cases/cg_toast_use_cases.dart <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_button.dart';\nimport 'package:collega_app/core/ui/components/cg_toast.dart';\nimport 'package:collega_app/core/ui/gallery/cg_toast_gallery.dart';\n\nfinal WidgetbookComponent cgToastComponent = WidgetbookComponent(\n  name: 'CgToast',\n  useCases: [\n    WidgetbookUseCase(name: 'Planche (capsule statique)', builder: (_) => const CgToastGallery()),\n    WidgetbookUseCase(\n      name: 'Interactif',\n      builder: (context) {\n        final message = context.knobs.string(label: 'Message', initialValue: 'Elle reviendra dans quelques questions');\n        final aboveTabBar = context.knobs.boolean(label: 'Au-dessus de la tab bar', initialValue: true);\n        return Center(\n          child: Padding(\n            padding: const EdgeInsets.all(20),\n            // Chaque tap remplace le toast affiché.\n            child: Builder(\n              builder: (context) => CgButton(\n                label: 'Afficher le toast',\n                onPressed: () => showCgToast(context, message, aboveTabBar: aboveTabBar),\n              ),\n            ),\n          ),\n        );\n      },\n    ),\n  ],\n);\nEOF\nflutter analyze 2>&1 | tail -8: 13: // La pulsation tourne ici ; elle se fige quand « Réduire les animations » est actif. Analyzing widgetbook... No issues found! (ran in 1.3s)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2667cef085c1fc004e6011a5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:45:28.595Z",
+  "stored_at": "2026-09-22T18:45:28.595Z"
+}

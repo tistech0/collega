@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bip01pkdo</task-id>\n<tool-use-id>toolu_019Q1U97MRkwWTNT7kkFqoj1</tool-use-id>\n<output-file>/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tasks/bip01pkdo.output</output-file>\n<status>completed</status>\n<summary>Monitor \"build iPhone release story 8.3\" stream ended</summary>\n<event>Launching lib/main.dart on iPhone de Matthis in release mode...\nInstalling and launching...\nError executing devicectl: ProcessException: Process exited abnormally with exit code 1:\nERROR: The application failed to launch. (com.apple.dt.CoreDeviceError error 10002 (0x2712))\nThe request to open \"com.lesurmatthis.collegaApp\" failed. (FBSOpenApplicationServiceErrorDomain error 1 (0x01))\nBSErrorCodeDescription = RequestDenied\nThe operation couldn’t be completed. Unable to launch com.lesurmatthis.collegaApp because the device was not, or could not be, unlocked. (FBSOpenApplicationErrorDomain error 7 (0x07))\nBSErrorCodeDescription = Locked\nCould not run build/ios/iphoneos/Runner.app on 00008110-000115D43499801E.\nInstalling and launching...                                        17.6s\nError running application on iPhone de Matthis.</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bip01pkdo</task-id> <tool-use-id>toolu_019Q1U97MRkwWTNT7kkFqoj1</tool-use-id> <output-file>/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tasks/bip01pkd",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "89dcea701de4db09465c6e42",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T19:31:10.164Z",
+  "stored_at": "2026-09-22T19:31:10.165Z",
+  "low_signal": true
+}

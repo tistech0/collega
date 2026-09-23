@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_field_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -E -B2 -A14 \"EXCEPTION CAUGHT|Error:\" | head -80; flutter test test/core/ui/components/cg_field_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]|All tests\" | sort -u",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_field_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -E -B2 -A14 \"EXCEPTION CAUGHT|Error",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1c26c043fc3ba8714cd95691",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:31.418Z",
+  "stored_at": "2026-09-22T18:43:31.419Z"
+}

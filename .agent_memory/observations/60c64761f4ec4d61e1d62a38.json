@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_sheet.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  late final AnimationController _settle = AnimationController(vsync: this)..addListener(_onSettle);\n  double _offset = 0;\n  double _settleFrom = 0;\n\"\"\",\"\"\"  late final AnimationController _settle;\n  double _offset = 0;\n  double _settleFrom = 0;\n\n  @override\n  void initState() {\n    super.initState();\n    _settle = AnimationController(vsync: this)..addListener(_onSettle);\n  }\n\"\"\")\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/component… [+103 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_sheet.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  late final AnimationController _settle = AnimationController(vsync: this)..addListener(_onSettle);\n  double _offset = 0;\n  double _settleFrom = 0;\n\"\"\",\"\"\"  late f",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_sheet.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  late final AnimationController _settle = AnimationController(vsync: this)..addListener(_onSettle);\n  double _offset = 0;\n  double _settleFrom = 0;\n\"\"\",\"\"\"  late final AnimationController _settle;\n  double _offset = 0;\n  double _settleFrom = 0;\n\n  @override\n  void initState() {\n    super.initState();\n    _settle = AnimationController(vsync: this)..addListener(_onSettle);\n  }\n\"\"\")\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/components/cg_sheet_test.dart 2>&1 | grep -E \"\\[E\\]|Expected:|Actual:|Which:|: Some|All tests|Error:\" | head -40: gActionSheet Annuler : ferme sans appeler d'action 00:02 +16 -2: showCgActionSheet Annuler : ferme sans appeler d'action 00:02 +16 -2: Dynamic Type 1,6 : le panneau se rend sans débordement 00:02 +17 -2: Dynamic Type 1,6 : le panneau se rend sans débordement 00:02 +17 -2: goldens (setUpAll) 00:02 +17 -2: goldens golden cg_sheet 375_10 00:02 +18 -2: goldens golden cg_sheet 375_10 00:02 +18 -2: goldens golden cg_sheet 375_16 00:02 +19 -2: goldens golden cg_sheet 375_16 00:02 +19 -2: goldens golden cg_sheet 393_10 00:02 +20 -2: goldens golden cg_sheet 393_10 00:02 +20 -2: goldens golden cg_sheet 393_16 00:02 +21 -2: goldens golden cg_sheet 393_16 00:02 +21 -2: goldens golden cg_sheet 430_10 00:02 +22 -2: goldens golden cg_sheet 430_10 00:02 +22 -2: goldens golden cg_sheet 430_16 00:02 +23 -2: goldens golden cg_sheet 430_16 00:02 +23 -2: goldens (tearDownAll) 00:02 +23 -2: Some tests failed.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "60c64761f4ec4d61e1d62a38",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:03.270Z",
+  "stored_at": "2026-09-22T18:43:03.271Z"
+}

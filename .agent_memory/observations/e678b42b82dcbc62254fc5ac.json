@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"Aujourd\" lib | head -5; sed -i '' \"/hasSelectedState: true,/d\" test/core/ui/components/cg_tab_bar_test.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"Aujourd\" lib | head -5; sed -i '' \"/hasSelectedState: true,/d\" test/core/ui/components/cg_tab_bar_test.dart: lib/core/ui/tokens/cg_type.dart:59: /// Grand nombre d'Aujourd'hui (64 pt, 52 sur écran compact).",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"Aujourd\" lib | head -5; sed -i '' \"/hasSelectedState: true,/d\" test/core/ui/components/cg_tab_bar_test.dart: lib/core/ui/tokens/cg_type.dart:59: /// Grand nombre d'Aujourd'hui (64 pt, 52 sur écran compact).",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e678b42b82dcbc62254fc5ac",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:44:41.485Z",
+  "stored_at": "2026-09-22T18:44:41.485Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 1,200p _bmad-output/planning-artifacts/prd.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 1,200p _bmad-output/planning-artifacts/prd.md: s données | | Rejet App Store | Demo gratuite sans compte, paywall après valeur démontrée | | OCR de mauvaise qualité mémorisé | Badge warning par item, invitation à vérifier dans le PDF original | ## Innovation &",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 1,200p _bmad-output/planning-artifacts/prd.md: s données | | Rejet App Store | Demo gratuite sans compte, paywall après valeur démontrée | | OCR de mauvaise qualité mémorisé | Badge warning par item, invitation à vérifier dans le PDF original | ## Innovation & Patterns Originaux ### Zones d'Innovation Identifiées **1. Hash-sharing à seuil de similarité** Deux PDFs considérés identiques si similarité de contenu textuel (post-OCR) ≥ seuil cible (point de départ : 90%, à calibrer sur vrais collèges). Si le seuil est atteint, les fiches existantes sont servies sans nouvel appel Claude. Architecture modulaire dès la v1 — algorithme remplaçable sans refonte. **2. Boucle de qualité par feedback** Pouce bas sur une fiche → régénération ciblée avec feedback en contexte Claude, ou suppression. Coût LLM nul à la génération initiale. Combiné au hash-sharing, le feedback d'un utilisateur améliore à terme les fiches partagées par toute la cohorte.",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b615689e7c0ab7410f97e59d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:26:06.811Z",
+  "stored_at": "2026-09-21T19:26:06.811Z"
+}

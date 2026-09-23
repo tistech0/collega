@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -m3 -E \"^id:|x-kage-id|^  id:\" .agent_memory/packets/decision-refonte-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres--752f4a56.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -m3 -E \"^id:|x-kage-id|^  id:\" .agent_memory/packets/decision-refonte-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres--752f4a56.md: x-kage-id: \"repo:git-github-com-tistech0-collega:decision:refonte-ux-ui-v2-direction-feuille-bloc-collega-",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -m3 -E \"^id:|x-kage-id|^  id:\" .agent_memory/packets/decision-refonte-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres--752f4a56.md: x-kage-id: \"repo:git-github-com-tistech0-collega:decision:refonte-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres-\"",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b28e87fb4cb3d98566249633",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:45:38.836Z",
+  "stored_at": "2026-09-22T17:45:38.837Z"
+}

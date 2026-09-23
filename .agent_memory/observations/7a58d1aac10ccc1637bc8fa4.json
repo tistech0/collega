@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_header.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_header.dart: import 'dart:math' as math;\nimport 'dart:ui' show ImageFilter;\n\nimport 'package:flutter/cupertino.dart';\n\nimport 'package:collega_app/core/ui/components/cg_tab_bar.dart';\nimport 'package:collega_app/core/ui/foundation/",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_header.dart: import 'dart:math' as math;\nimport 'dart:ui' show ImageFilter;\n\nimport 'package:flutter/cupertino.dart';\n\nimport 'package:collega_app/core/ui/components/cg_tab_bar.dart';\nimport 'package:collega_app/core/ui/foundation/cg_icon.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_motion.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\nimport 'package:collega_app/core/ui/tokens/cg_type.dart';\n\nenum _CgHeaderKind { large, inline }\n\n/// Tête d'écran (spec v2 § CgHeader).\n///\n/// - [CgHeader.large] : tête d'onglet, large titl",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7a58d1aac10ccc1637bc8fa4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:46:06.426Z",
+  "stored_at": "2026-09-22T18:46:06.426Z"
+}
