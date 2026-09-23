@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:collega_app/features/auth/data/auth_repository.dart';
+import 'package:collega_app/features/auth/domain/auth_state.dart';
 
 /// Fake storage qui trace les `delete()` pour vérifier qu'`AuthRepository.deleteAccount`
 /// ne vide PLUS le storage en interne (Story 7.3 T5 — wipe délégué au Notifier).
@@ -160,6 +161,39 @@ class _ScriptedRawAdapter implements HttpClientAdapter {
 }
 
 void main() {
+  group('AuthRepository.login — erreur typée (story 8.12)', () {
+    Future<LoginError?> errorFor(HttpClientAdapter adapter) async {
+      // Validation des statuts par défaut, comme le client de l'app (4xx = exception).
+      final dio = Dio(BaseOptions(baseUrl: 'http://test'))..httpClientAdapter = adapter;
+      final repo = AuthRepository(dio: dio, storage: _FakeSecureStorage());
+      return (await repo.login('a@b.fr', 'x')).loginError;
+    }
+
+    test('401 → identifiants incorrects', () async {
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 401, body: '{"detail":{"code":"INVALID_CREDENTIALS"}}',
+          contentType: 'application/json')), LoginError.invalidCredentials);
+    });
+
+    test('429 → trop d’essais', () async {
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 429, body: '{}', contentType: 'application/json')),
+          LoginError.tooManyAttempts);
+    });
+
+    test('réseau injoignable → réseau', () async {
+      expect(await errorFor(_ScriptedAdapter([DioExceptionType.connectionError])), LoginError.network);
+    });
+
+    test('422 (email mal formé) → email invalide', () async {
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 422, body: '{}', contentType: 'application/json')),
+          LoginError.invalidEmail);
+    });
+
+    test('500 → autre', () async {
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 500, body: '{}', contentType: 'application/json')),
+          LoginError.other);
+    });
+  });
+
   group('AuthRepository.deleteAccount (Story 7.3 — safe delete)', () {
     test('pas de token → errorMessage explicite, pas de wipe', () async {
       final storage = _FakeSecureStorage();

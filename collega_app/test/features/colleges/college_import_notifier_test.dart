@@ -671,4 +671,49 @@ void main() {
       expect(container.read(collegeImportProvider).valueOrNull, isA<ImportUploading>());
     });
   });
+
+  group('avancement de la génération (8.13)', () {
+    test('generation_progress : fiches prêtes et items au fil de l’eau', () async {
+      final container = _makeContainer(_FakeCollegeImportRepository());
+      addTearDown(container.dispose);
+      final notifier = container.read(collegeImportProvider.notifier);
+      await container.read(collegeImportProvider.future);
+      notifier.debugSetState(const ImportStreaming(
+        collegeId: 'c', jobId: 'j', ocrProgress: 80, totalPages: 80, status: 'ocr_complete',
+      ));
+      notifier.debugHandleSseEvent(
+        {'event': 'generation_progress', 'data': {'items_done': 3, 'items_total': 32, 'cards': 21}},
+        'c',
+      );
+      final s = container.read(collegeImportProvider).value! as ImportStreaming;
+      expect([s.itemsDone, s.itemsTotal, s.cards], [3, 32, 21]);
+      expect(s.status, 'ocr_complete');
+
+      // Un événement OCR tardif ne remet pas le compteur à zéro.
+      notifier.debugHandleSseEvent({'event': 'ocr_progress', 'data': {'page': 80, 'total': 80}}, 'c');
+      final after = container.read(collegeImportProvider).value! as ImportStreaming;
+      expect(after.cards, 21);
+      expect(after.status, 'ocr_complete', reason: 'la génération ne revient pas en lecture');
+    });
+  });
+
+  test('reprise (retour au premier plan) : le compteur de fiches ne repart pas de zéro', () async {
+    final repo = _FakeCollegeImportRepository(
+      statusOverride: CollegeStatusResponse(
+        collegeId: 'c', refId: 3, status: 'ocr_complete', ocrProgress: 80, totalPages: 80, jobId: 'j',
+      ),
+    );
+    final container = _makeContainer(repo, apiClient: _FakeApiClient());
+    addTearDown(container.dispose);
+    final notifier = container.read(collegeImportProvider.notifier);
+    await container.read(collegeImportProvider.future);
+    notifier.debugSetState(const ImportStreaming(
+      collegeId: 'c', jobId: 'j', ocrProgress: 80, totalPages: 80, status: 'ocr_complete',
+      itemsDone: 3, itemsTotal: 32, cards: 21, preview: ['Q'],
+    ));
+    await notifier.reconnectIfActive('c');
+    final s = container.read(collegeImportProvider).value! as ImportStreaming;
+    expect([s.itemsDone, s.itemsTotal, s.cards], [3, 32, 21]);
+    expect(s.preview, ['Q']);
+  });
 }

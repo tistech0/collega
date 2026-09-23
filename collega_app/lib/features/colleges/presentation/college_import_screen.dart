@@ -1,17 +1,28 @@
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 
-import 'package:collega_app/core/ui/foundation/cg_icon.dart';
-import 'package:collega_app/core/theme/app_theme.dart';
+import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/features/colleges/colleges_import_providers.dart';
+import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
+import 'package:collega_app/features/colleges/domain/import_messages.dart';
 import 'package:collega_app/features/colleges/domain/import_models.dart';
 
+/// Quota de réimport (null : premier import, ou limites injoignables).
+final _reloadLimitsProvider = FutureProvider.autoDispose.family<ReloadLimits?, int>((ref, refId) async {
+  final entries = await ref.watch(collegesProvider.future);
+  final imported = entries.any((e) => e.catalog.refId == refId && e.isImported);
+  if (!imported) return null;
+  try {
+    return await ref.read(collegeImportRepositoryProvider).getReloadLimits(refId);
+  } catch (_) {
+    return null;
+  }
+});
+
+/// Écran d'import (story 8.13, spec v2 § Parcours 4) : tout ce qu'il faut savoir
+/// avant de choisir le PDF ; l'envoi et ses erreurs restent à l'écran.
 class CollegeImportScreen extends ConsumerStatefulWidget {
   const CollegeImportScreen({super.key, required this.refId});
 
@@ -22,188 +33,253 @@ class CollegeImportScreen extends ConsumerStatefulWidget {
 }
 
 class _CollegeImportScreenState extends ConsumerState<CollegeImportScreen> {
-  CollegeCatalogEntry get _catalogEntry => kCollegeCatalog.firstWhere(
-        (e) => e.refId == widget.refId,
-        orElse: () => kCollegeCatalog.first,
-      );
+  static const _maxPdfBytes = 500 * 1024 * 1024;
+
+  /// Erreur affichée sous le bloc d'information (taille, envoi, quota).
+  String? _error;
+  bool _picking = false;
 
   @override
   void initState() {
     super.initState();
-    // Réinitialiser l'état à chaque ouverture de l'écran
+    // Chaque ouverture repart d'un état propre (un envoi en cours est conservé).
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(collegeImportProvider.notifier).reset();
+      if (mounted) ref.read(collegeImportProvider.notifier).reset();
     });
   }
 
-  static const int _maxPdfSizeBytes = 500 * 1024 * 1024; // 500 MB
+  bool get _isReimport =>
+      ref.read(collegesProvider).valueOrNull?.any((e) => e.catalog.refId == widget.refId && e.isImported) ?? false;
 
-  Future<void> _pickAndImport() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-    );
-    if (result == null || result.files.single.path == null) return;
-
-    final file = File(result.files.single.path!);
-    final sizeBytes = await file.length();
-    if (sizeBytes > _maxPdfSizeBytes) {
-      if (!mounted) return;
-      final sizeMb = (sizeBytes / (1024 * 1024)).toStringAsFixed(0);
-      ShadToaster.of(context).show(
-        ShadToast.destructive(
-          title: const Text('PDF trop volumineux'),
-          description: Text('Le fichier fait ${sizeMb} MB. Maximum : 500 MB.'),
-        ),
-      );
-      return;
+  Future<void> _pick() async {
+    if (_picking) return;
+    setState(() {
+      _picking = true;
+      _error = null;
+    });
+    try {
+      final PickedPdf? picked;
+      try {
+        picked = await ref.read(pdfPickerProvider)();
+      } catch (_) {
+        if (mounted) setState(() => _error = 'Le fichier n’a pas pu être ouvert. Réessaie.');
+        return;
+      }
+      final pdf = picked;
+      if (pdf == null || !mounted) return;
+      if (pdf.size > _maxPdfBytes) {
+        setState(() => _error = tooLargeMessage(pdf.size));
+        return;
+      }
+      await ref.read(collegeImportProvider.notifier).startImport(widget.refId, pdf.file);
+    } finally {
+      if (mounted) setState(() => _picking = false);
     }
+  }
 
-    await ref.read(collegeImportProvider.notifier).startImport(widget.refId, file);
+  void _back() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/colleges');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final importAsync = ref.watch(collegeImportProvider);
+    final c = CgTheme.of(context).colors;
+    final catalog = collegeCatalogEntry(widget.refId);
+    final importState = ref.watch(collegeImportProvider).valueOrNull;
+    final limits = ref.watch(_reloadLimitsProvider(widget.refId));
+    final isReimport = _isReimport;
 
     ref.listen<AsyncValue<CollegeImportState>>(collegeImportProvider, (previous, next) {
+      // Écran recouvert (import en cours ouvert par-dessus) : il ne réagit plus,
+      // sinon une reprise après erreur ouvrirait un second écran de progression.
+      if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
       final value = next.valueOrNull;
-      // Ne pousser l'écran de progression qu'à la TRANSITION vers ImportStreaming :
-      // chaque événement OCR produit un nouvel ImportStreaming (copyWith), un push
-      // par état empilait ~1 écran par page (régression prod 2026-09-21).
-      final wasStreaming = previous?.valueOrNull is ImportStreaming;
-      if (value is ImportStreaming && !wasStreaming) {
+      // L'écran d'import en cours ne s'ouvre qu'à la TRANSITION vers le streaming
+      // (chaque événement produit un nouvel état : régression prod 2026-09-21).
+      if (value is ImportStreaming && previous?.valueOrNull is! ImportStreaming) {
         context.push(
           '/colleges/${widget.refId}/import/progress',
-          extra: {'collegeId': value.collegeId, 'refId': widget.refId},
+          extra: {'collegeId': value.collegeId, 'refId': widget.refId, 'reimport': isReimport},
         );
-      } else if (value is ImportError) {
-        _handleError(context, value.message);
+      } else if (value is ImportError && previous?.valueOrNull is! ImportError) {
+        if (value.message == 'subscription_required') {
+          context.push('/paywall');
+        } else {
+          CgHaptics.error();
+          setState(() => _error = importErrorMessage(value.message, reimport: isReimport));
+        }
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _catalogEntry.name,
-          style: AppTypography.titleMedium(),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.screenMargin),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    if (catalog == null) {
+      return ColoredBox(
+        color: c.ground,
+        child: CgPage(
+          title: 'Import',
+          backLabel: 'Retour',
+          onBack: _back,
           children: [
-            const SizedBox(height: AppSpacing.sectionSpacing),
-            CgIcon(_catalogEntry.icon, size: 64, color: AppColors.primary),
-            const SizedBox(height: AppSpacing.sectionSpacing),
-            Text(
-              _catalogEntry.name,
-              style: AppTypography.titleLarge(),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.baseUnit),
-            Text(
-              _catalogEntry.editor,
-              style: AppTypography.bodyMedium()
-                  .copyWith(color: AppColors.secondary),
-              textAlign: TextAlign.center,
-            ),
-            const Spacer(),
-            if (importAsync.valueOrNull case ImportUploading(:final progress))
-              Column(
-                children: [
-                  SizedBox(
-                    height: 48,
-                    child: Center(child: LinearProgressIndicator(value: progress, color: AppColors.primary)),
-                  ),
-                  const SizedBox(height: AppSpacing.baseUnit),
-                  Text(
-                    progress == null
-                        ? 'Upload en cours…'
-                        : 'Upload en cours (${(progress * 100).round()} %) — continue en arrière-plan',
-                    style: AppTypography.bodyMedium(),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              )
-            else
-              ShadButton(
-                onPressed: _pickAndImport,
-                child: const Text('Choisir un PDF'),
+            Padding(
+              padding: const EdgeInsets.only(top: CgSpace.beforeLargeTitle),
+              child: CgState.error(
+                title: 'Ce collège est introuvable',
+                message: 'Le lien ne mène à aucun collège du catalogue.',
+                actionLabel: 'Retour',
+                onAction: _back,
               ),
-            const SizedBox(height: AppSpacing.sectionSpacing),
+            ),
           ],
         ),
+      );
+    }
+
+    final limitsValue = limits.valueOrNull;
+    final blocked = limitsValue != null && (limitsValue.isCollegeLimitReached || limitsValue.isMonthlyLimitReached);
+    // Envoi en cours : celui de ce collège (barre) ou d'un autre (bouton inactif).
+    final uploadingRef = importState is ImportUploading ? importState.refId : null;
+    final uploading = importState is ImportUploading && (uploadingRef == null || uploadingRef == widget.refId);
+    final otherUpload = importState is ImportUploading && !uploading;
+    final progress = importState is ImportUploading ? importState.progress : null;
+
+    final quota = !isReimport
+        ? 'Premier import de ce collège'
+        : limitsValue == null
+            ? 'Réimport : remplace les fiches actuelles'
+            : 'Réimport ${limitsValue.collegeReloadCount + 1}/${limitsValue.collegeReloadMax} · '
+                '${limitsValue.monthlyReloads + 1}/${limitsValue.monthlyMax} ce mois';
+    final blockedMessage = limitsValue == null
+        ? null
+        : limitsValue.isCollegeLimitReached
+            ? importErrorMessage('college_reload_limit', reimport: true)
+            : limitsValue.isMonthlyLimitReached
+                ? importErrorMessage('monthly_reload_limit:${limitsValue.monthlyResetAt}', reimport: true)
+                : null;
+    final shownError = _error ?? blockedMessage ?? (otherUpload ? importErrorMessage('upload_in_progress') : null);
+
+    return ColoredBox(
+      color: c.ground,
+      child: CgPage(
+        title: catalog.name,
+        subtitle: isReimport ? 'Réimporter le PDF' : 'Importer le PDF',
+        backLabel: 'Retour',
+        onBack: _back,
+        bottomAction: CgButton(
+          label: 'Choisir le PDF',
+          loading: uploading || _picking,
+          onPressed: blocked || uploading || otherUpload ? null : _pick,
+        ),
+        children: [
+          const SizedBox(height: CgSpace.s5),
+          Row(children: [
+            CgRowIcon(catalog.icon),
+            const SizedBox(width: CgSpace.s3),
+            Expanded(child: Text(catalog.editor, style: CgType.body.copyWith(color: c.ink2))),
+          ]),
+          const SizedBox(height: CgSpace.s5),
+          _InfoBlock(lines: [
+            (CgIcons.document, 'Le PDF officiel du collège (${catalog.editor})'),
+            (CgIcons.upload, '500 Mo au plus'),
+            (CgIcons.clock, '3 à 10 minutes selon la taille'),
+            (CgIcons.refresh, quota),
+            (CgIcons.bell, 'Tu peux fermer Collega pendant l’import : on te prévient quand les fiches sont prêtes.'),
+          ]),
+          if (uploading) ...[
+            const SizedBox(height: CgSpace.s5),
+            _UploadProgress(progress: progress),
+          ],
+          if (shownError != null) ...[
+            const SizedBox(height: CgSpace.s5),
+            Semantics(
+              liveRegion: true,
+              container: true,
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                CgIcon(CgIcons.warning, size: _iconSize, color: c.warningInk),
+                const SizedBox(width: CgSpace.s2),
+                Expanded(child: Text(shownError, style: CgType.bodyS.copyWith(color: c.warningInk))),
+              ]),
+            ),
+          ],
+        ],
       ),
     );
   }
 
-  String _formatDate(String isoDate) {
-    try {
-      final dt = DateTime.parse(isoDate).toLocal();
-      return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}';
-    } catch (_) {
-      return isoDate;
-    }
-  }
+  static const _iconSize = 18.0;
+}
 
-  void _handleError(BuildContext context, String message) {
-    switch (message) {
-      case 'subscription_required':
-        context.push('/paywall');
-      case 'job_in_progress':
-        ShadToaster.of(context).show(
-          const ShadToast(
-            title: Text('Import déjà en cours pour ce collège'),
+/// Ce qu'il faut savoir avant d'importer.
+class _InfoBlock extends StatelessWidget {
+  const _InfoBlock({required this.lines});
+
+  final List<(String, String)> lines;
+
+  static const _iconSize = 20.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = CgTheme.of(context).colors;
+    return Container(
+      padding: const EdgeInsets.all(CgSpace.s4),
+      decoration: BoxDecoration(color: c.surface, borderRadius: CgRadius.lAll),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        for (final (i, (icon, text)) in lines.indexed) ...[
+          if (i > 0) const SizedBox(height: CgSpace.s3),
+          MergeSemantics(
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              CgIcon(icon, size: _iconSize, color: c.accent),
+              const SizedBox(width: CgSpace.s3),
+              Expanded(child: Text(text, style: CgType.body.copyWith(color: c.ink))),
+            ]),
           ),
-        );
-      case 'college_reload_limit':
-        ShadToaster.of(context).show(
-          const ShadToast.destructive(
-            title: Text('Ce collège ne peut plus être retraité'),
+        ],
+      ]),
+    );
+  }
+}
+
+/// Barre d'envoi (upload par morceaux, story 7.11).
+class _UploadProgress extends StatelessWidget {
+  const _UploadProgress({required this.progress});
+
+  /// 0..1 ; null : envoi en une fois (pas de pourcentage).
+  final double? progress;
+
+  static const _barHeight = 6.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = CgTheme.of(context).colors;
+    final p = progress;
+    final label = p == null ? 'Envoi en cours…' : 'Envoi ${(p * 100).round()} % · continue en arrière-plan';
+    return Semantics(
+      liveRegion: true,
+      label: label,
+      excludeSemantics: true,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        ClipRRect(
+          borderRadius: CgRadius.pill,
+          child: SizedBox(
+            height: _barHeight,
+            child: ColoredBox(
+              color: c.unseen,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FractionallySizedBox(
+                  widthFactor: (p ?? 0).clamp(0.0, 1.0),
+                  heightFactor: 1,
+                  child: ColoredBox(color: c.accent),
+                ),
+              ),
+            ),
           ),
-        );
-      case String s when s.startsWith('monthly_reload_limit:'):
-        final resetAt = s.substring('monthly_reload_limit:'.length);
-        ShadToaster.of(context).show(
-          ShadToast.destructive(
-            title: const Text('Limite mensuelle atteinte'),
-            description: Text('Réinitialisation le ${_formatDate(resetAt)}'),
-          ),
-        );
-      case 'file_too_large':
-        ShadToaster.of(context).show(
-          const ShadToast.destructive(title: Text('PDF trop volumineux (max 500 Mo)')),
-        );
-      case 'upload_in_progress':
-        ShadToaster.of(context).show(
-          const ShadToast(title: Text('Un upload est déjà en cours — patientez')),
-        );
-      case 'upload_expired':
-        ShadToaster.of(context).show(
-          const ShadToast.destructive(title: Text('Upload expiré — relancez l\'import')),
-        );
-      case 'upload_source_missing':
-        ShadToaster.of(context).show(
-          const ShadToast.destructive(title: Text('Fichier introuvable — relancez l\'import')),
-        );
-      case 'upload_failed':
-        ShadToaster.of(context).show(
-          const ShadToast.destructive(
-            title: Text('Envoi interrompu'),
-            description: Text('L\'import reprendra automatiquement à la prochaine ouverture'),
-          ),
-        );
-      default:
-        ShadToaster.of(context).show(
-          ShadToast.destructive(
-            title: const Text('Erreur lors de l\'import'),
-            description: Text(message),
-          ),
-        );
-    }
+        ),
+        const SizedBox(height: CgSpace.s2),
+        Text(label, style: CgType.bodyS.copyWith(color: c.ink2)),
+      ]),
+    );
   }
 }

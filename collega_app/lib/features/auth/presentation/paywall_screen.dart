@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/core/theme/app_theme.dart';
 import 'package:collega_app/features/auth/paywall_providers.dart';
 
@@ -85,9 +85,11 @@ class _PaywallContent extends ConsumerWidget {
             ),
           ],
           const SizedBox(height: 12),
+          // Compte sans accès : jamais bloqué ici (le routeur ramène au paywall
+          // depuis la démo) ; l'écran est refait en story 8.14.
           ShadButton.ghost(
-            onPressed: () => context.go('/demo'),
-            child: const Text('Retour à la démo'),
+            onPressed: () => ref.read(authProvider.notifier).logout(),
+            child: const Text('Se déconnecter'),
           ),
           const SizedBox(height: 4),
           ShadButton.ghost(

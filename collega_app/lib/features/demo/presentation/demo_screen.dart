@@ -1,124 +1,103 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 
-import 'package:collega_app/core/theme/app_theme.dart';
+import 'package:collega_app/core/ui/collega_ui.dart';
+import 'package:collega_app/features/demo/demo_providers.dart';
 import 'package:collega_app/features/demo/domain/demo_data.dart';
 
-class DemoScreen extends StatelessWidget {
+/// Démo (story 8.12, spec v2 § Parcours 1) : les fiches d'exemple dans le vrai
+/// drill (gestes + boutons), puis un récap qui invite à se connecter.
+class DemoScreen extends ConsumerWidget {
   const DemoScreen({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    final cards = demoCollege.item.cards;
+  void _leave(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/welcome');
+    }
+  }
 
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.screenMargin),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: AppSpacing.sectionSpacing),
-              Text(
-                'Découvrez AppMédecine',
-                style: AppTypography.displayMedium(),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Explorez une démo sans créer de compte',
-                style: AppTypography.bodyMedium().copyWith(
-                  color: AppColors.secondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.sectionSpacing),
-              ShadCard(
-                padding: const EdgeInsets.all(AppSpacing.cardPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            demoCollege.name,
-                            style: AppTypography.titleMedium(),
-                          ),
-                        ),
-                        ShadBadge(
-                          backgroundColor: demoCollege.item.rang == 'A'
-                              ? AppColors.primary
-                              : AppColors.secondary,
-                          child: Text(
-                            'Rang ${demoCollege.item.rang}',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${demoCollege.item.title} — Item n°${demoCollege.item.number}',
-                      style: AppTypography.bodyMedium().copyWith(
-                        color: AppColors.secondary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    ...cards.map((card) => _CardPreviewRow(card: card)),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              ShadButton(
-                onPressed: () => context.go('/demo/drill'),
-                child: const Text('Essayer la démo'),
-              ),
-              const SizedBox(height: 8),
-              ShadButton.ghost(
-                onPressed: () => context.go('/auth/register'),
-                child: const Text('Accéder directement'),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(demoDrillProvider);
+    final notifier = ref.read(demoDrillProvider.notifier);
+    final cards = demoCollege.item.cards;
+    final c = CgTheme.of(context).colors;
+
+    if (state.isComplete) return _Recap(state: state, onRestart: notifier.restart, onClose: () => _leave(context));
+
+    final card = cards[state.currentIndex];
+    return ColoredBox(
+      color: c.accent,
+      child: CgDrillCard(
+        cardKey: '${card.id}#${state.currentIndex}',
+        question: card.front,
+        answer: card.back,
+        rank: card.rang,
+        collegeName: demoCollege.name,
+        index: state.currentIndex + 1,
+        total: cards.length,
+        contextLabel: 'Démo',
+        showFlipHint: state.currentIndex == 0,
+        onVerdict: notifier.judge,
+        onClose: () => _leave(context),
       ),
     );
   }
 }
 
-class _CardPreviewRow extends StatelessWidget {
-  const _CardPreviewRow({required this.card});
-  final DemoFlashCard card;
+class _Recap extends StatelessWidget {
+  const _Recap({required this.state, required this.onRestart, required this.onClose});
+
+  final DemoDrillState state;
+  final VoidCallback onRestart;
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
-    final badgeColor = card.rang == 'A' ? AppColors.primary : AppColors.secondary;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          ShadBadge(
-            backgroundColor: badgeColor,
-            child: Text(
-              'Rang ${card.rang}',
-              style: const TextStyle(color: Colors.white, fontSize: 10),
+    final c = CgTheme.of(context).colors;
+    final mastered = state.count(CgVerdict.mastered);
+    final good = state.count(CgVerdict.good);
+    final review = state.count(CgVerdict.review);
+    final bottom = MediaQuery.paddingOf(context).bottom;
+    return ColoredBox(
+      color: c.ground,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(CgSpace.gutter, 0, CgSpace.gutter, bottom + CgSpace.s4),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(top: CgSpace.beforeLargeTitle),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Semantics(
+                    header: true,
+                    child: Text('Démo terminée', style: CgType.titleL.copyWith(color: c.ink)),
+                  ),
+                  const SizedBox(height: CgSpace.s2),
+                  Text(
+                    '$mastered ${mastered > 1 ? 'maîtrisées' : 'maîtrisée'} · $good bien · $review à revoir',
+                    style: CgType.body.copyWith(color: c.ink2),
+                  ),
+                  const SizedBox(height: CgSpace.s4),
+                  CgRankBar(mastered: mastered, good: good, review: review, unseen: 0, size: CgRankBarSize.header),
+                  const SizedBox(height: CgSpace.section),
+                  Text(
+                    'Avec ton compte, Collega transforme les PDF de tes collèges en fiches comme celles-ci '
+                    'et te prépare une session chaque jour.',
+                    style: CgType.body.copyWith(color: c.ink),
+                  ),
+                ]),
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              card.front,
-              style: AppTypography.bodyMedium(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
+            CgButton(label: 'Se connecter', onPressed: () => context.go('/auth/login')),
+            CgButton(label: 'Recommencer', variant: CgButtonVariant.quiet, onPressed: onRestart),
+            CgButton(label: 'Fermer', variant: CgButtonVariant.quiet, onPressed: onClose),
+          ]),
+        ),
       ),
     );
   }

@@ -89,6 +89,11 @@ class CollegeDetailScreen extends ConsumerWidget {
     }
 
     final status = entry.userStatus;
+    if (status == null && async.isLoading) {
+      // Liste en rechargement (fin d'un premier import) : l'ancienne valeur dit
+      // « pas importé » ; on attend la nouvelle au lieu de renvoyer à l'import.
+      return page(const [_DetailSkeleton()]);
+    }
     if (status == null) {
       // Pas encore importé : l'écran utile est celui de l'import.
       WidgetsBinding.instance.addPostFrameCallback((_) {

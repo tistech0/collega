@@ -51,15 +51,23 @@ class AuthUser {
   static const _absent = Object();
 }
 
+/// Pourquoi une connexion a échoué (story 8.12) : l'écran dit la bonne chose
+/// au bon endroit (sous le champ, ou « pas de connexion »).
+enum LoginError { invalidCredentials, invalidEmail, tooManyAttempts, network, other }
+
 @immutable
 class AuthState {
   const AuthState({
     this.user,
     this.errorMessage,
+    this.loginError,
   });
 
   final AuthUser? user;
   final String? errorMessage;
+
+  /// Renseigné seulement par une connexion échouée.
+  final LoginError? loginError;
 
   bool get isAuthenticated => user != null;
 

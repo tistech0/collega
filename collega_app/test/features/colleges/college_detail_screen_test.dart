@@ -68,6 +68,22 @@ class _Colleges extends CollegesNotifier {
       ];
 }
 
+/// Fin d'un premier import : la liste se recharge (valeur précédente : pas
+/// encore importé) puis dit le collège prêt.
+class _ReloadingColleges extends CollegesNotifier {
+  static int builds = 0;
+  @override
+  Future<List<CollegeListEntry>> build() async {
+    builds++;
+    final ready = builds > 1;
+    if (ready) await Future<void>.delayed(const Duration(milliseconds: 30));
+    return [
+      for (final c in kCollegeCatalog)
+        CollegeListEntry(catalog: c, userStatus: ready && c.refId == 3 ? _status('generation_complete') : null),
+    ];
+  }
+}
+
 class _Detail extends CollegeDetailNotifier {
   _Detail(this.result);
   final FutureOr<CollegeDetailState> Function() result;
@@ -110,8 +126,10 @@ Widget _app({
   ReloadLimits? limits = _limitsOk,
   _Visit? visit,
   double textScale = 1,
+  CollegesNotifier Function()? colleges,
+  bool autoPush = true,
 }) {
-  var pushed = false;
+  var pushed = !autoPush;
   Widget detailPage(GoRouterState s) => CollegeDetailScreen(
         refId: int.parse(s.pathParameters['ref']!),
         origin: s.uri.path.startsWith('/home/') ? CollegeDetailOrigin.today : CollegeDetailOrigin.library,
@@ -156,7 +174,7 @@ Widget _app({
   );
   return ProviderScope(
     overrides: [
-      collegesProvider.overrideWith(() => _Colleges(imported ? status ?? _status('generation_complete') : null)),
+      collegesProvider.overrideWith(colleges ?? () => _Colleges(imported ? status ?? _status('generation_complete') : null)),
       collegeDetailProvider.overrideWith(() => _Detail(detail ?? () => CollegeDetailLoaded(items: _items))),
       collegeDrillStatsByItemProvider.overrideWith((ref, id) => Stream.value(stats ?? _stats)),
       collegeImportRepositoryProvider.overrideWithValue(_ImportRepo(limits)),
@@ -521,5 +539,25 @@ void main() {
         }
       }
     }
+  });
+
+  testWidgets('fin d’un premier import : pendant le rechargement de la liste, pas de renvoi vers l’import (revue 8.13)',
+      (tester) async {
+    _phone(tester);
+    _ReloadingColleges.builds = 0;
+    final visit = _Visit();
+    await tester.pumpWidget(_app(colleges: _ReloadingColleges.new, autoPush: false, visit: visit));
+    await tester.pumpAndSettle();
+    final element = tester.element(find.byType(SizedBox).first);
+    final container = ProviderScope.containerOf(element);
+    await container.read(collegesProvider.future); // pas encore importé
+    container.invalidate(collegesProvider); // l'import vient de finir : rechargement
+    GoRouter.of(element).push('/colleges/3');
+    await tester.pump();
+    await tester.pump();
+    expect(visit.paths, isEmpty, reason: 'la liste se recharge : on attend, on ne redirige pas');
+    await tester.pumpAndSettle();
+    expect(visit.paths, isEmpty);
+    expect(find.text('Réviser ce collège · 18 fiches'), findsOneWidget);
   });
 }

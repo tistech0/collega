@@ -52,8 +52,10 @@ class _FakeAuthRepository extends AuthRepository {
   @override
   Future<AuthState> register(String email, String password) async => const AuthState();
 
+  static int logouts = 0;
+
   @override
-  Future<void> logout() async {}
+  Future<void> logout() async => logouts++;
 
   @override
   Future<AuthState> refreshFromMe() async => const AuthState();
@@ -103,12 +105,13 @@ Widget _buildTestWidget({
 
 void main() {
   group('PaywallScreen', () {
-    testWidgets("affiche le bouton S'abonner et Retour à la démo", (tester) async {
+    testWidgets("affiche S'abonner et « Se déconnecter » (plus de « Retour à la démo » sans issue)", (tester) async {
       await tester.pumpWidget(_buildTestWidget());
       await tester.pumpAndSettle();
 
       expect(find.text("S'abonner"), findsOneWidget);
-      expect(find.text('Retour à la démo'), findsOneWidget);
+      expect(find.text('Se déconnecter'), findsOneWidget);
+      expect(find.text('Retour à la démo'), findsNothing);
     });
 
     testWidgets('affiche le bouton Gérer mon abonnement', (tester) async {
@@ -141,14 +144,13 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets("Retour à la démo navigue vers /demo", (tester) async {
+    testWidgets('« Se déconnecter » déconnecte (un compte sans accès n’est jamais bloqué)', (tester) async {
+      _FakeAuthRepository.logouts = 0;
       await tester.pumpWidget(_buildTestWidget());
       await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Retour à la démo'));
+      await tester.tap(find.text('Se déconnecter'));
       await tester.pumpAndSettle();
-
-      expect(find.text('Démo'), findsOneWidget);
+      expect(_FakeAuthRepository.logouts, 1);
     });
   });
 }

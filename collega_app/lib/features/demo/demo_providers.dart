@@ -1,56 +1,32 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'domain/demo_data.dart';
+import 'package:collega_app/core/ui/components/cg_verdict_bar.dart';
+import 'package:collega_app/features/demo/domain/demo_data.dart';
 
+/// Démo (story 8.12) : les fiches d'exemple dans le vrai drill, puis un récap.
 @immutable
 class DemoDrillState {
-  const DemoDrillState({
-    this.currentIndex = 0,
-    this.isFlipped = false,
-    this.evaluations = const {},
-    this.isComplete = false,
-  });
-  final int currentIndex;
-  final bool isFlipped;
-  final Map<int, String> evaluations; // index → 'A_REVOIR' | 'BIEN' | 'MAITRISE'
-  final bool isComplete;
+  const DemoDrillState({this.verdicts = const []});
 
-  DemoDrillState copyWith({
-    int? currentIndex,
-    bool? isFlipped,
-    Map<int, String>? evaluations,
-    bool? isComplete,
-  }) =>
-      DemoDrillState(
-        currentIndex: currentIndex ?? this.currentIndex,
-        isFlipped: isFlipped ?? this.isFlipped,
-        evaluations: evaluations ?? this.evaluations,
-        isComplete: isComplete ?? this.isComplete,
-      );
+  /// Un verdict par fiche jugée, dans l'ordre.
+  final List<CgVerdict> verdicts;
+
+  int get currentIndex => verdicts.length;
+  bool get isComplete => verdicts.length >= demoCollege.item.cards.length;
+  int count(CgVerdict v) => verdicts.where((x) => x == v).length;
 }
 
 class DemoDrillNotifier extends AutoDisposeNotifier<DemoDrillState> {
   @override
   DemoDrillState build() => const DemoDrillState();
 
-  void flip() => state = state.copyWith(isFlipped: !state.isFlipped);
-
-  void evaluate(String rang) {
-    final newEvals = Map<int, String>.from(state.evaluations)..[state.currentIndex] = rang;
-    final total = demoCollege.item.cards.length;
-    final nextIndex = state.currentIndex + 1;
-    state = state.copyWith(
-      evaluations: newEvals,
-      currentIndex: nextIndex < total ? nextIndex : state.currentIndex,
-      isFlipped: false,
-      isComplete: newEvals.length >= total,
-    );
+  void judge(CgVerdict verdict) {
+    if (state.isComplete) return;
+    state = DemoDrillState(verdicts: [...state.verdicts, verdict]);
   }
 
-  void reset() => state = const DemoDrillState();
+  void restart() => state = const DemoDrillState();
 }
 
-final demoDrillProvider = NotifierProvider.autoDispose<DemoDrillNotifier, DemoDrillState>(
-  DemoDrillNotifier.new,
-);
+final demoDrillProvider = NotifierProvider.autoDispose<DemoDrillNotifier, DemoDrillState>(DemoDrillNotifier.new);

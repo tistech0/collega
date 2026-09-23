@@ -1,68 +1,40 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/features/demo/demo_providers.dart';
+import 'package:collega_app/features/demo/domain/demo_data.dart';
 
 void main() {
-  group('DemoDrillNotifier', () {
-    late ProviderContainer container;
+  late ProviderContainer c;
+  setUp(() => c = ProviderContainer());
+  tearDown(() => c.dispose());
 
-    setUp(() => container = ProviderContainer());
-    tearDown(() => container.dispose());
+  DemoDrillNotifier n() => c.read(demoDrillProvider.notifier);
 
-    test('état initial correct', () {
-      final state = container.read(demoDrillProvider);
-      expect(state.currentIndex, 0);
-      expect(state.isFlipped, false);
-      expect(state.isComplete, false);
-      expect(state.evaluations, isEmpty);
-    });
+  test('état initial : première fiche, rien de jugé', () {
+    final s = c.read(demoDrillProvider);
+    expect(s.currentIndex, 0);
+    expect(s.verdicts, isEmpty);
+    expect(s.isComplete, isFalse);
+  });
 
-    test('flip() bascule isFlipped à true', () {
-      container.read(demoDrillProvider.notifier).flip();
-      expect(container.read(demoDrillProvider).isFlipped, true);
-    });
+  test('un verdict par fiche, puis terminé ; décompte par verdict', () {
+    n().judge(CgVerdict.mastered);
+    n().judge(CgVerdict.good);
+    expect(c.read(demoDrillProvider).currentIndex, 2);
+    n().judge(CgVerdict.mastered);
+    final s = c.read(demoDrillProvider);
+    expect(s.isComplete, isTrue);
+    expect(s.count(CgVerdict.mastered), 2);
+    expect(s.count(CgVerdict.good), 1);
+    expect(s.count(CgVerdict.review), 0);
+    expect(s.verdicts.length, demoCollege.item.cards.length);
+  });
 
-    test('flip() deux fois revient à false', () {
-      final notifier = container.read(demoDrillProvider.notifier);
-      notifier.flip();
-      notifier.flip();
-      expect(container.read(demoDrillProvider).isFlipped, false);
-    });
-
-    test('evaluate() ajoute à evaluations et remet isFlipped à false', () {
-      final notifier = container.read(demoDrillProvider.notifier);
-      notifier.flip();
-      notifier.evaluate('MAITRISE');
-      final state = container.read(demoDrillProvider);
-      expect(state.evaluations[0], 'MAITRISE');
-      expect(state.isFlipped, false);
-      expect(state.currentIndex, 1);
-    });
-
-    test('evaluate() après 3 évals → isComplete = true', () {
-      final notifier = container.read(demoDrillProvider.notifier);
-      notifier.flip();
-      notifier.evaluate('MAITRISE');
-      notifier.flip();
-      notifier.evaluate('BIEN');
-      notifier.flip();
-      notifier.evaluate('A_REVOIR');
-      final state = container.read(demoDrillProvider);
-      expect(state.isComplete, true);
-      expect(state.evaluations.length, 3);
-    });
-
-    test('reset() remet l\'état initial', () {
-      final notifier = container.read(demoDrillProvider.notifier);
-      notifier.flip();
-      notifier.evaluate('MAITRISE');
-      notifier.reset();
-      final state = container.read(demoDrillProvider);
-      expect(state.currentIndex, 0);
-      expect(state.isFlipped, false);
-      expect(state.isComplete, false);
-      expect(state.evaluations, isEmpty);
-    });
+  test('restart repart de zéro', () {
+    n().judge(CgVerdict.review);
+    n().restart();
+    expect(c.read(demoDrillProvider).verdicts, isEmpty);
   });
 }

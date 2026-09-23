@@ -1,17 +1,17 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:collega_app/core/ui/theme/cg_theme.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/auth/presentation/auth_login_screen.dart';
-import 'package:collega_app/features/auth/presentation/auth_register_screen.dart';
+import 'package:collega_app/features/auth/presentation/welcome_screen.dart';
 import 'package:collega_app/features/auth/presentation/paywall_screen.dart';
 import 'package:collega_app/features/colleges/presentation/college_detail_screen.dart';
 import 'package:collega_app/features/colleges/presentation/college_import_screen.dart';
 import 'package:collega_app/features/colleges/presentation/colleges_screen.dart';
 import 'package:collega_app/features/colleges/presentation/import_progress_screen.dart';
 import 'package:collega_app/features/colleges/presentation/item_detail_screen.dart';
-import 'package:collega_app/features/demo/presentation/demo_drill_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_screen.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
@@ -24,26 +24,43 @@ import 'package:collega_app/features/progress/progress_screen.dart';
 import 'package:collega_app/features/shell/app_shell.dart';
 import 'package:collega_app/features/today/presentation/today_screen.dart';
 
+/// Un seul routeur pour toute la vie de l'app (revue 8.12) : un changement de
+/// connexion réévalue les redirections (`refreshListenable`) au lieu de recréer
+/// le routeur — qui repartait de l'écran de marque et perdait l'écran courant
+/// (erreur de connexion jamais affichée, Profil renvoyé sur Aujourd'hui).
 final routerProvider = Provider<GoRouter>((ref) {
-  final authAsync = ref.watch(authProvider);
+  final authChanges = ValueNotifier<int>(0);
+  ref.listen(authProvider, (_, __) => authChanges.value++);
+  ref.onDispose(authChanges.dispose);
 
-  return GoRouter(
-    initialLocation: '/demo',
+  final router = GoRouter(
+    // Écran neutre le temps de relire la session (jamais l'écran de marque
+    // pour un compte connecté).
+    initialLocation: '/splash',
+    refreshListenable: authChanges,
     redirect: (context, state) {
-      if (authAsync.isLoading) return null;
+      final authAsync = ref.read(authProvider);
+      // Premier chargement seulement : pendant une connexion, la valeur
+      // précédente reste lue (l'écran de connexion ne bouge pas).
+      if (!authAsync.hasValue) return null;
 
       final isAuth = authAsync.valueOrNull?.isAuthenticated ?? false;
       final hasAccess = authAsync.valueOrNull?.hasAccess ?? false;
 
-      // R3 (Story 7.1) : un user authentifié ne doit jamais voir l'écran démo
+      if (state.matchedLocation == '/splash') {
+        return isAuth ? (hasAccess ? '/home' : '/paywall') : '/welcome';
+      }
+
+      // R3 (Story 7.1) : un user authentifié ne voit jamais la démo ni l'écran de marque.
       final isDemoRoute = state.matchedLocation == '/demo' ||
-          state.matchedLocation.startsWith('/demo/');
+          state.matchedLocation.startsWith('/demo/') ||
+          state.matchedLocation == '/welcome';
       if (isAuth && isDemoRoute) {
         return hasAccess ? '/home' : '/paywall';
       }
 
       if (state.fullPath == null || state.fullPath == '/') {
-        return isAuth ? (hasAccess ? '/home' : '/paywall') : '/demo';
+        return isAuth ? (hasAccess ? '/home' : '/paywall') : '/welcome';
       }
 
       final isProtected = state.matchedLocation.startsWith('/home') ||
@@ -53,7 +70,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           state.matchedLocation.startsWith('/drill') ||
           state.matchedLocation.startsWith('/planning');
 
-      if (!isAuth && (isProtected || state.matchedLocation == '/paywall')) return '/demo';
+      if (!isAuth && (isProtected || state.matchedLocation == '/paywall')) return '/welcome';
 
       if (isAuth && !hasAccess && isProtected) return '/paywall';
 
@@ -65,10 +82,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(path: '/splash', builder: (ctx, s) => const _Splash()),
       // Ancienne adresse du planning (story 8.9 : sous Progression).
       GoRoute(path: '/planning/config', redirect: (ctx, s) => '/progress/planning'),
+      GoRoute(path: '/welcome', builder: (ctx, s) => const WelcomeScreen()),
       GoRoute(path: '/demo', builder: (ctx, s) => const DemoScreen()),
-      GoRoute(path: '/demo/drill', builder: (ctx, s) => const DemoDrillScreen()),
+      // Anciens liens (8.12) : la démo est un seul écran ; l'inscription est fermée.
+      GoRoute(path: '/demo/drill', redirect: (ctx, s) => '/demo'),
+      GoRoute(path: '/auth/register', redirect: (ctx, s) => '/welcome'),
       GoRoute(
         path: '/drill',
         builder: (ctx, s) {
@@ -83,7 +104,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           return DrillScreen(launch: launch);
         },
       ),
-      GoRoute(path: '/auth/register', builder: (ctx, s) => const AuthRegisterScreen()),
       GoRoute(path: '/auth/login', builder: (ctx, s) => const AuthLoginScreen()),
       GoRoute(path: '/paywall', builder: (ctx, s) => const PaywallScreen()),
       // Story 7.4 AC #9 — documents légaux bundlés (option B).
@@ -104,14 +124,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/colleges/:ref_id/import/progress',
+        // Sans contexte (lien, app relancée) : le collège, qui dit s'il est en import.
+        redirect: (ctx, s) => s.extra is Map ? null : '/colleges/${s.pathParameters['ref_id']}',
         builder: (ctx, s) {
-          final extra = s.extra as Map<String, dynamic>?;
-          if (extra == null) {
-            return const Scaffold(body: Center(child: Text('Navigation invalide')));
-          }
+          final extra = s.extra! as Map<String, dynamic>;
           return ImportProgressScreen(
             collegeId: extra['collegeId'] as String,
             refId: extra['refId'] as int,
+            reimport: extra['reimport'] as bool? ?? false,
           );
         },
       ),
@@ -149,4 +169,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+  ref.onDispose(router.dispose);
+  return router;
 });
+
+/// Fond de l'app pendant la relecture de la session (quelques millisecondes).
+class _Splash extends StatelessWidget {
+  const _Splash();
+
+  @override
+  Widget build(BuildContext context) => ColoredBox(color: CgTheme.of(context).colors.ground);
+}

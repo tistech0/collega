@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'package:collega_app/core/network/network_errors.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 
@@ -44,8 +45,18 @@ class AuthRepository {
       );
       return _handleTokenResponse(response.data!['data'] as Map<String, dynamic>, email);
     } on DioException catch (e) {
-      return AuthState(errorMessage: _extractError(e));
+      return AuthState(errorMessage: _extractError(e), loginError: _loginError(e));
     }
+  }
+
+  static LoginError _loginError(DioException e) {
+    if (isNetworkUnreachable(e)) return LoginError.network;
+    return switch (e.response?.statusCode) {
+      401 => LoginError.invalidCredentials,
+      422 => LoginError.invalidEmail,
+      429 => LoginError.tooManyAttempts,
+      _ => LoginError.other,
+    };
   }
 
   Future<AuthState> loadStoredUser() async {

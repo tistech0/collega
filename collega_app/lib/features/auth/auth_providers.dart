@@ -62,7 +62,8 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   Future<void> login(String email, String password) async {
-    state = const AsyncLoading();
+    // La valeur précédente reste lisible pendant la requête (routeur, écrans).
+    state = const AsyncLoading<AuthState>().copyWithPrevious(state);
     final result = await ref.read(authRepositoryProvider).login(email, password);
     if (result.user != null) await _claimLocalData(result.user!.id);
     state = AsyncData(result);
