@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, Text, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -20,6 +20,14 @@ class GenerationJob(Base):
         CheckConstraint(
             "status IN ('pending', 'processing', 'ocr_complete', 'generation_complete', 'failed')",
             name="ck_generation_jobs_status",
+        ),
+        # Un seul import actif par collège (migration 012) : la course de deux imports
+        # simultanés se solde par une IntegrityError → 409 JOB_IN_PROGRESS.
+        Index(
+            "idx_one_active_job_per_college",
+            "college_id",
+            unique=True,
+            postgresql_where=text("status IN ('pending', 'processing', 'ocr_complete')"),
         ),
     )
 
@@ -41,7 +49,7 @@ class GenerationJob(Base):
         String(50), nullable=False, default="pending"
     )
     arq_job_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    card_count: Mapped[int] = mapped_column(Integer, default=0)
+    card_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     # Usage Anthropic cumulé sur le job (Story 7.8). NULL = job non mesuré
     # (antérieur migration 014 / échec avant capture) ; 0 = mesuré et gratuit
     # (hash-sharing, Claude jamais appelé). Le coût € est calculé à la lecture.
@@ -50,7 +58,8 @@ class GenerationJob(Base):
     hash_shared: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     pdf_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
-    page_texts_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Résumé de la bascule (chantier 1) : {changed, added, removed, unchanged, cards, claude_calls, quota_refunded}
+    summary_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

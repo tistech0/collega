@@ -23,6 +23,16 @@ class Base(DeclarativeBase):
     pass
 
 
+# Index sur expression qu'Alembic ne sait pas comparer (il les voit toujours
+# « différents ») : créés par migration SQL, jamais par les modèles, et exclus de
+# l'autogénération pour qu'aucune migration générée ne les supprime.
+ALEMBIC_UNMANAGED_INDEXES = frozenset({"idx_flash_cards_fts"})
+
+
+def alembic_include_object(obj, name, type_, reflected, compare_to) -> bool:
+    return not (type_ == "index" and name in ALEMBIC_UNMANAGED_INDEXES)
+
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_factory() as session:
         yield session
