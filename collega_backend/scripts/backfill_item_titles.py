@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Backfill des titres d'items depuis les PDF déjà importés (Story 8.0).
 
-`items.ocr_text` est purgé 24 h après génération (NFR9) : les titres ne peuvent être
-ré-extraits que du PDF source, encore présent sur le volume `pdf_storage_path`.
-Relit le texte (pdfplumber, sans OCR ni appel Claude), extrait les titres avec
+Les titres sont ré-extraits du PDF source, présent sur le volume `pdf_storage_path`
+(les imports antérieurs au chantier 1 n'ont plus de texte OCR en base). Relit le texte (pdfplumber, sans OCR ni appel Claude), extrait les titres avec
 `ItemDetector`, alimente le référentiel `item_titles` et complète les items sans titre.
 Ne modifie ni pages, ni rangs, ni fiches.
 
