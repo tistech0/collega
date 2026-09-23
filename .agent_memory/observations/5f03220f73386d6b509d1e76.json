@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/features/progress/progress_screen.dart lib/features/planning/domain/planning_models.dart lib/features/planning/planning_providers.dart lib/features/planning/data/planning_generator.dart",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/features/progress/progress_screen.dart lib/features/planning/domain/planning_models.dart lib/features/planning/planning_provide",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5f03220f73386d6b509d1e76",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T07:52:34.698Z",
+  "stored_at": "2026-09-23T07:52:34.699Z"
+}

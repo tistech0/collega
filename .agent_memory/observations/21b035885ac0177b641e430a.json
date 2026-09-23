@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_refresh",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_refresh: [{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"generated_at\": \"2026-09-23T08:27:38.696Z\",\\n \"quiet_refresh\": true,\\n \"index\": {\\n \"projectDir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"packets\": 36,\\n \"migrated\": 0,\\n \"indexes",
+  "text": "[{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"generated_at\": \"2026-09-23T08:27:38.696Z\",\\n \"quiet_refresh\": true,\\n \"index\": {\\n \"projectDir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"packets\": 36,\\n \"migrated\": 0,\\n \"indexes\": [\\n \".agent_memory/indexes/catalog.json\",\\n \".agent_memory/indexes/by-path.json\",\\n \".agent_memory/indexes/by-tag.json\",\\n \".agent_memory/indexes/by-type.json\",\\n \".agent_memory/indexes/vector-local.json\",\\n \".agent_memory/indexes/docs-index.json\",\\n \".agent_memory/indexes/structural.json\",\\n \".agent_memory/indexes/graph.json\",\\n \".agent_memory/indexes/code-graph.json\"\\n ],\\n \"policyPath\": \"AGENTS.md\"\\n },\\n \"validation\": {\\n \"ok\": true,\\n \"errors\": [],\\n \"warnings\": [\\n \".agent_memory/packets/repo_map-collega-repo-overview-cf8b6e00.md: low memory quality score 54\",\\n \".agent_memory/pending/bug_fix-pasted-content-id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f-29717d15.md: no repo-grounded source reference found\"\\n ]\\n },\\n \"metrics\": {\\n \"schema_version\": 1,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"repo_key\": \"git-github-com-tistech0-colle",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "21b035885ac0177b641e430a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:27:38.971Z",
+  "stored_at": "2026-09-23T08:27:38.972Z",
+  "low_signal": true
+}

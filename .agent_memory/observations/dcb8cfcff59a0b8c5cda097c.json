@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 228,245p _bmad-output/planning-artifacts/ux-audit-2026-09-21.html | sed 's/<[^>]*>/ /g' | tr -s ' ' | head -30; grep -n \"Décaler\\|postpone\" -r collega_app/lib | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 228,245p _bmad-output/planning-artifacts/ux-audit-2026-09-21.html | sed 's/<[^>]*>/ /g' | tr -s ' ' | head -30; grep -n \"Décaler\\|postpone\" -r collega_app/lib | head: ication. iOS regroupe en listes insetGrouped ; ici la hiérarchie est plate. « Not everything ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 228,245p _bmad-output/planning-artifacts/ux-audit-2026-09-21.html | sed 's/<[^>]*>/ /g' | tr -s ' ' | head -30; grep -n \"Décaler\\|postpone\" -r collega_app/lib | head: ication. iOS regroupe en listes insetGrouped ; ici la hiérarchie est plate. « Not everything is a card » · HIG lists collega_app/lib/features/planning/data/planning_repository.dart:75: Future<void> postponeSession(String sessionId) async { collega_app/lib/features/planning/data/planning_repository.dart:84: status: Value('postponed'), collega_app/lib/features/planning/data/planning_repository.dart:98: final newId = '${row.id}-postponed-$nextDay'; collega_app/lib/features/planning/domain/planning_models.dart:46: final String status; // 'pending' | 'completed' | 'postponed' collega_app/lib/core/database/tables/planning_sessions_table.dart:12: // 'pending' | 'completed' | 'postponed' collega_app/lib/features/planning/planning_providers.dart:113: Future<void> postponeToday() async { collega_app/lib/features/planning/planning_providers.dart:117: await repo.postponeSession(s!.todaySession!.id);",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "dcb8cfcff59a0b8c5cda097c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T07:52:46.604Z",
+  "stored_at": "2026-09-23T07:52:46.605Z"
+}

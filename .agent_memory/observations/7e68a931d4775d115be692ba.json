@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ./tool/run_device.sh --release -d 00008110-000115D43499801E 2>&1 | tail -4",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ./tool/run_device.sh --release -d 00008110-000115D43499801E 2>&1 | tail -4: bo03c74bg Session cwd remains /Users/lesurmatthis/dev/projet perso/collega; directory changes made by the backgrounded command do not apply to subsequent commands.",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ./tool/run_device.sh --release -d 00008110-000115D43499801E 2>&1 | tail -4: bo03c74bg Session cwd remains /Users/lesurmatthis/dev/projet perso/collega; directory changes made by the backgrounded command do not apply to subsequent commands.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7e68a931d4775d115be692ba",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:27:00.764Z",
+  "stored_at": "2026-09-23T08:27:00.764Z"
+}

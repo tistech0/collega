@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_learn",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_learn: [{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/decision-planning-v2-8-9-et-journal-complet-des-r-visions-8-8-sch-ma-v8-aae5950d.md\\nRepo-local memory is written immediately. Org/global promotion still requires explicit review.",
+  "text": "[{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/decision-planning-v2-8-9-et-journal-complet-des-r-visions-8-8-sch-ma-v8-aae5950d.md\\nRepo-local memory is written immediately. Org/global promotion still requires explicit review.'}]",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "07434b98efe1f81a3fe2370a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:27:15.850Z",
+  "stored_at": "2026-09-23T08:27:15.850Z"
+}
