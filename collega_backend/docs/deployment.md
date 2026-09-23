@@ -95,7 +95,7 @@ ou une donnée nouvelle collectée :
 - ajouter une modale au démarrage de l'app (à intégrer dans `app_router.dart`
   pour les comptes existants).
 
-Responsable de la dernière révision : Lesurmatthis (2026-05-22).
+Responsable de la dernière révision : Matthis Lesur (2026-05-22).
 
 ## Upload par morceaux (Story 7.11)
 

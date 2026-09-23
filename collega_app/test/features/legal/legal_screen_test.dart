@@ -30,7 +30,8 @@ class _MemoryBundle extends CachingAssetBundle {
   }
 }
 
-Widget _app(LegalDocument doc, {AssetBundle? bundle, List<String>? visited, double textScale = 1}) {
+Widget _app(LegalDocument doc,
+    {AssetBundle? bundle, List<String>? visited, double textScale = 1, List<Uri>? opened}) {
   final router = GoRouter(initialLocation: '/profile', routes: [
     GoRoute(path: '/profile', builder: (_, __) {
       visited?.add('/profile');
@@ -41,7 +42,13 @@ Widget _app(LegalDocument doc, {AssetBundle? bundle, List<String>? visited, doub
         return const SizedBox();
       });
     }),
-    GoRoute(path: '/legal', builder: (_, __) => LegalScreen(document: doc)),
+    GoRoute(path: '/legal', builder: (_, __) => LegalScreen(
+          document: doc,
+          openLink: (uri) async {
+            opened?.add(uri);
+            return true;
+          },
+        )),
   ]);
   final app = CgTheme(
     data: CgThemeData.light,
@@ -64,9 +71,10 @@ void _phone(WidgetTester tester, {double width = 393, double height = 900}) {
   addTearDown(tester.view.reset);
 }
 
-Future<void> _openFromProfile(WidgetTester tester, LegalDocument doc, {AssetBundle? bundle, double textScale = 1}) async {
+Future<void> _openFromProfile(WidgetTester tester, LegalDocument doc,
+    {AssetBundle? bundle, double textScale = 1, List<Uri>? opened}) async {
   final visited = <String>[];
-  await tester.pumpWidget(_app(doc, bundle: bundle, visited: visited, textScale: textScale));
+  await tester.pumpWidget(_app(doc, bundle: bundle, visited: visited, textScale: textScale, opened: opened));
   await tester.pumpAndSettle();
 }
 
@@ -93,12 +101,25 @@ void main() {
     expect(boxes.map((b) => b.color), contains(CgColors.light.ground));
   });
 
-  testWidgets('le produit s’appelle Collega (plus « AppMédecine »)', (tester) async {
+  testWidgets('éditeur : Collega, Matthis Lesur, contact@matthislesur.com', (tester) async {
     for (final doc in LegalDocument.values) {
       final text = File(doc.assetPath).readAsStringSync();
       expect(text, isNot(contains('AppMédecine')), reason: doc.assetPath);
       expect(text, contains('Collega'), reason: doc.assetPath);
+      expect(text, contains('contact@matthislesur.com'), reason: doc.assetPath);
+      expect(text, contains('Matthis Lesur'), reason: doc.assetPath);
+      expect(text, isNot(contains('astraga')), reason: doc.assetPath);
+      expect(text, isNot(contains('Lesurmatthis')), reason: doc.assetPath);
     }
+  });
+
+  testWidgets('l’adresse de contact ouvre Mail', (tester) async {
+    _phone(tester);
+    final opened = <Uri>[];
+    await _openFromProfile(tester, LegalDocument.cgu, opened: opened);
+    await tester.tapOnText(find.textRange.ofSubstring('contact@matthislesur.com').first);
+    await tester.pumpAndSettle();
+    expect(opened, [Uri.parse('mailto:contact@matthislesur.com')]);
   });
 
   testWidgets('« ‹ Retour » revient à l’écran précédent', (tester) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:collega_app/core/ui/collega_ui.dart';
 
@@ -17,9 +18,12 @@ enum LegalDocument {
 
 /// CGU / Confidentialité (story 8.14) : page Collega, texte aux styles du spec.
 class LegalScreen extends StatefulWidget {
-  const LegalScreen({super.key, required this.document});
+  const LegalScreen({super.key, required this.document, this.openLink});
 
   final LegalDocument document;
+
+  /// Ouvre un lien du document (adresse de contact → Mail) ; `launchUrl` par défaut.
+  final Future<bool> Function(Uri uri)? openLink;
 
   @override
   State<LegalScreen> createState() => _LegalScreenState();
@@ -75,7 +79,14 @@ class _LegalScreenState extends State<LegalScreen> {
         } else {
           children = [
             const SizedBox(height: CgSpace.s4),
-            MarkdownBody(data: _withoutTitle(snapshot.data!), styleSheet: _styleSheet(context)),
+            MarkdownBody(
+              data: _withoutTitle(snapshot.data!),
+              styleSheet: _styleSheet(context),
+              onTapLink: (_, href, __) {
+                if (href == null) return;
+                (widget.openLink ?? launchUrl)(Uri.parse(href));
+              },
+            ),
             const SizedBox(height: CgSpace.section),
           ];
         }

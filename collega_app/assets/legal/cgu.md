@@ -18,7 +18,7 @@ Collega est une application mobile (iOS) qui permet :
 - de suivre sa progression collège par collège, rang par rang ;
 - de recevoir des rappels de révision et des notifications push lorsque la génération est terminée.
 
-L'Application est éditée par **Lesurmatthis** (contact : `jerome.lesur@astraga.fr`).
+L'Application est éditée par **Matthis Lesur** (contact : contact@matthislesur.com).
 
 ---
 
@@ -123,4 +123,4 @@ une notification push et / ou un écran d'acceptation au prochain lancement.
 Les présentes CGU sont régies par le droit français. Tout litige relève de la compétence des
 juridictions françaises, sauf application impérative d'une autre règle.
 
-Pour toute question : `jerome.lesur@astraga.fr`.
+Pour toute question : contact@matthislesur.com.

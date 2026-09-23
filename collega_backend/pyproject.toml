@@ -2,7 +2,7 @@
 name = "collega-backend"
 version = "0.1.0"
 description = "AppMédecine backend — FastAPI + PostgreSQL + ARQ"
-authors = ["Lesurmatthis <jerome.lesur@astraga.fr>"]
+authors = ["Matthis Lesur <contact@matthislesur.com>"]
 readme = "README.md"
 packages = [{ include = "app" }]
 

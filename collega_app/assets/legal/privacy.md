@@ -10,7 +10,7 @@ protège tes données personnelles conformément au Règlement Général sur la 
 
 ## 1. Responsable du traitement
 
-**Lesurmatthis** — contact : `jerome.lesur@astraga.fr`.
+**Matthis Lesur** — contact : contact@matthislesur.com.
 
 L'éditeur agit seul comme responsable du traitement au sens du RGPD.
 
@@ -73,7 +73,7 @@ Tes données sont accessibles aux personnes suivantes, dans les limites strictes
 
 | Destinataire | Rôle | Localisation | Garanties |
 |---|---|---|---|
-| Éditeur (Lesurmatthis) | Responsable du traitement | France | — |
+| Éditeur (Matthis Lesur) | Responsable du traitement | France | — |
 | **Anthropic** (Claude API) | Génération des fiches à partir des PDF | États-Unis | Clauses contractuelles types UE (DPA Anthropic). Les PDF transmis sont traités pour la génération puis conservés selon la politique de rétention de l'API Anthropic (30 jours par défaut, prolongation possible en cas d'enquête liée aux conditions d'utilisation Anthropic). |
 | **Apple** (APNs + IAP) | Notifications push et paiements | États-Unis | Sous-traitant standard iOS. |
 | **RevenueCat** | Gestion des abonnements IAP | États-Unis | DPA RevenueCat ; aucune donnée médicale transmise. |
@@ -90,7 +90,7 @@ s'appuient sur les Clauses Contractuelles Types adoptées par la Commission Euro
 échéant, sur le cadre Data Privacy Framework UE/US.
 
 Tu peux à tout moment demander les copies des garanties contractuelles applicables via
-`jerome.lesur@astraga.fr`.
+contact@matthislesur.com.
 
 ---
 
@@ -103,7 +103,7 @@ Tu disposes, à tout moment, des droits suivants :
 - **Droit à l'effacement (« droit à l'oubli »)** : supprimer définitivement ton compte et toutes
   les données associées via le bouton **« Supprimer mon compte »** de l'écran Profil. La suppression
   est **immédiate, irréversible et complète** (collèges, fiches, drills, planning, token APNs).
-- **Droit à la portabilité** : sur demande à `jerome.lesur@astraga.fr`, un export structuré (JSON)
+- **Droit à la portabilité** : sur demande à contact@matthislesur.com, un export structuré (JSON)
   de tes données te sera fourni sous 30 jours.
 - **Droit d'opposition** : tu peux refuser les notifications push à tout moment depuis Réglages iOS
   → Notifications.
@@ -139,7 +139,7 @@ demandé selon le cas.
 
 Pour toute question relative au traitement de tes données ou à l'exercice de tes droits :
 
-**Email** : `jerome.lesur@astraga.fr`
+**Email** : contact@matthislesur.com
 
 Un délai de réponse maximum d'**un mois** s'applique (extensible à deux mois pour les demandes
 complexes, après information préalable).
