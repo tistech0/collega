@@ -9,6 +9,7 @@ la bascule, après la génération. Un réimport laisse donc le collège consult
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import uuid
@@ -49,6 +50,15 @@ async def process_college_ocr(ctx: dict, college_id: str, job_id: str, pdf_path:
         logger.exception("OCR failed for college %s: %r", college_id, exc)
         await fail_job(async_session_factory, job_uuid, f"OCR : {exc!r}"[:500])
         raise
+
+
+def file_sha256(path: str) -> str:
+    """Empreinte du PDF (affichée par la console admin), lue par blocs."""
+    digest = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 async def _job_status(db: AsyncSession, job_id: uuid.UUID) -> str | None:
@@ -96,6 +106,11 @@ async def run_ocr(
         college.generation_preview = None
         if first_import:
             college.status = CollegeStatus.processing
+        if job.pdf_hash is None:
+            try:
+                job.pdf_hash = await asyncio.to_thread(file_sha256, pdf_path)
+            except OSError:
+                logger.warning("Empreinte du PDF %s non calculée", pdf_path, exc_info=True)
         job.status = "processing"
         await record_job_event(db, job.id, "ocr_started", total=total_pages)
         await db.commit()

@@ -90,10 +90,11 @@ async def _count(pg_factory, model, **where):
         return (await s.execute(q)).scalar_one()
 
 
-async def test_first_run_stores_pages_and_draft_items(pg_factory, seed):
+async def test_first_run_stores_pages_and_draft_items(pg_factory, seed, tmp_path):
     college, job = await seed()
     proc = FakeProcessor(PAGES)
-    result = await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=proc, detector=FakeDetector())
+    pdf = str(tmp_path / f"{college.id}_{job.id}.pdf")
+    result = await run_ocr(pg_factory, college.id, job.id, pdf, processor=proc, detector=FakeDetector())
 
     assert result["item_count"] == 2 and proc.calls == [0, 1, 2]
     assert await _count(pg_factory, JobPage, job_id=job.id) == 3
@@ -105,7 +106,9 @@ async def test_first_run_stores_pages_and_draft_items(pg_factory, seed):
             (304, "Tumeurs du foie", 0, 1),
             (305, "Cancer du pancréas", 2, 2),
         ]
-        assert (await s.get(GenerationJob, job.id)).status == "ocr_complete"
+        j = await s.get(GenerationJob, job.id)
+        assert j.status == "ocr_complete"
+        assert j.pdf_hash == ocr_worker.file_sha256(pdf)
         c = await s.get(College, college.id)
         assert (c.status, c.total_pages, c.ocr_page_progress) == ("ocr_complete", 3, 3)
 
