@@ -188,20 +188,41 @@ async def test_empty_pdf_fails_first_import(pg_factory, seed):
         assert (await s.get(College, college.id)).status == "failed"
 
 
-@pytest.mark.parametrize("exc", [RuntimeError("pdfplumber KO"), asyncio.CancelledError()])
-async def test_crash_marks_job_failed_and_reraises(pg_factory, seed, monkeypatch, exc):
+async def test_error_marks_job_failed_and_reraises(pg_factory, seed, monkeypatch):
     college, job = await seed()
 
     def boom(n):
-        raise exc
+        raise RuntimeError("pdfplumber KO")
 
     monkeypatch.setattr(ocr_worker, "async_session_factory", pg_factory)
     monkeypatch.setattr(ocr_worker, "_ocr_processor", FakeProcessor(PAGES, on_page=boom))
-    with pytest.raises(type(exc)):
+    with pytest.raises(RuntimeError):
         await ocr_worker.process_college_ocr({}, str(college.id), str(job.id), "x.pdf")
     async with pg_factory() as s:
         assert (await s.get(GenerationJob, job.id)).status == "failed"
         assert (await s.get(College, college.id)).status == "failed"
+
+
+async def test_interruption_keeps_job_resumable(pg_factory, seed, monkeypatch):
+    """Redéploiement / arrêt du worker : le job reste actif, ARQ le reprend."""
+    college, job = await seed()
+
+    def interrupted(n):
+        if n == 1:
+            raise asyncio.CancelledError()
+
+    monkeypatch.setattr(ocr_worker, "async_session_factory", pg_factory)
+    monkeypatch.setattr(ocr_worker, "_ocr_processor", FakeProcessor(PAGES, on_page=interrupted))
+    with pytest.raises(asyncio.CancelledError):
+        await ocr_worker.process_college_ocr({}, str(college.id), str(job.id), "x.pdf")
+    async with pg_factory() as s:
+        assert (await s.get(GenerationJob, job.id)).status == "processing"
+    # Reprise par ARQ : repart de la page 1, termine l'OCR.
+    proc = FakeProcessor(PAGES)
+    await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=proc, detector=FakeDetector())
+    assert proc.calls == [1, 2]
+    async with pg_factory() as s:
+        assert (await s.get(GenerationJob, job.id)).status == "ocr_complete"
 
 
 async def test_finished_job_is_not_reprocessed(pg_factory, seed):

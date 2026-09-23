@@ -38,12 +38,14 @@ _item_detector = ItemDetector()
 
 
 async def process_college_ocr(ctx: dict, college_id: str, job_id: str, pdf_path: str) -> dict:
-    """Tâche ARQ. Toute sortie anormale — y compris l'annulation par timeout ARQ
-    (CancelledError) — passe l'import en échec sans toucher au contenu en service."""
+    """Tâche ARQ. Une erreur passe l'import en échec sans toucher au contenu en
+    service. Une interruption (CancelledError : redéploiement, arrêt du worker) le
+    laisse actif : ARQ le reprend au redémarrage depuis la dernière page faite ; s'il
+    n'est jamais repris (timeout), le cron des jobs bloqués le passe en échec."""
     job_uuid = uuid.UUID(job_id)
     try:
         return await run_ocr(async_session_factory, uuid.UUID(college_id), job_uuid, pdf_path, ctx=ctx)
-    except BaseException as exc:
+    except Exception as exc:
         logger.exception("OCR failed for college %s: %r", college_id, exc)
         await fail_job(async_session_factory, job_uuid, f"OCR : {exc!r}"[:500])
         raise
