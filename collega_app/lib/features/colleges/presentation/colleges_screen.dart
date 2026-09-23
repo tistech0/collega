@@ -8,6 +8,7 @@ import 'package:collega_app/features/colleges/colleges_import_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/colleges/domain/drill_stats.dart';
+import 'package:collega_app/features/search/presentation/search_sheet.dart';
 import 'package:collega_app/features/shell/tab_reselect.dart';
 
 /// Onglet Bibliothèque (story 8.6, maquette `direction-d-fusion.html` écran 5) :
@@ -99,7 +100,7 @@ class _CollegesScreenState extends ConsumerState<CollegesScreen> with TabReselec
       onRefresh: _refresh,
       children: [
         const SizedBox(height: CgSpace.s3),
-        _SearchField(onTap: () => context.push('/search')),
+        _SearchField(onTap: () => showSearchSheet(context)),
         if (_offline(async)) const _OfflineBanner(),
         ...content,
       ],
@@ -212,7 +213,7 @@ class _NoCollegeYet extends StatelessWidget {
   }
 }
 
-/// Faux champ de recherche : il ouvre la recherche (sheet en story 8.10).
+/// Faux champ de recherche : il ouvre la sheet de recherche (story 8.10).
 class _SearchField extends StatelessWidget {
   const _SearchField({required this.onTap});
 

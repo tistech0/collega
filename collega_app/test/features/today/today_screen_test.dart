@@ -14,6 +14,8 @@ import 'package:collega_app/features/today/today_providers.dart';
 import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
 
+import 'package:collega_app/features/search/presentation/search_sheet.dart';
+
 import '../../support/cg_golden.dart';
 
 final _date = DateTime(2026, 9, 21, 20); // lundi 21 septembre
@@ -102,7 +104,6 @@ Widget _app(TodayNotifier Function() notifier, {List<String>? visited, double te
     GoRoute(path: '/colleges', builder: (_, __) { visited?.add('/colleges'); return const SizedBox(); }),
     GoRoute(path: '/home/colleges/:ref', builder: (_, s) { visited?.add('/home/colleges/${s.pathParameters['ref']}'); return const SizedBox(); }),
     GoRoute(path: '/drill', builder: (_, s) { visited?.add('/drill'); return const SizedBox(); }),
-    GoRoute(path: '/search', builder: (_, __) { visited?.add('/search'); return const SizedBox(); }),
   ]);
   return ProviderScope(
     overrides: [
@@ -157,7 +158,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.bySemanticsLabel('Rechercher'));
       await tester.pumpAndSettle();
-      expect(visited, ['/search']);
+      expect(find.byType(SearchPanel), findsOneWidget, reason: 'sheet de recherche (8.10)');
       handle.dispose();
     });
   });

@@ -7,8 +7,10 @@ import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/core/utils/epoch_day.dart';
 import 'package:collega_app/core/utils/fr_dates.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
+import 'package:collega_app/features/colleges/presentation/college_detail_screen.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
+import 'package:collega_app/features/search/presentation/search_sheet.dart';
 import 'package:collega_app/features/shell/tab_reselect.dart';
 import 'package:collega_app/features/today/domain/daily_session_builder.dart';
 import 'package:collega_app/features/today/presentation/today_customize_sheet.dart';
@@ -131,7 +133,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
       subtitle: _subtitle(date, ready),
       controller: _scroll,
       reserveTabBar: true,
-      trailing: _SearchAction(onTap: () => context.push('/search')),
+      trailing: _SearchAction(onTap: () => showSearchSheet(context, origin: CollegeDetailOrigin.today)),
       onRefresh: () => ref.read(todayProvider.notifier).refresh(),
       children: children,
     );

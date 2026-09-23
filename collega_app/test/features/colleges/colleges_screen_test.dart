@@ -18,6 +18,8 @@ import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/colleges/domain/drill_stats.dart';
 import 'package:collega_app/features/colleges/presentation/colleges_screen.dart';
 
+import 'package:collega_app/features/search/presentation/search_sheet.dart';
+
 import '../../support/cg_golden.dart';
 
 const _cancero = UserCollegeStatus(
@@ -99,7 +101,6 @@ Widget _app(CollegesNotifier Function() notifier, {List<String>? visited, double
     GoRoute(path: '/', builder: (_, __) => const CollegesScreen()),
     GoRoute(path: '/colleges/:ref', builder: (_, s) { visited?.add('/colleges/${s.pathParameters['ref']}'); return const SizedBox(); }),
     GoRoute(path: '/colleges/:ref/import', builder: (_, s) { visited?.add('/colleges/${s.pathParameters['ref']}/import'); return const SizedBox(); }),
-    GoRoute(path: '/search', builder: (_, __) { visited?.add('/search'); return const SizedBox(); }),
   ]);
   final db = AppDatabase.forTesting(NativeDatabase.memory());
   addTearDown(db.close);
@@ -211,7 +212,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Un item, un signe, une dose…'));
       await tester.pumpAndSettle();
-      expect(visited, ['/search']);
+      expect(find.byType(SearchPanel), findsOneWidget, reason: 'sheet de recherche (8.10)');
     });
   });
 

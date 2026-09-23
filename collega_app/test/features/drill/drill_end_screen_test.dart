@@ -195,6 +195,54 @@ void main() {
     expect(find.text('Retour à la recherche'), findsOneWidget);
   });
 
+  testWidgets('recherche : « Terminer » ferme aussi la sheet de recherche restée dessous (revue 8.10)', (tester) async {
+    tester.view.physicalSize = const Size(393, 852);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const params = DrillSessionParams(collegeId: 'c3', itemId: 'item-0', fromSearch: true);
+    final notifier = _Notifier(_session());
+    final router = GoRouter(initialLocation: '/home', routes: [
+      ShellRoute(
+        builder: (_, __, child) => child,
+        routes: [GoRoute(path: '/home', builder: (_, __) => const Text('ACCUEIL'))],
+      ),
+      GoRoute(path: '/end', builder: (context, _) => Consumer(builder: (context, ref, _) {
+        final s = ref.watch(drillSessionProvider(params)).valueOrNull;
+        if (s == null) return const SizedBox();
+        return DrillEndScreen(session: s, notifier: ref.read(drillSessionProvider(params).notifier), params: params);
+      })),
+    ]);
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        drillRepositoryProvider.overrideWithValue(DrillRepository(dio: Dio(), db: db)),
+        drillSessionProvider.overrideWith(() => notifier),
+        todayProvider.overrideWith(_Today.new),
+      ],
+      child: CgTheme(
+        data: CgThemeData.light,
+        child: MaterialApp.router(
+          routerConfig: router,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(disableAnimations: true),
+            child: child!,
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    // La sheet de recherche : route sans page sur le Navigator racine, puis le drill par-dessus.
+    final homeContext = tester.element(find.text('ACCUEIL'));
+    showCgSheet<void>(homeContext, builder: (_) => const Text('SHEET'));
+    await tester.pumpAndSettle();
+    router.push('/end');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Terminer'));
+    await tester.pumpAndSettle();
+    expect(find.text('SHEET'), findsNothing);
+    expect(find.text('ACCUEIL'), findsOneWidget);
+  });
+
   testWidgets('haptique de succès à l’apparition', (tester) async {
     final calls = <String>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform,

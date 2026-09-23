@@ -18,8 +18,8 @@ import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/drill/presentation/drill_screen.dart';
 import 'package:collega_app/features/legal/presentation/legal_screen.dart';
 import 'package:collega_app/features/planning/presentation/planning_screen.dart';
+import 'package:collega_app/features/search/presentation/search_sheet.dart';
 import 'package:collega_app/features/profile/presentation/profile_screen.dart';
-import 'package:collega_app/features/search/presentation/search_screen.dart';
 import 'package:collega_app/features/progress/progress_screen.dart';
 import 'package:collega_app/features/shell/app_shell.dart';
 import 'package:collega_app/features/today/presentation/today_screen.dart';
@@ -48,7 +48,6 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final isProtected = state.matchedLocation.startsWith('/home') ||
           state.matchedLocation.startsWith('/colleges') ||
-          state.matchedLocation.startsWith('/search') ||
           state.matchedLocation.startsWith('/progress') ||
           state.matchedLocation.startsWith('/profile') ||
           state.matchedLocation.startsWith('/drill') ||
@@ -116,8 +115,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-      // Recherche : hors onglets, plein écran (sheet en story 8.10).
-      GoRoute(path: '/search', builder: (ctx, s) => const SearchScreen()),
+      // Recherche : sheet depuis Aujourd'hui / Bibliothèque (story 8.10) ; ancien lien.
+      GoRoute(path: '/search', redirect: (ctx, s) => '/home'),
       ShellRoute(
         builder: (context, state, child) => AppShell(location: state.uri.path, child: child),
         routes: [
@@ -139,6 +138,8 @@ final routerProvider = Provider<GoRouter>((ref) {
               builder: (ctx, s) => ItemDetailScreen(
                 refId: int.parse(s.pathParameters['ref_id']!),
                 itemId: s.pathParameters['item_id']!,
+                origin: origin,
+                fromSearch: s.extra == kFromSearch,
               ),
             ),
           ],

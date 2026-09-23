@@ -46,9 +46,21 @@ class _DrillEndScreenState extends ConsumerState<DrillEndScreen> {
 
   void _finish() {
     if (widget.params.fromSearch) {
-      // La recherche a remplacé le drill : retour à Aujourd'hui, recalculé.
+      // Retour à Aujourd'hui, recalculé. La sheet de recherche (route sans page,
+      // restée sous le drill) se ferme d'abord : `go` garderait la page du shell
+      // à laquelle elle est accrochée (revue 8.10).
       ref.invalidate(todayProvider);
-      context.go('/home');
+      final router = GoRouter.of(context);
+      var drillPopped = false;
+      // Le drill (au sommet), puis toutes les routes sans page jusqu'à la page du shell.
+      Navigator.of(context, rootNavigator: true).popUntil((route) {
+        if (!drillPopped) {
+          drillPopped = true;
+          return false;
+        }
+        return route.settings is Page;
+      });
+      router.go('/home');
     } else {
       leaveDrill(context);
     }

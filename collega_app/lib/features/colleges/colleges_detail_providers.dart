@@ -119,6 +119,26 @@ class CollegeDetailNotifier
   }
 }
 
+/// Numéro, titre et rang d'un item lus dans Drift (story 8.11) : le détail
+/// d'item n'a pas à recharger tout le collège (réseau + synchro) pour un titre.
+final itemInfoProvider = FutureProvider.autoDispose.family<ItemModel?, String>((ref, itemId) async {
+  final db = ref.watch(databaseProvider);
+  final row = await (db.select(db.items)..where((t) => t.id.equals(itemId))).getSingleOrNull();
+  if (row == null) return null;
+  return ItemModel(
+    id: row.id,
+    collegeId: row.collegeId,
+    itemNumber: row.itemNumber,
+    rang: row.rang,
+    chapterTitle: row.chapterTitle,
+    ocrConfidenceScore: row.ocrConfidenceScore,
+    lowConfidence: row.lowConfidence,
+    cardCountA: 0,
+    cardCountB: 0,
+    cardCountC: 0,
+  );
+});
+
 final itemDetailProvider = AsyncNotifierProvider.family<
     ItemDetailNotifier, List<FlashCardModel>, String>(
   ItemDetailNotifier.new,
@@ -140,7 +160,11 @@ class ItemDetailNotifier
       }));
       return cards;
     } on DioException {
-      return repo.getCardsFromDrift(itemId);
+      final cached = await repo.getCardsFromDrift(itemId);
+      // Rien en cache : c'est le réseau qui manque — l'écran le dit (hors-ligne),
+      // jamais « aucune fiche » (revue 8.11).
+      if (cached.isEmpty) rethrow;
+      return cached;
     }
   }
 

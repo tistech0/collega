@@ -10,6 +10,7 @@ import 'package:collega_app/features/auth/data/auth_repository.dart';
 import 'package:collega_app/features/auth/data/local_data_owner.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/search/search_providers.dart';
 import 'package:collega_app/features/today/today_providers.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
@@ -81,6 +82,8 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     // locale, elle, n'est vidée que si un autre compte se connecte (LocalDataOwner).
     ref.invalidate(collegesProvider);
     ref.invalidate(todayProvider);
+    ref.invalidate(searchNotifierProvider);
+    ref.invalidate(searchRecentsProvider);
     state = const AsyncData(AuthState());
   }
 

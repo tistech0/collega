@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
+import 'package:collega_app/features/search/search_providers.dart';
 
 /// Propriétaire des données locales (fiches, progression, session du jour).
 ///
@@ -17,7 +18,11 @@ class LocalDataOwner {
 
   Future<void> claim(String userId) async {
     final previous = await storage.read(key: storageKey);
-    if (previous != null && previous != userId) await db.deleteEverything();
+    if (previous != null && previous != userId) {
+      await db.deleteEverything();
+      // Les recherches récentes (trousseau) suivent la même règle.
+      await storage.delete(key: SecureSearchRecentsStore.storageKey);
+    }
     if (previous != userId) await storage.write(key: storageKey, value: userId);
   }
 }
