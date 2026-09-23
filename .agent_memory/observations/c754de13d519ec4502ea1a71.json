@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/ && python3 - <<'EOF'\ndef sub(f,o,n):\n    s=open(f).read(); assert o in s,(f,o[:40]); open(f,'w').write(s.replace(o,n))\nsub('project_prod_network_topology.md',\"Le chemin public n'a toutefois jamais été testé depuis l'iPhone hors LAN (pas de 4G). Le webhook RevenueCat a besoin d'une policy Bypass sur `/v1/webhooks/revenuecat` (à faire par l'utilisateur dans Zero Trust).\",\n\"Le chemin public n'a jamais été testé depuis l'iPhone hors LAN (pas de 4G), mais on peut le tester depuis le Mac sur le Wi-Fi avec `c… [+908 chars truncated]",
+  "summary": "About to run: cd /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/ && python3 - <<'EOF' def sub(f,o,n): s=open(f).read(); assert o in s,(f,o[:40]); open(f,'w').write(s.replac",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c754de13d519ec4502ea1a71",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:05:30.382Z",
+  "stored_at": "2026-09-23T16:05:30.383Z"
+}

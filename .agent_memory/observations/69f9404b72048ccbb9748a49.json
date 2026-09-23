@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "IP=104.21.37.178; C=/usr/bin/curl; for spec in \"POST /v1/webhooks/revenuecat\" \"GET /health\"; do set -- $spec; echo \"== $1 $2\"; $C -s -o /dev/null -w \"%{http_code} %{redirect_url}\\n\" -X $1 --max-time 15 --resolve collegatest.matthislesur.com:443:$IP https://collegatest.matthislesur.com$2; done",
+  "summary": "IP=104.21.37.178; C=/usr/bin/curl; for spec in \"POST /v1/webhooks/revenuecat\" \"GET /health\"; do set -- $spec; echo \"== $1 $2\"; $C -s -o /dev/null -w \"%{http_code} %{redirect_url}\\n\" -X $1 --max-time 15 --resolve collegatest.matthislesur.com:443:$IP https://collegatest.matthislesur.com$2; done: 91cmwiOiIvaGVhbHRoJTIwLyI",
+  "text": "IP=104.21.37.178; C=/usr/bin/curl; for spec in \"POST /v1/webhooks/revenuecat\" \"GET /health\"; do set -- $spec; echo \"== $1 $2\"; $C -s -o /dev/null -w \"%{http_code} %{redirect_url}\\n\" -X $1 --max-time 15 --resolve collegatest.matthislesur.com:443:$IP https://collegatest.matthislesur.com$2; done: 91cmwiOiIvaGVhbHRoJTIwLyIsInNlcnZpY2VfdG9rZW5fc3RhdHVzIjpmYWxzZSwiaXNfd2FycCI6ZmFsc2UsImlzX2dhdGV3YXkiOmZhbHNlLCJleHAiOjE3OTAxNzk3OTYsIm5iZiI6MTc5MDE3OTQ5NiwiaWF0IjoxNzkwMTc5NDk2LCJhdXRoX3N0YXR1cyI6Ik5PTkUiLCJtdGxzX2F1dGgiOnsiY2VydF9pc3N1ZXJfZG4iOiIiLCJjZXJ0X3NlcmlhbCI6IiIsImNlcnRfaXNzdWVyX3NraSI6IiIsImNlcnRfcHJlc2VudGVkIjpmYWxzZSwiY29tbW9uX25hbWUiOiIiLCJhdXRoX3N0YXR1cyI6Ik5PTkUifSwicmVhbF9jb3VudHJ5IjoiRlIiLCJhcHBfc2Vzc2lvbl9oYXNoIjoiMTgyYWJiOGIxODA4YTUwNTIzMjZmZjZhNTQ0ZDFlNDFlNGRjYzAwOTQ2MTc5NTRmMWZiODVkMTc5M2U5YzdmMSJ9.riWu7zmIQnozhUuuOOYkO-rdS8ZLqHGNWv4LmuRckJjARsLuzIIOKDRRZuRBqZ2na0J8LZ4Eh6AkL4oGs5WjdVMsUsI7u_gtcvfBdw-sEhR-zMeev6Shg9nZfhzNhPZbN157WEEYld9qYbrkysdUyP8xhj87z0_I3qQx65ahwk4pZ-5Aj_-tNKawdI66hMjY99e_8um3cePaUzu2a4OsQWzSUEKqwL673lf9LCZnsa8tgX59dDwJhHcrQx1wTMPIswVLLN1x9xdzCHWrOEVnv9cNlVmIBXbuGcjS5SbUbpZLlkrDSn6a-ksOh4BhHrFMUP_5AZyXre9qZ3vM2NqDHg&redirect_url=%2Fhealth%2520%2F",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "69f9404b72048ccbb9748a49",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:04:57.332Z",
+  "stored_at": "2026-09-23T16:04:57.333Z"
+}

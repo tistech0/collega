@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "IP=$(dig +short @1.1.1.1 collegatest.matthislesur.com | head -1); echo \"IP Cloudflare: $IP\"; for path in /v1/webhooks/revenuecat /health; do echo \"== POST/GET $path\"; m=POST; [ $path = /health ] && m=GET; curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\\n\" -X $m --max-time 15 --resolve collegatest.matthislesur.com:443:$IP https://collegatest.matthislesur.com$path; done",
+  "summary": "IP=$(dig +short @1.1.1.1 collegatest.matthislesur.com | head -1); echo \"IP Cloudflare: $IP\"; for path in /v1/webhooks/revenuecat /health; do echo \"== POST/GET $path\"; m=POST; [ $path = /health ] && m=GET; curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\\n\" -X $m --max-time 15 --resolve collegatest.matthislesur.com",
+  "text": "IP=$(dig +short @1.1.1.1 collegatest.matthislesur.com | head -1); echo \"IP Cloudflare: $IP\"; for path in /v1/webhooks/revenuecat /health; do echo \"== POST/GET $path\"; m=POST; [ $path = /health ] && m=GET; curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\\n\" -X $m --max-time 15 --resolve collegatest.matthislesur.com:443:$IP https://collegatest.matthislesur.com$path; done failed: Exit code 127 IP Cloudflare: 104.21.37.178 == POST/GET /v1/webhooks/revenuecat (eval):1: command not found: curl == POST/GET /health (eval):1: command not found: curl",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bc1da591e12ef4635254e6d3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:04:53.662Z",
+  "stored_at": "2026-09-23T16:04:53.662Z"
+}

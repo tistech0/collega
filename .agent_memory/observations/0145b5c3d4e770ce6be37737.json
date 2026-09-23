@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "cette app ? [Image #5]",
+  "summary": "cette app ? [Image #5]",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0145b5c3d4e770ce6be37737",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:01:24.854Z",
+  "stored_at": "2026-09-23T16:01:24.854Z",
+  "low_signal": true
+}

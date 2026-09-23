@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rniE \"cf-access|cf_access|access-jwt|\\baud\\b|collegatest\" collega_backend/app collega_app/lib --include=*.py --include=*.dart | grep -v \"^.*test\" | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rniE \"cf-access|cf_access|access-jwt|\\baud\\b|collegatest\" collega_backend/app collega_app/lib --include=*.py --include=*.dart | grep -v \"^.*test\" | head: (eval):1: no matches found: --include=*.py",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rniE \"cf-access|cf_access|access-jwt|\\baud\\b|collegatest\" collega_backend/app collega_app/lib --include=*.py --include=*.dart | grep -v \"^.*test\" | head: (eval):1: no matches found: --include=*.py",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4a7e13f494d27f0a25583837",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:00:23.329Z",
+  "stored_at": "2026-09-23T16:00:23.330Z"
+}
