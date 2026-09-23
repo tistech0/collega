@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_backend/docs/restore.md",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_backend/docs/restore.md: # Restaurer Collega (base, PDF, `.env`)\n\nCe qu'il y a à restaurer et où le trouver. Sauvegarde : `backup-nas` (User Script, chaque nuit à 03:30) → dump de cluster, instantanés kopia, réplication chiffrée vers Cloudflare R2.\n\n| Élément |",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_backend/docs/restore.md: # Restaurer Collega (base, PDF, `.env`)\n\nCe qu'il y a à restaurer et où le trouver. Sauvegarde : `backup-nas` (User Script, chaque nuit à 03:30) → dump de cluster, instantanés kopia, réplication chiffrée vers Cloudflare R2.\n\n| Élément | Source de sauvegarde | Perte maximale (RPO) |\n|---|---|---|\n| Postgres (comptes, collèges, fiches, jobs) | `/mnt/user/nas-backup/dumps/collega-db-1.sql.gz` (array, protégé par la parité) + kopia `/dumps` + R2 | depuis 03:30 |\n| PDF importés | kopia `/source/collega/pdfs` (= `/mnt/user/appdata/collega/pdfs`) + R2 | depuis 03:30 |\n| `.env` de prod | kopia `/sourc",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a6a55b02b196c708cdc7152d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:48:56.952Z",
+  "stored_at": "2026-09-23T16:48:56.952Z"
+}

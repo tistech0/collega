@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'D=/mnt/user/nas-backup/dumps/collega-db-1.sql.gz; zcat $D | head -30 | grep -vE \"^--$|^$\"; echo ...; zcat $D | grep -E \"^(\\\\\\\\connect|CREATE DATABASE|CREATE TABLE)\" ; echo; zcat $D | awk \"/^COPY /{t=\\$2; n=0; next} /^\\\\\\\\\\\\.\\$/{print t, n; t=\\\"\\\"} t!=\\\"\\\"{n++}\"'",
+  "summary": "About to run: ssh nas 'D=/mnt/user/nas-backup/dumps/collega-db-1.sql.gz; zcat $D | head -30 | grep -vE \"^--$|^$\"; echo ...; zcat $D | grep -E \"^(\\\\\\\\connect|CREATE DATABASE|CREATE TABLE)\" ; echo; zcat $D | awk \"/^C",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c2fc2bf08004837b2e510b57",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:47:30.009Z",
+  "stored_at": "2026-09-23T16:47:30.009Z"
+}

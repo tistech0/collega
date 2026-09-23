@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'D=/mnt/user/nas-backup/dumps/collega-db-1.sql.gz; zcat $D | head -30 | grep -vE \"^--$|^$\"; echo ...; zcat $D | grep -E \"^(\\\\\\\\connect|CREATE DATABASE|CREATE TABLE)\" ; echo; zcat $D | awk \"/^COPY /{t=\\$2; n=0; next} /^\\\\\\\\\\\\.\\$/{print t, n; t=\\\"\\\"} t!=\\\"\\\"{n++}\"'",
+  "summary": "ssh nas 'D=/mnt/user/nas-backup/dumps/collega-db-1.sql.gz; zcat $D | head -30 | grep -vE \"^--$|^$\"; echo ...; zcat $D | grep -E \"^(\\\\\\\\connect|CREATE DATABASE|CREATE TABLE)\" ; echo; zcat $D | awk \"/^COPY /{t=\\$2; n=0; next} /^\\\\\\\\\\\\.\\$/{print t, n; t=\\\"\\\"} t!=\\\"\\\"{n++}\"': MPLATE = template0 ENCODING = 'UTF8' LOCALE_PRO",
+  "text": "ssh nas 'D=/mnt/user/nas-backup/dumps/collega-db-1.sql.gz; zcat $D | head -30 | grep -vE \"^--$|^$\"; echo ...; zcat $D | grep -E \"^(\\\\\\\\connect|CREATE DATABASE|CREATE TABLE)\" ; echo; zcat $D | awk \"/^COPY /{t=\\$2; n=0; next} /^\\\\\\\\\\\\.\\$/{print t, n; t=\\\"\\\"} t!=\\\"\\\"{n++}\"': MPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'en_US.utf8'; \\connect template1 \\connect template1 CREATE DATABASE collega WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'en_US.utf8'; \\connect collega CREATE TABLE public.alembic_version ( CREATE TABLE public.colleges ( CREATE TABLE public.flash_cards ( CREATE TABLE public.generation_job_events ( CREATE TABLE public.generation_jobs ( CREATE TABLE public.item_titles ( CREATE TABLE public.items ( CREATE TABLE public.tester_feedbacks ( CREATE TABLE public.users ( CREATE DATABASE postgres WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'en_US.utf8'; \\connect postgres public.alembic_version 1 public.colleges 2 public.flash_cards 341 public.generation_job_events 52 public.generation_jobs 2 public.item_titles 43 public.items 44 public.tester_feedbacks 0 public.users 4",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8b9d82729b3c61e027acdc3a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:47:30.662Z",
+  "stored_at": "2026-09-23T16:47:30.663Z"
+}

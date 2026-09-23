@@ -77,5 +77,7 @@ for path in lan public; do
 done
 
 [ -n "$down" ] && notify "Collega : API en panne" "${down}Logs : docker logs collega-api-1" "alert"
-[ -n "$up" ] && notify "Collega : API rétablie" "$up" "normal"
+# Niveau alert aussi pour le retour : l'agent Telegram du NAS ne pousse tout de suite
+# que les `alert` et met `normal`/`warning` en file pour le récap de 08:00.
+[ -n "$up" ] && notify "Collega : API rétablie" "$up" "alert"
 exit 0

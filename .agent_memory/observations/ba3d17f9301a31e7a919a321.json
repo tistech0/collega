@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_learn",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_learn: [{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/runbook-supervision-collega-health-alertes-panne-et-retour-en-niveau-alert-lagent-telegr-a8d5f36f.md\\nRepo-local memory is written immediately. Org/global promotion still requires",
+  "text": "[{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/runbook-supervision-collega-health-alertes-panne-et-retour-en-niveau-alert-lagent-telegr-a8d5f36f.md\\nRepo-local memory is written immediately. Org/global promotion still requires explicit review.'}]",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ba3d17f9301a31e7a919a321",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:49:07.860Z",
+  "stored_at": "2026-09-23T16:49:07.860Z"
+}

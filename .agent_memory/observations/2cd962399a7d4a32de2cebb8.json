@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'sed -n 20,60p /boot/config/plugins/dynamix/notifications/agents/Telegram.sh'",
+  "summary": "ssh nas 'sed -n 20,60p /boot/config/plugins/dynamix/notifications/agents/Telegram.sh': dir -p \"$QUEUE_DIR\" 2>/dev/null && touch \"$QUEUE\" 2>/dev/null; then # Le TSV est un enregistrement par ligne : on neutralise les TABULATIONS *et* # les RETOURS A LA LIGNE. Sans ca, une DESCRIPTION multiligne (backup-verify # liste se",
+  "text": "ssh nas 'sed -n 20,60p /boot/config/plugins/dynamix/notifications/agents/Telegram.sh': dir -p \"$QUEUE_DIR\" 2>/dev/null && touch \"$QUEUE\" 2>/dev/null; then # Le TSV est un enregistrement par ligne : on neutralise les TABULATIONS *et* # les RETOURS A LA LIGNE. Sans ca, une DESCRIPTION multiligne (backup-verify # liste ses 25 bases) explose en autant de faux enregistrements, que # daily-recap affiche en puces vides. Constate le 2026-08-21 : 21 evenements # reels comptes et affiches 346 fois. T=${TITLE//[$'\\t\\n\\r']/ } M=${MESSAGE//[$'\\t\\n\\r']/ } printf '%s\\t%s\\t%s\\t%s\\t%s\\n' \\ \"${TIMESTAMP:-$(date +%s)}\" \"$IMPORTANCE\" \"${EVENT:-}\" \"$T\" \"$M\" >> \"$QUEUE\" exit 0 fi # sinon : on continue et on envoie tout de suite fi ############################################################################## MESSAGE=$(echo -e \"$(hostname): $TITLE\\n$MESSAGE\"); curl -G -s \"https://api.telegram.org/bot$BOT_TOKEN/sendMessage\" --data-urlencode \"chat_id=$CHATID\" --data-urlencode \"text=$MESSAGE\" 2>&1;",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2cd962399a7d4a32de2cebb8",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:46:58.937Z",
+  "stored_at": "2026-09-23T16:46:58.938Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'ls -l --time-style=+%F\\ %T /mnt/user/nas-backup/dumps/ | grep -i collega; L=$(ls /mnt/user/nas-backup/*verify*.log 2>/dev/null | head -1); echo \"log: $L\"; grep -n -i -B2 -A8 \"collega\" \"$L\" | tail -40'",
+  "summary": "About to run: ssh nas 'ls -l --time-style=+%F\\ %T /mnt/user/nas-backup/dumps/ | grep -i collega; L=$(ls /mnt/user/nas-backup/*verify*.log 2>/dev/null | head -1); echo \"log: $L\"; grep -n -i -B2 -A8 \"collega\" \"$L\" | ",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d67643e8299487bbc78e3e14",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:47:23.443Z",
+  "stored_at": "2026-09-23T16:47:23.443Z"
+}

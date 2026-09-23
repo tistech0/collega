@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'grep -nE \"^(normal|warning|alert|system|docker_notify|unraidos)=\" /boot/config/plugins/dynamix/dynamix.cfg; grep -n \"\\[notify\\]\" -A20 /boot/config/plugins/dynamix/dynamix.cfg | head -25; grep -nE \"IMPORTANCE|normal|LEVEL\" /boot/config/plugins/dynamix/notifications/agents/Telegram.sh | head'",
+  "summary": "ssh nas 'grep -nE \"^(normal|warning|alert|system|docker_notify|unraidos)=\" /boot/config/plugins/dynamix/dynamix.cfg; grep -n \"\\[notify\\]\" -A20 /boot/config/plugins/dynamix/dynamix.cfg | head -25; grep -nE \"IMPORTANCE|normal|LEVEL\" /boot/config/plugins/dynamix/notifications/agents/Telegram.sh | head': 20:warning=\"70\" 33",
+  "text": "ssh nas 'grep -nE \"^(normal|warning|alert|system|docker_notify|unraidos)=\" /boot/config/plugins/dynamix/dynamix.cfg; grep -n \"\\[notify\\]\" -A20 /boot/config/plugins/dynamix/dynamix.cfg | head -25; grep -nE \"IMPORTANCE|normal|LEVEL\" /boot/config/plugins/dynamix/notifications/agents/Telegram.sh | head': 20:warning=\"70\" 33:normal=\"7\" 34:warning=\"7\" 35:alert=\"7\" 38:docker_notify=\"5\" 47:system=\"*/1 * * * *\" 48:unraidos=\"11 0 * * *\" 31:[notify] 32-entity=\"1\" 33-normal=\"7\" 34-warning=\"7\" 35-alert=\"7\" 36-unraid=\"5\" 37-plugin=\"5\" 38-docker_notify=\"5\" 39-language_notify=\"5\" 40-report=\"5\" 41-display=\"0\" 42-position=\"top-right\" 43-life=\"5\" 44-date=\"d-m-Y\" 45-time=\"H:i\" 46-path=\"/tmp/notifications\" 47-system=\"*/1 * * * *\" 48-unraidos=\"11 0 * * *\" 49-version=\"10 0 * * *\" 50-docker_update=\"10 0 * * *\" 51-language_update=\"10 0 * * *\" 28:# echouee ne doit pas attendre le bilan du matin. Tout le reste (`normal`, 38:IMPORTANCE=\"${IMPORTANCE:-normal}\" 40:if [[ \"$IMPORTANCE\" != \"alert\" ]]; then 50: \"${TIMESTAMP:-$(date +%s)}\" \"$IMPORTANCE\" \"${EVENT:-}\" \"$T\" \"$M\" >> \"$QUEUE\"",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e6800648453e3d036fe1caed",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:46:55.995Z",
+  "stored_at": "2026-09-23T16:46:55.995Z"
+}

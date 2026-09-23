@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker stop collega-redis-1 >/dev/null && echo \"$(date +%T) redis arrete\"\nfor i in $(seq 1 30); do [ \"$(cat /tmp/collega-health/lan 2>/dev/null)\" = ko ] && [ \"$(cat /tmp/collega-health/public 2>/dev/null)\" = ko ] && break; sleep 5; done\necho \"$(date +%T) etat: lan=$(cat /tmp/collega-health/lan) public=$(cat /tmp/collega-health/public)\"\ngrep -E \" (lan|public) \" /tmp/user.scripts/tmpScripts/collega-health/log.txt | tail -2\ndocker start collega-redis-1 >/dev/null && echo \"$(date +%T) redis relance\"\nfor i in $(seq 1 30); do [ \"$(cat /tmp/collega-health/lan)\" = ok ] && [ \"$(cat /tmp/colleg… [+303 chars truncated]",
+  "summary": "ssh nas 'docker stop collega-redis-1 >/dev/null && echo \"$(date +%T) redis arrete\"\nfor i in $(seq 1 30); do [ \"$(cat /tmp/collega-health/lan 2>/dev/null)\" = ko ] && [ \"$(cat /tmp/collega-health/public 2>/dev/null)\" = ko ] && break; sleep 5; done\necho \"$(date +%T) etat: lan=$(cat /tmp/collega-health/lan) public=$(cat /t",
+  "text": "ssh nas 'docker stop collega-redis-1 >/dev/null && echo \"$(date +%T) redis arrete\"\nfor i in $(seq 1 30); do [ \"$(cat /tmp/collega-health/lan 2>/dev/null)\" = ko ] && [ \"$(cat /tmp/collega-health/public 2>/dev/null)\" = ko ] && break; sleep 5; done\necho \"$(date +%T) etat: lan=$(cat /tmp/collega-health/lan) public=$(cat /tmp/collega-health/public)\"\ngrep -E \" (lan|public) \" /tmp/user.scripts/tmpScripts/collega-health/log.txt | tail -2\ndocker start collega-redis-1 >/dev/null && echo \"$(date +%T) redis relance\"\nfor i in $(seq 1 30); do [ \"$(cat /tmp/collega-health/lan)\" = ok ] && [ \"$(cat /tmp/collega-health/public)\" = ok ] && break; sleep 5; done\necho \"$(date +%T) etat: lan=$(cat /tmp/collega-health/lan) public=$(cat /tmp/collega-health/public)\"\ngrep -E \" (lan|public) \" /tmp/user.scripts/tmpScripts/collega-health/log.txt | tail -2\ndocker ps --filter name=collega --format \"{{.Names}} {{.Status}}\"': 18:44:04 redis arrete 18:45:24 etat: lan=ko public=ko 2026-09-23 18:45:11 lan 503 db:ok,redis:error 2026-09-23 18:45:21 public 503 db:ok,redis:error 18:45:25 redis relance 18:46:05 etat: lan=ok public=ok 2026-09-23 18:46:01 lan 200 ok 2026-09-23 18:46:01 public 200 ok collega-worker-1 Up 20 seconds (healthy) collega-api-1 Up 6 minutes (healthy) collega-redis-1 Up 40 seconds (healthy) collega-db-1 Up 5 weeks (healthy)",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f4ada5acd691887cfbfa9dc3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:46:05.358Z",
+  "stored_at": "2026-09-23T16:46:05.359Z"
+}

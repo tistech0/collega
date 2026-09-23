@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'ls -t /tmp/notifications/archive/ 2>/dev/null | head -3; for f in $(ls -t /tmp/notifications/archive/*Collega* 2>/dev/null | head -2); do grep -E \"subject|description|importance\" \"$f\"; echo; done'",
+  "summary": "ssh nas 'ls -t /tmp/notifications/archive/ 2>/dev/null | head -3; for f in $(ls -t /tmp/notifications/archive/*Collega* 2>/dev/null | head -2); do grep -E \"subject|description|importance\" \"$f\"; echo; done': Collega_1790181961.notify Collega_1790181921.notify Sauvegarde_1790146805.notify subject=\"Collega : API rétablie\"",
+  "text": "ssh nas 'ls -t /tmp/notifications/archive/ 2>/dev/null | head -3; for f in $(ls -t /tmp/notifications/archive/*Collega* 2>/dev/null | head -2); do grep -E \"subject|description|importance\" \"$f\"; echo; done': Collega_1790181961.notify Collega_1790181921.notify Sauvegarde_1790146805.notify subject=\"Collega : API rétablie\" description=\"LAN (NPM) rétabli. public (Cloudflare) rétabli. \" importance=\"normal\" subject=\"Collega : API en panne\" description=\"LAN (NPM) : HTTP 503, db:ok,redis:error. public (Cloudflare) : HTTP 503, db:ok,redis:error. Logs : docker logs collega-api-1\" importance=\"alert\"",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8be43b07012e35fd1e548896",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:46:10.665Z",
+  "stored_at": "2026-09-23T16:46:10.665Z"
+}

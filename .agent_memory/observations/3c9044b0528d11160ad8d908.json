@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker inspect kopia -f \"{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}\"'",
+  "summary": "ssh nas 'docker inspect kopia -f \"{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}\"': /mnt/user/appdata -> /source /mnt/user/appdata/kopia/cache -> /cache /mnt/user/nas-backup/kopia -> /local /mnt/user/appdata/kopia -> /config /var/lib/docker/volumes/59fb304369db0194d6f928afaf363f1f6f88868c3cd42c62ce1",
+  "text": "ssh nas 'docker inspect kopia -f \"{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}\"': /mnt/user/appdata -> /source /mnt/user/appdata/kopia/cache -> /cache /mnt/user/nas-backup/kopia -> /local /mnt/user/appdata/kopia -> /config /var/lib/docker/volumes/59fb304369db0194d6f928afaf363f1f6f88868c3cd42c62ce17b8e1c9a1cb8b/_data -> /backups /boot/config -> /boot-config /mnt/user/nas-backup/dumps -> /dumps /mnt/user/Cloud -> /cloud",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3c9044b0528d11160ad8d908",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:48:36.478Z",
+  "stored_at": "2026-09-23T16:48:36.478Z"
+}

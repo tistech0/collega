@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; P=.agent_memory/packets; id(){ grep -m1 '^x-kage-id' \"$1\" | sed 's/x-kage-id: \"\\(.*\\)\"/\\1/'; }\nkage supersede --project . --packet \"$(id $P/runbook-supervision-prod-script-nas-collega-health-*bb11e1a6.md)\" --replacement \"$(id $P/runbook-supervision-collega-health-alertes-*a8d5f36f.md)\" --reason \"Message de retour passé en niveau alert (normal restait en file jusqu'au récap de 8 h)\" >/dev/null && echo superseded\ngit add -A collega_backend/ops collega_backend/docs/restore.md .agent_memory && git commit -q -m \"feat(ops): alerte de retour en nivea… [+448 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\"; P=.agent_memory/packets; id(){ grep -m1 '^x-kage-id' \"$1\" | sed 's/x-kage-id: \"\\(.*\\)\"/\\1/'; } kage supersede --project . --packet \"$(id $P/runbook-s",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "431a527c0f7ad743b4a43cee",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:49:21.861Z",
+  "stored_at": "2026-09-23T16:49:21.861Z"
+}

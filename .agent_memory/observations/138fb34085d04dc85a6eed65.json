@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; ls alembic/versions | sort | tail -4; grep -h \"^revision\" alembic/versions/*.py | sort | tail -4; ssh nas 'docker exec collega-restore-test psql -U postgres -d collega -Atc \"select version_num from alembic_version\"; docker exec collega-db-1 psql -U postgres -d collega -Atc \"select version_num from alembic_version\"; docker exec collega-restore-test psql -U postgres -d collega -Atc \"select table_name||\\\".\\\"||column_name from information_schema.columns where column_name in (\\x27ocr_text\\x27,\\x27page_texts_json\\x27)\"'",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; ls alembic/versions | sort | tail -4; grep -h \"^revision\" alembic/versions/*.py | sort | tail -4; ssh nas 'docker exec collega-restor",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "138fb34085d04dc85a6eed65",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:47:49.337Z",
+  "stored_at": "2026-09-23T16:47:49.338Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas '/usr/local/emhttp/webGui/scripts/notify -e \"Collega\" -s \"Collega : API rétablie (test)\" -d \"Test du message de retour envoyé en niveau alert — pas de panne réelle.\" -i \"alert\" && echo envoye'",
+  "summary": "About to run: ssh nas '/usr/local/emhttp/webGui/scripts/notify -e \"Collega\" -s \"Collega : API rétablie (test)\" -d \"Test du message de retour envoyé en niveau alert — pas de panne réelle.\" -i \"alert\" && echo envoye'",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2413b3f334c9c5e4d75961a0",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:47:11.855Z",
+  "stored_at": "2026-09-23T16:47:11.856Z"
+}

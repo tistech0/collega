@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'ls -t /tmp/notifications/archive/ 2>/dev/null | head -3; for f in $(ls -t /tmp/notifications/archive/*Collega* 2>/dev/null | head -2); do grep -E \"subject|description|importance\" \"$f\"; echo; done'",
+  "summary": "About to run: ssh nas 'ls -t /tmp/notifications/archive/ 2>/dev/null | head -3; for f in $(ls -t /tmp/notifications/archive/*Collega* 2>/dev/null | head -2); do grep -E \"subject|description|importance\" \"$f\"; echo; ",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "deb18ff56371def5ba7537c2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:46:09.967Z",
+  "stored_at": "2026-09-23T16:46:09.967Z"
+}
