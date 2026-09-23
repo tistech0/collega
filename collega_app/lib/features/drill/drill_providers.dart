@@ -2,6 +2,7 @@ import 'dart:async' show unawaited;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:collega_app/core/utils/epoch_day.dart';
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/utils/logger.dart';
@@ -183,17 +184,18 @@ class DrillSessionNotifier
         Map<String, DrillEvaluationResult>.from(s.evaluations)
           ..[card.id] = result;
 
-    if (arg.isDailySession && !_replayingErrors) {
-      unawaited(_daily
-          .recordVerdict(
-            day: arg.dailySessionDay!,
-            cardId: card.id,
-            collegeId: card.collegeId,
-            rang: card.rang,
-            drillLevel: _levelOf[result]!,
-          )
-          .catchError((Object e) => AppLogger.error('recordVerdict failed', error: e)));
-    }
+    // Toute révision est journalisée (semaine de Progression, 8.8) ; seule la
+    // session du jour elle-même alimente son bilan (pas « refaire les erreurs »).
+    unawaited(_daily
+        .recordVerdict(
+          day: arg.dailySessionDay ?? epochDayOf(DateTime.now()),
+          cardId: card.id,
+          collegeId: card.collegeId,
+          rang: card.rang,
+          drillLevel: _levelOf[result]!,
+          daily: arg.isDailySession && !_replayingErrors,
+        )
+        .catchError((Object e) => AppLogger.error('recordVerdict failed', error: e)));
 
     state = AsyncValue.data(s.copyWith(
       queue: newQueue,

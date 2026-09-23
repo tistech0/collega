@@ -136,16 +136,21 @@ void main() {
       expect(await repo.completedDays(from: today - 6, to: today), {today});
     });
 
-    test('clôture : la session planifiée du jour est marquée faite', () async {
-      await db.into(db.planningSessions).insert(PlanningSessionsCompanion.insert(
-            id: 'p1', planningConfigId: 'cfg', sessionDateEpochDay: today, collegeId: 'c1', maxCards: 10,
-          ));
-      await seed(1);
-      await repo.getOrBuild(day: today, budget: 1);
-      await repo.complete(today);
-      final p = await (db.select(db.planningSessions)..where((t) => t.id.equals('p1'))).getSingle();
-      expect(p.status, 'completed');
+    test('journal hors session du jour (8.8) : compté dans la semaine, pas dans le bilan du jour', () async {
+      await repo.recordVerdict(day: today, cardId: 'x', collegeId: 'c1', rang: 'A', drillLevel: 'maitrise');
+      await repo.recordVerdict(
+          day: today, cardId: 'y', collegeId: 'c1', rang: 'A', drillLevel: 'bien', daily: false);
+      await repo.recordVerdict(
+          day: today - 2, cardId: 'z', collegeId: 'c1', rang: 'B', drillLevel: 'a_revoir', daily: false);
+      expect(await repo.verdictCounts(today), {'maitrise': 1});
+      expect(await repo.lastVerdicts(today), {'x': 'maitrise'});
+      expect(await repo.weekCounts(from: today - 6, to: today), {today: 2, today - 2: 1});
+      // La même fiche revue une 2e fois le même jour compte une fois.
+      await repo.recordVerdict(
+          day: today, cardId: 'y', collegeId: 'c1', rang: 'A', drillLevel: 'maitrise', daily: false);
+      expect((await repo.weekCounts(from: today, to: today))[today], 2);
     });
+
 
     test('aperçu : compte sans enregistrer', () async {
       await seed(10);

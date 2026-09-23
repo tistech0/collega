@@ -44,6 +44,9 @@ Widget _app(String initial, {List<int>? reselected}) {
         GoRoute(path: '/colleges/3/items/i1', builder: (_, __) => const _Legacy()),
         GoRoute(path: '/home/colleges/3', builder: (_, __) => const _Migrated()),
         GoRoute(path: '/home/colleges/3/items/i1', builder: (_, __) => const _Legacy()),
+        GoRoute(path: '/progress/colleges/3', builder: (_, __) => const _Migrated()),
+        GoRoute(path: '/progress/colleges/3/items/i1', builder: (_, __) => const _Legacy()),
+        GoRoute(path: '/progress/planning', builder: (_, __) => const _Migrated()),
         GoRoute(path: '/progress', builder: (_, __) => const SizedBox.expand()),
         GoRoute(path: '/profile', builder: (_, __) => const SizedBox.expand()),
       ],
@@ -72,7 +75,7 @@ void main() {
     await tester.tap(find.byKey(const Key('launch'))); // atteint le bouton, pas la tab bar
   });
 
-  for (final path in ['/colleges', '/colleges/3']) {
+  for (final path in ['/colleges', '/colleges/3', '/progress/colleges/3', '/progress/planning']) {
     testWidgets('Bibliothèque et détail collège (8.6/8.7) : pleine hauteur, safe area intacte ($path)', (tester) async {
       phone(tester);
       await tester.pumpWidget(_app(path));
@@ -89,6 +92,8 @@ void main() {
     await tester.pumpWidget(_app('/home/colleges/3/items/i1'));
     await tester.pumpAndSettle();
     expect(AppShell.indexOf('/home/colleges/3'), 0);
+    expect(AppShell.indexOf('/progress/planning'), 2);
+    expect(AppShell.indexOf('/progress/colleges/3'), 2);
     final launch = tester.getRect(find.byKey(const Key('launch')));
     const capsuleTop = 844 - 34 - CgSpace.tabBarBottom - CgSpace.tabBarHeight;
     expect(launch.bottom, lessThanOrEqualTo(capsuleTop));

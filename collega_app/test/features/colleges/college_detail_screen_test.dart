@@ -114,7 +114,7 @@ Widget _app({
   var pushed = false;
   Widget detailPage(GoRouterState s) => CollegeDetailScreen(
         refId: int.parse(s.pathParameters['ref']!),
-        fromToday: s.uri.path.startsWith('/home/'),
+        origin: s.uri.path.startsWith('/home/') ? CollegeDetailOrigin.today : CollegeDetailOrigin.library,
       );
   final router = GoRouter(
     initialLocation: direct ? start : '/start',

@@ -17,7 +17,7 @@ import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/drill/presentation/drill_screen.dart';
 import 'package:collega_app/features/legal/presentation/legal_screen.dart';
-import 'package:collega_app/features/planning/presentation/planning_config_screen.dart';
+import 'package:collega_app/features/planning/presentation/planning_screen.dart';
 import 'package:collega_app/features/profile/presentation/profile_screen.dart';
 import 'package:collega_app/features/search/presentation/search_screen.dart';
 import 'package:collega_app/features/progress/progress_screen.dart';
@@ -66,10 +66,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/planning/config',
-        builder: (ctx, s) => const PlanningConfigScreen(),
-      ),
+      // Ancienne adresse du planning (story 8.9 : sous Progression).
+      GoRoute(path: '/planning/config', redirect: (ctx, s) => '/progress/planning'),
       GoRoute(path: '/demo', builder: (ctx, s) => const DemoScreen()),
       GoRoute(path: '/demo/drill', builder: (ctx, s) => const DemoDrillScreen()),
       GoRoute(
@@ -126,24 +124,25 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/home', builder: (ctx, s) => const TodayScreen()),
           GoRoute(path: '/progress', builder: (ctx, s) => const ProgressScreen()),
           GoRoute(path: '/colleges', builder: (ctx, s) => const CollegesScreen()),
-          // Détail collège et item : sous /colleges (Bibliothèque) ou sous /home
-          // (ouvert depuis Aujourd'hui : l'onglet actif et le retour suivent).
-          for (final base in ['/colleges', '/home/colleges']) ...[
+          // Détail collège et item : sous l'onglet d'où ils sont ouverts
+          // (Bibliothèque, Aujourd'hui, Progression) — onglet actif et retour suivent.
+          for (final origin in CollegeDetailOrigin.values) ...[
             GoRoute(
-              path: '$base/:ref_id',
+              path: '${origin.base}/:ref_id',
               builder: (ctx, s) => CollegeDetailScreen(
                 refId: int.parse(s.pathParameters['ref_id']!),
-                fromToday: base.startsWith('/home'),
+                origin: origin,
               ),
             ),
             GoRoute(
-              path: '$base/:ref_id/items/:item_id',
+              path: '${origin.base}/:ref_id/items/:item_id',
               builder: (ctx, s) => ItemDetailScreen(
                 refId: int.parse(s.pathParameters['ref_id']!),
                 itemId: s.pathParameters['item_id']!,
               ),
             ),
           ],
+          GoRoute(path: '/progress/planning', builder: (ctx, s) => const PlanningScreen()),
           GoRoute(path: '/profile', builder: (ctx, s) => const ProfileScreen()),
         ],
       ),

@@ -102,10 +102,7 @@ void main() {
       expect((await repo.find(today))!.cardIds, hasLength(4));
     });
 
-    test('dernière fiche : session close automatiquement, planning du jour marqué fait', () async {
-      await db.into(db.planningSessions).insert(PlanningSessionsCompanion.insert(
-            id: 'p1', planningConfigId: 'cfg', sessionDateEpochDay: today, collegeId: 'c1', maxCards: 3,
-          ));
+    test('dernière fiche : session close automatiquement', () async {
       final repo = DailySessionRepository(db);
       await repo.getOrBuild(day: today, budget: 10);
       final params = DrillSessionParams.daily(today);
@@ -117,8 +114,6 @@ void main() {
       }
       await pumpEventQueue();
       expect((await repo.find(today))!.isCompleted, isTrue);
-      final planned = await (db.select(db.planningSessions)..where((t) => t.id.equals('p1'))).getSingle();
-      expect(planned.status, 'completed');
     });
 
     test('reprise : une fiche déjà réinsérée ne l’est pas une seconde fois', () async {
@@ -197,6 +192,20 @@ void main() {
       await notifier.evaluate(DrillEvaluationResult.maitrise);
       await pumpEventQueue();
       expect(await repo.verdictCounts(today), before);
+      // …mais la révision est journalisée pour Progression (8.8), hors bilan du jour.
+      final extra = await (db.select(db.reviewLog)..where((t) => t.daily.equals(false))).get();
+      expect(extra, hasLength(1));
+    });
+
+    test('drill hors session du jour (collège) : journalisé pour la semaine (8.8)', () async {
+      final repo = DailySessionRepository(db);
+      final params = DrillSessionParams(collegeId: 'c1');
+      await container.read(drillSessionProvider(params).future);
+      final notifier = container.read(drillSessionProvider(params).notifier);
+      await notifier.evaluate(DrillEvaluationResult.bien);
+      await pumpEventQueue();
+      expect((await repo.weekCounts(from: today, to: today))[today], 1);
+      expect(await repo.verdictCounts(today), isEmpty, reason: 'le bilan du jour ne compte que la session du jour');
     });
 
     test('durée : comptée depuis l’ouverture du drill, pas depuis le premier démarrage', () async {

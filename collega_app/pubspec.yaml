@@ -10,6 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Sélecteur de date iOS et textes système en français (story 8.9)
+  flutter_localizations:
+    sdk: flutter
 
   # State management
   flutter_riverpod: ^2.6.1

@@ -249,6 +249,17 @@ class _Hero extends StatelessWidget {
       );
     }
 
+    if (state.postponedToday && !session.isStarted) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        const _Message(
+          title: 'Session décalée à demain',
+          message: 'Ton planning a été prolongé d’un jour, sans rien perdre. Tu peux quand même réviser.',
+        ),
+        const SizedBox(height: _actionsGap),
+        CgButton(label: 'Réviser quand même', onPressed: onStart),
+      ]);
+    }
+
     final compact = MediaQuery.sizeOf(context).width < _compactWidth;
     final numeralStyle = CgType.numeral.copyWith(
       color: c.ink,
@@ -449,13 +460,12 @@ class _TodaySkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.only(top: _TodayScreenLayout.heroGap),
-      child: CgSkeletonPulse(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          CgSkeleton.block(height: _heroHeight),
-          SizedBox(height: CgSpace.section),
-          CgSkeletonList(rows: 2),
-        ]),
-      ),
+      // Chaque forme pulse elle-même (CgSkeleton / CgSkeletonList).
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        CgSkeleton.block(height: _heroHeight),
+        SizedBox(height: CgSpace.section),
+        CgSkeletonList(rows: 2),
+      ]),
     );
   }
 }

@@ -20,20 +20,34 @@ import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/today/domain/daily_session_builder.dart';
 
+/// D'où le détail a été ouvert : fixe le retour, l'onglet actif et les routes
+/// des items (`/colleges`, `/home/colleges`, `/progress/colleges`).
+enum CollegeDetailOrigin {
+  library('/colleges', '/colleges', 'Bibliothèque'),
+  today('/home/colleges', '/home', 'Aujourd’hui'),
+  progress('/progress/colleges', '/progress', 'Progression');
+
+  const CollegeDetailOrigin(this.base, this.tabRoot, this.backLabel);
+
+  /// Préfixe des routes du détail (`$base/:id`, `$base/:id/items/:item`).
+  final String base;
+
+  /// Racine de l'onglet (retour sans historique).
+  final String tabRoot;
+  final String backLabel;
+}
+
 /// Détail d'un collège (story 8.7, maquette `direction-d-fusion.html` écran 6) :
 /// progression du collège, items titrés filtrables par rang, « Réviser ce
 /// collège » ancré ; le réimport vit dans une action sheet.
 class CollegeDetailScreen extends ConsumerWidget {
-  const CollegeDetailScreen({super.key, required this.refId, this.fromToday = false});
+  const CollegeDetailScreen({super.key, required this.refId, this.origin = CollegeDetailOrigin.library});
 
   final int refId;
-
-  /// Ouvert depuis Aujourd'hui (`/home/colleges/:id`) : « ‹ Aujourd'hui », onglet
-  /// Aujourd'hui actif, items poussés sous `/home`.
-  final bool fromToday;
+  final CollegeDetailOrigin origin;
 
   /// Racine des routes de ce détail (items poussés dessous).
-  String get basePath => fromToday ? '/home/colleges/$refId' : '/colleges/$refId';
+  String get basePath => '${origin.base}/$refId';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,7 +59,7 @@ class CollegeDetailScreen extends ConsumerWidget {
     Widget page(List<Widget> children, {Widget? trailing, String? subtitle, Widget? bottomAction}) => CgPage(
           title: title,
           subtitle: subtitle,
-          backLabel: fromToday ? 'Aujourd’hui' : 'Bibliothèque',
+          backLabel: origin.backLabel,
           onBack: () => _back(context),
           trailing: trailing,
           bottomAction: bottomAction,
@@ -115,7 +129,7 @@ class CollegeDetailScreen extends ConsumerWidget {
     if (context.canPop()) {
       context.pop();
     } else {
-      context.go(fromToday ? '/home' : '/colleges');
+      context.go(origin.tabRoot);
     }
   }
 
@@ -457,15 +471,13 @@ class _DetailSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.only(top: CgSpace.s4),
-      child: CgSkeletonPulse(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          CgSkeleton.block(height: _barHeight, radius: CgRadius.badge),
-          SizedBox(height: CgSpace.s4),
-          CgSkeleton.block(height: _segmentedHeight, radius: CgRadius.s),
-          SizedBox(height: CgSpace.section),
-          CgSkeletonList(rows: 6),
-        ]),
-      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        CgSkeleton.block(height: _barHeight, radius: CgRadius.badge),
+        SizedBox(height: CgSpace.s4),
+        CgSkeleton.block(height: _segmentedHeight, radius: CgRadius.s),
+        SizedBox(height: CgSpace.section),
+        CgSkeletonList(rows: 6),
+      ]),
     );
   }
 }

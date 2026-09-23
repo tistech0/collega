@@ -59,10 +59,14 @@ List<FlashCardModel> _makeCards(int count) => List.generate(
     );
 
 ProviderContainer _makeContainer(List<FlashCardModel> cards) {
+  // Chaque verdict est journalisé (semaine de Progression, 8.8) : base en mémoire.
+  final db = AppDatabase.forTesting(NativeDatabase.memory());
+  addTearDown(db.close);
   return ProviderContainer(
     overrides: [
       drillRepositoryProvider
           .overrideWithValue(_FakeDrillRepository(cards)),
+      databaseProvider.overrideWithValue(db),
     ],
   );
 }

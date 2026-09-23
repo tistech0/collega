@@ -233,4 +233,24 @@ void main() {
     expect(state.planningDays, 30);
     expect(state.cardCount, 24);
   });
+
+  test('jour décalé (8.9) : Aujourd’hui le sait', () async {
+    final c = container(
+      statuses: [_status(3, 'c3', a: 40)],
+      server: {'c3': [for (var i = 0; i < 40; i++) _card('n$i', 'c3')]},
+    );
+    final repo = c.read(planningRepositoryProvider);
+    await repo.replace(PlanningConfig(
+          id: 'cfg',
+          collegeIds: const ['c3'],
+          startDate: DateTime(now.year, now.month, now.day),
+          endDate: DateTime(now.year, now.month, now.day).add(const Duration(days: 29)),
+          dailyMinutes: 20,
+          createdAt: now,
+        ));
+    expect((await c.read(todayProvider.future) as TodayReady).postponedToday, isFalse);
+    await repo.addPostponed('cfg', today);
+    c.invalidate(planningProvider);
+    expect((await c.read(todayProvider.future) as TodayReady).postponedToday, isTrue);
+  });
 }

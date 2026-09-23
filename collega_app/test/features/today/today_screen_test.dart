@@ -31,6 +31,7 @@ TodayReady _ready({
   int toReview = 6,
   Map<String, int> verdicts = const {},
   int? planningDay = 1,
+  bool postponedToday = false,
 }) =>
     TodayReady(
       date: _date,
@@ -59,6 +60,7 @@ TodayReady _ready({
       sessionCollegeIds: const {'c3', 'c34'},
       planningDay: planningDay,
       planningDays: planningDay == null ? null : 30,
+      postponedToday: postponedToday,
     );
 
 class _Prefs extends RevisionPrefsNotifier {
@@ -339,6 +341,26 @@ void main() {
     }
     await tester.pumpAndSettle();
     expect(_Counting.builds, before, reason: 'même jour : pas de recalcul inutile');
+  });
+
+  testWidgets('jour décalé (8.9) : « Session décalée à demain » + « Réviser quand même »', (tester) async {
+    _phone(tester);
+    final visited = <String>[];
+    await tester.pumpWidget(_app(() => _Fixed(_ready(postponedToday: true)), visited: visited));
+    await tester.pumpAndSettle();
+    expect(find.text('Session décalée à demain'), findsOneWidget);
+    expect(find.text('Commencer'), findsNothing);
+    await tester.tap(find.text('Réviser quand même'));
+    await tester.pumpAndSettle();
+    expect(visited, ['/drill']);
+  });
+
+  testWidgets('jour décalé mais session déjà commencée : « Reprendre » reste', (tester) async {
+    _phone(tester);
+    await tester.pumpWidget(_app(() => _Fixed(_ready(postponedToday: true, position: 5))));
+    await tester.pumpAndSettle();
+    expect(find.text('Reprendre'), findsOneWidget);
+    expect(find.text('Session décalée à demain'), findsNothing);
   });
 
   testWidgets('Dynamic Type 1,6 sur 375 : aucun débordement', (tester) async {

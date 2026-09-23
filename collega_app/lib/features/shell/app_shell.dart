@@ -22,7 +22,7 @@ class AppShell extends StatefulWidget {
   /// au-dessus de la capsule (un simple padding MediaQuery ne suffit pas : une
   /// barre posée en bottomNavigationBar sans SafeArea finirait sous la capsule,
   /// intapable). Les écrans migrés la réservent eux-mêmes (`CgPage.reserveTabBar`).
-  static final _legacyPattern = RegExp(r'^/(profile|(home/)?colleges/[^/]+/items/)');
+  static final _legacyPattern = RegExp(r'^/(profile|((home|progress)/)?colleges/[^/]+/items/)');
 
   static int indexOf(String location) {
     for (var i = paths.length - 1; i >= 0; i--) {

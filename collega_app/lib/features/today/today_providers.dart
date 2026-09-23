@@ -76,6 +76,7 @@ class TodayReady extends TodayState {
     int? tomorrowBudget,
     this.planningDay,
     this.planningDays,
+    this.postponedToday = false,
   }) : _tomorrowBudget = tomorrowBudget;
 
   final DateTime date;
@@ -107,6 +108,10 @@ class TodayReady extends TodayState {
   /// « jour 3 sur 30 » si un planning couvre aujourd'hui.
   final int? planningDay;
   final int? planningDays;
+
+  /// « Décaler aujourd'hui » (story 8.9) : pas de session attendue aujourd'hui,
+  /// réviser reste possible.
+  final bool postponedToday;
 
   int get minutes => estimatedMinutes(cardCount);
 }
@@ -149,7 +154,8 @@ class TodayNotifier extends AsyncNotifier<TodayState> {
 
     final now = DateTime.now();
     final day = epochDayOf(now);
-    final planning = (await ref.watch(planningProvider.future)).config;
+    final planningState = await ref.watch(planningProvider.future);
+    final planning = planningState.config;
     final prefs = await ref.watch(revisionPrefsProvider.future);
     final readyIds = ready.map((e) => e.userStatus!.collegeId).toSet();
     final planned = planning?.collegeIds.toSet().intersection(readyIds);
@@ -232,6 +238,7 @@ class TodayNotifier extends AsyncNotifier<TodayState> {
       sessionCollegeIds: session.settings?.collegeIds ?? defaultCollegeIds,
       planningDay: planningDay,
       planningDays: planningDays,
+      postponedToday: planning != null && planningState.postponedDays.contains(day),
     );
   }
 

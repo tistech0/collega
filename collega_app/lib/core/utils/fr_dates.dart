@@ -16,3 +16,16 @@ String frDayTitle(DateTime d) {
 
 /// Initiale du jour (« L », « M »…), pour la semaine.
 String frWeekdayInitial(DateTime d) => frWeekday(d)[0].toUpperCase();
+
+const kFrMonthsShort = [
+  'janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin',
+  'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.',
+];
+
+String _frDay(DateTime d) => d.day == 1 ? '1er' : '${d.day}';
+
+/// « 21 sept. », « 1er mai » (bornes du planning).
+String frShortDate(DateTime d) => '${_frDay(d)} ${kFrMonthsShort[d.month - 1]}';
+
+/// « jeudi 1er octobre ».
+String frLongDate(DateTime d) => '${frWeekday(d)} ${_frDay(d)} ${frMonth(d)}';

@@ -28,7 +28,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -47,7 +47,8 @@ class AppDatabase extends _$AppDatabase {
           if (from >= 2 && from < 3) {
             await m.addColumn(flashCards, flashCards.userFeedback);
           }
-          if (from < 4) {
+          // Même garde : depuis v1, createTable(flashCards) a déjà ces colonnes.
+          if (from >= 2 && from < 4) {
             await m.addColumn(flashCards, flashCards.drillLevel);
             await m.addColumn(flashCards, flashCards.nextReviewAt);
             await m.addColumn(flashCards, flashCards.reviewCount);
@@ -65,6 +66,11 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(dailySessions);
             await m.createTable(reviewLog);
             await m.createTable(userColleges);
+          }
+          if (from >= 7 && from < 8) {
+            // Story 8.8 : toutes les révisions sont journalisées (semaine de
+            // Progression) ; les lignes existantes venaient de la session du jour.
+            await m.addColumn(reviewLog, reviewLog.daily);
           }
         },
       );

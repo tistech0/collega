@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -36,6 +37,14 @@ class App extends ConsumerWidget {
         theme: buildShadTheme(),
         routerConfig: router,
         debugShowCheckedModeBanner: false,
+        // App en français uniquement : sélecteur de date iOS, libellés système.
+        locale: const Locale('fr', 'FR'),
+        supportedLocales: const [Locale('fr', 'FR')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
         materialThemeBuilder: (context, theme) => neutralizeMaterial(theme).copyWith(
           cupertinoOverrideTheme: buildCgCupertinoTheme(CgThemeData.light),
         ),

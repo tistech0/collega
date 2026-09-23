@@ -3010,9 +3010,18 @@ class $ReviewLogTable extends ReviewLog
   late final GeneratedColumn<int> day = GeneratedColumn<int>(
       'day', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _dailyMeta = const VerificationMeta('daily');
+  @override
+  late final GeneratedColumn<bool> daily = GeneratedColumn<bool>(
+      'daily', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("daily" IN (0, 1))'),
+      defaultValue: const Constant(true));
   @override
   List<GeneratedColumn> get $columns =>
-      [id, cardId, collegeId, rang, drillLevel, reviewedAtMs, day];
+      [id, cardId, collegeId, rang, drillLevel, reviewedAtMs, day, daily];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3066,6 +3075,10 @@ class $ReviewLogTable extends ReviewLog
     } else if (isInserting) {
       context.missing(_dayMeta);
     }
+    if (data.containsKey('daily')) {
+      context.handle(
+          _dailyMeta, daily.isAcceptableOrUnknown(data['daily']!, _dailyMeta));
+    }
     return context;
   }
 
@@ -3089,6 +3102,8 @@ class $ReviewLogTable extends ReviewLog
           .read(DriftSqlType.int, data['${effectivePrefix}reviewed_at_ms'])!,
       day: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}day'])!,
+      daily: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}daily'])!,
     );
   }
 
@@ -3110,6 +3125,11 @@ class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
 
   /// Jour local de la révision (`epochDayOf`), pour les regroupements par jour.
   final int day;
+
+  /// Verdict de la session du jour (son bilan) ; `false` : autre révision
+  /// (collège, item, recherche, refaire les erreurs), comptée dans la semaine
+  /// de Progression seulement (story 8.8).
+  final bool daily;
   const ReviewLogRow(
       {required this.id,
       required this.cardId,
@@ -3117,7 +3137,8 @@ class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
       required this.rang,
       required this.drillLevel,
       required this.reviewedAtMs,
-      required this.day});
+      required this.day,
+      required this.daily});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -3128,6 +3149,7 @@ class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
     map['drill_level'] = Variable<String>(drillLevel);
     map['reviewed_at_ms'] = Variable<int>(reviewedAtMs);
     map['day'] = Variable<int>(day);
+    map['daily'] = Variable<bool>(daily);
     return map;
   }
 
@@ -3140,6 +3162,7 @@ class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
       drillLevel: Value(drillLevel),
       reviewedAtMs: Value(reviewedAtMs),
       day: Value(day),
+      daily: Value(daily),
     );
   }
 
@@ -3154,6 +3177,7 @@ class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
       drillLevel: serializer.fromJson<String>(json['drillLevel']),
       reviewedAtMs: serializer.fromJson<int>(json['reviewedAtMs']),
       day: serializer.fromJson<int>(json['day']),
+      daily: serializer.fromJson<bool>(json['daily']),
     );
   }
   @override
@@ -3167,6 +3191,7 @@ class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
       'drillLevel': serializer.toJson<String>(drillLevel),
       'reviewedAtMs': serializer.toJson<int>(reviewedAtMs),
       'day': serializer.toJson<int>(day),
+      'daily': serializer.toJson<bool>(daily),
     };
   }
 
@@ -3177,7 +3202,8 @@ class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
           String? rang,
           String? drillLevel,
           int? reviewedAtMs,
-          int? day}) =>
+          int? day,
+          bool? daily}) =>
       ReviewLogRow(
         id: id ?? this.id,
         cardId: cardId ?? this.cardId,
@@ -3186,6 +3212,7 @@ class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
         drillLevel: drillLevel ?? this.drillLevel,
         reviewedAtMs: reviewedAtMs ?? this.reviewedAtMs,
         day: day ?? this.day,
+        daily: daily ?? this.daily,
       );
   ReviewLogRow copyWithCompanion(ReviewLogCompanion data) {
     return ReviewLogRow(
@@ -3199,6 +3226,7 @@ class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
           ? data.reviewedAtMs.value
           : this.reviewedAtMs,
       day: data.day.present ? data.day.value : this.day,
+      daily: data.daily.present ? data.daily.value : this.daily,
     );
   }
 
@@ -3211,14 +3239,15 @@ class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
           ..write('rang: $rang, ')
           ..write('drillLevel: $drillLevel, ')
           ..write('reviewedAtMs: $reviewedAtMs, ')
-          ..write('day: $day')
+          ..write('day: $day, ')
+          ..write('daily: $daily')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, cardId, collegeId, rang, drillLevel, reviewedAtMs, day);
+  int get hashCode => Object.hash(
+      id, cardId, collegeId, rang, drillLevel, reviewedAtMs, day, daily);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3229,7 +3258,8 @@ class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
           other.rang == this.rang &&
           other.drillLevel == this.drillLevel &&
           other.reviewedAtMs == this.reviewedAtMs &&
-          other.day == this.day);
+          other.day == this.day &&
+          other.daily == this.daily);
 }
 
 class ReviewLogCompanion extends UpdateCompanion<ReviewLogRow> {
@@ -3240,6 +3270,7 @@ class ReviewLogCompanion extends UpdateCompanion<ReviewLogRow> {
   final Value<String> drillLevel;
   final Value<int> reviewedAtMs;
   final Value<int> day;
+  final Value<bool> daily;
   const ReviewLogCompanion({
     this.id = const Value.absent(),
     this.cardId = const Value.absent(),
@@ -3248,6 +3279,7 @@ class ReviewLogCompanion extends UpdateCompanion<ReviewLogRow> {
     this.drillLevel = const Value.absent(),
     this.reviewedAtMs = const Value.absent(),
     this.day = const Value.absent(),
+    this.daily = const Value.absent(),
   });
   ReviewLogCompanion.insert({
     this.id = const Value.absent(),
@@ -3257,6 +3289,7 @@ class ReviewLogCompanion extends UpdateCompanion<ReviewLogRow> {
     required String drillLevel,
     required int reviewedAtMs,
     required int day,
+    this.daily = const Value.absent(),
   })  : cardId = Value(cardId),
         collegeId = Value(collegeId),
         rang = Value(rang),
@@ -3271,6 +3304,7 @@ class ReviewLogCompanion extends UpdateCompanion<ReviewLogRow> {
     Expression<String>? drillLevel,
     Expression<int>? reviewedAtMs,
     Expression<int>? day,
+    Expression<bool>? daily,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3280,6 +3314,7 @@ class ReviewLogCompanion extends UpdateCompanion<ReviewLogRow> {
       if (drillLevel != null) 'drill_level': drillLevel,
       if (reviewedAtMs != null) 'reviewed_at_ms': reviewedAtMs,
       if (day != null) 'day': day,
+      if (daily != null) 'daily': daily,
     });
   }
 
@@ -3290,7 +3325,8 @@ class ReviewLogCompanion extends UpdateCompanion<ReviewLogRow> {
       Value<String>? rang,
       Value<String>? drillLevel,
       Value<int>? reviewedAtMs,
-      Value<int>? day}) {
+      Value<int>? day,
+      Value<bool>? daily}) {
     return ReviewLogCompanion(
       id: id ?? this.id,
       cardId: cardId ?? this.cardId,
@@ -3299,6 +3335,7 @@ class ReviewLogCompanion extends UpdateCompanion<ReviewLogRow> {
       drillLevel: drillLevel ?? this.drillLevel,
       reviewedAtMs: reviewedAtMs ?? this.reviewedAtMs,
       day: day ?? this.day,
+      daily: daily ?? this.daily,
     );
   }
 
@@ -3326,6 +3363,9 @@ class ReviewLogCompanion extends UpdateCompanion<ReviewLogRow> {
     if (day.present) {
       map['day'] = Variable<int>(day.value);
     }
+    if (daily.present) {
+      map['daily'] = Variable<bool>(daily.value);
+    }
     return map;
   }
 
@@ -3338,7 +3378,8 @@ class ReviewLogCompanion extends UpdateCompanion<ReviewLogRow> {
           ..write('rang: $rang, ')
           ..write('drillLevel: $drillLevel, ')
           ..write('reviewedAtMs: $reviewedAtMs, ')
-          ..write('day: $day')
+          ..write('day: $day, ')
+          ..write('daily: $daily')
           ..write(')'))
         .toString();
   }
@@ -5207,6 +5248,7 @@ typedef $$ReviewLogTableCreateCompanionBuilder = ReviewLogCompanion Function({
   required String drillLevel,
   required int reviewedAtMs,
   required int day,
+  Value<bool> daily,
 });
 typedef $$ReviewLogTableUpdateCompanionBuilder = ReviewLogCompanion Function({
   Value<int> id,
@@ -5216,6 +5258,7 @@ typedef $$ReviewLogTableUpdateCompanionBuilder = ReviewLogCompanion Function({
   Value<String> drillLevel,
   Value<int> reviewedAtMs,
   Value<int> day,
+  Value<bool> daily,
 });
 
 class $$ReviewLogTableFilterComposer
@@ -5247,6 +5290,9 @@ class $$ReviewLogTableFilterComposer
 
   ColumnFilters<int> get day => $composableBuilder(
       column: $table.day, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get daily => $composableBuilder(
+      column: $table.daily, builder: (column) => ColumnFilters(column));
 }
 
 class $$ReviewLogTableOrderingComposer
@@ -5279,6 +5325,9 @@ class $$ReviewLogTableOrderingComposer
 
   ColumnOrderings<int> get day => $composableBuilder(
       column: $table.day, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get daily => $composableBuilder(
+      column: $table.daily, builder: (column) => ColumnOrderings(column));
 }
 
 class $$ReviewLogTableAnnotationComposer
@@ -5310,6 +5359,9 @@ class $$ReviewLogTableAnnotationComposer
 
   GeneratedColumn<int> get day =>
       $composableBuilder(column: $table.day, builder: (column) => column);
+
+  GeneratedColumn<bool> get daily =>
+      $composableBuilder(column: $table.daily, builder: (column) => column);
 }
 
 class $$ReviewLogTableTableManager extends RootTableManager<
@@ -5345,6 +5397,7 @@ class $$ReviewLogTableTableManager extends RootTableManager<
             Value<String> drillLevel = const Value.absent(),
             Value<int> reviewedAtMs = const Value.absent(),
             Value<int> day = const Value.absent(),
+            Value<bool> daily = const Value.absent(),
           }) =>
               ReviewLogCompanion(
             id: id,
@@ -5354,6 +5407,7 @@ class $$ReviewLogTableTableManager extends RootTableManager<
             drillLevel: drillLevel,
             reviewedAtMs: reviewedAtMs,
             day: day,
+            daily: daily,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -5363,6 +5417,7 @@ class $$ReviewLogTableTableManager extends RootTableManager<
             required String drillLevel,
             required int reviewedAtMs,
             required int day,
+            Value<bool> daily = const Value.absent(),
           }) =>
               ReviewLogCompanion.insert(
             id: id,
@@ -5372,6 +5427,7 @@ class $$ReviewLogTableTableManager extends RootTableManager<
             drillLevel: drillLevel,
             reviewedAtMs: reviewedAtMs,
             day: day,
+            daily: daily,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

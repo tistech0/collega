@@ -86,7 +86,7 @@ class _CollegesScreenState extends ConsumerState<CollegesScreen> with TabReselec
     } else if (entries == null) {
       content = const [
         SizedBox(height: CgSpace.section),
-        CgSkeletonPulse(child: CgSkeletonList(rows: 8)),
+        CgSkeletonList(rows: 8),
       ];
     } else {
       content = _libraryChildren(entries);

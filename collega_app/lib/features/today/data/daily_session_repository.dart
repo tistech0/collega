@@ -202,27 +202,25 @@ class DailySessionRepository {
     ));
   }
 
-  /// Clôt la session du jour et marque la session planifiée correspondante faite.
+  /// Clôt la session du jour (le planning avance seul : jour suivant).
   Future<void> complete(int day) async {
     final at = _clock().millisecondsSinceEpoch;
-    await db.transaction(() async {
-      await (db.update(db.dailySessions)..where((t) => t.day.equals(day))).write(DailySessionsCompanion(
-        completedAtMs: Value(at),
-      ));
-      await (db.update(db.planningSessions)
-            ..where((t) => t.sessionDateEpochDay.equals(day) & t.status.equals('pending')))
-          .write(const PlanningSessionsCompanion(status: Value('completed')));
-    });
+    await (db.update(db.dailySessions)..where((t) => t.day.equals(day))).write(DailySessionsCompanion(
+      completedAtMs: Value(at),
+    ));
   }
 
   /// Journalise un verdict (`a_revoir` | `bien` | `maitrise`) sur le jour de la
   /// session (une session commencée à 23 h 50 reste comptée sur son jour).
+  /// [daily] : verdict de la session du jour (son bilan) ; sinon il ne compte
+  /// que dans la semaine de Progression.
   Future<void> recordVerdict({
     required int day,
     required String cardId,
     required String collegeId,
     required String rang,
     required String drillLevel,
+    bool daily = true,
   }) async {
     final at = _clock();
     await db.into(db.reviewLog).insert(ReviewLogCompanion.insert(
@@ -232,6 +230,7 @@ class DailySessionRepository {
           drillLevel: drillLevel,
           reviewedAtMs: at.millisecondsSinceEpoch,
           day: day,
+          daily: Value(daily),
         ));
   }
 
@@ -239,20 +238,33 @@ class DailySessionRepository {
   /// été jugé avant l'interruption).
   Future<Map<String, String>> lastVerdicts(int day) async {
     final rows = await (db.select(db.reviewLog)
-          ..where((t) => t.day.equals(day))
+          ..where((t) => t.day.equals(day) & t.daily.equals(true))
           ..orderBy([(t) => OrderingTerm.asc(t.id)]))
         .get();
     return {for (final r in rows) r.cardId: r.drillLevel};
   }
 
-  /// Verdicts d'un jour, par niveau.
+  /// Verdicts de la session d'un jour, par niveau.
   Future<Map<String, int>> verdictCounts(int day) async {
-    final rows = await (db.select(db.reviewLog)..where((t) => t.day.equals(day))).get();
+    final rows = await (db.select(db.reviewLog)..where((t) => t.day.equals(day) & t.daily.equals(true))).get();
     final counts = <String, int>{};
     for (final r in rows) {
       counts[r.drillLevel] = (counts[r.drillLevel] ?? 0) + 1;
     }
     return counts;
+  }
+
+  /// Fiches distinctes révisées par jour (toutes révisions confondues : une
+  /// fiche revue deux fois le même jour compte une fois), jours inclus ; les
+  /// jours sans révision sont absents.
+  Future<Map<int, int>> weekCounts({required int from, required int to}) async {
+    final count = db.reviewLog.cardId.count(distinct: true);
+    final rows = await (db.selectOnly(db.reviewLog)
+          ..addColumns([db.reviewLog.day, count])
+          ..where(db.reviewLog.day.isBetweenValues(from, to))
+          ..groupBy([db.reviewLog.day]))
+        .get();
+    return {for (final r in rows) r.read(db.reviewLog.day)!: r.read(count)!};
   }
 
   /// Jours (inclus) dont la session du jour a été terminée.
