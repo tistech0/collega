@@ -12,7 +12,7 @@ from app.models.generation_job import GenerationJob
 from app.models.user import User
 from app.services.generation.claude_client import ClaudeClient
 from app.services.generation.pipeline import generate_job_items, report_generation_progress
-from app.services.generation.publish import publish_job, stale_pdfs
+from app.services.generation.publish import ImportRejected, publish_job, stale_pdfs
 from app.services.jobs.job_events import record_job_event
 from app.services.jobs.job_failure import fail_job
 from app.services.notifications.apns_service import get_notification_service
@@ -65,7 +65,13 @@ async def run_generation(
         # Une relance ARQ ne compte que ses propres appels : le job a-t-il consommé
         # des tokens (tentatives précédentes comprises) ? C'est ce qui décide du quota.
         total_calls = calls if (job.input_tokens or 0) == 0 else max(calls, 1)
-        summary = await publish_job(db, job_id, claude_calls=total_calls)
+        try:
+            summary = await publish_job(db, job_id, claude_calls=total_calls)
+        except ImportRejected as rejected:
+            # Mauvais PDF probable : rien n'est modifié, l'import est refusé (quota rendu).
+            await db.rollback()
+            await fail_job(session_factory, job_id, str(rejected))
+            return {**base, "error": "rejected", "message": str(rejected)}
         if summary is None:
             return {**base, "error": "invalid_job_state"}
         user = await db.get(User, job.user_id)

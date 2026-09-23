@@ -16,8 +16,8 @@ pytestmark = pytest.mark.pg
 async def _seed(pg_factory, tmp_path, monkeypatch, college_status: str) -> Seed:
     monkeypatch.setattr(settings, "pdf_storage_path", str(tmp_path))
     async with pg_factory() as db:
-        user = await make_user(db)
-        college = await make_college(db, user, status=college_status)
+        user = await make_user(db, monthly_reloads=1)
+        college = await make_college(db, user, status=college_status, reload_count=1)
         job = await make_job(db, college, status="ocr_complete")
         await make_job_page(db, job, 0, "page")
         await make_draft(db, job, 304, "texte")
@@ -93,3 +93,22 @@ async def test_notification_error_never_breaks_failure(pg_factory, seed_reimport
 
     monkeypatch.setattr("app.services.jobs.job_failure.get_notification_service", lambda: Broken())
     assert await fail_job(pg_factory, seed_reimport.job.id, "boom") is True
+
+
+async def test_failed_reimport_gives_back_quota(pg_factory, seed_reimport):
+    from app.models.user import User
+
+    await fail_job(pg_factory, seed_reimport.job.id, "Claude indisponible", notify=False)
+    async with pg_factory() as s:
+        assert (await s.get(College, seed_reimport.college.id)).reload_count == 0
+        assert (await s.get(User, seed_reimport.user.id)).monthly_reloads == 0
+
+
+async def test_failed_first_import_consumes_no_quota_change(pg_factory, seed_first_import):
+    from app.models.user import User
+
+    await fail_job(pg_factory, seed_first_import.job.id, "boom", notify=False)
+    async with pg_factory() as s:
+        # Un premier import ne consomme pas de quota au router : rien à rendre.
+        assert (await s.get(College, seed_first_import.college.id)).reload_count == 1
+        assert (await s.get(User, seed_first_import.user.id)).monthly_reloads == 1

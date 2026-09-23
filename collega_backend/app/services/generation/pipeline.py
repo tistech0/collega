@@ -1,6 +1,9 @@
 """Génération des fiches d'un import, item par item (chantier 1).
 
 Pour chaque item du brouillon (`job_items`) :
+- item inchangé (même empreinte que l'item en service) qui a déjà des fiches →
+  rien à générer : la bascule garde ses fiches (c'est le cas des collèges
+  remplis par scripts.backfill_content_store, qui n'ont pas de génération) ;
 - une génération existe déjà pour (empreinte du texte, version de génération) —
   item inchangé, même PDF chez une autre utilisatrice, ou tentative précédente
   interrompue — → réutilisée, sans appel Claude ;
@@ -16,12 +19,14 @@ import logging
 import uuid
 from collections.abc import Awaitable, Callable, Sequence
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy import update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.models.college import College
 from app.models.content import ItemGeneration, JobItem
+from app.models.flash_card import FlashCard
+from app.models.item import Item
 from app.models.generation_job import GenerationJob
 from app.services.content import store
 from app.services.generation.claude_client import GENERATION_MODEL, GENERATION_VERSION
@@ -90,10 +95,30 @@ async def generate_job_items(
             (await db.execute(select(ItemGeneration).where(ItemGeneration.id.in_(done_gen_ids)))).scalars().all()
             if done_gen_ids else []
         )
-    todo = [(d.item_number, d.rang, d.text_hash) for d in drafts if d.generation_id is None]
+        # Items en service : (empreinte, nombre de fiches), par numéro.
+        live = {
+            number: (text_hash, count)
+            for number, text_hash, count in (
+                await db.execute(
+                    select(Item.item_number, Item.text_hash, func.count(FlashCard.id))
+                    .outerjoin(FlashCard, FlashCard.item_id == Item.id)
+                    .where(Item.college_id == college_id)
+                    .group_by(Item.id)
+                )
+            ).all()
+        }
+
+    def kept(d: JobItem) -> bool:
+        """Inchangé et déjà pourvu en fiches : la bascule les garde, rien à générer."""
+        text_hash, count = live.get(d.item_number, (None, 0))
+        return text_hash == d.text_hash and count > 0
+
+    todo = [(d.item_number, d.rang, d.text_hash) for d in drafts if d.generation_id is None and not kept(d)]
     total = len(drafts)
     items_done = total - len(todo)
-    cards = sum(len(store.generation_cards(g)) for g in done_gens)
+    cards = sum(len(store.generation_cards(g)) for g in done_gens) + sum(
+        live[d.item_number][1] for d in drafts if d.generation_id is None and kept(d)
+    )
     latest: list[str] = []
     claude_calls = 0
     await _report(progress, college_id, items_done=items_done, items_total=total, cards=cards, preview=latest)
@@ -109,7 +134,9 @@ async def generate_job_items(
         result = None
         if gen is None:
             result = await claude.generate_cards(item_number, rang, text or "")
-            claude_calls += 1
+            # Seul un appel réellement facturé compte (texte vide : aucun appel fait).
+            if result.input_tokens or result.output_tokens:
+                claude_calls += 1
 
         async with session_factory() as db:
             job = await db.get(GenerationJob, job_id)

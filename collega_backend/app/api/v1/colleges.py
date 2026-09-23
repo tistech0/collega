@@ -629,7 +629,8 @@ def _job_summary(job: GenerationJob | None) -> dict | None:
         value = json.loads(job.summary_json)
     except ValueError:
         return None
-    return value if isinstance(value, dict) else None
+    # Le résumé ne concerne que les réimports (un premier import n'a rien « changé »).
+    return value if isinstance(value, dict) and value.get("reimport") else None
 
 
 def _is_failed_reimport(college: College, job: GenerationJob | None) -> bool:

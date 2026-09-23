@@ -109,9 +109,28 @@ async def test_orphan_pdfs(pg_session, tmp_path, monkeypatch):
     assert keep == {f"{college.id}_{current.id}.pdf", f"{running.college_id}_{running.id}.pdf"}
 
     for name in keep | {f"{college.id}_{old.id}.pdf", f"{uuid.uuid4()}_{uuid.uuid4()}.pdf"}:
-        _touch(tmp_path / name)
+        _touch(tmp_path / name, age_hours=30)
+    being_written = f"{uuid.uuid4()}_{uuid.uuid4()}.pdf"  # import pas encore en base
+    _touch(tmp_path / being_written)
     _touch(tmp_path / "incoming_recent.pdf")
     _touch(tmp_path / "incoming_old.pdf", age_hours=25)
 
     assert purge_orphan_pdfs(keep, datetime.now(timezone.utc)) == 3
-    assert {p.name for p in tmp_path.glob("*.pdf")} == keep | {"incoming_recent.pdf"}
+    assert {p.name for p in tmp_path.glob("*.pdf")} == keep | {"incoming_recent.pdf", being_written}
+
+
+async def test_purge_waits_for_imports_writing_content(pg_factory):
+    """Un import qui vient de « retrouver » une page (ON CONFLICT DO NOTHING) tient le
+    verrou partagé jusqu'à son commit : la purge (verrou exclusif) attend."""
+    from sqlalchemy import text as sql_text
+    from sqlalchemy.exc import DBAPIError
+
+    async with pg_factory() as importing, pg_factory() as purging:
+        await store.put_page(importing, "page partagée", [], 0.9, "pdfplumber")  # transaction ouverte
+        await purging.execute(sql_text("SET LOCAL lock_timeout = '200ms'"))
+        with pytest.raises(DBAPIError, match="lock timeout"):
+            await purge_unreferenced_content(purging)
+        await purging.rollback()
+        await importing.commit()
+        await purge_unreferenced_content(purging)  # l'import a fini : la purge passe
+        await purging.commit()

@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.models.generation_job import GenerationJob
+from app.services.content.store import hold_content_lock_exclusive
 
 logger = logging.getLogger(__name__)
 
@@ -43,12 +44,15 @@ _PURGE_STATEMENTS = {
     """,
 }
 
-INCOMING_MAX_AGE = timedelta(hours=24)
+# Un PDF récent peut être en cours d'écriture (import pas encore en base) : jamais
+# supprimé avant ce délai, quel que soit son nom.
+PDF_GRACE = timedelta(hours=24)
 ACTIVE_STATUSES = ("pending", "processing", "ocr_complete")
 
 
 async def purge_unreferenced_content(db: AsyncSession) -> dict[str, int]:
     """Supprime le contenu que plus rien ne référence. Ne commit pas."""
+    await hold_content_lock_exclusive(db)
     counts = {}
     for table, statement in _PURGE_STATEMENTS.items():  # ordre : générations → textes → pages
         counts[table] = (await db.execute(text(statement))).rowcount or 0
@@ -88,15 +92,14 @@ async def active_pdf_names(db: AsyncSession) -> set[str]:
 
 
 def purge_orphan_pdfs(keep: set[str], now: datetime | None = None) -> int:
-    """Supprime les PDF hors de `keep` et les assemblages `incoming_*` de plus de 24 h."""
+    """Supprime les PDF hors de `keep` (dont les assemblages `incoming_*`) modifiés
+    depuis plus de 24 h."""
     now = now or datetime.now(timezone.utc)
     removed = 0
     for pdf in Path(settings.pdf_storage_path).glob("*.pdf"):
-        if pdf.name.startswith("incoming_"):
-            age = now - datetime.fromtimestamp(pdf.stat().st_mtime, timezone.utc)
-            if age <= INCOMING_MAX_AGE:
-                continue
-        elif pdf.name in keep:
+        if pdf.name in keep:
+            continue
+        if now - datetime.fromtimestamp(pdf.stat().st_mtime, timezone.utc) <= PDF_GRACE:
             continue
         try:
             pdf.unlink(missing_ok=True)

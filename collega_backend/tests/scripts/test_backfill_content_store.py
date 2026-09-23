@@ -42,7 +42,7 @@ async def test_fills_pages_and_matching_items_only(pg_session, tmp_path):
 
     assert (report["pages"], report["matched"], report["unmatched"], report["without_hash"]) == (3, [304], [306], [305])
     items = {i.item_number: i for i in (await pg_session.execute(select(Item))).scalars()}
-    assert items[304].text_hash == item_hash("ITEM 304 Foie\ntexte 304\nsuite 304")
+    assert items[304].text_hash == item_hash(["ITEM 304 Foie\ntexte 304", "suite 304"])
     assert items[305].text_hash is None
     assert (await pg_session.execute(select(func.count()).select_from(CollegePage))).scalar_one() == 3
     # Rien d'autre ne bouge : pas d'item créé, fiches intactes, aucune génération.

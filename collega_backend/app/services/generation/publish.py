@@ -2,10 +2,14 @@
 
 Une seule transaction, collège verrouillé. Items rapprochés par numéro :
 - inchangé (même empreinte) : métadonnées rafraîchies, fiches intactes (identifiants,
-  pouces, régénérations et suppressions de l'utilisatrice conservés) ;
-- modifié : item conservé (même id), fiches remplacées par la génération ;
+  pouces, régénérations et suppressions de l'utilisatrice conservés) ; s'il n'avait
+  aucune fiche et qu'une génération est prête, ses fiches sont ajoutées ;
+- modifié : item conservé (même id), fiches remplacées par la génération — sans
+  génération exploitable, l'ancien contenu est gardé tel quel (retenté plus tard) ;
 - nouveau : item + fiches créés ;
-- disparu : item supprimé (fiches en cascade).
+- disparu : item supprimé (fiches en cascade) — sauf si plus de la moitié des items
+  disparaissent d'un réimport : mauvais PDF probable, rien n'est modifié
+  (`ImportRejected`).
 Rejouable : un import qui n'est plus `ocr_complete` (déjà basculé, stoppé) n'est
 pas republié. Ne commit pas (l'appelant commit), ne touche à aucun fichier.
 """
@@ -34,6 +38,16 @@ from app.services.jobs.job_events import record_job_event
 logger = logging.getLogger(__name__)
 
 
+# Garde-fou « mauvais PDF » : au-delà de cette part d'items disparus, un réimport
+# est refusé (à partir de MIN_ITEMS_FOR_GUARD items en service).
+MAX_REMOVED_SHARE = 0.5
+MIN_ITEMS_FOR_GUARD = 4
+
+
+class ImportRejected(Exception):
+    """Bascule refusée sans rien modifier ; le message est destiné à l'utilisatrice."""
+
+
 @dataclass
 class ImportSummary:
     changed: int = 0
@@ -43,6 +57,7 @@ class ImportSummary:
     cards: int = 0
     claude_calls: int = 0
     quota_refunded: bool = False
+    reimport: bool = False
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -94,7 +109,23 @@ async def publish_job(db: AsyncSession, job_id: uuid.UUID, *, claude_calls: int)
         for g in (await db.execute(select(ItemGeneration).where(ItemGeneration.id.in_(gen_ids)))).scalars()
     } if gen_ids else {}
 
-    summary = ImportSummary(claude_calls=claude_calls)
+    card_counts = dict(
+        (
+            await db.execute(
+                select(FlashCard.item_id, func.count(FlashCard.id))
+                .where(FlashCard.college_id == college.id)
+                .group_by(FlashCard.item_id)
+            )
+        ).all()
+    )
+    removed_numbers = [n for n in live if n not in drafts]
+    if was_ready and len(live) >= MIN_ITEMS_FOR_GUARD and len(removed_numbers) > len(live) * MAX_REMOVED_SHARE:
+        raise ImportRejected(
+            f"Ce PDF ne semble pas correspondre à ce collège : {len(removed_numbers)} items sur {len(live)} "
+            "en disparaîtraient. Rien n'a été modifié."
+        )
+
+    summary = ImportSummary(claude_calls=claude_calls, reimport=was_ready)
 
     def add_cards(item: Item, draft: JobItem) -> None:
         gen = generations.get(draft.generation_id) if draft.generation_id else None
@@ -127,6 +158,16 @@ async def publish_job(db: AsyncSession, job_id: uuid.UUID, *, claude_calls: int)
             summary.added += 1
         elif item.text_hash == draft.text_hash:
             _copy_metadata(item, draft)
+            if card_counts.get(item.id, 0) == 0 and draft.generation_id is not None:
+                add_cards(item, draft)  # item resté sans fiche : il en reçoit enfin
+                summary.changed += 1
+            else:
+                summary.unchanged += 1
+        elif draft.generation_id is None:
+            # Modifié mais Claude n'a rien rendu d'exploitable : on garde l'ancien
+            # contenu (et son empreinte) plutôt que de le perdre ; retenté au prochain import.
+            _copy_metadata(item, draft)
+            logger.warning("Item %d modifié sans génération : ancien contenu conservé", number)
             summary.unchanged += 1
         else:
             _copy_metadata(item, draft)
@@ -135,10 +176,9 @@ async def publish_job(db: AsyncSession, job_id: uuid.UUID, *, claude_calls: int)
             add_cards(item, draft)
             summary.changed += 1
 
-    for number, item in live.items():
-        if number not in drafts:
-            await db.delete(item)
-            summary.removed += 1
+    for number in removed_numbers:
+        await db.delete(live[number])
+        summary.removed += 1
     await db.flush()
 
     await db.execute(delete(CollegePage).where(CollegePage.college_id == college.id))

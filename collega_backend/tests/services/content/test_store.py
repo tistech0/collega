@@ -20,14 +20,14 @@ async def test_same_page_is_stored_once(pg_session):
 
 
 async def test_item_text_keyed_by_normalized_hash_keeps_raw_text(pg_session):
-    h = await store.put_item_text(pg_session, "Le foie\n233\nsain")
+    h = await store.put_item_text(pg_session, ["Le foie\nsain\n233", "234\nsuite"])
     await pg_session.commit()
-    assert h == item_hash("Le foie\n999\nsain")
-    assert await store.get_item_text(pg_session, h) == "Le foie\n233\nsain"
+    assert h == item_hash(["Le foie\nsain\n999", "1000\nsuite"])
+    assert await store.get_item_text(pg_session, h) == "Le foie\nsain\n233\n234\nsuite"
 
 
 async def test_generation_is_unique_per_hash_and_version(pg_session):
-    h = await store.put_item_text(pg_session, "texte item")
+    h = await store.put_item_text(pg_session, ["texte item"])
     cards = [{"card_type": "classique", "recto": "Q ?", "verso": "R"}]
     g1 = await store.put_generation(pg_session, h, "v1", cards, "m", 10, 5)
     g2 = await store.put_generation(pg_session, h, "v1", [], "m", 99, 99)

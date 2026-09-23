@@ -269,3 +269,65 @@ async def test_not_ocr_complete_is_ignored(pg_factory, notifications):
     claude = FakeClaude()
     assert (await _run(pg_factory, college, job, claude))["error"] == "invalid_job_state"
     assert claude.calls == []
+
+
+async def test_backfilled_college_reimport_calls_claude_zero_times(pg_factory, notifications, storage):
+    """Scénario prod : collège antérieur au chantier 1 (fiches sans génération
+    d'origine), rempli par backfill_content_store, puis réimport du même PDF."""
+    from scripts.backfill_content_store import backfill_college
+
+    async with pg_factory() as db:
+        user = await make_user(db, monthly_reloads=1)
+        college = await make_college(db, user, status="generation_complete", reload_count=1)
+        old_job = await make_job(db, college, status="generation_complete")
+        kept = {}
+        for n in (304, 305):
+            item = await make_item(db, college, n, text=None)
+            kept[n] = (await make_card(db, item, recto=f"ancienne {n}", user_feedback="positive")).id
+        await db.commit()
+    write_pdf(storage, college, old_job)
+    async with pg_factory() as db:
+        await backfill_college(db, await db.get(College, college.id), processor=FakeProcessor(PAGES),
+                               detector=FakeDetector(), pdf_dir=storage)
+        await db.commit()
+        job = await make_job(db, await db.get(College, college.id))
+        await db.commit()
+    write_pdf(storage, college, job)
+    await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor(PAGES), detector=FakeDetector())
+    claude = FakeClaude()
+    result = await _run(pg_factory, college, job, claude)
+
+    assert claude.calls == []
+    assert (result["unchanged"], result["changed"], result["quota_refunded"]) == (2, 0, True)
+    async with pg_factory() as s:
+        assert set((await s.execute(select(FlashCard.id))).scalars()) == set(kept.values())
+
+
+async def test_empty_text_item_does_not_count_as_claude_call(pg_factory, notifications):
+    _, college, job = await _ready_job(pg_factory, {304: "texte"}, college_status="generation_complete")
+
+    class ZeroTokens(FakeClaude):
+        async def generate_cards(self, item_number, rang, text):
+            self.calls.append(item_number)
+            return CardGenResult(cards=[], input_tokens=0, output_tokens=0)
+
+    result = await _run(pg_factory, college, job, ZeroTokens())
+    assert result["claude_calls"] == 0
+
+
+async def test_rejected_publish_fails_job_and_keeps_content(pg_factory, notifications):
+    async with pg_factory() as db:
+        user = await make_user(db, monthly_reloads=1)
+        college = await make_college(db, user, status="generation_complete", reload_count=1)
+        for n in (301, 302, 303, 304):
+            await make_card(db, await make_item(db, college, n, text=f"t{n}"))
+        job = await make_job(db, college, status="ocr_complete")
+        await make_draft(db, job, 999, "autre collège", None)
+        await db.commit()
+    result = await _run(pg_factory, college, job, FakeClaude())
+    assert result["error"] == "rejected" and "Rien n'a été modifié" in result["message"]
+    async with pg_factory() as s:
+        assert (await s.get(GenerationJob, job.id)).status == "failed"
+        assert (await s.execute(select(func.count()).select_from(FlashCard))).scalar_one() == 4
+        assert (await s.get(College, college.id)).reload_count == 0  # quota rendu
+    assert notifications.sent[-1] == ("failed", 34, True)

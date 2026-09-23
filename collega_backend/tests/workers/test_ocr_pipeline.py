@@ -40,6 +40,15 @@ class FakeProcessor:
         return OcrPageResult(page_num=n, text=self.pages[n], confidence_score=0.9, method="pdfplumber", tables=[])
 
 
+class FakeRedis:
+    def __init__(self):
+        self.calls = []
+
+    async def enqueue_job(self, name, *args, _job_id=None):
+        self.calls.append((name, args, _job_id))
+        return type("J", (), {"job_id": _job_id})()
+
+
 class FakeDetector:
     """« ITEM n Titre » en tête de page ouvre un item jusqu'à la page suivante qui en ouvre un autre."""
 
@@ -231,7 +240,7 @@ async def test_interruption_keeps_job_resumable(pg_factory, seed, monkeypatch):
 async def test_finished_job_is_not_reprocessed(pg_factory, seed):
     college, job = await seed()
     async with pg_factory() as s:
-        (await s.get(GenerationJob, job.id)).status = "ocr_complete"
+        (await s.get(GenerationJob, job.id)).status = "generation_complete"
         await s.commit()
     proc = FakeProcessor(PAGES)
     result = await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=proc, detector=FakeDetector())
@@ -241,17 +250,26 @@ async def test_finished_job_is_not_reprocessed(pg_factory, seed):
 async def test_generation_enqueued_and_stop_target_repointed(pg_factory, seed):
     college, job = await seed()
 
-    class FakeRedis:
-        async def enqueue_job(self, name, *args):
-            self.call = (name, args)
-            return type("J", (), {"job_id": "arq-gen-1"})()
-
     redis = FakeRedis()
     await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor(PAGES),
                   detector=FakeDetector(), ctx={"redis": redis})
-    assert redis.call == ("generate_college_cards", (str(college.id), str(job.id), "x.pdf"))
+    assert redis.calls == [("generate_college_cards", (str(college.id), str(job.id), "x.pdf"), f"gen:{job.id}")]
     async with pg_factory() as s:
-        assert (await s.get(GenerationJob, job.id)).arq_job_id == "arq-gen-1"
+        assert (await s.get(GenerationJob, job.id)).arq_job_id == f"gen:{job.id}"
+
+
+async def test_resumed_after_ocr_complete_reenqueues_generation(pg_factory, seed):
+    """Interruption juste après la fin de l'OCR : la reprise remet la génération en
+    file (identifiant ARQ fixe, jamais dupliquée) sans refaire l'OCR."""
+    college, job = await seed()
+    async with pg_factory() as s:
+        (await s.get(GenerationJob, job.id)).status = "ocr_complete"
+        await s.commit()
+    redis, proc = FakeRedis(), FakeProcessor(PAGES)
+    result = await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=proc, detector=FakeDetector(),
+                           ctx={"redis": redis})
+    assert result["resumed"] == "generation_enqueued" and proc.calls == []
+    assert [c[2] for c in redis.calls] == [f"gen:{job.id}"]
 
 
 async def test_title_cascade_uses_and_feeds_referential(pg_factory, seed):

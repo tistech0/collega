@@ -84,6 +84,11 @@ async def run_ocr(
     async with session_factory() as db:
         college = await db.get(College, college_id)
         job = await db.get(GenerationJob, job_id)
+        if college is not None and job is not None and job.status == "ocr_complete":
+            # Reprise après une interruption survenue juste après la fin de l'OCR :
+            # la génération n'a peut-être jamais été mise en file.
+            await _enqueue_generation(db, job, pdf_path, ctx)
+            return {**base, "resumed": "generation_enqueued"}
         if college is None or job is None or job.status not in ("pending", "processing"):
             logger.info("OCR job %s ignoré (état %s)", job_id, job.status if job else "absent")
             return {**base, "error": "invalid_job_state"}
@@ -156,8 +161,8 @@ async def run_ocr(
             return {**base, "error": "cancelled"}
         items = await _detect_items(db, job_id, detector)
         await record_job_event(db, job_id, "items_detected", message=f"{len(items)} items")
-        for detected in items:
-            text_hash = await store.put_item_text(db, detected.ocr_text)
+        for detected, pages in items:
+            text_hash = await store.put_item_text(db, pages)
             db.add(
                 JobItem(
                     job_id=job_id,
@@ -182,24 +187,37 @@ async def run_ocr(
         await db.commit()
         logger.info("OCR complete for college %s — %d items détectés", college_id, len(items))
 
-        if ctx and "redis" in ctx:
-            try:
-                gen_job = await ctx["redis"].enqueue_job("generate_college_cards", str(college_id), str(job_id), pdf_path)
-                # GOTCHA Stop (Story 7.7) : arq_job_id doit pointer sur le job ARQ de
-                # la génération, sinon Stop ne pourrait plus l'annuler.
-                if gen_job is not None:
-                    job.arq_job_id = gen_job.job_id
-                    await db.commit()
-            except Exception as exc:  # noqa: BLE001
-                # Sans génération en file, l'import resterait ocr_complete : le cron
-                # des jobs bloqués le passera en échec (et l'utilisatrice pourra relancer).
-                logger.error("Failed to enqueue generation job for college %s: %s", college_id, exc)
+        await _enqueue_generation(db, job, pdf_path, ctx)
 
     return {**base, "item_count": len(items), "total_pages": total_pages}
 
 
-async def _detect_items(db: AsyncSession, job_id: uuid.UUID, detector) -> list[DetectedItem]:
-    """Détection sur toutes les pages de l'import, relues depuis le stockage."""
+def generation_arq_id(job_id: uuid.UUID) -> str:
+    """Identifiant ARQ fixe de la génération d'un import : une remise en file
+    (reprise de l'OCR) ne la duplique jamais."""
+    return f"gen:{job_id}"
+
+
+async def _enqueue_generation(db: AsyncSession, job: GenerationJob, pdf_path: str, ctx: dict | None) -> None:
+    if not ctx or "redis" not in ctx:
+        return
+    try:
+        await ctx["redis"].enqueue_job(
+            "generate_college_cards", str(job.college_id), str(job.id), pdf_path, _job_id=generation_arq_id(job.id)
+        )
+        # GOTCHA Stop (Story 7.7) : arq_job_id doit pointer sur le job ARQ de la
+        # génération, sinon Stop ne pourrait plus l'annuler.
+        job.arq_job_id = generation_arq_id(job.id)
+        await db.commit()
+    except Exception as exc:  # noqa: BLE001
+        # Sans génération en file, l'import resterait ocr_complete : le cron des
+        # jobs bloqués le passera en échec (quota rendu) et l'utilisatrice relancera.
+        logger.error("Failed to enqueue generation for job %s: %s", job.id, exc)
+
+
+async def _detect_items(db: AsyncSession, job_id: uuid.UUID, detector) -> list[tuple[DetectedItem, list[str]]]:
+    """Détection sur toutes les pages de l'import, relues depuis le stockage.
+    Renvoie chaque item avec le texte de ses pages (base de son empreinte)."""
     rows = (
         await db.execute(select(JobPage).where(JobPage.job_id == job_id).order_by(JobPage.page_number))
     ).scalars().all()
@@ -207,7 +225,12 @@ async def _detect_items(db: AsyncSession, job_id: uuid.UUID, detector) -> list[D
     texts = [pages[r.page_hash].text for r in rows]
     scores = [pages[r.page_hash].confidence for r in rows]
     tables = [json.loads(pages[r.page_hash].tables_json) for r in rows]
-    return dedupe_items(detector.detect_items(texts, scores, tables))
+    return with_pages(dedupe_items(detector.detect_items(texts, scores, tables)), texts)
+
+
+def with_pages(items: list[DetectedItem], texts: list[str]) -> list[tuple[DetectedItem, list[str]]]:
+    """Le texte d'un item est la concaténation de ses pages start..end (ItemDetector)."""
+    return [(d, texts[d.start_page : d.end_page + 1]) for d in items]
 
 
 def dedupe_items(detected_items: list[DetectedItem]) -> list[DetectedItem]:

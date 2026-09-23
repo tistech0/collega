@@ -7,16 +7,32 @@ import json
 import uuid
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.content import ItemGeneration, ItemText, OcrPage
 from app.services.content.fingerprint import item_hash, page_hash
 
+# Verrou consultatif Postgres (clé arbitraire, propre à ce stockage) : les écritures
+# des imports le prennent en PARTAGÉ jusqu'à la fin de leur transaction, la purge en
+# EXCLUSIF. Sans lui, la purge pourrait supprimer une page ou un texte qu'un import
+# concurrent (même PDF) vient de « retrouver » par ON CONFLICT DO NOTHING et va
+# référencer — son insertion suivante violerait alors la clé étrangère.
+CONTENT_LOCK_KEY = 0x636F6C6C  # « coll »
+
+
+async def hold_content_lock_shared(db: AsyncSession) -> None:
+    await db.execute(text("SELECT pg_advisory_xact_lock_shared(:k)"), {"k": CONTENT_LOCK_KEY})
+
+
+async def hold_content_lock_exclusive(db: AsyncSession) -> None:
+    await db.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": CONTENT_LOCK_KEY})
+
 
 async def put_page(db: AsyncSession, text: str, tables: list, confidence: float, method: str) -> str:
     h = page_hash(text)
+    await hold_content_lock_shared(db)
     await db.execute(
         insert(OcrPage)
         .values(hash=h, text=text, tables_json=json.dumps(tables, ensure_ascii=False),
@@ -33,9 +49,14 @@ async def load_pages(db: AsyncSession, hashes: list[str]) -> dict[str, OcrPage]:
     return {p.hash: p for p in rows.scalars()}
 
 
-async def put_item_text(db: AsyncSession, text: str) -> str:
-    h = item_hash(text)
-    await db.execute(insert(ItemText).values(hash=h, text=text).on_conflict_do_nothing(index_elements=["hash"]))
+async def put_item_text(db: AsyncSession, pages: list[str]) -> str:
+    """Stocke le texte d'un item (ses pages jointes, tel qu'envoyé à Claude) sous
+    l'empreinte normalisée calculée page par page."""
+    h = item_hash(pages)
+    await hold_content_lock_shared(db)
+    await db.execute(
+        insert(ItemText).values(hash=h, text="\n".join(pages)).on_conflict_do_nothing(index_elements=["hash"])
+    )
     return h
 
 
@@ -64,6 +85,7 @@ async def put_generation(
 ) -> ItemGeneration:
     """Enregistre la sortie d'origine de Claude ; si une génération existe déjà pour
     (empreinte, version) — import concurrent —, c'est elle qui est renvoyée."""
+    await hold_content_lock_shared(db)
     await db.execute(
         insert(ItemGeneration)
         .values(id=uuid.uuid4(), text_hash=text_hash, generation_version=version,

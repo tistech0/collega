@@ -202,7 +202,7 @@ async def test_summary_persisted_on_job(pg_session):
     await pg_session.refresh(job)
     assert json.loads(job.summary_json) == {
         "changed": 0, "added": 1, "removed": 0, "unchanged": 0, "cards": 1,
-        "claude_calls": 1, "quota_refunded": False,
+        "claude_calls": 1, "quota_refunded": False, "reimport": True,
     }
     assert job.hash_shared is False
 
@@ -214,3 +214,52 @@ def test_stale_pdfs_lists_other_pdfs_of_the_college(tmp_path, monkeypatch):
     for name in (f"{college_id}_{keep}.pdf", f"{college_id}_{old}.pdf", f"{other_college}_{old}.pdf"):
         (tmp_path / name).write_bytes(b"%PDF")
     assert [p.name for p in stale_pdfs(college_id, keep)] == [f"{college_id}_{old}.pdf"]
+
+
+async def test_unchanged_item_without_cards_finally_gets_them(pg_session):
+    _, college, job = await _setup(pg_session)
+    item = await make_item(pg_session, college, 304, text="même texte")  # publié sans fiche
+    await make_draft(pg_session, job, 304, "même texte", cards("Q enfin"))
+    await pg_session.commit()
+    summary = await publish_job(pg_session, job.id, claude_calls=1)
+    await pg_session.commit()
+    assert (summary.changed, summary.unchanged) == (1, 0)
+    rows = (await pg_session.execute(select(FlashCard))).scalars().all()
+    assert [(c.item_id, c.recto) for c in rows] == [(item.id, "Q enfin")]
+
+
+async def test_changed_item_without_generation_keeps_old_content(pg_session):
+    _, college, job = await _setup(pg_session)
+    item = await make_item(pg_session, college, 304, text="ancien texte")
+    old = await make_card(pg_session, item, recto="ancienne")
+    old_hash = item.text_hash
+    await make_draft(pg_session, job, 304, "texte modifié", None)  # Claude n'a rien rendu
+    await pg_session.commit()
+    summary = await publish_job(pg_session, job.id, claude_calls=1)
+    await pg_session.commit()
+    assert (summary.changed, summary.unchanged) == (0, 1)
+    await pg_session.refresh(item)
+    assert item.text_hash == old_hash  # retenté au prochain import
+    assert [c.id for c in (await pg_session.execute(select(FlashCard))).scalars()] == [old.id]
+
+
+async def test_reimport_losing_most_items_is_rejected_untouched(pg_session):
+    from app.services.generation.publish import ImportRejected
+
+    _, college, job = await _setup(pg_session)
+    for n in (301, 302, 303, 304):
+        await make_card(pg_session, await make_item(pg_session, college, n, text=f"t{n}"))
+    await make_draft(pg_session, job, 304, "t304", cards("Q"))  # 3 items sur 4 disparaîtraient
+    await pg_session.commit()
+    with pytest.raises(ImportRejected, match="3 items sur 4"):
+        await publish_job(pg_session, job.id, claude_calls=1)
+    await pg_session.rollback()
+    assert (await pg_session.execute(select(func.count()).select_from(Item))).scalar_one() == 4
+    assert (await pg_session.execute(select(func.count()).select_from(FlashCard))).scalar_one() == 4
+
+
+async def test_first_import_is_never_rejected(pg_session):
+    _, college, job = await _setup(pg_session, status="ocr_complete")
+    await make_draft(pg_session, job, 304, "t", cards("Q"))
+    await pg_session.commit()
+    assert (await publish_job(pg_session, job.id, claude_calls=1)).reimport is False

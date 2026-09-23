@@ -117,7 +117,7 @@ async def test_reimport_progress_follows_job_while_college_stays_ready(stream_wi
     c = _college(None, status="generation_complete", progress=10)
     c.generation_items_total = 2
     summary = {"changed": 1, "added": 0, "removed": 0, "unchanged": 1, "cards": 9, "claude_calls": 1,
-               "quota_refunded": False}
+               "quota_refunded": False, "reimport": True}
     states = [(c, _job("ocr_complete")), (c, _job("generation_complete", summary_json=json.dumps(summary)))]
     events = _events((await stream_with_states(c, states)).text)
     kinds = [e["event"] for e in events]
@@ -150,7 +150,7 @@ async def test_stream_holds_no_request_session(pg_client, pg_factory, monkeypatc
         user = await make_user(db)
         college = await make_college(db, user, status="generation_complete")
         job = await make_job(db, college, status="generation_complete")
-        job.summary_json = json.dumps({"changed": 0})
+        job.summary_json = json.dumps({"changed": 0, "reimport": True})
         await db.commit()
     login_as(user)
 
@@ -161,7 +161,7 @@ async def test_stream_holds_no_request_session(pg_client, pg_factory, monkeypatc
     app.dependency_overrides[get_db] = forbidden
     response = await pg_client.get(f"/v1/colleges/{college.id}/stream")
     assert response.status_code == 200
-    assert _events(response.text)[-1]["data"]["summary"] == {"changed": 0}
+    assert _events(response.text)[-1]["data"]["summary"] == {"changed": 0, "reimport": True}
 
 
 @pytest.mark.pg
@@ -204,14 +204,29 @@ async def test_status_exposes_summary_and_failed_reimport(pg_client, pg_factory)
         user = await make_user(db)
         college = await make_college(db, user, status="generation_complete")
         done = await make_job(db, college, status="generation_complete")
-        done.summary_json = json.dumps({"changed": 2})
+        done.summary_json = json.dumps({"changed": 2, "reimport": True})
         await db.commit()
     login_as(user)
     status = (await pg_client.get(f"/v1/colleges/{college.id}/status")).json()["data"]
-    assert (status["status"], status["summary"]) == ("generation_complete", {"changed": 2})
+    assert (status["status"], status["summary"]) == ("generation_complete", {"changed": 2, "reimport": True})
 
     async with pg_factory() as db:
         failed = await make_job(db, await db.get(College, college.id), status="failed")
         await db.commit()
     status = (await pg_client.get(f"/v1/colleges/{college.id}/status")).json()["data"]
     assert (status["status"], status["reimport"], status["job_id"]) == ("failed", True, str(failed.id))
+
+
+
+@pytest.mark.pg
+async def test_first_import_summary_is_not_exposed(pg_client, pg_factory):
+    """Le résumé ne concerne que les réimports : l'app n'affiche pas « 120 nouveaux »."""
+    async with pg_factory() as db:
+        user = await make_user(db)
+        college = await make_college(db, user, status="generation_complete")
+        job = await make_job(db, college, status="generation_complete")
+        job.summary_json = json.dumps({"added": 120, "reimport": False})
+        await db.commit()
+    login_as(user)
+    status = (await pg_client.get(f"/v1/colleges/{college.id}/status")).json()["data"]
+    assert status["summary"] is None

@@ -51,7 +51,7 @@ async def make_job(db: AsyncSession, college: College, *, status: str = "pending
 async def make_item(
     db: AsyncSession, college: College, number: int, *, text: str | None = None, rang: str = "A"
 ) -> Item:
-    text_hash = await store.put_item_text(db, text) if text is not None else None
+    text_hash = await store.put_item_text(db, [text]) if text is not None else None
     item = Item(
         id=uuid.uuid4(), college_id=college.id, item_number=number, rang=rang,
         chapter_title=f"Item {number}", text_hash=text_hash, ocr_confidence_score=0.9,
@@ -78,7 +78,7 @@ async def make_draft(
     *, version: str = "claude-sonnet-4-6:p1", rang: str = "A",
 ) -> JobItem:
     """Item détecté par l'import `job` ; `cards` non None → génération d'origine déjà faite."""
-    text_hash = await store.put_item_text(db, text)
+    text_hash = await store.put_item_text(db, [text])
     generation_id = None
     if cards is not None:
         gen = await store.put_generation(db, text_hash, version, cards, "claude-sonnet-4-6", 10, 5)

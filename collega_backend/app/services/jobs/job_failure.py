@@ -4,8 +4,9 @@ des jobs bloqués (chantier 1).
 Toujours dans une session neuve : celle de l'appelant peut être inutilisable
 (rollback en attente, connexion perdue, CancelledError du timeout ARQ).
 Le contenu en service du collège n'est jamais touché : un réimport qui échoue
-laisse le collège `generation_complete` ; seul un premier import passe le
-collège à `failed`.
+laisse le collège `generation_complete` et son quota est rendu (l'utilisatrice
+n'a rien obtenu) ; seul un premier import passe le collège à `failed`.
+Verrous dans le même ordre que la bascule (collège puis job) : pas d'interblocage.
 """
 from __future__ import annotations
 
@@ -14,6 +15,7 @@ import uuid
 from pathlib import Path
 
 from sqlalchemy import delete, select
+from sqlalchemy import update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import settings
@@ -40,25 +42,44 @@ async def fail_job(
     """Passe un import actif en `failed`. Renvoie False s'il n'existe plus ou
     n'était plus actif (déjà terminé, déjà en échec) — rien n'est alors modifié."""
     async with session_factory() as db:
+        college_id = (
+            await db.execute(select(GenerationJob.college_id).where(GenerationJob.id == job_id))
+        ).scalar_one_or_none()
+        if college_id is None:
+            return False
+        college = (
+            await db.execute(select(College).where(College.id == college_id).with_for_update())
+        ).scalar_one_or_none()
         job = (
             await db.execute(select(GenerationJob).where(GenerationJob.id == job_id).with_for_update())
         ).scalar_one_or_none()
         if job is None or job.status not in ACTIVE_JOB_STATUSES:
             return False
-        college = await db.get(College, job.college_id)
+        user = await db.get(User, job.user_id)
         reimport = college is not None and college.status == CollegeStatus.generation_complete
+        ref_id = college.college_ref_id if college is not None else None
+        token = user.apns_token if user is not None else None
+
         job.status = "failed"
         job.error_message = message
         await record_job_event(db, job.id, event, message=message)
         await db.execute(delete(JobPage).where(JobPage.job_id == job.id))
         await db.execute(delete(JobItem).where(JobItem.job_id == job.id))
-        if college is not None and not reimport:
-            college.status = CollegeStatus.failed
+        if college is not None:
             college.generation_items_total = None
-        user = await db.get(User, job.user_id)
-        ref_id = college.college_ref_id if college is not None else None
-        token = user.apns_token if user is not None else None
-        college_id = job.college_id
+            if not reimport:
+                college.status = CollegeStatus.failed
+            else:
+                # Réimport sans résultat : le quota consommé au router est rendu
+                # (UPDATE conditionnels : jamais négatif).
+                await db.execute(
+                    sa_update(College).where(College.id == college.id).where(College.reload_count > 0)
+                    .values(reload_count=College.reload_count - 1)
+                )
+                await db.execute(
+                    sa_update(User).where(User.id == job.user_id).where(User.monthly_reloads > 0)
+                    .values(monthly_reloads=User.monthly_reloads - 1)
+                )
         await db.commit()
 
     # Le PDF d'un import échoué n'est jamais le PDF en service (celui du dernier
