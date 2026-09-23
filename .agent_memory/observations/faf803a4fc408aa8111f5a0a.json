@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib\"; grep -rn \"generation_complete\\|'processing'\\|ocr_complete\\|'failed'\\|isReady\\|CollegeStatus\" --include=*.dart . 2>/dev/null | grep -v \"\\.g\\.dart\" | head -30",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib\"; grep -rn \"generation_complete\\|'processing'\\|ocr_complete\\|'failed'\\|isReady\\|CollegeStatus\" --include=*.dart . 2>/dev/null | grep -v",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "faf803a4fc408aa8111f5a0a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:12:19.930Z",
+  "stored_at": "2026-09-23T20:12:19.931Z"
+}

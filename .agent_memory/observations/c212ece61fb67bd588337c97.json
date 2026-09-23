@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"table\" app/services/ocr/item_detector.py | head -30; grep -n \"def process_page\\|tables\\|def count_pages\" app/services/ocr/ocr_processor.py | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"table\" app/services/ocr/item_detector.py | head -30; grep -n \"def process_page\\|tables\\|def count_pages\" app/services/ocr/ocr_processor.py | head -20: bles: PageTables) -> RangType | None: 319: \"\"\"Extraire le rang dominant depuis les tableaux",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"table\" app/services/ocr/item_detector.py | head -30; grep -n \"def process_page\\|tables\\|def count_pages\" app/services/ocr/ocr_processor.py | head -20: bles: PageTables) -> RangType | None: 319: \"\"\"Extraire le rang dominant depuis les tableaux pdfplumber. 321: Cherche une table ayant une colonne dont l'en-tête contient \"Rang\", 327: for table in tables: 328: if not table: 333: for col_idx, cell in enumerate(table[0]): 341: for row in table[1:]: 355: \"\"\"Fallback pytesseract : détecter le rang dans le texte brut du tableau OCR. 360: in_rang_table = False 366: # Détecter l'en-tête du tableau rang (ex: \"Rang Rubrique Intitulé\") 21: tables: PageTables = field(default_factory=list) # tableaux extraits par pdfplumber 34: def process_page(self, pdf_path: str | Path, page_num: int) -> OcrPageResult: 66: raw_tables = page.extract_tables() or [] 69: tables: PageTables = [ 74: for table in raw_tables 83: tables=tables, 124: # pytesseract ne fournit pas de tables structurées — tables reste vide 145: def count_pages(self, pdf_path: str | Path) -> int:",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c212ece61fb67bd588337c97",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:18:48.574Z",
+  "stored_at": "2026-09-23T21:18:48.575Z"
+}

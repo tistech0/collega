@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Edit",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts/chantier-1-fiabilite-imports-spec.md",
+  "summary": "changed /Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts/chantier-1-fiabilite-imports-spec.md: - **`generation_jobs`** : − `page_texts_json` ; + `summary_json` TEXT NULL (résumé de la bascule, §6.5) ; `pdf_hash` conservé à titre informatif, n'est plus uti -> - **`generation_jobs`** : − `page",
+  "text": "changed /Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts/chantier-1-fiabilite-imports-spec.md: - **`generation_jobs`** : − `page_texts_json` ; + `summary_json` TEXT NULL (résumé de la bascule, §6.5) ; `pdf_hash` conservé à titre informatif, n'est plus uti -> - **`generation_jobs`** : − `page_texts_json` ; + `summary_json` TEXT NULL (résumé de la bascule, §6.5) ; `pdf_hash` conservé à titre informatif (toujours calculé, affiché par l'admin), n'est plus utilisé pour le partage ; `hash_shared` conservé et redéfini : `true` si le job n'a fait **aucun** appel Claude (tout réutilisé). La console admin (« Hash partagé ») n'a pas à changer.\n- Code retiré : `services/generation/hash_sharing.py` (partage par PDF entier), `_copy_cards_for_h",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e4dfe3701f0e78d324d76090",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:23:31.727Z",
+  "stored_at": "2026-09-23T20:23:31.727Z"
+}

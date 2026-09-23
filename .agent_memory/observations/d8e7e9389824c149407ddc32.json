@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"_updateDriftProgress\\|status:\" lib/features/colleges/colleges_import_providers.dart | head -40; grep -n \"void _updateDriftProgress\" -A30 lib/features/colleges/colleges_import_providers.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"_updateDriftProgress\\|status:\" lib/features/colleges/colleges_import_providers.dart | head -40; grep -n \"void _updateDriftProgress\" -A30 lib/features/colleges/colleges_import_providers.dart: egeImports).insertOnConflictUpdate( 328- CollegeImports",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"_updateDriftProgress\\|status:\" lib/features/colleges/colleges_import_providers.dart | head -40; grep -n \"void _updateDriftProgress\" -A30 lib/features/colleges/colleges_import_providers.dart: egeImports).insertOnConflictUpdate( 328- CollegeImportsCompanion( 329- id: Value(collegeId), 330- ocrProgress: Value(page), 331- totalPages: Value(total), 332- status: Value(status), 333- updatedAt: Value(DateTime.now().toUtc()), 334- ), 335- ).catchError((Object e) { 336- AppLogger.error('Drift update failed', tag: 'CollegeImportNotifier', error: e); 337- return 0; 338- }), 339- ); 340- } 341- 342- Future<void> reconnectIfActive(String collegeId) { 343- final inFlight = _resyncInFlight; 344- if (inFlight != null) return inFlight; 345- final run = _reconnectIfActive(collegeId).whenComplete(() => _resyncInFlight = null); 346- _resyncInFlight = run; 347- return run; 348- } 349- 350- Future<void> _reconnectIfActive(String collegeId) async { 351- final repo = ref.read(collegeImportRepositoryProvider); 352- try { 353- final status = await repo.getStatus(collegeId); 354- if (_disposed) return;",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d8e7e9389824c149407ddc32",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:19:07.470Z",
+  "stored_at": "2026-09-23T21:19:07.470Z"
+}

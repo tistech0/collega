@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; python3 - <<'EOF'\ndef sub(p,o,n,count=1):\n    s=open(p).read(); assert o in s,(p,o[:60]); open(p,'w').write(s.replace(o,n,count))\np='_bmad-output/planning-artifacts/architecture.md'\nsub(p,\"clé Claude jamais dans l'app, abonnement validé côté backend, texte OCR supprimé ≤ 24h.\",\"clé Claude jamais dans l'app, abonnement validé côté backend, texte OCR conservé avec le collège (NFR9 remplacée au chantier 1, 2026-09-23).\")\nsub(p,\"4. **Nettoyage des données éphémères** — texte OCR supprimé ≤ 24h (NFR9), job de nettoyage planifié\",\"4. **Nettoyage des… [+3173 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\"; python3 - <<'EOF' def sub(p,o,n,count=1): s=open(p).read(); assert o in s,(p,o[:60]); open(p,'w').write(s.replace(o,n,count)) p='_bmad-output/plannin",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "270df408b0ee89eb806708fb",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:14:23.829Z",
+  "stored_at": "2026-09-23T21:14:23.830Z"
+}

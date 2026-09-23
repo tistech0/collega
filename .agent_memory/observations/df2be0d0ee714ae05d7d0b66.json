@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"getStatus\\|reconnectIfActive(\" lib | grep -v \"^lib/features/colleges/colleges_import_providers.dart:34[2-9]\" | head; sed -n 350,390p lib/features/colleges/colleges_import_providers.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"getStatus\\|reconnectIfActive(\" lib | grep -v \"^lib/features/colleges/colleges_import_providers.dart:34[2-9]\" | head; sed -n 350,390p lib/features/colleges/colleges_import_providers.dart: tStreaming && previous.collegeId == collegeId ? previous :",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"getStatus\\|reconnectIfActive(\" lib | grep -v \"^lib/features/colleges/colleges_import_providers.dart:34[2-9]\" | head; sed -n 350,390p lib/features/colleges/colleges_import_providers.dart: tStreaming && previous.collegeId == collegeId ? previous : null; state = AsyncValue.data(ImportStreaming( collegeId: collegeId, jobId: status.jobId ?? '', ocrProgress: status.ocrProgress, totalPages: status.totalPages, status: status.status, itemsDone: same?.itemsDone ?? 0, itemsTotal: same?.itemsTotal, cards: same?.cards ?? 0, preview: same?.preview ?? const [], )); await _connectSse(collegeId); case 'generation_complete': state = AsyncValue.data(ImportComplete(collegeId: collegeId, summary: status.summary)); _onGenerationComplete(collegeId); case 'failed': state = AsyncValue.data(ImportError(message: status.reimport ? 'reimport_failed' : 'generation_failed')); } } catch (e) { AppLogger.warning('reconnectIfActive failed: $e', tag: 'CollegeImportNotifier'); // Réseau indisponible : on réessaie tant que l'import est en cours. _scheduleResync(collegeId); } } } final collegeImportProvider =",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "df2be0d0ee714ae05d7d0b66",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:19:15.051Z",
+  "stored_at": "2026-09-23T21:19:15.052Z"
+}

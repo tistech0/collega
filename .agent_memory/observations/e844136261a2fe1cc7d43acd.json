@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; find . -name \"*.pdf\" -not -path \"*/node_modules/*\" -not -path \"*/Pods/*\" -not -path \"*/build/*\" 2>/dev/null | head; ssh nas 'ls -la /mnt/user/appdata/collega/pdfs/ | head -20'",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; find . -name \"*.pdf\" -not -path \"*/node_modules/*\" -not -path \"*/Pods/*\" -not -path \"*/build/*\" 2>/dev/null | head; ssh nas 'ls -la /mnt/user/appdata/collega/pdfs/ | head -20': ./ANAPATH 4e.pdf ./PNEUMO 8e college.pdf ./CANCERO 4e college (1).pdf ./collega_backend/test",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; find . -name \"*.pdf\" -not -path \"*/node_modules/*\" -not -path \"*/Pods/*\" -not -path \"*/build/*\" 2>/dev/null | head; ssh nas 'ls -la /mnt/user/appdata/collega/pdfs/ | head -20': ./ANAPATH 4e.pdf ./PNEUMO 8e college.pdf ./CANCERO 4e college (1).pdf ./collega_backend/tests/fixtures/sample_ecni.pdf total 713972 drwxrwxrwx 1 root root 476 Sep 23 12:14 . drwxrwxrwx 1 root root 48 Sep 22 20:16 .. -rw-r--r-- 1 root root 430964137 Sep 21 17:26 4ab16fc4-f333-43aa-b8b3-d67c0e232bfc_6f9a2293-7aac-4992-9ee4-e97baeadeb1b.pdf -rw-r--r-- 1 root root 229361217 Sep 23 12:14 e060576f-c114-4109-bf7d-2f55598ddc79_65a8ad5b-a592-4920-97b7-9808bde3ef72.pdf -rw-r--r-- 1 root root 70775494 Sep 21 15:53 ed9a1032-24f5-4243-8ad2-2d71ff9eae44_5bbd3c32-a9f0-4d35-b4fd-f3e992975ae6.pdf drwxr-xr-x 1 root root 72 Sep 23 12:28 uploads",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e844136261a2fe1cc7d43acd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:06:17.860Z",
+  "stored_at": "2026-09-23T20:06:17.860Z"
+}

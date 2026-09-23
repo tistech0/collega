@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "aanapath est casse en effet je ne peux pas louvrir non plus",
+  "summary": "aanapath est casse en effet je ne peux pas louvrir non plus",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b745d6669184894da84c1a1a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:10:03.529Z",
+  "stored_at": "2026-09-23T20:10:03.530Z",
+  "low_signal": true
+}

@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "oui 1 completement je penses est ce que tu peux rechallenger les 3 car cest assez sensible comme partie mais je penses 1 oui",
+  "summary": "oui 1 completement je penses est ce que tu peux rechallenger les 3 car cest assez sensible comme partie mais je penses 1 oui",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "99be9576416d31843efc1ca5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:03:38.922Z",
+  "stored_at": "2026-09-23T20:03:38.922Z",
+  "low_signal": true
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 45,70p alembic/versions/003_review_fixes.py; grep -rn \"text_hash\\|generation_id\" app --include=*.py | grep -v \"^app/services/generation\\|^app/models/content\\|^app/services/content\" | head -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 45,70p alembic/versions/003_review_fixes.py; grep -rn \"text_hash\\|generation_id\" app --include=*.py | grep -v \"^app/services/generation\\|^app/models/content\\|^app/services/content\" | head -30: FOR EACH ROW EXECUTE FUNCTION update_updated_at_col",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 45,70p alembic/versions/003_review_fixes.py; grep -rn \"text_hash\\|generation_id\" app --include=*.py | grep -v \"^app/services/generation\\|^app/models/content\\|^app/services/content\" | head -30: FOR EACH ROW EXECUTE FUNCTION update_updated_at_column(); \"\"\" ) # Index unique partiel — un seul job actif (pending/processing) par college à la fois op.execute( \"\"\" CREATE UNIQUE INDEX ix_generation_jobs_unique_active ON generation_jobs(college_id) WHERE status IN ('pending', 'processing'); \"\"\" ) # Contrainte UNIQUE (college_id, item_number) — pas de doublon d'item par college op.create_unique_constraint( \"uq_items_college_item_number\", \"items\", [\"college_id\", \"item_number\"], ) def downgrade() -> None: op.drop_constraint(\"uq_items_college_item_number\", \"items\", type_=\"unique\") op.execute(\"DROP INDEX IF EXISTS ix_generation_jobs_unique_active;\") op.execute(\"DROP TRIGGER IF EXISTS update_generation_jobs_updated_at ON generation_jobs;\") op.execute( (eval):1: no matches found: --include=*.py",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4c5713f4ec6c436931310e75",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:18:33.071Z",
+  "stored_at": "2026-09-23T21:18:33.071Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; .venv/bin/python -m pytest tests/services/test_publish.py -q -p no:warnings 2>&1 | grep -E \"passed|failed|^FAILED|^E  \" | head -20",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; .venv/bin/python -m pytest tests/services/test_publish.py -q -p no:warnings 2>&1 | grep -E \"passed|failed|^FAILED|^E \" | head -20",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b7aaa7732c5e46dae8f66162",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:59:12.326Z",
+  "stored_at": "2026-09-23T20:59:12.326Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git diff main...feat/chantier-1-fiabilite-imports -- app/api/v1/colleges.py app/services/ocr/pdf_check.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git diff main...feat/chantier-1-fiabilite-imports -- app/api/v1/colleges.py app/services/ocr/pdf_check.py:  d'import. +\"\"\" +import asyncio +import logging +from pathlib import Path + +from fastapi import HTTPException + +from app.services.ocr.ocr_proc",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git diff main...feat/chantier-1-fiabilite-imports -- app/api/v1/colleges.py app/services/ocr/pdf_check.py:  d'import. +\"\"\" +import asyncio +import logging +from pathlib import Path + +from fastapi import HTTPException + +from app.services.ocr.ocr_processor import OcrProcessor + +logger = logging.getLogger(__name__) + +PDF_DAMAGED_MESSAGE = \"Ce PDF est endommagé : il ne s'ouvre pas. Réessaie avec une autre copie.\" + + +def pdf_damaged() -> HTTPException: + return HTTPException(status_code=422, detail={\"code\": \"PDF_DAMAGED\", \"message\": PDF_DAMAGED_MESSAGE}) + + +async def assert_pdf_readable(path: Path) -> int: + \"\"\"Nombre de pages ; 422 PDF_DAMAGED si le fichier ne s'ouvre pas ou n'a aucune page.\"\"\" + try: + pages = await asyncio.to_thread(OcrProcessor().count_pages, path) + except Exception as exc: # noqa: BLE001 — toute erreur d'ouverture = PDF endommagé + logger.info(\"PDF endommagé refusé (%s) : %r\", path.name, exc) + raise pdf_damaged() + if pages <= 0: + raise pdf_damaged() + return pages",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bb3cb44df1e0d787a54bf7e3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:17:34.468Z",
+  "stored_at": "2026-09-23T21:17:34.468Z"
+}

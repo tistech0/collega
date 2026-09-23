@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; cat app/services/jobs/job_events.py | sed -n 1,60p; sed -n 130,175p app/services/notifications/apns_service.py; grep -n \"event_type\\|CheckConstraint\" app/models/generation_job_event.py; ls tests/services | grep -i notif",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; cat app/services/jobs/job_events.py | sed -n 1,60p; sed -n 130,175p app/services/notifications/apns_service.py; grep -n \"event_type\\|",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "72927fce4f1a90b34a3f5778",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:55:24.693Z",
+  "stored_at": "2026-09-23T20:55:24.693Z"
+}

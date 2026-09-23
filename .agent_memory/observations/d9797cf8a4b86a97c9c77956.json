@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets\"; python3 - <<'EOF'\nimport json,re,glob\nfor f in glob.glob('gotcha-formats-r-els*.md')+glob.glob('decision-import-avancement*.md'):\n    d=json.loads(re.search(r'```json kage-state\\n(.*?)\\n```',open(f).read(),re.S).group(1))\n    if d['status']=='approved': print('####',f,'\\n',d['body'],'\\n',d['paths'])\nEOF",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets\"; python3 - <<'EOF' import json,re,glob for f in glob.glob('gotcha-formats-r-els*.md')+glob.glob('decision-import-avancement*.md'",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d9797cf8a4b86a97c9c77956",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:16:15.321Z",
+  "stored_at": "2026-09-23T21:16:15.321Z"
+}

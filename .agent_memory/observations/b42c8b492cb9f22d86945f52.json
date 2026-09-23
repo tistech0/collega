@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && wc -l _bmad-output/planning-artifacts/chantier-1-fiabilite-imports-*.md && sed -n 1,400p _bmad-output/planning-artifacts/chantier-1-fiabilite-imports-spec.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && wc -l _bmad-output/planning-artifacts/chantier-1-fiabilite-imports-*.md && sed -n 1,400p _bmad-output/planning-artifacts/chantier-1-fiabilite-imports-spec.md: ion après remplissage ; 14. `alembic check` sans différence ; migration montante puis descendante ; 15. comm",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && wc -l _bmad-output/planning-artifacts/chantier-1-fiabilite-imports-*.md && sed -n 1,400p _bmad-output/planning-artifacts/chantier-1-fiabilite-imports-spec.md: ion après remplissage ; 14. `alembic check` sans différence ; migration montante puis descendante ; 15. commande de remplissage (dry-run et réel) sur une base de test. **App** : écran d'import (résumé, aucun changement, échec de réimport). ## 16. Déploiement 1. Suite backend et tests app verts ; image construite et vérifiée. 2. Aucun job en cours (runbook) ; **dump de la base** juste avant. 3. `compose pull` + `up -d` : migration, api et worker `healthy`, `/health` OK. 4. `backfill_content_store --dry-run`, puis réel ; vérification des empreintes renseignées sur les 3 collèges. 5. Validation sur l'iPhone : réimport de PNEUMO (même fichier) → « Aucun changement », 0 token dans la console admin, quota non décompté, progression PNEUMO intacte. 6. Retour arrière : `alembic downgrade` (la migration descendante recrée `ocr_text` et `page_texts_json` vides) ou restauration du dump de l'étape 2.",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b42c8b492cb9f22d86945f52",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:15:29.077Z",
+  "stored_at": "2026-09-23T21:15:29.077Z"
+}

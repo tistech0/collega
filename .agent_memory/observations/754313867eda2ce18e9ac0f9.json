@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/content/fingerprint.py app/services/content/store.py app/services/content/purge.py app/workers/maintenance_worker.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/content/fingerprint.py app/services/content/store.py app/services/content/purge.py app/workers/maintenance_worker.py: d, updated_at, last_event_at in rows: 44 last_activity = max(t for t in (updated_at, last_event_at) if t is not N",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/content/fingerprint.py app/services/content/store.py app/services/content/purge.py app/workers/maintenance_worker.py: d, updated_at, last_event_at in rows: 44 last_activity = max(t for t in (updated_at, last_event_at) if t is not None) 45 if now - last_activity < STALE_AFTER: 46 continue 47 if redis is not None and arq_job_id and await redis.exists(in_progress_key_prefix + arq_job_id): 48 continue # un worker le traite encore (OCR très long d'une page, par ex.) 49 if await fail_job(session_factory, job_id, STALE_MESSAGE, event=\"stale\"): 50 failed += 1 51 if failed: 52 logger.warning(\"%d import(s) bloqué(s) passé(s) en échec\", failed) 53 return failed 54 55 56 async def purge_content(ctx: dict, *, session_factory=None) -> None: 57 \"\"\"Nuit : contenu non référencé et PDF orphelins.\"\"\" 58 session_factory = session_factory or async_session_factory 59 async with session_factory() as db: 60 await purge_unreferenced_content(db) 61 await db.commit() 62 keep = await active_pdf_names(db) 63 purge_orphan_pdfs(keep)",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "754313867eda2ce18e9ac0f9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:16:15.459Z",
+  "stored_at": "2026-09-23T21:16:15.459Z"
+}

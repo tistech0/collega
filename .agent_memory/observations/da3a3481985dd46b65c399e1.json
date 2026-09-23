@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_backend/tests/services/test_publish.py",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_backend/tests/services/test_publish.py: \"\"\"Bascule d'un import (chantier 1) sur Postgres réel.\"\"\"\nimport json\nimport uuid\n\nimport pytest\nfrom sqlalchemy import func, select\n\nfrom app.core.config import settings\nfrom app.models.college import College\nfrom app.mo",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_backend/tests/services/test_publish.py: \"\"\"Bascule d'un import (chantier 1) sur Postgres réel.\"\"\"\nimport json\nimport uuid\n\nimport pytest\nfrom sqlalchemy import func, select\n\nfrom app.core.config import settings\nfrom app.models.college import College\nfrom app.models.content import CollegePage, JobItem, JobPage\nfrom app.models.flash_card import FlashCard\nfrom app.models.generation_job import GenerationJob\nfrom app.models.item import Item\nfrom app.models.user import User\nfrom app.services.generation.publish import publish_job, stale_pdfs\nfrom tests.factories import cards, make_card, make_college, make_draft, make_item, make_job, make_j",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "da3a3481985dd46b65c399e1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:58:53.006Z",
+  "stored_at": "2026-09-23T20:58:53.006Z"
+}

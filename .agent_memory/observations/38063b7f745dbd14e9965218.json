@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; R=repo:git-github-com-tistech0-collega\nE=\"Correctifs de revue (0e76425) sans effet sur cette affirmation : ocr_worker (_resolve_title, référentiel), colleges.py (upload par morceaux, routes) et publish.py (items inchangés : fiches et ids conservés, ajoutées si l'item n'en avait aucune) — 551 tests verts\"\nfor pk in \"decision:r-f-rentiel-item-titles-titres-ditems-partag-s-entre-coll-ges-official-plus-fr-q\" \"decision:refonte-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres-\" \"decision:session-du-jour-8-3-moteur-persistance-… [+317 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\"; R=repo:git-github-com-tistech0-collega E=\"Correctifs de revue (0e76425) sans effet sur cette affirmation : ocr_worker (_resolve_title, référentiel), ",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "38063b7f745dbd14e9965218",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:29:42.702Z",
+  "stored_at": "2026-09-23T21:29:42.702Z"
+}

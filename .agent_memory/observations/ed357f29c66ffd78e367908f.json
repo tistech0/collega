@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 40,56p app/models/user.py; sed -n 64,78p app/models/college.py; sed -n 50,56p app/models/item.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 40,56p app/models/user.py; sed -n 64,78p app/models/college.py; sed -n 50,56p app/models/item.py: ) generation_jobs: Mapped[list[\"GenerationJob\"]] = relationship( \"GenerationJob\", back_populates=\"user\", cascade=\"all, delete-orphan\" ) flash_card",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 40,56p app/models/user.py; sed -n 64,78p app/models/college.py; sed -n 50,56p app/models/item.py: ) generation_jobs: Mapped[list[\"GenerationJob\"]] = relationship( \"GenerationJob\", back_populates=\"user\", cascade=\"all, delete-orphan\" ) flash_cards: Mapped[list[\"FlashCard\"]] = relationship( \"FlashCard\", back_populates=\"user\", cascade=\"all, delete-orphan\" ) ) user: Mapped[\"User\"] = relationship(\"User\", back_populates=\"colleges\") items: Mapped[list[\"Item\"]] = relationship( \"Item\", back_populates=\"college\", cascade=\"all, delete-orphan\" ) generation_jobs: Mapped[list[\"GenerationJob\"]] = relationship( \"GenerationJob\", back_populates=\"college\", cascade=\"all, delete-orphan\" ) flash_cards: Mapped[list[\"FlashCard\"]] = relationship( \"FlashCard\", back_populates=\"college\", cascade=\"all, delete-orphan\" ) college: Mapped[\"College\"] = relationship(\"College\", back_populates=\"items\") flash_cards: Mapped[list[\"FlashCard\"]] = relationship( \"FlashCard\", back_populates=\"item\", cascade=\"all, delete-orphan\" )",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ed357f29c66ffd78e367908f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:21:20.660Z",
+  "stored_at": "2026-09-23T21:21:20.661Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff --stat main...feat/chantier-1-fiabilite-imports -- . ':!.agent_memory' | tail -80",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff --stat main...feat/chantier-1-fiabilite-imports -- . ':!.agent_memory' | tail -80: ces/content/test_store.py | 44 + .../tests/services/test_card_generator.py | 359 ----- .../tests/services/test_claude_client.py | 47 +- .../tests/services/test_generation_pipe",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff --stat main...feat/chantier-1-fiabilite-imports -- . ':!.agent_memory' | tail -80: ces/content/test_store.py | 44 + .../tests/services/test_card_generator.py | 359 ----- .../tests/services/test_claude_client.py | 47 +- .../tests/services/test_generation_pipeline.py | 271 ++++ .../tests/services/test_hash_sharing.py | 65 - collega_backend/tests/services/test_job_failure.py | 95 ++ .../tests/services/test_notification_messages.py | 41 + collega_backend/tests/services/test_publish.py | 216 +++ .../tests/services/test_token_usage_capture.py | 153 --- collega_backend/tests/test_migration_015.py | 8 - collega_backend/tests/test_migrations.py | 39 - .../tests/workers/test_cleanup_worker.py | 55 - .../tests/workers/test_generation_worker.py | 102 -- .../tests/workers/test_maintenance_worker.py | 74 + collega_backend/tests/workers/test_ocr_pipeline.py | 280 ++++ collega_backend/tests/workers/test_ocr_worker.py | 444 ------ 94 files changed, 5534 insertions(+), 2380 deletions(-)",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1b870db30ee71594d4e7348e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:15:25.636Z",
+  "stored_at": "2026-09-23T21:15:25.637Z"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "oui tu as 3 pdf dans le dossier normlement]",
+  "summary": "oui tu as 3 pdf dans le dossier normlement]",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d5d20fcffbe9055409a53900",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:06:12.091Z",
+  "stored_at": "2026-09-23T20:06:12.092Z",
+  "low_signal": true
+}

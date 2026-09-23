@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "Skill",
+  "path": "",
+  "command": "",
+  "summary": "Skill: superpowers:executing-plans",
+  "text": "superpowers:executing-plans",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "55dd554023bb79bc72405e95",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:50:40.168Z",
+  "stored_at": "2026-09-23T20:50:40.169Z",
+  "low_signal": true
+}

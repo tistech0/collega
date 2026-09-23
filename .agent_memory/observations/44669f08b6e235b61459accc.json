@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n \"NFR9\\|ocr_text\\|24h\\|24 h\" _bmad-output/planning-artifacts/architecture.md | head; sed -n 25,35p collega_app/assets/legal/privacy.md; sed -n 60,70p collega_app/assets/legal/privacy.md; grep -rn \"privacy.md\\|Dernière mise à jour\\|mise à jour\" collega_app/assets/legal/privacy.md | head -3",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n \"NFR9\\|ocr_text\\|24h\\|24 h\" _bmad-output/planning-artifacts/architecture.md | head; sed -n 25,35p collega_app/assets/legal/privacy.md; sed -n 60,70p collega_app/assets/legal/privacy.md; grep -rn \"privacy.md\\|Dernière mise à jour\\|mise à jour\" collega_app/assets",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n \"NFR9\\|ocr_text\\|24h\\|24 h\" _bmad-output/planning-artifacts/architecture.md | head; sed -n 25,35p collega_app/assets/legal/privacy.md; sed -n 60,70p collega_app/assets/legal/privacy.md; grep -rn \"privacy.md\\|Dernière mise à jour\\|mise à jour\" collega_app/assets/legal/privacy.md | head -3: | Pipeline IA | Affichage et révision dans l'Application | | Évaluations de drill (à revoir / bien / maîtrisé) | Usage | Planning adaptatif, statistiques de progression | | Token APNs (notifications push) | iOS, sur autorisation explicite | Rappels quotidiens et notifications de fin de génération | | Heure de rappel quotidien (UTC) | Réglage profil | Envoi du push de rappel à l'heure choisie | ### 2.2. Données techniques ## 4. Durée de conservation - **Données du compte (email, profil, fiches, drills)** : conservées tant que ton compte est actif. Supprimées **définitivement et immédiatement** à la suppression du compte (cf. § 7). - **PDF importés** : conservés tant que le collège associé est dans ton compte. - **Logs serveur** : 12 mois maximum (rotation automatique). - **Token APNs** : supprimé dès le revoke d'autorisation iOS ou la déconnexion. --- ## 5. Destinataires et sous-traitants",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "44669f08b6e235b61459accc",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:14:10.376Z",
+  "stored_at": "2026-09-23T21:14:10.376Z"
+}

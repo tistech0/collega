@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; python3 - <<'EOF'\np='app/workers/ocr_worker.py'; s=open(p).read()\ns=s.replace(\"import asyncio\\nimport json\\n\",\"import asyncio\\nimport hashlib\\nimport json\\n\")\ns=s.replace('''async def _job_status(db: AsyncSession, job_id: uuid.UUID) -> str | None:''','''def file_sha256(path: str) -> str:\n    \"\"\"Empreinte du PDF (affichée par la console admin), lue par blocs.\"\"\"\n    digest = hashlib.sha256()\n    with open(path, \"rb\") as f:\n        for block in iter(lambda: f.read(1024 * 1024), b\"\"):\n            digest.update(block)\n    return di… [+2145 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; python3 - <<'EOF' p='app/workers/ocr_worker.py'; s=open(p).read() s=s.replace(\"import asyncio\\nimport json\\n\",\"import asyncio\\nimport",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bd04dd22c467eefc8844aa38",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:02:18.997Z",
+  "stored_at": "2026-09-23T21:02:18.997Z"
+}

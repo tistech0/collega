@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_backend/app/services/generation/publish.py",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_backend/app/services/generation/publish.py: \"\"\"Bascule d'un import vers le contenu en service (chantier 1).\n\nUne seule transaction, collège verrouillé. Items rapprochés par numéro :\n- inchangé (même empreinte) : métadonnées rafraîchies, fiches intactes (identif",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_backend/app/services/generation/publish.py: \"\"\"Bascule d'un import vers le contenu en service (chantier 1).\n\nUne seule transaction, collège verrouillé. Items rapprochés par numéro :\n- inchangé (même empreinte) : métadonnées rafraîchies, fiches intactes (identifiants,\n  pouces, régénérations et suppressions de l'utilisatrice conservés) ;\n- modifié : item conservé (même id), fiches remplacées par la génération ;\n- nouveau : item + fiches créés ;\n- disparu : item supprimé (fiches en cascade).\nRejouable : un import qui n'est plus `ocr_complete` (déjà basculé, stoppé) n'est\npas republié. Ne commit pas (l'appelant commit), ne touche à aucun f",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "49d5d3175bb32f96dc089a5a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:59:11.641Z",
+  "stored_at": "2026-09-23T20:59:11.641Z"
+}

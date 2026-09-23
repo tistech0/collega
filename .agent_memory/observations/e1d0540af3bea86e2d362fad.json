@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git show main:collega_backend/app/workers/generation_worker.py | grep -n \"failed\" | head; git show main:collega_backend/app/workers/ocr_worker.py | grep -n \"CollegeStatus.failed\\|status = \\\"failed\\\"\\|CollegeStatus.processing\" | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git show main:collega_backend/app/workers/generation_worker.py | grep -n \"failed\" | head; git show main:collega_backend/app/workers/ocr_worker.py | grep -n \"CollegeStatus.failed\\|status = \\\"failed\\\"\\|CollegeStatus.processing\" | head: 67: logger.except",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git show main:collega_backend/app/workers/generation_worker.py | grep -n \"failed\" | head; git show main:collega_backend/app/workers/ocr_worker.py | grep -n \"CollegeStatus.failed\\|status = \\\"failed\\\"\\|CollegeStatus.processing\" | head: 67: logger.exception(\"Generation failed for college %s: %s\", college_id, exc) 71: job.status = \"failed\" 73: await record_job_event(db, job.id, \"failed\", message=str(exc)) 66: job.status = \"failed\" 68: college.status = CollegeStatus.failed 134: job.status = \"failed\" 136: college.status = CollegeStatus.failed 144: college.status = CollegeStatus.processing",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e1d0540af3bea86e2d362fad",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:21:56.632Z",
+  "stored_at": "2026-09-23T21:21:56.633Z"
+}

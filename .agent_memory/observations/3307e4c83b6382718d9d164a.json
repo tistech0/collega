@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git diff main...feat/chantier-1-fiabilite-imports -- app/api/v1/admin.py app/api/v1/auth.py app/api/v1/flash_cards.py app/deps.py app/core/database.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git diff main...feat/chantier-1-fiabilite-imports -- app/api/v1/admin.py app/api/v1/auth.py app/api/v1/flash_cards.py app/deps.py app/core/database.py: sion\", + \"require_subscription\", +] async def get_admin_user( @@ -114,6 +121,22 @@ async def get_cu",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git diff main...feat/chantier-1-fiabilite-imports -- app/api/v1/admin.py app/api/v1/auth.py app/api/v1/flash_cards.py app/deps.py app/core/database.py: sion\", + \"require_subscription\", +] async def get_admin_user( @@ -114,6 +121,22 @@ async def get_current_user( return user +async def get_current_user_short_session( + request: Request, + authorization: str | None = Header(None), +): + \"\"\"Comme `get_current_user`, mais dans une session courte rendue aussitôt. + + Pour les réponses longues (flux SSE, jusqu'à 3 h) : une dépendance `get_db` + n'est libérée qu'à la fin de la réponse, et garderait une connexion du pool + pendant tout le flux (saturation à ~15 flux, incident de septembre 2026). + \"\"\" + from app.core.database import async_session_factory + + async with async_session_factory() as db: + return await get_current_user(request, authorization, db) + + async def require_subscription(user=Depends(get_current_user)): \"\"\"Guard FR42 : vérifie is_subscribed OR is_beta avant tout appel Claude.\"\"\" if not (user.is_subscribed or user.is_beta):",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3307e4c83b6382718d9d164a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:16:57.685Z",
+  "stored_at": "2026-09-23T21:16:57.685Z"
+}

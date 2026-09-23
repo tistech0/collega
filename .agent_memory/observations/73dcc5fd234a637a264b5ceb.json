@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/ios\"; ls Runner/*.entitlements 2>/dev/null && cat Runner/*.entitlements; grep -m3 -E \"DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER = \" Runner.xcodeproj/project.pbxproj | sort -u; grep -rn \"UIBackgroundModes\" -A4 Runner/Info.plist | head; ls ~/Library/MobileDevice/Provisioning\\ Profiles 2>/dev/null | head -3; security find-identity -v -p codesigning 2>/dev/null | head -5",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/ios\"; ls Runner/*.entitlements 2>/dev/null && cat Runner/*.entitlements; grep -m3 -E \"DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER = \" Runner",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "73dcc5fd234a637a264b5ceb",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T19:49:46.207Z",
+  "stored_at": "2026-09-23T19:49:46.207Z"
+}

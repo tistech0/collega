@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n alembic/versions/018_content_store.py; ls alembic/versions | tail -5",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n alembic/versions/018_content_store.py; ls alembic/versions | tail -5: ), nullable=False) 99 100 101 def downgrade() -> None: 102 op.alter_column(\"generation_jobs\", \"card_count\", existing_type=sa.Integer(), nullable=True) 103 op.create_index( 10",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n alembic/versions/018_content_store.py; ls alembic/versions | tail -5: ), nullable=False) 99 100 101 def downgrade() -> None: 102 op.alter_column(\"generation_jobs\", \"card_count\", existing_type=sa.Integer(), nullable=True) 103 op.create_index( 104 \"ix_generation_jobs_unique_active\", \"generation_jobs\", [\"college_id\"], unique=True, 105 postgresql_where=sa.text(\"status IN ('pending', 'processing')\"), 106 ) 107 op.add_column(\"generation_jobs\", sa.Column(\"page_texts_json\", sa.Text(), nullable=True)) 108 op.drop_column(\"generation_jobs\", \"summary_json\") 109 op.drop_column(\"flash_cards\", \"generation_id\") 110 op.add_column(\"items\", sa.Column(\"ocr_text\", sa.Text(), nullable=True)) 111 op.drop_column(\"items\", \"text_hash\") 112 for table in (\"college_pages\", \"job_items\", \"job_pages\", \"item_generations\", \"item_texts\", \"ocr_pages\"): 113 op.drop_table(table) 015_add_item_titles.py 016_add_generation_progress.py 017_add_generation_preview.py 018_content_store.py __pycache__",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4158a1834156af544439f6d1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:18:16.030Z",
+  "stored_at": "2026-09-23T21:18:16.030Z"
+}

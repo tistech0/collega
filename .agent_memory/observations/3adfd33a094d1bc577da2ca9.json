@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "on va commencer par la cle apple comment faire ? je dois avoir un compte payant du coup ?",
+  "summary": "on va commencer par la cle apple comment faire ? je dois avoir un compte payant du coup ?",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3adfd33a094d1bc577da2ca9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T19:49:40.624Z",
+  "stored_at": "2026-09-23T19:49:40.625Z",
+  "low_signal": true
+}
