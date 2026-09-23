@@ -149,8 +149,9 @@ Aucune transaction n'est gardée ouverte pendant un appel Claude. Puis bascule (
 
 ## 9. Échecs, arrêts, jobs bloqués
 
-- Les deux workers attrapent **toute** sortie anormale (`BaseException`, dont `CancelledError` du timeout ARQ) : rollback, puis dans une **nouvelle** session : job `failed` + `error_message` + événement, `job_pages`/`job_items` du job supprimés, PDF du job supprimé s'il n'est pas le PDF en service, notification d'échec ; collège `failed` seulement s'il n'avait pas de contenu. L'exception est relancée pour ARQ.
-- Relance ARQ (crash, redéploiement) : reprise OCR depuis `job_pages`, générations réutilisées, bascule rejouable → **aucun appel Claude repayé**. `max_tries=3` inchangé.
+- **Erreur** (exception : Claude en erreur, PDF illisible, base…) : les deux workers passent l'import en échec via `fail_job` (nouvelle session) : job `failed` + `error_message` + événement, `job_pages`/`job_items` du job supprimés, PDF du job supprimé, notification d'échec ; collège `failed` seulement s'il n'avait pas de contenu. L'exception est relancée pour ARQ.
+- **Interruption** (`CancelledError` : redéploiement, arrêt du worker) : l'import reste **actif** ; ARQ (`retry_jobs=True`) le relance au redémarrage — reprise OCR depuis `job_pages`, générations réutilisées, bascule rejouable → **aucun appel Claude repayé et aucun quota reconsommé**. (Décision prise à l'implémentation : échouer sur interruption obligeait l'utilisatrice à relancer — et à consommer un réimport — à chaque redéploiement.)
+- **Timeout ARQ** (2 h) ou job jamais repris : ARQ abandonne le job, qui reste actif en base → le cron `fail_stale_jobs` le passe en échec. `max_tries=3` inchangé.
 - **Cron `fail_stale_jobs`** (toutes les 10 min) : job `pending`/`processing`/`ocr_complete` dont le dernier événement de timeline (ou `updated_at`) date de **plus de 30 min** et absent de `arq:in-progress:*` → même traitement qu'un échec, événement `failed` « import bloqué ».
 - Stop admin : inchangé côté admin ; le contenu en service n'est plus touché.
 
