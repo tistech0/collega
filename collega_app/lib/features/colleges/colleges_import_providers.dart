@@ -297,10 +297,10 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
         state = AsyncValue.data(current.copyWith(status: 'ocr_complete'));
         _updateDriftProgress(collegeId, current.ocrProgress, current.totalPages, 'ocr_complete');
       case 'generation_complete':
-        state = AsyncValue.data(ImportComplete(collegeId: collegeId));
+        state = AsyncValue.data(ImportComplete(collegeId: collegeId, summary: ImportSummary.maybeFromJson(data['summary'])));
         _onGenerationComplete(collegeId);
       case 'generation_failed':
-        state = const AsyncValue.data(ImportError(message: 'generation_failed'));
+        state = AsyncValue.data(ImportError(message: data['reimport'] == true ? 'reimport_failed' : 'generation_failed'));
     }
   }
 
@@ -373,10 +373,10 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
           ));
           await _connectSse(collegeId);
         case 'generation_complete':
-          state = AsyncValue.data(ImportComplete(collegeId: collegeId));
+          state = AsyncValue.data(ImportComplete(collegeId: collegeId, summary: status.summary));
           _onGenerationComplete(collegeId);
         case 'failed':
-          state = const AsyncValue.data(ImportError(message: 'generation_failed'));
+          state = AsyncValue.data(ImportError(message: status.reimport ? 'reimport_failed' : 'generation_failed'));
       }
     } catch (e) {
       AppLogger.warning('reconnectIfActive failed: $e', tag: 'CollegeImportNotifier');

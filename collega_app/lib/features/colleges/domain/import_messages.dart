@@ -3,6 +3,8 @@ import 'package:collega_app/core/utils/fr_dates.dart';
 /// Phrases des erreurs d'import (story 8.13, spec v2 § Feedback : rassurer →
 /// expliquer → proposer). Jamais un code technique à l'écran.
 String importErrorMessage(String code, {bool reimport = false}) {
+  // Le serveur confirme que c'était un réimport : son contenu n'a pas bougé.
+  if (code == 'reimport_failed') return 'Le réimport n’a pas abouti. Tes fiches actuelles sont intactes.';
   final message = switch (code) {
     'file_too_large' => 'Ce fichier dépasse 500 Mo. Choisis une version plus légère du PDF.',
     'job_in_progress' => 'Un import de ce collège est déjà en cours. Tu le retrouves dans la Bibliothèque.',
