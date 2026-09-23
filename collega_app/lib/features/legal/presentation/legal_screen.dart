@@ -79,11 +79,15 @@ class _LegalScreenState extends State<LegalScreen> {
             const SizedBox(height: CgSpace.section),
           ];
         }
-        return CgPage(
-          title: widget.document.title,
-          backLabel: 'Retour',
-          onBack: _back,
-          children: children,
+        // Hors onglets : rien ne peint le fond sous la page (sinon noir sur iPhone).
+        return ColoredBox(
+          color: CgTheme.of(context).colors.ground,
+          child: CgPage(
+            title: widget.document.title,
+            backLabel: 'Retour',
+            onBack: _back,
+            children: children,
+          ),
         );
       },
     );

@@ -82,6 +82,17 @@ void main() {
     expect(find.text('Conditions Générales d\'Utilisation'), findsNothing);
   });
 
+  testWidgets('fond de page Collega (hors onglets, rien ne le peint dessous)', (tester) async {
+    _phone(tester);
+    await _openFromProfile(tester, LegalDocument.privacy);
+    // Posé par l'écran lui-même (le cadre des tests peint aussi le fond).
+    final boxes = tester.widgetList<ColoredBox>(find.descendant(
+      of: find.byType(LegalScreen),
+      matching: find.ancestor(of: find.byType(CgPage), matching: find.byType(ColoredBox)),
+    ));
+    expect(boxes.map((b) => b.color), contains(CgColors.light.ground));
+  });
+
   testWidgets('le produit s’appelle Collega (plus « AppMédecine »)', (tester) async {
     for (final doc in LegalDocument.values) {
       final text = File(doc.assetPath).readAsStringSync();
