@@ -1,6 +1,6 @@
 # Story 8.8 : Progression (maquette 4) — livrée avec la 8.9
 
-Status: review
+Status: done
 
 > Regroupée avec la 8.9 (Planning) à la demande de l'utilisateur (2026-09-23).
 

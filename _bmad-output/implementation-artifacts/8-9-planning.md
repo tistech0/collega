@@ -1,6 +1,6 @@
 # Story 8.9 : Planning — livrée avec la 8.8
 
-Status: review
+Status: done
 
 ## Story
 
