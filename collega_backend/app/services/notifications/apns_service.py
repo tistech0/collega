@@ -10,10 +10,51 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _plural(n: int, one: str, many: str) -> str:
+    return f"{n} {one if n == 1 else many}"
+
+
+def completion_message(summary: dict | None) -> tuple[str, str]:
+    """(titre, corps) de la notification de fin d'import. `summary` = résumé de la
+    bascule d'un réimport (None pour un premier import)."""
+    if not summary:
+        return "Fiches prêtes", "Tes fiches t’attendent dans Collega."
+    if not (summary.get("changed") or summary.get("added") or summary.get("removed")):
+        if summary.get("quota_refunded"):
+            return "Aucun changement", "Aucun changement dans ce PDF : ton réimport n’a pas été décompté."
+        return "Aucun changement", "Aucun changement dans ce PDF."
+    parts = [
+        _plural(summary["changed"], "item mis à jour", "items mis à jour") if summary.get("changed") else None,
+        _plural(summary["added"], "nouveau", "nouveaux") if summary.get("added") else None,
+        _plural(summary["removed"], "supprimé", "supprimés") if summary.get("removed") else None,
+        _plural(summary["unchanged"], "inchangé", "inchangés") if summary.get("unchanged") else None,
+    ]
+    return "Fiches mises à jour", ", ".join(p for p in parts if p) + "."
+
+
+def failure_message(reimport: bool, college_name: str) -> tuple[str, str]:
+    if reimport:
+        return (
+            "Réimport interrompu",
+            f"Le réimport de {college_name} n’a pas abouti. Tes fiches actuelles sont intactes.",
+        )
+    return "Import interrompu", f"L’import de {college_name} n’a pas abouti. Relance-le depuis l’app."
+
+
+def college_label(college_ref_id: int) -> str:
+    # Le catalogue des noms de collèges vit côté app.
+    return f"ton collège n°{college_ref_id}"
+
+
 class NotificationService(ABC):
     @abstractmethod
     async def send_generation_complete(
-        self, apns_token: str | None, college_ref_id: int
+        self, apns_token: str | None, college_ref_id: int, summary: dict | None = None
+    ) -> None: ...
+
+    @abstractmethod
+    async def send_import_failed(
+        self, apns_token: str | None, college_ref_id: int, reimport: bool
     ) -> None: ...
 
     @abstractmethod
@@ -26,12 +67,17 @@ class NotificationService(ABC):
 
 class NullNotificationService(NotificationService):
     async def send_generation_complete(
-        self, apns_token: str | None, college_ref_id: int
+        self, apns_token: str | None, college_ref_id: int, summary: dict | None = None
     ) -> None:
         logger.debug(
             "NullNotificationService: génération complète collège %s (APNs non configuré)",
             college_ref_id,
         )
+
+    async def send_import_failed(
+        self, apns_token: str | None, college_ref_id: int, reimport: bool
+    ) -> None:
+        logger.debug("NullNotificationService: échec d'import collège %s (APNs non configuré)", college_ref_id)
 
     async def send_daily_reminder(self, apns_token: str | None) -> None:
         logger.debug("NullNotificationService: rappel quotidien ignoré")
@@ -51,60 +97,42 @@ class APNsNotificationService(NotificationService):
             use_sandbox=settings.apns_use_sandbox,
         )
 
-    async def send_generation_complete(
-        self, apns_token: str | None, college_ref_id: int
+    async def _send_alert(
+        self, apns_token: str | None, title: str, body: str, *, extra: dict | None = None, badge: bool = False
     ) -> None:
         if not apns_token:
-            logger.info(
-                "APNs token absent pour collège %s — notification ignorée", college_ref_id
-            )
+            logger.info("APNs token absent — notification « %s » ignorée", title)
             return
         from aioapns import NotificationRequest, PushType
 
+        aps: dict[str, Any] = {"alert": {"title": title, "body": body}, "sound": "default"}
+        if badge:
+            aps["badge"] = 1
         request = NotificationRequest(
             device_token=apns_token,
-            message={
-                "aps": {
-                    "alert": {
-                        "title": "Fiches prêtes",
-                        "body": "Tes fiches t’attendent dans Collega.",
-                    },
-                    "sound": "default",
-                    "badge": 1,
-                },
-                "college_ref_id": college_ref_id,
-            },
+            message={"aps": aps, **(extra or {})},
             push_type=PushType.ALERT,
         )
         result = await self._apns.send_notification(request)
         if result.is_successful:
-            logger.info("Push APNs envoyé (collège %s)", college_ref_id)
+            logger.info("Push APNs envoyé : %s", title)
         else:
-            logger.warning(
-                "Push APNs échoué pour collège %s : %s", college_ref_id, result.description
-            )
+            logger.warning("Push APNs échoué (%s) : %s", title, result.description)
+
+    async def send_generation_complete(
+        self, apns_token: str | None, college_ref_id: int, summary: dict | None = None
+    ) -> None:
+        title, body = completion_message(summary)
+        await self._send_alert(apns_token, title, body, extra={"college_ref_id": college_ref_id}, badge=True)
+
+    async def send_import_failed(
+        self, apns_token: str | None, college_ref_id: int, reimport: bool
+    ) -> None:
+        title, body = failure_message(reimport, college_label(college_ref_id))
+        await self._send_alert(apns_token, title, body, extra={"college_ref_id": college_ref_id})
 
     async def send_daily_reminder(self, apns_token: str | None) -> None:
-        if not apns_token:
-            return
-        from aioapns import NotificationRequest, PushType
-
-        request = NotificationRequest(
-            device_token=apns_token,
-            message={
-                "aps": {
-                    "alert": {
-                        "title": "Collega",
-                        "body": "Ta session du jour t’attend.",
-                    },
-                    "sound": "default",
-                },
-            },
-            push_type=PushType.ALERT,
-        )
-        result = await self._apns.send_notification(request)
-        if not result.is_successful:
-            logger.warning("Rappel push échoué : %s", result.description)
+        await self._send_alert(apns_token, "Collega", "Ta session du jour t’attend.")
 
     async def close(self) -> None:
         """Ferme proprement la connexion HTTP/2 vers APNs.
