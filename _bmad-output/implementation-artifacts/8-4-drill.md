@@ -1,6 +1,6 @@
 # Story 8.4 : Drill plein écran (maquette 2a)
 
-Status: review
+Status: done
 
 ## Story
 

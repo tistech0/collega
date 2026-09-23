@@ -1,6 +1,6 @@
 # Story 8.5 : Fin de session (pic de la Peak-end rule)
 
-Status: review
+Status: done
 
 ## Story
 
