@@ -14,6 +14,13 @@ from app.services.upload.chunked_upload import PART_SIZE, ChunkedUploadStore
 from tests.fakes.fake_redis import FakeRedis
 
 
+@pytest.fixture(autouse=True)
+def _readable_pdf(monkeypatch):
+    """Ces tests exercent l'assemblage des morceaux (octets factices) ; l'ouverture
+    du PDF (422 PDF_DAMAGED) est testée à part dans test_pdf_damaged.py."""
+    monkeypatch.setattr(colleges_module, "assert_pdf_readable", AsyncMock(return_value=1))
+
+
 def _make_user(user_id=None):
     return types.SimpleNamespace(
         id=user_id or uuid.uuid4(),
@@ -208,6 +215,28 @@ class TestComplete:
         assert captured["ref_id"] == 34 and captured["bytes"].startswith(b"%PDF-") and len(captured["bytes"]) == 10
         assert await store.get(st.upload_id) is None
         assert not store.part_path(st.upload_id, 0).parent.exists()
+
+    async def test_complete_pdf_endommage_422_purge_sans_import(
+        self, client, mock_db, app_with_store, store, monkeypatch, tmp_path
+    ):
+        from app.services.ocr.pdf_check import pdf_damaged
+
+        user = _make_user()
+        app_with_store.dependency_overrides[require_subscription] = lambda: user
+        monkeypatch.setattr(colleges_module.settings, "pdf_storage_path", str(tmp_path))
+        monkeypatch.setattr(colleges_module, "assert_pdf_readable", AsyncMock(side_effect=pdf_damaged()))
+        start = AsyncMock()
+        monkeypatch.setattr(colleges_module, "_start_import_from_file", start)
+        st = await store.create(user.id, 34, 10)
+        await _upload_all(store, st)
+
+        resp = await client.post(f"/v1/colleges/import/{st.upload_id}/complete")
+
+        assert resp.status_code == 422 and resp.json()["detail"]["code"] == "PDF_DAMAGED"
+        start.assert_not_awaited()
+        assert await store.get(st.upload_id) is None
+        assert not store.part_path(st.upload_id, 0).parent.exists()
+        assert list(tmp_path.glob("incoming_*.pdf")) == []
 
     async def test_double_complete_le_second_404(self, client, mock_db, app_with_store, store, monkeypatch, tmp_path):
         user = _make_user()

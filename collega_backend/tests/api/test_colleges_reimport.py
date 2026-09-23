@@ -55,6 +55,17 @@ def _result(value):
 
 
 _PDF_BYTES = b"%PDF-1.4 fake pdf content for testing"
+
+
+@pytest.fixture(autouse=True)
+def _readable_pdf(monkeypatch):
+    """L'écriture du PDF est simulée ici : l'ouverture réelle (422 PDF_DAMAGED) est
+    testée dans test_pdf_damaged.py."""
+    from unittest.mock import AsyncMock
+
+    from app.api.v1 import colleges as colleges_module
+
+    monkeypatch.setattr(colleges_module, "assert_pdf_readable", AsyncMock(return_value=1))
 _FUTURE = datetime.now(timezone.utc) + timedelta(days=15)
 
 

@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import async_session_factory, get_db
 from app.core.time_utils import next_month_reset as _next_month_reset
-from app.deps import get_current_user, require_subscription
+from app.deps import get_current_user, get_current_user_short_session, require_subscription
 from app.models.college import College
 from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
@@ -45,6 +45,7 @@ from app.schemas.college import (
     UploadStatusResponseWrapped,
     UserCollegeData,
 )
+from app.services.ocr.pdf_check import assert_pdf_readable
 from app.services.upload.chunked_upload import (
     MAX_UPLOAD_SIZE,
     ChunkedUploadStore,
@@ -416,6 +417,14 @@ async def import_college_pdf(
         pdf_file_path.unlink(missing_ok=True)
         raise
 
+    try:
+        await assert_pdf_readable(pdf_file_path)
+    except HTTPException:
+        # Quota (UPDATE non validé) annulé : un PDF endommagé ne coûte rien.
+        pdf_file_path.unlink(missing_ok=True)
+        await db.rollback()
+        raise
+
     logger.info("PDF saved for college %s (ref_id=%s) at %s", college.id, ref_id, pdf_file_path)
 
     data = await _create_job_and_enqueue(db, current_user, college, job_id, pdf_file_path)
@@ -555,6 +564,7 @@ async def complete_chunked_import(
     assembled = storage_path / f"incoming_{state.upload_id}.pdf"
     try:
         store.assemble(claimed, assembled)
+        await assert_pdf_readable(assembled)
         data = await _start_import_from_file(db, current_user, claimed.ref_id, assembled)
     except HTTPException as exc:
         assembled.unlink(missing_ok=True)
@@ -591,24 +601,60 @@ async def get_college_status(
             detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
         )
 
-    latest_job_result = await db.execute(
-        select(GenerationJob)
-        .where(GenerationJob.college_id == college_id)
-        .order_by(GenerationJob.created_at.desc())
-        .limit(1)
-    )
-    latest_job = latest_job_result.scalar_one_or_none()
+    latest_job = await _latest_job(db, college_id)
+    return CollegeStatusResponseWrapped(data=_status_data(college, latest_job))
 
-    return CollegeStatusResponseWrapped(
-        data=CollegeStatusData(
-            college_id=str(college.id),
-            ref_id=college.college_ref_id,
-            status=college.status,
-            ocr_page_progress=college.ocr_page_progress,
-            total_pages=college.total_pages,
-            job_id=str(latest_job.id) if latest_job else None,
+
+async def _latest_job(db: AsyncSession, college_id: uuid.UUID) -> GenerationJob | None:
+    return (
+        await db.execute(
+            select(GenerationJob)
+            .where(GenerationJob.college_id == college_id)
+            .order_by(GenerationJob.created_at.desc())
+            .limit(1)
         )
+    ).scalar_one_or_none()
+
+
+def _import_status(college: College, job: GenerationJob | None) -> str:
+    """Statut de l'import en cours ou du dernier import (chantier 1) — le statut du
+    collège, lui, décrit son contenu et reste `generation_complete` pendant un réimport."""
+    return job.status if job is not None else college.status
+
+
+def _job_summary(job: GenerationJob | None) -> dict | None:
+    if job is None or job.status != "generation_complete" or not job.summary_json:
+        return None
+    try:
+        value = json.loads(job.summary_json)
+    except ValueError:
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def _is_failed_reimport(college: College, job: GenerationJob | None) -> bool:
+    return job is not None and job.status == "failed" and college.status == "generation_complete"
+
+
+def _status_data(college: College, job: GenerationJob | None) -> CollegeStatusData:
+    return CollegeStatusData(
+        college_id=str(college.id),
+        ref_id=college.college_ref_id,
+        status=_import_status(college, job),
+        ocr_page_progress=college.ocr_page_progress,
+        total_pages=college.total_pages,
+        job_id=str(job.id) if job else None,
+        summary=_job_summary(job),
+        reimport=_is_failed_reimport(college, job),
     )
+
+
+async def _poll_state(college_id: uuid.UUID) -> tuple[College | None, GenerationJob | None]:
+    """Un sondage du flux SSE : session courte, rendue avant l'attente suivante."""
+    async with async_session_factory() as session:
+        college = await session.get(College, college_id)
+        job = await _latest_job(session, college_id) if college is not None else None
+        return college, job
 
 
 def _preview(raw: str | None) -> list[str]:
@@ -625,11 +671,14 @@ def _preview(raw: str | None) -> list[str]:
 @router.get("/colleges/{college_id}/stream")
 async def stream_college_progress(
     college_id: uuid.UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_short_session),
 ) -> StreamingResponse:
-    """Stream SSE de progression OCR pour un collège appartenant à l'utilisateur."""
-    college = await db.get(College, college_id)
+    """Stream SSE de progression d'un import (collège de l'utilisateur).
+
+    Aucune connexion à la base n'est gardée pendant le flux : authentification et
+    contrôle d'accès en sessions courtes, puis une session courte par sondage."""
+    async with async_session_factory() as session:
+        college = await session.get(College, college_id)
     if college is None or college.user_id != current_user.id:
         raise HTTPException(
             status_code=404,
@@ -640,7 +689,7 @@ async def stream_college_progress(
         last_progress = -1
         last_generation: tuple[int, int, int, str | None] | None = None
         ocr_complete_emitted = False
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         start_time = loop.time()
         last_emit = start_time
 
@@ -650,11 +699,10 @@ async def stream_college_progress(
                 if now - start_time > _SSE_MAX_DURATION:
                     break
 
-                async with async_session_factory() as session:
-                    c = await session.get(College, college_id)
-
+                c, job = await _poll_state(college_id)
                 if c is None:
                     break
+                status = _import_status(c, job)
 
                 if c.ocr_page_progress != last_progress:
                     last_progress = c.ocr_page_progress
@@ -662,7 +710,7 @@ async def stream_college_progress(
                     yield f"data: {json.dumps(event)}\n\n"
                     last_emit = now
 
-                if c.status == "ocr_complete" and not ocr_complete_emitted:
+                if status == "ocr_complete" and not ocr_complete_emitted:
                     ocr_complete_emitted = True
                     event = {"event": "card_generation_started", "data": {"college_id": str(college_id)}}
                     yield f"data: {json.dumps(event)}\n\n"
@@ -670,7 +718,7 @@ async def stream_college_progress(
 
                 # Story 8.13 : fiches générées au fil des items (seulement pendant la génération).
                 total = c.generation_items_total
-                if c.status == "ocr_complete" and total is not None:
+                if status == "ocr_complete" and total is not None:
                     current = (c.generation_items_done, total, c.generation_cards, c.generation_preview)
                     if current != last_generation:
                         last_generation = current
@@ -686,14 +734,18 @@ async def stream_college_progress(
                         yield f"data: {json.dumps(event)}\n\n"
                         last_emit = now
 
-                if c.status == "generation_complete":
-                    event = {"event": "generation_complete", "data": {"college_id": str(college_id)}}
-                    yield f"data: {json.dumps(event)}\n\n"
+                if status == "generation_complete":
+                    data = {"college_id": str(college_id), "summary": _job_summary(job)}
+                    yield f"data: {json.dumps({'event': 'generation_complete', 'data': data})}\n\n"
                     break
 
-                if c.status == "failed":
-                    event = {"event": "generation_failed", "data": {"college_id": str(college_id)}}
-                    yield f"data: {json.dumps(event)}\n\n"
+                if status == "failed":
+                    data = {
+                        "college_id": str(college_id),
+                        "message": job.error_message if job is not None else None,
+                        "reimport": _is_failed_reimport(c, job),
+                    }
+                    yield f"data: {json.dumps({'event': 'generation_failed', 'data': data})}\n\n"
                     break
 
                 if now - last_emit >= _SSE_HEARTBEAT_INTERVAL:

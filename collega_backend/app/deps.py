@@ -12,7 +12,14 @@ from app.core.security import JWTError, decode_token
 _http_basic = HTTPBasic()
 _http_basic_tester = HTTPBasic(auto_error=False)
 
-__all__ = ["get_db", "get_admin_user", "get_tester_user", "get_current_user", "require_subscription"]
+__all__ = [
+    "get_db",
+    "get_admin_user",
+    "get_tester_user",
+    "get_current_user",
+    "get_current_user_short_session",
+    "require_subscription",
+]
 
 
 async def get_admin_user(
@@ -112,6 +119,22 @@ async def get_current_user(
         )
     request.state.user_id = str(user.id)
     return user
+
+
+async def get_current_user_short_session(
+    request: Request,
+    authorization: str | None = Header(None),
+):
+    """Comme `get_current_user`, mais dans une session courte rendue aussitôt.
+
+    Pour les réponses longues (flux SSE, jusqu'à 3 h) : une dépendance `get_db`
+    n'est libérée qu'à la fin de la réponse, et garderait une connexion du pool
+    pendant tout le flux (saturation à ~15 flux, incident de septembre 2026).
+    """
+    from app.core.database import async_session_factory
+
+    async with async_session_factory() as db:
+        return await get_current_user(request, authorization, db)
 
 
 async def require_subscription(user=Depends(get_current_user)):

@@ -16,7 +16,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.database import get_db
+from app.core.database import async_session_factory, get_db
 from app.core.security import hash_password
 from app.deps import get_admin_user
 from app.models.college import College
@@ -29,6 +29,7 @@ from app.models.user import User
 from app.services.generation.token_cost import compute_cost_eur
 from app.services.jobs.arq_control import abort_arq_job
 from app.services.jobs.job_events import record_job_event
+from app.services.jobs.job_failure import fail_job
 from app.schemas.admin import (
     AdminCardsResponseWrapped,
     AdminFeedbackData,
@@ -734,10 +735,10 @@ async def stop_job(
     if job.arq_job_id:
         aborted = await abort_arq_job(job.arq_job_id)
 
-    job.status = "failed"
-    job.error_message = "Annulé par l'admin"
-    await record_job_event(db, job.id, "cancelled", message="Annulé par l'admin")
-    await db.commit()
+    # Échec centralisé (chantier 1) : brouillon vidé, PDF de l'import supprimé,
+    # contenu en service du collège intact, utilisatrice notifiée.
+    await fail_job(async_session_factory, job.id, "Annulé par l'admin", event="cancelled")
+    await db.refresh(job)
 
     return StopJobResponseWrapped(
         data=StopJobData(
