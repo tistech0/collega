@@ -1,6 +1,6 @@
 # Story 8.14 : Profil, paywall, CGU
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -45,7 +45,7 @@ révision et mon rappel ; un paywall qui dit ce que l'abonnement donne ; des CGU
 - [x] T3 `ProfileScreen` Collega UI (+ sheet profil, rangs, fiches, rappel, suppression) + tests + goldens
 - [x] T4 `PaywallScreen` Collega UI + tests + goldens
 - [x] T5 `LegalScreen` Collega UI + tests + goldens
-- [ ] T6 Shell : Profil hors legacy ; revue adversariale ; déploiement serveur ; build iPhone
+- [x] T6 Shell : Profil hors legacy ; revue adversariale ; déploiement serveur ; build iPhone
 
 ## Dev Notes
 

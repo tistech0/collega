@@ -1,6 +1,6 @@
 # Story 8.13 : Import et import en cours (livrée avec la 8.12)
 
-Status: review
+Status: done
 
 ## Story
 

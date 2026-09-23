@@ -1,6 +1,6 @@
 # Story 8.12 : Entrée — marque, connexion, démo (livrée avec la 8.13)
 
-Status: review
+Status: done
 
 > Regroupée avec la 8.13 (Import) à la demande de l'utilisateur (2026-09-23).
 

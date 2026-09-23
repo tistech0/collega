@@ -157,8 +157,8 @@ development_status:
   8-9-planning: done
   8-10-recherche: done                               # [2026-09-23 validée iPhone avec 8.11]
   8-11-detail-item: done
-  8-12-entree-login-demo: review                     # [2026-09-23 livrée avec 8.13 (demande utilisateur) + revue corrigée]
-  8-13-import: review
-  8-14-profil-paywall-cgu: backlog
-  8-15-retrait-shadcn-accessibilite: backlog
+  8-12-entree-login-demo: done                     # [2026-09-23 validée iPhone avec 8.13 (+ envoi en cours visible dans la Bibliothèque)]
+  8-13-import: done
+  8-14-profil-paywall-cgu: done                    # [2026-09-23 validée iPhone ; revue : 6 correctifs (/me inter-comptes, rappel DST, permission, paywall) ; éditeur Matthis Lesur]
+  8-15-retrait-shadcn-accessibilite: in-progress
   epic-8-retrospective: optional
