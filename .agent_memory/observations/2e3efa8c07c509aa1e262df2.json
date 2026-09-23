@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "vue que jqi fait lq session dqujourdhui je ne peux pas voir peut etre la suppri;er pour tester le decalage etc jai bien creer le planing",
+  "summary": "vue que jqi fait lq session dqujourdhui je ne peux pas voir peut etre la suppri;er pour tester le decalage etc jai bien creer le planing",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2e3efa8c07c509aa1e262df2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:31:53.999Z",
+  "stored_at": "2026-09-23T08:31:54.000Z",
+  "low_signal": true
+}

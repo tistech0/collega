@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Monitor",
+  "path": "",
+  "command": "until grep -qE \"Installing and launching|Error|Flutter run key commands|Syncing files\" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log 2>/dev/null; do sleep 10; done; tail -3 /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log",
+  "summary": "About to run: until grep -qE \"Installing and launching|Error|Flutter run key commands|Syncing files\" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratch",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e07152c60f1eecc338c81486",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:32:54.554Z",
+  "stored_at": "2026-09-23T08:32:54.555Z"
+}
