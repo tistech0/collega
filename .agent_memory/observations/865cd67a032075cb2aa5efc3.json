@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker ps -a --format \"{{.Names}} {{.Status}}\" | grep -i -E \"kuma|glances\"; docker inspect -f \"{{.Config.Image}}\" collega-api-1; docker image inspect -f \"{{.Size}} {{.Created}} {{.RepoDigests}}\" tistech0/collega-backend:latest; docker images tistech0/collega-backend --format \"{{.Tag}} {{.ID}} {{.CreatedSince}} {{.Size}}\"' 2>&1; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; grep -rn -E \"logging\\.(basicConfig|config|getLogger)|dictConfig|key_func|get_remote_address|proxy.headers|forwarded|/health\" app | head -30",
+  "summary": "About to run: ssh nas 'docker ps -a --format \"{{.Names}} {{.Status}}\" | grep -i -E \"kuma|glances\"; docker inspect -f \"{{.Config.Image}}\" collega-api-1; docker image inspect -f \"{{.Size}} {{.Created}} {{.RepoDigests",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "865cd67a032075cb2aa5efc3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:49.543Z",
+  "stored_at": "2026-09-23T16:14:49.544Z",
+  "low_signal": true
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rln \"sqlite_db\\|sqlite_session\\|aiosqlite\" tests; head -20 tests/sqlite_db.py; sed -n 60,110p tests/api/test_colleges_reimport.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rln \"sqlite_db\\|sqlite_session\\|aiosqlite\" tests; head -20 tests/sqlite_db.py; sed -n 60,110p tests/api/test_colleges_reimport.py: [\"detail\"] assert detail[\"code\"] == \"COLLEGE_RELOAD_LIMIT\" assert detail[\"reload_count\"] == 2 assert detail[\"reloa",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rln \"sqlite_db\\|sqlite_session\\|aiosqlite\" tests; head -20 tests/sqlite_db.py; sed -n 60,110p tests/api/test_colleges_reimport.py: [\"detail\"] assert detail[\"code\"] == \"COLLEGE_RELOAD_LIMIT\" assert detail[\"reload_count\"] == 2 assert detail[\"reload_count_max\"] == 2 async def test_reimport_bloque_monthly_limit_rollback_college( self, client: AsyncClient, mock_db ): \"\"\"409 MONTHLY_RELOAD_LIMIT — College a été UPDATE OK mais User RETURNING None. On vérifie aussi que `db.rollback()` est bien appelé pour annuler l'incrément College fait juste avant. \"\"\" from app.main import app user = _make_user(monthly_reloads=3, monthly_reloads_reset_at=_FUTURE) college = _make_college(ref_id=15, user_id=user.id, status=\"generation_complete\", reload_count=0) app.dependency_overrides[require_subscription] = lambda: user mock_db.execute = AsyncMock( side_effect=[ _result(college), # SELECT College _result(None), # SELECT GenerationJob _result(1), # UPDATE College RETURNING 1 (OK) _result(None), # UPDATE User RETURNING None → saturé → 409 ]",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "aa15fd6eaef93330b4fee61a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:30.795Z",
+  "stored_at": "2026-09-23T16:14:30.796Z"
+}

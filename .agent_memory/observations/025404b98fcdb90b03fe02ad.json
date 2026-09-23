@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls && find app -name \"*.py\" | xargs wc -l | sort -n | tail -60 && ls alembic/versions 2>/dev/null || find . -path ./node_modules -prune -o -name \"*.py\" -path \"*versions*\" -print | head -40",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls && find app -name \"*.py\" | xargs wc -l | sort -n | tail -60 && ls alembic/versions 2>/dev/null || find . -path ./node_modules -p",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "025404b98fcdb90b03fe02ad",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:26.395Z",
+  "stored_at": "2026-09-23T16:13:26.395Z"
+}

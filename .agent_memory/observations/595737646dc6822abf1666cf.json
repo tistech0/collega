@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls poetry.lock 2>&1; grep -A1 -E '^name = \"(fastapi|anthropic|pdfplumber|pdfminer.six|sqlalchemy|arq|uvicorn|starlette)\"' poetry.lock 2>/dev/null; .venv/bin/pip list 2>/dev/null | grep -iE \"fastapi|anthropic|pdfplumber|pdfminer|starlette|sqlalchemy|arq\"",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls poetry.lock 2>&1; grep -A1 -E '^name = \"(fastapi|anthropic|pdfplumber|pdfminer.six|sqlalchemy|arq|uvicorn|starlette)\"' poetry.lo",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "595737646dc6822abf1666cf",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:59.688Z",
+  "stored_at": "2026-09-23T16:13:59.689Z"
+}

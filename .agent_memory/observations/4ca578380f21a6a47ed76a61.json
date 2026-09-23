@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "docker images 2>/dev/null | grep -i collega | head; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && du -sh app/static 2>/dev/null; ls tests | head -3",
+  "summary": "docker images 2>/dev/null | grep -i collega | head; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && du -sh app/static 2>/dev/null; ls tests | head -3: collega-backend:story80 43ed8655934d 523MB 0B collega_backend-api:latest 37986325ac47 629MB 0B U collega_backend-worker:latest 1836fea94d60 629MB 0B",
+  "text": "docker images 2>/dev/null | grep -i collega | head; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && du -sh app/static 2>/dev/null; ls tests | head -3: collega-backend:story80 43ed8655934d 523MB 0B collega_backend-api:latest 37986325ac47 629MB 0B U collega_backend-worker:latest 1836fea94d60 629MB 0B U tistech0/collega-backend:0a7d3c5 3553c9c87232 673MB 0B tistech0/collega-backend:3e75bdd 39effa7e191b 523MB 0B tistech0/collega-backend:48e50f9 be3f5d6c29fa 673MB 0B tistech0/collega-backend:5f92eb8 bd5463ff796b 523MB 0B tistech0/collega-backend:7420304 86f6179b5c9e 523MB 0B tistech0/collega-backend:87986a0 b316ae1b3232 523MB 0B tistech0/collega-backend:8f5476d 772a4135cb05 523MB 0B 80K app/static __init__.py __pycache__ api",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4ca578380f21a6a47ed76a61",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:55.060Z",
+  "stored_at": "2026-09-23T16:15:55.060Z"
+}

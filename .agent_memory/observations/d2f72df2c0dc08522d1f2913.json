@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rn \"collega-test-redis\" --include=*.md --include=*.py --include=*.yml --include=*.toml . 2>/dev/null | grep -v node_modules | head -5; grep -rln \"localhost:6379\\|aioredis\\|redis.asyncio\\|from_url\" collega_backend/tests | head; ssh nas 'docker inspect -f \"{{.Config.Cmd}}\" collega-redis-1; ls /mnt/user/appdata/compose-stacks/collega/; grep -c \"^REDIS_URL=redis://:\" /mnt/user/appdata/compose-stacks/collega/.env; grep -c \"^ENVIRONMENT=production\" /mnt/user/appdata/compose-stacks/collega/.env; ss -ltnp 2>/dev/null | grep -E \":(430|8000|5432|6… [+13 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rn \"collega-test-redis\" --include=*.md --include=*.py --include=*.yml --include=*.toml . 2>/dev/null | grep -v node_modules | head -5; grep -rln \"localhost:6379\\|aioredis\\|redis.asyncio\\|from_url\" collega_backend/tests | head; ssh nas 'docker inspect -f \"{{.Confi",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rn \"collega-test-redis\" --include=*.md --include=*.py --include=*.yml --include=*.toml . 2>/dev/null | grep -v node_modules | head -5; grep -rln \"localhost:6379\\|aioredis\\|redis.asyncio\\|from_url\" collega_backend/tests | head; ssh nas 'docker inspect -f \"{{.Config.Cmd}}\" collega-redis-1; ls /mnt/user/appdata/compose-stacks/collega/; grep -c \"^REDIS_URL=redis://:\" /mnt/user/appdata/compose-stacks/collega/.env; grep -c \"^ENVIRONMENT=production\" /mnt/user/appdata/compose-stacks/collega/.env; ss -ltnp 2>/dev/null | grep -E \":(430|8000|5432|6379)\\b\"' 2>&1 failed: Exit code 1 (eval):1: no matches found: --include=*.md collega_backend/tests/conftest.py collega_backend/tests/fakes/fake_redis.py [redis-server] collega_dump.sql docker-compose.yml docker-compose.yml.bak-20260814-p3 0 0",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d2f72df2c0dc08522d1f2913",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:31.301Z",
+  "stored_at": "2026-09-23T16:15:31.302Z"
+}

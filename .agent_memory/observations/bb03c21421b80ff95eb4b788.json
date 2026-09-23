@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls tests tests/*/ | head -80; grep -rln \"generation_worker\\|generate_college_cards\" tests; grep -rn \"college.status\\|CollegeStatus.failed\\|\\\"failed\\\"\" tests/workers/test_generation_worker*.py 2>/dev/null | head -20",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls tests tests/*/ | head -80; grep -rln \"generation_worker\\|generate_college_cards\" tests; grep -rn \"college.status\\|CollegeStatus.",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bb03c21421b80ff95eb4b788",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:19.911Z",
+  "stored_at": "2026-09-23T16:15:19.912Z"
+}

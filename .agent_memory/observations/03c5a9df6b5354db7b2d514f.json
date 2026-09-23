@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn -i \"pdf\" collega_app/assets 2>/dev/null | grep -i \"supprim\\|conserv\\|dur\\|24\" | head -8",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn -i \"pdf\" collega_app/assets 2>/dev/null | grep -i \"supprim\\|conserv\\|dur\\|24\" | head -8: collega_app/assets/legal/privacy.md:64:- **PDF importés** : conservés tant que le collège associé est dans ton compte. collega_app/assets/legal/privacy.md:77:| **Anthrop",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rn -i \"pdf\" collega_app/assets 2>/dev/null | grep -i \"supprim\\|conserv\\|dur\\|24\" | head -8: collega_app/assets/legal/privacy.md:64:- **PDF importés** : conservés tant que le collège associé est dans ton compte. collega_app/assets/legal/privacy.md:77:| **Anthropic** (Claude API) | Génération des fiches à partir des PDF | États-Unis | Clauses contractuelles types UE (DPA Anthropic). Les PDF transmis sont traités pour la génération puis conservés selon la politique de rétention de l'API Anthropic (30 jours par défaut, prolongation possible en cas d'enquête liée aux conditions d'utilisation Anthropic). |",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "03c5a9df6b5354db7b2d514f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:35.017Z",
+  "stored_at": "2026-09-23T16:16:35.017Z"
+}

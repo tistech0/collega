@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n \"feedback\" collega_backend/app/api/v1/flash_cards.py | head; grep -rn \"feedback\" collega_app/lib --include=*.dart | grep -v \"\\.g\\.dart\" | grep -iv \"haptic\" | head -8",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n \"feedback\" collega_backend/app/api/v1/flash_cards.py | head; grep -rn \"feedback\" collega_app/lib --include=*.dart | grep -v \"\\.g\\.dart\" | grep -iv \"haptic\" | head -8: 1:\"\"\"Endpoints de feedback, suppression et régénération de fiches — FR19, FR20, FR21.\"\"\" 41:@r",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n \"feedback\" collega_backend/app/api/v1/flash_cards.py | head; grep -rn \"feedback\" collega_app/lib --include=*.dart | grep -v \"\\.g\\.dart\" | grep -iv \"haptic\" | head -8: 1:\"\"\"Endpoints de feedback, suppression et régénération de fiches — FR19, FR20, FR21.\"\"\" 41:@router.post(\"/flash-cards/{card_id}/feedback\") 42:async def submit_feedback( 49: card.user_feedback = body.feedback 51: return {\"data\": {\"id\": str(card.id), \"feedback\": card.user_feedback}} 94: card.user_feedback = None 110: user_feedback=card.user_feedback, (eval):1: no matches found: --include=*.dart",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3a27d1d5f764f6d681f44ec7",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:28:42.051Z",
+  "stored_at": "2026-09-23T16:28:42.051Z",
+  "low_signal": true
+}

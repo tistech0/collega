@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 100,126p collega_app/assets/legal/privacy.md; grep -n \"logging\\|max-size\" collega_backend/docker-compose.prod.yml",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 100,126p collega_app/assets/legal/privacy.md; grep -n \"logging\\|max-size\" collega_backend/docker-compose.prod.yml: ourni sous 30 jours. - **Droit d'opposition** : tu peux refuser les notifications push à tout moment depuis Réglages iOS → Notifications. - **Dro",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 100,126p collega_app/assets/legal/privacy.md; grep -n \"logging\\|max-size\" collega_backend/docker-compose.prod.yml: ourni sous 30 jours. - **Droit d'opposition** : tu peux refuser les notifications push à tout moment depuis Réglages iOS → Notifications. - **Droit de réclamation** : tu peux saisir la **CNIL** (Commission Nationale Informatique et Libertés) à l'adresse `https://www.cnil.fr/fr/plaintes`. --- ## 8. Sécurité L'Application met en œuvre des mesures techniques et organisationnelles adaptées : - chiffrement HTTPS / TLS de bout en bout côté API ; - mots de passe stockés sous forme de **hash bcrypt** (jamais en clair) ; - tokens JWT stockés dans le **Keychain iOS** (`flutter_secure_storage`) ; - séparation backend / frontend ; rate limiting des routes sensibles (login, refresh, suppression de compte) ; - backups réguliers de la base de données PostgreSQL côté éditeur. En cas de violation de données, l'éditeur s'engage à notifier la CNIL et les utilisateurs concernés dans les délais légaux (72h).",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "441fa6b9ae47cdba69c061bf",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:43.928Z",
+  "stored_at": "2026-09-23T16:16:43.928Z"
+}

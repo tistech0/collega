@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "docker images --format '{{.Repository}}:{{.Tag}}' | grep -i postgres; docker run --rm -d --name audit-pg-tmp -e POSTGRES_PASSWORD=audit -e POSTGRES_DB=collega -p 55432:5432 postgres:16-alpine 2>&1 | tail -1; for i in $(seq 1 30); do docker exec audit-pg-tmp pg_isready -U postgres >/dev/null 2>&1 && break; sleep 1; done; docker exec audit-pg-tmp pg_isready -U postgres",
+  "summary": "docker images --format '{{.Repository}}:{{.Tag}}' | grep -i postgres; docker run --rm -d --name audit-pg-tmp -e POSTGRES_PASSWORD=audit -e POSTGRES_DB=collega -p 55432:5432 postgres:16-alpine 2>&1 | tail -1; for i in $(seq 1 30); do docker exec audit-pg-tmp pg_isready -U postgres >/dev/null 2>&1 && break; sleep 1; done",
+  "text": "docker images --format '{{.Repository}}:{{.Tag}}' | grep -i postgres; docker run --rm -d --name audit-pg-tmp -e POSTGRES_PASSWORD=audit -e POSTGRES_DB=collega -p 55432:5432 postgres:16-alpine 2>&1 | tail -1; for i in $(seq 1 30); do docker exec audit-pg-tmp pg_isready -U postgres >/dev/null 2>&1 && break; sleep 1; done; docker exec audit-pg-tmp pg_isready -U postgres: postgres:16 postgres:16-alpine postgres:15-alpine postgres:15 8114f0ebfde034932a752350264d40251f681687bd42fbb40efb5d846e0cc338 /var/run/postgresql:5432 - accepting connections",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ae892d0acd8c6ca0f2e24c15",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:58.899Z",
+  "stored_at": "2026-09-23T16:15:58.899Z"
+}

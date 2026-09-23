@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rn \"feedback\" collega_app/lib | grep -v \"\\.g\\.dart\" | grep -iv haptic | head -8",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rn \"feedback\" collega_app/lib | grep -v \"\\.g\\.dart\" | grep -iv haptic | head -8: éfinition). collega_app/lib/core/ui/components/cg_field.dart:12:/// feedback. Un `CupertinoTextField` natif (curseur, sélection, autofill, collega_app/lib/features/drill/drill_provid",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rn \"feedback\" collega_app/lib | grep -v \"\\.g\\.dart\" | grep -iv haptic | head -8: éfinition). collega_app/lib/core/ui/components/cg_field.dart:12:/// feedback. Un `CupertinoTextField` natif (curseur, sélection, autofill, collega_app/lib/features/drill/drill_providers.dart:144: void setSemanticFeedback(SemanticFeedback feedback, {String? cardId}) { collega_app/lib/features/drill/drill_providers.dart:148: state = AsyncValue.data(s.copyWith(semanticFeedback: feedback)); collega_app/lib/features/drill/domain/drill_session_state.dart:63: const SemanticFeedback({required this.result, required this.feedback}); collega_app/lib/features/drill/domain/drill_session_state.dart:66: final String feedback; collega_app/lib/features/drill/presentation/drill_screen.dart:120: final feedback = await ref.read(drillRepositoryProvider).evaluateSemantic(card.id, text); collega_app/lib/features/drill/presentation/drill_screen.dart:121: _notifier.setSemanticFeedback(feedback, cardId: card.id);",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0ba03647d8bc06f39a81ad3c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:28:44.693Z",
+  "stored_at": "2026-09-23T16:28:44.694Z"
+}

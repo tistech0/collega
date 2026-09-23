@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls tests tests/*/ | head -80; grep -rln \"generation_worker\\|generate_college_cards\" tests; grep -rn \"college.status\\|CollegeStatus.failed\\|\\\"failed\\\"\" tests/workers/test_generation_worker*.py 2>/dev/null | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls tests tests/*/ | head -80; grep -rln \"generation_worker\\|generate_college_cards\" tests; grep -rn \"college.status\\|CollegeStatus.failed\\|\\\"failed\\\"\" tests/workers/test_generation_worker*.py 2>/dev/null | head -20: _stop.py test_admin_ocr.py test_adm",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls tests tests/*/ | head -80; grep -rln \"generation_worker\\|generate_college_cards\" tests; grep -rn \"college.status\\|CollegeStatus.failed\\|\\\"failed\\\"\" tests/workers/test_generation_worker*.py 2>/dev/null | head -20: _stop.py test_admin_ocr.py test_admin_overview.py test_admin_queue.py test_admin_usage.py test_admin_user_detail.py test_admin_users_beta.py test_admin_users_create.py test_admin_users_quota.py test_auth.py test_billing_webhook.py test_college_cards.py test_colleges.py test_colleges_chunked_upload.py test_colleges_import.py test_colleges_reimport.py test_colleges_stream.py test_flash_cards.py test_health.py test_lifespan_apns.py test_reminder.py test_require_subscription.py test_search.py test_tester_colleges.py test_tester_feedback.py test_tester_items.py test_tester_summary.py tests/core/: __init__.py __pycache__ test_config_validators.py tests/fakes/: __init__.py __pycache__ fake_redis.py tests/fixtures/: __init__.py sample_ecni.pdf tests/scripts/: __init__.py __pycache__ tests/workers/test_generation_worker.py tests/workers/test_generation_worker.py:100: assert job.status == \"failed\"",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "cfb6eb7c977d660659799801",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:20.378Z",
+  "stored_at": "2026-09-23T16:15:20.379Z"
+}

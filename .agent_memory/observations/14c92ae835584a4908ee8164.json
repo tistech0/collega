@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'ls -la /mnt/user/appdata/collega/ /mnt/user/appdata/collega/backups; echo ---WHERE---; ls -d /mnt/cache/appdata/collega /mnt/disk*/appdata/collega 2>/dev/null; cat /boot/config/shares/appdata.cfg 2>/dev/null | grep -i -E \"useCache|cachepool|cache\"; echo ---CRON---; crontab -l 2>&1; ls /etc/cron.d/ 2>/dev/null; cat /etc/cron.d/root 2>/dev/null | grep -v \"^#\" ; echo ---USERSCRIPTS---; ls /boot/config/plugins/user.scripts/scripts/ 2>/dev/null; echo ---PLUGINS---; ls /boot/config/plugins/ | grep -i -E \"backup|appdata|ca\\.|rclone|dupl|restic|borg\"; echo ---AUTOSTART---; cat /var/lib/docker… [+35 chars truncated]",
+  "summary": "About to run: ssh nas 'ls -la /mnt/user/appdata/collega/ /mnt/user/appdata/collega/backups; echo ---WHERE---; ls -d /mnt/cache/appdata/collega /mnt/disk*/appdata/collega 2>/dev/null; cat /boot/config/shares/appdata",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "14c92ae835584a4908ee8164",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:56.634Z",
+  "stored_at": "2026-09-23T16:13:56.635Z"
+}

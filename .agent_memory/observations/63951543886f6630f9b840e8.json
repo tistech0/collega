@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'IP=104.21.37.178; URL=https://collegatest.matthislesur.com/v1/webhooks/revenuecat; BODY=\"{\\\"event\\\":{\\\"type\\\":\\\"TEST\\\",\\\"app_user_id\\\":\\\"test-claude\\\"},\\\"api_version\\\":\\\"1.0\\\"}\";\necho \"== sans secret\"; curl -s -w \" -> %{http_code}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$IP -H \"Content-Type: application/json\" -d \"$BODY\" $URL;\necho \"== mauvais secret\"; curl -s -w \" -> %{http_code}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$IP -H \"Content-Type: application/json\" -H \"Authorization: Bearer faux\" -d \"$BODY\" $URL;\necho \"== vrai secret (lu dans le conteneur, non aff… [+307 chars truncated]",
+  "summary": "About to run: ssh nas 'IP=104.21.37.178; URL=https://collegatest.matthislesur.com/v1/webhooks/revenuecat; BODY=\"{\\\"event\\\":{\\\"type\\\":\\\"TEST\\\",\\\"app_user_id\\\":\\\"test-claude\\\"},\\\"api_version\\\":\\\"1.0\\\"}\"; echo \"== san",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "63951543886f6630f9b840e8",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:06:55.160Z",
+  "stored_at": "2026-09-23T16:06:55.160Z"
+}

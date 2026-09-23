@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; cat .dockerignore; echo ---; cat .env.example; echo ---; cat .env.nas.example; echo ---; cat Caddyfile Caddyfile.prod; echo ---; cat pyproject.toml; ls poetry.lock 2>&1; git ls-files | grep -i -E 'lock|requirements'; ls -la collega_dump.sql; git ls-files collega_dump.sql",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; cat .dockerignore; echo ---; cat .env.example; echo ---; cat .env.nas.example; echo ---; cat Caddyfile Caddyfile.prod; echo ---; cat pyproject.toml; ls poetry.lock 2>&1; git ls-files | grep -i -E 'lock|requirements'; ls -la collega_dump.sql; git ls-file",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; cat .dockerignore; echo ---; cat .env.example; echo ---; cat .env.nas.example; echo ---; cat Caddyfile Caddyfile.prod; echo ---; cat pyproject.toml; ls poetry.lock 2>&1; git ls-files | grep -i -E 'lock|requirements'; ls -la collega_dump.sql; git ls-files collega_dump.sql: 2.0.0\" } asyncpg = \">=0.29.0\" alembic = \">=1.13.0\" arq = \">=0.25.0\" anthropic = \">=0.25.0\" aioapns = \">=3.0.0\" pydantic-settings = \">=2.0.0\" email-validator = \">=2.0.0\" python-jose = { extras = [\"cryptography\"], version = \">=3.3.0\" } passlib = { extras = [\"bcrypt\"], version = \">=1.7.4\" } bcrypt = \">=3.2.0,<4.0.0\" httpx = \">=0.27.0\" python-multipart = \">=0.0.9\" slowapi = \">=0.1.9\" pdfplumber = \">=0.11.0\" pytesseract = \">=0.3.10\" pdf2image = \">=1.17.0\" [tool.poetry.group.dev.dependencies] pytest = \">=8.0.0\" pytest-asyncio = \">=0.23.0\" httpx = \">=0.27.0\" pytest-cov = \">=5.0.0\" [build-system] requires = [\"poetry-core\"] build-backend = \"poetry.core.masonry.api\" [tool.pytest.ini_options] asyncio_mode = \"auto\" testpaths = [\"tests\"] [tool.ruff] line-length = 88 target-version = \"py311\" ls: poetry.lock: No such file or directory -rw-r--r--@ 1 lesurmatthis staff 119320 May 8 11:46 collega_dump.sql",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a270522ab94a7294826fa8d0",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:19.627Z",
+  "stored_at": "2026-09-23T16:13:19.628Z"
+}

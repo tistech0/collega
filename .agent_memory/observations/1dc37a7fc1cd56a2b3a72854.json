@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'awk \"/^\\[\\\"cache\\\"\\]/,/^\\[\\\"flash\\\"\\]/\" /var/local/emhttp/disks.ini | grep -E \"^(name|device|slots|fsType|status)=\"; ls /mnt/cache/nas-backup 2>/dev/null | head' 2>&1",
+  "summary": "ssh nas 'awk \"/^\\[\\\"cache\\\"\\]/,/^\\[\\\"flash\\\"\\]/\" /var/local/emhttp/disks.ini | grep -E \"^(name|device|slots|fsType|status)=\"; ls /mnt/cache/nas-backup 2>/dev/null | head' 2>&1: name=\"cache\" device=\"nvme0n1\" status=\"DISK_OK\" fsType=\"btrfs\" slots=\"1\" archive-radarr-langue-20260905 crafty.sqlite.corrompu-20260821",
+  "text": "ssh nas 'awk \"/^\\[\\\"cache\\\"\\]/,/^\\[\\\"flash\\\"\\]/\" /var/local/emhttp/disks.ini | grep -E \"^(name|device|slots|fsType|status)=\"; ls /mnt/cache/nas-backup 2>/dev/null | head' 2>&1: name=\"cache\" device=\"nvme0n1\" status=\"DISK_OK\" fsType=\"btrfs\" slots=\"1\" archive-radarr-langue-20260905 crafty.sqlite.corrompu-20260821",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1dc37a7fc1cd56a2b3a72854",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:05.163Z",
+  "stored_at": "2026-09-23T16:16:05.163Z"
+}

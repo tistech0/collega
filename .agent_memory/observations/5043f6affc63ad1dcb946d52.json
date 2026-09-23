@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; (nc -z localhost 6379 && echo \"redis local: UP\") || echo \"redis local: DOWN\"; timeout 280 .venv/bin/python -m pytest -q -p no:cacheprovider -x --no-header 2>&1 | tail -15",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; (nc -z localhost 6379 && echo \"redis local: UP\") || echo \"redis local: DOWN\"; timeout 280 .venv/bin/python -m pytest -q -p no:cacheprovider -x --no-header 2>&1 | tail -15: Connection to localhost port 6379 [tcp/*] succeeded! redis local: UP (eval):1: co",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; (nc -z localhost 6379 && echo \"redis local: UP\") || echo \"redis local: DOWN\"; timeout 280 .venv/bin/python -m pytest -q -p no:cacheprovider -x --no-header 2>&1 | tail -15: Connection to localhost port 6379 [tcp/*] succeeded! redis local: UP (eval):1: command not found: timeout",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5043f6affc63ad1dcb946d52",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:11.912Z",
+  "stored_at": "2026-09-23T16:15:11.913Z"
+}

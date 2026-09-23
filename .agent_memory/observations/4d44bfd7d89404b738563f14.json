@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && find _bmad-output docs -maxdepth 2 -iname '*context*' -o -maxdepth 2 -iname 'architecture*' | head; git check-ignore -v docs _bmad-output 2>&1 | head; ls docs | head; cat AGENTS.md | head -20",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && find _bmad-output docs -maxdepth 2 -iname '*context*' -o -maxdepth 2 -iname 'architecture*' | head; git check-ignore -v docs _bmad-output 2>&1 | he",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4d44bfd7d89404b738563f14",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:48.323Z",
+  "stored_at": "2026-09-23T16:15:48.323Z"
+}

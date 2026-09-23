@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 281,430p app/api/v1/colleges.py; echo; grep -rn \"create_pool\\|_PDF_MAGIC =\\|_CHUNK_SIZE =\" app",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 281,430p app/api/v1/colleges.py; echo; grep -rn \"create_pool\\|_PDF_MAGIC =\\|_CHUNK_SIZE =\" app",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ed6bac9180c68b9dfee8359a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:55.482Z",
+  "stored_at": "2026-09-23T16:14:55.482Z"
+}

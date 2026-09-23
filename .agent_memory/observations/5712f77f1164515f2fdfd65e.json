@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"localStorage\\|sessionStorage\\|Authorization\\|btoa\\|innerHTML\\|<script src\\|http://\\|https://\" app/static/admin/index.html | head -60; grep -c innerHTML app/static/admin/index.html app/static/index.html",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"localStorage\\|sessionStorage\\|Authorization\\|btoa\\|innerHTML\\|<script src\\|http://\\|https://\" app/static/admin/index.html ",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5712f77f1164515f2fdfd65e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:18.194Z",
+  "stored_at": "2026-09-23T16:13:18.195Z"
+}

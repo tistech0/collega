@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd /private/tmp/claude-501/bundled-skills/2.1.280/bbcc1b83f012a26220adb5c529a9edb8/claude-api && grep -niE \"sonnet 5.*tokeniz|tokeniz.*sonnet 5\" shared/*.md | head -5; grep -niE \"sonnet-4-6|sonnet 4.6\" shared/models.md | head -5",
+  "summary": "cd /private/tmp/claude-501/bundled-skills/2.1.280/bbcc1b83f012a26220adb5c529a9edb8/claude-api && grep -niE \"sonnet 5.*tokeniz|tokeniz.*sonnet 5\" shared/*.md | head -5; grep -niE \"sonnet-4-6|sonnet 4.6\" shared/models.md | head -5:  more tokens for the same text), `max_tokens` limits tuned for Sonnet 4.6 may truncate equ",
+  "text": "cd /private/tmp/claude-501/bundled-skills/2.1.280/bbcc1b83f012a26220adb5c529a9edb8/claude-api && grep -niE \"sonnet 5.*tokeniz|tokeniz.*sonnet 5\" shared/*.md | head -5; grep -niE \"sonnet-4-6|sonnet 4.6\" shared/models.md | head -5:  more tokens for the same text), `max_tokens` limits tuned for Sonnet 4.6 may truncate equivalent output. 70:| Claude Sonnet 4.6 | `claude-sonnet-4-6` | - | 1M | 128K | Active | 82:- **Claude Sonnet 5** - The best combination of speed and intelligence in the Sonnet tier; near-Opus quality on coding and agentic work. Adaptive thinking on by default (omitting `thinking` runs adaptive); manual `budget_tokens` removed; non-default sampling parameters rejected. `effort` supports `low`/`medium`/`high`/`xhigh`/`max`. New tokenizer (~30% more tokens for the same text vs Sonnet 4.6). High-resolution vision (2576px). 1M context window, 128K max output. See `shared/model-migration.md` -> Migrating to Claude Sonnet 5. 83:- **Claude Sonnet 4.6** - Previous-generation Sonnet. Supports adaptive thinking (recommended). 1M context window. 128K max output tokens. 138:| \"sonnet 4.6\" | `claude-sonnet-4-6` |",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bd2f4fde57d3c64d75622ab9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:28.909Z",
+  "stored_at": "2026-09-23T16:15:28.909Z"
+}

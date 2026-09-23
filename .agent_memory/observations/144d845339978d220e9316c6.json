@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ls; ls collega_backend; ls collega_backend/docs; ls -a collega_backend | grep -i -E 'env|caddy|docker|lock|req|pyproject'; ls -a . | grep -i -E 'github|ci'; cat -n collega_backend/Dockerfile; cat -n collega_backend/docker-compose.prod.yml; cat -n collega_backend/docker-compose.yml",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ls; ls collega_backend; ls collega_backend/docs; ls -a collega_backend | grep -i -E 'env|caddy|docker|lock|req|pyproject'; ls -a . | grep -i -E 'gith",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "144d845339978d220e9316c6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:15.165Z",
+  "stored_at": "2026-09-23T16:13:15.166Z"
+}

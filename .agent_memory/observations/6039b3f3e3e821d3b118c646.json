@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; curl -s \"https://hub.docker.com/v2/repositories/tistech0/collega-backend/\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print('is_private', d.get('is_private'), 'pulls', d.get('pull_count'))\"; grep -n -A12 \"def default_log_config\" .venv/lib/python*/site-packages/arq/logs.py | head -30; grep -rn -i \"redis\" tests/conftest.py | head; ls tests | head -50; ls tests | wc -l; .venv/bin/python --version",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; curl -s \"https://hub.docker.com/v2/repositories/tistech0/collega-backend/\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print('is_private', d.get('is_private'), 'pulls', d.get('pull_count'))\"; grep -n -A12 \"def default_log_config\" .venv/lib/py",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; curl -s \"https://hub.docker.com/v2/repositories/tistech0/collega-backend/\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print('is_private', d.get('is_private'), 'pulls', d.get('pull_count'))\"; grep -n -A12 \"def default_log_config\" .venv/lib/python*/site-packages/arq/logs.py | head -30; grep -rn -i \"redis\" tests/conftest.py | head; ls tests | head -50; ls tests | wc -l; .venv/bin/python --version: is_private False pulls 734 4:def default_log_config(verbose: bool) -> dict[str, Any]: 5- \"\"\" 6- Setup default config. for dictConfig. 7- 8- :param verbose: level: DEBUG if True, INFO if False 9- :return: dict suitable for ``logging.config.dictConfig`` 10- \"\"\" 11- log_level = 'DEBUG' if verbose else 'INFO' 12- return { 13- 'version': 1, 14- 'disable_existing_loggers': False, 15- 'handlers': { 16- 'arq.standard': {'level': log_level, 'class': 'logging.StreamHandler', 'formatter': 'arq.standard'} tests/conftest.py:10:os.environ.setdefault(\"REDIS_URL\", \"redis://localhost:6379/0\") __init__.py __pycache__ api conftest.py core fakes fixtures scripts services sqlite_db.py test_migration_015.py test_migrations.py workers 13 Python 3.14.3",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6039b3f3e3e821d3b118c646",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:07.421Z",
+  "stored_at": "2026-09-23T16:15:07.422Z"
+}

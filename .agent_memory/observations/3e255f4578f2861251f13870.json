@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'cd /mnt/user/appdata/compose-stacks/collega; diff docker-compose.yml.bak-20260814-p3 docker-compose.yml; echo ---NETS---; for c in collega-api-1 collega-worker-1 collega-db-1 collega-redis-1 Nginx-Proxy-Manager-Official CloudflaredTunnel; do echo \"$c: $(docker inspect -f \"{{range \\$k,\\$v := .NetworkSettings.Networks}}{{\\$k}} {{end}} | restart={{.HostConfig.RestartPolicy.Name}} | mem={{.HostConfig.Memory}} cpus={{.HostConfig.NanoCpus}} | log={{.HostConfig.LogConfig.Type}} {{.HostConfig.LogConfig.Config}} | user={{.Config.User}} | health={{if .State.Health}}{{.State.Health.Status}}{{els… [+288 chars truncated]",
+  "summary": "About to run: ssh nas 'cd /mnt/user/appdata/compose-stacks/collega; diff docker-compose.yml.bak-20260814-p3 docker-compose.yml; echo ---NETS---; for c in collega-api-1 collega-worker-1 collega-db-1 collega-redis-1 ",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3e255f4578f2861251f13870",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:40.637Z",
+  "stored_at": "2026-09-23T16:13:40.638Z"
+}

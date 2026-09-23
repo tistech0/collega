@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/workers/settings.py app/workers/generation_worker.py app/workers/cleanup_worker.py app/workers/daily_reminder_worker.py app/core/database.py app/core/redis.py app/services/jobs/arq_control.py app/services/jobs/job_events.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/workers/settings.py app/workers/generation_worker.py app/workers/cleanup_worker.py app/workers/daily_reminder_worker.py app/core/database.py app/core/redis.py app/services/jobs/arq_control.py app/services/jobs/job_events.py: ion_job_event i",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/workers/settings.py app/workers/generation_worker.py app/workers/cleanup_worker.py app/workers/daily_reminder_worker.py app/core/database.py app/core/redis.py app/services/jobs/arq_control.py app/services/jobs/job_events.py: ion_job_event import GenerationJobEvent 17 18 logger = logging.getLogger(__name__) 19 20 21 async def record_job_event( 22 db: AsyncSession, 23 generation_job_id: uuid.UUID, 24 event_type: str, 25 *, 26 message: str | None = None, 27 page: int | None = None, 28 total: int | None = None, 29 ) -> None: 30 \"\"\"Ajoute un GenerationJobEvent à la session (sans commit). 31 32 Le commit est porté par le flux appelant. Toute exception est avalée et 33 journalisée en warning — la timeline est best-effort, jamais bloquante. 34 \"\"\" 35 try: 36 db.add( 37 GenerationJobEvent( 38 generation_job_id=generation_job_id, 39 event_type=event_type, 40 message=message, 41 page=page, 42 total=total, 43 ) 44 ) 45 except Exception as exc: # noqa: BLE001 — best-effort, ne jamais casser le pipeline 46 logger.warning( 47 \"record_job_event failed (job=%s, type=%s): %s\", 48 generation_job_id, 49 event_type, 50 exc, 51 )",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "fdc66eb1f50ca33f5bedeebe",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:12:52.627Z",
+  "stored_at": "2026-09-23T16:12:52.627Z"
+}

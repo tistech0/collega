@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/hash_sharing.py; grep -n \"hash\\|shar\" app/services/generation/card_generator.py | head -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/hash_sharing.py; grep -n \"hash\\|shar\" app/services/generation/card_generator.py | head -30: db, pdf_hash) 95: count = await self._copy_cards_for_hash_sharing( 99: job.hash_shared = True 101: # Hash-sharing : Claude n'est",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/hash_sharing.py; grep -n \"hash\\|shar\" app/services/generation/card_generator.py | head -30: db, pdf_hash) 95: count = await self._copy_cards_for_hash_sharing( 99: job.hash_shared = True 101: # Hash-sharing : Claude n'est jamais appelé → usage gratuit 107: # hash-sharing (Claude PAS appelé, gratuit), on compense le 124: \"Hash-sharing reimport: quota compensé (college %s, user %s)\", 130: db, job_id, \"generation_complete\", message=f\"{count} cards (hash-sharing)\" 134: \"Hash-sharing: copied %d cards for college %s from job %s\", 139: return {\"college_id\": str(college_id), \"job_id\": str(job_id), \"hash_shared\": True, \"card_count\": count} 142: \"Hash-sharing from job %s returned 0 cards — falling through to normal generation\", 177: \"hash_shared\": False, 233: return {\"college_id\": str(college_id), \"job_id\": str(job_id), \"hash_shared\": False, \"card_count\": card_count} 259: Utilisé pour décider si l'on doit compenser le quota après hash-sharing : 273: async def _copy_cards_for_hash_sharing(",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "43642b5b5586801e857e5575",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:59.212Z",
+  "stored_at": "2026-09-23T16:13:59.213Z",
+  "low_signal": true
+}

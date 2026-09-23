@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"MarkdownBody\\|Markdown(\\|onTapLink\\|launchUrl\" lib | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"MarkdownBody\\|Markdown(\\|onTapLink\\|launchUrl\" lib | head: lib/features/auth/data/revenuecat_service.dart:31: await launchUrl(uri); lib/features/legal/presentation/legal_screen.dart:25: /// Ouvre un lien du document (adresse de contact → Mail) ;",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -rn \"MarkdownBody\\|Markdown(\\|onTapLink\\|launchUrl\" lib | head: lib/features/auth/data/revenuecat_service.dart:31: await launchUrl(uri); lib/features/legal/presentation/legal_screen.dart:25: /// Ouvre un lien du document (adresse de contact → Mail) ; `launchUrl` par défaut. lib/features/legal/presentation/legal_screen.dart:82: MarkdownBody( lib/features/legal/presentation/legal_screen.dart:85: onTapLink: (_, href, __) { lib/features/legal/presentation/legal_screen.dart:87: (widget.openLink ?? launchUrl)(Uri.parse(href));",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "af45cc84d1f5eb7ae6fe8479",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:19.021Z",
+  "stored_at": "2026-09-23T16:16:19.022Z"
+}

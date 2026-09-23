@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'grep -nE \"telegram|TELEGRAM|send|notify|source|secrets\" /boot/config/plugins/user.scripts/scripts/backup-check/script | head -20; ls /boot/config/secrets 2>/dev/null | sed \"s/.*/[fichier] &/\"'",
+  "summary": "About to run: ssh nas 'grep -nE \"telegram|TELEGRAM|send|notify|source|secrets\" /boot/config/plugins/user.scripts/scripts/backup-check/script | head -20; ls /boot/config/secrets 2>/dev/null | sed \"s/.*/[fichier] &/\"",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "dc80df248a2af49dc9af31fd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:33:13.684Z",
+  "stored_at": "2026-09-23T16:33:13.684Z"
+}

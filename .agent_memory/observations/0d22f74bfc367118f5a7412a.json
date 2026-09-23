@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat alembic/env.py | head -60; timeout 30 .venv/bin/alembic check 2>&1 | tail -5; git status --short . | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat alembic/env.py | head -60; timeout 30 .venv/bin/alembic check 2>&1 | tail -5; git status --short . | head: .get_main_option(\"sqlalchemy.url\") context.configure( url=url, target_metadata=target_metadata, literal_binds=True, dialect_opts={\"paramstyl",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat alembic/env.py | head -60; timeout 30 .venv/bin/alembic check 2>&1 | tail -5; git status --short . | head: .get_main_option(\"sqlalchemy.url\") context.configure( url=url, target_metadata=target_metadata, literal_binds=True, dialect_opts={\"paramstyle\": \"named\"}, ) with context.begin_transaction(): context.run_migrations() def do_run_migrations(connection: Connection) -> None: context.configure(connection=connection, target_metadata=target_metadata) with context.begin_transaction(): context.run_migrations() async def run_async_migrations() -> None: connectable = async_engine_from_config( config.get_section(config.config_ini_section, {}), prefix=\"sqlalchemy.\", poolclass=pool.NullPool, ) async with connectable.connect() as connection: await connection.run_sync(do_run_migrations) await connectable.dispose() def run_migrations_online() -> None: asyncio.run(run_async_migrations()) if context.is_offline_mode(): run_migrations_offline() else: run_migrations_online() (eval):1: command not found: timeout",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0d22f74bfc367118f5a7412a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:30.118Z",
+  "stored_at": "2026-09-23T16:15:30.118Z"
+}

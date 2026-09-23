@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"scope\" .venv/lib/python*/site-packages/fastapi/params.py | head -8; grep -rn \"def Depends\" -A12 .venv/lib/python*/site-packages/fastapi/param_functions.py | grep -n scope | head -3; grep -rn \"response_awaited\\|function_stack\\|request_stack\\|fastapi_inner_astack\\|fastapi_function_astack\" .venv/lib/python*/site-packages/fastapi/routing.py | head -10",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"scope\" .venv/lib/python*/site-packages/fastapi/params.py | head -8; grep -rn \"def Depends\" -A12 .venv/lib/python*/site-pa",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f52a3adef584bd5dc2f7cf95",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:05.355Z",
+  "stored_at": "2026-09-23T16:14:05.356Z"
+}

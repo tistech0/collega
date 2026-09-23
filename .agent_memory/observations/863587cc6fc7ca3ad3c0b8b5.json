@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "docker exec audit-pg-tmp psql -U postgres -d collega -c \"select indexname, indexdef from pg_indexes where tablename in ('generation_jobs','colleges','flash_cards','items') order by 1;\" -c \"select conrelid::regclass, conname, pg_get_constraintdef(oid) from pg_constraint where contype in ('f','c','u') and conrelid::regclass::text in ('flash_cards','items','generation_jobs','generation_job_events','colleges') order by 1;\"",
+  "summary": "About to run: docker exec audit-pg-tmp psql -U postgres -d collega -c \"select indexname, indexdef from pg_indexes where tablename in ('generation_jobs','colleges','flash_cards','items') order by 1;\" -c \"select conr",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "863587cc6fc7ca3ad3c0b8b5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:44.156Z",
+  "stored_at": "2026-09-23T16:16:44.157Z"
+}

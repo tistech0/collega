@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"ocr_text\\[\\|truncat\\|MAX_OCR\\|max_chars\\|\\[:.*000\\]\" app | head; cat -n pyproject.toml; cat -n Dockerfile; cat -n docker-compose.prod.yml; cat -n app/main.py app/core/database.py app/core/config.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"ocr_text\\[\\|truncat\\|MAX_OCR\\|max_chars\\|\\[:.*000\\]\" app | head; cat -n pyproject.toml; cat -n Dockerfile; cat -n docker-compose.prod.yml; cat -n app/main.py app/core/database.py app/core/config.py: RD / TESTER_PASSWORD : non vide + pas de p",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"ocr_text\\[\\|truncat\\|MAX_OCR\\|max_chars\\|\\[:.*000\\]\" app | head; cat -n pyproject.toml; cat -n Dockerfile; cat -n docker-compose.prod.yml; cat -n app/main.py app/core/database.py app/core/config.py: RD / TESTER_PASSWORD : non vide + pas de placeholder. 128 if not admin_password or admin_password in _PLACEHOLDER_PASSWORDS: 129 issues.append(\"ADMIN_PASSWORD (default placeholder value)\") 130 131 if not tester_password or tester_password in _PLACEHOLDER_PASSWORDS: 132 issues.append(\"TESTER_PASSWORD (default placeholder value)\") 133 134 # REVENUECAT_WEBHOOK_SECRET : pas de placeholder (le non-vide est déjà 135 # vérifié par _require_webhook_secret au-dessus). 136 if webhook_secret in _PLACEHOLDER_WEBHOOK_SECRETS: 137 issues.append(\"REVENUECAT_WEBHOOK_SECRET (default placeholder value)\") 138 139 if not issues: 140 return self 141 142 msg = f\"Insecure config values: {', '.join(issues)}\" 143 if is_prod: 144 raise ValueError(f\"Production secrets invalid — {msg}. Refuse to start.\") 145 logger.warning(\"DEV mode: %s — DO NOT deploy as-is.\", msg) 146 return self 147 148 149 settings = Settings()",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c23a0fe47bf5d1d4d7fdbc2c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:43.834Z",
+  "stored_at": "2026-09-23T16:13:43.834Z"
+}

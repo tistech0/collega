@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"text(\\|execute(f\\|\\.format(\\|literal_column\\|raw\" app --include=*.py | grep -v \"^.*#\" | head -30; cat -n app/services/search/full_text_search.py | sed -n 1,116p",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"text(\\|execute(f\\|\\.format(\\|literal_column\\|raw\" app --include=*.py | grep -v \"^.*#\" | head -30; cat -n app/services/search/full_text_search.py | sed -n 1,116p: i ON fc.item_id = i.id 95 JOIN colleges c ON fc.college_id = c.id 96 WHERE fc.u",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"text(\\|execute(f\\|\\.format(\\|literal_column\\|raw\" app --include=*.py | grep -v \"^.*#\" | head -30; cat -n app/services/search/full_text_search.py | sed -n 1,116p: i ON fc.item_id = i.id 95 JOIN colleges c ON fc.college_id = c.id 96 WHERE fc.user_id = :user_id 97 AND to_tsvector('french', coalesce(fc.recto, '') || ' ' || coalesce(fc.verso, '')) 98 @@ plainto_tsquery('french', :query) 99 ORDER BY fc.item_id, rank DESC 100 \"\"\") 101 102 result = await db.execute(sql, {\"query\": query, \"user_id\": str(user_id)}) 103 rows = result.mappings().all() 104 105 # Re-trier par rank décroissant (DISTINCT ON trie par item_id en premier) 106 sorted_rows = sorted(rows, key=lambda r: r[\"rank\"], reverse=True) 107 108 results = [] 109 for r in sorted_rows[:MAX_RESULTS]: 110 row = dict(r) 111 # La réponse (verso) d'abord : elle porte l'information, la question la répète. 112 recto = row.pop(\"recto\", \"\") or \"\" 113 text_ = f\"{row.pop('verso', '') or ''}\\n{recto}\" 114 row[\"excerpt\"] = build_excerpt(text_, row.get(\"excerpt\") or \"\") 115 results.append(row) 116 return results",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ffff8cf903beaef84d8b0397",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:43.658Z",
+  "stored_at": "2026-09-23T16:13:43.659Z"
+}

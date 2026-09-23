@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && pipx run ruff check --no-cache --statistics app tests scripts 2>&1 | tail -30; echo ---; pipx run ruff check --no-cache --select E,F,W,I,B,UP,SIM,C90 --statistics app 2>&1 | tail -30",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && pipx run ruff check --no-cache --statistics app tests scripts 2>&1 | tail -30; echo ---; pipx run ruff check --no-cache --select E,",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2170823d28dab93d4fc0a5fb",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:17.663Z",
+  "stored_at": "2026-09-23T16:13:17.664Z"
+}

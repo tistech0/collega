@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && echo \"--- HTTPException total:\"; grep -rn \"HTTPException(\" app | grep -v \"^.*import\" | wc -l; echo \"--- detail string:\"; grep -rnE 'detail=\"|detail=f\"' app; echo \"--- exception handlers:\"; grep -rn \"exception_handler\\|add_exception_handler\" app; echo \"--- response wrappers\"; grep -rn \"class .*Wrapped\\|class .*Response(\" app/schemas | wc -l; grep -rn \"return {\\\"data\\\"\\|return {'data'\\|\\\"data\\\":\" app/api | head -20",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && echo \"--- HTTPException total:\"; grep -rn \"HTTPException(\" app | grep -v \"^.*import\" | wc -l; echo \"--- detail string:\"; grep -rnE 'detail=\"|detail=f\"' app; echo \"--- exception handlers:\"; grep -rn \"exception_handler\\|add_exception_handler\" app; echo ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && echo \"--- HTTPException total:\"; grep -rn \"HTTPException(\" app | grep -v \"^.*import\" | wc -l; echo \"--- detail string:\"; grep -rnE 'detail=\"|detail=f\"' app; echo \"--- exception handlers:\"; grep -rn \"exception_handler\\|add_exception_handler\" app; echo \"--- response wrappers\"; grep -rn \"class .*Wrapped\\|class .*Response(\" app/schemas | wc -l; grep -rn \"return {\\\"data\\\"\\|return {'data'\\|\\\"data\\\":\" app/api | head -20: current_user.is_subscribed, \"is_beta\": current_user.is_beta}} app/api/v1/colleges.py:661: event = {\"event\": \"ocr_progress\", \"data\": {\"page\": last_progress, \"total\": c.total_pages}} app/api/v1/colleges.py:667: event = {\"event\": \"card_generation_started\", \"data\": {\"college_id\": str(college_id)}} app/api/v1/colleges.py:679: \"data\": { app/api/v1/colleges.py:690: event = {\"event\": \"generation_complete\", \"data\": {\"college_id\": str(college_id)}} app/api/v1/colleges.py:695: event = {\"event\": \"generation_failed\", \"data\": {\"college_id\": str(college_id)}} app/api/v1/flash_cards.py:51: return {\"data\": {\"id\": str(card.id), \"feedback\": card.user_feedback}} app/api/v1/notifications.py:36: return {\"data\": {\"registered\": True}} app/api/v1/notifications.py:60: return {\"data\": {\"reminder_enabled\": True, \"hour_utc\": body.hour_utc}} app/api/v1/notifications.py:72: return {\"data\": {\"reminder_enabled\": False}}",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "34db1699ce101f09f9e1e49d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:36.085Z",
+  "stored_at": "2026-09-23T16:14:36.086Z",
+  "low_signal": true
+}

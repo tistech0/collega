@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,150p app/services/ocr/ocr_processor.py | grep -n \"def \\|convert_from\\|dpi\\|timeout\\|MAX\\|pages\\|open(\" ; grep -n \"unlink\\|remove\\|ocr_text\\|timeout\\|max_tries\\|job_timeout\" app/workers/*.py",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,150p app/services/ocr/ocr_processor.py | grep -n \"def \\|convert_from\\|dpi\\|timeout\\|MAX\\|pages\\|open(\" ; grep -n \"unlink\\|",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ce85faeb72d82be02298c56d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:12.176Z",
+  "stored_at": "2026-09-23T16:14:12.176Z"
+}

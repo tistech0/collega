@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'IP=104.21.37.178; URL=https://collegatest.matthislesur.com/v1/webhooks/revenuecat; BODY=\"{\\\"event\\\":{\\\"type\\\":\\\"TEST\\\",\\\"app_user_id\\\":\\\"test-claude\\\"},\\\"api_version\\\":\\\"1.0\\\"}\";\necho \"== sans secret\"; curl -s -w \" -> %{http_code}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$IP -H \"Content-Type: application/json\" -d \"$BODY\" $URL;\necho \"== mauvais secret\"; curl -s -w \" -> %{http_code}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$IP -H \"Content-Type: application/json\" -H \"Authorization: Bearer faux\" -d \"$BODY\" $URL;\necho \"== vrai secret (lu dans le conteneur, non aff… [+307 chars truncated]",
+  "summary": "ssh nas 'IP=104.21.37.178; URL=https://collegatest.matthislesur.com/v1/webhooks/revenuecat; BODY=\"{\\\"event\\\":{\\\"type\\\":\\\"TEST\\\",\\\"app_user_id\\\":\\\"test-claude\\\"},\\\"api_version\\\":\\\"1.0\\\"}\";\necho \"== sans secret\"; curl -s -w \" -> %{http_code}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$IP -H \"Content-Type: appl",
+  "text": "ssh nas 'IP=104.21.37.178; URL=https://collegatest.matthislesur.com/v1/webhooks/revenuecat; BODY=\"{\\\"event\\\":{\\\"type\\\":\\\"TEST\\\",\\\"app_user_id\\\":\\\"test-claude\\\"},\\\"api_version\\\":\\\"1.0\\\"}\";\necho \"== sans secret\"; curl -s -w \" -> %{http_code}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$IP -H \"Content-Type: application/json\" -d \"$BODY\" $URL;\necho \"== mauvais secret\"; curl -s -w \" -> %{http_code}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$IP -H \"Content-Type: application/json\" -H \"Authorization: Bearer faux\" -d \"$BODY\" $URL;\necho \"== vrai secret (lu dans le conteneur, non affiché)\"; S=$(docker exec collega-api-1 printenv REVENUECAT_WEBHOOK_SECRET); [ -n \"$S\" ] || echo \"variable vide\";\nprintf \"Authorization: Bearer %s\" \"$S\" | curl -s -w \" -> %{http_code}\\n\" -X POST --resolve collegatest.matthislesur.com:443:$IP -H \"Content-Type: application/json\" -H @- -d \"$BODY\" $URL; unset S': == sans secret {\"detail\":{\"code\":\"INVALID_SIGNATURE\",\"message\":\"Invalid or missing Authorization\"}} -> 401 == mauvais secret {\"detail\":{\"code\":\"INVALID_SIGNATURE\",\"message\":\"Invalid or missing Authorization\"}} -> 401 == vrai secret (lu dans le conteneur, non affiché) {\"data\":{\"status\":\"ignored\"}} -> 200",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4d46cfa46fbe9278ef390c80",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:06:56.126Z",
+  "stored_at": "2026-09-23T16:06:56.126Z",
+  "low_signal": true
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls && find app -name \"*.py\" | xargs wc -l | sort -n | tail -60 && ls alembic/versions 2>/dev/null || find . -path ./node_modules -prune -o -name \"*.py\" -path \"*versions*\" -print | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls && find app -name \"*.py\" | xargs wc -l | sort -n | tail -60 && ls alembic/versions 2>/dev/null || find . -path ./node_modules -prune -o -name \"*.py\" -path \"*versions*\" -print | head -40: hunked_upload.py 201 app/services/ocr/item_titles.py 211 app/",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && ls && find app -name \"*.py\" | xargs wc -l | sort -n | tail -60 && ls alembic/versions 2>/dev/null || find . -path ./node_modules -prune -o -name \"*.py\" -path \"*versions*\" -print | head -40: hunked_upload.py 201 app/services/ocr/item_titles.py 211 app/services/generation/claude_client.py 256 app/api/v1/tester.py 312 app/schemas/admin.py 313 app/workers/ocr_worker.py 318 app/services/generation/card_generator.py 388 app/services/ocr/item_detector.py 869 app/api/v1/colleges.py 972 app/api/v1/admin.py 6797 total 001_init_users_colleges.py 002_add_items_generation_jobs.py 003_review_fixes.py 004_add_flash_cards.py 005_add_tester_feedbacks.py 006_add_unique_constraint_colleges_user_ref.py 007_add_monthly_reloads_reset_at.py 008_add_user_feedback_to_flash_cards.py 009_add_reminder_hour_utc_to_users.py 010_add_gin_index_flash_cards_fts.py 011_add_profile_fields_to_users.py 012_atomic_quota_and_unique_processing.py 013_add_generation_job_events.py 014_add_token_usage_to_generation_jobs.py 015_add_item_titles.py 016_add_generation_progress.py 017_add_generation_preview.py __pycache__",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "100293237b52f239bf8c176a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:26.886Z",
+  "stored_at": "2026-09-23T16:13:26.887Z"
+}

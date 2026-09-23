@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 55,75p collega_app/assets/legal/privacy.md; grep -n -i \"suppr\\|compte\" collega_app/assets/legal/privacy.md | head -12",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 55,75p collega_app/assets/legal/privacy.md; grep -n -i \"suppr\\|compte\" collega_app/assets/legal/privacy.md | head -12:  suivantes, dans les limites strictes de leur mission : | Destinataire | Rôle | Localisation | Garanties | |---|---|---|---| 43:aucune donnée",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && sed -n 55,75p collega_app/assets/legal/privacy.md; grep -n -i \"suppr\\|compte\" collega_app/assets/legal/privacy.md | head -12:  suivantes, dans les limites strictes de leur mission : | Destinataire | Rôle | Localisation | Garanties | |---|---|---|---| 43:aucune donnée bancaire**. Seul un identifiant d'abonnement RevenueCat est associé à ton compte 62:- **Données du compte (email, profil, fiches, drills)** : conservées tant que ton compte est actif. 63: Supprimées **définitivement et immédiatement** à la suppression du compte (cf. § 7). 64:- **PDF importés** : conservés tant que le collège associé est dans ton compte. 66:- **Token APNs** : supprimé dès le revoke d'autorisation iOS ou la déconnexion. 103:- **Droit à l'effacement (« droit à l'oubli »)** : supprimer définitivement ton compte et toutes 104: les données associées via le bouton **« Supprimer mon compte »** de l'écran Profil. La suppression 122:- séparation backend / frontend ; rate limiting des routes sensibles (login, refresh, suppression de compte) ;",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e454312302d2da882d9b4e77",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:38.680Z",
+  "stored_at": "2026-09-23T16:16:38.681Z"
+}

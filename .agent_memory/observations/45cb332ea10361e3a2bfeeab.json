@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'for c in collega-api-1 collega-worker-1 Nginx-Proxy-Manager-Official CloudflaredTunnel; do echo \"$c: $(docker inspect -f \"{{range \\$k,\\$v := .NetworkSettings.Networks}}{{\\$k}} {{end}} | restart={{.HostConfig.RestartPolicy.Name}} | mem={{.HostConfig.Memory}} cpus={{.HostConfig.NanoCpus}} | log={{.HostConfig.LogConfig.Type}} {{.HostConfig.LogConfig.Config}} | user={{.Config.User}} | restarts={{.RestartCount}} | started={{.State.StartedAt}} | image={{.Image}}\" $c)\"; done; echo; docker network ls; echo ---STATS---; docker stats --no-stream --format \"table {{.Name}}\\t{{.CPUPerc}}\\t{{.MemUs… [+276 chars truncated]",
+  "summary": "ssh nas 'for c in collega-api-1 collega-worker-1 Nginx-Proxy-Manager-Official CloudflaredTunnel; do echo \"$c: $(docker inspect -f \"{{range \\$k,\\$v := .NetworkSettings.Networks}}{{\\$k}} {{end}} | restart={{.HostConfig.RestartPolicy.Name}} | mem={{.HostConfig.Memory}} cpus={{.HostConfig.NanoCpus}} | log={{.HostConfig.Log",
+  "text": "ssh nas 'for c in collega-api-1 collega-worker-1 Nginx-Proxy-Manager-Official CloudflaredTunnel; do echo \"$c: $(docker inspect -f \"{{range \\$k,\\$v := .NetworkSettings.Networks}}{{\\$k}} {{end}} | restart={{.HostConfig.RestartPolicy.Name}} | mem={{.HostConfig.Memory}} cpus={{.HostConfig.NanoCpus}} | log={{.HostConfig.LogConfig.Type}} {{.HostConfig.LogConfig.Config}} | user={{.Config.User}} | restarts={{.RestartCount}} | started={{.State.StartedAt}} | image={{.Image}}\" $c)\"; done; echo; docker network ls; echo ---STATS---; docker stats --no-stream --format \"table {{.Name}}\\t{{.CPUPerc}}\\t{{.MemUsage}}\\t{{.MemPerc}}\" | grep -E \"NAME|collega|Cloudflared|Nginx\"; echo ---DF---; df -h / /mnt/user /mnt/cache /mnt/disk* /var/lib/docker 2>/dev/null; echo ---DU---; du -sh /mnt/user/appdata/collega/* 2>/dev/null; echo ---DAEMON---; cat /etc/docker/daemon.json 2>/dev/null' 2>&1 failed: ess-site1-net bridge local ---STATS--- NAME CPU % MEM USAGE / LIMIT MEM % collega-api-1 0.22% 236.4MiB / 31.13GiB 0.74% collega-worker-1 0.08% 93.16MiB / 31.13GiB 0.29% CloudflaredTunnel 0.11% 39.48MiB / 31.13GiB 0.12% collega-redis-1 0.33% 13.2MiB / 31.13GiB 0.04% collega-db-1 0.00% 170.3MiB / 31.13GiB 0.53% Nginx-Proxy-Manager-Official 0.05% 271.8MiB / 1GiB 26.54% ---DF--- Filesystem Size Used Avail Use% Mounted on rootfs 16G 829M 15G 6% / shfs 11T 9.1T 1.9T 83% /mnt/user /dev/nvme0n1p1 477G 158G 313G 34% /mnt/cache /dev/md1p1 3.7T 3.6T 124G 97% /mnt/disk1 /dev/md2p1 3.7T 2.8T 868G 77% /mnt/disk2 /dev/md3p1 3.7T 2.8T 925G 76% /mnt/disk3 tmpfs 1.0M 4.0K 1020K 1% /mnt/disks /dev/loop2 100G 54G 46G 54% /var/lib/docker ---DU--- 160K /mnt/user/appdata/collega/backups 916M /mnt/user/appdata/collega/pdfs 194M /mnt/user/appdata/collega/postgres 4.0K /mnt/user/appdata/collega/redis ---DAEMON---",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "45cb332ea10361e3a2bfeeab",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:50.451Z",
+  "stored_at": "2026-09-23T16:13:50.452Z"
+}

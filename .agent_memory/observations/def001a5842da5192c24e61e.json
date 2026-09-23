@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && time .venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | tail -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && time .venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | tail -40: , make_college(), make_job(), \"/fake.pdf\") Enable tracemalloc to get traceback where the object was allocated. See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#r",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && time .venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | tail -40: , make_college(), make_job(), \"/fake.pdf\") Enable tracemalloc to get traceback where the object was allocated. See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info. -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html =========================== short test summary info ============================ FAILED tests/api/test_auth.py::TestLogin::test_login_success - assert 429 == 200 FAILED tests/api/test_auth.py::TestLogin::test_login_wrong_password - assert ... FAILED tests/api/test_auth.py::TestLogin::test_login_unknown_email - assert 4... FAILED tests/api/test_auth.py::TestGetCurrentUser::test_beta_user_flag_in_token_response 4 failed, 476 passed, 1 skipped, 27 warnings in 4.71s .venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 6.08s user 0.36s system 96% cpu 6.641 total tail -40 0.00s user 0.00s system 0% cpu 6.640 total",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "def001a5842da5192c24e61e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:48.428Z",
+  "stored_at": "2026-09-23T16:15:48.429Z"
+}

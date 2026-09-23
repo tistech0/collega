@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rniE \"thumb|pouce|userFeedback|user_feedback|/feedback\" lib | grep -v \"\\.g\\.dart\" | head -30",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\"; grep -rniE \"thumb|pouce|userFeedback|user_feedback|/feedback\" lib | grep -v \"\\.g\\.dart\" | head -30",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e206bad2970d778e3fecfcf6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:30:17.721Z",
+  "stored_at": "2026-09-23T16:30:17.722Z"
+}

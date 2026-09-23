@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"INSERT\\|text(\" seed_dev.py | head; sed -n 1,40p docs/deployment.md | head -40; wc -l docs/*.md; ls ../docs 2>&1 | head; ls ../_bmad-output 2>&1 | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"INSERT\\|text(\" seed_dev.py | head; sed -n 1,40p docs/deployment.md | head -40; wc -l docs/*.md; ls ../docs 2>&1 | head; ls ../_bmad-output 2>&1 | head: t **ne doit jamais être écrasé** (mémoire `project_nas_env.md`). Vérification non-destruct",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"INSERT\\|text(\" seed_dev.py | head; sed -n 1,40p docs/deployment.md | head -40; wc -l docs/*.md; ls ../docs 2>&1 | head; ls ../_bmad-output 2>&1 | head: t **ne doit jamais être écrasé** (mémoire `project_nas_env.md`). Vérification non-destructive : ```bash ssh <user>@<nas> 'grep -E \"^(ENVIRONMENT|SECRET_KEY|ADMIN_PASSWORD|TESTER_PASSWORD|CLAUDE_API_KEY|REVENUECAT_WEBHOOK_SECRET)=\" /mnt/user/appdata/compose-stacks/collega/.env' ``` Pour mettre à jour une valeur fautive : éditer **uniquement la ligne concernée** via `nano` / `vi` sur le NAS — ne pas régénérer le fichier complet ni copier `.env.example` par-dessus. ## Ports DB / Redis — accès interne uniquement `docker-compose.prod.yml` n'expose **aucun port** sur l'host pour `db` (PostgreSQL) et `redis` — accès interne uniquement via le bridge `collega_net`. Un commentaire YAML en tête de chaque service rappelle cette contrainte. 113 docs/deployment.md 100 docs/sdk-gotchas.md 213 total suite i;ple;entqtion superpowers brainstorming implementation-artifacts planning-artifacts test-artifacts",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "269c713114ab22fc6000df56",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:18.579Z",
+  "stored_at": "2026-09-23T16:15:18.580Z"
+}

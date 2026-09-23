@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; git checkout -q -b feat/chantier-0-exploitation && git branch --show-current; cd collega_backend; cat app/api/v1/health.py; sed -n 1,120p app/main.py; sed -n 60,100p app/workers/settings.py; cat app/core/redis.py; ls tests/api | grep -i health; cat docker-compose.prod.yml",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\"; git checkout -q -b feat/chantier-0-exploitation && git branch --show-current; cd collega_backend; cat app/api/v1/health.py; sed -n 1,120p app/main.py",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9ef25cb61c03f18081103173",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:36:52.536Z",
+  "stored_at": "2026-09-23T16:36:52.537Z"
+}

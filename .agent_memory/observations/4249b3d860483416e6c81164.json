@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && export DATABASE_URL=\"postgresql+asyncpg://postgres:audit@localhost:55432/collega\"; .venv/bin/python -c \"from alembic.config import main; main(argv=['upgrade','head'])\" 2>&1 | tail -3; echo \"--- check\"; .venv/bin/python -c \"from alembic.config import main; main(argv=['check'])\" 2>&1 | tail -25",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && export DATABASE_URL=\"postgresql+asyncpg://postgres:audit@localhost:55432/collega\"; .venv/bin/python -c \"from alembic.config import main; main(argv=['upgrade','head'])\" 2>&1 | tail -3; echo \"--- check\"; .venv/bin/python -c \"from alembic.config import m",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && export DATABASE_URL=\"postgresql+asyncpg://postgres:audit@localhost:55432/collega\"; .venv/bin/python -c \"from alembic.config import main; main(argv=['upgrade','head'])\" 2>&1 | tail -3; echo \"--- check\"; .venv/bin/python -c \"from alembic.config import main; main(argv=['check'])\" 2>&1 | tail -25: from alembic.config import main; main(argv=['upgrade','head']) ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ModuleNotFoundError: No module named 'alembic.config' --- check Traceback (most recent call last): File \"<string>\", line 1, in <module> from alembic.config import main; main(argv=['check']) ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ModuleNotFoundError: No module named 'alembic.config'",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4249b3d860483416e6c81164",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:16:11.530Z",
+  "stored_at": "2026-09-23T16:16:11.531Z"
+}

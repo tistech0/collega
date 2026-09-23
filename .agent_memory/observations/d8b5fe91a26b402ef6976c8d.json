@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/api/v1/flash_cards.py | sed -n 40,112p; cat -n app/api/v1/billing.py; cat -n app/main.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/api/v1/flash_cards.py | sed -n 40,112p; cat -n app/api/v1/billing.py; cat -n app/main.py: ded, _rate_limit_exceeded_handler) 90 91 app.include_router(health_router) 92 app.include_router(auth_router, prefix=\"/v1/auth\") 93 app.include_router",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/api/v1/flash_cards.py | sed -n 40,112p; cat -n app/api/v1/billing.py; cat -n app/main.py: ded, _rate_limit_exceeded_handler) 90 91 app.include_router(health_router) 92 app.include_router(auth_router, prefix=\"/v1/auth\") 93 app.include_router(colleges_router, prefix=\"/v1\") 94 app.include_router(flash_cards_router, prefix=\"/v1\") 95 app.include_router(drill_router, prefix=\"/v1\") 96 app.include_router(notifications_router, prefix=\"/v1\") 97 app.include_router(search_router, prefix=\"/v1\") 98 app.include_router(admin_router, prefix=\"/v1/admin\") 99 app.include_router(billing_router, prefix=\"/v1/webhooks\") 100 app.include_router(tester_router, prefix=\"/v1/tester\") 101 # StaticFiles doit être monté EN DERNIER pour ne pas masquer les routes API 102 app.mount(\"/admin\", StaticFiles(directory=str(Path(__file__).parent / \"static\" / \"admin\"), html=True), name=\"admin-static\") 103 app.mount(\"/tester\", StaticFiles(directory=str(Path(__file__).parent / \"static\"), html=True), name=\"tester-static\")",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d8b5fe91a26b402ef6976c8d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:42.792Z",
+  "stored_at": "2026-09-23T16:14:42.793Z"
+}

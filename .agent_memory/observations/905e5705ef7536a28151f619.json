@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_context",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_context: [{'type': 'text', 'text': '# Kage Context\\n\\nQuery: audit fiabilité async backend: jobs ARQ, reprise, idempotence, pool DB, SSE, Redis, upload par morceaux, crons\\n\\n## Relevant Code Graph\\n1. [route] PUT /colleges/import/:upload_id/parts/:n -> collega_backend/app/api/v1/colleges.py:498\\n2. [route] ",
+  "text": "[{'type': 'text', 'text': '# Kage Context\\n\\nQuery: audit fiabilité async backend: jobs ARQ, reprise, idempotence, pool DB, SSE, Redis, upload par morceaux, crons\\n\\n## Relevant Code Graph\\n1. [route] PUT /colleges/import/:upload_id/parts/:n -> collega_backend/app/api/v1/colleges.py:498\\n2. [route] PUT /colleges/import/:upload_id/parts/:n -> collega_backend/app/api/v1/colleges.py:498\\n3. [route] GET /colleges/import/:upload_id -> collega_backend/app/api/v1/colleges.py:478\\n1. [symbol] method write_part in collega_backend/app/services/upload/chunked_upload.py:159\\n2. [symbol] function abort_arq_job in collega_backend/app/services/jobs/arq_control.py:13\\n3. [symbol] class UploadRedis in collega_backend/app/services/upload/chunked_upload.py:23\\n4. [symbol] function get_upload_store in collega_backend/app/api/v1/colleges.py:428\\n5. [symbol] method _parts_key in collega_backend/app/services/upload/chunked_upload.py:88\\n1. [test] test_put_part_204_et_marque in collega_backend/tests/api/test_colleges_chunked_upload.py:117\\n2. [test] test_write_part_ecrit_et_marque_recu in collega_backend/tests/services/test_chunked_upload_store.py:50\\n3. [test] test_write_part_taille_incorrecte_leve_et_ne",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "905e5705ef7536a28151f619",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:12:48.048Z",
+  "stored_at": "2026-09-23T16:12:48.049Z"
+}

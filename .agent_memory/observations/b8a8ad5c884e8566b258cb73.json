@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && pipx run ruff check --no-cache --statistics app tests scripts 2>&1 | tail -30; echo ---; pipx run ruff check --no-cache --select E,F,W,I,B,UP,SIM,C90 --statistics app 2>&1 | tail -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && pipx run ruff check --no-cache --statistics app tests scripts 2>&1 | tail -30; echo ---; pipx run ruff check --no-cache --select E,F,W,I,B,UP,SIM,C90 --statistics app 2>&1 | tail -30: le-with-context-handler 1 EXE001 [ ] shebang-not-executable 1 PLW15",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && pipx run ruff check --no-cache --statistics app tests scripts 2>&1 | tail -30; echo ---; pipx run ruff check --no-cache --select E,F,W,I,B,UP,SIM,C90 --statistics app 2>&1 | tail -30: le-with-context-handler 1 EXE001 [ ] shebang-not-executable 1 PLW1510 [ ] subprocess-run-without-check 1 S110 [ ] try-except-pass 1 C408 [ ] unnecessary-collection-call 1 RET501 [*] unnecessary-return-none Found 262 errors. [*] 136 fixable with the `--fix` option (1 hidden fix can be enabled with the `--unsafe-fixes` option). --- 223 E501 [ ] line-too-long 75 B008 [ ] function-call-in-default-argument 29 UP017 [*] datetime-timezone-utc 14 I001 [*] unsorted-imports 13 B904 [ ] raise-without-from-inside-except 5 C901 [ ] complex-structure 2 UP045 [*] non-pep604-annotation-optional 2 UP037 [*] quoted-annotation 2 SIM905 [*] split-static-string 1 UP042 [ ] replace-str-enum 1 SIM105 [ ] suppressible-exception 1 F401 [*] unused-import 1 B905 [ ] zip-without-explicit-strict Found 369 errors. [*] 50 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b8a8ad5c884e8566b258cb73",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:21.367Z",
+  "stored_at": "2026-09-23T16:13:21.368Z"
+}

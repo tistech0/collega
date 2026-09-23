@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git ls-files collega_backend/collega_dump.sql collega_backend/.env collega_backend/seed_dev.py; git check-ignore -v collega_backend/collega_dump.sql; ls -la collega_backend/collega_dump.sql; grep -c \"\" collega_backend/collega_dump.sql; grep -n \"COPY public.users\" -A3 collega_backend/collega_dump.sql | cut -c1-120; git log --oneline --all -- collega_backend/collega_dump.sql | head",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git ls-files collega_backend/collega_dump.sql collega_backend/.env collega_backend/seed_dev.py; git check-ignore -v collega_backend/collega_dump.sq",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "98a82ae26285b6b031a8d83e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:39.535Z",
+  "stored_at": "2026-09-23T16:14:39.536Z"
+}

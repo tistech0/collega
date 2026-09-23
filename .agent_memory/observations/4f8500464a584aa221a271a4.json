@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'for s in backup-nas backup-dumps backup-check backup-verify connect-npm-networks daily-recap; do echo \"=== $s ===\"; cat /boot/config/plugins/user.scripts/scripts/$s/name 2>/dev/null; echo; sed -E \"s/((PASS|PASSWORD|TOKEN|SECRET|KEY|WEBHOOK)[A-Z_]*=)[^ ]*/\\1<masqué>/Ig; s#(https?://)[^ \\\"]*#\\1<masqué>#g\" /boot/config/plugins/user.scripts/scripts/$s/script 2>/dev/null | head -120; done' 2>&1",
+  "summary": "About to run: ssh nas 'for s in backup-nas backup-dumps backup-check backup-verify connect-npm-networks daily-recap; do echo \"=== $s ===\"; cat /boot/config/plugins/user.scripts/scripts/$s/name 2>/dev/null; echo; se",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4f8500464a584aa221a271a4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:02.102Z",
+  "stored_at": "2026-09-23T16:14:02.103Z"
+}

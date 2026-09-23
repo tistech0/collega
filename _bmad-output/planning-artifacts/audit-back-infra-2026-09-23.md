@@ -27,6 +27,8 @@ Bilan : pas de faille d'accès inter-utilisatrices (chaque route vérifie le pro
 - Compose du dépôt ≠ prod (port `430:8000` retiré sur le NAS le 14/08) ; `install.md`, `Caddyfile*` obsolètes ; `docs/deployment.md` faux sur le validateur `SECRET_KEY`.
 - Aucune limite mémoire/CPU ; Redis sans mot de passe (non exposé) et RDB seul.
 
+- **Notifications push jamais actives en prod** (découvert au déploiement du chantier 0) : aucune variable `APNS_*` dans le `.env` du NAS → `NullNotificationService` au démarrage de l'API et du worker ; ni rappel quotidien ni « import terminé » ne partent. Il faut une clé `.p8` Apple (Key ID, Team ID) créée par l'utilisateur, puis `APNS_KEY_PATH` monté dans les conteneurs et `APNS_USE_SANDBOX=false` pour les builds TestFlight/App Store.
+
 **Coûts Claude**
 - `"max_retries": 3` ignoré par ARQ (`settings.py:85`) → `max_tries=5` par défaut ; la génération (une transaction pour tous les appels, `card_generator.py:84-226`) repart de zéro à chaque relance/redéploiement → Claude repayé.
 - Import typique ≈ 1,15 € estimé (0,7–1,6), 80 % en entrée (tout le texte OCR de l'item, `item_detector.py:307`). Leviers : Batch API (−50 %), génération parallèle (Semaphore 4-5, ×3-5 plus rapide), allègement de l'entrée, évaluation Haiku 4.5 (qualité médicale à valider). Chiffre réel à lire dans `generation_jobs.input_tokens/output_tokens`.

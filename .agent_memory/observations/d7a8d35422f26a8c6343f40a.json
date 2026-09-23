@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/workers/ocr_worker.py app/services/ocr/ocr_processor.py app/services/ocr/__init__.py app/services/ocr/confidence_scorer.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/workers/ocr_worker.py app/services/ocr/ocr_processor.py app/services/ocr/__init__.py app/services/ocr/confidence_scorer.py: etector\", 9 \"OcrPageResult\", 10 \"OcrProcessor\", 11 ] 1 \"\"\"Calcul et classification du score de confiance OCR.\"\"\" 2 f",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/workers/ocr_worker.py app/services/ocr/ocr_processor.py app/services/ocr/__init__.py app/services/ocr/confidence_scorer.py: etector\", 9 \"OcrPageResult\", 10 \"OcrProcessor\", 11 ] 1 \"\"\"Calcul et classification du score de confiance OCR.\"\"\" 2 from __future__ import annotations 3 4 from app.services.ocr.ocr_processor import OcrPageResult 5 6 LOW_CONFIDENCE_THRESHOLD = 0.7 7 8 9 class ConfidenceScorer: 10 \"\"\"Classifie les scores OCR et détermine le flag low_confidence.\"\"\" 11 12 def score(self, page_result: OcrPageResult) -> float: 13 \"\"\"Retourne le score de confiance 0.0–1.0 déjà calculé par OcrProcessor.\"\"\" 14 return round(page_result.confidence_score, 4) 15 16 def is_low_confidence(self, score: float) -> bool: 17 \"\"\"Retourne True si le score est en dessous du seuil (< 0.7).\"\"\" 18 return score < LOW_CONFIDENCE_THRESHOLD 19 20 def aggregate_scores(self, scores: list[float]) -> float: 21 \"\"\"Calcule le score moyen sur une liste de pages.\"\"\" 22 if not scores: 23 return 0.0 24 return round(sum(scores) / len(scores), 4)",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d7a8d35422f26a8c6343f40a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:35.744Z",
+  "stored_at": "2026-09-23T16:13:35.745Z"
+}

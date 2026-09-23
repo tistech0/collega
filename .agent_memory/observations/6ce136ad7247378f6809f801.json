@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 105,135p .venv/lib/python3.14/site-packages/fastapi/routing.py; grep -n \"fastapi_inner_astack\\|fastapi_function_astack\\|scope == \\\"function\\\"\\|\\.scope\" .venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 105,135p .venv/lib/python3.14/site-packages/fastapi/routing.py; grep -n \"fastapi_inner_astack\\|fastapi_function_astack\\|scope == \\\"function\\\"\\|\\.scope\" .venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py | head:  \"application code ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 105,135p .venv/lib/python3.14/site-packages/fastapi/routing.py; grep -n \"fastapi_inner_astack\\|fastapi_function_astack\\|scope == \\\"function\\\"\\|\\.scope\" .venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py | head:  \"application code is raising an exception and a dependency with yield \" \"has a block with a bare except, or a block with except Exception, \" \"and is not raising the exception again. Read more about it in the \" \"docs: https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/#dependencies-with-yield-and-except\" ) # Same as in Starlette await wrap_app_handling_exceptions(app, request)(scope, receive, send) 128: if isinstance(depends, params.Security) and depends.scopes: 129: own_oauth_scopes.extend(depends.scopes) 133: scope=depends.scope, 170: scope=dependant.scope, 322: and param_details.depends.scope == \"function\" 332: if param_details.depends.scopes: 333: sub_own_oauth_scopes = list(param_details.depends.scopes) 341: scope=param_details.depends.scope, 612: request_astack = request.scope.get(\"fastapi_inner_astack\") 614: \"fastapi_inner_astack not found in request scope\"",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6ce136ad7247378f6809f801",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:09.866Z",
+  "stored_at": "2026-09-23T16:14:09.867Z"
+}

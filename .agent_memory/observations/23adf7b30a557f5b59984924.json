@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,150p app/services/ocr/ocr_processor.py | grep -n \"def \\|convert_from\\|dpi\\|timeout\\|MAX\\|pages\\|open(\" ; grep -n \"unlink\\|remove\\|ocr_text\\|timeout\\|max_tries\\|job_timeout\" app/workers/*.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,150p app/services/ocr/ocr_processor.py | grep -n \"def \\|convert_from\\|dpi\\|timeout\\|MAX\\|pages\\|open(\" ; grep -n \"unlink\\|remove\\|ocr_text\\|timeout\\|max_tries\\|job_timeout\" app/workers/*.py:  est terminé depuis > 24h (NFR9).\"\"\" app/workers/cl",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 1,150p app/services/ocr/ocr_processor.py | grep -n \"def \\|convert_from\\|dpi\\|timeout\\|MAX\\|pages\\|open(\" ; grep -n \"unlink\\|remove\\|ocr_text\\|timeout\\|max_tries\\|job_timeout\" app/workers/*.py:  est terminé depuis > 24h (NFR9).\"\"\" app/workers/cleanup_worker.py:45: .where(Item.ocr_text.is_not(None)) app/workers/cleanup_worker.py:46: .values(ocr_text=None) app/workers/cleanup_worker.py:87: removed = 0 app/workers/cleanup_worker.py:91: removed += 1 app/workers/cleanup_worker.py:92: logger.info(\"Purged %d stale chunked uploads\", removed) app/workers/cleanup_worker.py:93: return removed app/workers/ocr_worker.py:236: if len(det.ocr_text) > len(prev.ocr_text): app/workers/ocr_worker.py:244: ocr_text=prev.ocr_text, app/workers/ocr_worker.py:253: \"Dedup: %d → %d items (removed %d duplicates)\", app/workers/ocr_worker.py:271: ocr_text=detected.ocr_text, app/workers/settings.py:7:from app.workers.cleanup_worker import cleanup_ocr_text, cleanup_stale_uploads, reset_monthly_reloads app/workers/settings.py:74: cron(cleanup_ocr_text, minute=0), app/workers/settings.py:82: \"job_timeout\": 7200,",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "23adf7b30a557f5b59984924",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:12.850Z",
+  "stored_at": "2026-09-23T16:14:12.853Z"
+}

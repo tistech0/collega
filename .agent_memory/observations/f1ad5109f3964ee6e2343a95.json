@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh -o ConnectTimeout=10 nas 'cd /mnt/user/appdata/compose-stacks/collega && ls -la && echo ---COMPOSE--- && cat docker-compose.yml; echo ---PS---; docker ps -a --format \"table {{.Names}}\\t{{.Image}}\\t{{.Status}}\\t{{.Ports}}\" | grep -i -E \"collega|cloudflared|npm|proxy|NAMES\"' 2>&1",
+  "summary": "About to run: ssh -o ConnectTimeout=10 nas 'cd /mnt/user/appdata/compose-stacks/collega && ls -la && echo ---COMPOSE--- && cat docker-compose.yml; echo ---PS---; docker ps -a --format \"table {{.Names}}\\t{{.Image}}\\",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f1ad5109f3964ee6e2343a95",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:33.745Z",
+  "stored_at": "2026-09-23T16:13:33.746Z"
+}

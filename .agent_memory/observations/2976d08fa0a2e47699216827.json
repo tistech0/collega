@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && which ruff mypy pyright uvx pipx 2>&1; cat ../.gitignore | head -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && which ruff mypy pyright uvx pipx 2>&1; cat ../.gitignore | head -30: ruff not found mypy not found pyright not found uvx not found /opt/homebrew/bin/pipx .claude* /docs/ *.pdf collega_dump.sql # Kage: indexes/reports régénérables (packets/ restent ver",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && which ruff mypy pyright uvx pipx 2>&1; cat ../.gitignore | head -30: ruff not found mypy not found pyright not found uvx not found /opt/homebrew/bin/pipx .claude* /docs/ *.pdf collega_dump.sql # Kage: indexes/reports régénérables (packets/ restent versionnés) .agent_memory/indexes/ .agent_memory/reports/ .agent_memory/graph/ .agent_memory/code_graph/ .agent_memory/structural/ # Secrets locaux build app (service token Cloudflare) — jamais committés collega_app/.env.local",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2976d08fa0a2e47699216827",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:14.186Z",
+  "stored_at": "2026-09-23T16:13:14.186Z"
+}

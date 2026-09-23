@@ -2,7 +2,7 @@
 
 Project: /Users/lesurmatthis/dev/projet perso/collega
 Pending packets: 0
-Branch summaries: 3
+Branch summaries: 4
 
 Review with:
 
@@ -10,7 +10,40 @@ Review with:
 kage review --project /Users/lesurmatthis/dev/projet perso/collega
 ```
 
-## Branch Summary 1: feat/redesign-ux-ui
+## Branch Summary 1: feat/chantier-0-exploitation
+
+- Head: `2083f55461411f5ee2b144358e0b0101313ebff5`
+- Merge base: `0dbc1418ff8ac20fe884b489f7e77827d26a6e68`
+- Changed files: .agent_memory/packets/bug_fix-college-status-n-tait-jamais-avanc-generation-complete-job-seulement-import-jama-5ea68aac.md, .agent_memory/packets/bug_fix-crans-de-progression-empil-s-un-push-par-tat-importstreaming-rafales-status-n-st-c3e6a84b.md, .agent_memory/packets/bug_fix-import-timeout-coll-ge-vide-sse-coup-par-cloudflare-apr-s-90-s-de-silence-app-sa-ef1271f2.md, .agent_memory/packets/convention-docs-d-sactiv-et-post-v1-auth-register-bloqu-en-403-746ea530.md, .agent_memory/packets/convention-rate-limit-login-5-min-via-slowapi-redis-7e992825.md, .agent_memory/packets/decision-acc-s-backend-via-tunnel-cloudflare-service-token-dans-lapp-heartbeat-sse-limite-4e3de494.md, .agent_memory/packets/decision-r-f-rentiel-item-titles-titres-ditems-partag-s-entre-coll-ges-official-plus-fr-q-b8a67ce6.md, .agent_memory/packets/decision-refonte-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres--752f4a56.md, .agent_memory/packets/decision-session-du-jour-8-3-moteur-persistance-synchro-des-fiches-propri-taire-des-donn--ab467dbd.md, .agent_memory/packets/decision-upload-par-morceaux-story-7-11-architecture-backend-init-parts-complete-helpers--6eee8fc0.md, .agent_memory/packets/gotcha-app-upload-par-morceaux-chunkeduploadservice-background-downloader-9-5-5-pi-ges--83a931c5.md, .agent_memory/packets/gotcha-formats-r-els-des-pdf-de-coll-ges-en-t-tes-courants-cnec-objectifs-n-sommaire-le-6573083c.md, .agent_memory/packets/gotcha-prod-collegatest-2-chemins-r-seau-le-chemin-public-est-bloqu-par-cloudflare-acce-4c9884ac.md, .agent_memory/packets/gotcha-sheets-routes-sans-page-et-gorouter-go-ne-les-ferme-pas-recherche-sheet-extrait--74575541.md, .agent_memory/packets/runbook-builds-de-validation-outils-de-test-via-dart-define-collega-test-tools-true-9a744bc2.md, .agent_memory/packets/runbook-cloudflare-access-bypass-du-webhook-revenuecat-en-place-tester-le-chemin-public--59ea0e97.md, .agent_memory/packets/runbook-d-ployer-le-backend-en-prod-nas-unraid-build-amd64-push-docker-hub-compose-pull--0117012e.md, .agent_memory/packets/workflow-change-memory-main-c83865fd.md, .agent_memory/packets/workflow-story-7-11-d-ploy-e-et-v-rifi-e-en-prod-wi-fi-cancero-411-mb-en-17-morceaux-177--8ba9bed7.md, collega_backend/ops/nas/collega-health.sh
+- Generated: 2026-09-23T16:42:22.253Z
+
+```text
+...-status-n-tait-jamais-avanc-generation-complete-job-seulement-import-jama-5ea68aac.md |  2 +-
+ ...e-progression-empil-s-un-push-par-tat-importstreaming-rafales-status-n-st-c3e6a84b.md |  2 +-
+ ...timeout-coll-ge-vide-sse-coup-par-cloudflare-apr-s-90-s-de-silence-app-sa-ef1271f2.md |  2 +-
+ .../packets/convention-docs-d-sactiv-et-post-v1-auth-register-bloqu-en-403-746ea530.md   |  2 +-
+ .agent_memory/packets/convention-rate-limit-login-5-min-via-slowapi-redis-7e992825.md    |  2 +-
+ ...ackend-via-tunnel-cloudflare-service-token-dans-lapp-heartbeat-sse-limite-4e3de494.md |  2 +-
+ ...tiel-item-titles-titres-ditems-partag-s-entre-coll-ges-official-plus-fr-q-b8a67ce6.md |  2 +-
+ ...-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres--752f4a56.md |  2 +-
+ ...-du-jour-8-3-moteur-persistance-synchro-des-fiches-propri-taire-des-donn--ab467dbd.md |  2 +-
+ ...par-morceaux-story-7-11-architecture-backend-init-parts-complete-helpers--6eee8fc0.md |  2 +-
+ ...oad-par-morceaux-chunkeduploadservice-background-downloader-9-5-5-pi-ges--83a931c5.md |  2 +-
+ ...-r-els-des-pdf-de-coll-ges-en-t-tes-courants-cnec-objectifs-n-sommaire-le-6573083c.md |  2 +-
+ ...llegatest-2-chemins-r-seau-le-chemin-public-est-bloqu-par-cloudflare-acce-4c9884ac.md |  2 +-
+ ...routes-sans-page-et-gorouter-go-ne-les-ferme-pas-recherche-sheet-extrait--74575541.md |  2 +-
+ ...ilds-de-validation-outils-de-test-via-dart-define-collega-test-tools-true-9a744bc2.md |  2 +-
+ ...are-access-bypass-du-webhook-revenuecat-en-place-tester-le-chemin-public--59ea0e97.md |  2 +-
+ ...r-le-backend-en-prod-nas-unraid-build-amd64-push-docker-hub-compose-pull--0117012e.md |  2 +-
+ .agent_memory/packets/workflow-change-memory-main-c83865fd.md                            | 61 ++++++++++++++++++++------------------------
+ ...-11-d-ploy-e-et-v-rifi-e-en-prod-wi-fi-cancero-411-mb-en-17-morceaux-177--8ba9bed7.md |  2 +-
+ .agent_memory/review/branch-summary-main.json                                            | 19 +++++++-------
+ .agent_memory/review/memory-review.md                                                    | 53 +++++++++++++++++++-------------------
+ 21 files changed, 80 insertions(+), 89 deletions(-)
+collega_backend/ops/nas/collega-health.sh | untracked
+```
+
+## Branch Summary 2: feat/redesign-ux-ui
 
 - Head: `87986a00e8c08f1488c74693b627869d1ad61e10`
 - Merge base: `6d0a0eeb566a8722ef1808e976422a0672fba8d3`
@@ -50,7 +83,7 @@ kage review --project /Users/lesurmatthis/dev/projet perso/collega
 .agent_memory/packets/runbook-logo-collega-source-unique-et-r-g-n-ration-de-lic-ne-ios-6d6845d3.md | untracked
 ```
 
-## Branch Summary 2: feat/story-7.11-upload-chunked
+## Branch Summary 3: feat/story-7.11-upload-chunked
 
 - Head: `395b5890adb79c6c755d0f6da3cb91cfebda4cfa`
 - Merge base: `c56e83c5f9cffb6fc3a466f8879dfed8524abbc5`
@@ -83,35 +116,34 @@ AGENTS.md | untracked
 CLAUDE.md | untracked
 ```
 
-## Branch Summary 3: main
+## Branch Summary 4: main
 
-- Head: `656356f9878a4fb4c491bde1558b31d549e7075b`
-- Merge base: `560e5037fa7660af62f883c7c8efcdf197c22433`
-- Changed files: .agent_memory/packets/bug_fix-college-status-n-tait-jamais-avanc-generation-complete-job-seulement-import-jama-5ea68aac.md, .agent_memory/packets/bug_fix-import-timeout-coll-ge-vide-sse-coup-par-cloudflare-apr-s-90-s-de-silence-app-sa-ef1271f2.md, .agent_memory/packets/code_explanation-chronom-tre-du-drill-3-modes-et-launchdrill-point-dentr-e-unique-30355180.md, .agent_memory/packets/convention-docs-d-sactiv-et-post-v1-auth-register-bloqu-en-403-746ea530.md, .agent_memory/packets/convention-rate-limit-login-5-min-via-slowapi-redis-7e992825.md, .agent_memory/packets/decision-acc-s-backend-via-tunnel-cloudflare-service-token-dans-lapp-heartbeat-sse-limite-4e3de494.md, .agent_memory/packets/decision-drill-une-fiche-revoir-nest-r-ins-r-e-quune-fois-toast-2-s-la-2e-fois-elle-est-c-2cdcd000.md, .agent_memory/packets/decision-refonte-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres--752f4a56.md, .agent_memory/packets/decision-session-du-jour-8-3-moteur-persistance-synchro-des-fiches-propri-taire-des-donn--ab467dbd.md, .agent_memory/packets/decision-upload-par-morceaux-story-7-11-architecture-backend-init-parts-complete-helpers--6eee8fc0.md, .agent_memory/packets/gotcha-app-upload-par-morceaux-chunkeduploadservice-background-downloader-9-5-5-pi-ges--83a931c5.md, .agent_memory/packets/gotcha-collega-ui-8-2-r-gles-dassemblage-des-composants-pour-les-crans-f3c8b7d2.md, .agent_memory/packets/gotcha-prod-collegatest-2-chemins-r-seau-le-chemin-public-est-bloqu-par-cloudflare-acce-4c9884ac.md, .agent_memory/packets/gotcha-profil-me-rappel-quotidien-et-quota-pi-ges-8-14-2d47f0a8.md, .agent_memory/packets/gotcha-tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-10b95ec1.md, .agent_memory/packets/runbook-builds-de-validation-outils-de-test-via-dart-define-collega-test-tools-true-9a744bc2.md, .agent_memory/packets/runbook-d-ployer-le-backend-en-prod-nas-unraid-build-amd64-push-docker-hub-compose-pull--0117012e.md, .agent_memory/packets/runbook-logo-collega-source-unique-et-r-g-n-ration-de-lic-ne-ios-6d6845d3.md, .agent_memory/packets/workflow-change-memory-main-c83865fd.md, .agent_memory/packets/workflow-story-7-11-d-ploy-e-et-v-rifi-e-en-prod-wi-fi-cancero-411-mb-en-17-morceaux-177--8ba9bed7.md
-- Generated: 2026-09-23T16:03:43.215Z
+- Head: `06e4f9068f39ae1cbb97ac8181013a52849a57ba`
+- Merge base: `0dbc1418ff8ac20fe884b489f7e77827d26a6e68`
+- Changed files: .agent_memory/packets/bug_fix-college-status-n-tait-jamais-avanc-generation-complete-job-seulement-import-jama-5ea68aac.md, .agent_memory/packets/bug_fix-crans-de-progression-empil-s-un-push-par-tat-importstreaming-rafales-status-n-st-c3e6a84b.md, .agent_memory/packets/bug_fix-import-timeout-coll-ge-vide-sse-coup-par-cloudflare-apr-s-90-s-de-silence-app-sa-ef1271f2.md, .agent_memory/packets/convention-docs-d-sactiv-et-post-v1-auth-register-bloqu-en-403-746ea530.md, .agent_memory/packets/convention-rate-limit-login-5-min-via-slowapi-redis-7e992825.md, .agent_memory/packets/decision-acc-s-backend-via-tunnel-cloudflare-service-token-dans-lapp-heartbeat-sse-limite-4e3de494.md, .agent_memory/packets/decision-r-f-rentiel-item-titles-titres-ditems-partag-s-entre-coll-ges-official-plus-fr-q-b8a67ce6.md, .agent_memory/packets/decision-refonte-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres--752f4a56.md, .agent_memory/packets/decision-session-du-jour-8-3-moteur-persistance-synchro-des-fiches-propri-taire-des-donn--ab467dbd.md, .agent_memory/packets/decision-upload-par-morceaux-story-7-11-architecture-backend-init-parts-complete-helpers--6eee8fc0.md, .agent_memory/packets/gotcha-app-upload-par-morceaux-chunkeduploadservice-background-downloader-9-5-5-pi-ges--83a931c5.md, .agent_memory/packets/gotcha-formats-r-els-des-pdf-de-coll-ges-en-t-tes-courants-cnec-objectifs-n-sommaire-le-6573083c.md, .agent_memory/packets/gotcha-prod-collegatest-2-chemins-r-seau-le-chemin-public-est-bloqu-par-cloudflare-acce-4c9884ac.md, .agent_memory/packets/gotcha-sheets-routes-sans-page-et-gorouter-go-ne-les-ferme-pas-recherche-sheet-extrait--74575541.md, .agent_memory/packets/runbook-builds-de-validation-outils-de-test-via-dart-define-collega-test-tools-true-9a744bc2.md, .agent_memory/packets/runbook-cloudflare-access-bypass-du-webhook-revenuecat-en-place-tester-le-chemin-public--59ea0e97.md, .agent_memory/packets/runbook-d-ployer-le-backend-en-prod-nas-unraid-build-amd64-push-docker-hub-compose-pull--0117012e.md, .agent_memory/packets/workflow-change-memory-main-c83865fd.md, .agent_memory/packets/workflow-story-7-11-d-ploy-e-et-v-rifi-e-en-prod-wi-fi-cancero-411-mb-en-17-morceaux-177--8ba9bed7.md
+- Generated: 2026-09-23T16:33:54.912Z
 
 ```text
-...ration-complete-job-seulement-import-jama-5ea68aac.md |  2 +-
- ...r-cloudflare-apr-s-90-s-de-silence-app-sa-ef1271f2.md |  2 +-
- ...modes-et-launchdrill-point-dentr-e-unique-30355180.md |  2 +-
- ...tiv-et-post-v1-auth-register-bloqu-en-403-746ea530.md |  2 +-
- ...-rate-limit-login-5-min-via-slowapi-redis-7e992825.md |  2 +-
- ...vice-token-dans-lapp-heartbeat-sse-limite-4e3de494.md |  2 +-
- ...uune-fois-toast-2-s-la-2e-fois-elle-est-c-2cdcd000.md |  2 +-
- ...-collega-ui-epic-8-r-f-rentiel-de-titres--752f4a56.md |  2 +-
- ...synchro-des-fiches-propri-taire-des-donn--ab467dbd.md |  2 +-
- ...ture-backend-init-parts-complete-helpers--6eee8fc0.md |  2 +-
- ...rvice-background-downloader-9-5-5-pi-ges--83a931c5.md |  2 +-
- ...dassemblage-des-composants-pour-les-crans-f3c8b7d2.md |  2 +-
- ...emin-public-est-bloqu-par-cloudflare-acce-4c9884ac.md |  2 +-
- ...-me-rappel-quotidien-et-quota-pi-ges-8-14-2d47f0a8.md |  2 +-
- ...er-cibl-les-tests-home-ont-disparu-en-8-3-10b95ec1.md |  2 +-
- ...t-via-dart-define-collega-test-tools-true-9a744bc2.md |  2 +-
- ...build-amd64-push-docker-hub-compose-pull--0117012e.md |  2 +-
- ...urce-unique-et-r-g-n-ration-de-lic-ne-ios-6d6845d3.md |  2 +-
- .../packets/workflow-change-memory-main-c83865fd.md      | 79 +++++++++++-------------
- ...-wi-fi-cancero-411-mb-en-17-morceaux-177--8ba9bed7.md |  2 +-
- .agent_memory/review/branch-summary-main.json            | 45 ++------------
- .agent_memory/review/memory-review.md                    | 80 +++++++------------------
- 22 files changed, 77 insertions(+), 165 deletions(-)
+...-status-n-tait-jamais-avanc-generation-complete-job-seulement-import-jama-5ea68aac.md |  2 +-
+ ...e-progression-empil-s-un-push-par-tat-importstreaming-rafales-status-n-st-c3e6a84b.md |  2 +-
+ ...timeout-coll-ge-vide-sse-coup-par-cloudflare-apr-s-90-s-de-silence-app-sa-ef1271f2.md |  2 +-
+ .../packets/convention-docs-d-sactiv-et-post-v1-auth-register-bloqu-en-403-746ea530.md   |  2 +-
+ .agent_memory/packets/convention-rate-limit-login-5-min-via-slowapi-redis-7e992825.md    |  2 +-
+ ...ackend-via-tunnel-cloudflare-service-token-dans-lapp-heartbeat-sse-limite-4e3de494.md |  2 +-
+ ...tiel-item-titles-titres-ditems-partag-s-entre-coll-ges-official-plus-fr-q-b8a67ce6.md |  2 +-
+ ...-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres--752f4a56.md |  2 +-
+ ...-du-jour-8-3-moteur-persistance-synchro-des-fiches-propri-taire-des-donn--ab467dbd.md |  2 +-
+ ...par-morceaux-story-7-11-architecture-backend-init-parts-complete-helpers--6eee8fc0.md |  2 +-
+ ...oad-par-morceaux-chunkeduploadservice-background-downloader-9-5-5-pi-ges--83a931c5.md |  2 +-
+ ...-r-els-des-pdf-de-coll-ges-en-t-tes-courants-cnec-objectifs-n-sommaire-le-6573083c.md |  2 +-
+ ...llegatest-2-chemins-r-seau-le-chemin-public-est-bloqu-par-cloudflare-acce-4c9884ac.md |  2 +-
+ ...routes-sans-page-et-gorouter-go-ne-les-ferme-pas-recherche-sheet-extrait--74575541.md |  2 +-
+ ...ilds-de-validation-outils-de-test-via-dart-define-collega-test-tools-true-9a744bc2.md |  2 +-
+ ...are-access-bypass-du-webhook-revenuecat-en-place-tester-le-chemin-public--59ea0e97.md |  2 +-
+ ...r-le-backend-en-prod-nas-unraid-build-amd64-push-docker-hub-compose-pull--0117012e.md |  2 +-
+ .agent_memory/packets/workflow-change-memory-main-c83865fd.md                            | 61 ++++++++++++++++++++------------------------
+ ...-11-d-ploy-e-et-v-rifi-e-en-prod-wi-fi-cancero-411-mb-en-17-morceaux-177--8ba9bed7.md |  2 +-
+ .agent_memory/review/branch-summary-main.json                                            | 19 +++++++-------
+ .agent_memory/review/memory-review.md                                                    | 53 +++++++++++++++++++-------------------
+ 21 files changed, 80 insertions(+), 89 deletions(-)
 ```

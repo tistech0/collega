@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && (time .venv/bin/python -m pytest -q -p no:cacheprovider --timeout 120 2>&1 | tail -40) > /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad/pytest.txt 2>&1",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && (time .venv/bin/python -m pytest -q -p no:cacheprovider --timeout 120 2>&1 | tail -40) > /private/tmp/claude-501/-Users-lesurmatthi",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "914ed8f3ff5dab6e5d259cfd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:28.291Z",
+  "stored_at": "2026-09-23T16:15:28.291Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'for c in collega-api-1 collega-worker-1 Nginx-Proxy-Manager-Official CloudflaredTunnel; do echo \"$c: $(docker inspect -f \"{{range \\$k,\\$v := .NetworkSettings.Networks}}{{\\$k}} {{end}} | restart={{.HostConfig.RestartPolicy.Name}} | mem={{.HostConfig.Memory}} cpus={{.HostConfig.NanoCpus}} | log={{.HostConfig.LogConfig.Type}} {{.HostConfig.LogConfig.Config}} | user={{.Config.User}} | restarts={{.RestartCount}} | started={{.State.StartedAt}} | image={{.Image}}\" $c)\"; done; echo; docker network ls; echo ---STATS---; docker stats --no-stream --format \"table {{.Name}}\\t{{.CPUPerc}}\\t{{.MemUs… [+276 chars truncated]",
+  "summary": "About to run: ssh nas 'for c in collega-api-1 collega-worker-1 Nginx-Proxy-Manager-Official CloudflaredTunnel; do echo \"$c: $(docker inspect -f \"{{range \\$k,\\$v := .NetworkSettings.Networks}}{{\\$k}} {{end}} | resta",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9aa4d6a4ddf33c26e2aa28d9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:48.101Z",
+  "stored_at": "2026-09-23T16:13:48.103Z",
+  "low_signal": true
+}

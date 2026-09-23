@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; cat -n collega_backend/docs/deployment.md; grep -l -i \"Déployer le backend\" .agent_memory/packets/*.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; cat -n collega_backend/docs/deployment.md; grep -l -i \"Déployer le backend\" .agent_memory/packets/*.md: port/{upload_id}/complete`. 105 - Les morceaux sont écrits dans `${PDF_STORAGE_PATH}/uploads/{upload_id}/` sur le volume 106 `pdf_storage` (partagé api/worker). Pic ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; cat -n collega_backend/docs/deployment.md; grep -l -i \"Déployer le backend\" .agent_memory/packets/*.md: port/{upload_id}/complete`. 105 - Les morceaux sont écrits dans `${PDF_STORAGE_PATH}/uploads/{upload_id}/` sur le volume 106 `pdf_storage` (partagé api/worker). Pic disque ≈ 2 × taille du PDF pendant `complete` 107 (morceaux + fichier assemblé), puis les morceaux sont purgés. 108 - État en Redis (`upload:{id}` hash + `upload:{id}:parts` set, TTL 24 h). Le cron 109 `cleanup_stale_uploads` (worker, toutes les heures à xx:30) purge les dossiers orphelins 110 (sans clé Redis ou > 24 h). 111 - Vérification après déploiement : `scripts/chunked_upload.py` (voir docstring), avec 112 `--cloudflare-ip` + `--env-file ../collega_app/.env.local` pour reproduire le chemin hors LAN. 113 Couper le script en cours de route puis relancer avec `--resume <upload_id>` vérifie la reprise. .agent_memory/packets/runbook-d-ployer-le-backend-en-prod-nas-unraid-build-amd64-push-docker-hub-compose-pull--0117012e.md",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a48f41b96a180a016c6d07d3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:22.664Z",
+  "stored_at": "2026-09-23T16:13:22.665Z"
+}

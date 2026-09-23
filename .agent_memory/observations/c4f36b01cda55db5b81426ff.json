@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 700,805p app/api/v1/admin.py; sed -n 110,235p app/api/v1/admin.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 700,805p app/api/v1/admin.py; sed -n 110,235p app/api/v1/admin.py: ool = await create_pool(_redis_settings) arq_job = await pool.enqueue_job( \"process_college_ocr\", str(college_id), str(job_id), str(pdf_file_path), ) if arq_job is not None: job",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 700,805p app/api/v1/admin.py; sed -n 110,235p app/api/v1/admin.py: ool = await create_pool(_redis_settings) arq_job = await pool.enqueue_job( \"process_college_ocr\", str(college_id), str(job_id), str(pdf_file_path), ) if arq_job is not None: job.arq_job_id = arq_job.job_id await db.commit() logger.info(\"OCR job %s enqueued for college %s\", job_id, college_id) except Exception as exc: # noqa: BLE001 logger.error(\"Failed to enqueue OCR job: %s\", exc) # Rollback complet : supprimer le job DB et le fichier PDF await db.delete(job) await db.commit() pdf_file_path.unlink(missing_ok=True) raise HTTPException( status_code=503, detail={\"code\": \"QUEUE_UNAVAILABLE\", \"message\": \"Failed to enqueue OCR job — please retry\"}, ) finally: if pool is not None: await pool.close() return ProcessCollegeResponseWrapped( data=ProcessCollegeResponse(job_id=str(job.id), status=job.status) ) @router.get( \"/colleges/{college_id}/status\", response_model=CollegeStatusResponseWrapped,",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c4f36b01cda55db5b81426ff",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:20.201Z",
+  "stored_at": "2026-09-23T16:14:20.202Z"
+}

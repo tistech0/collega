@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ssh nas 'docker port Nginx-Proxy-Manager-Official | grep 443; ip -4 addr show br0 2>/dev/null | grep inet | head -1'; grep -oE \"^CF_ACCESS_CLIENT_(ID|SECRET)=\" collega_app/.env.local",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ssh nas 'docker port Nginx-Proxy-Manager-Official | grep 443; ip -4 addr show br0 2>/dev/null | grep inet | head -1'; grep -oE \"^CF_ACCESS_CLIENT_(ID|SECRET)=\" collega_app/.env.local: 443/tcp -> 0.0.0.0:443 443/tcp -> [::]:443 inet 192.168.1.10/24 metric 1 scope global",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ssh nas 'docker port Nginx-Proxy-Manager-Official | grep 443; ip -4 addr show br0 2>/dev/null | grep inet | head -1'; grep -oE \"^CF_ACCESS_CLIENT_(ID|SECRET)=\" collega_app/.env.local: 443/tcp -> 0.0.0.0:443 443/tcp -> [::]:443 inet 192.168.1.10/24 metric 1 scope global br0 CF_ACCESS_CLIENT_ID= CF_ACCESS_CLIENT_SECRET=",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "430a0a5cbf7c00ec5a17fed0",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:40:31.562Z",
+  "stored_at": "2026-09-23T16:40:31.562Z"
+}

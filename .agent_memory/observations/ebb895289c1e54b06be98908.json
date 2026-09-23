@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rnE \"177|2 ?min ?46|436\" .agent_memory/packets _bmad-output/implementation-artifacts 2>/dev/null | grep -viE \"line|0x|#[0-9a-f]\" | head -10; ls ~/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/; grep -rnE \"177|436|2 ?min\" ~/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/*.md | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rnE \"177|2 ?min ?46|436\" .agent_memory/packets _bmad-output/implementation-artifacts 2>/dev/null | grep -viE \"line|0x|#[0-9a-f]\" | head -10; ls ~/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/; grep -rnE \"177|436|2 ?min\" ~/.claude/project",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rnE \"177|2 ?min ?46|436\" .agent_memory/packets _bmad-output/implementation-artifacts 2>/dev/null | grep -viE \"line|0x|#[0-9a-f]\" | head -10; ls ~/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/; grep -rnE \"177|436|2 ?min\" ~/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory/*.md | head: 177 + 164 fiches. .agent_memory/packets/decision-session-du-jour-8-3-moteur-persistance-synchro-des-fiches-propri-taire-des-donn--ab467dbd.md:27:801 tests app + 232 backend ; revue adversariale 8.3 (17 correctifs) ; endpoint vérifié en prod 177 + 164 fiches. .agent_memory/packets/convention-docs-d-sactiv-et-post-v1-auth-register-bloqu-en-403-746ea530.md:38:{\"schema_version\":2,\"id\":\"repo:git-github-com-tistech0-collega:convention:docs-d-sactiv-et-post-v1-auth-register-bloqu-en-403-1790178811463\",\"title\":\"/docs désactivé et POST /v1/auth/register bloqué en 403\",\"summary\":\"Durcissement sécurité du backend collega : 1 la documentation OpenAPI est désactivée en configurant l'app FastAPI avec docs url=None et redoc url=None dans collega backend/app/main.py:84 85 — pas de Swagger ni ReDoc expo\",\"body\":\"Durcissement sécurité du backend collega : (1) la documentation OpenAPI est désactivée en con",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ebb895289c1e54b06be98908",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:04.164Z",
+  "stored_at": "2026-09-23T16:15:04.165Z",
+  "low_signal": true
+}

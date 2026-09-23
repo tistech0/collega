@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/card_generator.py app/workers/generation_worker.py app/workers/settings.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/card_generator.py app/workers/generation_worker.py app/workers/settings.py: arning(\"Worker: APNs close() failed: %s\", exc) 64 finally: 65 # Reset du singleton module-level — sinon un test ultérieur qui 66 # importe le mo",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/card_generator.py app/workers/generation_worker.py app/workers/settings.py: arning(\"Worker: APNs close() failed: %s\", exc) 64 finally: 65 # Reset du singleton module-level — sinon un test ultérieur qui 66 # importe le module verrait une instance fermée. 67 apns_service._service_instance = None 68 69 70 WORKER_SETTINGS = { 71 \"redis_settings\": redis_settings, 72 \"functions\": [process_college_ocr, generate_college_cards], 73 \"cron_jobs\": [ 74 cron(cleanup_ocr_text, minute=0), 75 cron(send_daily_reminders, minute=0), 76 cron(reset_monthly_reloads, hour=0, minute=5), 77 cron(cleanup_stale_uploads, minute=30), 78 ], 79 \"on_startup\": _worker_startup, 80 \"on_shutdown\": _worker_shutdown, 81 \"max_jobs\": 10, 82 \"job_timeout\": 7200, 83 \"keep_result\": 3600, 84 \"retry_jobs\": True, 85 \"max_retries\": 3, 86 # Story 7.7 — sans ce flag, Job.abort() est ignoré par le worker et le job 87 # continue malgré la demande d'annulation de l'endpoint Stop. 88 \"allow_abort_jobs\": True, 89 }",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8aa53c99b3597c785c14856f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:31.412Z",
+  "stored_at": "2026-09-23T16:13:31.413Z",
+  "low_signal": true
+}

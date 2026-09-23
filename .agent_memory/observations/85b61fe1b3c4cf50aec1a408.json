@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && time .venv/bin/python -m pytest -q -p no:cacheprovider --durations=15 2>&1 | tail -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && time .venv/bin/python -m pytest -q -p no:cacheprovider --durations=15 2>&1 | tail -40: s setup tests/api/test_tester_summary.py::TestGetCollegeSummary::test_401_without_credentials 0.11s call tests/services/test_chunked_upload_store.py::TestClaimAssem",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && time .venv/bin/python -m pytest -q -p no:cacheprovider --durations=15 2>&1 | tail -40: s setup tests/api/test_tester_summary.py::TestGetCollegeSummary::test_401_without_credentials 0.11s call tests/services/test_chunked_upload_store.py::TestClaimAssemble::test_assemble_concatene_dans_l_ordre 0.09s call tests/core/test_config_validators.py::TestValidatorsProductionMode::test_default_tester_password_raises 0.08s setup tests/services/test_item_titles.py::TestReferential::test_record_same_label_increments 0.07s setup tests/services/test_item_titles.py::TestReferential::test_record_rejects_invalid 0.07s call tests/api/test_search.py::TestSearchEndpoint::test_search_scoped_par_user 0.06s setup tests/services/test_item_titles.py::TestReferential::test_record_creates_entry 480 passed, 1 skipped, 27 warnings in 7.77s .venv/bin/python -m pytest -q -p no:cacheprovider --durations=15 2>&1 8.41s user 0.59s system 85% cpu 10.578 total tail -40 0.00s user 0.01s system 0% cpu 10.578 total",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "85b61fe1b3c4cf50aec1a408",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:33.366Z",
+  "stored_at": "2026-09-23T16:13:33.367Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ls collega_backend/app/static collega_backend/app/static/*; grep -n \"tester\" collega_backend/app/main.py collega_backend/app/deps.py collega_backend/app/core/config.py | head -20; grep -n \"@router\" collega_backend/app/api/v1/tester.py; grep -rln \"tester\\|TesterFeedback\\|feedback\" collega_backend/app collega_app/lib | grep -v static/ | head -20",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\"; ls collega_backend/app/static collega_backend/app/static/*; grep -n \"tester\" collega_backend/app/main.py collega_backend/app/deps.py collega_backend/",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f0e6f4fb2693caaced551eb4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:28:33.082Z",
+  "stored_at": "2026-09-23T16:28:33.082Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"limiter.limit\" -A0 app/api/v1/search.py app/api/v1/auth.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"limiter.limit\" -A0 app/api/v1/search.py app/api/v1/auth.py: app/api/v1/auth.py:36:@limiter.limit(\"5/minute\") app/api/v1/auth.py:151:@limiter.limit(\"3/minute\") app/api/v1/search.py:35:@limiter.limit(\"30/minute\", key_func=_user_id_key)",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -n \"limiter.limit\" -A0 app/api/v1/search.py app/api/v1/auth.py: app/api/v1/auth.py:36:@limiter.limit(\"5/minute\") app/api/v1/auth.py:151:@limiter.limit(\"3/minute\") app/api/v1/search.py:35:@limiter.limit(\"30/minute\", key_func=_user_id_key)",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e352941b74c6e5bbff15b157",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:18:58.080Z",
+  "stored_at": "2026-09-23T16:18:58.081Z"
+}

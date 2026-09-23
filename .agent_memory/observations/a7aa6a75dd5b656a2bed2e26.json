@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'ls /boot/config/plugins/user.scripts/scripts/ 2>/dev/null; for d in /boot/config/plugins/user.scripts/scripts/*/; do echo \"== $d\"; cat \"$d/schedule\" 2>/dev/null; cat \"$d/cron\" 2>/dev/null; head -5 \"$d/script\" 2>/dev/null; done 2>/dev/null | head -80; cat /boot/config/plugins/user.scripts/schedule.json 2>/dev/null | head -40'",
+  "summary": "About to run: ssh nas 'ls /boot/config/plugins/user.scripts/scripts/ 2>/dev/null; for d in /boot/config/plugins/user.scripts/scripts/*/; do echo \"== $d\"; cat \"$d/schedule\" 2>/dev/null; cat \"$d/cron\" 2>/dev/null; he",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a7aa6a75dd5b656a2bed2e26",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:33:10.408Z",
+  "stored_at": "2026-09-23T16:33:10.408Z"
+}

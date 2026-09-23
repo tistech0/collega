@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/api/v1/colleges.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/api/v1/colleges.py:  _SSE_MAX_DURATION: 651 break 652 653 async with async_session_factory() as session: 654 c = await session.get(College, college_id) 655 656 if c is None: 657 break 658 659 if c.ocr_page_progress != last_progress: 660 las",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/api/v1/colleges.py:  _SSE_MAX_DURATION: 651 break 652 653 async with async_session_factory() as session: 654 c = await session.get(College, college_id) 655 656 if c is None: 657 break 658 659 if c.ocr_page_progress != last_progress: 660 last_progress = c.ocr_page_progress 661 event = {\"event\": \"ocr_progress\", \"data\": {\"page\": last_progress, \"total\": c.total_pages}} 662 yield f\"data: {json.dumps(event)}\\n\\n\" 663 last_emit = now 664 665 if c.status == \"ocr_complete\" and not ocr_complete_emitted: 666 ocr_complete_emitted = True 667 event = {\"event\": \"card_generation_started\", \"data\": {\"college_id\": str(college_id)}} 668 yield f\"data: {json.dumps(event)}\\n\\n\" 669 last_emit = now 670 671 # Story 8.13 : fiches générées au fil des items (seulement pendant la génération). 672 total = c.generation_items_total 673 if c.status == \"ocr_complete\" and total is not None: 674 current = (c.generation_items_done, total, c.ge",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a80009f44c1b9a857c29536e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:12:49.038Z",
+  "stored_at": "2026-09-23T16:12:49.038Z",
+  "low_signal": true
+}

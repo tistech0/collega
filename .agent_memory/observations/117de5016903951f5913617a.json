@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && for i in 1 2 3; do .venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | grep -E \"^FAILED|passed|failed\"; done",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && for i in 1 2 3; do .venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | grep -E \"^FAILED|passed|failed\"; done: est_page_tables_passed_to_detector tests/workers/test_ocr_worker.py::TestRunOcr::test_page_tables_passed_to_detector tests/workers/test_",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && for i in 1 2 3; do .venv/bin/python -m pytest -q -p no:cacheprovider 2>&1 | grep -E \"^FAILED|passed|failed\"; done: est_page_tables_passed_to_detector tests/workers/test_ocr_worker.py::TestRunOcr::test_page_tables_passed_to_detector tests/workers/test_ocr_worker.py::TestRunOcr::test_page_tables_passed_to_detector FAILED tests/api/test_auth.py::TestLogin::test_login_success - assert 429 == 200 FAILED tests/api/test_auth.py::TestLogin::test_login_wrong_password - assert ... FAILED tests/api/test_auth.py::TestLogin::test_login_unknown_email - assert 4... FAILED tests/api/test_auth.py::TestGetCurrentUser::test_beta_user_flag_in_token_response FAILED tests/api/test_auth.py::TestDeleteAccount::test_delete_account_success FAILED tests/api/test_reminder.py::TestSetReminder::test_set_reminder_ok - as... FAILED tests/api/test_reminder.py::TestSetReminder::test_set_reminder_minuit_ok FAILED tests/api/test_reminder.py::TestClearReminder::test_clear_reminder_ok 8 failed, 472 passed, 1 skipped, 27 warnings in 5.05s",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "117de5016903951f5913617a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:14:13.201Z",
+  "stored_at": "2026-09-23T16:14:13.201Z"
+}

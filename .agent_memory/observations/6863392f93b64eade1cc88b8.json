@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/claude_client.py app/services/generation/token_cost.py app/services/generation/hash_sharing.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/claude_client.py app/services/generation/token_cost.py app/services/generation/hash_sharing.py: app.models.generation_job import GenerationJob 11 12 13 class SimilarityChecker(ABC): 14 @abstractmethod 15 def compute_hash",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n app/services/generation/claude_client.py app/services/generation/token_cost.py app/services/generation/hash_sharing.py: app.models.generation_job import GenerationJob 11 12 13 class SimilarityChecker(ABC): 14 @abstractmethod 15 def compute_hash(self, pdf_path: str) -> str: ... 16 17 @abstractmethod 18 async def find_similar_job(self, db: AsyncSession, pdf_hash: str) -> Optional[GenerationJob]: ... 19 20 21 class SHA256SimilarityChecker(SimilarityChecker): 22 def compute_hash(self, pdf_path: str) -> str: 23 h = hashlib.sha256() 24 with open(pdf_path, \"rb\") as f: 25 for chunk in iter(lambda: f.read(65536), b\"\"): 26 h.update(chunk) 27 return h.hexdigest() 28 29 async def find_similar_job(self, db: AsyncSession, pdf_hash: str) -> Optional[GenerationJob]: 30 result = await db.execute( 31 select(GenerationJob) 32 .where(GenerationJob.pdf_hash == pdf_hash) 33 .where(GenerationJob.status == \"generation_complete\") 34 .order_by(GenerationJob.created_at.desc()) 35 .limit(1) 36 ) 37 return result.scalar_one_or_none()",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6863392f93b64eade1cc88b8",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:13:30.579Z",
+  "stored_at": "2026-09-23T16:13:30.580Z"
+}

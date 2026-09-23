@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd /private/tmp/claude-501/bundled-skills/2.1.280/bbcc1b83f012a26220adb5c529a9edb8/claude-api && grep -niE \"minimum cacheable|1024|2048|4096|0\\.1|1\\.25|write|read.*price|sonnet 4.6|haiku 4.5\" shared/prompt-caching.md | head -30; grep -niE \"50%|discount|sonnet-4-6|haiku\" shared/cost-optimization.md | head -20",
+  "summary": "About to run: cd /private/tmp/claude-501/bundled-skills/2.1.280/bbcc1b83f012a26220adb5c529a9edb8/claude-api && grep -niE \"minimum cacheable|1024|2048|4096|0\\.1|1\\.25|write|read.*price|sonnet 4.6|haiku 4.5\" shared/p",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ab07834030a1774b40ab41c7",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:20.844Z",
+  "stored_at": "2026-09-23T16:15:20.844Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"type: ignore\" app | wc -l; grep -rn \"^def _\\|^async def _\" app/api/v1/*.py | awk -F: '{print $1\": \"$3}'; grep -rn \"func.count(FlashCard.id)\" app | wc -l; grep -rn \"func.count(FlashCard.id)\" app | cut -d: -f1 | sort | uniq -c",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"type: ignore\" app | wc -l; grep -rn \"^def _\\|^async def _\" app/api/v1/*.py | awk -F: '{print $1\": \"$3}'; grep -rn \"func.count(FlashCard.id)\" app | wc -l; grep -rn \"func.count(FlashCard.id)\" app | cut -d: -f1 | sort | uniq -c: s.py: def _job_",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && grep -rn \"type: ignore\" app | wc -l; grep -rn \"^def _\\|^async def _\" app/api/v1/*.py | awk -F: '{print $1\": \"$3}'; grep -rn \"func.count(FlashCard.id)\" app | wc -l; grep -rn \"func.count(FlashCard.id)\" app | cut -d: -f1 | sort | uniq -c: s.py: def _job_in_progress() -> HTTPException app/api/v1/colleges.py: def _invalid_ref_id(ref_id app/api/v1/colleges.py: async def _select_college(db app/api/v1/colleges.py: async def _get_or_create_college(db app/api/v1/colleges.py: async def _assert_no_active_job(db app/api/v1/colleges.py: def _college_reload_limit(college app/api/v1/colleges.py: def _monthly_reload_limit(user app/api/v1/colleges.py: async def _apply_reimport_quota(db app/api/v1/colleges.py: async def _assert_import_allowed(db app/api/v1/colleges.py: async def _create_job_and_enqueue( app/api/v1/colleges.py: async def _start_import_from_file( app/api/v1/colleges.py: def _upload_not_found() -> HTTPException app/api/v1/colleges.py: def _preview(raw app/api/v1/flash_cards.py: async def _get_card_for_user( app/api/v1/search.py: def _user_id_key(request 4 1 app/api/v1/admin.py 2 app/api/v1/colleges.py 1 app/api/v1/tester.py",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9a041b9523087fc365f62cff",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T16:15:27.831Z",
+  "stored_at": "2026-09-23T16:15:27.831Z"
+}
