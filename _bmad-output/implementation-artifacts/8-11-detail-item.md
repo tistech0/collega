@@ -1,6 +1,6 @@
 # Story 8.11 : Détail item — livrée avec la 8.10
 
-Status: review
+Status: done
 
 ## Story
 

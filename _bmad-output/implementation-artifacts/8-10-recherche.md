@@ -1,6 +1,6 @@
 # Story 8.10 : Recherche (sheet plein écran) — livrée avec la 8.11
 
-Status: review
+Status: done
 
 > Regroupée avec la 8.11 (Détail item) à la demande de l'utilisateur (2026-09-23).
 
