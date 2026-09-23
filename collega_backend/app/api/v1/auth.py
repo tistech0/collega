@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import uuid
 from datetime import datetime, timezone
 
@@ -21,6 +22,7 @@ from app.core.config import settings
 from app.core.time_utils import next_month_reset
 from app.schemas.auth import LoginRequest, ProfileUpdateRequest, RefreshRequest, RegisterRequest, TokenResponse
 
+logger = logging.getLogger(__name__)
 router = APIRouter(tags=["auth"])
 
 
@@ -154,8 +156,22 @@ async def delete_account(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    from app.models.college import College
+    from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
+
+    college_ids = list((await db.execute(select(College.id).where(College.user_id == current_user.id))).scalars())
     await db.delete(current_user)
     await db.commit()
+    # Suppression « immédiate et complète » (politique de confidentialité) : PDF des
+    # collèges et contenu qui n'appartenait qu'à ce compte. Best-effort : la
+    # suppression du compte est déjà faite, le cron de nuit rattrape un échec.
+    for college_id in college_ids:
+        delete_college_pdfs(college_id)
+    try:
+        await purge_unreferenced_content(db)
+        await db.commit()
+    except Exception:  # noqa: BLE001
+        logger.warning("Purge du contenu après suppression de compte reportée au cron", exc_info=True)
     return {"data": {"message": "Account deleted"}}
 
 

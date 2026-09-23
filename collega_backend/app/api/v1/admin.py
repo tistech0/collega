@@ -29,6 +29,7 @@ from app.models.user import User
 from app.services.generation.token_cost import compute_cost_eur
 from app.services.jobs.arq_control import abort_arq_job
 from app.services.jobs.job_events import record_job_event
+from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
 from app.services.jobs.job_failure import fail_job
 from app.schemas.admin import (
     AdminCardsResponseWrapped,
@@ -793,10 +794,11 @@ async def delete_college(
     # Cleanup PDF best-effort : ne jamais faire échouer la suppression DB pour un
     # problème disque. Plusieurs réimports ⇒ plusieurs PDFs ({college_id}_*.pdf).
     try:
-        for pdf_file in Path(settings.pdf_storage_path).glob(f"{college_id}_*.pdf"):
-            pdf_file.unlink(missing_ok=True)
-    except Exception as exc:  # noqa: BLE001 — cleanup non bloquant
-        logger.warning("PDF cleanup failed for college %s: %s", college_id, exc)
+        delete_college_pdfs(college_id)
+        await purge_unreferenced_content(db)
+        await db.commit()
+    except Exception as exc:  # noqa: BLE001 — cleanup non bloquant (cron de nuit en filet)
+        logger.warning("Cleanup failed for college %s: %s", college_id, exc)
 
     return Response(status_code=204)
 

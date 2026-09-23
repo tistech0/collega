@@ -49,7 +49,7 @@ class TestDeleteImport:
 
         # College supprimé + commit
         mock_db.delete.assert_awaited_once_with(college)
-        mock_db.commit.assert_awaited_once()
+        mock_db.commit.assert_awaited()  # + commit de la purge du contenu (chantier 1)
 
         # PDF cleanup tenté pour ce college (pattern {college_id}_*.pdf)
         assert glob_calls == [f"{college.id}_*.pdf"]

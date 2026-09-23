@@ -137,7 +137,11 @@ async def generate_job_items(
                     .where(JobItem.job_id == job_id, JobItem.item_number == item_number)
                     .values(generation_id=gen.id)
                 )
-            await record_job_event(db, job_id, "generation_progress", message=f"item {item_number}")
+            # Un événement par item : trace pour l'admin et « progression » pour le cron
+            # des jobs bloqués (la console n'affiche que le dernier d'une série).
+            await record_job_event(
+                db, job_id, "generation_progress", message=f"item {item_number}", page=items_done + 1, total=total
+            )
             await db.commit()
 
         items_done += 1

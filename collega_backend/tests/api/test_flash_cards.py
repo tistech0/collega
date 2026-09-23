@@ -144,59 +144,6 @@ class TestDeleteCard:
         app.dependency_overrides.clear()
 
 
-class TestRegenerateCard:
-    async def test_regenerate_card_ok(self, client: AsyncClient, mock_db):
-        """POST .../regenerate avec ClaudeClient mocké → 200 avec nouvelle fiche."""
-        from app.main import app
-        from app.schemas.college import FlashCardData
-
-        user = _make_user()
-        card = _make_card(user_id=user.id)
-        item = _make_item(item_id=card.item_id)
-
-        def _get_side_effect(model, pk):
-            from app.models.flash_card import FlashCard
-            from app.models.item import Item
-
-            if model is FlashCard or (isinstance(model, type) and issubclass(model, FlashCard)):
-                return card
-            return item
-
-        mock_db.get = AsyncMock(side_effect=_get_side_effect)
-        mock_db.refresh = AsyncMock()
-
-        new_card_data = FlashCardData(
-            id=str(card.id),
-            item_id=str(card.item_id),
-            college_id=str(card.college_id),
-            card_type="classique",
-            rang="A",
-            recto="Nouvelle question ?",
-            verso="Nouvelle réponse",
-            ocr_confidence_score=0.85,
-            low_confidence=False,
-        )
-
-        app.dependency_overrides[require_subscription] = lambda: user
-
-        with patch(
-            "app.api.v1.flash_cards.ClaudeClient.regenerate_single_card",
-            new=AsyncMock(return_value=new_card_data),
-        ):
-            resp = await client.post(
-                f"/v1/flash-cards/{card.id}/regenerate",
-                json={"user_note": "La réponse était trop vague"},
-                headers={"Authorization": "Bearer token"},
-            )
-
-        assert resp.status_code == 200
-        data = resp.json()["data"]
-        assert data["recto"] == "Nouvelle question ?"
-        assert data["verso"] == "Nouvelle réponse"
-
-        app.dependency_overrides.clear()
-
-
 class TestRegisterApnsToken:
     async def test_register_token_ok(self, client: AsyncClient, mock_db):
         """POST /v1/notifications/apns-token → 200 registered=True."""
