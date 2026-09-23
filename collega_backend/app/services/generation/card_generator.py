@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import logging
 import uuid
+from collections.abc import Awaitable, Callable, Sequence
 
 from sqlalchemy import delete, select
 from sqlalchemy import update as sa_update
@@ -18,11 +20,52 @@ from app.services.jobs.job_events import record_job_event
 
 logger = logging.getLogger(__name__)
 
+ProgressReporter = Callable[..., Awaitable[None]]
+
+
+PREVIEW_SIZE = 3
+
+
+async def report_generation_progress(
+    college_id: uuid.UUID, *, items_done: int, items_total: int | None, cards: int, preview: Sequence[str] = ()
+) -> None:
+    """Publie l'avancement dans une session à part (commit immédiat) : la
+    génération, elle, n'écrit ses fiches qu'à la fin, en une transaction."""
+    from app.core.database import async_session_factory
+
+    async with async_session_factory() as session:
+        await session.execute(
+            sa_update(College)
+            .where(College.id == college_id)
+            .values(
+                generation_items_done=items_done,
+                generation_items_total=items_total,
+                generation_cards=cards,
+                generation_preview=json.dumps(list(preview), ensure_ascii=False),
+            )
+        )
+        await session.commit()
+
 
 class CardGenerator:
-    def __init__(self) -> None:
+    def __init__(self, progress_reporter: ProgressReporter | None = None) -> None:
         self._claude = ClaudeClient()
         self._similarity = SHA256SimilarityChecker()
+        self._progress = progress_reporter
+
+    async def _report(
+        self, college_id: uuid.UUID, *, items_done: int, items_total: int | None, cards: int,
+        preview: Sequence[str] = (),
+    ) -> None:
+        """L'avancement n'est qu'un affichage : son échec n'arrête jamais la génération."""
+        if self._progress is None:
+            return
+        try:
+            await self._progress(
+                college_id, items_done=items_done, items_total=items_total, cards=cards, preview=list(preview)
+            )
+        except Exception:  # noqa: BLE001
+            logger.warning("Avancement de génération non publié (college %s)", college_id, exc_info=True)
 
     async def generate_for_college(
         self,
@@ -109,7 +152,9 @@ class CardGenerator:
         # Usage Anthropic cumulé sur tous les appels du job (Story 7.8 AC1).
         total_input_tokens = 0
         total_output_tokens = 0
-        for item in items:
+        await self._report(college_id, items_done=0, items_total=len(items), cards=0)
+        latest: list[str] = []  # questions récentes, la plus récente d'abord
+        for index, item in enumerate(items):
             # Garde anti-race (review 7.7 D1) : si l'admin a forcé l'arrêt
             # (Stop → status="failed") pendant la génération, stopper avant le
             # prochain appel Claude (évite de payer pour un job annulé) et ne pas
@@ -142,6 +187,9 @@ class CardGenerator:
             cards_data = gen_result.cards
             if not cards_data:
                 logger.warning("Item %s produced 0 cards — skipping", item.id)
+                await self._report(
+                    college_id, items_done=index + 1, items_total=len(items), cards=card_count, preview=latest
+                )
                 continue
             for card_data in cards_data:
                 card = FlashCard(
@@ -157,6 +205,10 @@ class CardGenerator:
                 )
                 db.add(card)
                 card_count += 1
+                latest = [card_data.recto, *latest][:PREVIEW_SIZE]
+            await self._report(
+                college_id, items_done=index + 1, items_total=len(items), cards=card_count, preview=latest
+            )
 
         job.card_count = card_count
         job.input_tokens = total_input_tokens

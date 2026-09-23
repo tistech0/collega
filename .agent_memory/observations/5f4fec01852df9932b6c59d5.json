@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_segmented_gallery.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_segmented_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_segmented.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_segmented_gallery.dart: import 'package:flutter/widgets.dart';\n\nimport 'package:collega_app/core/ui/components/cg_segmented.dart';\nimport 'package:collega_app/core/ui/theme/cg_theme.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\nimport 'package:collega_app/core/ui/tokens/cg_type.dart';\n\n/// Planche de toutes les variantes et états de [CgSegmented] (Widgetbook + goldens).\n/// Chaque exemple est vivant : taper change la sélection.\nclass CgSegmentedGallery extends StatelessWidget {\n  const CgSegmentedGallery({super.key});\n\n  /// Échelle de démonstration du mode liste (au-delà du seuil de 1,6×).\n  stat",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5f4fec01852df9932b6c59d5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:40:31.267Z",
+  "stored_at": "2026-09-22T18:40:31.267Z"
+}

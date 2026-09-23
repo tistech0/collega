@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s#^import 'package:flutter/cupertino.dart';#import 'package:flutter/cupertino.dart';\\nimport 'package:flutter/semantics.dart';#\" test/core/ui/components/cg_sheet_test.dart && flutter test test/core/ui/components/cg_sheet_test.dart --update-goldens 2>&1 | grep -E \"\\[E\\]|Expected:|Actual:|Which:|EXCEPTION|: Some|All tests|overflowed|Error:\" | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s#^import 'package:flutter/cupertino.dart';#import 'package:flutter/cupertino.dart';\\nimport 'package:flutter/semantics.dart';#\" test/core/ui/components/cg_sheet_test.dart && flutter test test/core/ui/components/cg_sheet_test.dart --update-gold",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s#^import 'package:flutter/cupertino.dart';#import 'package:flutter/cupertino.dart';\\nimport 'package:flutter/semantics.dart';#\" test/core/ui/components/cg_sheet_test.dart && flutter test test/core/ui/components/cg_sheet_test.dart --update-goldens 2>&1 | grep -E \"\\[E\\]|Expected:|Actual:|Which:|EXCEPTION|: Some|All tests|overflowed|Error:\" | head -40: 00:02 +4 -14: showCgActionSheet Annuler : ferme sans appeler d'action 00:02 +4 -14: Dynamic Type 1,6 : le panneau se rend sans débordement 00:02 +5 -14: Dynamic Type 1,6 : le panneau se rend sans débordement 00:02 +5 -14: goldens (setUpAll) 00:02 +5 -14: goldens golden cg_sheet 375_10 00:02 +6 -14: goldens golden cg_sheet 375_10 00:02 +6 -14: goldens golden cg_sheet 375_16 00:02 +7 -14: goldens golden cg_sheet 375_16 00:02 +7 -14: goldens golden cg_sheet 393_10 00:02 +8 -14: goldens golden cg_sheet 393_10 00:02 +8 -14: goldens golden cg_sheet 393_16 00:02 +9 -14: goldens golden cg_sheet 393_16 00:02 +9 -14: goldens golden cg_sheet 430_10 00:02 +10 -14: goldens golden cg_sheet 430_10 00:02 +10 -14: goldens golden cg_sheet 430_16 00:03 +10 -14: goldens golden cg_sheet 430_16 00:03 +11 -14: goldens golden cg_sheet 430_16 00:03 +11 -14: goldens (tearDownAll) 00:03 +11 -14: Some tests failed.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "18b524c1541981db2e0066a2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:42:50.754Z",
+  "stored_at": "2026-09-22T18:42:50.754Z"
+}

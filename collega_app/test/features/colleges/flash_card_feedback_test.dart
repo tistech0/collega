@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -38,20 +39,27 @@ class _FakeCollegeDetailRepository extends CollegeDetailRepository {
   _FakeCollegeDetailRepository({
     List<FlashCardModel>? cards,
     this.regeneratedCard,
+    this.offline = false,
+    this.cached,
   })  : cards = cards ?? const [_card1, _card2],
         super(dio: Dio(), db: AppDatabase.forTesting(NativeDatabase.memory()));
 
   final List<FlashCardModel> cards;
   final FlashCardModel? regeneratedCard;
+  final bool offline;
+  final List<FlashCardModel>? cached;
 
   @override
   Future<List<FlashCardModel>> getCards(String collegeId, String itemId) async {
+    if (offline) {
+      throw DioException(requestOptions: RequestOptions(path: '/cards'), type: DioExceptionType.connectionError);
+    }
     return cards;
   }
 
   @override
   Future<List<FlashCardModel>> getCardsFromDrift(String itemId) async {
-    return cards;
+    return cached ?? cards;
   }
 
   @override
@@ -80,6 +88,9 @@ ProviderContainer _makeContainer(_FakeCollegeDetailRepository repo) {
 }
 
 void main() {
+  // Bases en mémoire distinctes (dépôt factice + provider) : voulu ici.
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+
   group('FlashCardModel.fromJson', () {
     test('parse user_feedback correctement', () {
       final json = {
@@ -129,6 +140,20 @@ void main() {
       final updated = original.copyWith(userFeedback: 'positive');
       expect(updated.userFeedback, 'positive');
       expect(updated.id, original.id);
+    });
+  });
+
+  group('ItemDetailNotifier hors-ligne (8.11)', () {
+    test('fiches en cache : servies', () async {
+      final container = _makeContainer(_FakeCollegeDetailRepository(offline: true));
+      addTearDown(container.dispose);
+      expect(await container.read(itemDetailProvider('c:i').future), hasLength(2));
+    });
+
+    test('rien en cache : l’erreur réseau remonte (pas « aucune fiche »)', () async {
+      final container = _makeContainer(_FakeCollegeDetailRepository(offline: true, cached: const []));
+      addTearDown(container.dispose);
+      await expectLater(container.read(itemDetailProvider('c:i').future), throwsA(isA<DioException>()));
     });
   });
 

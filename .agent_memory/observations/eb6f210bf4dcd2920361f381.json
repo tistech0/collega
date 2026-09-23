@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_learn",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_learn: [{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/decision-refonte-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres--752f4a56.md\\nRepo-local memory is written immediately. Org/global promotion still require",
+  "text": "[{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/decision-refonte-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres--752f4a56.md\\nRepo-local memory is written immediately. Org/global promotion still requires explicit review.'}]",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "eb6f210bf4dcd2920361f381",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:45:35.541Z",
+  "stored_at": "2026-09-22T17:45:35.541Z"
+}

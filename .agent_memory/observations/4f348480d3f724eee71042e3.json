@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_supersede",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_supersede: [{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:decision:refonte-ux-ui-v2-direction-feuille-bloc-design-system-maison-collega-ui-epic-8-1\",\\n \"replacement_packet_id\": \"repo:git-github",
+  "text": "[{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:decision:refonte-ux-ui-v2-direction-feuille-bloc-design-system-maison-collega-ui-epic-8-1\",\\n \"replacement_packet_id\": \"repo:git-github-com-tistech0-collega:decision:refonte-ux-ui-v2-direction-feuille-bloc-collega-ui-epic-8-r-f-rentiel-de-titres-\",\\n \"reason\": \"Story 8.0 révisée le 2026-09-22 (commit 326d372) : le référentiel de titres d\\'items n\\'est plus une liste officielle ECN fournie au départ, mais une table partagée auto-alimentée par l\\'extraction (item_titles, libellé le plus fréquent, source official prioritaire si injectée plus tard). Le reste des décisions est inchangé.\",\\n \"old_packet\": {\\n \"schema_version\": 2,\\n \"id\": \"repo:git-github-com-tistech0-collega:decision:refonte-ux-ui-v2-direction-feuille-bloc-design-system-maison-collega-ui-epic-8-1\",\\n \"title\": \"Refonte UX/UI v2 : direction « Feuille × Bloc », design system maison Collega UI, epic 8\",\\n \"summary\": \"Session de cadrage du 2026 09 21/22 branche feat/redesign ux ui, commit 445f759 : la refonte UX/UI de l\\'app Flutter est spécifiée dans bmad output/",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4f348480d3f724eee71042e3",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:45:45.933Z",
+  "stored_at": "2026-09-22T17:45:45.933Z",
+  "low_signal": true
+}

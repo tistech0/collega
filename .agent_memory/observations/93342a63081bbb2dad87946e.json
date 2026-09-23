@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory\" && python3 - <<'EOF'\np='project_upload_debug_2026_09.md'\ns=open(p).read()\ns=s.replace(\"session « écrans » FAITE (5 commits sur la même branche feat/story-7.11-upload-chunked, non mergée)\",\"session « écrans » FAITE ; TOUT MERGÉ dans main et pushé le 2026-09-21 soir (merge 6d0a0ee)\")\ns=s.replace(\"reste test hors LAN + reprise upload + merge\\\"\",\"reste test hors LAN + reprise upload ; prochain sujet = refonte UX/UI sur une branche dédiée\\\"\")\ns=s.replace(\"sur la branche `feat/story-7.11-upload-chunked` (13… [+572 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory\" && python3 - <<'EOF' p='project_upload_debug_2026_09.md' s=open(p).read() s=s.replace(\"session « écrans » ",
+  "session_id": "09310be1-f74e-45e7-97aa-104726ef96aa",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "93342a63081bbb2dad87946e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T18:57:57.389Z",
+  "stored_at": "2026-09-21T18:57:57.390Z"
+}

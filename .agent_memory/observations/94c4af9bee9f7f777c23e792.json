@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_verdict_bar.dart'\ns=open(p).read()\nold=\"\"\"    return Row(children: [\n      for (final (i, b) in buttons.indexed) ...[\n        if (i > 0) const SizedBox(width: _gap),\n        Expanded(child: b),\n      ],\n    ]);\n  }\n\"\"\"\nnew=\"\"\"    // Sur une ligne, les trois libellés partagent une même échelle, réduite juste\n    // assez pour que le plus long tienne (« Maîtrisé » à 1,6× sur 375 pt) : pas de\n    // mot coupé, pas de tailles inégales d'un bouton à l'autre.\n    return LayoutBuilder(build… [+2654 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='lib/core/ui/components/cg_verdict_bar.dart' s=open(p).read() old=\"\"\" return Row(children: [ for (final (i, b) in b",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "94c4af9bee9f7f777c23e792",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:42.448Z",
+  "stored_at": "2026-09-22T18:43:42.448Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat > /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/q1.sql <<'EOF'\nselect c.college_ref, c.status, count(i.id) items, count(nullif(i.chapter_title,'')) titled from colleges c left join items i on i.college_id=c.id group by c.college_ref, c.status order by 1;\nselect c.college_ref, i.item_number, i.chapter_title, replace(left(i.ocr_text, 260), E'\\n', ' ⏎ ') head from items i join colleges c on c.id=i.college_id order by c.college_ref, i.item_number limit 60;\nEOF\nssh nas 'docker exec -i collega-db-1 psql -U postgres -d collega… [+144 chars truncated]",
+  "summary": "About to run: cat > /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/q1.sql <<'EOF' select c.college_ref, c.status, count(i.id) items, count(nulli",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d01bc24b8aed3760fd1fcf2c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:48:32.122Z",
+  "stored_at": "2026-09-22T17:48:32.123Z"
+}

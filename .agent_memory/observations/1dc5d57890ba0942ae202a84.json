@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s/final reserved = CgSpace.tabBarHeight + CgSpace.tabBarBottom + 34;/final reserved = CgTabBar.reservedHeight(tester.element(find.byType(CgPage)));/\" test/core/ui/components/cg_header_test.dart && grep -c \"CgTabBar.reservedHeight\" test/core/ui/components/cg_header_test.dart && flutter test test/core/ui/components/cg_header_test.dart 2>&1 | grep -E \"Error|Some tests\" | head -3",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s/final reserved = CgSpace.tabBarHeight + CgSpace.tabBarBottom + 34;/final reserved = CgTabBar.reservedHeight(tester.element",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1dc5d57890ba0942ae202a84",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:58.085Z",
+  "stored_at": "2026-09-22T18:43:58.085Z"
+}

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'package:collega_app/core/network/network_errors.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 
@@ -15,6 +16,9 @@ const _kYearGroup = 'year_group';
 const _kFaculty = 'faculty';
 const _kMonthlyReloads = 'monthly_reloads';
 const _kMonthlyMax = 'monthly_max';
+const _kMonthlyResetAt = 'monthly_reset_at';
+const _kReminderHourUtc = 'reminder_hour_utc';
+const _kReminderLocalHour = 'reminder_local_hour';
 
 class AuthRepository {
   AuthRepository({required Dio dio, required FlutterSecureStorage storage})
@@ -44,8 +48,18 @@ class AuthRepository {
       );
       return _handleTokenResponse(response.data!['data'] as Map<String, dynamic>, email);
     } on DioException catch (e) {
-      return AuthState(errorMessage: _extractError(e));
+      return AuthState(errorMessage: _extractError(e), loginError: _loginError(e));
     }
+  }
+
+  static LoginError _loginError(DioException e) {
+    if (isNetworkUnreachable(e)) return LoginError.network;
+    return switch (e.response?.statusCode) {
+      401 => LoginError.invalidCredentials,
+      422 => LoginError.invalidEmail,
+      429 => LoginError.tooManyAttempts,
+      _ => LoginError.other,
+    };
   }
 
   Future<AuthState> loadStoredUser() async {
@@ -60,6 +74,9 @@ class AuthRepository {
       final faculty = await _storage.read(key: _kFaculty);
       final monthlyReloadsStr = await _storage.read(key: _kMonthlyReloads);
       final monthlyMaxStr = await _storage.read(key: _kMonthlyMax);
+      final monthlyResetAtStr = await _storage.read(key: _kMonthlyResetAt);
+      final reminderStr = await _storage.read(key: _kReminderHourUtc);
+      final reminderLocalStr = await _storage.read(key: _kReminderLocalHour);
 
       if (accessToken == null || userId == null || email == null) {
         return const AuthState();
@@ -76,6 +93,9 @@ class AuthRepository {
           faculty: faculty,
           monthlyReloads: int.tryParse(monthlyReloadsStr ?? '0') ?? 0,
           monthlyMax: int.tryParse(monthlyMaxStr ?? '3') ?? 3,
+          monthlyResetAt: monthlyResetAtStr == null ? null : DateTime.tryParse(monthlyResetAtStr),
+          reminderHourUtc: reminderStr == null ? null : int.tryParse(reminderStr),
+          reminderLocalHour: reminderLocalStr == null ? null : int.tryParse(reminderLocalStr),
         ),
       );
     } catch (e) {
@@ -97,8 +117,18 @@ class AuthRepository {
       _storage.delete(key: _kFaculty),
       _storage.delete(key: _kMonthlyReloads),
       _storage.delete(key: _kMonthlyMax),
+      _storage.delete(key: _kMonthlyResetAt),
+      _storage.delete(key: _kReminderHourUtc),
+      _storage.delete(key: _kReminderLocalHour),
     ]);
   }
+
+  /// Rappel quotidien mémorisé (l'interrupteur du Profil au prochain démarrage),
+  /// avec l'heure locale choisie (recalage au changement d'heure).
+  Future<void> saveReminderHour(int? hourUtc, {int? localHour}) => Future.wait([
+        _storage.write(key: _kReminderHourUtc, value: hourUtc?.toString()),
+        _storage.write(key: _kReminderLocalHour, value: hourUtc == null ? null : localHour?.toString()),
+      ]);
 
   Future<AuthState> refreshFromMe() async {
     try {
@@ -110,6 +140,11 @@ class AuthRepository {
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
       final data = response.data!['data'] as Map<String, dynamic>;
+      // Réponse tardive : déconnectée ou autre compte entre-temps → rien n'est écrit.
+      final storedId = await _storage.read(key: _kUserId);
+      if (storedId == null || storedId != data['id']) {
+        return const AuthState(errorMessage: 'Compte changé pendant la synchronisation');
+      }
       final isSubscribed = data['is_subscribed'] as bool;
       final isBeta = data['is_beta'] as bool;
       final firstName = data['first_name'] as String?;
@@ -117,6 +152,13 @@ class AuthRepository {
       final faculty = data['faculty'] as String?;
       final monthlyReloads = data['monthly_reloads'] as int? ?? 0;
       final monthlyMax = data['monthly_reloads_max'] as int? ?? 3;
+      final resetAtStr = data['monthly_reloads_reset_at'] as String?;
+      final monthlyResetAt = resetAtStr == null ? null : DateTime.tryParse(resetAtStr);
+      final reminderHourUtc = data['reminder_hour_utc'] as int?;
+      // Heure locale choisie : gardée tant que le serveur a la même heure UTC.
+      final storedUtc = int.tryParse(await _storage.read(key: _kReminderHourUtc) ?? '');
+      final storedLocal = int.tryParse(await _storage.read(key: _kReminderLocalHour) ?? '');
+      final reminderLocalHour = reminderHourUtc != null && reminderHourUtc == storedUtc ? storedLocal : null;
 
       await Future.wait([
         _storage.write(key: _kIsSubscribed, value: isSubscribed.toString()),
@@ -126,6 +168,9 @@ class AuthRepository {
         _storage.write(key: _kFaculty, value: faculty),
         _storage.write(key: _kMonthlyReloads, value: monthlyReloads.toString()),
         _storage.write(key: _kMonthlyMax, value: monthlyMax.toString()),
+        _storage.write(key: _kMonthlyResetAt, value: monthlyResetAt?.toIso8601String()),
+        _storage.write(key: _kReminderHourUtc, value: reminderHourUtc?.toString()),
+        _storage.write(key: _kReminderLocalHour, value: reminderLocalHour?.toString()),
       ]);
 
       final userId = await _storage.read(key: _kUserId) ?? '';
@@ -142,6 +187,9 @@ class AuthRepository {
           faculty: faculty,
           monthlyReloads: monthlyReloads,
           monthlyMax: monthlyMax,
+          monthlyResetAt: monthlyResetAt,
+          reminderHourUtc: reminderHourUtc,
+          reminderLocalHour: reminderLocalHour,
         ),
       );
     } on DioException catch (e) {
@@ -163,32 +211,12 @@ class AuthRepository {
       final isSubscribed = data['is_subscribed'] as bool;
       final isBeta = data['is_beta'] as bool;
 
-      final userId = await _storage.read(key: _kUserId) ?? '';
-      final email = await _storage.read(key: _kUserEmail) ?? '';
-      final firstName = await _storage.read(key: _kFirstName);
-      final yearGroup = await _storage.read(key: _kYearGroup);
-      final faculty = await _storage.read(key: _kFaculty);
-      final monthlyReloadsStr = await _storage.read(key: _kMonthlyReloads);
-      final monthlyMaxStr = await _storage.read(key: _kMonthlyMax);
-
       await Future.wait([
         _storage.write(key: _kIsSubscribed, value: isSubscribed.toString()),
         _storage.write(key: _kIsBeta, value: isBeta.toString()),
       ]);
-
-      return AuthState(
-        user: AuthUser(
-          id: userId,
-          email: email,
-          isBeta: isBeta,
-          isSubscribed: isSubscribed,
-          firstName: firstName,
-          yearGroup: yearGroup,
-          faculty: faculty,
-          monthlyReloads: int.tryParse(monthlyReloadsStr ?? '0') ?? 0,
-          monthlyMax: int.tryParse(monthlyMaxStr ?? '3') ?? 3,
-        ),
-      );
+      // Le reste du compte (profil, quota, rappel) tel que mémorisé.
+      return loadStoredUser();
     } on DioException catch (e) {
       AppLogger.error('refreshSubscriptionStatus failed', tag: 'AuthRepository', error: e);
       return const AuthState(errorMessage: 'Impossible de synchroniser le statut');
@@ -279,6 +307,8 @@ class AuthRepository {
     String? faculty;
     int monthlyReloads = 0;
     int monthlyMax = 3;
+    DateTime? monthlyResetAt;
+    int? reminderHourUtc;
 
     try {
       final meResponse = await _dio.get<Map<String, dynamic>>(
@@ -292,6 +322,9 @@ class AuthRepository {
       faculty = meData['faculty'] as String?;
       monthlyReloads = meData['monthly_reloads'] as int? ?? 0;
       monthlyMax = meData['monthly_reloads_max'] as int? ?? 3;
+      final resetAtStr = meData['monthly_reloads_reset_at'] as String?;
+      monthlyResetAt = resetAtStr == null ? null : DateTime.tryParse(resetAtStr);
+      reminderHourUtc = meData['reminder_hour_utc'] as int?;
     } catch (e) {
       AppLogger.error('Failed to fetch user profile after login', tag: 'AuthRepository', error: e);
       return const AuthState(errorMessage: 'Impossible de récupérer le profil utilisateur');
@@ -310,6 +343,10 @@ class AuthRepository {
         _storage.write(key: _kFaculty, value: faculty),
         _storage.write(key: _kMonthlyReloads, value: monthlyReloads.toString()),
         _storage.write(key: _kMonthlyMax, value: monthlyMax.toString()),
+        // Toujours réécrits : jamais le rappel d'un compte précédent sur cet appareil.
+        _storage.write(key: _kMonthlyResetAt, value: monthlyResetAt?.toIso8601String()),
+        _storage.write(key: _kReminderHourUtc, value: reminderHourUtc?.toString()),
+        _storage.write(key: _kReminderLocalHour, value: null),
       ]);
     } catch (e) {
       AppLogger.error('Failed to persist tokens', tag: 'AuthRepository', error: e);
@@ -328,6 +365,8 @@ class AuthRepository {
         faculty: faculty,
         monthlyReloads: monthlyReloads,
         monthlyMax: monthlyMax,
+        monthlyResetAt: monthlyResetAt,
+        reminderHourUtc: reminderHourUtc,
       ),
     );
   }

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_field.dart'\ns=open(p).read()\nrep=[\n(\"\"\"  static const _actionIconSize = 20.0;\n\"\"\",\"\"\"  static const _actionIconSize = 20.0;\n\n  /// Les icônes suivent le Dynamic Type, plafonnées (comme les SF Symbols).\n  static const _iconMaxScale = 1.3;\n\"\"\"),\n(\"\"\"    final focused = _focusNode.hasFocus;\n\"\"\",\"\"\"    final focused = _focusNode.hasFocus;\n    final iconScaler = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: _iconMaxScale);\n\"\"\"),\n(\"CgIcon(CgIcons.search, size: _searchIconSize, col… [+1107 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='lib/core/ui/components/cg_field.dart' s=open(p).read() rep=[ (\"\"\" static const _actionIconSize = 20.0; \"\"\",\"\"\" sta",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7dd50071d29dd70e3694d403",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:45:08.117Z",
+  "stored_at": "2026-09-22T18:45:08.117Z"
+}

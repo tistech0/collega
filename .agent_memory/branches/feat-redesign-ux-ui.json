@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "branch": "feat/redesign-ux-ui",
+  "head": "1cb63e6c9825bb51dab278a5131792c172ff9039",
+  "merge_base": "6d0a0eeb566a8722ef1808e976422a0672fba8d3",
+  "changed_files": [
+    ".agent_memory/packets/decision-planning-v2-8-9-et-journal-complet-des-r-visions-8-8-sch-ma-v8-aae5950d.md",
+    ".agent_memory/packets/gotcha-dates-jamais-duration-days-sur-un-minuit-local-jours-epoch-ou-datetime-y-m-d-n-6394204b.md"
+  ],
+  "pending_packet_ids": [
+    "repo:git-github-com-tistech0-collega:bug_fix:pasted-content-id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f"
+  ],
+  "generated_at": "2026-09-23T08:27:18.566Z"
+}

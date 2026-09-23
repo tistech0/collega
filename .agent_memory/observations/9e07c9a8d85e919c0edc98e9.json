@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls _bmad-output/planning-artifacts/*.md _bmad-output/planning-artifacts/specs _bmad-output/planning-artifacts/plans docs 2>/dev/null; echo \"=== brief?\"; find . -iname \"*brief*.md\" -not -path \"*/node_modules/*\" -not -path \"*/Pods/*\" -not -path \"*/.agent_memory/*\" | head; echo \"=== superpowers specs\"; ls docs/superpowers/specs 2>/dev/null | tail -5; echo \"=== retro\"; ls _bmad-output/implementation-artifacts/ | grep -iE \"retro|epic-\" | head",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && ls _bmad-output/planning-artifacts/*.md _bmad-output/planning-artifacts/specs _bmad-output/planning-artifacts/plans docs 2>/dev/null; echo \"=== bri",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9e07c9a8d85e919c0edc98e9",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:25:00.833Z",
+  "stored_at": "2026-09-21T19:25:00.834Z"
+}

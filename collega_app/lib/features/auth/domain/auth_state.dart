@@ -12,6 +12,9 @@ class AuthUser {
     this.faculty,
     this.monthlyReloads = 0,
     this.monthlyMax = 3,
+    this.monthlyResetAt,
+    this.reminderHourUtc,
+    this.reminderLocalHour,
   });
 
   final String id;
@@ -24,6 +27,15 @@ class AuthUser {
   final int monthlyReloads;
   final int monthlyMax;
 
+  /// Renouvellement du quota de réimports (UTC) ; inconnu avant le premier `/me`.
+  final DateTime? monthlyResetAt;
+
+  /// Rappel quotidien (heure UTC côté serveur) ; `null` = rappel éteint.
+  final int? reminderHourUtc;
+
+  /// Heure locale choisie pour le rappel (le décalage UTC change deux fois par an).
+  final int? reminderLocalHour;
+
   AuthUser copyWith({
     String? id,
     String? email,
@@ -34,6 +46,9 @@ class AuthUser {
     Object? faculty = _absent,
     int? monthlyReloads,
     int? monthlyMax,
+    Object? monthlyResetAt = _absent,
+    Object? reminderHourUtc = _absent,
+    Object? reminderLocalHour = _absent,
   }) {
     return AuthUser(
       id: id ?? this.id,
@@ -45,21 +60,32 @@ class AuthUser {
       faculty: identical(faculty, _absent) ? this.faculty : faculty as String?,
       monthlyReloads: monthlyReloads ?? this.monthlyReloads,
       monthlyMax: monthlyMax ?? this.monthlyMax,
+      monthlyResetAt: identical(monthlyResetAt, _absent) ? this.monthlyResetAt : monthlyResetAt as DateTime?,
+      reminderHourUtc: identical(reminderHourUtc, _absent) ? this.reminderHourUtc : reminderHourUtc as int?,
+      reminderLocalHour: identical(reminderLocalHour, _absent) ? this.reminderLocalHour : reminderLocalHour as int?,
     );
   }
 
   static const _absent = Object();
 }
 
+/// Pourquoi une connexion a échoué (story 8.12) : l'écran dit la bonne chose
+/// au bon endroit (sous le champ, ou « pas de connexion »).
+enum LoginError { invalidCredentials, invalidEmail, tooManyAttempts, network, other }
+
 @immutable
 class AuthState {
   const AuthState({
     this.user,
     this.errorMessage,
+    this.loginError,
   });
 
   final AuthUser? user;
   final String? errorMessage;
+
+  /// Renseigné seulement par une connexion échouée.
+  final LoginError? loginError;
 
   bool get isAuthenticated => user != null;
 

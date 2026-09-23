@@ -1,0 +1,16 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-b-nuit.html",
+  "summary": "wrote /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-b-nuit.html: <title>Collega — Nuit</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap\">\n<style>\n  :root{\n    --groun",
+  "text": "wrote /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-b-nuit.html: <title>Collega — Nuit</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap\">\n<style>\n  :root{\n    --ground:#0F1216; --surface:#171B21; --surface2:#1F242C; --ink:#EDF0F4; --ink2:#9AA3AF; --ink3:#5E6772; --line:#262C35;\n    --accent:#7FB8FF; --accent-soft:#1B2A3F; --accent-ink:#0B1524;\n    --rank-a:#7FB8FF; --rank-b:#B3A5FF; --rank-c:#7C8794;\n    --mastered:#5CE0A4; --good:#7FB8FF; --review:#FFB454; --unseen:#262C35;\n    --danger:#FF6B6B; --warning:#FFB454;\n    --font:\"Geist\",system-ui,-apple-system,\"Helvetica Neue\",sans-serif;",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4671620420a9869c769422fc",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:51:41.149Z",
+  "stored_at": "2026-09-21T19:51:41.150Z",
+  "low_signal": true
+}

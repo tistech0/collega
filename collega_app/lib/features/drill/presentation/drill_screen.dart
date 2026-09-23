@@ -1,500 +1,325 @@
-import 'dart:math';
-
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show TextInputAction;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 
-import 'package:collega_app/core/theme/app_theme.dart';
+import 'package:collega_app/core/ui/collega_ui.dart';
+import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/domain/drill_state.dart';
+import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/drill/drill_providers.dart';
-import 'package:collega_app/features/drill/widgets/drill_evaluation_bar.dart';
-import 'package:collega_app/features/drill/widgets/timer_ring.dart';
-import 'package:collega_app/features/generation/widgets/flash_card_widget.dart';
-import 'package:collega_app/features/planning/planning_providers.dart';
+import 'package:collega_app/features/drill/presentation/drill_end_screen.dart';
+import 'package:collega_app/features/drill/presentation/drill_timer_slot.dart';
 import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
 
+/// Drill plein écran (story 8.4, maquette `direction-d-fusion.html` 2a) :
+/// toucher pour voir la réponse, glisser ou choisir un verdict, fiche suivante.
+/// Pas de tab bar, pas de retour par balayage natif : quitter passe par
+/// « Quitter ? » (✕ ou balayage depuis le bord gauche).
 class DrillScreen extends ConsumerWidget {
-  const DrillScreen({super.key, required this.params});
+  const DrillScreen({super.key, required this.launch});
 
-  final DrillSessionParams params;
+  final DrillLaunch launch;
+
+  DrillSessionParams get params => launch.params;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final drillAsync = ref.watch(drillSessionProvider(params));
-    final notifier = ref.read(drillSessionProvider(params).notifier);
-
-    return Scaffold(
-      body: SafeArea(
-        child: drillAsync.when(
-          loading: () => const LinearProgressIndicator(),
-          error: (e, _) => Center(child: Text(e.toString())),
-          data: (session) => session.isComplete
-              ? _DrillEndScreen(session: session, notifier: notifier, params: params)
-              : _DrillActiveView(
-                  session: session,
-                  notifier: notifier,
-                  itemTitle: params.itemName,
-                ),
-        ),
-      ),
-    );
+    final async = ref.watch(drillSessionProvider(params));
+    final session = async.valueOrNull;
+    if (session == null && async.hasError) {
+      return _DrillError(
+        onRetry: () => ref.invalidate(drillSessionProvider(params)),
+        onQuit: () => leaveDrill(context),
+      );
+    }
+    if (session == null) return const _DrillLoading();
+    if (session.isComplete) {
+      return DrillEndScreen(
+        session: session,
+        notifier: ref.read(drillSessionProvider(params).notifier),
+        params: params,
+      );
+    }
+    return _DrillActive(launch: launch, session: session);
   }
 }
 
-class _DrillActiveView extends ConsumerStatefulWidget {
-  const _DrillActiveView({
-    required this.session,
-    required this.notifier,
-    this.itemTitle,
-  });
-
-  final DrillSessionState session;
-  final DrillSessionNotifier notifier;
-  final String? itemTitle;
-
-  @override
-  ConsumerState<_DrillActiveView> createState() => _DrillActiveViewState();
+/// Conséquence écrite de « Quitter ? » (spec § Feedback — Décision).
+String quitMessage({required bool isDaily, required int judged, bool replaying = false}) {
+  // « Refaire les à revoir » : la session du jour est close, rien n'est à reprendre.
+  if (replaying) return 'Ta session du jour est déjà enregistrée.';
+  if (isDaily) return 'Ta session reprendra là où tu l’as laissée.';
+  if (judged == 0) return 'Aucune fiche n’a encore été jugée.';
+  if (judged == 1) return '1 fiche jugée est enregistrée.';
+  return '$judged fiches jugées sont enregistrées.';
 }
 
-class _DrillActiveViewState extends ConsumerState<_DrillActiveView> {
-  final _answerController = TextEditingController();
+/// Sort du drill vers l'écran d'origine (Aujourd'hui se recalcule au retour).
+void leaveDrill(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go('/home');
+  }
+}
 
-  /// État pause local à la session drill (Story 7.4 AC4). Volontairement
-  /// non persisté dans `RevisionPrefs` ni `DrillSessionState` — la session
-  /// suivante repart avec le timer actif comme défini en prefs.
+const _verdictResult = {
+  CgVerdict.review: DrillEvaluationResult.aRevoir,
+  CgVerdict.good: DrillEvaluationResult.bien,
+  CgVerdict.mastered: DrillEvaluationResult.maitrise,
+};
+
+class _DrillActive extends ConsumerStatefulWidget {
+  const _DrillActive({required this.launch, required this.session});
+
+  final DrillLaunch launch;
+  final DrillSessionState session;
+
+  @override
+  ConsumerState<_DrillActive> createState() => _DrillActiveState();
+}
+
+class _DrillActiveState extends ConsumerState<_DrillActive> {
+  final _card = GlobalKey<CgDrillCardState>();
+  final _answer = TextEditingController();
+  late bool _timerOn = widget.launch.timerOn;
   bool _timerPaused = false;
+  bool _submitting = false;
+
+  DrillSessionParams get _params => widget.launch.params;
+  DrillSessionNotifier get _notifier => ref.read(drillSessionProvider(_params).notifier);
 
   @override
   void dispose() {
-    _answerController.dispose();
+    _answer.dispose();
     super.dispose();
   }
 
-  Color _rangColor(String rang) {
-    switch (rang) {
-      case 'A':
-        return AppColors.primary;
-      case 'B':
-        return AppColors.secondary;
-      default:
-        return const Color(0xFF6B7C6E);
-    }
+  Future<void> _onVerdict(CgVerdict verdict) async {
+    final requeued = await _notifier.evaluate(_verdictResult[verdict]!);
+    _notifier.advanceToNext();
+    _answer.clear();
+    if (requeued && mounted) showCgToast(context, 'Elle reviendra dans quelques questions');
   }
 
-  Future<void> _handleDefinitionSubmit(String cardId, String answer) async {
-    if (answer.trim().isEmpty) return;
+  void _onFlip() {
+    final current = ref.read(drillSessionProvider(_params)).valueOrNull;
+    if (current != null && !current.isFlipped) _notifier.flip();
+  }
+
+  Future<void> _submitDefinition(FlashCardModel card) async {
+    final text = _answer.text.trim();
+    if (text.isEmpty || _submitting) return;
+    final position = widget.session.currentQueuePos;
+    setState(() => _submitting = true);
     try {
-      final repo = ref.read(drillRepositoryProvider);
-      final feedback = await repo.evaluateSemantic(cardId, answer.trim());
-      widget.notifier.setSemanticFeedback(feedback);
-      widget.notifier.flip();
+      final feedback = await ref.read(drillRepositoryProvider).evaluateSemantic(card.id, text);
+      _notifier.setSemanticFeedback(feedback, cardId: card.id);
     } catch (_) {
-      widget.notifier.flip();
+      // Évaluation indisponible (réseau) : la réponse s'ouvre quand même.
+    }
+    if (!mounted) return;
+    setState(() => _submitting = false);
+    // Réponse arrivée après le passage à la fiche suivante : on n'ouvre rien.
+    final now = ref.read(drillSessionProvider(_params)).valueOrNull;
+    if (now == null || now.currentQueuePos != position || now.currentCard?.id != card.id) return;
+    _card.currentState?.flip();
+  }
+
+  void _onTimerExpired() {
+    // D'abord l'état (timerExpired), ensuite l'ouverture (qui passe isFlipped à vrai).
+    _notifier.handleTimerExpiry();
+    _card.currentState?.flip();
+    if (mounted) showCgToast(context, 'Temps écoulé');
+  }
+
+  Future<void> _confirmQuit() async {
+    // Le chrono s'arrête pendant la question : « Continuer » retrouve la fiche intacte.
+    final wasPaused = _timerPaused;
+    setState(() => _timerPaused = true);
+    final quit = await showCgDialogSheet(
+      context,
+      title: 'Quitter ?',
+      message: quitMessage(
+        isDaily: _params.isDailySession,
+        judged: widget.session.evaluatedCount,
+        replaying: widget.session.replayingErrors,
+      ),
+      confirmLabel: 'Quitter',
+      cancelLabel: 'Continuer',
+    );
+    if (!mounted) return;
+    if (quit) {
+      leaveDrill(context);
+    } else {
+      setState(() => _timerPaused = wasPaused);
     }
   }
 
-  /// Rappel quand un 1er « à revoir » réinsère la carte plus loin dans la
-  /// file (S4) — l'exit de la carte dure 300 ms, un toast reste lisible.
-  Future<void> _handleEvaluate(DrillEvaluationResult result) async {
-    final requeued = await widget.notifier.evaluate(result);
-    if (!requeued || !mounted) return;
-    ShadToaster.of(context).show(
-      const ShadToast(
-        title: Text('Cette fiche reviendra dans quelques questions'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+  String _contextLabel(String collegeName) {
+    if (_params.isDailySession) return 'Session du jour';
+    if (_params.fromSearch) return 'Recherche';
+    return _params.itemName ?? collegeName;
   }
 
   @override
   Widget build(BuildContext context) {
     final session = widget.session;
-    final notifier = widget.notifier;
-    final card = session.currentCard;
+    final card = session.currentCard!;
+    final prefs = ref.watch(revisionPrefsProvider).valueOrNull ?? RevisionPrefs.defaults;
+    final names = {
+      for (final e in ref.watch(collegesProvider).valueOrNull ?? const [])
+        if (e.userStatus != null) e.userStatus!.collegeId: e.catalog.name,
+    };
+    final collegeName = names[card.collegeId] ?? '';
+    final isDefinition = card.cardType == 'definition';
+    final feedback = session.semanticFeedback;
+    final canFlip = !isDefinition || feedback != null || session.timerExpired;
 
-    if (card == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final isDefinitionFront =
-        card.cardType == 'definition' && !session.isFlipped;
-    // R2 (Story 7.1) : autorise le re-flip recto→verso sur carte définition
-    // une fois la réponse soumise (semanticFeedback != null), pour éviter le
-    // dead-end UX où l'utilisateur cache le verso sans pouvoir y revenir.
-    // Story 7.4 AC3 : timer expiré → flip autorisé même sans réponse soumise.
-    final flipDisabled = isDefinitionFront &&
-        session.semanticFeedback == null &&
-        !session.timerExpired;
-
-    final prefs = ref.watch(revisionPrefsProvider).valueOrNull ??
-        const RevisionPrefs();
-    final timerEnabled =
-        prefs.timerEnabled && prefs.timerDurationSeconds > 0;
-    final showTimerRing =
-        timerEnabled && !session.isFlipped && session.exitResult == null;
-
-    return Column(
-      children: [
-        // Header
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenMargin,
-            vertical: 8,
-          ),
-          child: Row(
-            children: [
-              Semantics(
-                label: 'Quitter le drill',
-                child: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => context.pop(),
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  widget.itemTitle ?? card.itemId,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodyLarge(),
-                ),
-              ),
-              ShadBadge(
-                backgroundColor: _rangColor(card.rang),
-                child: Text(
-                  'Rang ${card.rang}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-              if (timerEnabled) ...[
-                const SizedBox(width: 4),
-                Semantics(
-                  label: _timerPaused
-                      ? 'Reprendre le chronomètre'
-                      : 'Mettre le chronomètre en pause',
-                  child: IconButton(
-                    icon: Icon(
-                      _timerPaused ? Icons.timer_off : Icons.timer,
-                    ),
-                    onPressed: () =>
-                        setState(() => _timerPaused = !_timerPaused),
-                  ),
-                ),
-              ],
-            ],
-          ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _confirmQuit();
+      },
+      child: CgDrillCard(
+        key: _card,
+        cardKey: '${card.id}#${session.currentQueuePos}',
+        question: card.recto,
+        answer: card.verso,
+        rank: card.rang,
+        collegeName: collegeName,
+        index: session.currentQueuePos + 1,
+        total: session.queue.length,
+        contextLabel: _contextLabel(collegeName),
+        // Invite de retournement : tant que la première fiche n'est pas jugée.
+        showFlipHint: session.evaluatedCount == 0 && !isDefinition,
+        canFlip: canFlip,
+        onFlip: _onFlip,
+        onVerdict: _onVerdict,
+        onClose: _confirmQuit,
+        trailing: DrillTimerSlot(
+          enabled: _timerOn && prefs.timerDurationSeconds > 0,
+          paused: _timerPaused,
+          running: !session.isFlipped,
+          durationSeconds: prefs.timerDurationSeconds,
+          cardKey: '${card.id}#${session.currentQueuePos}',
+          onToggle: () => setState(() {
+            _timerOn = !_timerOn;
+            _timerPaused = false;
+          }),
+          onTogglePause: () => setState(() => _timerPaused = !_timerPaused),
+          onExpired: _onTimerExpired,
         ),
-        // Progress
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenMargin),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${session.evaluatedCount} / ${session.totalInitial} fiches',
-                style: AppTypography.labelMedium(),
-              ),
-              const SizedBox(height: 4),
-              ShadProgress(
-                value: session.totalInitial == 0
-                    ? 0
-                    : session.evaluatedCount / session.totalInitial,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        // Card
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenMargin),
-            child: Stack(
-              children: [
-                FlashCardWidget(
-                  card: card,
-                  isFlipped: session.isFlipped,
-                  exitResult: session.exitResult,
-                  onFlip: flipDisabled ? null : notifier.flip,
-                  onExitComplete: notifier.advanceToNext,
-                ),
-                if (showTimerRing)
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: TimerRing(
-                      durationSeconds: prefs.timerDurationSeconds,
-                      cardId: card.id,
-                      isPaused: _timerPaused,
-                      onExpired: () {
-                        notifier.handleTimerExpiry();
-                        if (!mounted) return;
-                        ShadToaster.of(context).show(
-                          const ShadToast(
-                            title: Text('Temps écoulé'),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        // Semantic feedback banner
-        if (session.semanticFeedback != null)
-          _SemanticFeedbackBanner(feedback: session.semanticFeedback!),
-        // Definition input (recto uniquement, avant retournement)
-        if (isDefinitionFront) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.screenMargin,
-              vertical: 8,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ShadInput(
-                    controller: _answerController,
-                    placeholder: const Text('Votre définition…'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ShadButton(
-                  onPressed: session.semanticFeedback != null
-                      ? null
-                      : () {
-                          _handleDefinitionSubmit(card.id, _answerController.text);
-                          _answerController.clear();
-                        },
-                  child: const Text('Évaluer'),
-                ),
-              ],
-            ),
-          ),
-          if (session.semanticFeedback == null)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenMargin,
-              ),
-              child: Text(
-                'Soumets ta définition pour voir la réponse',
-                style: AppTypography.labelMedium()
-                    .copyWith(color: AppColors.secondary),
-              ),
-            ),
-        ],
-        // Evaluation bar
-        DrillEvaluationBar(
-          isVisible: session.isFlipped,
-          onEvaluate: _handleEvaluate,
-        ),
-        const SizedBox(height: 24),
-      ],
+        frontInput: isDefinition
+            ? _DefinitionInput(
+                controller: _answer,
+                submitting: _submitting,
+                onSubmit: () => _submitDefinition(card),
+              )
+            : null,
+        answerHeader: feedback == null ? null : _SemanticFeedback(feedback: feedback),
+      ),
     );
   }
 }
 
-class _SemanticFeedbackBanner extends StatelessWidget {
-  const _SemanticFeedbackBanner({required this.feedback});
+/// Mode définition : l'étudiante écrit sa réponse avant de la voir (spec § Établi vs nouveau).
+class _DefinitionInput extends StatelessWidget {
+  const _DefinitionInput({required this.controller, required this.submitting, required this.onSubmit});
+
+  final TextEditingController controller;
+  final bool submitting;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      CgField(
+        controller: controller,
+        kind: CgFieldKind.multiline,
+        placeholder: 'Ta définition…',
+        minLines: 3,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) => onSubmit(),
+      ),
+      const SizedBox(height: CgSpace.s3),
+      CgButton(
+        label: 'Valider',
+        variant: CgButtonVariant.inverse,
+        size: CgButtonSize.compact,
+        loading: submitting,
+        onPressed: onSubmit,
+      ),
+    ]);
+  }
+}
+
+/// Retour de l'évaluation sémantique, en tête de la feuille réponse : un mot + le détail.
+class _SemanticFeedback extends StatelessWidget {
+  const _SemanticFeedback({required this.feedback});
 
   final SemanticFeedback feedback;
 
-  Color get _color {
-    switch (feedback.result) {
-      case 'correct':
-        return AppColors.primary;
-      case 'partial':
-        return AppColors.secondary;
-      default:
-        return AppColors.error;
-    }
-  }
-
-  String get _label {
-    switch (feedback.result) {
-      case 'correct':
-        return 'Correct';
-      case 'partial':
-        return 'Partiel';
-      default:
-        return 'Incorrect';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenMargin,
-        vertical: 4,
-      ),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: _color.withValues(alpha: 0.1),
-        border: Border.all(color: _color),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          ShadBadge(
-            backgroundColor: _color,
-            child: Text(_label, style: const TextStyle(color: Colors.white)),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              feedback.feedback,
-              style: AppTypography.bodyMedium(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Écran de fin ─────────────────────────────────────────────────────────────
-
-class _DrillEndScreen extends ConsumerWidget {
-  const _DrillEndScreen({
-    required this.session,
-    required this.notifier,
-    required this.params,
-  });
-
-  final DrillSessionState session;
-  final DrillSessionNotifier notifier;
-  final DrillSessionParams params;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final summary =
-        DrillSessionSummary.fromEvaluations(session.evaluations);
-    final planningAsync = ref.watch(planningProvider);
-    final todaySession = planningAsync.valueOrNull?.todaySession;
-
+    final c = CgTheme.of(context).colors;
+    final (label, color) = switch (feedback.result) {
+      'correct' => ('Correct', c.mastered),
+      'partial' => ('Partiel', c.ink2),
+      _ => ('À revoir', c.reviewInk),
+    };
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.screenMargin),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Session terminée',
-            style: AppTypography.titleLarge(),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.sectionSpacing),
-          Center(child: _MasteryCircle(ratio: summary.masteryRatio)),
-          const SizedBox(height: AppSpacing.sectionSpacing),
-          Row(
-            children: [
-              Expanded(
-                child: _StatCard(
-                  label: 'Maîtrisé',
-                  count: summary.maitrisCount,
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _StatCard(
-                  label: 'Bien',
-                  count: summary.bienCount,
-                  color: AppColors.secondary,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _StatCard(
-                  label: 'À revoir',
-                  count: summary.aRevoirCount,
-                  color: AppColors.error,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sectionSpacing),
-          ShadButton(
-            onPressed:
-                summary.aRevoirCount > 0 ? notifier.restartWithErrors : null,
-            width: double.infinity,
-            child: const Text('Recommencer les erreurs'),
-          ),
-          if (params.fromSearch) ...[
-            const SizedBox(height: 8),
-            ShadButton(
-              onPressed: () => context.go('/search'),
-              width: double.infinity,
-              child: const Text('Nouvelle recherche'),
-            ),
-            if (todaySession != null) ...[
-              const SizedBox(height: 8),
-              ShadButton.outline(
-                onPressed: () async {
-                  await ref
-                      .read(planningProvider.notifier)
-                      .markTodayCompleted();
-                  if (context.mounted) context.go('/home');
-                },
-                width: double.infinity,
-                child: const Text('Session terminée ✓'),
-              ),
-            ],
-            const SizedBox(height: 8),
-            ShadButton.outline(
-              onPressed: () => context.go('/home'),
-              width: double.infinity,
-              child: const Text("Retour à l'accueil"),
-            ),
-          ] else ...[
-            if (todaySession != null) ...[
-              const SizedBox(height: 8),
-              ShadButton.outline(
-                onPressed: () async {
-                  await ref
-                      .read(planningProvider.notifier)
-                      .markTodayCompleted();
-                  if (context.mounted) context.go('/home');
-                },
-                width: double.infinity,
-                child: const Text('Session terminée ✓'),
-              ),
-            ],
-            const SizedBox(height: 8),
-            ShadButton.outline(
-              onPressed: () => context.go('/home'),
-              width: double.infinity,
-              child: const Text("Retour à l'accueil"),
-            ),
-          ],
-        ],
+      padding: const EdgeInsets.only(bottom: CgSpace.s4),
+      child: MergeSemantics(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(label, style: CgType.head.copyWith(color: color)),
+          const SizedBox(height: CgSpace.s1),
+          Text(feedback.feedback, style: CgType.bodyS.copyWith(color: c.ink2)),
+        ]),
       ),
     );
   }
 }
 
-class _MasteryCircle extends StatelessWidget {
-  const _MasteryCircle({required this.ratio});
+class _DrillLoading extends StatelessWidget {
+  const _DrillLoading();
 
-  final double ratio;
+  static const _blockAlpha = 0.14;
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(160, 160),
-      painter: _DonutPainter(ratio: ratio),
-      child: SizedBox(
-        width: 160,
-        height: 160,
-        child: Center(
-          child: Text(
-            '${(ratio * 100).round()}%',
-            style: AppTypography.titleLarge()
-                .copyWith(fontWeight: FontWeight.bold),
+    final c = CgTheme.of(context).colors;
+    return ColoredBox(
+      key: const Key('drill-loading'),
+      color: c.accent,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(CgSpace.gutter),
+          child: Semantics(
+            label: 'Chargement de la session',
+            child: CgSkeletonPulse(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const SizedBox(height: CgSpace.section),
+                for (final width in const [0.4, 0.9, 0.7])
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: CgSpace.s3),
+                    child: FractionallySizedBox(
+                      widthFactor: width,
+                      child: Container(
+                        height: CgSpace.s6,
+                        decoration: BoxDecoration(
+                          color: c.accentInk.withValues(alpha: _blockAlpha),
+                          borderRadius: CgRadius.sAll,
+                        ),
+                      ),
+                    ),
+                  ),
+              ]),
+            ),
           ),
         ),
       ),
@@ -502,73 +327,31 @@ class _MasteryCircle extends StatelessWidget {
   }
 }
 
-class _DonutPainter extends CustomPainter {
-  const _DonutPainter({required this.ratio});
+class _DrillError extends StatelessWidget {
+  const _DrillError({required this.onRetry, required this.onQuit});
 
-  final double ratio;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 10;
-    const strokeWidth = 20.0;
-    final rect = Rect.fromCircle(center: center, radius: radius);
-
-    canvas.drawArc(
-      rect,
-      -pi / 2,
-      2 * pi,
-      false,
-      Paint()
-        ..color = const Color(0xFFE8F5EC)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth,
-    );
-
-    if (ratio > 0) {
-      canvas.drawArc(
-        rect,
-        -pi / 2,
-        2 * pi * ratio,
-        false,
-        Paint()
-          ..color = AppColors.primary
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = strokeWidth
-          ..strokeCap = StrokeCap.round,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DonutPainter old) => old.ratio != ratio;
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.label,
-    required this.count,
-    required this.color,
-  });
-
-  final String label;
-  final int count;
-  final Color color;
+  final VoidCallback onRetry;
+  final VoidCallback onQuit;
 
   @override
   Widget build(BuildContext context) {
-    return ShadCard(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      child: Column(
-        children: [
-          Text(
-            '$count',
-            style: AppTypography.titleLarge()
-                .copyWith(color: color, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(label, style: AppTypography.labelMedium(), textAlign: TextAlign.center),
-        ],
+    final c = CgTheme.of(context).colors;
+    return ColoredBox(
+      color: c.ground,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(CgSpace.gutter),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            CgState.error(
+              title: 'Tes fiches sont là',
+              message: 'La session n’a pas pu s’ouvrir. Réessaie dans un instant.',
+              actionLabel: 'Réessayer',
+              onAction: onRetry,
+            ),
+            const SizedBox(height: CgSpace.s3),
+            CgButton(label: 'Quitter', variant: CgButtonVariant.quiet, expand: false, onPressed: onQuit),
+          ]),
+        ),
       ),
     );
   }

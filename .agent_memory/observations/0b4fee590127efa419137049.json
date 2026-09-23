@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_badge_use_cases.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_badge_use_cases.dart: import 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_badge.dart';\nimport 'package:collega_app/core/ui/gallery/cg_badge_galler",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_badge_use_cases.dart: import 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_badge.dart';\nimport 'package:collega_app/core/ui/gallery/cg_badge_gallery.dart';\n\nfinal WidgetbookComponent cgBadgeComponent = WidgetbookComponent(\n  name: 'CgBadge',\n  useCases: [\n    WidgetbookUseCase(name: 'Planche (toutes variantes)', builder: (_) => const CgBadgeGallery()),\n    WidgetbookUseCase(\n      name: 'Interactif',\n      builder: (context) {\n        final variant = context.knobs.list(\n          label: 'Variante',\n          options: const ['rank', 'o",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0b4fee590127efa419137049",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:38:39.721Z",
+  "stored_at": "2026-09-22T18:38:39.721Z"
+}

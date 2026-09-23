@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "AskUserQuestion",
+  "path": "",
+  "command": "",
+  "summary": "About to run: AskUserQuestion",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e31e3ad5187ef17c10491919",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:06:09.431Z",
+  "stored_at": "2026-09-21T19:06:09.431Z",
+  "low_signal": true
+}

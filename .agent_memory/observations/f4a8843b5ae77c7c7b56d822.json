@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' 's#M63.3 14.8A30 30 0 0 1 81.2 32.7#M68.3 9.8A30 30 0 0 1 86.2 27.7#' lib/core/ui/components/cg_illustrations.dart && flutter test test/core/ui/components/cg_state_test.dart --update-goldens 2>&1 | tail -1 | grep -o \"All tests passed\\|Some tests failed\"",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' 's#M63.3 14.8A30 30 0 0 1 81.2 32.7#M68.3 9.8A30 30 0 0 1 86.2 27.7#' lib/core/ui/components/cg_illustrations.dart && flutter",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f4a8843b5ae77c7c7b56d822",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:45:32.069Z",
+  "stored_at": "2026-09-22T18:45:32.069Z"
+}

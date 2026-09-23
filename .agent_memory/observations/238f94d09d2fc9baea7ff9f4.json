@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_skeleton_use_cases.dart\" <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_skeleton.dart';\nimport 'package:collega_app/core/ui/gallery/cg_skeleton_gallery.dart';\n\nfinal WidgetbookComponent cgSkeletonComponent = WidgetbookComponent(\n  name: 'CgSkeleton',\n  useCases: [\n    WidgetbookUseCase(name: 'Planche (formes et liste)', builder: (_) => const CgSkeletonGallery()),\n    WidgetbookUseCase(\n      name: 'Interactif… [+506 chars truncated]",
+  "summary": "cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_skeleton_use_cases.dart\" <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_skeleton.dart';\nimport 'package:collega_app/core/ui/gallery/",
+  "text": "cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_skeleton_use_cases.dart\" <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_skeleton.dart';\nimport 'package:collega_app/core/ui/gallery/cg_skeleton_gallery.dart';\n\nfinal WidgetbookComponent cgSkeletonComponent = WidgetbookComponent(\n  name: 'CgSkeleton',\n  useCases: [\n    WidgetbookUseCase(name: 'Planche (formes et liste)', builder: (_) => const CgSkeletonGallery()),\n    WidgetbookUseCase(\n      name: 'Interactif',\n      // La pulsation tourne ici ; elle se fige avec l'addon « Réduire les animations ».\n      builder: (context) => Padding(\n        padding: const EdgeInsets.all(20),\n        child: CgSkeletonList(\n          rows: context.knobs.double.slider(label: 'Lignes', initialValue: 5, min: 1, max: 8, divisions: 7).round(),\n        ),\n      ),\n    ),\n  ],\n);\nEOF\ncd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook\" && flutter analyze lib/use_cases/cg_skeleton_use_cases.dart 2>&1 | tail -1: No issues found! (ran in 1.0s)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "238f94d09d2fc9baea7ff9f4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:21.278Z",
+  "stored_at": "2026-09-22T18:43:21.278Z"
+}

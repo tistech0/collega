@@ -7,7 +7,12 @@ import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/auth/data/auth_repository.dart';
+import 'package:collega_app/features/auth/paywall_providers.dart';
+import 'package:collega_app/features/auth/data/local_data_owner.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
+import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/search/search_providers.dart';
+import 'package:collega_app/features/today/today_providers.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepository(
@@ -47,6 +52,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<void> register(String email, String password) async {
     state = const AsyncLoading();
     final result = await ref.read(authRepositoryProvider).register(email, password);
+    if (result.user != null) await _claimLocalData(result.user!.id);
     state = AsyncData(result);
     if (result.errorMessage != null) {
       AppLogger.warning('Register error: ${result.errorMessage}', tag: 'AuthNotifier');
@@ -57,8 +63,10 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   Future<void> login(String email, String password) async {
-    state = const AsyncLoading();
+    // La valeur précédente reste lisible pendant la requête (routeur, écrans).
+    state = const AsyncLoading<AuthState>().copyWithPrevious(state);
     final result = await ref.read(authRepositoryProvider).login(email, password);
+    if (result.user != null) await _claimLocalData(result.user!.id);
     state = AsyncData(result);
     if (result.errorMessage != null) {
       AppLogger.warning('Login error: ${result.errorMessage}', tag: 'AuthNotifier');
@@ -72,7 +80,27 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     state = const AsyncLoading();
     await ref.read(authRepositoryProvider).logout();
     _rcLogOut();
+    // Données en mémoire oubliées (le compte suivant ne les voit jamais) ; la base
+    // locale, elle, n'est vidée que si un autre compte se connecte (LocalDataOwner).
+    ref.invalidate(collegesProvider);
+    ref.invalidate(todayProvider);
+    ref.invalidate(searchNotifierProvider);
+    ref.invalidate(searchRecentsProvider);
+    // Message d'achat d'une session passée : jamais montré au compte suivant.
+    ref.invalidate(paywallProvider);
     state = const AsyncData(AuthState());
+  }
+
+  /// Revue 8.3 : un autre compte sur l'appareil → base locale vidée avant d'afficher
+  /// quoi que ce soit. Borné dans le temps : la connexion n'est jamais bloquée.
+  Future<void> _claimLocalData(String userId) async {
+    try {
+      await LocalDataOwner(storage: ref.read(secureStorageProvider), db: ref.read(databaseProvider))
+          .claim(userId)
+          .timeout(_kLocalWipeStepTimeout);
+    } catch (e) {
+      AppLogger.error('LocalDataOwner.claim failed', tag: 'AuthNotifier', error: e);
+    }
   }
 
   Future<String?> updateProfile({
@@ -80,6 +108,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     String? yearGroup,
     String? faculty,
   }) async {
+    _localWrites++;
     final result = await ref.read(authRepositoryProvider).updateProfile(
       firstName: firstName,
       yearGroup: yearGroup,
@@ -93,6 +122,36 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       return result.errorMessage;
     }
     return null;
+  }
+
+  /// Écritures locales du compte (profil, rappel) : un `/me` parti avant l'une
+  /// d'elles rapporterait l'ancien état.
+  int _localWrites = 0;
+
+  /// Profil ouvert ou tiré pour rafraîchir (story 8.14) : relit `/me` (quota du
+  /// mois, rappel). Un échec ne touche à rien : jamais de déconnexion ici.
+  Future<void> refreshProfile() async {
+    final startedFor = state.valueOrNull?.user?.id;
+    final writes = _localWrites;
+    if (startedFor == null) return;
+    final result = await ref.read(authRepositoryProvider).refreshFromMe();
+    final current = state.valueOrNull?.user;
+    if (_disposed || result.user == null || current == null) return;
+    // Autre compte entre-temps, ou modification locale plus récente : on garde l'affiché.
+    if (current.id != startedFor || result.user!.id != startedFor || writes != _localWrites) return;
+    state = AsyncData(result);
+  }
+
+  /// Rappel quotidien réglé côté serveur : mémorisé pour le prochain démarrage.
+  Future<void> setReminderHour(int? hourUtc, {int? localHour}) async {
+    _localWrites++;
+    await ref.read(authRepositoryProvider).saveReminderHour(hourUtc, localHour: localHour);
+    final current = state.valueOrNull;
+    final user = current?.user;
+    if (_disposed || current == null || user == null) return;
+    state = AsyncData(current.copyWith(
+      user: user.copyWith(reminderHourUtc: hourUtc, reminderLocalHour: hourUtc == null ? null : localHour),
+    ));
   }
 
   /// Supprime le compte (backend) puis exécute le wipe local **dans l'ordre** :

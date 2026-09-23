@@ -293,3 +293,67 @@ class TestCollegeStatusFinalisation:
 
         updates = _college_status_updates(db)
         assert any("generation_complete" in u for u in updates), updates
+
+
+class TestGenerationProgress:
+    """Story 8.13 — compteur de fiches au fil de l'eau (écran d'import en cours)."""
+
+    async def test_publie_l_avancement_par_item(self):
+        college_id = uuid.uuid4()
+        job = make_job()
+        db = AsyncMock()
+        db.get = AsyncMock(return_value=job)
+        db.add = MagicMock()
+        db.commit = AsyncMock()
+        items = [make_item(1), make_item(2), make_item(3)]
+        scalars_result = MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=items))))
+        db.execute = AsyncMock(return_value=scalars_result)
+
+        calls = []
+
+        async def reporter(cid, *, items_done, items_total, cards, preview=()):
+            calls.append((cid, items_done, items_total, cards, list(preview)))
+
+        generator = CardGenerator(progress_reporter=reporter)
+        two_cards = CardGenResult(
+            cards=[
+                FlashCardData(card_type="classique", recto="Q1 ?", verso="R"),
+                FlashCardData(card_type="classique", recto="Q2 ?", verso="R"),
+            ],
+            input_tokens=1,
+            output_tokens=1,
+        )
+        with patch.object(generator._similarity, "compute_hash", return_value="h"):
+            with patch.object(generator._similarity, "find_similar_job", new=AsyncMock(return_value=None)):
+                with patch.object(generator._claude, "generate_cards_for_item", new=AsyncMock(return_value=two_cards)):
+                    await generator.generate_for_college(db, college_id, job.id, "/f.pdf")
+
+        # Aperçu : questions des 3 dernières fiches générées, la plus récente d'abord.
+        assert calls == [
+            (college_id, 0, 3, 0, []),
+            (college_id, 1, 3, 2, ["Q2 ?", "Q1 ?"]),
+            (college_id, 2, 3, 4, ["Q2 ?", "Q1 ?", "Q2 ?"]),
+            (college_id, 3, 3, 6, ["Q2 ?", "Q1 ?", "Q2 ?"]),
+        ]
+
+    async def test_un_echec_de_publication_n_arrete_pas_la_generation(self):
+        college_id = uuid.uuid4()
+        job = make_job()
+        db = AsyncMock()
+        db.get = AsyncMock(return_value=job)
+        db.add = MagicMock()
+        db.commit = AsyncMock()
+        scalars_result = MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[make_item(1)]))))
+        db.execute = AsyncMock(return_value=scalars_result)
+
+        async def failing(cid, *, items_done, items_total, cards, preview=()):
+            raise RuntimeError("db down")
+
+        generator = CardGenerator(progress_reporter=failing)
+        one = CardGenResult(cards=[FlashCardData(card_type="classique", recto="Q", verso="R")], input_tokens=1, output_tokens=1)
+        with patch.object(generator._similarity, "compute_hash", return_value="h"):
+            with patch.object(generator._similarity, "find_similar_job", new=AsyncMock(return_value=None)):
+                with patch.object(generator._claude, "generate_cards_for_item", new=AsyncMock(return_value=one)):
+                    result = await generator.generate_for_college(db, college_id, job.id, "/f.pdf")
+        assert result["card_count"] == 1
+        assert job.status == "generation_complete"

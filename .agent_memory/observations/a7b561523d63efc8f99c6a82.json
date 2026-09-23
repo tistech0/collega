@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook\" && sed -i '' 's|// La pulsation tourne ici ; elle se fige avec l.addon « Réduire les animations ».|// La pulsation tourne ici ; elle se fige quand « Réduire les animations » est actif.|' lib/use_cases/cg_skeleton_use_cases.dart && grep -n \"pulsation\" lib/use_cases/cg_skeleton_use_cases.dart\ncat > lib/use_cases/cg_toast_use_cases.dart <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_button.dart';\nimport 'package:collega_app/core/u… [+1068 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook\" && sed -i '' 's|// La pulsation tourne ici ; elle se fige avec l.addon « Réduire les animations ».|// La pulsation tourne ici ;",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a7b561523d63efc8f99c6a82",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:45:26.122Z",
+  "stored_at": "2026-09-22T18:45:26.123Z"
+}

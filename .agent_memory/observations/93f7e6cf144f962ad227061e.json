@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts/directions-v2\" && sed -n 1,40p direction-d-fusion.html; sed -n 195,215p direction-d-fusion.html; sed -n 375,411p direction-d-fusion.html",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts/directions-v2\" && sed -n 1,40p direction-d-fusion.html; sed -n 195,215p direction-d-fusion.html; sed -n 375,411p direct",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "93f7e6cf144f962ad227061e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:29.791Z",
+  "stored_at": "2026-09-22T18:37:29.791Z"
+}

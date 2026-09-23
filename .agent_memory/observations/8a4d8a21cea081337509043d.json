@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bjir7w02g</task-id>\n<tool-use-id>toolu_01XNHffLbG83epQ2SCGvAdDV</tool-use-id>\n<output-file>/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tasks/bjir7w02g.output</output-file>\n<status>completed</status>\n<summary>Monitor \"Attendre l'installation iPhone\" stream ended</summary>\n<event>Skipped: &lt;private&gt;\nFinished in 0.592266s\n-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bjir7w02g</task-id> <tool-use-id>toolu_01XNHffLbG83epQ2SCGvAdDV</tool-use-id> <output-file>/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tasks/bjir7w02",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8a4d8a21cea081337509043d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:33:25.026Z",
+  "stored_at": "2026-09-23T08:33:25.027Z",
+  "low_signal": true
+}

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
+import 'package:collega_app/core/utils/epoch_day.dart';
 import 'package:collega_app/features/planning/domain/planning_models.dart';
 
 class PlanningRepository {
@@ -33,98 +34,67 @@ class PlanningRepository {
     );
   }
 
-  // ── Sessions ────────────────────────────────────────────────────────────────
-
-  Future<PlannedSession?> getTodaySession() async {
-    final today = _toEpochDay(DateTime.now());
-    final rows = await (db.select(db.planningSessions)
-          ..where((t) => t.sessionDateEpochDay.equals(today))
-          ..where((t) => t.status.equals('pending')))
-        .get();
-    if (rows.isEmpty) return null;
-    return _sessionFromRow(rows.first);
-  }
-
-  Future<void> saveSessions(List<PlannedSession> sessions) async {
-    await db.batch((batch) {
-      for (final s in sessions) {
-        batch.insert(
-          db.planningSessions,
-          PlanningSessionsCompanion.insert(
-            id: s.id,
-            planningConfigId: s.planningConfigId,
-            sessionDateEpochDay: _toEpochDay(s.sessionDate),
-            collegeId: s.collegeId,
-            maxCards: s.maxCards,
-            status: Value(s.status),
-          ),
-          mode: InsertMode.insertOrReplace,
-        );
-      }
+  /// Remplace le planning actif (un seul à la fois) et ses jours décalés.
+  Future<void> replace(PlanningConfig config) async {
+    await db.transaction(() async {
+      await clear();
+      await saveConfig(config);
     });
   }
 
-  Future<void> markSessionCompleted(String sessionId) async {
-    await (db.update(db.planningSessions)
-          ..where((t) => t.id.equals(sessionId)))
-        .write(const PlanningSessionsCompanion(
-      status: Value('completed'),
-    ));
+  Future<void> clear() async {
+    await db.transaction(() async {
+      await db.delete(db.planningSessions).go();
+      await db.delete(db.planningConfigs).go();
+    });
   }
 
-  Future<void> postponeSession(String sessionId) async {
-    final row = await (db.select(db.planningSessions)
-          ..where((t) => t.id.equals(sessionId)))
-        .getSingleOrNull();
-    if (row == null) return;
+  // ── Jours décalés ───────────────────────────────────────────────────────────
+  // Depuis la 8.3 la session du jour est calculée à part : `planning_sessions`
+  // ne garde que les jours décalés (« Décaler aujourd'hui », story 8.9).
 
-    await (db.update(db.planningSessions)
-          ..where((t) => t.id.equals(sessionId)))
-        .write(const PlanningSessionsCompanion(
-      status: Value('postponed'),
-    ));
+  static const _postponed = 'postponed';
 
-    var nextDay = row.sessionDateEpochDay + 1;
-    while (true) {
-      final existing = await (db.select(db.planningSessions)
-            ..where((t) => t.sessionDateEpochDay.equals(nextDay))
-            ..where((t) => t.status.equals('pending')))
-          .get();
-      if (existing.isEmpty) break;
-      nextDay++;
-    }
-    final newId =
-        '${row.planningConfigId}-postponed-${row.sessionDateEpochDay}';
-    await db.into(db.planningSessions).insert(
-      PlanningSessionsCompanion.insert(
-        id: newId,
-        planningConfigId: row.planningConfigId,
-        sessionDateEpochDay: nextDay,
-        collegeId: row.collegeId,
-        maxCards: row.maxCards,
-        status: const Value('pending'),
-      ),
-    );
+  Future<Set<int>> postponedDays(String configId) async {
+    final rows = await (db.select(db.planningSessions)
+          ..where((t) => t.planningConfigId.equals(configId) & t.status.equals(_postponed)))
+        .get();
+    return rows.map((r) => r.sessionDateEpochDay).toSet();
   }
 
-  Future<void> deleteAllPendingSessions() async {
-    await (db.delete(db.planningSessions)
-          ..where((t) => t.status.equals('pending')))
-        .go();
+  Future<void> addPostponed(String configId, int day) async {
+    await db.into(db.planningSessions).insertOnConflictUpdate(PlanningSessionsCompanion.insert(
+          id: '$configId-postponed-$day',
+          planningConfigId: configId,
+          sessionDateEpochDay: day,
+          collegeId: '',
+          maxCards: 0,
+          status: const Value(_postponed),
+        ));
   }
 
-  Future<void> deleteAllConfigs() async {
-    await db.delete(db.planningConfigs).go();
+  /// Décale [day] et prolonge la période d'un jour, en une seule transaction.
+  Future<void> postpone(PlanningConfig config, int day) => db.transaction(() async {
+        await addPostponed(config.id, day);
+        await saveConfig(config.withEndDay(epochDayOf(config.endDate) + 1));
+      });
+
+  /// Annule le décalage de [day] et rend le jour ajouté à la période.
+  Future<void> unpostpone(PlanningConfig config, int day) => db.transaction(() async {
+        await removePostponed(config.id, day);
+        await saveConfig(config.withEndDay(epochDayOf(config.endDate) - 1));
+      });
+
+  Future<void> removePostponed(String configId, int day) async {
+    await (db.delete(db.planningSessions)..where((t) => t.id.equals('$configId-postponed-$day'))).go();
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
-  static int _toEpochDay(DateTime dt) =>
-      DateTime.utc(dt.year, dt.month, dt.day).millisecondsSinceEpoch ~/
-      86400000;
+  static int _toEpochDay(DateTime dt) => epochDayOf(dt);
 
-  static DateTime _fromEpochDay(int day) =>
-      DateTime.fromMillisecondsSinceEpoch(day * 86400000, isUtc: true);
+  /// Minuit local du jour (les écrans affichent et comparent des dates locales).
+  static DateTime _fromEpochDay(int day) => dateOfEpochDay(day);
 
   PlanningConfig _configFromRow(PlanningConfigRow row) {
     final collegeIds =
@@ -141,17 +111,6 @@ class PlanningRepository {
       dailyMinutes: row.dailyMinutes,
       createdAt:
           DateTime.fromMillisecondsSinceEpoch(row.createdAtMs, isUtc: true),
-    );
-  }
-
-  PlannedSession _sessionFromRow(PlanningSessionRow row) {
-    return PlannedSession(
-      id: row.id,
-      planningConfigId: row.planningConfigId,
-      sessionDate: _fromEpochDay(row.sessionDateEpochDay),
-      collegeId: row.collegeId,
-      maxCards: row.maxCards,
-      status: row.status,
     );
   }
 }

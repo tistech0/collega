@@ -14,7 +14,20 @@ class DrillSessionParams {
     this.onlyARevoir = false,
     this.maxCards = 0,
     this.fromSearch = false,
+    this.dailySessionDay,
   });
+
+  /// Session du jour (story 8.3) : fiches de la file figée en Drift pour ce jour,
+  /// tous collèges confondus, reprise à la position enregistrée.
+  const DrillSessionParams.daily(int day)
+      : collegeId = '',
+        itemId = null,
+        itemName = null,
+        rangs = null,
+        onlyARevoir = false,
+        maxCards = 0,
+        fromSearch = false,
+        dailySessionDay = day;
 
   final String collegeId;
   final String? itemId;
@@ -23,6 +36,9 @@ class DrillSessionParams {
   final bool onlyARevoir;
   final int maxCards;
   final bool fromSearch;
+  final int? dailySessionDay;
+
+  bool get isDailySession => dailySessionDay != null;
 
   @override
   bool operator ==(Object other) =>
@@ -33,11 +49,13 @@ class DrillSessionParams {
       const ListEquality<String>().equals(other.rangs, rangs) &&
       other.onlyARevoir == onlyARevoir &&
       other.maxCards == maxCards &&
-      other.fromSearch == fromSearch;
+      other.fromSearch == fromSearch &&
+      other.dailySessionDay == dailySessionDay;
 
   @override
   int get hashCode => Object.hash(
-      collegeId, itemId, itemName, Object.hashAll(rangs ?? []), onlyARevoir, maxCards, fromSearch);
+      collegeId, itemId, itemName, Object.hashAll(rangs ?? []), onlyARevoir, maxCards, fromSearch,
+      dailySessionDay);
 }
 
 @immutable
@@ -62,9 +80,17 @@ class DrillSessionState {
     this.isComplete = false,
     this.timerExpired = false,
     this.requeued = false,
+    this.startedAt,
+    this.replayingErrors = false,
   });
 
+  /// « Refaire les à revoir » après la fin : entraînement hors session du jour.
+  final bool replayingErrors;
+
   final List<FlashCardModel> cards;
+
+  /// Début du drill (session du jour : son premier démarrage) — durée de la fin de session.
+  final DateTime? startedAt;
   final List<int> queue;
   final int currentQueuePos;
   final int evaluatedCount;
@@ -100,6 +126,8 @@ class DrillSessionState {
     bool? requeued,
   }) {
     return DrillSessionState(
+      startedAt: startedAt,
+      replayingErrors: replayingErrors,
       cards: cards ?? this.cards,
       queue: queue ?? this.queue,
       currentQueuePos: currentQueuePos ?? this.currentQueuePos,

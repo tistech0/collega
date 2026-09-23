@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 318,352p directions-v2/direction-d-fusion.html | cut -c1-400; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat widgetbook/lib/main.dart | head -60; cat widgetbook/pubspec.yaml | head -30; git status --short . | head -30",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 318,352p directions-v2/direction-d-fusion.html | cut -c1-400; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat widgetbook/lib/main.dart | head -60; cat widgetbook/pubspec.yaml | head -30; git status --short .",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 318,352p directions-v2/direction-d-fusion.html | cut -c1-400; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat widgetbook/lib/main.dart | head -60; cat widgetbook/pubspec.yaml | head -30; git status --short . | head -30:  [ WidgetbookComponent( name: 'Tokens', useCases: [ WidgetbookUseCase( name: 'Palette, typographie, espaces, rayons, mouvement', builder: (context) => const CgTokensPage(), ), ], ), ], ), WidgetbookFolder( name: 'Composants', children: [ cgButtonComponent, ], ), ], ); } } name: collega_widgetbook description: \"Catalogue Collega UI (Widgetbook) — tokens et composants, story 8.1+.\" publish_to: 'none' version: 1.0.0+1 environment: sdk: ^3.6.0 dependencies: flutter: sdk: flutter widgetbook: ^3.15.0 collega_app: path: .. dev_dependencies: flutter_test: sdk: flutter flutter_lints: ^5.0.0 flutter: uses-material-design: true # La police de l'app, déclarée ici aussi : les polices d'un paquet racine ne # sont pas exposées à ceux qui en dépendent. fonts: - family: InstrumentSans fonts: - asset: ../assets/fonts/InstrumentSans-Regular.ttf weight: 400 - asset: ../assets/fonts/InstrumentSans-Medium.ttf",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ecc86485e82362225e8ebbe6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:14.092Z",
+  "stored_at": "2026-09-22T18:37:14.093Z"
+}

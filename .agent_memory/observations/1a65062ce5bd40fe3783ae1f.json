@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_badge.dart'\ns=open(p).read()\ns=s.replace(\"\"\"                CgIcon(CgIcons.warning, size: _iconSize, color: ink),\"\"\",\"\"\"                // L'icône suit le Dynamic Type comme le texte qu'elle accompagne.\n                CgIcon(CgIcons.warning, size: MediaQuery.textScalerOf(context).scale(_iconSize), color: ink),\"\"\")\nopen(p,'w').write(s)\np='lib/core/ui/gallery/cg_badge_gallery.dart'\ns=open(p).read()\ns=s.replace(\"(cible 44 pt)\",\"(cible 44\\\\u00A0pt)\")\nopen(p,'w').write(s)\nEOF\ngrep -n \"u0… [+134 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='lib/core/ui/components/cg_badge.dart' s=open(p).read() s=s.replace(\"\"\" CgIcon(CgIcons.warning, size: _iconSize, co",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1a65062ce5bd40fe3783ae1f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:38:58.277Z",
+  "stored_at": "2026-09-22T18:38:58.278Z"
+}

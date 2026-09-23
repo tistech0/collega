@@ -2606,6 +2606,1127 @@ class PendingUploadsCompanion extends UpdateCompanion<PendingUpload> {
   }
 }
 
+class $DailySessionsTable extends DailySessions
+    with TableInfo<$DailySessionsTable, DailySessionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DailySessionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dayMeta = const VerificationMeta('day');
+  @override
+  late final GeneratedColumn<int> day = GeneratedColumn<int>(
+      'day', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _queueJsonMeta =
+      const VerificationMeta('queueJson');
+  @override
+  late final GeneratedColumn<String> queueJson = GeneratedColumn<String>(
+      'queue_json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _positionMeta =
+      const VerificationMeta('position');
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+      'position', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _settingsJsonMeta =
+      const VerificationMeta('settingsJson');
+  @override
+  late final GeneratedColumn<String> settingsJson = GeneratedColumn<String>(
+      'settings_json', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _startedAtMsMeta =
+      const VerificationMeta('startedAtMs');
+  @override
+  late final GeneratedColumn<int> startedAtMs = GeneratedColumn<int>(
+      'started_at_ms', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _completedAtMsMeta =
+      const VerificationMeta('completedAtMs');
+  @override
+  late final GeneratedColumn<int> completedAtMs = GeneratedColumn<int>(
+      'completed_at_ms', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [day, queueJson, position, settingsJson, startedAtMs, completedAtMs];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'daily_sessions';
+  @override
+  VerificationContext validateIntegrity(Insertable<DailySessionRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('day')) {
+      context.handle(
+          _dayMeta, day.isAcceptableOrUnknown(data['day']!, _dayMeta));
+    }
+    if (data.containsKey('queue_json')) {
+      context.handle(_queueJsonMeta,
+          queueJson.isAcceptableOrUnknown(data['queue_json']!, _queueJsonMeta));
+    } else if (isInserting) {
+      context.missing(_queueJsonMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(_positionMeta,
+          position.isAcceptableOrUnknown(data['position']!, _positionMeta));
+    }
+    if (data.containsKey('settings_json')) {
+      context.handle(
+          _settingsJsonMeta,
+          settingsJson.isAcceptableOrUnknown(
+              data['settings_json']!, _settingsJsonMeta));
+    }
+    if (data.containsKey('started_at_ms')) {
+      context.handle(
+          _startedAtMsMeta,
+          startedAtMs.isAcceptableOrUnknown(
+              data['started_at_ms']!, _startedAtMsMeta));
+    }
+    if (data.containsKey('completed_at_ms')) {
+      context.handle(
+          _completedAtMsMeta,
+          completedAtMs.isAcceptableOrUnknown(
+              data['completed_at_ms']!, _completedAtMsMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {day};
+  @override
+  DailySessionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DailySessionRow(
+      day: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}day'])!,
+      queueJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}queue_json'])!,
+      position: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}position'])!,
+      settingsJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}settings_json']),
+      startedAtMs: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}started_at_ms']),
+      completedAtMs: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}completed_at_ms']),
+    );
+  }
+
+  @override
+  $DailySessionsTable createAlias(String alias) {
+    return $DailySessionsTable(attachedDatabase, alias);
+  }
+}
+
+class DailySessionRow extends DataClass implements Insertable<DailySessionRow> {
+  /// Jour local (`epochDayOf`).
+  final int day;
+
+  /// File des ids de fiches (JSON), réinsertions « à revoir » comprises.
+  final String queueJson;
+
+  /// Nombre de fiches jugées.
+  final int position;
+
+  /// Réglages « Personnaliser » (JSON), null = session calculée par défaut.
+  final String? settingsJson;
+  final int? startedAtMs;
+  final int? completedAtMs;
+  const DailySessionRow(
+      {required this.day,
+      required this.queueJson,
+      required this.position,
+      this.settingsJson,
+      this.startedAtMs,
+      this.completedAtMs});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['day'] = Variable<int>(day);
+    map['queue_json'] = Variable<String>(queueJson);
+    map['position'] = Variable<int>(position);
+    if (!nullToAbsent || settingsJson != null) {
+      map['settings_json'] = Variable<String>(settingsJson);
+    }
+    if (!nullToAbsent || startedAtMs != null) {
+      map['started_at_ms'] = Variable<int>(startedAtMs);
+    }
+    if (!nullToAbsent || completedAtMs != null) {
+      map['completed_at_ms'] = Variable<int>(completedAtMs);
+    }
+    return map;
+  }
+
+  DailySessionsCompanion toCompanion(bool nullToAbsent) {
+    return DailySessionsCompanion(
+      day: Value(day),
+      queueJson: Value(queueJson),
+      position: Value(position),
+      settingsJson: settingsJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(settingsJson),
+      startedAtMs: startedAtMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startedAtMs),
+      completedAtMs: completedAtMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAtMs),
+    );
+  }
+
+  factory DailySessionRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DailySessionRow(
+      day: serializer.fromJson<int>(json['day']),
+      queueJson: serializer.fromJson<String>(json['queueJson']),
+      position: serializer.fromJson<int>(json['position']),
+      settingsJson: serializer.fromJson<String?>(json['settingsJson']),
+      startedAtMs: serializer.fromJson<int?>(json['startedAtMs']),
+      completedAtMs: serializer.fromJson<int?>(json['completedAtMs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'day': serializer.toJson<int>(day),
+      'queueJson': serializer.toJson<String>(queueJson),
+      'position': serializer.toJson<int>(position),
+      'settingsJson': serializer.toJson<String?>(settingsJson),
+      'startedAtMs': serializer.toJson<int?>(startedAtMs),
+      'completedAtMs': serializer.toJson<int?>(completedAtMs),
+    };
+  }
+
+  DailySessionRow copyWith(
+          {int? day,
+          String? queueJson,
+          int? position,
+          Value<String?> settingsJson = const Value.absent(),
+          Value<int?> startedAtMs = const Value.absent(),
+          Value<int?> completedAtMs = const Value.absent()}) =>
+      DailySessionRow(
+        day: day ?? this.day,
+        queueJson: queueJson ?? this.queueJson,
+        position: position ?? this.position,
+        settingsJson:
+            settingsJson.present ? settingsJson.value : this.settingsJson,
+        startedAtMs: startedAtMs.present ? startedAtMs.value : this.startedAtMs,
+        completedAtMs:
+            completedAtMs.present ? completedAtMs.value : this.completedAtMs,
+      );
+  DailySessionRow copyWithCompanion(DailySessionsCompanion data) {
+    return DailySessionRow(
+      day: data.day.present ? data.day.value : this.day,
+      queueJson: data.queueJson.present ? data.queueJson.value : this.queueJson,
+      position: data.position.present ? data.position.value : this.position,
+      settingsJson: data.settingsJson.present
+          ? data.settingsJson.value
+          : this.settingsJson,
+      startedAtMs:
+          data.startedAtMs.present ? data.startedAtMs.value : this.startedAtMs,
+      completedAtMs: data.completedAtMs.present
+          ? data.completedAtMs.value
+          : this.completedAtMs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DailySessionRow(')
+          ..write('day: $day, ')
+          ..write('queueJson: $queueJson, ')
+          ..write('position: $position, ')
+          ..write('settingsJson: $settingsJson, ')
+          ..write('startedAtMs: $startedAtMs, ')
+          ..write('completedAtMs: $completedAtMs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      day, queueJson, position, settingsJson, startedAtMs, completedAtMs);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DailySessionRow &&
+          other.day == this.day &&
+          other.queueJson == this.queueJson &&
+          other.position == this.position &&
+          other.settingsJson == this.settingsJson &&
+          other.startedAtMs == this.startedAtMs &&
+          other.completedAtMs == this.completedAtMs);
+}
+
+class DailySessionsCompanion extends UpdateCompanion<DailySessionRow> {
+  final Value<int> day;
+  final Value<String> queueJson;
+  final Value<int> position;
+  final Value<String?> settingsJson;
+  final Value<int?> startedAtMs;
+  final Value<int?> completedAtMs;
+  const DailySessionsCompanion({
+    this.day = const Value.absent(),
+    this.queueJson = const Value.absent(),
+    this.position = const Value.absent(),
+    this.settingsJson = const Value.absent(),
+    this.startedAtMs = const Value.absent(),
+    this.completedAtMs = const Value.absent(),
+  });
+  DailySessionsCompanion.insert({
+    this.day = const Value.absent(),
+    required String queueJson,
+    this.position = const Value.absent(),
+    this.settingsJson = const Value.absent(),
+    this.startedAtMs = const Value.absent(),
+    this.completedAtMs = const Value.absent(),
+  }) : queueJson = Value(queueJson);
+  static Insertable<DailySessionRow> custom({
+    Expression<int>? day,
+    Expression<String>? queueJson,
+    Expression<int>? position,
+    Expression<String>? settingsJson,
+    Expression<int>? startedAtMs,
+    Expression<int>? completedAtMs,
+  }) {
+    return RawValuesInsertable({
+      if (day != null) 'day': day,
+      if (queueJson != null) 'queue_json': queueJson,
+      if (position != null) 'position': position,
+      if (settingsJson != null) 'settings_json': settingsJson,
+      if (startedAtMs != null) 'started_at_ms': startedAtMs,
+      if (completedAtMs != null) 'completed_at_ms': completedAtMs,
+    });
+  }
+
+  DailySessionsCompanion copyWith(
+      {Value<int>? day,
+      Value<String>? queueJson,
+      Value<int>? position,
+      Value<String?>? settingsJson,
+      Value<int?>? startedAtMs,
+      Value<int?>? completedAtMs}) {
+    return DailySessionsCompanion(
+      day: day ?? this.day,
+      queueJson: queueJson ?? this.queueJson,
+      position: position ?? this.position,
+      settingsJson: settingsJson ?? this.settingsJson,
+      startedAtMs: startedAtMs ?? this.startedAtMs,
+      completedAtMs: completedAtMs ?? this.completedAtMs,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (day.present) {
+      map['day'] = Variable<int>(day.value);
+    }
+    if (queueJson.present) {
+      map['queue_json'] = Variable<String>(queueJson.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (settingsJson.present) {
+      map['settings_json'] = Variable<String>(settingsJson.value);
+    }
+    if (startedAtMs.present) {
+      map['started_at_ms'] = Variable<int>(startedAtMs.value);
+    }
+    if (completedAtMs.present) {
+      map['completed_at_ms'] = Variable<int>(completedAtMs.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DailySessionsCompanion(')
+          ..write('day: $day, ')
+          ..write('queueJson: $queueJson, ')
+          ..write('position: $position, ')
+          ..write('settingsJson: $settingsJson, ')
+          ..write('startedAtMs: $startedAtMs, ')
+          ..write('completedAtMs: $completedAtMs')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReviewLogTable extends ReviewLog
+    with TableInfo<$ReviewLogTable, ReviewLogRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReviewLogTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _cardIdMeta = const VerificationMeta('cardId');
+  @override
+  late final GeneratedColumn<String> cardId = GeneratedColumn<String>(
+      'card_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _collegeIdMeta =
+      const VerificationMeta('collegeId');
+  @override
+  late final GeneratedColumn<String> collegeId = GeneratedColumn<String>(
+      'college_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _rangMeta = const VerificationMeta('rang');
+  @override
+  late final GeneratedColumn<String> rang = GeneratedColumn<String>(
+      'rang', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _drillLevelMeta =
+      const VerificationMeta('drillLevel');
+  @override
+  late final GeneratedColumn<String> drillLevel = GeneratedColumn<String>(
+      'drill_level', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _reviewedAtMsMeta =
+      const VerificationMeta('reviewedAtMs');
+  @override
+  late final GeneratedColumn<int> reviewedAtMs = GeneratedColumn<int>(
+      'reviewed_at_ms', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _dayMeta = const VerificationMeta('day');
+  @override
+  late final GeneratedColumn<int> day = GeneratedColumn<int>(
+      'day', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _dailyMeta = const VerificationMeta('daily');
+  @override
+  late final GeneratedColumn<bool> daily = GeneratedColumn<bool>(
+      'daily', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("daily" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, cardId, collegeId, rang, drillLevel, reviewedAtMs, day, daily];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'review_log';
+  @override
+  VerificationContext validateIntegrity(Insertable<ReviewLogRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('card_id')) {
+      context.handle(_cardIdMeta,
+          cardId.isAcceptableOrUnknown(data['card_id']!, _cardIdMeta));
+    } else if (isInserting) {
+      context.missing(_cardIdMeta);
+    }
+    if (data.containsKey('college_id')) {
+      context.handle(_collegeIdMeta,
+          collegeId.isAcceptableOrUnknown(data['college_id']!, _collegeIdMeta));
+    } else if (isInserting) {
+      context.missing(_collegeIdMeta);
+    }
+    if (data.containsKey('rang')) {
+      context.handle(
+          _rangMeta, rang.isAcceptableOrUnknown(data['rang']!, _rangMeta));
+    } else if (isInserting) {
+      context.missing(_rangMeta);
+    }
+    if (data.containsKey('drill_level')) {
+      context.handle(
+          _drillLevelMeta,
+          drillLevel.isAcceptableOrUnknown(
+              data['drill_level']!, _drillLevelMeta));
+    } else if (isInserting) {
+      context.missing(_drillLevelMeta);
+    }
+    if (data.containsKey('reviewed_at_ms')) {
+      context.handle(
+          _reviewedAtMsMeta,
+          reviewedAtMs.isAcceptableOrUnknown(
+              data['reviewed_at_ms']!, _reviewedAtMsMeta));
+    } else if (isInserting) {
+      context.missing(_reviewedAtMsMeta);
+    }
+    if (data.containsKey('day')) {
+      context.handle(
+          _dayMeta, day.isAcceptableOrUnknown(data['day']!, _dayMeta));
+    } else if (isInserting) {
+      context.missing(_dayMeta);
+    }
+    if (data.containsKey('daily')) {
+      context.handle(
+          _dailyMeta, daily.isAcceptableOrUnknown(data['daily']!, _dailyMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ReviewLogRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReviewLogRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      cardId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}card_id'])!,
+      collegeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}college_id'])!,
+      rang: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}rang'])!,
+      drillLevel: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}drill_level'])!,
+      reviewedAtMs: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}reviewed_at_ms'])!,
+      day: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}day'])!,
+      daily: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}daily'])!,
+    );
+  }
+
+  @override
+  $ReviewLogTable createAlias(String alias) {
+    return $ReviewLogTable(attachedDatabase, alias);
+  }
+}
+
+class ReviewLogRow extends DataClass implements Insertable<ReviewLogRow> {
+  final int id;
+  final String cardId;
+  final String collegeId;
+  final String rang;
+
+  /// Même vocabulaire que `flash_cards.drillLevel` : `a_revoir` | `bien` | `maitrise`.
+  final String drillLevel;
+  final int reviewedAtMs;
+
+  /// Jour local de la révision (`epochDayOf`), pour les regroupements par jour.
+  final int day;
+
+  /// Verdict de la session du jour (son bilan) ; `false` : autre révision
+  /// (collège, item, recherche, refaire les erreurs), comptée dans la semaine
+  /// de Progression seulement (story 8.8).
+  final bool daily;
+  const ReviewLogRow(
+      {required this.id,
+      required this.cardId,
+      required this.collegeId,
+      required this.rang,
+      required this.drillLevel,
+      required this.reviewedAtMs,
+      required this.day,
+      required this.daily});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['card_id'] = Variable<String>(cardId);
+    map['college_id'] = Variable<String>(collegeId);
+    map['rang'] = Variable<String>(rang);
+    map['drill_level'] = Variable<String>(drillLevel);
+    map['reviewed_at_ms'] = Variable<int>(reviewedAtMs);
+    map['day'] = Variable<int>(day);
+    map['daily'] = Variable<bool>(daily);
+    return map;
+  }
+
+  ReviewLogCompanion toCompanion(bool nullToAbsent) {
+    return ReviewLogCompanion(
+      id: Value(id),
+      cardId: Value(cardId),
+      collegeId: Value(collegeId),
+      rang: Value(rang),
+      drillLevel: Value(drillLevel),
+      reviewedAtMs: Value(reviewedAtMs),
+      day: Value(day),
+      daily: Value(daily),
+    );
+  }
+
+  factory ReviewLogRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReviewLogRow(
+      id: serializer.fromJson<int>(json['id']),
+      cardId: serializer.fromJson<String>(json['cardId']),
+      collegeId: serializer.fromJson<String>(json['collegeId']),
+      rang: serializer.fromJson<String>(json['rang']),
+      drillLevel: serializer.fromJson<String>(json['drillLevel']),
+      reviewedAtMs: serializer.fromJson<int>(json['reviewedAtMs']),
+      day: serializer.fromJson<int>(json['day']),
+      daily: serializer.fromJson<bool>(json['daily']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'cardId': serializer.toJson<String>(cardId),
+      'collegeId': serializer.toJson<String>(collegeId),
+      'rang': serializer.toJson<String>(rang),
+      'drillLevel': serializer.toJson<String>(drillLevel),
+      'reviewedAtMs': serializer.toJson<int>(reviewedAtMs),
+      'day': serializer.toJson<int>(day),
+      'daily': serializer.toJson<bool>(daily),
+    };
+  }
+
+  ReviewLogRow copyWith(
+          {int? id,
+          String? cardId,
+          String? collegeId,
+          String? rang,
+          String? drillLevel,
+          int? reviewedAtMs,
+          int? day,
+          bool? daily}) =>
+      ReviewLogRow(
+        id: id ?? this.id,
+        cardId: cardId ?? this.cardId,
+        collegeId: collegeId ?? this.collegeId,
+        rang: rang ?? this.rang,
+        drillLevel: drillLevel ?? this.drillLevel,
+        reviewedAtMs: reviewedAtMs ?? this.reviewedAtMs,
+        day: day ?? this.day,
+        daily: daily ?? this.daily,
+      );
+  ReviewLogRow copyWithCompanion(ReviewLogCompanion data) {
+    return ReviewLogRow(
+      id: data.id.present ? data.id.value : this.id,
+      cardId: data.cardId.present ? data.cardId.value : this.cardId,
+      collegeId: data.collegeId.present ? data.collegeId.value : this.collegeId,
+      rang: data.rang.present ? data.rang.value : this.rang,
+      drillLevel:
+          data.drillLevel.present ? data.drillLevel.value : this.drillLevel,
+      reviewedAtMs: data.reviewedAtMs.present
+          ? data.reviewedAtMs.value
+          : this.reviewedAtMs,
+      day: data.day.present ? data.day.value : this.day,
+      daily: data.daily.present ? data.daily.value : this.daily,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReviewLogRow(')
+          ..write('id: $id, ')
+          ..write('cardId: $cardId, ')
+          ..write('collegeId: $collegeId, ')
+          ..write('rang: $rang, ')
+          ..write('drillLevel: $drillLevel, ')
+          ..write('reviewedAtMs: $reviewedAtMs, ')
+          ..write('day: $day, ')
+          ..write('daily: $daily')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, cardId, collegeId, rang, drillLevel, reviewedAtMs, day, daily);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReviewLogRow &&
+          other.id == this.id &&
+          other.cardId == this.cardId &&
+          other.collegeId == this.collegeId &&
+          other.rang == this.rang &&
+          other.drillLevel == this.drillLevel &&
+          other.reviewedAtMs == this.reviewedAtMs &&
+          other.day == this.day &&
+          other.daily == this.daily);
+}
+
+class ReviewLogCompanion extends UpdateCompanion<ReviewLogRow> {
+  final Value<int> id;
+  final Value<String> cardId;
+  final Value<String> collegeId;
+  final Value<String> rang;
+  final Value<String> drillLevel;
+  final Value<int> reviewedAtMs;
+  final Value<int> day;
+  final Value<bool> daily;
+  const ReviewLogCompanion({
+    this.id = const Value.absent(),
+    this.cardId = const Value.absent(),
+    this.collegeId = const Value.absent(),
+    this.rang = const Value.absent(),
+    this.drillLevel = const Value.absent(),
+    this.reviewedAtMs = const Value.absent(),
+    this.day = const Value.absent(),
+    this.daily = const Value.absent(),
+  });
+  ReviewLogCompanion.insert({
+    this.id = const Value.absent(),
+    required String cardId,
+    required String collegeId,
+    required String rang,
+    required String drillLevel,
+    required int reviewedAtMs,
+    required int day,
+    this.daily = const Value.absent(),
+  })  : cardId = Value(cardId),
+        collegeId = Value(collegeId),
+        rang = Value(rang),
+        drillLevel = Value(drillLevel),
+        reviewedAtMs = Value(reviewedAtMs),
+        day = Value(day);
+  static Insertable<ReviewLogRow> custom({
+    Expression<int>? id,
+    Expression<String>? cardId,
+    Expression<String>? collegeId,
+    Expression<String>? rang,
+    Expression<String>? drillLevel,
+    Expression<int>? reviewedAtMs,
+    Expression<int>? day,
+    Expression<bool>? daily,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (cardId != null) 'card_id': cardId,
+      if (collegeId != null) 'college_id': collegeId,
+      if (rang != null) 'rang': rang,
+      if (drillLevel != null) 'drill_level': drillLevel,
+      if (reviewedAtMs != null) 'reviewed_at_ms': reviewedAtMs,
+      if (day != null) 'day': day,
+      if (daily != null) 'daily': daily,
+    });
+  }
+
+  ReviewLogCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? cardId,
+      Value<String>? collegeId,
+      Value<String>? rang,
+      Value<String>? drillLevel,
+      Value<int>? reviewedAtMs,
+      Value<int>? day,
+      Value<bool>? daily}) {
+    return ReviewLogCompanion(
+      id: id ?? this.id,
+      cardId: cardId ?? this.cardId,
+      collegeId: collegeId ?? this.collegeId,
+      rang: rang ?? this.rang,
+      drillLevel: drillLevel ?? this.drillLevel,
+      reviewedAtMs: reviewedAtMs ?? this.reviewedAtMs,
+      day: day ?? this.day,
+      daily: daily ?? this.daily,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (cardId.present) {
+      map['card_id'] = Variable<String>(cardId.value);
+    }
+    if (collegeId.present) {
+      map['college_id'] = Variable<String>(collegeId.value);
+    }
+    if (rang.present) {
+      map['rang'] = Variable<String>(rang.value);
+    }
+    if (drillLevel.present) {
+      map['drill_level'] = Variable<String>(drillLevel.value);
+    }
+    if (reviewedAtMs.present) {
+      map['reviewed_at_ms'] = Variable<int>(reviewedAtMs.value);
+    }
+    if (day.present) {
+      map['day'] = Variable<int>(day.value);
+    }
+    if (daily.present) {
+      map['daily'] = Variable<bool>(daily.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReviewLogCompanion(')
+          ..write('id: $id, ')
+          ..write('cardId: $cardId, ')
+          ..write('collegeId: $collegeId, ')
+          ..write('rang: $rang, ')
+          ..write('drillLevel: $drillLevel, ')
+          ..write('reviewedAtMs: $reviewedAtMs, ')
+          ..write('day: $day, ')
+          ..write('daily: $daily')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $UserCollegesTable extends UserColleges
+    with TableInfo<$UserCollegesTable, UserCollegeRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UserCollegesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _refIdMeta = const VerificationMeta('refId');
+  @override
+  late final GeneratedColumn<int> refId = GeneratedColumn<int>(
+      'ref_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _collegeIdMeta =
+      const VerificationMeta('collegeId');
+  @override
+  late final GeneratedColumn<String> collegeId = GeneratedColumn<String>(
+      'college_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _cardCountAMeta =
+      const VerificationMeta('cardCountA');
+  @override
+  late final GeneratedColumn<int> cardCountA = GeneratedColumn<int>(
+      'card_count_a', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _cardCountBMeta =
+      const VerificationMeta('cardCountB');
+  @override
+  late final GeneratedColumn<int> cardCountB = GeneratedColumn<int>(
+      'card_count_b', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _cardCountCMeta =
+      const VerificationMeta('cardCountC');
+  @override
+  late final GeneratedColumn<int> cardCountC = GeneratedColumn<int>(
+      'card_count_c', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [refId, collegeId, status, cardCountA, cardCountB, cardCountC];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'user_colleges';
+  @override
+  VerificationContext validateIntegrity(Insertable<UserCollegeRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('ref_id')) {
+      context.handle(
+          _refIdMeta, refId.isAcceptableOrUnknown(data['ref_id']!, _refIdMeta));
+    }
+    if (data.containsKey('college_id')) {
+      context.handle(_collegeIdMeta,
+          collegeId.isAcceptableOrUnknown(data['college_id']!, _collegeIdMeta));
+    } else if (isInserting) {
+      context.missing(_collegeIdMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('card_count_a')) {
+      context.handle(
+          _cardCountAMeta,
+          cardCountA.isAcceptableOrUnknown(
+              data['card_count_a']!, _cardCountAMeta));
+    } else if (isInserting) {
+      context.missing(_cardCountAMeta);
+    }
+    if (data.containsKey('card_count_b')) {
+      context.handle(
+          _cardCountBMeta,
+          cardCountB.isAcceptableOrUnknown(
+              data['card_count_b']!, _cardCountBMeta));
+    } else if (isInserting) {
+      context.missing(_cardCountBMeta);
+    }
+    if (data.containsKey('card_count_c')) {
+      context.handle(
+          _cardCountCMeta,
+          cardCountC.isAcceptableOrUnknown(
+              data['card_count_c']!, _cardCountCMeta));
+    } else if (isInserting) {
+      context.missing(_cardCountCMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {refId};
+  @override
+  UserCollegeRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UserCollegeRow(
+      refId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}ref_id'])!,
+      collegeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}college_id'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      cardCountA: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}card_count_a'])!,
+      cardCountB: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}card_count_b'])!,
+      cardCountC: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}card_count_c'])!,
+    );
+  }
+
+  @override
+  $UserCollegesTable createAlias(String alias) {
+    return $UserCollegesTable(attachedDatabase, alias);
+  }
+}
+
+class UserCollegeRow extends DataClass implements Insertable<UserCollegeRow> {
+  final int refId;
+  final String collegeId;
+  final String status;
+  final int cardCountA;
+  final int cardCountB;
+  final int cardCountC;
+  const UserCollegeRow(
+      {required this.refId,
+      required this.collegeId,
+      required this.status,
+      required this.cardCountA,
+      required this.cardCountB,
+      required this.cardCountC});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['ref_id'] = Variable<int>(refId);
+    map['college_id'] = Variable<String>(collegeId);
+    map['status'] = Variable<String>(status);
+    map['card_count_a'] = Variable<int>(cardCountA);
+    map['card_count_b'] = Variable<int>(cardCountB);
+    map['card_count_c'] = Variable<int>(cardCountC);
+    return map;
+  }
+
+  UserCollegesCompanion toCompanion(bool nullToAbsent) {
+    return UserCollegesCompanion(
+      refId: Value(refId),
+      collegeId: Value(collegeId),
+      status: Value(status),
+      cardCountA: Value(cardCountA),
+      cardCountB: Value(cardCountB),
+      cardCountC: Value(cardCountC),
+    );
+  }
+
+  factory UserCollegeRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UserCollegeRow(
+      refId: serializer.fromJson<int>(json['refId']),
+      collegeId: serializer.fromJson<String>(json['collegeId']),
+      status: serializer.fromJson<String>(json['status']),
+      cardCountA: serializer.fromJson<int>(json['cardCountA']),
+      cardCountB: serializer.fromJson<int>(json['cardCountB']),
+      cardCountC: serializer.fromJson<int>(json['cardCountC']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'refId': serializer.toJson<int>(refId),
+      'collegeId': serializer.toJson<String>(collegeId),
+      'status': serializer.toJson<String>(status),
+      'cardCountA': serializer.toJson<int>(cardCountA),
+      'cardCountB': serializer.toJson<int>(cardCountB),
+      'cardCountC': serializer.toJson<int>(cardCountC),
+    };
+  }
+
+  UserCollegeRow copyWith(
+          {int? refId,
+          String? collegeId,
+          String? status,
+          int? cardCountA,
+          int? cardCountB,
+          int? cardCountC}) =>
+      UserCollegeRow(
+        refId: refId ?? this.refId,
+        collegeId: collegeId ?? this.collegeId,
+        status: status ?? this.status,
+        cardCountA: cardCountA ?? this.cardCountA,
+        cardCountB: cardCountB ?? this.cardCountB,
+        cardCountC: cardCountC ?? this.cardCountC,
+      );
+  UserCollegeRow copyWithCompanion(UserCollegesCompanion data) {
+    return UserCollegeRow(
+      refId: data.refId.present ? data.refId.value : this.refId,
+      collegeId: data.collegeId.present ? data.collegeId.value : this.collegeId,
+      status: data.status.present ? data.status.value : this.status,
+      cardCountA:
+          data.cardCountA.present ? data.cardCountA.value : this.cardCountA,
+      cardCountB:
+          data.cardCountB.present ? data.cardCountB.value : this.cardCountB,
+      cardCountC:
+          data.cardCountC.present ? data.cardCountC.value : this.cardCountC,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserCollegeRow(')
+          ..write('refId: $refId, ')
+          ..write('collegeId: $collegeId, ')
+          ..write('status: $status, ')
+          ..write('cardCountA: $cardCountA, ')
+          ..write('cardCountB: $cardCountB, ')
+          ..write('cardCountC: $cardCountC')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(refId, collegeId, status, cardCountA, cardCountB, cardCountC);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UserCollegeRow &&
+          other.refId == this.refId &&
+          other.collegeId == this.collegeId &&
+          other.status == this.status &&
+          other.cardCountA == this.cardCountA &&
+          other.cardCountB == this.cardCountB &&
+          other.cardCountC == this.cardCountC);
+}
+
+class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
+  final Value<int> refId;
+  final Value<String> collegeId;
+  final Value<String> status;
+  final Value<int> cardCountA;
+  final Value<int> cardCountB;
+  final Value<int> cardCountC;
+  const UserCollegesCompanion({
+    this.refId = const Value.absent(),
+    this.collegeId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.cardCountA = const Value.absent(),
+    this.cardCountB = const Value.absent(),
+    this.cardCountC = const Value.absent(),
+  });
+  UserCollegesCompanion.insert({
+    this.refId = const Value.absent(),
+    required String collegeId,
+    required String status,
+    required int cardCountA,
+    required int cardCountB,
+    required int cardCountC,
+  })  : collegeId = Value(collegeId),
+        status = Value(status),
+        cardCountA = Value(cardCountA),
+        cardCountB = Value(cardCountB),
+        cardCountC = Value(cardCountC);
+  static Insertable<UserCollegeRow> custom({
+    Expression<int>? refId,
+    Expression<String>? collegeId,
+    Expression<String>? status,
+    Expression<int>? cardCountA,
+    Expression<int>? cardCountB,
+    Expression<int>? cardCountC,
+  }) {
+    return RawValuesInsertable({
+      if (refId != null) 'ref_id': refId,
+      if (collegeId != null) 'college_id': collegeId,
+      if (status != null) 'status': status,
+      if (cardCountA != null) 'card_count_a': cardCountA,
+      if (cardCountB != null) 'card_count_b': cardCountB,
+      if (cardCountC != null) 'card_count_c': cardCountC,
+    });
+  }
+
+  UserCollegesCompanion copyWith(
+      {Value<int>? refId,
+      Value<String>? collegeId,
+      Value<String>? status,
+      Value<int>? cardCountA,
+      Value<int>? cardCountB,
+      Value<int>? cardCountC}) {
+    return UserCollegesCompanion(
+      refId: refId ?? this.refId,
+      collegeId: collegeId ?? this.collegeId,
+      status: status ?? this.status,
+      cardCountA: cardCountA ?? this.cardCountA,
+      cardCountB: cardCountB ?? this.cardCountB,
+      cardCountC: cardCountC ?? this.cardCountC,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (refId.present) {
+      map['ref_id'] = Variable<int>(refId.value);
+    }
+    if (collegeId.present) {
+      map['college_id'] = Variable<String>(collegeId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (cardCountA.present) {
+      map['card_count_a'] = Variable<int>(cardCountA.value);
+    }
+    if (cardCountB.present) {
+      map['card_count_b'] = Variable<int>(cardCountB.value);
+    }
+    if (cardCountC.present) {
+      map['card_count_c'] = Variable<int>(cardCountC.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserCollegesCompanion(')
+          ..write('refId: $refId, ')
+          ..write('collegeId: $collegeId, ')
+          ..write('status: $status, ')
+          ..write('cardCountA: $cardCountA, ')
+          ..write('cardCountB: $cardCountB, ')
+          ..write('cardCountC: $cardCountC')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2617,6 +3738,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PlanningSessionsTable planningSessions =
       $PlanningSessionsTable(this);
   late final $PendingUploadsTable pendingUploads = $PendingUploadsTable(this);
+  late final $DailySessionsTable dailySessions = $DailySessionsTable(this);
+  late final $ReviewLogTable reviewLog = $ReviewLogTable(this);
+  late final $UserCollegesTable userColleges = $UserCollegesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2627,7 +3751,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         flashCards,
         planningConfigs,
         planningSessions,
-        pendingUploads
+        pendingUploads,
+        dailySessions,
+        reviewLog,
+        userColleges
       ];
 }
 
@@ -3929,6 +5056,583 @@ typedef $$PendingUploadsTableProcessedTableManager = ProcessedTableManager<
     ),
     PendingUpload,
     PrefetchHooks Function()>;
+typedef $$DailySessionsTableCreateCompanionBuilder = DailySessionsCompanion
+    Function({
+  Value<int> day,
+  required String queueJson,
+  Value<int> position,
+  Value<String?> settingsJson,
+  Value<int?> startedAtMs,
+  Value<int?> completedAtMs,
+});
+typedef $$DailySessionsTableUpdateCompanionBuilder = DailySessionsCompanion
+    Function({
+  Value<int> day,
+  Value<String> queueJson,
+  Value<int> position,
+  Value<String?> settingsJson,
+  Value<int?> startedAtMs,
+  Value<int?> completedAtMs,
+});
+
+class $$DailySessionsTableFilterComposer
+    extends Composer<_$AppDatabase, $DailySessionsTable> {
+  $$DailySessionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get day => $composableBuilder(
+      column: $table.day, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get queueJson => $composableBuilder(
+      column: $table.queueJson, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get settingsJson => $composableBuilder(
+      column: $table.settingsJson, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get startedAtMs => $composableBuilder(
+      column: $table.startedAtMs, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get completedAtMs => $composableBuilder(
+      column: $table.completedAtMs, builder: (column) => ColumnFilters(column));
+}
+
+class $$DailySessionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DailySessionsTable> {
+  $$DailySessionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get day => $composableBuilder(
+      column: $table.day, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get queueJson => $composableBuilder(
+      column: $table.queueJson, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get position => $composableBuilder(
+      column: $table.position, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get settingsJson => $composableBuilder(
+      column: $table.settingsJson,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get startedAtMs => $composableBuilder(
+      column: $table.startedAtMs, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get completedAtMs => $composableBuilder(
+      column: $table.completedAtMs,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$DailySessionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DailySessionsTable> {
+  $$DailySessionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => column);
+
+  GeneratedColumn<String> get queueJson =>
+      $composableBuilder(column: $table.queueJson, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<String> get settingsJson => $composableBuilder(
+      column: $table.settingsJson, builder: (column) => column);
+
+  GeneratedColumn<int> get startedAtMs => $composableBuilder(
+      column: $table.startedAtMs, builder: (column) => column);
+
+  GeneratedColumn<int> get completedAtMs => $composableBuilder(
+      column: $table.completedAtMs, builder: (column) => column);
+}
+
+class $$DailySessionsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $DailySessionsTable,
+    DailySessionRow,
+    $$DailySessionsTableFilterComposer,
+    $$DailySessionsTableOrderingComposer,
+    $$DailySessionsTableAnnotationComposer,
+    $$DailySessionsTableCreateCompanionBuilder,
+    $$DailySessionsTableUpdateCompanionBuilder,
+    (
+      DailySessionRow,
+      BaseReferences<_$AppDatabase, $DailySessionsTable, DailySessionRow>
+    ),
+    DailySessionRow,
+    PrefetchHooks Function()> {
+  $$DailySessionsTableTableManager(_$AppDatabase db, $DailySessionsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DailySessionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DailySessionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DailySessionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> day = const Value.absent(),
+            Value<String> queueJson = const Value.absent(),
+            Value<int> position = const Value.absent(),
+            Value<String?> settingsJson = const Value.absent(),
+            Value<int?> startedAtMs = const Value.absent(),
+            Value<int?> completedAtMs = const Value.absent(),
+          }) =>
+              DailySessionsCompanion(
+            day: day,
+            queueJson: queueJson,
+            position: position,
+            settingsJson: settingsJson,
+            startedAtMs: startedAtMs,
+            completedAtMs: completedAtMs,
+          ),
+          createCompanionCallback: ({
+            Value<int> day = const Value.absent(),
+            required String queueJson,
+            Value<int> position = const Value.absent(),
+            Value<String?> settingsJson = const Value.absent(),
+            Value<int?> startedAtMs = const Value.absent(),
+            Value<int?> completedAtMs = const Value.absent(),
+          }) =>
+              DailySessionsCompanion.insert(
+            day: day,
+            queueJson: queueJson,
+            position: position,
+            settingsJson: settingsJson,
+            startedAtMs: startedAtMs,
+            completedAtMs: completedAtMs,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$DailySessionsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $DailySessionsTable,
+    DailySessionRow,
+    $$DailySessionsTableFilterComposer,
+    $$DailySessionsTableOrderingComposer,
+    $$DailySessionsTableAnnotationComposer,
+    $$DailySessionsTableCreateCompanionBuilder,
+    $$DailySessionsTableUpdateCompanionBuilder,
+    (
+      DailySessionRow,
+      BaseReferences<_$AppDatabase, $DailySessionsTable, DailySessionRow>
+    ),
+    DailySessionRow,
+    PrefetchHooks Function()>;
+typedef $$ReviewLogTableCreateCompanionBuilder = ReviewLogCompanion Function({
+  Value<int> id,
+  required String cardId,
+  required String collegeId,
+  required String rang,
+  required String drillLevel,
+  required int reviewedAtMs,
+  required int day,
+  Value<bool> daily,
+});
+typedef $$ReviewLogTableUpdateCompanionBuilder = ReviewLogCompanion Function({
+  Value<int> id,
+  Value<String> cardId,
+  Value<String> collegeId,
+  Value<String> rang,
+  Value<String> drillLevel,
+  Value<int> reviewedAtMs,
+  Value<int> day,
+  Value<bool> daily,
+});
+
+class $$ReviewLogTableFilterComposer
+    extends Composer<_$AppDatabase, $ReviewLogTable> {
+  $$ReviewLogTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get cardId => $composableBuilder(
+      column: $table.cardId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get collegeId => $composableBuilder(
+      column: $table.collegeId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get rang => $composableBuilder(
+      column: $table.rang, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get drillLevel => $composableBuilder(
+      column: $table.drillLevel, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get reviewedAtMs => $composableBuilder(
+      column: $table.reviewedAtMs, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get day => $composableBuilder(
+      column: $table.day, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get daily => $composableBuilder(
+      column: $table.daily, builder: (column) => ColumnFilters(column));
+}
+
+class $$ReviewLogTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReviewLogTable> {
+  $$ReviewLogTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get cardId => $composableBuilder(
+      column: $table.cardId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get collegeId => $composableBuilder(
+      column: $table.collegeId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get rang => $composableBuilder(
+      column: $table.rang, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get drillLevel => $composableBuilder(
+      column: $table.drillLevel, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get reviewedAtMs => $composableBuilder(
+      column: $table.reviewedAtMs,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get day => $composableBuilder(
+      column: $table.day, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get daily => $composableBuilder(
+      column: $table.daily, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ReviewLogTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReviewLogTable> {
+  $$ReviewLogTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get cardId =>
+      $composableBuilder(column: $table.cardId, builder: (column) => column);
+
+  GeneratedColumn<String> get collegeId =>
+      $composableBuilder(column: $table.collegeId, builder: (column) => column);
+
+  GeneratedColumn<String> get rang =>
+      $composableBuilder(column: $table.rang, builder: (column) => column);
+
+  GeneratedColumn<String> get drillLevel => $composableBuilder(
+      column: $table.drillLevel, builder: (column) => column);
+
+  GeneratedColumn<int> get reviewedAtMs => $composableBuilder(
+      column: $table.reviewedAtMs, builder: (column) => column);
+
+  GeneratedColumn<int> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => column);
+
+  GeneratedColumn<bool> get daily =>
+      $composableBuilder(column: $table.daily, builder: (column) => column);
+}
+
+class $$ReviewLogTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ReviewLogTable,
+    ReviewLogRow,
+    $$ReviewLogTableFilterComposer,
+    $$ReviewLogTableOrderingComposer,
+    $$ReviewLogTableAnnotationComposer,
+    $$ReviewLogTableCreateCompanionBuilder,
+    $$ReviewLogTableUpdateCompanionBuilder,
+    (
+      ReviewLogRow,
+      BaseReferences<_$AppDatabase, $ReviewLogTable, ReviewLogRow>
+    ),
+    ReviewLogRow,
+    PrefetchHooks Function()> {
+  $$ReviewLogTableTableManager(_$AppDatabase db, $ReviewLogTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReviewLogTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReviewLogTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReviewLogTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> cardId = const Value.absent(),
+            Value<String> collegeId = const Value.absent(),
+            Value<String> rang = const Value.absent(),
+            Value<String> drillLevel = const Value.absent(),
+            Value<int> reviewedAtMs = const Value.absent(),
+            Value<int> day = const Value.absent(),
+            Value<bool> daily = const Value.absent(),
+          }) =>
+              ReviewLogCompanion(
+            id: id,
+            cardId: cardId,
+            collegeId: collegeId,
+            rang: rang,
+            drillLevel: drillLevel,
+            reviewedAtMs: reviewedAtMs,
+            day: day,
+            daily: daily,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String cardId,
+            required String collegeId,
+            required String rang,
+            required String drillLevel,
+            required int reviewedAtMs,
+            required int day,
+            Value<bool> daily = const Value.absent(),
+          }) =>
+              ReviewLogCompanion.insert(
+            id: id,
+            cardId: cardId,
+            collegeId: collegeId,
+            rang: rang,
+            drillLevel: drillLevel,
+            reviewedAtMs: reviewedAtMs,
+            day: day,
+            daily: daily,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ReviewLogTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ReviewLogTable,
+    ReviewLogRow,
+    $$ReviewLogTableFilterComposer,
+    $$ReviewLogTableOrderingComposer,
+    $$ReviewLogTableAnnotationComposer,
+    $$ReviewLogTableCreateCompanionBuilder,
+    $$ReviewLogTableUpdateCompanionBuilder,
+    (
+      ReviewLogRow,
+      BaseReferences<_$AppDatabase, $ReviewLogTable, ReviewLogRow>
+    ),
+    ReviewLogRow,
+    PrefetchHooks Function()>;
+typedef $$UserCollegesTableCreateCompanionBuilder = UserCollegesCompanion
+    Function({
+  Value<int> refId,
+  required String collegeId,
+  required String status,
+  required int cardCountA,
+  required int cardCountB,
+  required int cardCountC,
+});
+typedef $$UserCollegesTableUpdateCompanionBuilder = UserCollegesCompanion
+    Function({
+  Value<int> refId,
+  Value<String> collegeId,
+  Value<String> status,
+  Value<int> cardCountA,
+  Value<int> cardCountB,
+  Value<int> cardCountC,
+});
+
+class $$UserCollegesTableFilterComposer
+    extends Composer<_$AppDatabase, $UserCollegesTable> {
+  $$UserCollegesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get refId => $composableBuilder(
+      column: $table.refId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get collegeId => $composableBuilder(
+      column: $table.collegeId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get cardCountA => $composableBuilder(
+      column: $table.cardCountA, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get cardCountB => $composableBuilder(
+      column: $table.cardCountB, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get cardCountC => $composableBuilder(
+      column: $table.cardCountC, builder: (column) => ColumnFilters(column));
+}
+
+class $$UserCollegesTableOrderingComposer
+    extends Composer<_$AppDatabase, $UserCollegesTable> {
+  $$UserCollegesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get refId => $composableBuilder(
+      column: $table.refId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get collegeId => $composableBuilder(
+      column: $table.collegeId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get cardCountA => $composableBuilder(
+      column: $table.cardCountA, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get cardCountB => $composableBuilder(
+      column: $table.cardCountB, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get cardCountC => $composableBuilder(
+      column: $table.cardCountC, builder: (column) => ColumnOrderings(column));
+}
+
+class $$UserCollegesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UserCollegesTable> {
+  $$UserCollegesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get refId =>
+      $composableBuilder(column: $table.refId, builder: (column) => column);
+
+  GeneratedColumn<String> get collegeId =>
+      $composableBuilder(column: $table.collegeId, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get cardCountA => $composableBuilder(
+      column: $table.cardCountA, builder: (column) => column);
+
+  GeneratedColumn<int> get cardCountB => $composableBuilder(
+      column: $table.cardCountB, builder: (column) => column);
+
+  GeneratedColumn<int> get cardCountC => $composableBuilder(
+      column: $table.cardCountC, builder: (column) => column);
+}
+
+class $$UserCollegesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $UserCollegesTable,
+    UserCollegeRow,
+    $$UserCollegesTableFilterComposer,
+    $$UserCollegesTableOrderingComposer,
+    $$UserCollegesTableAnnotationComposer,
+    $$UserCollegesTableCreateCompanionBuilder,
+    $$UserCollegesTableUpdateCompanionBuilder,
+    (
+      UserCollegeRow,
+      BaseReferences<_$AppDatabase, $UserCollegesTable, UserCollegeRow>
+    ),
+    UserCollegeRow,
+    PrefetchHooks Function()> {
+  $$UserCollegesTableTableManager(_$AppDatabase db, $UserCollegesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UserCollegesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UserCollegesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UserCollegesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> refId = const Value.absent(),
+            Value<String> collegeId = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<int> cardCountA = const Value.absent(),
+            Value<int> cardCountB = const Value.absent(),
+            Value<int> cardCountC = const Value.absent(),
+          }) =>
+              UserCollegesCompanion(
+            refId: refId,
+            collegeId: collegeId,
+            status: status,
+            cardCountA: cardCountA,
+            cardCountB: cardCountB,
+            cardCountC: cardCountC,
+          ),
+          createCompanionCallback: ({
+            Value<int> refId = const Value.absent(),
+            required String collegeId,
+            required String status,
+            required int cardCountA,
+            required int cardCountB,
+            required int cardCountC,
+          }) =>
+              UserCollegesCompanion.insert(
+            refId: refId,
+            collegeId: collegeId,
+            status: status,
+            cardCountA: cardCountA,
+            cardCountB: cardCountB,
+            cardCountC: cardCountC,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$UserCollegesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $UserCollegesTable,
+    UserCollegeRow,
+    $$UserCollegesTableFilterComposer,
+    $$UserCollegesTableOrderingComposer,
+    $$UserCollegesTableAnnotationComposer,
+    $$UserCollegesTableCreateCompanionBuilder,
+    $$UserCollegesTableUpdateCompanionBuilder,
+    (
+      UserCollegeRow,
+      BaseReferences<_$AppDatabase, $UserCollegesTable, UserCollegeRow>
+    ),
+    UserCollegeRow,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3945,4 +5649,10 @@ class $AppDatabaseManager {
       $$PlanningSessionsTableTableManager(_db, _db.planningSessions);
   $$PendingUploadsTableTableManager get pendingUploads =>
       $$PendingUploadsTableTableManager(_db, _db.pendingUploads);
+  $$DailySessionsTableTableManager get dailySessions =>
+      $$DailySessionsTableTableManager(_db, _db.dailySessions);
+  $$ReviewLogTableTableManager get reviewLog =>
+      $$ReviewLogTableTableManager(_db, _db.reviewLog);
+  $$UserCollegesTableTableManager get userColleges =>
+      $$UserCollegesTableTableManager(_db, _db.userColleges);
 }

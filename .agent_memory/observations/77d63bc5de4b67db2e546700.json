@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'mkdir -p /mnt/user/appdata/collega/backups && docker exec collega-db-1 pg_dump -U postgres -d collega -Fc > /mnt/user/appdata/collega/backups/collega_pre_015_$(date +%Y%m%d_%H%M).dump && ls -la /mnt/user/appdata/collega/backups/ | tail -2'; cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && docker build --platform linux/amd64 -t tistech0/collega-backend:latest -t tistech0/collega-backend:3e75bdd . 2>&1 | tail -1 && docker run --rm --platform linux/amd64 --entrypoint sh tistech0/collega-backend:latest -c \"grep -c _TOC_ITEM_PATTERN app/services/ocr/item_detector.py; ls… [+77 chars truncated]",
+  "summary": "About to run: ssh nas 'mkdir -p /mnt/user/appdata/collega/backups && docker exec collega-db-1 pg_dump -U postgres -d collega -Fc > /mnt/user/appdata/collega/backups/collega_pre_015_$(date +%Y%m%d_%H%M).dump && ls -",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "77d63bc5de4b67db2e546700",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:16:21.395Z",
+  "stored_at": "2026-09-22T18:16:21.395Z"
+}

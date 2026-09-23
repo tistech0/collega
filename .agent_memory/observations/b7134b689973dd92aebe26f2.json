@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_drill_card_test.dart'\ns=open(p).read()\na=\"\"\"        await tester.tap(find.byKey(CgVerdictBar.buttonKey(v)));\n        await tester.pump(const Duration(milliseconds: 120));\"\"\"\nassert a in s\ns=s.replace(a,\"\"\"        await tester.tap(find.byKey(CgVerdictBar.buttonKey(v)));\n        await tester.pump(); // première frame du ticker\n        await tester.pump(const Duration(milliseconds: 120));\"\"\")\na=\"\"\"      await gesture.up();\n      await tester.pump(const Duration(milliseconds: 75));\"\"\"\na… [+385 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_drill_card_test.dart'\ns=open(p).read()\na=\"\"\"        await tester.tap(find.byKey(CgVerdictBar.buttonKey(v)));\n        await tester.pump(const Duration(milliseconds: 120));\"\"\"\nassert a in s\ns=s.replace(a,\"\"\"  ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_drill_card_test.dart'\ns=open(p).read()\na=\"\"\"        await tester.tap(find.byKey(CgVerdictBar.buttonKey(v)));\n        await tester.pump(const Duration(milliseconds: 120));\"\"\"\nassert a in s\ns=s.replace(a,\"\"\"        await tester.tap(find.byKey(CgVerdictBar.buttonKey(v)));\n        await tester.pump(); // première frame du ticker\n        await tester.pump(const Duration(milliseconds: 120));\"\"\")\na=\"\"\"      await gesture.up();\n      await tester.pump(const Duration(milliseconds: 75));\"\"\"\nassert a in s\ns=s.replace(a,\"\"\"      await gesture.up();\n      await tester.pump(); // première frame du ticker\n      await tester.pump(const Duration(milliseconds: 75));\"\"\")\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/components/cg_drill_card_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -E \"Expected|Actual|Which|\\[E\\]|Some tests|All tests|Error:\" | sort -u | head -30: 00:03 +51: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b7134b689973dd92aebe26f2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:49:00.967Z",
+  "stored_at": "2026-09-22T18:49:00.967Z"
+}

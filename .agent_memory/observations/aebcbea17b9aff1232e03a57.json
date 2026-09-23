@@ -1,0 +1,17 @@
+{
+  "type": "file_change",
+  "tool": "Artifact",
+  "path": "/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-a-feuille.html",
+  "command": "",
+  "summary": "Artifact: https://claude.ai/artifact/8vJyocB4dQ1n7S9aSwwbkh /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-a-feuille.html 40217879-fd6b-49f8-956f-bd708b1ba65e Collega — Feuille phone owner 1790020464-4e47 0.0.0 arming",
+  "text": "https://claude.ai/artifact/8vJyocB4dQ1n7S9aSwwbkh /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/b3633e6c-40e4-438c-812f-7fd281ec7496/scratchpad/direction-a-feuille.html 40217879-fd6b-49f8-956f-bd708b1ba65e Collega — Feuille phone owner 1790020464-4e47 0.0.0 arming",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "aebcbea17b9aff1232e03a57",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:54:26.277Z",
+  "stored_at": "2026-09-21T19:54:26.278Z",
+  "low_signal": true
+}

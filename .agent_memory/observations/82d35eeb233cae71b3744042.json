@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_field.dart'\ns=open(p).read()\nold=\"\"\"    final Color? borderColor = _hasError\n        ? c.danger\n        : search\n            ? (focused ? c.accent : null)\n            : (focused ? c.accent : c.line);\"\"\"\nnew=\"\"\"    // Recherche : fond `soft` sans contour, même au focus (champ iOS natif).\n    final Color? borderColor = _hasError\n        ? c.danger\n        : search\n            ? null\n            : (focused ? c.accent : c.line);\"\"\"\nassert old in s\ns=s.replace(old,new)\nopen(p,'w').write(s… [+5 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='lib/core/ui/components/cg_field.dart' s=open(p).read() old=\"\"\" final Color? borderColor = _hasError ? c.danger : s",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "82d35eeb233cae71b3744042",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:19.835Z",
+  "stored_at": "2026-09-22T18:43:19.835Z"
+}

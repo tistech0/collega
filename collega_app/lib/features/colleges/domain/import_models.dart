@@ -54,7 +54,10 @@ class ImportIdle extends CollegeImportState {
 }
 
 class ImportUploading extends CollegeImportState {
-  const ImportUploading({this.progress});
+  const ImportUploading({this.refId, this.progress});
+
+  /// Collège en cours d'envoi (null : inconnu, envoi repris sans contexte).
+  final int? refId;
 
   /// Progression 0..1 de l'upload par morceaux (Story 7.11) ; null pour l'upload mono-requête.
   final double? progress;
@@ -67,6 +70,10 @@ class ImportStreaming extends CollegeImportState {
     required this.ocrProgress,
     required this.status,
     this.totalPages,
+    this.itemsDone = 0,
+    this.itemsTotal,
+    this.cards = 0,
+    this.preview = const [],
   });
 
   final String collegeId;
@@ -75,12 +82,24 @@ class ImportStreaming extends CollegeImportState {
   final int? totalPages;
   final String status;
 
+  /// Génération (story 8.13) : items traités / total, fiches prêtes.
+  final int itemsDone;
+  final int? itemsTotal;
+  final int cards;
+
+  /// Questions des dernières fiches générées (aperçu, 3 au plus).
+  final List<String> preview;
+
   ImportStreaming copyWith({
     String? collegeId,
     String? jobId,
     int? ocrProgress,
     int? totalPages,
     String? status,
+    int? itemsDone,
+    int? itemsTotal,
+    int? cards,
+    List<String>? preview,
   }) =>
       ImportStreaming(
         collegeId: collegeId ?? this.collegeId,
@@ -88,6 +107,10 @@ class ImportStreaming extends CollegeImportState {
         ocrProgress: ocrProgress ?? this.ocrProgress,
         totalPages: totalPages ?? this.totalPages,
         status: status ?? this.status,
+        itemsDone: itemsDone ?? this.itemsDone,
+        itemsTotal: itemsTotal ?? this.itemsTotal,
+        cards: cards ?? this.cards,
+        preview: preview ?? this.preview,
       );
 }
 

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 265,372p ux-design-specification-v2.md; sed -n 541,546p ux-design-specification-v2.md; grep -n \"Mouvement et haptique\" ux-design-specification-v2.md; grep -n \"^### Accessibilité\\|^## Accessib\" ux-design-specification-v2.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 265,372p ux-design-specification-v2.md; sed -n 541,546p ux-design-specification-v2.md; grep -n \"Mouvement et haptique\" ux-design-specification-v2.md; grep -n \"^### Accessibilité\\|^## Accessib\" ux-design-specification-v2.md: init",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && sed -n 265,372p ux-design-specification-v2.md; sed -n 541,546p ux-design-specification-v2.md; grep -n \"Mouvement et haptique\" ux-design-specification-v2.md; grep -n \"^### Accessibilité\\|^## Accessib\" ux-design-specification-v2.md: inition** : le verso ne s'ouvre qu'après saisie dans un `CgField` intégré au recto ; le feedback sémantique s'affiche dans la feuille au-dessus de la réponse. **États** : recto, verso, drag (avec verdict), sortie, chargement (skeleton de carte), fin (transition vers le récap). **A11y** : `Semantics(label: 'Fiche rang A, Cancérologie. Question : …', hint: 'Touche pour voir la réponse')` ; les trois boutons restent le chemin VoiceOver ; `reduceMotion` → fondu 150 ms à la place des glissements. #### CgVerdictBar **Rôle** : les trois verdicts. **Anatomie** : 3 boutons 54 pt égaux — « À revoir » (texte `#9A5A16`), « Bien » (neutre), « Maîtrisé » (`primary`). **Comportement** : haptique distinct par verdict (impact moyen / léger / succès) ; le bouton pressé pilote la même animation de sortie que le swipe. 652:### Mouvement et haptique 369:### Accessibilité 687:### Accessibilité — WCAG AA + HIG",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b624c5c75010ecbabbd54a4b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:21.668Z",
+  "stored_at": "2026-09-22T18:37:21.668Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -m3 -iE \"id\" .agent_memory/packets/gotcha-tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-bf832ba8.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -m3 -iE \"id\" .agent_memory/packets/gotcha-tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-bf832ba8.md: resource: \"collega_app/test/features/today/today_provider_test.dart\" x-kage-id: \"repo:git-github-com-tistech0-collega:gotcha:tests-flut",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -m3 -iE \"id\" .agent_memory/packets/gotcha-tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-bf832ba8.md: resource: \"collega_app/test/features/today/today_provider_test.dart\" x-kage-id: \"repo:git-github-com-tistech0-collega:gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-17901124\" x-kage-paths: [\"collega_app/test/features/today/today_provider_test.dart\", \"collega_app/test/features/profile/profile_screen_test.dart\", \"collega_app/test/features/search/search_notifier_test.dart\"]",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "88b3b735be638acf8b77e7c8",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T21:28:16.313Z",
+  "stored_at": "2026-09-22T21:28:16.313Z"
+}

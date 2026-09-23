@@ -26,7 +26,7 @@ class AppLogger {
   }) {
     if (!kDebugMode && level == LogLevel.debug) return;
 
-    final name = tag ?? 'AppMédecine';
+    final name = tag ?? 'Collega';
     developer.log(
       message,
       name: name,

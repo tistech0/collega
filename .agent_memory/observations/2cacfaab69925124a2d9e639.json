@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib\" && find features -path \"*presentation*\" -name \"*.dart\" | xargs wc -l | sort -n; echo \"---shared widgets---\"; find core shared -name \"*.dart\" 2>/dev/null | grep -iE \"widget|shell|nav|scaffold\" | xargs wc -l",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib\" && find features -path \"*presentation*\" -name \"*.dart\" | xargs wc -l | sort -n; echo \"---shared widgets---\"; find core shared -name \"*",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2cacfaab69925124a2d9e639",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:13:56.918Z",
+  "stored_at": "2026-09-21T19:13:56.919Z"
+}

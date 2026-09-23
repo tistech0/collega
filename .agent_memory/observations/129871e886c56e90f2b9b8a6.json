@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_segmented.dart'\ns=open(p).read()\nold=\"          _row(context, value),\"\nnew=\"          KeyedSubtree(key: ValueKey(i), child: _row(context, value)),\"\nassert old in s\ns=s.replace(old,new)\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -E -A25 \"EXCEPTION CAUGHT\" | head -60; flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]\" | sort -u",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_segmented.dart'\ns=open(p).read()\nold=\"          _row(context, value),\"\nnew=\"          KeyedSubtree(key: ValueKey(i), child: _row(context, value)),\"\nassert old in s\ns=s.replace(old,new)\nopen(p,'w').write(s)\nEO",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_segmented.dart'\ns=open(p).read()\nold=\"          _row(context, value),\"\nnew=\"          KeyedSubtree(key: ValueKey(i), child: _row(context, value)),\"\nassert old in s\ns=s.replace(old,new)\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -E -A25 \"EXCEPTION CAUGHT\" | head -60; flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]\" | sort -u: estWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1027:5) <asynchronous suspension> <asynchronous suspension> (elided 3 frames from dart:async and package:stack_trace) -- ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════ The following assertion was thrown while running async test code: Golden \"goldens/cg_segmented_393_10.png\": Pixel test failed, 40.07%, 119667px diff detected. Failure feedback can be found at /Users/lesurmatthis/dev/projet%20perso/collega/collega_app/test/core/ui/components/failures 00:01 +10 -1: goldens golden cg_segmented 375_10 [E] 00:02 +10 -2: goldens golden cg_segmented 375_16 [E] 00:02 +10 -3: goldens golden cg_segmented 393_10 [E] 00:02 +10 -4: goldens golden cg_segmented 393_16 [E] 00:02 +10 -5: goldens golden cg_segmented 430_10 [E] 00:02 +10 -6: goldens golden cg_segmented 430_16 [E]",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "129871e886c56e90f2b9b8a6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:41:03.097Z",
+  "stored_at": "2026-09-22T18:41:03.098Z"
+}

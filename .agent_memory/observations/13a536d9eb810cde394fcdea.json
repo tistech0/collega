@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_refresh",
+  "path": "",
+  "command": "",
+  "summary": "About to run: mcp__kage__kage_refresh",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "13a536d9eb810cde394fcdea",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:45:48.414Z",
+  "stored_at": "2026-09-22T17:45:48.414Z",
+  "low_signal": true
+}

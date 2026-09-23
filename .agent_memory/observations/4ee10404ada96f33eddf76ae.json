@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/cg_colors.dart lib/core/ui/tokens/cg_motion.dart lib/core/ui/tokens/cg_radius.dart lib/core/ui/tokens/cg_space.dart lib/core/ui/tokens/cg_type.dart lib/core/ui/theme/cg_theme.dart lib/core/ui/foundation/cg_icon.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/cg_colors.dart lib/core/ui/tokens/cg_motion.dart lib/core/ui/tokens/cg_radius.dart lib/core/ui/tokens/cg_space.dart lib/core/ui/tokens/cg_type.dart lib/core/ui/theme/cg_theme.dart lib/core/ui/foundation/cg_icon.dart: f, 'refresh': r",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/cg_colors.dart lib/core/ui/tokens/cg_motion.dart lib/core/ui/tokens/cg_radius.dart lib/core/ui/tokens/cg_space.dart lib/core/ui/tokens/cg_type.dart lib/core/ui/theme/cg_theme.dart lib/core/ui/foundation/cg_icon.dart: f, 'refresh': refresh, 'calendar': calendar, 'clock': clock, 'bell': bell, 'lock': lock, 'logout': logout, 'sparkle': sparkle, }; } /// Icône Collega UI. Décorative par défaut ; avec [semanticLabel], lue par VoiceOver. class CgIcon extends StatelessWidget { const CgIcon(this.svg, {super.key, this.size = 22, this.color, this.semanticLabel}); final String svg; final double size; /// Par défaut la couleur du texte ambiant. final Color? color; final String? semanticLabel; @override Widget build(BuildContext context) { final c = color ?? DefaultTextStyle.of(context).style.color ?? CgTheme.of(context).colors.ink; final picture = SvgPicture.string( svg, width: size, height: size, colorFilter: ColorFilter.mode(c, BlendMode.srcIn), ); if (semanticLabel == null) return ExcludeSemantics(child: picture); return Semantics(label: semanticLabel, image: true, excludeSemantics: true, child: picture); } }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4ee10404ada96f33eddf76ae",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:49.479Z",
+  "stored_at": "2026-09-22T18:37:49.479Z"
+}

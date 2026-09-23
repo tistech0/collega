@@ -1,0 +1,16 @@
+{
+  "type": "tool_result",
+  "tool": "mcp__kage__kage_pr_check",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_pr_check failed: f8b6e00.md: low memory quality score 54\", \".agent_memory/packets/workflow-change-memory-feat-story-7-11-upload-chunked-1f26889e.md: some referenced paths do not exist in this repo: .agent_memory/pending/bug_fix-pasted-content-id-36da-contexte-projet-collega-flutter-app-collega-app-backe",
+  "text": "mcp__kage__kage_pr_check failed: f8b6e00.md: low memory quality score 54\", \".agent_memory/packets/workflow-change-memory-feat-story-7-11-upload-chunked-1f26889e.md: some referenced paths do not exist in this repo: .agent_memory/pending/bug_fix-pasted-content-id-36da-contexte-projet-collega-flutter-app-collega-app-backend-f-e23c92d0.md\", \".agent_memory/pending/bug_fix-pasted-content-id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f-29717d15.md: no repo-grounded source reference found\", \"indexes/catalog.json is stale; run kage index\", \"9 memory packet(s) reference code that changed since capture — review with kage verify (not blocking).\", \"8 memory reconciliation item(s) may need update after recent code changes (review on handoff; not blocking).\", \"4 distillable session learnings pending review (run kage distill; not blocking).\" ], \"required_actions\": [ \"Run kage refresh --project <dir> before merge.\" ] }",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1cbbea95a4f23fd50fbd62a4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:27:19.155Z",
+  "stored_at": "2026-09-23T08:27:19.155Z"
+}

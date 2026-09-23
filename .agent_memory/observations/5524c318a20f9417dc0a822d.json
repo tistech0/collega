@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -A12 \"EXCEPTION CAUGHT BY WIDGETS\" | head -40; flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]\" | sort -u",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -A12 \"EXCEPTION CAUGHT BY WIDGETS\" | head -40; flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]\" | sort -u: ): Duplicate",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -A12 \"EXCEPTION CAUGHT BY WIDGETS\" | head -40; flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]\" | sort -u: ): Duplicate keys found. If multiple keyed widgets exist as children of another widget, they must have unique keys. Column(direction: vertical, mainAxisAlignment: start, mainAxisSize: min, crossAxisAlignment: center) has multiple children with key [<'cg-segmented-row'>]. The relevant error-causing widget was: CgSegmented<String> CgSegmented:file:///Users/lesurmatthis/dev/projet%20perso/collega/collega_app/lib/core/ui/gallery/cg_segmented_gallery.dart:60:41 00:01 +8 -1: Dynamic Type > 1,6 : liste de lignes à coche [E] 00:01 +8 -2: Semantics : groupe exclusif, bouton, sélectionné [E] 00:01 +8 -3: goldens golden cg_segmented 375_10 [E] 00:01 +8 -4: goldens golden cg_segmented 375_16 [E] 00:01 +8 -5: goldens golden cg_segmented 393_10 [E] 00:02 +8 -6: goldens golden cg_segmented 393_16 [E] 00:02 +8 -7: goldens golden cg_segmented 430_10 [E] 00:02 +8 -8: goldens golden cg_segmented 430_16 [E]",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5524c318a20f9417dc0a822d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:40:51.144Z",
+  "stored_at": "2026-09-22T18:40:51.144Z"
+}

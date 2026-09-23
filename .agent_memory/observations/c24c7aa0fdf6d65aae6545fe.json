@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_skeleton_test.dart --update-goldens 2>&1 | grep -oE \"(All tests passed!|Some tests failed.*)\" ; flutter test test/core/ui/components/cg_skeleton_test.dart 2>&1 | grep -oE \"\\+[0-9]+.*(All tests passed!|Some tests failed)\" | tail -1",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_skeleton_test.dart --update-goldens 2>&1 | grep -oE \"(All tests passed!|Some tests failed.*)\" ; flutter test test/core/ui/components/cg_skeleton_test.dart 2>&1 | grep -oE \"\\+[0-9]+.*(All tests passed!|Some tests fai",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_skeleton_test.dart --update-goldens 2>&1 | grep -oE \"(All tests passed!|Some tests failed.*)\" ; flutter test test/core/ui/components/cg_skeleton_test.dart 2>&1 | grep -oE \"\\+[0-9]+.*(All tests passed!|Some tests failed)\" | tail -1: émantique 00:01 +11: accessibilité CgSkeleton seul : exclu de l'arbre sémantique 00:01 +11: accessibilité Dynamic Type 1,6 : les lignes de la liste grandissent comme le texte 00:01 +12: accessibilité Dynamic Type 1,6 : les lignes de la liste grandissent comme le texte 00:01 +12: goldens (setUpAll) 00:01 +12: goldens golden cg_skeleton 375_10 00:01 +13: goldens golden cg_skeleton 375_10 00:01 +13: goldens golden cg_skeleton 375_16 00:01 +14: goldens golden cg_skeleton 375_16 00:01 +14: goldens golden cg_skeleton 393_10 00:01 +15: goldens golden cg_skeleton 393_10 00:01 +15: goldens golden cg_skeleton 393_16 00:01 +16: goldens golden cg_skeleton 393_16 00:01 +16: goldens golden cg_skeleton 430_10 00:01 +17: goldens golden cg_skeleton 430_10 00:01 +17: goldens golden cg_skeleton 430_16 00:01 +18: goldens golden cg_skeleton 430_16 00:01 +18: goldens (tearDownAll) 00:01 +18: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c24c7aa0fdf6d65aae6545fe",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:11.581Z",
+  "stored_at": "2026-09-22T18:43:11.581Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat test/core/ui/components/cg_button_test.dart test/support/cg_golden.dart widgetbook/lib/use_cases/cg_button_use_cases.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat test/core/ui/components/cg_button_test.dart test/support/cg_golden.dart widgetbook/lib/use_cases/cg_button_use_cases.dart:  'package:collega_app/core/ui/gallery/cg_button_gallery.dart'; final WidgetbookComponent cgButtonComponent = WidgetbookComponent",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat test/core/ui/components/cg_button_test.dart test/support/cg_golden.dart widgetbook/lib/use_cases/cg_button_use_cases.dart:  'package:collega_app/core/ui/gallery/cg_button_gallery.dart'; final WidgetbookComponent cgButtonComponent = WidgetbookComponent( name: 'CgButton', useCases: [ WidgetbookUseCase(name: 'Planche (toutes variantes)', builder: (_) => const CgButtonGallery()), WidgetbookUseCase( name: 'Interactif', builder: (context) => Center( child: Padding( padding: const EdgeInsets.all(20), child: CgButton( label: context.knobs.string(label: 'Libellé', initialValue: 'Commencer'), variant: context.knobs.list( label: 'Variante', options: CgButtonVariant.values, labelBuilder: (v) => v.name, ), size: context.knobs.list( label: 'Taille', options: CgButtonSize.values, labelBuilder: (v) => v.name, ), loading: context.knobs.boolean(label: 'Chargement'), expand: context.knobs.boolean(label: 'Pleine largeur', initialValue: true), onPressed: context.knobs.boolean(label: 'Désactivé') ? null : () {}, ), ), ), ), ], );",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4c230d59194601fd86e64f21",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:29.839Z",
+  "stored_at": "2026-09-22T18:37:29.840Z"
+}

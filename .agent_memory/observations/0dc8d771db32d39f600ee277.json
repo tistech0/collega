@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s/CgRingGallery(), height: 820)/CgRingGallery(), height: 480)/\" test/core/ui/components/cg_ring_test.dart && flutter test test/core/ui/components/cg_ring_test.dart --update-goldens 2>&1 | tail -1",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s/CgRingGallery(), height: 820)/CgRingGallery(), height: 480)/\" test/core/ui/components/cg_ring_test.dart && flutter test te",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0dc8d771db32d39f600ee277",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:39:58.849Z",
+  "stored_at": "2026-09-22T18:39:58.850Z"
+}

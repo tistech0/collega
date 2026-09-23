@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart: import 'package:flutter/cupertino.dart';\nimport 'package:flutter_test/flutter_test.dart';\n\nimport 'package:collega_app/core/ui/components/cg_button.dart';\nimport 'package:collega_app/core/ui/components/cg_sheet.da",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart: import 'package:flutter/cupertino.dart';\nimport 'package:flutter_test/flutter_test.dart';\n\nimport 'package:collega_app/core/ui/components/cg_button.dart';\nimport 'package:collega_app/core/ui/components/cg_sheet.dart';\nimport 'package:collega_app/core/ui/gallery/cg_sheet_gallery.dart';\nimport 'package:collega_app/core/ui/tokens/cg_colors.dart';\nimport 'package:collega_app/core/ui/tokens/cg_radius.dart';\n\nimport '../../../support/cg_golden.dart';\n\nconst c = CgColors.light;\n\n/// Hôte : un bouton « Ouvrir » qui lance [open] avec un contexte sous le Navigator.\nFuture<void> _pumpHost(\n  WidgetTester",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "30b2546e8c4a97b844f6352b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:40:18.796Z",
+  "stored_at": "2026-09-22T18:40:18.796Z"
+}

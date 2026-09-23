@@ -1,0 +1,12 @@
+# Ne jamais embarquer secrets, dumps ni environnement local dans l'image (publique sur Docker Hub)
+.env
+.env.*
+!.env.example
+!.env.nas.example
+*.sql
+*.db
+.venv
+.pytest_cache
+**/__pycache__
+tests
+docs

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_field.dart'\ns=open(p).read()\nold=\"padding: EdgeInsets.symmetric(horizontal: search ? CgSpace.s2 : CgSpace.s4, vertical: CgSpace.s3),\"\nnew=\"\"\"padding: search\n          ? const EdgeInsets.symmetric(horizontal: CgSpace.s2, vertical: CgSpace.s2)\n          : const EdgeInsets.symmetric(horizontal: CgSpace.s4, vertical: CgSpace.s3),\"\"\"\nassert old in s\ns=s.replace(old,new)\nopen(p,'w').write(s)\np='test/core/ui/components/cg_field_test.dart'\ns=open(p).read()\nold=\"\"\"            hasTapAction: tr… [+507 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='lib/core/ui/components/cg_field.dart' s=open(p).read() old=\"padding: EdgeInsets.symmetric(horizontal: search ? CgS",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f47a528522a8833d96ec022c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:46.017Z",
+  "stored_at": "2026-09-22T18:43:46.018Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; sed -i '' 's/college_ref/college_ref_id/g' $S/q1.sql; ssh nas 'docker exec -i collega-db-1 psql -U postgres -d collega' < $S/q1.sql 2>&1 | head -120",
+  "summary": "About to run: S=/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad; sed -i '' 's/college_ref/college_ref_id/g' $S/q1.sql; ssh nas 'docker exec -i co",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f87676301b715c30cf33a147",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:48:35.084Z",
+  "stored_at": "2026-09-22T17:48:35.085Z"
+}

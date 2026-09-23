@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_drill_card_use_cases.dart",
+  "command": "",
+  "summary": "About to run: Write",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b51bcb88495954f06d00465a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:50:33.894Z",
+  "stored_at": "2026-09-22T18:50:33.894Z",
+  "low_signal": true
+}

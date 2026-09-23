@@ -207,11 +207,11 @@ class TestRegisterApnsToken:
 
         resp = await client.post(
             "/v1/notifications/apns-token",
-            json={"token": "abc123devicetoken"},
+            json={"token": "ab12" * 16},
             headers={"Authorization": "Bearer token"},
         )
         assert resp.status_code == 200
         assert resp.json()["data"]["registered"] is True
-        assert user.apns_token == "abc123devicetoken"
+        assert user.apns_token == "ab12" * 16
 
         app.dependency_overrides.clear()

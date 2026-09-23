@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat _bmad-output/planning-artifacts/ux-design-specification.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat _bmad-output/planning-artifacts/ux-design-specification.md: n réussie | `ShadToast` vert · 3s | Positif, bref — \"Fiche signalée\" | | Erreur récupérable | `ShadToast` avec action \"Réessayer\" | Neutre, actionnable | | Blocage quota | `ShadAlertDialog` avec date de ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && cat _bmad-output/planning-artifacts/ux-design-specification.md: n réussie | `ShadToast` vert · 3s | Positif, bref — \"Fiche signalée\" | | Erreur récupérable | `ShadToast` avec action \"Réessayer\" | Neutre, actionnable | | Blocage quota | `ShadAlertDialog` avec date de réinitialisation | Rassurant — \"tes fiches sont là\" en premier | | OCR en cours | `ShadProgress` + fiches progressives via `flutter_animate` | Impatience productive — jamais un écran vide | | OCR qualité basse | `OcrConfidenceBadge` sur la fiche concernée | Informatif, pas alarmiste | | Génération terminée | Notification push + badge sur l'icône collège | Satisfaction — \"tes fiches sont prêtes\" | ### États Vides Chaque état vide explique **pourquoi** et propose **quoi faire** : | Écran | État vide | Message + action | |---|---|---| | Accueil — aucun collège | Aucun collège importé | \"Importe ton premier collège pour commencer →\" | | Accueil — génération en cours | OCR en background | `Sha",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bd4310c254365b31395b9806",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:01:31.023Z",
+  "stored_at": "2026-09-21T19:01:31.023Z"
+}

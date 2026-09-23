@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_sheet_test.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      tester.semantics.tap(find.byKey(CgSheetPanel.handleKey));\"\"\",\"\"\"      final node = tester.getSemantics(find.byKey(CgSheetPanel.handleKey));\n      tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.tap);\"\"\")\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/components/cg_sheet_test.dart --update-goldens 2>&1 | grep -vE \"^\\s*$\" | grep -E \"\\[E\\]|Expected|Actual|Which|EXCEPTION|was thrown|: Some|All… [+29 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='test/core/ui/components/cg_sheet_test.dart' s=open(p).read() s=s.replace(\"\"\" tester.semantics.tap(find.byKey(CgShe",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "91ac389559449a75be6b826f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:42:37.427Z",
+  "stored_at": "2026-09-22T18:42:37.428Z"
+}

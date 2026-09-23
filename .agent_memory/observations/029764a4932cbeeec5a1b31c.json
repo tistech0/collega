@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Monitor",
+  "path": "",
+  "command": "until grep -qE \"Installing and launching|Error running|Could not run|Error: \" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log 2>/dev/null; do sleep 10; done; sleep 25; grep -E \"Installing|Error running|key commands|Could not run|unlocked|Error: \" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log | tail -3",
+  "summary": "until grep -qE \"Installing and launching|Error running|Could not run|Error: \" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log 2>/dev/null; do sleep 10; done; sleep 25; grep -E \"Installing|Error running|key commands|Could not run|unlocked|Error",
+  "text": "until grep -qE \"Installing and launching|Error running|Could not run|Error: \" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log 2>/dev/null; do sleep 10; done; sleep 25; grep -E \"Installing|Error running|key commands|Could not run|unlocked|Error: \" /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run.log | tail -3: bpfar0nie",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "029764a4932cbeeec5a1b31c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T09:15:28.445Z",
+  "stored_at": "2026-09-23T09:15:28.446Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_context",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_context: [{'type': 'text', 'text': '# Kage Context\\n\\nQuery: Refonte UX/UI app Flutter collega_app : thème shadcn_ui app_theme.dart, écrans home/collèges/drill/recherche/profil/planning/login/inscription, spec UX ux-design-specification.md, inscription fermée REGISTRATION_DISABLED\\n\\n## Relevant Code Graph\\n",
+  "text": "[{'type': 'text', 'text': '# Kage Context\\n\\nQuery: Refonte UX/UI app Flutter collega_app : thème shadcn_ui app_theme.dart, écrans home/collèges/drill/recherche/profil/planning/login/inscription, spec UX ux-design-specification.md, inscription fermée REGISTRATION_DISABLED\\n\\n## Relevant Code Graph\\n1. [route] PATCH /app.services.ocr.ocr_processor.OcrProcessor._extract_with_pdfplumber -> collega_backend/tests/services/test_ocr_processor.py:32\\n2. [route] PATCH /app.services.ocr.ocr_processor.OcrProcessor._extract_with_pdfplumber -> collega_backend/tests/services/test_ocr_processor.py:42\\n3. [route] PATCH /app.services.ocr.ocr_processor.OcrProcessor._extract_with_pdfplumber -> collega_backend/tests/services/test_ocr_processor.py:57\\n1. [symbol] method registerWith in collega_app/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:17\\n2. [symbol] class GeneratedPluginRegistrant in collega_app/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java:14\\n3. [symbol] function generateAuxiliaryPath in collega_app/ios/Pods/DKImagePickerController/Sources/DKImagePickerController/DKImageAssetExporter.swift:340\\n4. [symbol] class MainActivity in coll",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a05f093d696a3f93eee8f519",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:01:18.072Z",
+  "stored_at": "2026-09-21T19:01:18.072Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter devices 2>&1 | grep -i \"00008110\" | head -2; (tool/run_device.sh --release -d 00008110-000115D43499801E > /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/scratchpad/run83b.log 2>&1 &); echo started",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter devices 2>&1 | grep -i \"00008110\" | head -2; (tool/run_device.sh --release -d 00008110-000115D43499801E > /private/tmp/claude-5",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "27238eb578e32da94c5fdae8",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T19:44:16.040Z",
+  "stored_at": "2026-09-22T19:44:16.041Z"
+}

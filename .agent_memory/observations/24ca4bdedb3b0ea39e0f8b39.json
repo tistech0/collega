@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_sheet_test.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      tester.semantics.tap(find.semantics.byLabel('Fermer'));\"\"\",\"\"\"      // Le voile porte aussi « Fermer » : on vise la poignée (bouton).\n      tester.semantics.tap(find.semantics.byPredicate(\n        (node) => node.label == 'Fermer' && node.hasFlag(SemanticsFlag.isButton),\n      ));\"\"\")\ns=s.replace(\"import 'package:flutter/cupertino.dart';\\n\",\"import 'package:flutter/cupertino.dart';\\nimport 'package:flutter/semantics.dart';\\n\",1)… [+248 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_sheet_test.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      tester.semantics.tap(find.semantics.byLabel('Fermer'));\"\"\",\"\"\"      // Le voile porte aussi « Fermer » : on vise la poignée (bouton).\n      tester.seman",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_sheet_test.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      tester.semantics.tap(find.semantics.byLabel('Fermer'));\"\"\",\"\"\"      // Le voile porte aussi « Fermer » : on vise la poignée (bouton).\n      tester.semantics.tap(find.semantics.byPredicate(\n        (node) => node.label == 'Fermer' && node.hasFlag(SemanticsFlag.isButton),\n      ));\"\"\")\ns=s.replace(\"import 'package:flutter/cupertino.dart';\\n\",\"import 'package:flutter/cupertino.dart';\\nimport 'package:flutter/semantics.dart';\\n\",1)\nopen(p,'w').write(s)\nEOF\nflutter analyze lib/core/ui test/core/ui 2>&1 | grep -E \"cg_sheet|cg_state|cg_illustr\"; flutter test test/core/ui/components/cg_sheet_test.dart --update-goldens 2>&1 | tail -1 | grep -o \"All tests passed\\|Some tests failed\": All tests passed",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "24ca4bdedb3b0ea39e0f8b39",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:46:44.171Z",
+  "stored_at": "2026-09-22T18:46:44.172Z"
+}

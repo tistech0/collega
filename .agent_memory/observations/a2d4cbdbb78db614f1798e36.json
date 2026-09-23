@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage pr-check 2>/dev/null | head -5; true",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage pr-check 2>/dev/null | head -5; true: Kage — code-grounded memory for coding agents Core commands: kage install [--project <dir>] one-shot: init + index + auto-wire detected agents kage check [--project <dir>] verify CLAUDE.md/AGENTS.md/docs claims against the c",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && kage pr-check 2>/dev/null | head -5; true: Kage — code-grounded memory for coding agents Core commands: kage install [--project <dir>] one-shot: init + index + auto-wire detected agents kage check [--project <dir>] verify CLAUDE.md/AGENTS.md/docs claims against the code — counted, not estimated",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a2d4cbdbb78db614f1798e36",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T07:48:06.142Z",
+  "stored_at": "2026-09-23T07:48:06.143Z"
+}

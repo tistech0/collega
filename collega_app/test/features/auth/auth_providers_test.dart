@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
+import 'package:collega_app/features/auth/paywall_providers.dart';
 import 'package:collega_app/features/auth/data/auth_repository.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 
@@ -28,6 +30,18 @@ class _FakeAuthRepository extends AuthRepository {
   final AuthState _loginResult;
   final Future<AuthState> Function()? onDeleteAccount;
   final Future<void> Function()? onLogout;
+  AuthState? meResult;
+  Future<void>? meGate;
+  final savedReminders = <int?>[];
+
+  @override
+  Future<AuthState> refreshFromMe() async {
+    await meGate;
+    return meResult ?? const AuthState(errorMessage: 'réseau');
+  }
+
+  @override
+  Future<void> saveReminderHour(int? hourUtc, {int? localHour}) async => savedReminders.add(hourUtc);
 
   @override
   Future<AuthState> loadStoredUser() async => _loadResult;
@@ -64,6 +78,15 @@ class _SpyAppDatabase extends AppDatabase {
   @override
   Future<void> deleteEverything() async {
     await _onDelete();
+  }
+}
+
+class _CountingPaywall extends PaywallNotifier {
+  static int builds = 0;
+  @override
+  Future<PaywallState> build() async {
+    builds++;
+    return const PaywallState(errorMessage: 'Aucun abonnement actif à restaurer sur ce compte Apple.');
   }
 }
 
@@ -169,6 +192,94 @@ void main() {
       final state = container.read(authProvider).valueOrNull!;
       expect(state.isAuthenticated, isTrue);
       expect(state.user!.isBeta, isTrue);
+    });
+
+    test('refreshProfile : /me frais appliqué (quota, rappel)', () async {
+      final repo = _FakeAuthRepository(loadResult: const AuthState(user: _testUser))
+        ..meResult = const AuthState(user: AuthUser(
+          id: 'uid-1', email: 'test@example.com', isBeta: true, isSubscribed: false,
+          monthlyReloads: 1, reminderHourUtc: 6,
+        ));
+      final container = _makeContainer(repo);
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+
+      await container.read(authProvider.notifier).refreshProfile();
+
+      final user = container.read(authProvider).valueOrNull!.user!;
+      expect(user.monthlyReloads, 1);
+      expect(user.reminderHourUtc, 6);
+    });
+
+    test('refreshProfile en échec réseau : on garde la session affichée (jamais déconnectée)', () async {
+      final container = _makeContainer(_FakeAuthRepository(loadResult: const AuthState(user: _testUser)));
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+
+      await container.read(authProvider.notifier).refreshProfile();
+
+      expect(container.read(authProvider).valueOrNull!.user, _testUser);
+    });
+
+    test('refreshProfile : réponse d’un autre compte ignorée (connexion changée entre-temps)', () async {
+      final repo = _FakeAuthRepository(loadResult: const AuthState(user: _testUser))
+        ..meResult = const AuthState(user: AuthUser(id: 'autre', email: 'b@b.fr', isBeta: true, isSubscribed: true));
+      final container = _makeContainer(repo);
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+
+      await container.read(authProvider.notifier).refreshProfile();
+
+      expect(container.read(authProvider).valueOrNull!.user, _testUser);
+    });
+
+    test('refreshProfile parti avant une modification locale : ne l’écrase pas', () async {
+      final gate = Completer<void>();
+      final repo = _FakeAuthRepository(loadResult: const AuthState(user: _testUser))
+        ..meGate = gate.future
+        ..meResult = const AuthState(user: _testUser);
+      final container = _makeContainer(repo);
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+
+      final refresh = container.read(authProvider.notifier).refreshProfile();
+      await container.read(authProvider.notifier).setReminderHour(7);
+      gate.complete();
+      await refresh;
+
+      expect(container.read(authProvider).valueOrNull!.user!.reminderHourUtc, 7);
+    });
+
+    test('setReminderHour : mémorisé et appliqué au compte', () async {
+      final repo = _FakeAuthRepository(loadResult: const AuthState(user: _testUser));
+      final container = _makeContainer(repo);
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+
+      await container.read(authProvider.notifier).setReminderHour(7);
+      expect(container.read(authProvider).valueOrNull!.user!.reminderHourUtc, 7);
+      await container.read(authProvider.notifier).setReminderHour(null);
+      expect(container.read(authProvider).valueOrNull!.user!.reminderHourUtc, isNull);
+      expect(repo.savedReminders, [7, null]);
+    });
+
+    test('logout : le message du paywall ne survit pas (compte suivant)', () async {
+      final container = ProviderContainer(overrides: [
+        authRepositoryProvider.overrideWithValue(_FakeAuthRepository(loadResult: const AuthState(user: _testUser))),
+        secureStorageProvider.overrideWithValue(const FlutterSecureStorage()),
+        paywallProvider.overrideWith(_CountingPaywall.new),
+      ]);
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+      final sub = container.listen(paywallProvider, (_, __) {});
+      addTearDown(sub.close);
+      await container.read(paywallProvider.future);
+      _CountingPaywall.builds = 0;
+
+      await container.read(authProvider.notifier).logout();
+      await container.read(paywallProvider.future);
+
+      expect(_CountingPaywall.builds, 1);
     });
 
     test('logout → état non authentifié', () async {

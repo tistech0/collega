@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_learn",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_learn: [{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/gotcha-sheets-routes-sans-page-et-gorouter-go-ne-les-ferme-pas-recherche-sheet-extrait--74575541.md\\nRepo-local memory is written immediately. Org/global promotion still requires ",
+  "text": "[{'type': 'text', 'text': 'Captured session learning: /Users/lesurmatthis/dev/projet perso/collega/.agent_memory/packets/gotcha-sheets-routes-sans-page-et-gorouter-go-ne-les-ferme-pas-recherche-sheet-extrait--74575541.md\\nRepo-local memory is written immediately. Org/global promotion still requires explicit review.'}]",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b9e9ac9733a83368d1199dd5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T09:15:36.343Z",
+  "stored_at": "2026-09-23T09:15:36.344Z"
+}

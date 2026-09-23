@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
+import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_client.dart';
 import 'package:collega_app/core/network/api_providers.dart';
@@ -17,6 +19,8 @@ import 'package:collega_app/core/upload/upload_api.dart';
 import 'package:collega_app/core/upload/upload_models.dart';
 import 'package:collega_app/core/upload/upload_providers.dart';
 import 'package:collega_app/features/colleges/colleges_import_providers.dart';
+import 'package:collega_app/features/colleges/domain/college_models.dart';
+import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/data/college_import_repository.dart';
 import 'package:collega_app/features/colleges/domain/import_models.dart';
 
@@ -136,6 +140,15 @@ Future<_FakeChunkedUploadService> _makeFakeChunkedService(AppDatabase db, {bool 
         ));
   }
   return _FakeChunkedUploadService(db: db, cacheDir: dir, pending: pending, uploadError: uploadError);
+}
+
+class _CountingColleges extends CollegesNotifier {
+  static int builds = 0;
+  @override
+  Future<List<CollegeListEntry>> build() async {
+    builds++;
+    return const [];
+  }
 }
 
 ProviderContainer _makeContainer(
@@ -350,6 +363,48 @@ void main() {
 
         // Pas de _connectSse appelé → refresh non déclenché
         expect(apiClient.refreshCalls, 0);
+      },
+    );
+    test(
+      'import (ou réimport) terminé → les nouvelles fiches du collège arrivent dans Drift (revue 8.7)',
+      () async {
+        final repo = _FakeCollegeImportRepository(
+          statusOverride: CollegeStatusResponse(
+            collegeId: 'college-uuid-15',
+            refId: 15,
+            status: 'generation_complete',
+            ocrProgress: 0,
+          ),
+        );
+        final db = _makeInMemoryDb();
+        addTearDown(db.close);
+        final fetched = Completer<void>();
+        final container = ProviderContainer(
+          overrides: [
+            collegeImportRepositoryProvider.overrideWithValue(repo),
+            secureStorageProvider.overrideWithValue(const FlutterSecureStorage()),
+            databaseProvider.overrideWithValue(db),
+            apiClientProvider.overrideWithValue(_FakeApiClient()),
+            collegeCardsFetcherProvider.overrideWithValue((id) async {
+              if (!fetched.isCompleted) scheduleMicrotask(fetched.complete);
+              return [
+                FlashCardModel(
+                  id: 'new-1', itemId: 'i1', collegeId: id, cardType: 'qa', rang: 'A',
+                  recto: 'Q', verso: 'R', ocrConfidenceScore: 0.9, lowConfidence: false,
+                ),
+              ];
+            }),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await container.read(collegeImportProvider.notifier).reconnectIfActive('college-uuid-15');
+        await fetched.future;
+        await pumpEventQueue();
+        final ids = (await db.select(db.flashCards).get()).map((c) => c.id);
+        expect(ids, ['new-1']);
+        expect(container.read(collegeDataVersionProvider('college-uuid-15')), 1,
+            reason: 'le détail ouvert se recharge');
       },
     );
     test(
@@ -600,6 +655,32 @@ void main() {
       expect((await db.select(db.collegeImports).get()).single.refId, 15);
     });
 
+    test('envoi accepté → la Bibliothèque se recharge (le collège existe côté serveur)', () async {
+      final repo = _FakeCollegeImportRepository();
+      final db = _makeInMemoryDb();
+      final fakeSvc = await _makeFakeChunkedService(db, pending: true);
+      _CountingColleges.builds = 0;
+      final container = ProviderContainer(overrides: [
+        collegeImportRepositoryProvider.overrideWithValue(repo),
+        secureStorageProvider.overrideWithValue(const FlutterSecureStorage()),
+        databaseProvider.overrideWithValue(db),
+        apiClientProvider.overrideWithValue(_FakeApiClient()),
+        chunkedUploadServiceProvider.overrideWith((ref) async => fakeSvc),
+        collegesProvider.overrideWith(_CountingColleges.new),
+      ]);
+      addTearDown(container.dispose);
+      final sub = container.listen(collegesProvider, (_, __) {});
+      addTearDown(sub.close);
+      await container.read(collegesProvider.future);
+      expect(_CountingColleges.builds, 1);
+
+      await container.read(collegeImportProvider.future);
+      await container.read(collegeImportProvider.notifier).resumePendingUpload();
+      await container.read(collegesProvider.future);
+
+      expect(_CountingColleges.builds, 2);
+    });
+
     test('resumePendingUpload sans ligne → état inchangé, resume non appelé', () async {
       final repo = _FakeCollegeImportRepository();
       final db = _makeInMemoryDb();
@@ -626,5 +707,50 @@ void main() {
 
       expect(container.read(collegeImportProvider).valueOrNull, isA<ImportUploading>());
     });
+  });
+
+  group('avancement de la génération (8.13)', () {
+    test('generation_progress : fiches prêtes et items au fil de l’eau', () async {
+      final container = _makeContainer(_FakeCollegeImportRepository());
+      addTearDown(container.dispose);
+      final notifier = container.read(collegeImportProvider.notifier);
+      await container.read(collegeImportProvider.future);
+      notifier.debugSetState(const ImportStreaming(
+        collegeId: 'c', jobId: 'j', ocrProgress: 80, totalPages: 80, status: 'ocr_complete',
+      ));
+      notifier.debugHandleSseEvent(
+        {'event': 'generation_progress', 'data': {'items_done': 3, 'items_total': 32, 'cards': 21}},
+        'c',
+      );
+      final s = container.read(collegeImportProvider).value! as ImportStreaming;
+      expect([s.itemsDone, s.itemsTotal, s.cards], [3, 32, 21]);
+      expect(s.status, 'ocr_complete');
+
+      // Un événement OCR tardif ne remet pas le compteur à zéro.
+      notifier.debugHandleSseEvent({'event': 'ocr_progress', 'data': {'page': 80, 'total': 80}}, 'c');
+      final after = container.read(collegeImportProvider).value! as ImportStreaming;
+      expect(after.cards, 21);
+      expect(after.status, 'ocr_complete', reason: 'la génération ne revient pas en lecture');
+    });
+  });
+
+  test('reprise (retour au premier plan) : le compteur de fiches ne repart pas de zéro', () async {
+    final repo = _FakeCollegeImportRepository(
+      statusOverride: CollegeStatusResponse(
+        collegeId: 'c', refId: 3, status: 'ocr_complete', ocrProgress: 80, totalPages: 80, jobId: 'j',
+      ),
+    );
+    final container = _makeContainer(repo, apiClient: _FakeApiClient());
+    addTearDown(container.dispose);
+    final notifier = container.read(collegeImportProvider.notifier);
+    await container.read(collegeImportProvider.future);
+    notifier.debugSetState(const ImportStreaming(
+      collegeId: 'c', jobId: 'j', ocrProgress: 80, totalPages: 80, status: 'ocr_complete',
+      itemsDone: 3, itemsTotal: 32, cards: 21, preview: ['Q'],
+    ));
+    await notifier.reconnectIfActive('c');
+    final s = container.read(collegeImportProvider).value! as ImportStreaming;
+    expect([s.itemsDone, s.itemsTotal, s.cards], [3, 32, 21]);
+    expect(s.preview, ['Q']);
   });
 }

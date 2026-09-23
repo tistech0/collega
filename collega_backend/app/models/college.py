@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -43,6 +43,13 @@ class College(Base):
     reload_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     ocr_page_progress: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     total_pages: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Avancement de la génération (story 8.13) : items traités / total, fiches
+    # générées. Total nul hors génération.
+    generation_items_done: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    generation_items_total: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    generation_cards: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    # Aperçu : questions des 3 dernières fiches générées (liste JSON).
+    generation_preview: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

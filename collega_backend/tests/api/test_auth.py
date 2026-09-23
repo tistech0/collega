@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import types
 import uuid
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -23,6 +24,8 @@ def make_user(
     faculty=None,
     monthly_reloads=0,
     with_password=True,
+    monthly_reloads_reset_at=None,
+    reminder_hour_utc=None,
 ):
     uid = user_id or uuid.uuid4()
     hashed = hash_password("password123") if with_password else "not-used"
@@ -36,54 +39,21 @@ def make_user(
         year_group=year_group,
         faculty=faculty,
         monthly_reloads=monthly_reloads,
+        monthly_reloads_reset_at=monthly_reloads_reset_at,
+        reminder_hour_utc=reminder_hour_utc,
     )
 
 
 class TestRegister:
-    async def test_register_success(self, client: AsyncClient, mock_db):
-        new_user = make_user()
-
-        def _refresh_user(u):
-            u.id = new_user.id
-            u.is_beta = False
-            u.is_subscribed = False
-
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None))
-        )
-        mock_db.add = MagicMock()
-        mock_db.commit = AsyncMock()
-        mock_db.refresh = AsyncMock(side_effect=_refresh_user)
-
+    async def test_inscription_fermee_beta_privee(self, client: AsyncClient, mock_db):
+        """Beta privée : comptes créés à la main, l'inscription répond 403 (spec v2)."""
         resp = await client.post(
             "/v1/auth/register",
-            json={"email": "new@example.com", "password": "password123"},
+            json={"email": "new@example.com", "password": "motdepasse123"},
         )
-        assert resp.status_code == 201
-        body = resp.json()
-        assert "access_token" in body["data"]
-        assert "refresh_token" in body["data"]
-        assert body["data"]["token_type"] == "bearer"
-
-    async def test_register_duplicate_email(self, client: AsyncClient, mock_db):
-        existing = make_user(email="taken@example.com")
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=existing))
-        )
-
-        resp = await client.post(
-            "/v1/auth/register",
-            json={"email": "taken@example.com", "password": "password123"},
-        )
-        assert resp.status_code == 409
-        assert resp.json()["detail"]["code"] == "EMAIL_ALREADY_EXISTS"
-
-    async def test_register_password_too_short(self, client: AsyncClient, mock_db):
-        resp = await client.post(
-            "/v1/auth/register",
-            json={"email": "short@example.com", "password": "abc"},
-        )
-        assert resp.status_code == 422
+        assert resp.status_code == 403
+        assert resp.json()["detail"]["code"] == "REGISTRATION_DISABLED"
+        mock_db.add.assert_not_called()
 
     async def test_register_invalid_email(self, client: AsyncClient, mock_db):
         resp = await client.post(
@@ -209,6 +179,7 @@ class TestGetMe:
             faculty="Paris 6",
             monthly_reloads=2,
             with_password=False,
+            monthly_reloads_reset_at=datetime.now(timezone.utc) + timedelta(days=5),
         )
         app.dependency_overrides[get_current_user] = lambda: user
         try:
@@ -225,6 +196,43 @@ class TestGetMe:
         assert data["faculty"] == "Paris 6"
         assert data["monthly_reloads"] == 2
         assert data["monthly_reloads_max"] == 3
+
+    async def test_get_me_quota_du_mois_en_cours_et_rappel(self, client: AsyncClient, mock_db):
+        """Profil (story 8.14) : réimports du mois en cours + date de renouvellement + rappel."""
+        reset = datetime.now(timezone.utc) + timedelta(days=5)
+        user = make_user(with_password=False, monthly_reloads=2, monthly_reloads_reset_at=reset, reminder_hour_utc=6)
+        app.dependency_overrides[get_current_user] = lambda: user
+        try:
+            with patch("app.api.v1.auth.settings") as mock_settings:
+                mock_settings.monthly_reloads_max = 3
+                resp = await client.get("/v1/auth/me")
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        data = resp.json()["data"]
+        assert data["monthly_reloads"] == 2
+        assert datetime.fromisoformat(data["monthly_reloads_reset_at"]) == reset
+        assert data["reminder_hour_utc"] == 6
+
+    async def test_get_me_quota_perime_repart_a_zero(self, client: AsyncClient, mock_db):
+        """Mois passé : le compteur stocké n'est plus le bon, /me dit 0 et la prochaine date."""
+        user = make_user(
+            with_password=False,
+            monthly_reloads=3,
+            monthly_reloads_reset_at=datetime.now(timezone.utc) - timedelta(days=2),
+        )
+        app.dependency_overrides[get_current_user] = lambda: user
+        try:
+            with patch("app.api.v1.auth.settings") as mock_settings:
+                mock_settings.monthly_reloads_max = 3
+                resp = await client.get("/v1/auth/me")
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        data = resp.json()["data"]
+        assert data["monthly_reloads"] == 0
+        assert datetime.fromisoformat(data["monthly_reloads_reset_at"]) > datetime.now(timezone.utc)
+        assert data["reminder_hour_utc"] is None
 
     async def test_get_me_null_profile_fields(self, client: AsyncClient, mock_db):
         user = make_user(with_password=False)

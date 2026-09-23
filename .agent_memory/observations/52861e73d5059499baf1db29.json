@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | grep -m3 -E \"Error\"",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | grep -m3 -E \"Error\": 00:00 +0: loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_segmented_test.dart test/core/ui/components/cg_segmented_test.dar",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | grep -m3 -E \"Error\": 00:00 +0: loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_segmented_test.dart test/core/ui/components/cg_segmented_test.dart:5:8: Error: Error when reading 'lib/core/ui/components/cg_segmented.dart': No such file or directory test/core/ui/components/cg_segmented_test.dart:7:8: Error: Error when reading 'lib/core/ui/gallery/cg_segmented_gallery.dart': No such file or directory test/core/ui/components/cg_segmented_test.dart:34:16: Error: The method 'CgSegmented' isn't defined for the class '_HostState'.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "52861e73d5059499baf1db29",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:39:35.489Z",
+  "stored_at": "2026-09-22T18:39:35.489Z"
+}

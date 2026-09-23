@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -nE \"^## |TBD|TODO|À définir|\\[à compléter\\]\" _bmad-output/planning-artifacts/ux-design-specification-v2.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -nE \"^## |TBD|TODO|À définir|\\[à compléter\\]\" _bmad-output/planning-artifacts/ux-design-specification-v2.md: 26:## Cadrage (session du 2026-09-21) 48:## Résumé exécutif 81:## Expérience cœur 132:## Réponse émotionnelle 171:## Analyse UX et inspiration 225:## Fon",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -nE \"^## |TBD|TODO|À définir|\\[à compléter\\]\" _bmad-output/planning-artifacts/ux-design-specification-v2.md: 26:## Cadrage (session du 2026-09-21) 48:## Résumé exécutif 81:## Expérience cœur 132:## Réponse émotionnelle 171:## Analyse UX et inspiration 225:## Fondation du design system 267:## Expérience définissante 316:## Fondation visuelle 375:## Direction de design 414:## Parcours utilisateur 517:## Stratégie de composants 587:## Patterns UX de cohérence 668:## Adaptation aux écrans et accessibilité 715:## Prérequis et dépendances",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f083f61ee706baaa6df860cd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:22:27.602Z",
+  "stored_at": "2026-09-22T17:22:27.602Z"
+}

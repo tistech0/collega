@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && python3 _bmad/scripts/resolve_customization.py --skill .claude/skills/bmad-create-story --key workflow 2>&1 | head -40; cat _bmad/bmm/config.yaml; ls .claude/skills/bmad-create-story/",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && python3 _bmad/scripts/resolve_customization.py --skill .claude/skills/bmad-create-story --key workflow 2>&1 | head -40; cat _bmad/bmm/config.yaml; ",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "76595a4014c65e3408dcf8b5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:48:09.394Z",
+  "stored_at": "2026-09-22T17:48:09.394Z"
+}

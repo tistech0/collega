@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_pr_check",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_pr_check: [{'type': 'text', 'text': '✓ No team memory invalidated by this change\\n\\n{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"branch\": \"feat/redesign-ux-ui\",\\n \"head\": \"08e1e5bcba39eeb9acd2bbabe2a15899b260c076\",\\n \"changed_files\": [\\n \".agent_memory/pending/bug_fix-pa",
+  "text": "[{'type': 'text', 'text': '✓ No team memory invalidated by this change\\n\\n{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"branch\": \"feat/redesign-ux-ui\",\\n \"head\": \"08e1e5bcba39eeb9acd2bbabe2a15899b260c076\",\\n \"changed_files\": [\\n \".agent_memory/pending/bug_fix-pasted-content-id-656b-contexte-projet-collega-flutter-app-collega-app-backend-f-29717d15.md\"\\n ],\\n \"validation\": {\\n \"ok\": true,\\n \"errors\": [],\\n \"warnings\": [\\n \".agent_memory/packets/gotcha-flutter-test-complet-pas-vert-home-notifier-binding-home-screen-timer-blocage-ap-be1fd156.md: some referenced paths do not exist in this repo: collega_app/test/features/home/home_notifier_test.dart, collega_app/test/features/home/home_screen_test.dart\",\\n \".agent_memory/packets/repo_map-collega-repo-overview-cf8b6e00.md: low memory quality score 54\",\\n \".agent_memory/packets/workflow-change-memory-feat-story-7-11-upload-chunked-1f26889e.md: some referenced paths do not exist in this repo: .agent_memory/pending/bug_fix-pasted-content-id-36da-contexte-projet-collega-flutter-app-collega-app-backend-f-e23c92d0.md\",\\n \".agent_memory/pending/bug_fix-pasted-content-id-656b-contexte-projet-collega-flutter-",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "cad8cf2aab92b7204c9dc5b4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T19:31:48.643Z",
+  "stored_at": "2026-09-22T19:31:48.643Z",
+  "low_signal": true
+}

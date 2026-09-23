@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,13 +15,27 @@ import 'package:collega_app/core/upload/upload_models.dart';
 import 'package:collega_app/core/upload/upload_providers.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/env.dart';
+import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/colleges/data/college_cards_sync.dart';
 import 'package:collega_app/features/colleges/data/college_import_repository.dart';
 import 'package:collega_app/features/colleges/domain/import_models.dart';
 
 export 'package:collega_app/features/colleges/data/college_import_repository.dart'
     show SubscriptionRequiredException, JobInProgressException, QueueUnavailableException,
          CollegeReloadLimitException, MonthlyReloadLimitException;
+
+/// PDF choisi et sa taille (lue une fois, au choix).
+typedef PickedPdf = ({File file, int size});
+
+/// Choix du PDF (sélecteur de fichiers iOS) ; remplacé en test.
+final pdfPickerProvider = Provider<Future<PickedPdf?> Function()>((ref) => () async {
+      final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
+      final path = result?.files.single.path;
+      if (path == null) return null;
+      final file = File(path);
+      return (file: file, size: await file.length());
+    });
 
 final collegeImportRepositoryProvider = Provider<CollegeImportRepository>(
   (ref) => CollegeImportRepository(
@@ -63,6 +78,8 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
     // Un upload par morceaux en cours (transport arrière-plan) survit à la navigation :
     // l'écran d'import le réaffiche via ImportUploading.progress.
     if (state.valueOrNull case ImportUploading(progress: != null)) return;
+    // Un import suivi (SSE) continue : ouvrir un écran d'import ne le coupe pas.
+    if (state.valueOrNull is ImportStreaming) return;
     _reconnectTimer?.cancel();
     _reconnectAttempt = 0;
     await _sseSubscription?.cancel();
@@ -73,7 +90,7 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
   }
 
   Future<void> startImport(int refId, File file) async {
-    state = const AsyncValue.data(ImportUploading());
+    state = AsyncValue.data(ImportUploading(refId: refId));
     try {
       final size = await file.length();
       if (size > ChunkedUploadService.maxSize) {
@@ -136,13 +153,16 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
       totalPages: null,
       status: 'pending',
     ));
+    // Le serveur connaît désormais le collège : la Bibliothèque le montre « import en cours ».
+    ref.invalidate(collegesProvider);
 
     await _connectSse(response.collegeId);
   }
 
   void _onUploadProgress(double p) {
     if (_disposed) return;
-    if (state.valueOrNull is ImportUploading) state = AsyncValue.data(ImportUploading(progress: p));
+    final current = state.valueOrNull;
+    if (current is ImportUploading) state = AsyncValue.data(ImportUploading(refId: current.refId, progress: p));
   }
 
   bool _resumeInFlight = false;
@@ -164,7 +184,7 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
       return;
     }
     _resumeInFlight = true;
-    state = const AsyncValue.data(ImportUploading(progress: 0));
+    state = AsyncValue.data(ImportUploading(refId: refId, progress: 0));
     try {
       final response = await chunked.resume(onProgress: _onUploadProgress);
       if (response != null) await _afterUploadAccepted(refId, response);
@@ -185,6 +205,9 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
 
   @visibleForTesting
   void debugSetState(CollegeImportState value) => state = AsyncValue.data(value);
+
+  @visibleForTesting
+  void debugHandleSseEvent(Map<String, dynamic> event, String collegeId) => _handleSseEvent(event, collegeId);
 
   Future<void> _connectSse(String collegeId) async {
     await _sseSubscription?.cancel();
@@ -258,21 +281,44 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
       case 'ocr_progress':
         final page = data['page'] as int? ?? 0;
         final total = data['total'] as int?;
+        // Un événement OCR tardif ne ramène pas la génération en lecture.
+        final status = current.status == 'ocr_complete' ? 'ocr_complete' : 'processing';
+        state = AsyncValue.data(current.copyWith(ocrProgress: page, totalPages: total, status: status));
+        _updateDriftProgress(collegeId, page, total, status);
+      case 'generation_progress':
         state = AsyncValue.data(current.copyWith(
-          ocrProgress: page,
-          totalPages: total,
-          status: 'processing',
+          status: 'ocr_complete',
+          itemsDone: data['items_done'] as int? ?? current.itemsDone,
+          itemsTotal: data['items_total'] as int? ?? current.itemsTotal,
+          cards: data['cards'] as int? ?? current.cards,
+          preview: (data['preview'] as List?)?.whereType<String>().toList() ?? current.preview,
         ));
-        _updateDriftProgress(collegeId, page, total, 'processing');
       case 'card_generation_started':
         state = AsyncValue.data(current.copyWith(status: 'ocr_complete'));
         _updateDriftProgress(collegeId, current.ocrProgress, current.totalPages, 'ocr_complete');
       case 'generation_complete':
         state = AsyncValue.data(ImportComplete(collegeId: collegeId));
-        ref.invalidate(collegesProvider);
+        _onGenerationComplete(collegeId);
       case 'generation_failed':
         state = const AsyncValue.data(ImportError(message: 'generation_failed'));
     }
+  }
+
+  /// Fiches prêtes (import ou réimport, même `college_id`) : la liste, le détail
+  /// et les fiches locales repartent du serveur. Sans cela le détail et le drill
+  /// resteraient sur les fiches supprimées par le réimport (revue 8.7).
+  void _onGenerationComplete(String collegeId) {
+    ref.invalidate(collegesProvider);
+    final db = ref.read(databaseProvider);
+    unawaited(ref.read(collegeCardsFetcherProvider)(collegeId).then((cards) async {
+      await syncCollegeCards(db, collegeId, cards);
+    }).catchError((Object e) {
+      AppLogger.warning('fiches du collège $collegeId après import : $e', tag: 'CollegeImportNotifier');
+    }).whenComplete(() {
+      // Le détail (s'il est ouvert) recharge items et fiches. Pas d'invalidate :
+      // en debug, invalider un provider jamais lu le construit (appel réseau inutile).
+      if (!_disposed) ref.read(collegeDataVersionProvider(collegeId).notifier).state++;
+    }));
   }
 
   void _updateDriftProgress(String collegeId, int page, int? total, String status) {
@@ -310,17 +356,25 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
         // ocr_complete = génération Claude en cours : phase la plus longue,
         // il faut bien reprendre le stream ici aussi.
         case 'pending' || 'processing' || 'ocr_complete':
+          // Même import déjà suivi : on garde le compteur de fiches et l'aperçu
+          // (le flux les renverra au prochain changement).
+          final previous = state.valueOrNull;
+          final same = previous is ImportStreaming && previous.collegeId == collegeId ? previous : null;
           state = AsyncValue.data(ImportStreaming(
             collegeId: collegeId,
             jobId: status.jobId ?? '',
             ocrProgress: status.ocrProgress,
             totalPages: status.totalPages,
             status: status.status,
+            itemsDone: same?.itemsDone ?? 0,
+            itemsTotal: same?.itemsTotal,
+            cards: same?.cards ?? 0,
+            preview: same?.preview ?? const [],
           ));
           await _connectSse(collegeId);
         case 'generation_complete':
           state = AsyncValue.data(ImportComplete(collegeId: collegeId));
-          ref.invalidate(collegesProvider);
+          _onGenerationComplete(collegeId);
         case 'failed':
           state = const AsyncValue.data(ImportError(message: 'generation_failed'));
       }

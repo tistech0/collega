@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat pubspec.yaml; ls lib lib/core lib/core/theme; wc -l lib/core/theme/*.dart; sed -n 1,200p lib/app.dart 2>/dev/null | head -120; ls test test/core 2>/dev/null",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat pubspec.yaml; ls lib lib/core lib/core/theme; wc -l lib/core/theme/*.dart; sed -n 1,200p lib/app.dart 2>/dev/null | head -120; ls t",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8b55dd7f09d2ba7161e6638a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:20:35.924Z",
+  "stored_at": "2026-09-22T18:20:35.924Z"
+}

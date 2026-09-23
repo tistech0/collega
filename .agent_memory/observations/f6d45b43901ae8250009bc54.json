@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/*.dart lib/core/ui/theme/cg_theme.dart lib/core/ui/foundation/cg_icon.dart lib/core/ui/foundation/cg_haptics.dart test/support/cg_golden.dart",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/*.dart lib/core/ui/theme/cg_theme.dart lib/core/ui/foundation/cg_icon.dart lib/core/ui/foundation/cg_haptics.dar",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "f6d45b43901ae8250009bc54",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:36:38.157Z",
+  "stored_at": "2026-09-22T18:36:38.157Z"
+}

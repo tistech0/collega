@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Edit",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_skeleton_test.dart",
+  "summary": "changed /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_skeleton_test.dart: testWidgets('ring : disque de 56 pt', (tester) async { -> testWidgets('largeur imposée respectée même sous un parent qui étire', (tester) async {\n      await tester.pumpWidget(_app(\n        Column(crossAxisAl",
+  "text": "changed /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_skeleton_test.dart: testWidgets('ring : disque de 56 pt', (tester) async { -> testWidgets('largeur imposée respectée même sous un parent qui étire', (tester) async {\n      await tester.pumpWidget(_app(\n        Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [CgSkeleton.line(width: 180)]),\n        reduced: true,\n      ));\n      final bone = find.descendant(of: find.byType(CgSkeleton), matching: find.byType(DecoratedBox));\n      expect(tester.getSize(bone), const Size(180, 14));\n      expect(tester.getTopLeft(bone).dx, 0);\n    });\n\n    t",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "00aeed27e876f5dee96d5f16",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:03.005Z",
+  "stored_at": "2026-09-22T18:43:03.006Z"
+}

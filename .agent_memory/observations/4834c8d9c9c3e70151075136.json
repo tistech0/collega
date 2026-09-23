@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "c juste pour le drill si je lenvoi en haut la carte cest bien",
+  "summary": "c juste pour le drill si je lenvoi en haut la carte cest bien",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4834c8d9c9c3e70151075136",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T20:10:46.063Z",
+  "stored_at": "2026-09-21T20:10:46.064Z",
+  "low_signal": true
+}

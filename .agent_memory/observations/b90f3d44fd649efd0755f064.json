@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_ring_use_cases.dart\" <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_ring.dart';\nimport 'package:collega_app/core/ui/gallery/cg_ring_gallery.dart';\n\nfinal WidgetbookComponent cgRingComponent = WidgetbookComponent(\n  name: 'CgRing',\n  useCases: [\n    WidgetbookUseCase(name: 'Planche (toutes tailles)', builder: (_) => const CgRingGallery()),\n    WidgetbookUseCase(\n      name: 'Interactif',\n      // Déplacer le c… [+768 chars truncated]",
+  "summary": "About to run: cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_ring_use_cases.dart\" <<'EOF' import 'package:flutter/widgets.dart'; import 'package:widgetbook/widgetbook.da",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b90f3d44fd649efd0755f064",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:40:08.604Z",
+  "stored_at": "2026-09-22T18:40:08.605Z"
+}

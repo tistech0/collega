@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && for f in tab_bar header; do echo \"== $f\"; flutter test -r expanded test/core/ui/components/cg_${f}_test.dart --update-goldens 2>&1 | grep -E \"^\\s*(Expected|Actual|Which)|══╡|Error:|All tests passed|Some tests failed|\\[E\\]|overflowed\" | cut -c1-220 | head -30; done",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && for f in tab_bar header; do echo \"== $f\"; flutter test -r expanded test/core/ui/components/cg_${f}_test.dart --update-goldens 2>&1 | grep -E \"^\\s*(Expected|Actual|Which)|══╡|Error:|All tests passed|Some tests failed|\\[E\\]|overflowed\" | cut -c1-220 | head ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && for f in tab_bar header; do echo \"== $f\"; flutter test -r expanded test/core/ui/components/cg_${f}_test.dart --update-goldens 2>&1 | grep -E \"^\\s*(Expected|Actual|Which)|══╡|Error:|All tests passed|Some tests failed|\\[E\\]|overflowed\" | cut -c1-220 | head -30; done: == tab_bar 00:01 +27: All tests passed! == header ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════ Expected: exactly one matching candidate Actual: _TypeWidgetFinder:<Found 0 widgets with type \"CupertinoSliverRefreshControl\": []> Which: means none were found but one was expected 00:00 +15 -1: CgPage onRefresh : CupertinoSliverRefreshControl ; sinon absent [E] 00:01 +29 -1: Some tests failed.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "242eabb63b0c3fecd6ba3b88",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:47:14.203Z",
+  "stored_at": "2026-09-22T18:47:14.203Z"
+}

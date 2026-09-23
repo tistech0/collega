@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "python3 - <<'EOF'\nimport colorsys\ndef lum(h):\n    h=h.lstrip('#'); r,g,b=[int(h[i:i+2],16)/255 for i in (0,2,4)]\n    f=lambda c: c/12.92 if c<=0.03928 else ((c+0.055)/1.055)**2.4\n    return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b)\ndef cr(a,b):\n    la,lb=sorted([lum(a),lum(b)],reverse=True); return (la+0.05)/(lb+0.05)\ndef darken(h, target, bgs):\n    h=h.lstrip('#'); r,g,b=[int(h[i:i+2],16)/255 for i in (0,2,4)]\n    H,L,S=colorsys.rgb_to_hls(r,g,b)\n    while L>0:\n        c=\"#%02X%02X%02X\"%tuple(round(x*255) for x in colorsys.hls_to_rgb(H,L,S))\n        if min(cr(c,bg) for bg in bgs)>=target: return c… [+698 chars truncated]",
+  "summary": "About to run: python3 - <<'EOF' import colorsys def lum(h): h=h.lstrip('#'); r,g,b=[int(h[i:i+2],16)/255 for i in (0,2,4)] f=lambda c: c/12.92 if c<=0.03928 else ((c+0.055)/1.055)**2.4 return 0.2126*f(r)+0.7152*f(g",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5ad9e2e25be55f79786869bd",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:22:20.963Z",
+  "stored_at": "2026-09-22T18:22:20.963Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ./tool/run_device.sh --release -d 00008110-000115D43499801E 2>&1 | tail -4",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && ./tool/run_device.sh --release -d 00008110-000115D43499801E 2>&1 | tail -4",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "bf8b56f32b4e6669feaafa22",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:16:59.794Z",
+  "stored_at": "2026-09-23T08:16:59.795Z"
+}

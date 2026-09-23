@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_list_row_test.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_list_row_test.dart: import 'package:flutter/cupertino.dart';\nimport 'package:flutter/rendering.dart';\nimport 'package:flutter_test/flutter_test.dart';\n\nimport 'package:collega_app/core/ui/components/cg_list_row.dart';\nimport 'pack",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_list_row_test.dart: import 'package:flutter/cupertino.dart';\nimport 'package:flutter/rendering.dart';\nimport 'package:flutter_test/flutter_test.dart';\n\nimport 'package:collega_app/core/ui/components/cg_list_row.dart';\nimport 'package:collega_app/core/ui/foundation/cg_icon.dart';\nimport 'package:collega_app/core/ui/gallery/cg_list_row_gallery.dart';\nimport 'package:collega_app/core/ui/tokens/cg_colors.dart';\nimport 'package:collega_app/core/ui/tokens/cg_radius.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\nimport 'package:collega_app/core/ui/tokens/cg_type.dart';\n\nimport '../../../support/cg_gol",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6e52a7d088f5fb5fae402492",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:39:56.137Z",
+  "stored_at": "2026-09-22T18:39:56.137Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | grep -v '^.. .agent_memory' | head -20; echo \"---\"; git checkout -b feat/redesign-ux-ui main 2>&1; git branch --show-current",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | grep -v '^.. .agent_memory' | head -20; echo \"---\"; git checkout -b feat/redesign-ux-ui main 2>&1; git branch --show-current",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "29780399c2501cc46ad688d2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:01:18.335Z",
+  "stored_at": "2026-09-21T19:01:18.335Z"
+}

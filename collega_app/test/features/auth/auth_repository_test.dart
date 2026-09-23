@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:collega_app/features/auth/data/auth_repository.dart';
+import 'package:collega_app/features/auth/domain/auth_state.dart';
 
 /// Fake storage qui trace les `delete()` pour vérifier qu'`AuthRepository.deleteAccount`
 /// ne vide PLUS le storage en interne (Story 7.3 T5 — wipe délégué au Notifier).
@@ -160,6 +161,124 @@ class _ScriptedRawAdapter implements HttpClientAdapter {
 }
 
 void main() {
+  group('AuthRepository.login — erreur typée (story 8.12)', () {
+    Future<LoginError?> errorFor(HttpClientAdapter adapter) async {
+      // Validation des statuts par défaut, comme le client de l'app (4xx = exception).
+      final dio = Dio(BaseOptions(baseUrl: 'http://test'))..httpClientAdapter = adapter;
+      final repo = AuthRepository(dio: dio, storage: _FakeSecureStorage());
+      return (await repo.login('a@b.fr', 'x')).loginError;
+    }
+
+    test('401 → identifiants incorrects', () async {
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 401, body: '{"detail":{"code":"INVALID_CREDENTIALS"}}',
+          contentType: 'application/json')), LoginError.invalidCredentials);
+    });
+
+    test('429 → trop d’essais', () async {
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 429, body: '{}', contentType: 'application/json')),
+          LoginError.tooManyAttempts);
+    });
+
+    test('réseau injoignable → réseau', () async {
+      expect(await errorFor(_ScriptedAdapter([DioExceptionType.connectionError])), LoginError.network);
+    });
+
+    test('422 (email mal formé) → email invalide', () async {
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 422, body: '{}', contentType: 'application/json')),
+          LoginError.invalidEmail);
+    });
+
+    test('500 → autre', () async {
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 500, body: '{}', contentType: 'application/json')),
+          LoginError.other);
+    });
+  });
+
+  group('AuthRepository /me (story 8.14)', () {
+    Map<String, dynamic> me({int? reminder}) => {
+          'data': {
+            'id': 'u', 'email': 'a@b.fr', 'is_beta': true, 'is_subscribed': false,
+            'first_name': 'Léa', 'year_group': null, 'faculty': null,
+            'monthly_reloads': 1, 'monthly_reloads_max': 3,
+            'monthly_reloads_reset_at': '2026-10-01T00:00:00+00:00',
+            'reminder_hour_utc': reminder,
+          },
+        };
+
+    test('refreshFromMe : renouvellement du quota et heure du rappel, mémorisés pour un démarrage hors-ligne', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 't', 'user_id': 'u', 'user_email': 'a@b.fr'});
+      final repo = AuthRepository(dio: _makeScriptedDio(_ScriptedAdapter([me(reminder: 6)])), storage: storage);
+
+      final user = (await repo.refreshFromMe()).user!;
+      expect(user.monthlyResetAt, DateTime.utc(2026, 10, 1));
+      expect(user.reminderHourUtc, 6);
+
+      final stored = (await repo.loadStoredUser()).user!;
+      expect(stored.monthlyResetAt, DateTime.utc(2026, 10, 1));
+      expect(stored.reminderHourUtc, 6);
+    });
+
+    test('refreshFromMe d’un autre compte (réponse tardive) : rien n’est écrit', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 't', 'user_id': 'autre', 'user_email': 'b@b.fr'});
+      final repo = AuthRepository(dio: _makeScriptedDio(_ScriptedAdapter([me(reminder: 6)])), storage: storage);
+
+      final result = await repo.refreshFromMe();
+      expect(result.user, isNull);
+      expect(storage.writtenKeys, isEmpty);
+    });
+
+    test('refreshFromMe après déconnexion : rien n’est réécrit', () async {
+      final storage = _FakeSecureStorage();
+      final repo = AuthRepository(dio: _makeScriptedDio(_ScriptedAdapter([me(reminder: 6)])), storage: storage);
+      expect((await repo.refreshFromMe()).user, isNull);
+      expect(storage.writtenKeys, isEmpty);
+    });
+
+    test('connexion : rappel et renouvellement du compte connecté (jamais ceux du précédent)', () async {
+      final storage = _FakeSecureStorage(initial: {'reminder_hour_utc': '9', 'reminder_local_hour': '11'});
+      final repo = AuthRepository(
+        dio: _makeScriptedDio(_ScriptedAdapter([
+          {'data': {'access_token': 'a', 'refresh_token': 'r', 'is_beta': true, 'is_subscribed': false}},
+          me(reminder: null),
+        ])),
+        storage: storage,
+      );
+      final user = (await repo.login('a@b.fr', 'x')).user!;
+      expect(user.reminderHourUtc, isNull);
+      expect(user.monthlyResetAt, DateTime.utc(2026, 10, 1));
+      final stored = (await repo.loadStoredUser()).user!;
+      expect(stored.reminderHourUtc, isNull);
+      expect(stored.reminderLocalHour, isNull);
+    });
+
+    test('saveReminderHour : heure locale choisie gardée (changement d’heure)', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 't', 'user_id': 'u', 'user_email': 'a@b.fr'});
+      final repo = AuthRepository(dio: Dio(), storage: storage);
+      await repo.saveReminderHour(6, localHour: 8);
+      final stored = (await repo.loadStoredUser()).user!;
+      expect(stored.reminderHourUtc, 6);
+      expect(stored.reminderLocalHour, 8);
+    });
+
+    test('saveReminderHour(null) : rappel éteint au prochain démarrage', () async {
+      final storage = _FakeSecureStorage(initial: {
+        'access_token': 't', 'user_id': 'u', 'user_email': 'a@b.fr', 'reminder_hour_utc': '6',
+        'reminder_local_hour': '8',
+      });
+      final repo = AuthRepository(dio: Dio(), storage: storage);
+      await repo.saveReminderHour(null);
+      final stored = (await repo.loadStoredUser()).user!;
+      expect(stored.reminderHourUtc, isNull);
+      expect(stored.reminderLocalHour, isNull);
+    });
+
+    test('logout oublie le rappel et la date de renouvellement', () async {
+      final storage = _FakeSecureStorage();
+      await AuthRepository(dio: Dio(), storage: storage).logout();
+      expect(storage.deletedKeys, containsAll(['reminder_hour_utc', 'reminder_local_hour', 'monthly_reset_at']));
+    });
+  });
+
   group('AuthRepository.deleteAccount (Story 7.3 — safe delete)', () {
     test('pas de token → errorMessage explicite, pas de wipe', () async {
       final storage = _FakeSecureStorage();

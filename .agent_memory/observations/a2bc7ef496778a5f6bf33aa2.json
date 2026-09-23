@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n -i -E \"cgring|cgrankbar|cgskeleton|cgtoast|toast|skeleton\" ux-design-specification-v2.md | head -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n -i -E \"cgring|cgrankbar|cgskeleton|cgtoast|toast|skeleton\" ux-design-specification-v2.md | head -60:  primary + quiet, CgRing `l` optionnel | 573:| Progression | CgHeader large (valeur en titre), CgRankBar 22 pt + légende, barr",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n -i -E \"cgring|cgrankbar|cgskeleton|cgtoast|toast|skeleton\" ux-design-specification-v2.md | head -60:  primary + quiet, CgRing `l` optionnel | 573:| Progression | CgHeader large (valeur en titre), CgRankBar 22 pt + légende, barres de semaine, CgListRow + CgRing `s`, CgListRow + CgRankBar, CgTabBar | 575:| Détail collège | CgHeader back, CgRankBar 10 pt + légende, CgSegmented, CgListRow + CgBadge + CgRankBar, CgButton primary ancré | 604:| Action confirmée hors écran | `CgToast` 2 s, une ligne | « Elle reviendra dans quelques questions » · « Fiche signalée » | 619:| Chargement | `CgSkeleton` aux formes du contenu (jamais spinner) ; hero d'Aujourd'hui, lignes de Bibliothèque, anneaux de Progression | 647:- Une seule grammaire : `CgRankBar` (répartition) + `CgRing` (part maîtrisée) + chiffres tabulaires ; jamais un pourcentage sans son total. 664:Jamais de mouvement au survol (il n'y en a pas), jamais deux animations simultanées sur un même écran, jamais d'animation en boucle hors skeleton.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a2bc7ef496778a5f6bf33aa2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:33.694Z",
+  "stored_at": "2026-09-22T18:37:33.694Z"
+}

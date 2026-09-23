@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter analyze lib/core/ui test/core/ui 2>&1 | grep -E \"cg_(badge|field|segmented)\"; echo \"exit grep: $?\"; cd widgetbook && flutter analyze lib/use_cases/cg_badge_use_cases.dart lib/use_cases/cg_field_use_cases.dart lib/use_cases/cg_segmented_use_cases.dart 2>&1 | tail -2; cd .. && grep -lE \"material.dart|shadcn\" lib/core/ui/components/cg_badge.dart lib/core/ui/components/cg_field.dart lib/core/ui/components/cg_segmented.dart; grep -nE \"Color\\(0x|Duration\\(\" lib/core/ui/components/cg_badge.dart lib/core/ui/components/cg_field.da… [+43 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter analyze lib/core/ui test/core/ui 2>&1 | grep -E \"cg_(badge|field|segmented)\"; echo \"exit grep: $?\"; cd widgetbook && flutter an",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7dc552504437a80d268c8e92",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:45:45.577Z",
+  "stored_at": "2026-09-22T18:45:45.578Z"
+}

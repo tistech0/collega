@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_supersede",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_supersede: [{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:gotcha:flutter-test-complet-pas-vert-home-notifier-binding-home-screen-timer-blocage-ap\",\\n \"replacement_packet_id\": \"repo:git-github-c",
+  "text": "[{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:gotcha:flutter-test-complet-pas-vert-home-notifier-binding-home-screen-timer-blocage-ap\",\\n \"replacement_packet_id\": \"repo:git-github-com-tistech0-collega:gotcha:tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-17901124\",\\n \"reason\": \"Tests home supprimés en 8.3 avec l\\'écran Home\",\\n \"old_packet\": {\\n \"schema_version\": 2,\\n \"id\": \"repo:git-github-com-tistech0-collega:gotcha:flutter-test-complet-pas-vert-home-notifier-binding-home-screen-timer-blocage-ap\",\\n \"title\": \"flutter test complet pas vert : home_notifier (binding), home_screen (Timer), blocage après profile_screen_test — search_notifier corrigé en 8.0\",\\n \"summary\": \"flutter test complet n\\'est pas vert avant l\\'epic 8 : test/features/home/home notifier test.dart 2 cas HomeReady échoue avec « Binding has not yet been initialized » MethodChannel sans TestWidgetsFlutterBinding.ensureInit\",\\n \"body\": \"`flutter test` complet n\\'est pas vert avant l\\'epic 8 : test/features/home/home_notifier_test.dart (2 cas HomeReady) échoue avec « Binding ha",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e5a9cc12c9ac6a74cb11e3a6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T21:28:20.593Z",
+  "stored_at": "2026-09-22T21:28:20.593Z",
+  "low_signal": true
+}

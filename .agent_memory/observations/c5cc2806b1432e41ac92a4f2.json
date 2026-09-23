@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_toast_test.dart 2>&1 | grep -E \"Error\" | head -3",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_toast_test.dart 2>&1 | grep -E \"Error\" | head -3",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c5cc2806b1432e41ac92a4f2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:44:20.399Z",
+  "stored_at": "2026-09-22T18:44:20.400Z"
+}

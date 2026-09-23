@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_segmented.dart'\ns=open(p).read()\nold=\"          _row(context, value),\"\nnew=\"          KeyedSubtree(key: ValueKey(i), child: _row(context, value)),\"\nassert old in s\ns=s.replace(old,new)\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -E -A25 \"EXCEPTION CAUGHT\" | head -60; flutter test test/core/ui/components/cg_segmented_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]\" | sort -u",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='lib/core/ui/components/cg_segmented.dart' s=open(p).read() old=\" _row(context, value),\" new=\" KeyedSubtree(key: Va",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8f939817ad8817636fc93468",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:40:56.714Z",
+  "stored_at": "2026-09-22T18:40:56.714Z"
+}

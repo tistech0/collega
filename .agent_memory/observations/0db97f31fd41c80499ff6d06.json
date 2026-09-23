@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_sheet.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  late final AnimationController _settle = AnimationController(vsync: this)..addListener(_onSettle);\n  double _offset = 0;\n  double _settleFrom = 0;\n\"\"\",\"\"\"  late final AnimationController _settle;\n  double _offset = 0;\n  double _settleFrom = 0;\n\n  @override\n  void initState() {\n    super.initState();\n    _settle = AnimationController(vsync: this)..addListener(_onSettle);\n  }\n\"\"\")\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/component… [+103 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='lib/core/ui/components/cg_sheet.dart' s=open(p).read() s=s.replace(\"\"\" late final AnimationController _settle = An",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0db97f31fd41c80499ff6d06",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:42:59.665Z",
+  "stored_at": "2026-09-22T18:42:59.665Z"
+}

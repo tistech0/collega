@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_segmented_use_cases.dart",
+  "summary": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_segmented_use_cases.dart: import 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_segmented.dart';\nimport 'package:collega_app/core/ui/gallery/cg_segm",
+  "text": "wrote /Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_segmented_use_cases.dart: import 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_segmented.dart';\nimport 'package:collega_app/core/ui/gallery/cg_segmented_gallery.dart';\n\nconst _sets = <String, List<String>>{\n  'Rangs (4)': ['Tous', 'A', 'B', 'C'],\n  'Bibliothèque (2)': ['Tous', 'Importés'],\n  'Durées (3)': ['10 min', '20 min', '30 min'],\n  'Libellés longs (2)': ['Mes collèges', 'Catalogue complet'],\n};\n\nfinal WidgetbookComponent cgSegmentedComponent = WidgetbookComponent(\n  name: 'CgSegmented',\n  useCases: [\n    WidgetbookUseCase(name: 'Pl",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b4f83caba7d25420bbe372bb",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:41:43.530Z",
+  "stored_at": "2026-09-22T18:41:43.530Z"
+}

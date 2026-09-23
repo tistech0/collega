@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s#^import 'package:flutter/cupertino.dart';#import 'package:flutter/cupertino.dart';\\nimport 'package:flutter/semantics.dart';#\" test/core/ui/components/cg_sheet_test.dart && flutter test test/core/ui/components/cg_sheet_test.dart --update-goldens 2>&1 | grep -E \"\\[E\\]|Expected:|Actual:|Which:|EXCEPTION|: Some|All tests|overflowed|Error:\" | head -40",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && sed -i '' \"s#^import 'package:flutter/cupertino.dart';#import 'package:flutter/cupertino.dart';\\nimport 'package:flutter/semantics.dart",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4bc015f6a131ff3d9b03baf5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:42:46.578Z",
+  "stored_at": "2026-09-22T18:42:46.578Z"
+}

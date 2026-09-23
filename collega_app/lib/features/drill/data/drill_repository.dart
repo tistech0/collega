@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
+import 'package:collega_app/features/colleges/domain/item_title.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/domain/drill_state.dart';
 
@@ -48,6 +49,31 @@ class DrillRepository {
       return models.sublist(0, maxCards);
     }
     return models;
+  }
+
+  /// Fiches par ids, dans l'ordre demandé (ids absents de Drift ignorés).
+  Future<List<FlashCardModel>> getCardsByIds(List<String> ids) async {
+    if (ids.isEmpty) return const [];
+    final rows = await (db.select(db.flashCards)..where((t) => t.id.isIn(ids))).get();
+    final byId = {for (final r in rows) r.id: rowToModel(r)};
+    return [for (final id in ids) if (byId[id] != null) byId[id]!];
+  }
+
+  /// Titres affichables des items (« Tumeurs du testicule », sinon « Item 310 »),
+  /// par numéro d'item croissant ; items absents de Drift ignorés.
+  Future<List<String>> itemTitles(Iterable<String> itemIds) async {
+    final ids = itemIds.toSet().toList();
+    if (ids.isEmpty) return const [];
+    final rows = await (db.select(db.items)
+          ..where((t) => t.id.isIn(ids))
+          ..orderBy([(t) => OrderingTerm.asc(t.itemNumber)]))
+        .get();
+    // Un même item ECN peut exister dans deux collèges (ids différents) : une fois.
+    final seen = <int>{};
+    return [
+      for (final r in rows)
+        if (seen.add(r.itemNumber)) itemDisplayTitle(r.itemNumber, r.chapterTitle),
+    ];
   }
 
   Future<void> updateCardDrillLevel(

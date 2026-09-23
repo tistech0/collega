@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_field_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -E -B2 -A14 \"EXCEPTION CAUGHT|Error:\" | head -80; flutter test test/core/ui/components/cg_field_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]|All tests\" | sort -u",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_field_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -E -B2 -A14 \"EXCEPTION CAUGHT|Error:\" | head -80; flutter test test/core/ui/components/cg_field_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]|All tests\" |",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_field_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -E -B2 -A14 \"EXCEPTION CAUGHT|Error:\" | head -80; flutter test test/core/ui/components/cg_field_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]|All tests\" | sort -u: didLoseAccessibilityFocus, dismiss, moveCursorForwardByWord, moveCursorBackwardByWord, setText] with flags: [isTextField, isFocusable, hasEnabledState, isEnabled] without flags: [hasCheckedState, isChecked, isCheckStateMixed, isSelected, isButton, isSlider, isKeyboardKey, isLink, isReadOnly, isFocused, isInMutuallyExclusiveGroup, isHeader, isObscured, isMultiline, namesRoute, scopesRoute, isHidden, isImage, isLiveRegion, hasToggledState, isToggled, hasImplicitScrolling, hasExpandedState, isExpanded] Actual: SemanticsNode:<SemanticsNode#4(Rect.fromLTRB(20.0, 49.5, 780.0, 98.5), actions: [focus, tap], flags: [isTextField, hasEnabledState, isEnabled], label: \"Email\", textDirection: ltr)> Which: missing actions: [] unexpected actions: [focus] 00:02 +11 -2: Semantics le champ porte son libellé [E] 00:02 +8 -1: variantes search : 40 pt, fond soft sans contour, loupe, effacer quand non vide [E]",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "748a27e26754ddeb1cf96cc4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:38.078Z",
+  "stored_at": "2026-09-22T18:43:38.078Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_drill_card_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -vE \"^\\s*$\" | grep -E \"Expected|Actual|Which|══╡|\\[E\\]|Some tests|All tests|Error:|error:|^[0-9:]+ \\+[0-9]+ -[0-9]+:\" | sort -u | head -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_drill_card_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -vE \"^\\s*$\" | grep -E \"Expected|Actual|Which|══╡|\\[E\\]|Some tests|All tests|Error:|error:|^[0-9:]+ \\+[0-9]+ -[0-9]+:\" | sort -u | head -60:  430_16 00",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_drill_card_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -vE \"^\\s*$\" | grep -E \"Expected|Actual|Which|══╡|\\[E\\]|Some tests|All tests|Error:|error:|^[0-9:]+ \\+[0-9]+ -[0-9]+:\" | sort -u | head -60:  430_16 00:03 +35 -4: goldens golden cg_drill_card_recto 430_16 00:03 +35 -4: goldens golden cg_drill_card_verso 375_10 00:03 +36 -4: goldens golden cg_drill_card_verso 375_10 00:03 +36 -4: goldens golden cg_drill_card_verso 375_16 00:03 +37 -4: goldens golden cg_drill_card_verso 375_16 00:03 +37 -4: goldens golden cg_drill_card_verso 393_10 00:03 +38 -4: goldens golden cg_drill_card_verso 393_10 00:03 +38 -4: goldens golden cg_drill_card_verso 393_16 00:03 +39 -4: goldens golden cg_drill_card_verso 393_16 00:03 +39 -4: goldens golden cg_drill_card_verso 430_10 00:03 +40 -4: goldens golden cg_drill_card_verso 430_10 00:03 +40 -4: goldens golden cg_drill_card_verso 430_16 00:03 +41 -4: goldens golden cg_drill_card_drag 375_10 00:03 +41 -4: goldens golden cg_drill_card_verso 430_16 00:03 +42 -4: goldens golden cg_drill_card_drag 375_10 00:03 +42 -4: goldens golden cg_drill_card_drag 375_16",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "782529cfa67812e5d3d6f15d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:48:45.306Z",
+  "stored_at": "2026-09-22T18:48:45.306Z"
+}

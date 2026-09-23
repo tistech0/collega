@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "WebSearch",
+  "path": "",
+  "command": "",
+  "summary": "WebSearch: iOS 26 Liquid Glass design guidelines tab bar apps adopting minimal 2026 review",
+  "text": "iOS 26 Liquid Glass design guidelines tab bar apps adopting minimal 2026 review",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c06c6c7457e49c7226391e55",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:45:21.513Z",
+  "stored_at": "2026-09-21T19:45:21.513Z",
+  "low_signal": true
+}

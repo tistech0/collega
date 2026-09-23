@@ -6,7 +6,7 @@ import uuid
 
 from app.core.database import async_session_factory
 from app.models.generation_job import GenerationJob
-from app.services.generation.card_generator import CardGenerator
+from app.services.generation.card_generator import CardGenerator, report_generation_progress
 from app.services.jobs.job_events import record_job_event
 
 logger = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ async def generate_college_cards(
             return {"error": "invalid_job_state"}
 
         try:
-            card_generator = CardGenerator()
+            card_generator = CardGenerator(progress_reporter=report_generation_progress)
             result = await card_generator.generate_for_college(
                 db, uuid.UUID(college_id), uuid.UUID(job_id), pdf_path
             )

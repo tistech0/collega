@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_segmented.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  static const _checkSize = 22.0;\n\"\"\",\"\")\nold=\"\"\"    final label = labelOf(value);\n    return _semantics(\n      key: const ValueKey('cg-segmented-row'),\"\"\"\nnew=\"\"\"    final label = labelOf(value);\n    // La coche suit le Dynamic Type : même taille que le texte qu'elle marque.\n    final checkSize = MediaQuery.textScalerOf(context).scale(CgType.bodyS.fontSize!);\n    return _semantics(\n      key: const ValueKey('cg-segmented-row'),\"\"\"\nasse… [+502 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_segmented.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  static const _checkSize = 22.0;\n\"\"\",\"\")\nold=\"\"\"    final label = labelOf(value);\n    return _semantics(\n      key: const ValueKey('cg-segmented-row'),\"\"\"\nnew=",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_segmented.dart'\ns=open(p).read()\ns=s.replace(\"\"\"  static const _checkSize = 22.0;\n\"\"\",\"\")\nold=\"\"\"    final label = labelOf(value);\n    return _semantics(\n      key: const ValueKey('cg-segmented-row'),\"\"\"\nnew=\"\"\"    final label = labelOf(value);\n    // La coche suit le Dynamic Type : même taille que le texte qu'elle marque.\n    final checkSize = MediaQuery.textScalerOf(context).scale(CgType.bodyS.fontSize!);\n    return _semantics(\n      key: const ValueKey('cg-segmented-row'),\"\"\"\nassert old in s\ns=s.replace(old,new)\ns=s.replace(\"\"\"                dimension: _checkSize,\n                child: on ? CgIcon(CgIcons.check, size: _checkSize, color: c.accent) : null,\"\"\",\"\"\"                dimension: checkSize,\n                child: on ? CgIcon(CgIcons.check, size: checkSize, color: c.accent) : null,\"\"\")\nopen(p,'w').write(s)\nEOF\ngrep -n \"_checkSize\" lib/core/ui/components/cg_segmented.dart; flutter test test/core/ui/components/cg_segmented_test.dart --update-goldens 2>&1 | tail -c 60 completed",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "79eab66949cd685b643b3790",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:41:25.428Z",
+  "stored_at": "2026-09-22T18:41:25.429Z"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bhw5gtziq</task-id>\n<tool-use-id>toolu_01TKFJT97HZBQAmcR9r7URAS</tool-use-id>\n<output-file>/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tasks/bhw5gtziq.output</output-file>\n<status>completed</status>\n<summary>Monitor \"Attendre l'installation iPhone\" stream ended</summary>\n<event>Installing and launching...                                         5.7s\nFlutter run key commands.</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bhw5gtziq</task-id> <tool-use-id>toolu_01TKFJT97HZBQAmcR9r7URAS</tool-use-id> <output-file>/private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/21d61618-24eb-4775-bb63-b6c109928d29/tasks/bhw5gtzi",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d080d3a44a10515d760deb8d",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:33:57.245Z",
+  "stored_at": "2026-09-23T08:33:57.245Z",
+  "low_signal": true
+}

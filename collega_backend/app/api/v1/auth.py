@@ -1,5 +1,6 @@
 import asyncio
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
@@ -17,6 +18,7 @@ from app.core.limiter import limiter
 from app.deps import get_current_user, get_db
 from app.models.user import User
 from app.core.config import settings
+from app.core.time_utils import next_month_reset
 from app.schemas.auth import LoginRequest, ProfileUpdateRequest, RefreshRequest, RegisterRequest, TokenResponse
 
 router = APIRouter(tags=["auth"])
@@ -97,6 +99,14 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
 
 @router.get("/me")
 async def get_me(current_user: User = Depends(get_current_user)):
+    # Quota du mois en cours : le compteur stocké n'est remis à zéro qu'au
+    # prochain réimport ; passé la date, il n'est plus le bon (Profil, story 8.14).
+    now = datetime.now(timezone.utc)
+    reset_at = current_user.monthly_reloads_reset_at
+    if reset_at is None or now >= reset_at:
+        monthly_reloads, reset_at = 0, next_month_reset(now)
+    else:
+        monthly_reloads = current_user.monthly_reloads
     return {
         "data": {
             "id": str(current_user.id),
@@ -106,8 +116,10 @@ async def get_me(current_user: User = Depends(get_current_user)):
             "first_name": current_user.first_name,
             "year_group": current_user.year_group,
             "faculty": current_user.faculty,
-            "monthly_reloads": current_user.monthly_reloads,
+            "monthly_reloads": monthly_reloads,
             "monthly_reloads_max": settings.monthly_reloads_max,
+            "monthly_reloads_reset_at": reset_at.isoformat(),
+            "reminder_hour_utc": current_user.reminder_hour_utc,
         }
     }
 

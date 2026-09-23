@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas 'docker ps --format \"{{.Names}}\" | grep collega; docker exec collega-db-1 psql -U postgres -d collega -c \"select c.college_ref, c.status, count(i.id) items, count(nullif(i.chapter_title,\\x27\\x27)) titled from colleges c left join items i on i.college_id=c.id group by c.college_ref, c.status order by 1;\"' 2>&1 | head -40",
+  "summary": "ssh nas 'docker ps --format \"{{.Names}}\" | grep collega; docker exec collega-db-1 psql -U postgres -d collega -c \"select c.college_ref, c.status, count(i.id) items, count(nullif(i.chapter_title,\\x27\\x27)) titled from colleges c left join items i on i.college_id=c.id group by c.college_ref, c.status order by 1;\"' 2>&1 |",
+  "text": "ssh nas 'docker ps --format \"{{.Names}}\" | grep collega; docker exec collega-db-1 psql -U postgres -d collega -c \"select c.college_ref, c.status, count(i.id) items, count(nullif(i.chapter_title,\\x27\\x27)) titled from colleges c left join items i on i.college_id=c.id group by c.college_ref, c.status order by 1;\"' 2>&1 | head -40: collega-api-1 collega-worker-1 collega-redis-1 collega-db-1 ERROR: syntax error at or near \"\\\" LINE 1: ..., count(i.id) items, count(nullif(i.chapter_title,\\x27\\x27))... ^",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3fda1fee0fd796bddc3c3e2f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:48:27.950Z",
+  "stored_at": "2026-09-22T17:48:27.950Z"
+}

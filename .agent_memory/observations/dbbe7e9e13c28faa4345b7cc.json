@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='test/core/ui/components/cg_sheet_test.dart'\ns=open(p).read()\ns=s.replace(\"tester.view.padding = const FakeViewPadding(top: 47);\",\"// FakeViewPadding est en pixels physiques.\\n      tester.view.padding = FakeViewPadding(top: 47 * tester.view.devicePixelRatio);\")\ns=s.replace(\"tester.view.viewInsets = const FakeViewPadding(bottom: 200);\",\"tester.view.viewInsets = FakeViewPadding(bottom: 200 * tester.view.devicePixelRatio);\")\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/components/cg_sheet_test.dart 2>&1 |… [+7 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='test/core/ui/components/cg_sheet_test.dart' s=open(p).read() s=s.replace(\"tester.view.padding = const FakeViewPadd",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "dbbe7e9e13c28faa4345b7cc",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:40:34.635Z",
+  "stored_at": "2026-09-22T18:40:34.635Z"
+}

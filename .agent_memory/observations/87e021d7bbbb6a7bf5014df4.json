@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_sheet_use_cases.dart\" <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_button.dart';\nimport 'package:collega_app/core/ui/components/cg_sheet.dart';\nimport 'package:collega_app/core/ui/gallery/cg_sheet_gallery.dart';\nimport 'package:collega_app/core/ui/tokens/cg_space.dart';\n\n/// Un bouton qui ouvre une sheet (la route est poussée sur le Navigator racine).\nWidget _opener(String label, void Function(BuildContext… [+5068 chars truncated]",
+  "summary": "About to run: cat > \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/widgetbook/lib/use_cases/cg_sheet_use_cases.dart\" <<'EOF' import 'package:flutter/widgets.dart'; import 'package:widgetbook/widgetbook.d",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "87e021d7bbbb6a7bf5014df4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:46:03.441Z",
+  "stored_at": "2026-09-22T18:46:03.441Z"
+}

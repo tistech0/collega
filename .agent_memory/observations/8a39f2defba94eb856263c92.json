@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "Write",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/gallery/cg_header_gallery.dart",
+  "command": "",
+  "summary": "About to run: Write",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8a39f2defba94eb856263c92",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:46:35.129Z",
+  "stored_at": "2026-09-22T18:46:35.129Z",
+  "low_signal": true
+}

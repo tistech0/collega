@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter analyze lib/core/ui test/core/ui 2>&1 | tail -15; cd widgetbook && flutter analyze 2>&1 | tail -15",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter analyze lib/core/ui test/core/ui 2>&1 | tail -15; cd widgetbook && flutter analyze 2>&1 | tail -15: Analyzing 2 items... info • The import of 'package:flutter/foundation.dart' is unnecessary because all of the used elements are also provided by th",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter analyze lib/core/ui test/core/ui 2>&1 | tail -15; cd widgetbook && flutter analyze 2>&1 | tail -15: Analyzing 2 items... info • The import of 'package:flutter/foundation.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/widgets.dart' • lib/core/ui/components/cg_drill_card.dart:4:8 • unnecessary_import info • 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g • lib/core/ui/gallery/cg_tokens_page.dart:82:16 • deprecated_member_use 2 issues found. (ran in 1.7s) Analyzing widgetbook... No issues found! (ran in 0.9s)",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e6fe2683cdf81ef7485c6176",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:50:39.225Z",
+  "stored_at": "2026-09-22T18:50:39.225Z"
+}

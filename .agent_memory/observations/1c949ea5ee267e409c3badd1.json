@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_sheet.dart'\ns=open(p).read()\ns=s.replace(\"final topLimit = mq.viewPadding.top + _fullTopGap;\",\"final topLimit = mq.padding.top + _fullTopGap;\")\ns=s.replace(\"Semantics(key: handleKey, button: true,\",\"Semantics(key: handleKey, container: true, button: true,\")\ns=s.replace(\"\"\"              child: Semantics(\n                header: true,\"\"\",\"\"\"              child: Semantics(\n                container: true,\n                header: true,\"\"\")\nopen(p,'w').write(s)\nEOF\nflutter test test/core/… [+115 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF' p='lib/core/ui/components/cg_sheet.dart' s=open(p).read() s=s.replace(\"final topLimit = mq.viewPadding.top + _fullTop",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "1c949ea5ee267e409c3badd1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:14.951Z",
+  "stored_at": "2026-09-22T18:43:14.951Z"
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rln \"excerpt\" collega_backend/app | head; f=$(grep -rln \"excerpt\" collega_backend/app | grep -v __pycache__ | grep -i search | head -1); echo \"== $f\"; grep -n \"excerpt\\|ts_headline\\|headline\\|MaxWords\\|MinWords\\|StartSel\\|def \\|select(\" $f | head -40",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -rln \"excerpt\" collega_backend/app | head; f=$(grep -rln \"excerpt\" collega_backend/app | grep -v __pycache__ | grep -i search | head -1); echo",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "693562a66c1bc1b577388290",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:37:58.397Z",
+  "stored_at": "2026-09-23T08:37:58.398Z"
+}

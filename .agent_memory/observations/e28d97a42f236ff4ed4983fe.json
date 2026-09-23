@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory && python3 - <<'EOF'\np=\"project_redesign_ux_2026_09.md\"\ns=open(p).read()\ns=s.replace('description: \"Refonte UX/UI Collega v2 — branche feat/redesign-ux-ui, spec v2 + epic 8 commités (445f759) le 2026-09-22 ; direction « Feuille × Bloc », design system maison, prochaine étape = story 8.0 (titres d\\'items)\"','description: \"Refonte UX/UI Collega v2 — branche feat/redesign-ux-ui ; story 8.0 (titres d\\'items) FAITE et déployée 2026-09-22 (44/44 titrés) ; prochaine = 8.1 tokens/thème ; user veut autonomie tot… [+1491 chars truncated]",
+  "summary": "About to run: cd /Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/memory && python3 - <<'EOF' p=\"project_redesign_ux_2026_09.md\" s=open(p).read() s=s.replace('description: \"Refonte ",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e28d97a42f236ff4ed4983fe",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:20:30.341Z",
+  "stored_at": "2026-09-22T18:20:30.341Z"
+}

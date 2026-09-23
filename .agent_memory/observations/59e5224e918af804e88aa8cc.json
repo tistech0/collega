@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_field.dart'\ns=open(p).read()\nold=\"padding: EdgeInsets.symmetric(horizontal: search ? CgSpace.s2 : CgSpace.s4, vertical: CgSpace.s3),\"\nnew=\"\"\"padding: search\n          ? const EdgeInsets.symmetric(horizontal: CgSpace.s2, vertical: CgSpace.s2)\n          : const EdgeInsets.symmetric(horizontal: CgSpace.s4, vertical: CgSpace.s3),\"\"\"\nassert old in s\ns=s.replace(old,new)\nopen(p,'w').write(s)\np='test/core/ui/components/cg_field_test.dart'\ns=open(p).read()\nold=\"\"\"            hasTapAction: tr… [+507 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_field.dart'\ns=open(p).read()\nold=\"padding: EdgeInsets.symmetric(horizontal: search ? CgSpace.s2 : CgSpace.s4, vertical: CgSpace.s3),\"\nnew=\"\"\"padding: search\n          ? const EdgeInsets.symmetric(horizontal: ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_field.dart'\ns=open(p).read()\nold=\"padding: EdgeInsets.symmetric(horizontal: search ? CgSpace.s2 : CgSpace.s4, vertical: CgSpace.s3),\"\nnew=\"\"\"padding: search\n          ? const EdgeInsets.symmetric(horizontal: CgSpace.s2, vertical: CgSpace.s2)\n          : const EdgeInsets.symmetric(horizontal: CgSpace.s4, vertical: CgSpace.s3),\"\"\"\nassert old in s\ns=s.replace(old,new)\nopen(p,'w').write(s)\np='test/core/ui/components/cg_field_test.dart'\ns=open(p).read()\nold=\"\"\"            hasTapAction: true, isFocusable: true),\"\"\"\nnew=\"\"\"            hasTapAction: true, hasFocusAction: true),\"\"\"\nassert old in s\ns=s.replace(old,new)\nopen(p,'w').write(s)\nEOF\nrm -f test/core/ui/components/failures/cg_field_*; rmdir test/core/ui/components/failures 2>/dev/null\nflutter test test/core/ui/components/cg_field_test.dart --update-goldens 2>&1 | tr '\\r' '\\n' | grep -E -A8 \"EXCEPTION CAUGHT\" | head -40; flutter test test/core/ui/components/cg_field_test.dart 2>&1 | tr '\\r' '\\n' | grep -E \"\\[E\\]|All tests\" | sort -u: (eval):19: no matches found: test/core/ui/components/failures/cg_field_* 00:02 +20: All tests passed!",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "59e5224e918af804e88aa8cc",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:43:52.940Z",
+  "stored_at": "2026-09-22T18:43:52.941Z"
+}

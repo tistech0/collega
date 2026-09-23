@@ -241,10 +241,10 @@ class TestDetectItems:
         items = detector.detect_items(pages, scores, page_tables=tables)
         assert items[0].ocr_confidence_score == pytest.approx(0.85, abs=0.01)
 
-    def test_chapter_extracted_from_page(self, detector):
+    def test_chapter_line_is_not_a_title_source(self, detector):
+        """Story 8.0 : « Chapitre … » dans le texte ne produit plus de titre (bruit en prod)."""
         items = detector.detect_items([PAGE_WITH_CHAPTER], page_tables=[[TABLE_SIMPLE_A]])
-        assert items[0].chapter_title != ""
-        assert "cardiologie" in items[0].chapter_title.lower()
+        assert items[0].chapter_title == ""
 
     def test_empty_pages_returns_empty(self, detector):
         assert detector.detect_items(["", "   ", "\n\n"]) == []
@@ -259,3 +259,212 @@ class TestDetectItems:
         # Accepté car position < 400 ; rang defaults to "A"
         assert len(items) == 1
         assert items[0].rang == "A"
+
+
+# ── Story 8.0 : titres d'items ────────────────────────────────────────────────
+
+# Format CNEC : « Item N » en en-tête courant sur chaque page, titre dans « OBJECTIFS: N° N. … »
+CNEC_290_P1 = (
+    "Item 290\n"
+    "OBJECTIFS: N° 290. Épidémiologie, facteurs de risque, prévention et dépistage des cancers\n"
+    "-+\nDécrire l'épidémiologie des cancers les plus fréquents.\n"
+)
+CNEC_290_P2 = "Item 290\n• Les recommandations sont de ne pas dépasser dix verres par semaine.\n"
+CNEC_291_P1 = (
+    "Item 291\n"
+    "OBJECTIFS : N° 291. Cancer : cancérogenèse, oncogénétique\n"
+    "➔ Décrire l'histoire naturelle du cancer.\n"
+)
+CNEC_TOC = (
+    "SOMMAIRE\n"
+    "Chapitre 16 : Tumeurs de l'ovaire .......................... 271\n"
+    "Item 306\n"
+    "Chapitre 17 : Tumeurs des os primitives et secondaires ..... 287\n"
+    "Item 307\n"
+    "Chapitre 18 : Tumeurs du pancréas .......................... 307\n"
+    "Item 308\n"
+)
+
+
+class TestTitleExtraction:
+    def test_title_on_same_line_with_dash(self, detector):
+        page = "Item 310 – Tumeurs du testicule\nRang Rubrique Intitulé\n"
+        items = detector.detect_items([page], page_tables=[[TABLE_SIMPLE_A]])
+        assert items[0].chapter_title == "Tumeurs du testicule"
+
+    @pytest.mark.parametrize("sep", [":", "-", "."])
+    def test_title_on_same_line_other_separators(self, detector, sep):
+        page = f"Item 311 {sep} Tumeurs du rein\n"
+        items = detector.detect_items([page], page_tables=[[TABLE_SIMPLE_A]])
+        assert items[0].chapter_title == "Tumeurs du rein"
+
+    def test_title_on_next_line(self, detector):
+        items = detector.detect_items([PAGE_ITEM_75], page_tables=[[TABLE_ITEM_75]])
+        assert items[0].chapter_title == "Addiction au tabac"
+
+    def test_title_wrapped_on_two_lines(self, detector):
+        page = (
+            "Collège des Enseignants de Pneumologie - 2023\nItem 154\n"
+            "Infections broncho-pulmonaires\ncommunautaires de l’adulte.\n"
+            "Rang Rubrique Intitulé\n"
+        )
+        items = detector.detect_items([page], page_tables=[[TABLE_SIMPLE_A]])
+        assert items[0].chapter_title == (
+            "Infections broncho-pulmonaires communautaires de l’adulte"
+        )
+
+    def test_single_word_title(self, detector):
+        page = "Item 360\nPneumothorax\nRang Rubrique Intitulé\n"
+        items = detector.detect_items([page], page_tables=[[TABLE_SIMPLE_A]])
+        assert items[0].chapter_title == "Pneumothorax"
+
+    def test_body_text_after_header_is_not_a_title(self, detector):
+        items = detector.detect_items([CNEC_290_P2], page_tables=[[]])
+        assert items[0].chapter_title == ""
+
+    def test_objectifs_line_gives_title(self, detector):
+        items = detector.detect_items([CNEC_291_P1], page_tables=[[]])
+        assert items[0].chapter_title == "Cancer : cancérogenèse, oncogénétique"
+
+    def test_objectifs_wrapped_title(self, detector):
+        page = (
+            "Item 292\nOBJECTIFS: N° 292. Diagnostic des cancers: signes d'appel et "
+            "investigations paracliniques; caractérisation du\nstade ; pronostic\n-+\n"
+            "Décrire les principes du raisonnement diagnostique.\n"
+        )
+        items = detector.detect_items([page], page_tables=[[]])
+        assert items[0].chapter_title == (
+            "Diagnostic des cancers: signes d'appel et investigations paracliniques; "
+            "caractérisation du stade ; pronostic"
+        )
+
+    def test_objectifs_ocr_variant(self, detector):
+        page = 'Item 300\nOBJECTIFS: N"o300. Tumeurs du col utérin et du corps utérin\n-+ Éléments\n'
+        items = detector.detect_items([page], page_tables=[[]])
+        assert items[0].chapter_title == "Tumeurs du col utérin et du corps utérin"
+
+    def test_objectifs_wins_over_header_line(self, detector):
+        page = (
+            "Item 304\nTumeurs du foie,\n►-p-ri-m-it-i_ve_s\n"
+            "OBJECTIFS: N° 304. Tumeurs du foie, primitives et secondaires\n➔ Éléments\n"
+        )
+        items = detector.detect_items([page], page_tables=[[]])
+        assert items[0].chapter_title == "Tumeurs du foie, primitives et secondaires"
+
+    def test_objectifs_on_later_page_of_the_item(self, detector):
+        pages = ["Item 299\nIntroduction du chapitre\n", "Item 299\nOBJECTIFS: N° 299. Tumeurs intracrâniennes\n-+\n"]
+        items = detector.detect_items(pages, page_tables=[[], []])
+        assert items[0].chapter_title == "Tumeurs intracrâniennes"
+
+
+class TestRunningHeadersAndToc:
+    def test_consecutive_pages_same_number_form_one_item(self, detector):
+        pages = [CNEC_290_P1, CNEC_290_P2, CNEC_291_P1]
+        items = detector.detect_items(pages, page_tables=[[], [], []])
+        assert [i.item_number for i in items] == [290, 291]
+        assert (items[0].start_page, items[0].end_page) == (0, 1)
+        assert "dix verres" in items[0].ocr_text
+        assert (items[1].start_page, items[1].end_page) == (2, 2)
+
+    def test_merged_span_takes_best_rang(self, detector):
+        pages = ["Item 297\nIntro\n", "Item 297\nsuite\n"]
+        tables = [[TABLE_ITEM_200_ONLY_C], [TABLE_ITEM_110_ONLY_B]]
+        items = detector.detect_items(pages, page_tables=tables)
+        assert len(items) == 1
+        assert items[0].rang == "B"
+
+    def test_toc_page_does_not_create_item(self, detector):
+        pages = [CNEC_TOC, CNEC_290_P1, CNEC_290_P2]
+        items = detector.detect_items(pages, page_tables=[[], [], []])
+        assert [i.item_number for i in items] == [290]
+        assert items[0].start_page == 1
+
+
+class TestProdCorpusEdgeCases:
+    """Cas relevés sur les PDF de prod (CEP 2023, CNEC 4e éd.) — story 8.0."""
+
+    def test_header_with_leading_punctuation_is_detected(self, detector):
+        pages = ["Item 312\nOBJECTIFS: N° 312. Tumeurs du sein\n", ". Item 313\nTumeurs du testicule\n"]
+        items = detector.detect_items(pages, page_tables=[[], []])
+        assert [i.item_number for i in items] == [312, 313]
+        assert items[1].chapter_title == "Tumeurs du testicule"
+
+    def test_toc_gives_title_when_no_objectifs(self, detector):
+        toc = (
+            "SOMMAIRE\n►\n"
+            "Chapitre 17 : Tumeurs des os primitives et secondaires .......... 287\nItem 307\n"
+            "Chapitre 18 : Tumeurs du pancréas ...............................\n307\nItem 308\n"
+            "C' a ire 13 : Tumeurs de l'estomac ................ 213\nItem 303\n"
+        )
+        pages = [toc, "Item 308\n1.2. Facteurs de risque\n", "Item 308\nN - Adénopathies régionales\n"]
+        items = detector.detect_items(pages, page_tables=[[], [], []])
+        assert [i.item_number for i in items] == [308]
+        assert items[0].chapter_title == "Tumeurs du pancréas"
+
+    def test_header_title_read_on_first_page_only(self, detector):
+        pages = ["Item 308\n1.2. Facteurs de risque\n", "Item 308\nN - Adénopathies régionales\n"]
+        items = detector.detect_items(pages, page_tables=[[], []])
+        assert items[0].chapter_title == ""
+
+    def test_broken_drop_cap_is_rejected(self, detector):
+        page = "Item 338\nŒ Q A\nDEME DE UINCKE ET NAPHYLAXIE\nRang Rubrique Intitulé\n"
+        items = detector.detect_items([page], page_tables=[[TABLE_SIMPLE_A]])
+        assert items[0].chapter_title == ""
+
+    def test_all_caps_title_becomes_sentence_case(self, detector):
+        page = "Item 204\nTOUX CHEZ L’ADULTE\nRang Rubrique Intitulé\n"
+        items = detector.detect_items([page], page_tables=[[TABLE_SIMPLE_A]])
+        assert items[0].chapter_title == "Toux chez l’adulte"
+
+    def test_truncated_running_header_is_ignored(self, detector):
+        """« tem 30 » (en-tête « Item 306 » tronqué des deux côtés) ne crée pas d'item 30."""
+        pages = ["Item 306\nTumeurs de l'ovaire\n", "tem 30\nClinique\n", "Item 306\n4. Démarche\n"]
+        items = detector.detect_items(pages, page_tables=[[], [], []])
+        assert [(i.item_number, i.start_page, i.end_page) for i in items] == [(306, 0, 2)]
+
+    def test_objectifs_title_on_next_line(self, detector):
+        page = "Item 304\nOBJECTIFS: N° 304.\nTumeurs du foie, primitives et secondaires\n➔ Éléments\n"
+        items = detector.detect_items([page], page_tables=[[]])
+        assert items[0].chapter_title == "Tumeurs du foie, primitives et secondaires"
+
+
+class TestReviewFindings:
+    """Retours de revue story 8.0 — un mauvais titre se propagerait via le référentiel global."""
+
+    def test_table_header_is_not_a_title(self, detector):
+        page = "Item 75\nRang Rubrique Intitulé Descriptif\nA Définition Connaître\n"
+        items = detector.detect_items([page], page_tables=[[TABLE_SIMPLE_A]])
+        assert items[0].chapter_title == ""
+
+    def test_running_header_span_ignores_header_line(self, detector):
+        """Format CNEC (en-tête répété) : la ligne sous « Item N » est du corps de texte."""
+        pages = ["Item 290\nIntroduction\n", "Item 290\nÉpidémiologie\n"]
+        items = detector.detect_items(pages, page_tables=[[], []])
+        assert items[0].chapter_title == ""
+
+    def test_related_items_list_does_not_make_header_a_toc(self, detector):
+        page = "Item 75\nAddiction au tabac.\nItems liés :\n- Item 12\n- Item 45\n• Item 46\n"
+        items = detector.detect_items([page, "Item 76\nTitre suivant correct\n"], page_tables=[[TABLE_ITEM_75], []])
+        assert [i.item_number for i in items] == [75, 76]
+        assert items[0].chapter_title == "Addiction au tabac"
+
+    def test_bulleted_reference_is_not_a_header(self, detector):
+        pages = [PAGE_ITEM_75, "• Item 230 évoqué ici\nsuite du texte\n"]
+        items = detector.detect_items(pages, page_tables=[[TABLE_ITEM_75], []])
+        assert [(i.item_number, i.start_page, i.end_page) for i in items] == [(75, 0, 1)]
+
+    def test_toc_with_title_below_number_is_ignored(self, detector):
+        """Sommaire « Item N \\n Titre » : le tampon serait décalé d'un rang → rejeté."""
+        toc = (
+            "SOMMAIRE\nItem 306\nTumeurs du col utérin ...... 12\n"
+            "Item 307\nTumeurs de l'ovaire ...... 30\nItem 308\nTumeurs du pancréas ...... 44\n"
+        )
+        pages = [toc, "Item 307\nTumeurs de l'ovaire\n"]
+        items = detector.detect_items(pages, page_tables=[[], []])
+        assert items[0].chapter_title == "Tumeurs de l'ovaire"
+
+    def test_non_adjacent_repeat_keeps_header_title(self, detector):
+        """CEP : « Item 359 bis » 14 pages plus loin n'est pas un en-tête courant."""
+        pages = ["Item 359\nDétresse respiratoire de l’adulte\nRang Rubrique\n", "suite", "Item 359 bis\nDétresse de l'enfant\n"]
+        items = detector.detect_items(pages, page_tables=[[TABLE_SIMPLE_A], [], []])
+        assert items[0].chapter_title == "Détresse respiratoire de l’adulte"

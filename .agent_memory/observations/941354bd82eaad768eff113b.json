@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/features/search/search_providers.dart lib/features/search/data/search_repository.dart lib/features/search/domain/search_result.dart lib/features/search/presentation/search_screen.dart lib/features/search/widgets/search_result_tile.dart",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/features/search/search_providers.dart lib/features/search/data/search_repository.dart lib/features/search/domain/search_result.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "941354bd82eaad768eff113b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:37:46.492Z",
+  "stored_at": "2026-09-23T08:37:46.492Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_illustrations.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      '<path d=\"M74 33A30 30 0 1 1 48 18\"/>'\n      '<path d=\"M57 14.5l3-5M69 22l5-3\"/></svg>';\"\"\",\"\"\"      '<path d=\"M78 48A30 30 0 1 1 42.8 18.5\"/>'\n      '<path d=\"M63.3 14.8A30 30 0 0 1 81.2 32.7\"/></svg>';\"\"\")\ns=s.replace(\"/// Cercle interrompu : le serveur ne répond pas.\",\"/// Anneau rompu (un fragment décalé) : le serveur ne répond pas.\")\nopen(p,'w').write(s)\np='test/core/ui/components/cg_state_test.dart'\ns=open(p).read()\ns=s.… [+199 chars truncated]",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_illustrations.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      '<path d=\"M74 33A30 30 0 1 1 48 18\"/>'\n      '<path d=\"M57 14.5l3-5M69 22l5-3\"/></svg>';\"\"\",\"\"\"      '<path d=\"M78 48A30 30 0 1 1 42.8 18.5\"/>'\n      ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && python3 - <<'EOF'\np='lib/core/ui/components/cg_illustrations.dart'\ns=open(p).read()\ns=s.replace(\"\"\"      '<path d=\"M74 33A30 30 0 1 1 48 18\"/>'\n      '<path d=\"M57 14.5l3-5M69 22l5-3\"/></svg>';\"\"\",\"\"\"      '<path d=\"M78 48A30 30 0 1 1 42.8 18.5\"/>'\n      '<path d=\"M63.3 14.8A30 30 0 0 1 81.2 32.7\"/></svg>';\"\"\")\ns=s.replace(\"/// Cercle interrompu : le serveur ne répond pas.\",\"/// Anneau rompu (un fragment décalé) : le serveur ne répond pas.\")\nopen(p,'w').write(s)\np='test/core/ui/components/cg_state_test.dart'\ns=open(p).read()\ns=s.replace(\"height: 1900\",\"height: 1550\")\nopen(p,'w').write(s)\nEOF\nflutter test test/core/ui/components/cg_state_test.dart --update-goldens 2>&1 | tail -1 | grep -o \"All tests passed\\|Some tests failed\": All tests passed",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "876f96bd02911c2338cab123",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:45:23.336Z",
+  "stored_at": "2026-09-22T18:45:23.337Z"
+}

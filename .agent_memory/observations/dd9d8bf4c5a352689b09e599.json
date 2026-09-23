@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -m1 \"^id:\" .agent_memory/packets/gotcha-tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-bf832ba8.md",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -m1 \"^id:\" .agent_memory/packets/gotcha-tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-bf832ba8.md: No matches found",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && grep -m1 \"^id:\" .agent_memory/packets/gotcha-tests-flutter-lancer-par-dossier-cibl-les-tests-home-ont-disparu-en-8-3-bf832ba8.md: No matches found",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "dd9d8bf4c5a352689b09e599",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T21:28:13.888Z",
+  "stored_at": "2026-09-22T21:28:13.888Z"
+}

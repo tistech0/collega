@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Edit",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart",
+  "summary": "changed /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart: testWidgets('half ≈ 50 % de l\\'écran, full ≈ plein écran', (tester) async {\n      await _pumpHost(tester, (context) {\n        showCgSheet<void>(context, builder -> testWidgets('half ≈ 50 % de l\\'écran, ancrée en",
+  "text": "changed /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart: testWidgets('half ≈ 50 % de l\\'écran, full ≈ plein écran', (tester) async {\n      await _pumpHost(tester, (context) {\n        showCgSheet<void>(context, builder -> testWidgets('half ≈ 50 % de l\\'écran, ancrée en bas', (tester) async {\n      await _pumpHost(tester, (context) {\n        showCgSheet<void>(context, builder: (_) => const Text('Moitié'));\n      });\n      // Surface de test : 800 × 600.\n      expect(tester.getSize(find.byType(CgSheetPanel)).height, closeTo(300, 1));\n      expect(tester.getBottomLeft(find.byType(CgSheetPanel)).dy, 600);\n    });\n\n    testWidgets('full ≈ plein écran sous la safe area', (tester) async {\n      teste",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "114dd7eb2f396c624f5ddf80",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:40:26.484Z",
+  "stored_at": "2026-09-22T18:40:26.484Z"
+}

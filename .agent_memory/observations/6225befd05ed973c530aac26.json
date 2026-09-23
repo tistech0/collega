@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | grep -v agent_memory | head; grep -n \"failures\" .gitignore collega_app/.gitignore 2>/dev/null",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | grep -v agent_memory | head; grep -n \"failures\" .gitignore collega_app/.gitignore 2>/dev/null: No matches found",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git status --short | grep -v agent_memory | head; grep -n \"failures\" .gitignore collega_app/.gitignore 2>/dev/null: No matches found",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "6225befd05ed973c530aac26",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T07:46:41.968Z",
+  "stored_at": "2026-09-23T07:46:41.968Z"
+}

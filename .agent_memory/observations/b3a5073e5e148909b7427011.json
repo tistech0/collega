@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "ok donc peux tu me gnerer le prompt pour la nouvelle session qui va courvrir lepic 8 complete",
+  "summary": "ok donc peux tu me gnerer le prompt pour la nouvelle session qui va courvrir lepic 8 complete",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b3a5073e5e148909b7427011",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T17:28:36.252Z",
+  "stored_at": "2026-09-22T17:28:36.253Z",
+  "low_signal": true
+}

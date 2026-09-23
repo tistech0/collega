@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_supersede",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_supersede: [{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:bug_fix:progression-coll-ge-0-0-fiches-vs-barre-pleine-fiches-locales-items-ouverts-seul\",\\n \"replacement_packet_id\": \"repo:git-github-",
+  "text": "[{'type': 'text', 'text': '{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"old_packet_id\": \"repo:git-github-com-tistech0-collega:bug_fix:progression-coll-ge-0-0-fiches-vs-barre-pleine-fiches-locales-items-ouverts-seul\",\\n \"replacement_packet_id\": \"repo:git-github-com-tistech0-collega:bug_fix:progression-coll-ge-les-fiches-locales-sont-d-sormais-toutes-synchronis-es-8-3-l\",\\n \"reason\": \"La story 8.3 synchronise toutes les fiches : la cause « items ouverts seulement » n\\'existe plus\",\\n \"old_packet\": {\\n \"schema_version\": 2,\\n \"id\": \"repo:git-github-com-tistech0-collega:bug_fix:progression-coll-ge-0-0-fiches-vs-barre-pleine-fiches-locales-items-ouverts-seul\",\\n \"title\": \"Progression collège « 0 % · 0 fiches » vs barre pleine : fiches locales = items ouverts seulement + collegeDetailProvider figé\",\\n \"summary\": \"Repro iPhone 2026 09 21 CANCERO 177 fiches : Home/Collèges montraient une barre de progression pleine sans gris alors que le détail affichait « 0 % maîtrisé · 0 fiches ». Deux causes. 1 Les flashCards ne sont écrites en\",\\n \"body\": \"Repro iPhone 2026-09-21 (CANCERO 177 fiches) : Home/Collèges montraient une barre de progression pleine (sans ",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9d521c4dab46a1b69767dd29",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T19:32:07.850Z",
+  "stored_at": "2026-09-22T19:32:07.850Z",
+  "low_signal": true
+}

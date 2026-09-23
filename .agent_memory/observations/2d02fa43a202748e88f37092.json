@@ -1,0 +1,16 @@
+{
+  "type": "tool_use",
+  "tool": "Read",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/goldens/cg_drill_card_recto_375_16.png",
+  "command": "",
+  "summary": "About to run: Read",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "2d02fa43a202748e88f37092",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:49:19.972Z",
+  "stored_at": "2026-09-22T18:49:19.972Z",
+  "low_signal": true
+}

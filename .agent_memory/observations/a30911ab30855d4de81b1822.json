@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat > widgetbook/lib/use_cases/cg_header_use_cases.dart <<'EOF'\nimport 'package:flutter/widgets.dart';\nimport 'package:widgetbook/widgetbook.dart';\n\nimport 'package:collega_app/core/ui/components/cg_header.dart';\nimport 'package:collega_app/core/ui/foundation/cg_icon.dart';\nimport 'package:collega_app/core/ui/gallery/cg_header_gallery.dart';\n\nfinal WidgetbookComponent cgHeaderComponent = WidgetbookComponent(\n  name: 'CgHeader / CgPage',\n  useCases: [\n    WidgetbookUseCase(name: 'Planche (large, inline)', builder: (_) => const CgH… [+2811 chars truncated]",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat > widgetbook/lib/use_cases/cg_header_use_cases.dart <<'EOF' import 'package:flutter/widgets.dart'; import 'package:widgetbook/widge",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a30911ab30855d4de81b1822",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:48:12.949Z",
+  "stored_at": "2026-09-22T18:48:12.950Z"
+}

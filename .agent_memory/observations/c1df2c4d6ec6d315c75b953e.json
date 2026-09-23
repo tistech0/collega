@@ -1,0 +1,15 @@
+{
+  "type": "file_change",
+  "tool": "Edit",
+  "path": "/Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_header.dart",
+  "summary": "changed /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_header.dart: if (trailing != null) ...[\n        const SizedBox(width: CgSpace.s2),\n        _TrailingSlot(child: trailing!),\n      ],\n    ]);\n  } -> if (trailing != null) ...[\n        const SizedBox(width: CgSpace.s2),\n        // ",
+  "text": "changed /Users/lesurmatthis/dev/projet perso/collega/collega_app/lib/core/ui/components/cg_header.dart: if (trailing != null) ...[\n        const SizedBox(width: CgSpace.s2),\n        _TrailingSlot(child: trailing!),\n      ],\n    ]);\n  } -> if (trailing != null) ...[\n        const SizedBox(width: CgSpace.s2),\n        // Centrée sur la première ligne du titre (et non sur tout le bloc).\n        Transform.translate(\n          offset: Offset(0, (_largeTitleLineHeight(context) - CgSpace.tapTarget) / 2),\n          child: _TrailingSlot(child: trailing!),\n        ),\n      ],\n    ]);\n  }\n\n  /// Hauteur d'une ligne de large title, à l'échelle plafonnée.\n  static double _largeTitleLineHeight(BuildContext context) {\n    fin",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c1df2c4d6ec6d315c75b953e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:47:45.618Z",
+  "stored_at": "2026-09-22T18:47:45.618Z"
+}

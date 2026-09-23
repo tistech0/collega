@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_list_row_test.dart --update-goldens 2>&1 | grep -v \"^\\s*$\" | grep -E \"Expected|Actual|Which|══|\\[E\\]|tests passed|Some tests|Error|error\" | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_list_row_test.dart --update-goldens 2>&1 | grep -v \"^\\s*$\" | grep -E \"Expected|Actual|Which|══|\\[E\\]|tests passed|Some tests|Error|error\" | head -40: e/ui/components/cg_list_row_test.dart test/core/ui/components/cg_",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_list_row_test.dart --update-goldens 2>&1 | grep -v \"^\\s*$\" | grep -E \"Expected|Actual|Which|══|\\[E\\]|tests passed|Some tests|Error|error\" | head -40: e/ui/components/cg_list_row_test.dart test/core/ui/components/cg_list_row_test.dart:218:11: Error: No named parameter with the name 'hasSelectedState'. test/core/ui/components/cg_list_row_test.dart:240:19: Error: The method 'hasAction' isn't defined for the class 'SemanticsNode'. test/core/ui/components/cg_list_row_test.dart:257:19: Error: The method 'hasAction' isn't defined for the class 'SemanticsNode'. lib/core/ui/components/cg_list_row.dart:159:12: Error: The method 'CustomSemanticsAction' isn't defined for the class '_CgListRowState'. lib/core/ui/components/cg_list_row.dart:169:33: Error: The argument type 'Map<dynamic, void Function()>?' can't be assigned to the parameter type 'Map<CustomSemanticsAction, void Function()>?'. 00:00 +0 -1: loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_list_row_test.dart [E] 00:00 +0 -1: Some tests failed.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "c0ad495363f23c774d538abe",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:41:38.548Z",
+  "stored_at": "2026-09-22T18:41:38.548Z"
+}

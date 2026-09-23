@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "python3 -c \"\ndef lin(c):\n  c/=255; return c/12.92 if c<=0.03928 else ((c+0.055)/1.055)**2.4\ndef L(r,g,b): return 0.2126*lin(r)+0.7152*lin(g)+0.0722*lin(b)\nacc=(0x0E,0x5E,0x63); ink=(0xF2,0xF5,0xF3)\nfor a in (0.7,0.75,0.8,0.85,0.9,1):\n  m=tuple(a*i+(1-a)*j for i,j in zip(ink,acc))\n  l1,l2=L(*m),L(*acc); print(a, round((max(l1,l2)+.05)/(min(l1,l2)+.05),2))\n\"",
+  "summary": "python3 -c \"\ndef lin(c):\n  c/=255; return c/12.92 if c<=0.03928 else ((c+0.055)/1.055)**2.4\ndef L(r,g,b): return 0.2126*lin(r)+0.7152*lin(g)+0.0722*lin(b)\nacc=(0x0E,0x5E,0x63); ink=(0xF2,0xF5,0xF3)\nfor a in (0.7,0.75,0.8,0.85,0.9,1):\n  m=tuple(a*i+(1-a)*j for i,j in zip(ink,acc))\n  l1,l2=L(*m),L(*acc); print(a, round((",
+  "text": "python3 -c \"\ndef lin(c):\n  c/=255; return c/12.92 if c<=0.03928 else ((c+0.055)/1.055)**2.4\ndef L(r,g,b): return 0.2126*lin(r)+0.7152*lin(g)+0.0722*lin(b)\nacc=(0x0E,0x5E,0x63); ink=(0xF2,0xF5,0xF3)\nfor a in (0.7,0.75,0.8,0.85,0.9,1):\n  m=tuple(a*i+(1-a)*j for i,j in zip(ink,acc))\n  l1,l2=L(*m),L(*acc); print(a, round((max(l1,l2)+.05)/(min(l1,l2)+.05),2))\n\": 0.7 4.23 0.75 4.61 0.8 5.01 0.85 5.43 0.9 5.88 1 6.83",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "92e8b875332f05dd4a1cc951",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:46:37.804Z",
+  "stored_at": "2026-09-22T18:46:37.804Z"
+}

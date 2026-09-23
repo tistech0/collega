@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "tu peux reupload lapp je viens de rebrancher le telephone",
+  "summary": "tu peux reupload lapp je viens de rebrancher le telephone",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "483dc291348aa2997b146d0a",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T19:44:07.627Z",
+  "stored_at": "2026-09-22T19:44:07.628Z",
+  "low_signal": true
+}

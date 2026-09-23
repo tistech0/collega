@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n \"^#\" ux-design-specification-v2.md | head -80",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n \"^#\" ux-design-specification-v2.md | head -80: — Mode stage (Tom, 40 %) 474:### Parcours 4 — Import, attente, qualité (Léa puis Camille) 495:### Parcours 5 — Planifier (depuis Progression ou Aujourd'hui) 508:### Patterns commun",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/_bmad-output/planning-artifacts\" && grep -n \"^#\" ux-design-specification-v2.md | head -80: — Mode stage (Tom, 40 %) 474:### Parcours 4 — Import, attente, qualité (Léa puis Camille) 495:### Parcours 5 — Planifier (depuis Progression ou Aujourd'hui) 508:### Patterns communs aux parcours 515:## Stratégie de composants 517:### Ce qui vient de Cupertino (natif, non thémé au-delà de l'accent) 521:### Les quatorze composants Collega UI 523:#### CgButton 526:#### CgTabBar 529:#### CgHeader 532:#### CgListRow / CgListGroup 535:#### CgSegmented 538:#### CgSheet 541:#### CgDrillCard (l'écran de drill) 544:#### CgVerdictBar 547:#### CgRing 550:#### CgRankBar 553:#### CgBadge 556:#### CgField 559:#### CgState 562:#### CgSkeleton / CgToast 565:### Assemblage par écran 585:## Patterns UX de cohérence 587:### Hiérarchie des actions 599:### Feedback 614:### Les quatre états, obligatoires par écran 623:### Navigation 631:### Formulaires et saisie 639:### Recherche et filtres 645:### Progression",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "234efc3808a663beb43371cb",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:36:58.625Z",
+  "stored_at": "2026-09-22T18:36:58.625Z"
+}

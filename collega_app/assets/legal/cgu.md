@@ -2,7 +2,7 @@
 
 **Version : 2026-05-22**
 
-Bienvenue sur **AppMédecine** (« l'Application »), service de révision personnalisée à destination
+Bienvenue sur **Collega** (« l'Application »), service de révision personnalisée à destination
 des étudiantes et étudiants en médecine. En téléchargeant et en utilisant l'Application, tu acceptes
 les présentes Conditions Générales d'Utilisation (« CGU »).
 
@@ -10,7 +10,7 @@ les présentes Conditions Générales d'Utilisation (« CGU »).
 
 ## 1. Objet du service
 
-AppMédecine est une application mobile (iOS) qui permet :
+Collega est une application mobile (iOS) qui permet :
 
 - d'importer un PDF de collège médical et d'en générer automatiquement des fiches de révision
   structurées (recto/verso) à l'aide d'une intelligence artificielle ;
@@ -18,7 +18,7 @@ AppMédecine est une application mobile (iOS) qui permet :
 - de suivre sa progression collège par collège, rang par rang ;
 - de recevoir des rappels de révision et des notifications push lorsque la génération est terminée.
 
-L'Application est éditée par **Lesurmatthis** (contact : `jerome.lesur@astraga.fr`).
+L'Application est éditée par **Matthis Lesur** (contact : contact@matthislesur.com).
 
 ---
 
@@ -68,7 +68,7 @@ abonnement payant mensuel, géré via les services d'achat in-app d'Apple et de 
   en cours, depuis les **Réglages iOS → Apple ID → Abonnements**.
 - En cas de résiliation, tu conserves l'accès jusqu'à la date de fin de la période payée.
 
-Aucun remboursement n'est traité directement par AppMédecine — toute demande passe par les canaux
+Aucun remboursement n'est traité directement par Collega — toute demande passe par les canaux
 officiels d'Apple.
 
 ---
@@ -123,4 +123,4 @@ une notification push et / ou un écran d'acceptation au prochain lancement.
 Les présentes CGU sont régies par le droit français. Tout litige relève de la compétence des
 juridictions françaises, sauf application impérative d'une autre règle.
 
-Pour toute question : `jerome.lesur@astraga.fr`.
+Pour toute question : contact@matthislesur.com.

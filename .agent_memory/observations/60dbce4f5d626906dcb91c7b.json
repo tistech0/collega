@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "WebSearch",
+  "path": "",
+  "command": "",
+  "summary": "WebSearch: Apple Design Awards 2026 winners finalists apps interaction visuals",
+  "text": "Apple Design Awards 2026 winners finalists apps interaction visuals",
+  "session_id": "b3633e6c-40e4-438c-812f-7fd281ec7496",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "60dbce4f5d626906dcb91c7b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-21T19:45:20.410Z",
+  "stored_at": "2026-09-21T19:45:20.410Z",
+  "low_signal": true
+}

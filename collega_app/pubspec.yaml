@@ -1,5 +1,5 @@
 name: collega_app
-description: "AppMédecine — révision médicale personnalisée par collège et par rang"
+description: "Collega — révision médicale personnalisée par collège et par rang"
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -9,6 +9,9 @@ environment:
 
 dependencies:
   flutter:
+    sdk: flutter
+  # Sélecteur de date iOS et textes système en français (story 8.9)
+  flutter_localizations:
     sdk: flutter
 
   # State management
@@ -32,11 +35,9 @@ dependencies:
   background_downloader: 9.5.5 # 9.6.x exige Flutter >= 3.47
 
   # Design system
-  shadcn_ui: ^0.19.0
-  google_fonts: ^6.2.1
+  flutter_svg: ^2.2.0 # wordmark + illustrations d'états (Collega UI, story 8.1)
 
   # Animations
-  flutter_animate: ^4.5.0
 
   # Secure storage (JWT tokens — Keychain iOS)
   flutter_secure_storage: ^9.2.2
@@ -76,3 +77,17 @@ flutter:
   assets:
     - assets/legal/cgu.md
     - assets/legal/privacy.md
+
+  # Collega UI (story 8.1) — Instrument Sans embarquée (OFL, assets/fonts/OFL.txt),
+  # instances statiques générées depuis la police variable Google Fonts.
+  fonts:
+    - family: InstrumentSans
+      fonts:
+        - asset: assets/fonts/InstrumentSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/InstrumentSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/InstrumentSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/InstrumentSans-Bold.ttf
+          weight: 700

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/cg_motion.dart lib/core/ui/tokens/cg_colors.dart lib/core/ui/tokens/cg_space.dart lib/core/ui/tokens/cg_radius.dart lib/core/ui/tokens/cg_type.dart lib/core/ui/theme/cg_theme.dart",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/cg_motion.dart lib/core/ui/tokens/cg_colors.dart lib/core/ui/tokens/cg_space.dart lib/core/ui/tokens/cg_radius.dart lib/core/ui/tokens/cg_type.dart lib/core/ui/theme/cg_theme.dart: our les écrans Collega UI. ThemeData buildCgMateria",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && cat lib/core/ui/tokens/cg_motion.dart lib/core/ui/tokens/cg_colors.dart lib/core/ui/tokens/cg_space.dart lib/core/ui/tokens/cg_radius.dart lib/core/ui/tokens/cg_type.dart lib/core/ui/theme/cg_theme.dart: our les écrans Collega UI. ThemeData buildCgMaterialTheme(CgThemeData data) { final c = data.colors; final base = ThemeData( useMaterial3: true, brightness: Brightness.light, fontFamily: CgType.family, scaffoldBackgroundColor: c.ground, canvasColor: c.ground, dividerColor: c.line, colorScheme: ColorScheme.light( primary: c.accent, onPrimary: c.accentInk, secondary: c.accent, onSecondary: c.accentInk, surface: c.surface, onSurface: c.ink, error: c.danger, onError: c.accentInk, outline: c.line, ), textSelectionTheme: TextSelectionThemeData( cursorColor: c.accent, selectionColor: c.accentSoft, selectionHandleColor: c.accent, ), ); return neutralizeMaterial(base); } /// Cupertino n'est thémé qu'à la couleur d'accent : ses widgets restent natifs. CupertinoThemeData buildCgCupertinoTheme(CgThemeData data) => CupertinoThemeData( brightness: Brightness.light, primaryColor: data.colors.accent, );",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "93b322859c092ab97b20ba77",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:37:30.781Z",
+  "stored_at": "2026-09-22T18:37:30.781Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_sheet_test.dart --update-goldens 2>&1 | tail -60",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_sheet_test.dart --update-goldens 2>&1 | tail -60: utter/src/semantics/semantics.dart' ('../../../app/flutter/packages/flutter/lib/src/semantics/semantics.dart'). tester.semantics.tap(find.byKey(CgSheetPanel.handleKe",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && flutter test test/core/ui/components/cg_sheet_test.dart --update-goldens 2>&1 | tail -60: utter/src/semantics/semantics.dart' ('../../../app/flutter/packages/flutter/lib/src/semantics/semantics.dart'). tester.semantics.tap(find.byKey(CgSheetPanel.handleKey)); ^ 00:00 +0 -1: loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart [E] Failed to load \"/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart\": Compilation failed for testPath=/Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart To run this test again: /Users/lesurmatthis/dev/app/flutter/bin/cache/dart-sdk/bin/dart test /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart -p vm --plain-name 'loading /Users/lesurmatthis/dev/projet perso/collega/collega_app/test/core/ui/components/cg_sheet_test.dart' 00:00 +0 -1: Some tests failed.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "732738547c0f2b0d039129c7",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:42:32.853Z",
+  "stored_at": "2026-09-22T18:42:32.853Z"
+}

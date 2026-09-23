@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd /Users/lesurmatthis/dev/app/flutter/packages/flutter/lib/src/cupertino && grep -n -E \"_kDisabledBackground|disabledColor|placeholder|textAlignVertical|effectiveDecoration\" text_field.dart | sed -n 1,80p",
+  "summary": "cd /Users/lesurmatthis/dev/app/flutter/packages/flutter/lib/src/cupertino && grep -n -E \"_kDisabledBackground|disabledColor|placeholder|textAlignVertical|effectiveDecoration\" text_field.dart | sed -n 1,80p: of the main EditableText 1242: if (placeholder != null) placeholder, 1268: hintText: widget.placeholder, 1321: fi",
+  "text": "cd /Users/lesurmatthis/dev/app/flutter/packages/flutter/lib/src/cupertino && grep -n -E \"_kDisabledBackground|disabledColor|placeholder|textAlignVertical|effectiveDecoration\" text_field.dart | sed -n 1,80p: of the main EditableText 1242: if (placeholder != null) placeholder, 1268: hintText: widget.placeholder, 1321: final TextStyle? resolvedPlaceholderStyle = widget.placeholderStyle?.copyWith( 1322: color: CupertinoDynamicColor.maybeResolve(widget.placeholderStyle?.color, context), 1323: backgroundColor: CupertinoDynamicColor.maybeResolve(widget.placeholderStyle?.backgroundColor, context), 1326: final TextStyle placeholderStyle = textStyle.merge(resolvedPlaceholderStyle); 1334: final Color disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context); 1357: final BoxDecoration? effectiveDecoration = 1362: ? disabledColor 1496: decoration: effectiveDecoration, 1497: color: !enabled && effectiveDecoration == null ? disabledColor : null, 1501: alignment: Alignment(-1.0, _textAlignVertical.y), 1504: child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "384e1056d2f230553126c106",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-22T18:44:07.414Z",
+  "stored_at": "2026-09-22T18:44:07.414Z"
+}
