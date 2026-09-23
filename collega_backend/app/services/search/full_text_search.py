@@ -15,7 +15,12 @@ EXCERPT_MAX_CHARS = 220
 
 _MARK_RE = re.compile(r"<mark>(.*?)</mark>", re.DOTALL)
 # Fin de phrase, retour à la ligne, puce : l'extrait ne déborde jamais sur la voisine.
-_SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?;])\s+|\n+|^\s*[-•*]\s+", re.MULTILINE)
+# « ; » ne coupe pas (énumérations médicales) ; « cf. », « p. ex. », « etc. »,
+# initiales (« M. ») non plus.
+_SENTENCE_SPLIT_RE = re.compile(
+    r"(?<!\bcf\.)(?<!\bex\.)(?<!\betc\.)(?<!\benv\.)(?<!\bvs\.)(?<!\b\w\.)(?<=[.!?])\s+|\n+|^\s*[-•*]\s+",
+    re.MULTILINE | re.IGNORECASE,
+)
 
 
 def build_excerpt(text: str, headline: str, max_chars: int = EXCERPT_MAX_CHARS) -> str:
@@ -103,7 +108,9 @@ async def search_flash_cards(
     results = []
     for r in sorted_rows[:MAX_RESULTS]:
         row = dict(r)
-        text_ = f"{row.pop('recto', '') or ''}\n{row.pop('verso', '') or ''}"
+        # La réponse (verso) d'abord : elle porte l'information, la question la répète.
+        recto = row.pop("recto", "") or ""
+        text_ = f"{row.pop('verso', '') or ''}\n{recto}"
         row["excerpt"] = build_excerpt(text_, row.get("excerpt") or "")
         results.append(row)
     return results

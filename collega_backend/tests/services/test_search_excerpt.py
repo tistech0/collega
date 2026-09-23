@@ -48,6 +48,11 @@ def test_puces_et_retours_a_la_ligne_separent_les_phrases():
     assert build_excerpt(text, headline) == "<mark>œdèmes</mark> des membres inférieurs"
 
 
+def test_abreviations_et_point_virgule_ne_coupent_pas_la_phrase():
+    text = "Voir cf. item 232 ; dosage du BNP p. ex. en urgence. Autre."
+    assert build_excerpt(text, "<mark>BNP</mark>") == "Voir cf. item 232 ; dosage du <mark>BNP</mark> p. ex. en urgence."
+
+
 def test_sans_surlignage_le_headline_est_rendu_tel_quel():
     assert build_excerpt("Texte.", "Texte.") == "Texte."
 
@@ -67,5 +72,20 @@ async def test_service_remplace_l_extrait_et_retire_le_texte_brut():
     result.mappings.return_value.all.return_value = [row]
     db = types.SimpleNamespace(execute=AsyncMock(return_value=result))
     out = await search_flash_cards(db, uuid.uuid4(), "BNP")
+    # La réponse (verso) passe avant la question (recto).
     assert out[0]["excerpt"] == "Dosage : le <mark>BNP</mark> s'élève."
     assert "recto" not in out[0] and "verso" not in out[0]
+
+
+async def test_service_prefere_la_reponse_a_la_question():
+    row = {
+        "item_id": str(uuid.uuid4()), "item_number": 232, "rang": "A", "chapter_title": "IC",
+        "college_id": str(uuid.uuid4()), "college_ref_id": 1,
+        "excerpt": "<mark>BNP</mark>", "rank": 0.8,
+        "recto": "Quel dosage du BNP ?", "verso": "Le BNP est élevé dans l'IC.",
+    }
+    result = MagicMock()
+    result.mappings.return_value.all.return_value = [row]
+    db = types.SimpleNamespace(execute=AsyncMock(return_value=result))
+    out = await search_flash_cards(db, uuid.uuid4(), "BNP")
+    assert out[0]["excerpt"] == "Le <mark>BNP</mark> est élevé dans l'IC."
