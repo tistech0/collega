@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "docker push tistech0/collega-backend:b064cda 2>&1 | tail -1 && docker push tistech0/collega-backend:latest 2>&1 | tail -1 && ssh nas 'cd /mnt/user/appdata/compose-stacks/collega && docker compose pull api worker migrate 2>&1 | tail -2 && docker compose up -d 2>&1 | tail -4 && sleep 8 && docker ps --format \"{{.Names}} {{.Status}}\" | grep collega && docker logs --tail 3 collega-api-1 2>&1'",
+  "summary": "docker push tistech0/collega-backend:b064cda 2>&1 | tail -1 && docker push tistech0/collega-backend:latest 2>&1 | tail -1 && ssh nas 'cd /mnt/user/appdata/compose-stacks/collega && docker compose pull api worker migrate 2>&1 | tail -2 && docker compose up -d 2>&1 | tail -4 && sleep 8 && docker ps --format \"{{.Names}} {",
+  "text": "docker push tistech0/collega-backend:b064cda 2>&1 | tail -1 && docker push tistech0/collega-backend:latest 2>&1 | tail -1 && ssh nas 'cd /mnt/user/appdata/compose-stacks/collega && docker compose pull api worker migrate 2>&1 | tail -2 && docker compose up -d 2>&1 | tail -4 && sleep 8 && docker ps --format \"{{.Names}} {{.Status}}\" | grep collega && docker logs --tail 3 collega-api-1 2>&1': b064cda: digest: sha256:4c7cfac7f61596ef5c7ce33399ad7d1ff4858c9ef9e5164a7ceb3520bd47169c size: 2206 latest: digest: sha256:4c7cfac7f61596ef5c7ce33399ad7d1ff4858c9ef9e5164a7ceb3520bd47169c size: 2206 30187bab29c1 Pull complete api Pulled Container collega-db-1 Healthy Container collega-migrate-1 Exited Container collega-api-1 Starting Container collega-api-1 Started collega-api-1 Up 8 seconds collega-worker-1 Up 9 seconds collega-redis-1 Up 2 days (healthy) collega-db-1 Up 5 weeks (healthy) INFO: Started server process [9] INFO: Waiting for application startup. INFO: Application startup complete.",
+  "session_id": "21d61618-24eb-4775-bb63-b6c109928d29",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "a86131409e944f331a0c191e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T08:41:02.985Z",
+  "stored_at": "2026-09-23T08:41:02.986Z"
+}
