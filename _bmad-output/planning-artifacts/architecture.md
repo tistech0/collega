@@ -24,7 +24,7 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 50 FR répartis en 8 domaines : Onboarding & Accès (FR1–6), Import & OCR (FR7–15), Génération & Fiches (FR16–23), Révision (FR24–35), Recherche (FR36–38), Compte & RGPD (FR39–42), Administration (FR43–48), Testeur Phase 0 (FR49–50).
 
 **Non-Functional Requirements:**
-12 NFR critiques : search < 1s (GIN index), génération < 2h (async queue), quiz < 100ms (offline-first), clé Claude jamais dans l'app, abonnement validé côté backend, texte OCR supprimé ≤ 24h.
+12 NFR critiques : search < 1s (GIN index), génération < 2h (async queue), quiz < 100ms (offline-first), clé Claude jamais dans l'app, abonnement validé côté backend, texte OCR conservé avec le collège (NFR9 remplacée au chantier 1, 2026-09-23).
 
 **Scale & Complexity:**
 Complexité : HAUTE.
@@ -47,7 +47,7 @@ Complexité : HAUTE.
 1. **Authentification & validation abonnement** — vérifiée à chaque appel backend générant des coûts Claude
 2. **Gestion d'état offline/online** — révision 100% hors ligne, génération/search 100% cloud
 3. **Propagation des états de progression longs** — OCR, génération Claude, upload : chaque étape a un état visible et récupérable
-4. **Nettoyage des données éphémères** — texte OCR supprimé ≤ 24h (NFR9), job de nettoyage planifié
+4. **Nettoyage des données** — contenu (pages OCR, textes d'items, générations) stocké par empreinte et purgé quand plus aucun collège ne le référence ; PDF supprimés avec le collège ou le compte (chantier 1 ; l'ancienne purge du texte OCR à 24 h, NFR9, est abandonnée)
 5. **Configuration runtime des quotas anti-spam** — `reload_count` et `monthly_reloads` modifiables sans redéploiement
 6. **RGPD** — suppression compte + données utilisateur en cascade depuis l'app (FR39)
 
@@ -122,7 +122,7 @@ backend/
 
 **PostgreSQL :** GIN index sur le texte des fiches pour full-text search < 1s (NFR1)
 - Row-level scoping par `user_id` côté applicatif (NFR8)
-- Champ `ocr_text` éphémère : supprimé par job ARQ planifié ≤ 24h après génération (NFR9)
+- Texte OCR conservé avec le collège, par empreinte (`ocr_pages`, `item_texts`) : permet la régénération à tout moment et le réimport incrémental ; supprimé avec le collège (chantier 1, remplace NFR9)
 
 **Hash-sharing v1 :** Interface abstraite `SimilarityChecker` dès le départ — algorithme remplaçable sans refonte (similarité textuelle post-OCR, seuil ~90% à calibrer sur vrais PDFs)
 
@@ -386,7 +386,7 @@ collega_backend/
     ├── models/
     │   ├── user.py                 # id, email, is_beta, monthly_reloads
     │   ├── college.py              # id, user_id, reload_count, status
-    │   ├── flash_card.py           # rang, ocr_confidence, ocr_text (éphémère)
+    │   ├── flash_card.py           # rang, ocr_confidence, generation_id (sortie Claude d'origine)
     │   ├── item.py
     │   └── generation_job.py       # status, queue ARQ
     ├── schemas/
@@ -413,7 +413,8 @@ collega_backend/
     └── workers/
         ├── settings.py
         ├── generation_worker.py    # génération Claude + retry (NFR10)
-        └── cleanup_worker.py       # suppression ocr_text ≤ 24h (NFR9)
+        ├── cleanup_worker.py       # quotas mensuels, uploads par morceaux orphelins
+        └── maintenance_worker.py   # imports bloqués, purge du contenu non référencé et des PDF orphelins
 tests/
 ├── api/
 ├── services/
@@ -441,7 +442,7 @@ Drill :       Drift (local) → Riverpod → UI  [aucun appel réseau]
 Search :      Flutter → GET /v1/search → PostgreSQL GIN → résultats contextuels
 IAP :         App Store → RevenueCat → POST /v1/webhooks/revenuecat → user.is_subscribed
 Push :        ARQ worker → aioapns → APNs → iPhone
-Nettoyage :   cleanup_worker (ARQ cron) → DELETE ocr_text WHERE age > 24h
+Nettoyage :   maintenance_worker (ARQ cron) → contenu non référencé, PDF orphelins, imports bloqués
 ```
 
 ## Architecture Validation Results
@@ -466,7 +467,7 @@ Toutes les décisions sont compatibles : Flutter 3.41.5 + Riverpod + GoRouter + 
 | NFR6 abonnement validé | RevenueCat webhook + guard backend avant Claude |
 | NFR7 HTTPS | Caddy TLS Let's Encrypt automatique |
 | NFR8 isolation user_id | Scoping applicatif PostgreSQL sur toutes les requêtes |
-| NFR9 OCR text ≤ 24h | `cleanup_worker.py` ARQ cron |
+| NFR9 (remplacée) texte OCR conservé avec le collège | `services/content/` + `maintenance_worker.py` (purge à la suppression) |
 | NFR10 Claude indisponible | ARQ queue persistante + retry backoff |
 | NFR11 OCR reprise | Voir gap résolu ci-dessous |
 | NFR12 offline quiz | Drift local après sync initiale |
