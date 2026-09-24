@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bfcuzc7fq</task-id>\n<summary>Monitor event: \"logs prod réimport PNEUMO (API + worker)\"</summary>\n<event>[worker] 2026-09-24 05:29:20,698 INFO app.services.ocr.item_detector Found 21 item header pages\n[worker] 2026-09-24 05:29:20,703 INFO app.services.ocr.item_detector Detected 21 items from 355 pages\n[worker] 2026-09-24 05:29:20,818 INFO app.workers.ocr_worker OCR complete for college ed9a1032-24f5-4243-8ad2-2d71ff9eae44 — 21 items détectés\n[worker] 05:29:20:  81.51s ← 77d8cdd4de3e43dbbcb68f26c5d38ae0:process_college_ocr ● {'college_id': 'ed9a1032-24f5-4243-8ad2-2d71ff9eae44', 'job_id': '207f5b0e-dcc9…</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bfcuzc7fq</task-id> <summary>Monitor event: \"logs prod réimport PNEUMO (API + worker)\"</summary> <event>[worker] 2026-09-24 05:29:20,698 INFO app.services.ocr.item_detector Found 21 item header pages [worker] 20",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "0c1a77ae6ece5606e3000ac2",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-24T05:29:21.236Z",
+  "stored_at": "2026-09-24T05:29:21.236Z",
+  "low_signal": true
+}

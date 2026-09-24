@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "ssh nas \"docker exec collega-db-1 psql -U postgres -d collega -Atc \\\"select status, coalesce(input_tokens,0), coalesce(output_tokens,0), hash_shared, card_count from generation_jobs where id='207f5b0e-dcc9-4c42-85c1-38f79042b135'; select status, reload_count from colleges where id='ed9a1032-24f5-4243-8ad2-2d71ff9eae44'; select count(*), count(generation_id), min(created_at)::date from flash_cards where college_id='ed9a1032-24f5-4243-8ad2-2d71ff9eae44'\\\"; ls /mnt/user/appdata/collega/pdfs/ | grep ed9a1032\"",
+  "summary": "ssh nas \"docker exec collega-db-1 psql -U postgres -d collega -Atc \\\"select status, coalesce(input_tokens,0), coalesce(output_tokens,0), hash_shared, card_count from generation_jobs where id='207f5b0e-dcc9-4c42-85c1-38f79042b135'; select status, reload_count from colleges where id='ed9a1032-24f5-4243-8ad2-2d71ff9eae44'",
+  "text": "ssh nas \"docker exec collega-db-1 psql -U postgres -d collega -Atc \\\"select status, coalesce(input_tokens,0), coalesce(output_tokens,0), hash_shared, card_count from generation_jobs where id='207f5b0e-dcc9-4c42-85c1-38f79042b135'; select status, reload_count from colleges where id='ed9a1032-24f5-4243-8ad2-2d71ff9eae44'; select count(*), count(generation_id), min(created_at)::date from flash_cards where college_id='ed9a1032-24f5-4243-8ad2-2d71ff9eae44'\\\"; ls /mnt/user/appdata/collega/pdfs/ | grep ed9a1032\": generation_complete|0|0|t|164 generation_complete|0 164|0|2026-09-21 ed9a1032-24f5-4243-8ad2-2d71ff9eae44_207f5b0e-dcc9-4c42-85c1-38f79042b135.pdf",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "441439128af1d6cf2efe1cb6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-24T05:29:36.131Z",
+  "stored_at": "2026-09-24T05:29:36.131Z"
+}
