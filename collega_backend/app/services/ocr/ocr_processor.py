@@ -5,6 +5,9 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
+
+from app.services.ocr.text_normalize import undouble_text
 
 logger = logging.getLogger(__name__)
 
@@ -59,8 +62,9 @@ class OcrProcessor:
         with pdfplumber.open(str(pdf_path)) as pdf:
             if page_num >= len(pdf.pages):
                 return None
-            page = pdf.pages[page_num]
-            text = page.extract_text() or ""
+            # Glyphes superposés en double (ex. « CCoollllèèggee » en pneumo) retirés d'abord
+            page = pdf.pages[page_num].dedupe_chars()
+            text = undouble_text(self._page_text(page))
             words = page.extract_words() or []
             raw_tables = page.extract_tables() or []
 
@@ -77,6 +81,36 @@ class OcrProcessor:
             method="pdfplumber",
             tables=tables,
         )
+
+    @staticmethod
+    def _page_text(page: Any) -> str:
+        """Texte droit, puis caractères pivotés extraits à part dans le bon ordre.
+
+        Par défaut, pdfplumber lit un mot tourné de 90° comme une pile de lignes
+        d'un caractère, à l'envers (« snoitacidnI »). La matrice de chaque
+        caractère donne le sens : `matrix[1] > 0` → tourné anti-horaire (se lit
+        de bas en haut), `matrix[1] < 0` → tourné horaire (de haut en bas).
+        Le bloc pivoté est ajouté après le texte droit.
+        """
+
+        def is_char(obj: dict[str, Any]) -> bool:
+            return bool(obj.get("object_type") == "char")
+
+        def rotation(obj: dict[str, Any]) -> int:
+            """1 = anti-horaire, -1 = horaire, 0 = droit (ou penché sans sens de lecture sûr)."""
+            if not is_char(obj) or obj.get("upright", True):
+                return 0
+            b = obj["matrix"][1]
+            return (b > 0) - (b < 0)
+
+        parts = [page.filter(lambda o: rotation(o) == 0).extract_text() or ""]
+        ccw = page.filter(lambda o: rotation(o) == 1)
+        cw = page.filter(lambda o: rotation(o) == -1)
+        if ccw.chars:
+            parts.append(ccw.extract_text(line_dir_rotated="ltr", char_dir_rotated="btt") or "")
+        if cw.chars:
+            parts.append(cw.extract_text(line_dir_rotated="rtl", char_dir_rotated="ttb") or "")
+        return "\n".join(p for p in parts if p)
 
     def _extract_with_pytesseract(self, pdf_path: str | Path, page_num: int) -> OcrPageResult:
         import pytesseract  # type: ignore[import]

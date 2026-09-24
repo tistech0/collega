@@ -36,6 +36,7 @@ pytest-cov = "^7.0.0"
 aiosqlite = "^0.22.1"
 ruff = "^0.14.0"
 mypy = "^1.18.0"
+reportlab = "^5.0.1"
 
 [build-system]
 requires = ["poetry-core"]
