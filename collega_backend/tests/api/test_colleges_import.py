@@ -164,10 +164,9 @@ class TestImportCollegePdf:
         mock_arq_job.job_id = "arq-job-123"
         mock_pool = AsyncMock()
         mock_pool.enqueue_job = AsyncMock(return_value=mock_arq_job)
-        mock_pool.close = AsyncMock()
 
         with (
-            patch("app.api.v1.colleges.Path.mkdir"),
+            patch("app.services.imports.Path.mkdir"),
             patch("builtins.open", MagicMock()),
             arq_pool(mock_pool),
         ):

@@ -166,10 +166,9 @@ class TestReimportQuotaChecks:
         mock_arq_job.job_id = "arq-test"
         mock_pool = _AM()
         mock_pool.enqueue_job = _AM(return_value=mock_arq_job)
-        mock_pool.close = _AM()
 
         with (
-            patch("app.api.v1.colleges.Path.mkdir"),
+            patch("app.services.imports.Path.mkdir"),
             patch("builtins.open", _MM()),
             arq_pool(mock_pool),
         ):
@@ -207,10 +206,9 @@ class TestReimportQuotaChecks:
         mock_arq_job.job_id = "arq-test"
         mock_pool = _AM()
         mock_pool.enqueue_job = _AM(return_value=mock_arq_job)
-        mock_pool.close = _AM()
 
         with (
-            patch("app.api.v1.colleges.Path.mkdir"),
+            patch("app.services.imports.Path.mkdir"),
             patch("builtins.open", _MM()),
             arq_pool(mock_pool),
         ):
@@ -252,7 +250,6 @@ class TestReimportQuotaChecks:
         mock_arq_job.job_id = "arq-ok"
         mock_pool = _AM()
         mock_pool.enqueue_job = _AM(return_value=mock_arq_job)
-        mock_pool.close = _AM()
 
         async def mock_refresh(obj):
             pass
@@ -260,7 +257,7 @@ class TestReimportQuotaChecks:
         mock_db.refresh = mock_refresh
 
         with (
-            patch("app.api.v1.colleges.Path.mkdir"),
+            patch("app.services.imports.Path.mkdir"),
             patch("builtins.open", _MM()),
             arq_pool(mock_pool),
         ):
@@ -307,10 +304,9 @@ class TestUniqueProcessingIntegrity:
 
         mock_pool = _AM()
         mock_pool.enqueue_job = _AM(return_value=_MM(job_id="x"))
-        mock_pool.close = _AM()
 
         with (
-            patch("app.api.v1.colleges.Path.mkdir"),
+            patch("app.services.imports.Path.mkdir"),
             patch("builtins.open", _MM()),
             arq_pool(mock_pool),
         ):

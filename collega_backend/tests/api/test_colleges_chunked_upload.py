@@ -53,7 +53,7 @@ def app_with_store(store):
 
 
 def _no_college(mock_db):
-    # _assert_import_allowed : SELECT College → None (premier import)
+    # imports.assert_import_allowed : SELECT College → None (premier import)
     mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
 
 
@@ -203,14 +203,14 @@ class TestComplete:
         await _upload_all(store, st)
         captured = {}
 
-        async def fake_start(db, u, ref_id, pdf_file_path, arq):
+        async def fake_start(db, arq, u, ref_id, pdf_file_path, limits):
             captured["ref_id"] = ref_id
             captured["bytes"] = pdf_file_path.read_bytes()
             from app.schemas.college import ImportCollegeResponseData
 
             return ImportCollegeResponseData(college_id="c", job_id="j", status="pending")
 
-        monkeypatch.setattr(colleges_module, "_start_import_from_file", fake_start)
+        monkeypatch.setattr("app.services.imports.start_import_from_file", fake_start)
         resp = await client.post(f"/v1/colleges/import/{st.upload_id}/complete")
         assert resp.status_code == 202 and resp.json()["data"] == {
             "college_id": "c",
@@ -231,7 +231,7 @@ class TestComplete:
         monkeypatch.setattr(colleges_module.settings, "pdf_storage_path", str(tmp_path))
         monkeypatch.setattr(colleges_module, "assert_pdf_readable", AsyncMock(side_effect=pdf_damaged()))
         start = AsyncMock()
-        monkeypatch.setattr(colleges_module, "_start_import_from_file", start)
+        monkeypatch.setattr("app.services.imports.start_import_from_file", start)
         st = await store.create(user.id, 34, 10)
         await _upload_all(store, st)
 
@@ -280,13 +280,13 @@ class TestComplete:
         st = await store.create(user.id, 34, 10)
         await _upload_all(store, st)
 
-        async def failing_start(db, u, ref_id, pdf_file_path, arq):
+        async def failing_start(db, arq, u, ref_id, pdf_file_path, limits):
             pdf_file_path.unlink(missing_ok=True)
             from fastapi import HTTPException
 
             raise HTTPException(status_code=503, detail={"code": "QUEUE_UNAVAILABLE", "message": "x"})
 
-        monkeypatch.setattr(colleges_module, "_start_import_from_file", failing_start)
+        monkeypatch.setattr("app.services.imports.start_import_from_file", failing_start)
         resp = await client.post(f"/v1/colleges/import/{st.upload_id}/complete")
         assert resp.status_code == 503
         again = await store.get(st.upload_id)
@@ -296,7 +296,7 @@ class TestComplete:
     async def test_complete_reel_renomme_et_enqueue(
         self, client, mock_db, app_with_store, store, monkeypatch, tmp_path
     ):
-        """Chemin complet sans fake : assemblage → _start_import_from_file → {college.id}_{job_id}.pdf enqueué."""
+        """Chemin complet sans fake : assemblage → imports.start_import_from_file → {college.id}_{job_id}.pdf enqueué."""
 
         user = _make_user()
         app_with_store.dependency_overrides[require_subscription] = lambda: user

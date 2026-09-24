@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import os
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -14,8 +13,6 @@ from arq.connections import ArqRedis
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, select
-from sqlalchemy import update as sa_update
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -33,7 +30,6 @@ from app.schemas.college import (
     CollegeStatusData,
     CollegeStatusResponseWrapped,
     FlashCardData,
-    ImportCollegeResponseData,
     ImportCollegeResponseWrapped,
     ItemsListResponseWrapped,
     ItemSummaryData,
@@ -46,7 +42,7 @@ from app.schemas.college import (
     UploadStatusResponseWrapped,
     UserCollegeData,
 )
-from app.services import app_settings
+from app.services import app_settings, imports
 from app.services.ocr.pdf_check import assert_pdf_readable
 from app.services.upload.chunked_upload import (
     MAX_UPLOAD_SIZE,
@@ -59,9 +55,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["colleges"])
 
 
-_PDF_MAGIC = b"%PDF-"
-_CHUNK_SIZE = 1024 * 1024  # 1 MB
-_MAX_PDF_SIZE = 500 * 1024 * 1024  # 500 MB
 _SSE_MAX_DURATION = 3 * 3600  # 3h
 _SSE_POLL_INTERVAL = 1.5  # s entre deux lectures DB
 # Cloudflare / reverse proxies coupent une connexion silencieuse après ~100 s :
@@ -140,214 +133,6 @@ async def get_college_reload_limits(
     )
 
 
-def _job_in_progress() -> HTTPException:
-    return HTTPException(
-        status_code=409,
-        detail={"code": "JOB_IN_PROGRESS", "message": "Un import est déjà en cours pour ce collège"},
-    )
-
-
-def _invalid_ref_id(ref_id: int) -> None:
-    if not (1 <= ref_id <= 39):
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "INVALID_REF_ID", "message": "ref_id must be between 1 and 39"},
-        )
-
-
-async def _select_college(db: AsyncSession, user: User, ref_id: int) -> College | None:
-    result = await db.execute(select(College).where(College.user_id == user.id).where(College.college_ref_id == ref_id))
-    return result.scalar_one_or_none()
-
-
-async def _get_or_create_college(db: AsyncSession, user: User, ref_id: int) -> College:
-    college = await _select_college(db, user, ref_id)
-    if college is None:
-        college = College(user_id=user.id, college_ref_id=ref_id)
-        db.add(college)
-        try:
-            await db.flush()
-        except IntegrityError:
-            await db.rollback()
-            raise _job_in_progress() from None
-    return college
-
-
-async def _assert_no_active_job(db: AsyncSession, college: College) -> None:
-    """Aucun job actif (inclut ocr_complete : génération Claude en cours)."""
-    existing_job = await db.execute(
-        select(GenerationJob)
-        .where(GenerationJob.college_id == college.id)
-        .where(GenerationJob.status.in_(["pending", "processing", "ocr_complete"]))
-    )
-    if existing_job.scalar_one_or_none() is not None:
-        raise _job_in_progress()
-
-
-def _college_reload_limit(college: College, reload_count_max: int) -> HTTPException:
-    return HTTPException(
-        status_code=409,
-        detail={
-            "code": "COLLEGE_RELOAD_LIMIT",
-            "message": f"Ce collège ne peut plus être retraité (limite : {reload_count_max})",
-            "reload_count": college.reload_count,
-            "reload_count_max": reload_count_max,
-        },
-    )
-
-
-def _monthly_reload_limit(user: User, now: datetime, monthly_reloads_max: int) -> HTTPException:
-    reset_at = user.monthly_reloads_reset_at or _next_month_reset(now)
-    return HTTPException(
-        status_code=409,
-        detail={
-            "code": "MONTHLY_RELOAD_LIMIT",
-            "message": f"Limite mensuelle atteinte ({monthly_reloads_max} reimports/mois)",
-            "monthly_reloads": user.monthly_reloads,
-            "monthly_max": monthly_reloads_max,
-            "reset_at": reset_at.isoformat(),
-        },
-    )
-
-
-async def _apply_reimport_quota(db: AsyncSession, user: User, college: College, limits: tuple[int, int]) -> None:
-    """Quota checks pour les reimports uniquement (premier import = libre).
-    Atomique : UPDATE conditionnel avec RETURNING — pas de race read-then-check.
-    `limits` = (reload_count_max, monthly_reloads_max), lus une fois par requête."""
-    if college.status != "generation_complete":
-        return
-
-    reload_count_max, monthly_reloads_max = limits
-    now = datetime.now(UTC)
-    is_month_reset = user.monthly_reloads_reset_at is None or now >= user.monthly_reloads_reset_at
-
-    # 1. Reset mensuel lazy (filet de sécurité — cron quotidien est la source défensive)
-    if is_month_reset:
-        user.monthly_reloads = 0
-        user.monthly_reloads_reset_at = _next_month_reset(now)
-        await db.flush()
-
-    # 2. Incrément atomique College.reload_count
-    college_update = await db.execute(
-        sa_update(College)
-        .where(College.id == college.id)
-        .where(College.reload_count < reload_count_max)
-        .values(reload_count=College.reload_count + 1)
-        .returning(College.reload_count)
-    )
-    if college_update.scalar_one_or_none() is None:
-        raise _college_reload_limit(college, reload_count_max)
-
-    # 3. Incrément atomique User.monthly_reloads — rollback college si échec
-    user_update = await db.execute(
-        sa_update(User)
-        .where(User.id == user.id)
-        .where(User.monthly_reloads < monthly_reloads_max)
-        .values(monthly_reloads=User.monthly_reloads + 1)
-        .returning(User.monthly_reloads)
-    )
-    if user_update.scalar_one_or_none() is None:
-        # Annule l'incrément college fait juste avant (transaction non commitée)
-        await db.rollback()
-        raise _monthly_reload_limit(user, now, monthly_reloads_max)
-
-
-async def _assert_import_allowed(db: AsyncSession, user: User, ref_id: int, limits: tuple[int, int]) -> College | None:
-    """Gardes d'import en lecture seule (aucune écriture) — utilisées par POST /import/init
-    (morceaux) avant de recevoir le moindre octet. Renvoie le College existant ou None.
-    Lève les mêmes HTTPException que le chemin d'import (422 INVALID_REF_ID, 409 JOB_IN_PROGRESS,
-    409 COLLEGE_RELOAD_LIMIT / MONTHLY_RELOAD_LIMIT) ; le quota réel est consommé à `complete`."""
-    _invalid_ref_id(ref_id)
-    college = await _select_college(db, user, ref_id)
-    if college is None:
-        return None
-    await _assert_no_active_job(db, college)
-
-    if college.status == "generation_complete":
-        now = datetime.now(UTC)
-        month_reset_due = user.monthly_reloads_reset_at is None or now >= user.monthly_reloads_reset_at
-        reload_count_max, monthly_reloads_max = limits
-        if college.reload_count >= reload_count_max:
-            raise _college_reload_limit(college, reload_count_max)
-        if not month_reset_due and user.monthly_reloads >= monthly_reloads_max:
-            raise _monthly_reload_limit(user, now, monthly_reloads_max)
-    return college
-
-
-async def _create_job_and_enqueue(
-    db: AsyncSession, arq: ArqRedis, user: User, college: College, job_id: uuid.UUID, pdf_file_path: Path
-) -> ImportCollegeResponseData:
-    """Crée le GenerationJob et enqueue l'OCR. Supprime le PDF sur toute erreur."""
-    # IntegrityError = race OCR détectée par l'index UNIQUE partial sur (college_id) WHERE status active.
-    job = GenerationJob(
-        id=job_id,
-        college_id=college.id,
-        user_id=user.id,
-        status="pending",
-    )
-    db.add(job)
-    try:
-        await db.commit()
-        await db.refresh(job)
-    except IntegrityError:
-        await db.rollback()
-        pdf_file_path.unlink(missing_ok=True)
-        raise _job_in_progress() from None
-    except Exception:
-        pdf_file_path.unlink(missing_ok=True)
-        raise
-
-    # Enqueuer le job ARQ (pool unique de l'application)
-    try:
-        arq_job = await arq.enqueue_job(
-            "process_college_ocr",
-            str(college.id),
-            str(job_id),
-            str(pdf_file_path),
-        )
-        if arq_job is not None:
-            job.arq_job_id = arq_job.job_id
-            await db.commit()
-        logger.info("OCR job %s enqueued for college %s", job_id, college.id)
-    except Exception as exc:  # noqa: BLE001
-        logger.error("Failed to enqueue OCR job: %s", exc)
-        await db.delete(job)
-        await db.commit()
-        pdf_file_path.unlink(missing_ok=True)
-        raise HTTPException(
-            status_code=503,
-            detail={"code": "QUEUE_UNAVAILABLE", "message": "Impossible d'enqueuer le job OCR — réessayez"},
-        ) from exc
-
-    return ImportCollegeResponseData(
-        college_id=str(college.id),
-        job_id=str(job_id),
-        status="pending",
-    )
-
-
-async def _start_import_from_file(
-    db: AsyncSession, user: User, ref_id: int, pdf_file_path: Path, arq: ArqRedis
-) -> ImportCollegeResponseData:
-    """Chemin d'import à partir d'un PDF déjà écrit sur le volume partagé (upload par morceaux
-    assemblé) : get/create College, garde job actif, quotas atomiques, renommage en
-    `{college.id}_{job_id}.pdf` (convention attendue par la purge admin), GenerationJob + enqueue.
-    Supprime le PDF sur toute erreur."""
-    try:
-        college = await _get_or_create_college(db, user, ref_id)
-        await _assert_no_active_job(db, college)
-        await _apply_reimport_quota(db, user, college, await app_settings.anti_spam_limits(db))
-    except HTTPException:
-        pdf_file_path.unlink(missing_ok=True)
-        raise
-
-    job_id = uuid.uuid4()
-    final_path = pdf_file_path.with_name(f"{college.id}_{job_id}.pdf")
-    os.replace(pdf_file_path, final_path)
-    logger.info("PDF ready for college %s (ref_id=%s) at %s", college.id, ref_id, final_path)
-    return await _create_job_and_enqueue(db, arq, user, college, job_id, final_path)
-
-
 @router.post(
     "/colleges/{ref_id}/import",
     response_model=ImportCollegeResponseWrapped,
@@ -362,48 +147,14 @@ async def import_college_pdf(
 ) -> ImportCollegeResponseWrapped:
     """Soumet un PDF pour traitement OCR — crée le College si nécessaire (mono-requête, ≤ 100 MB
     derrière Cloudflare ; au-delà, voir /import/init)."""
-    _invalid_ref_id(ref_id)
-    college = await _get_or_create_college(db, current_user, ref_id)
-    await _assert_no_active_job(db, college)
-    await _apply_reimport_quota(db, current_user, college, await app_settings.anti_spam_limits(db))
-
-    # Valider le type de fichier
-    is_pdf = (pdf.content_type == "application/pdf") or (pdf.filename or "").lower().endswith(".pdf")
-    if not is_pdf:
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "INVALID_FILE_TYPE", "message": "Le fichier doit être un PDF"},
-        )
-
-    first_chunk = await pdf.read(_CHUNK_SIZE)
-    if not first_chunk.startswith(_PDF_MAGIC):
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "INVALID_FILE_TYPE", "message": "Le fichier ne semble pas être un PDF valide"},
-        )
-
-    # Sauvegarder le PDF
-    storage_path = Path(settings.pdf_storage_path)
-    storage_path.mkdir(parents=True, exist_ok=True)
+    imports.validate_ref_id(ref_id)
+    college = await imports.get_or_create_college(db, current_user, ref_id)
+    await imports.assert_no_active_job(db, college)
+    await imports.apply_reimport_quota(db, current_user, college, await app_settings.anti_spam_limits(db))
 
     job_id = uuid.uuid4()
-    pdf_file_path = storage_path / f"{college.id}_{job_id}.pdf"
-
-    total_size = len(first_chunk)
-    try:
-        with open(pdf_file_path, "wb") as f:
-            f.write(first_chunk)
-            while chunk := await pdf.read(_CHUNK_SIZE):
-                total_size += len(chunk)
-                if total_size > _MAX_PDF_SIZE:
-                    raise HTTPException(
-                        status_code=413,
-                        detail={"code": "FILE_TOO_LARGE", "message": "Le PDF ne doit pas dépasser 500 MB"},
-                    )
-                f.write(chunk)
-    except HTTPException:
-        pdf_file_path.unlink(missing_ok=True)
-        raise
+    pdf_file_path = imports.pdf_path_for(college.id, job_id)
+    await imports.save_upload(pdf, pdf_file_path, max_size=imports.MAX_PDF_SIZE)
 
     try:
         await assert_pdf_readable(pdf_file_path)
@@ -415,8 +166,10 @@ async def import_college_pdf(
 
     logger.info("PDF saved for college %s (ref_id=%s) at %s", college.id, ref_id, pdf_file_path)
 
-    data = await _create_job_and_enqueue(db, arq, current_user, college, job_id, pdf_file_path)
-    return ImportCollegeResponseWrapped(data=data)
+    await imports.create_job_and_enqueue(
+        db, arq, college=college, user_id=current_user.id, job_id=job_id, pdf_path=pdf_file_path
+    )
+    return ImportCollegeResponseWrapped(data=imports.import_response(college, job_id))
 
 
 # ── Story 7.11 — upload par morceaux (Cloudflare : 100 MB max par requête) ──────
@@ -447,12 +200,9 @@ async def init_chunked_import(
     store: ChunkedUploadStore = Depends(get_upload_store),
 ) -> UploadInitResponseWrapped:
     """Ouvre un upload par morceaux. Mêmes gardes que POST /import, quota NON consommé."""
-    await _assert_import_allowed(db, current_user, ref_id, await app_settings.anti_spam_limits(db))
+    await imports.assert_import_allowed(db, current_user, ref_id, await app_settings.anti_spam_limits(db))
     if body.size_bytes > MAX_UPLOAD_SIZE:
-        raise HTTPException(
-            status_code=413,
-            detail={"code": "FILE_TOO_LARGE", "message": "Le PDF ne doit pas dépasser 500 MB"},
-        )
+        raise imports.file_too_large()
     state = await store.create(current_user.id, ref_id, body.size_bytes)
     logger.info("Chunked upload %s opened (ref_id=%s, %d parts)", state.upload_id, ref_id, state.parts_total)
     return UploadInitResponseWrapped(
@@ -528,18 +278,15 @@ async def complete_chunked_import(
             detail={"code": "UPLOAD_INCOMPLETE", "message": "Morceaux manquants", "missing": state.missing},
         )
     with open(store.part_path(state.upload_id, 0), "rb") as f:
-        if not f.read(len(_PDF_MAGIC)).startswith(_PDF_MAGIC):
+        if not f.read(len(imports.PDF_MAGIC)).startswith(imports.PDF_MAGIC):
             await store.claim(state.upload_id)
             store.purge(state.upload_id)
-            raise HTTPException(
-                status_code=422,
-                detail={"code": "INVALID_FILE_TYPE", "message": "Le fichier ne semble pas être un PDF valide"},
-            )
+            raise imports.invalid_pdf_signature()
 
     # Prise de possession atomique : un complete concurrent qui perd le DEL reçoit 409.
     claimed = await store.claim(state.upload_id)
     if claimed is None:
-        raise _job_in_progress()
+        raise imports.job_in_progress()
 
     storage_path = Path(settings.pdf_storage_path)
     storage_path.mkdir(parents=True, exist_ok=True)
@@ -547,7 +294,8 @@ async def complete_chunked_import(
     try:
         store.assemble(claimed, assembled)
         await assert_pdf_readable(assembled)
-        data = await _start_import_from_file(db, current_user, claimed.ref_id, assembled, arq)
+        limits = await app_settings.anti_spam_limits(db)
+        data = await imports.start_import_from_file(db, arq, current_user, claimed.ref_id, assembled, limits)
     except HTTPException as exc:
         assembled.unlink(missing_ok=True)
         if exc.status_code == 503:

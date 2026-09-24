@@ -189,10 +189,9 @@ class TestProcessCollege:
         mock_arq_job = MagicMock()
         mock_arq_job.job_id = "arq-test-id"
         mock_pool.enqueue_job = AsyncMock(return_value=mock_arq_job)
-        mock_pool.close = AsyncMock()
         override_arq(mock_pool)
 
-        with patch("app.api.v1.admin.settings") as mock_settings:
+        with patch("app.services.imports.settings") as mock_settings:
             mock_settings.pdf_storage_path = str(tmp_path)
             mock_settings.admin_username = "admin"
             mock_settings.admin_password = "testpass"

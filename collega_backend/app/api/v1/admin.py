@@ -8,7 +8,6 @@ from __future__ import annotations
 import logging
 import uuid
 from datetime import UTC, datetime
-from pathlib import Path
 
 from arq.connections import ArqRedis
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile
@@ -17,7 +16,6 @@ from sqlalchemy import update as sa_update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
 from app.core.database import async_session_factory, get_db
 from app.core.security import hash_password
 from app.deps import get_admin_user, get_arq, get_arq_optional
@@ -71,7 +69,7 @@ from app.schemas.admin import (
     UserJobSummary,
     UsersListResponseWrapped,
 )
-from app.services import app_settings
+from app.services import app_settings, imports
 from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
 from app.services.generation.token_cost import compute_cost_eur
 from app.services.jobs.arq_control import abort_arq_job
@@ -79,9 +77,6 @@ from app.services.jobs.job_failure import fail_job
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["admin"])
-
-_PDF_MAGIC = b"%PDF-"
-_CHUNK_SIZE = 1024 * 1024  # 1 MB — évite de charger l'intégralité du fichier en mémoire
 
 
 @router.post("/colleges", response_model=CreateCollegeResponseWrapped, status_code=201)
@@ -135,98 +130,16 @@ async def process_college(
             detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
         )
 
-    # Vérifier qu'aucun job actif n'existe déjà (aligné sur l'index UNIQUE
-    # partial créé par migration 012 : ('pending', 'processing', 'ocr_complete')).
-    existing_job = await db.execute(
-        select(GenerationJob)
-        .where(GenerationJob.college_id == college_id)
-        .where(GenerationJob.status.in_(["pending", "processing", "ocr_complete"]))
-    )
-    if existing_job.scalar_one_or_none() is not None:
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "JOB_IN_PROGRESS", "message": "An active job already exists for this college"},
-        )
-
-    # Valider le type de fichier : content-type OU extension .pdf requis
-    is_pdf = (pdf.content_type == "application/pdf") or (pdf.filename or "").lower().endswith(".pdf")
-    if not is_pdf:
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "code": "INVALID_FILE_TYPE",
-                "message": "File must be a PDF (.pdf extension or application/pdf content-type)",
-            },
-        )
-
-    # Lire le premier chunk et vérifier la signature binaire PDF
-    first_chunk = await pdf.read(_CHUNK_SIZE)
-    if not first_chunk.startswith(_PDF_MAGIC):
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "code": "INVALID_FILE_TYPE",
-                "message": "File does not appear to be a valid PDF (missing %PDF- signature)",
-            },
-        )
-
-    # Sauvegarder le PDF en chunks pour éviter de tout charger en mémoire
-    storage_path = Path(settings.pdf_storage_path)
-    storage_path.mkdir(parents=True, exist_ok=True)
+    await imports.assert_no_active_job(db, college)
 
     job_id = uuid.uuid4()
-    pdf_file_path = storage_path / f"{college_id}_{job_id}.pdf"
-
-    with open(pdf_file_path, "wb") as f:
-        f.write(first_chunk)
-        while chunk := await pdf.read(_CHUNK_SIZE):
-            f.write(chunk)
-
+    pdf_file_path = imports.pdf_path_for(college_id, job_id)
+    await imports.save_upload(pdf, pdf_file_path, max_size=None)
     logger.info("PDF saved for college %s at %s", college_id, pdf_file_path)
 
-    # Créer le GenerationJob en base. IntegrityError = race avec /v1/colleges/{ref_id}/import
-    # détectée par l'index UNIQUE partial sur (college_id) WHERE status active (migration 012).
-    job = GenerationJob(
-        id=job_id,
-        college_id=college_id,
-        user_id=college.user_id,
-        status="pending",
+    job = await imports.create_job_and_enqueue(
+        db, arq, college=college, user_id=college.user_id, job_id=job_id, pdf_path=pdf_file_path
     )
-    db.add(job)
-    try:
-        await db.commit()
-        await db.refresh(job)
-    except IntegrityError:
-        await db.rollback()
-        pdf_file_path.unlink(missing_ok=True)
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "JOB_IN_PROGRESS", "message": "An active job already exists for this college"},
-        ) from None
-
-    # Enqueuer le job ARQ — si l'enqueue échoue, on rollback et retourne 503
-    try:
-        arq_job = await arq.enqueue_job(
-            "process_college_ocr",
-            str(college_id),
-            str(job_id),
-            str(pdf_file_path),
-        )
-        if arq_job is not None:
-            job.arq_job_id = arq_job.job_id
-            await db.commit()
-        logger.info("OCR job %s enqueued for college %s", job_id, college_id)
-    except Exception as exc:  # noqa: BLE001
-        logger.error("Failed to enqueue OCR job: %s", exc)
-        # Rollback complet : supprimer le job DB et le fichier PDF
-        await db.delete(job)
-        await db.commit()
-        pdf_file_path.unlink(missing_ok=True)
-        raise HTTPException(
-            status_code=503,
-            detail={"code": "QUEUE_UNAVAILABLE", "message": "Failed to enqueue OCR job — please retry"},
-        ) from exc
-
     return ProcessCollegeResponseWrapped(data=ProcessCollegeResponse(job_id=str(job.id), status=job.status))
 
 
@@ -628,8 +541,6 @@ async def get_overview(
 
 # ── Story 7.7 — Suivi & contrôle des imports (timeline / détail / stop / delete) ─
 
-_ACTIVE_JOB_STATUSES = ("pending", "processing", "ocr_complete")
-
 
 @router.get("/jobs/{job_id}", response_model=JobDetailResponseWrapped)
 async def get_job_detail(
@@ -721,7 +632,7 @@ async def stop_job(
             status_code=404,
             detail={"code": "JOB_NOT_FOUND", "message": f"Job {job_id} not found"},
         )
-    if job.status not in _ACTIVE_JOB_STATUSES:
+    if job.status not in imports.ACTIVE_JOB_STATUSES:
         raise HTTPException(
             status_code=409,
             detail={"code": "JOB_NOT_ACTIVE", "message": "Job is not active — nothing to cancel"},
@@ -778,7 +689,7 @@ async def delete_college(
     active_job = await db.execute(
         select(GenerationJob)
         .where(GenerationJob.college_id == college_id)
-        .where(GenerationJob.status.in_(_ACTIVE_JOB_STATUSES))
+        .where(GenerationJob.status.in_(imports.ACTIVE_JOB_STATUSES))
     )
     if active_job.scalar_one_or_none() is not None:
         raise HTTPException(
