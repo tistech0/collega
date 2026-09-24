@@ -233,6 +233,14 @@
         <thead><tr><th>Item</th><th>Score OCR</th><th>Confiance</th></tr></thead>
         <tbody id="job-items-body"></tbody>
       </table>
+      <details id="job-segmentation" style="display:none; margin-top:16px">
+        <summary class="subsection-title" id="job-segmentation-summary">Découpage</summary>
+        <table>
+          <thead><tr><th>Item / section</th><th>Pages</th><th>Rang</th><th>Objectifs A / B</th></tr></thead>
+          <tbody id="job-segmentation-body"></tbody>
+        </table>
+        <ul id="job-segmentation-warnings" class="tl-msg"></ul>
+      </details>
     </div>
   </section>
 
@@ -787,6 +795,7 @@
 
       renderTimeline(data.timeline);
       renderJobItems(data.items);
+      renderSegmentation(data.segmentation);
 
       loader.style.display = "none";
       content.style.display = "block";
@@ -818,6 +827,24 @@
         ${e.message ? `<div class="tl-msg">${escapeHtml(e.message)}</div>` : ""}`;
       ul.appendChild(li);
     });
+  }
+
+  // Chantier 4 — rapport de découpage (items → pages, sections hors item, warnings), replié.
+  function renderSegmentation(seg) {
+    const box = document.getElementById("job-segmentation");
+    if (!seg) { box.style.display = "none"; return; }
+    box.style.display = "";
+    const items = seg.items || [], sections = seg.sections || [], warnings = seg.warnings || [];
+    document.getElementById("job-segmentation-summary").textContent =
+      `Découpage : ${items.length} items, ${sections.length} sections, ${warnings.length} warnings`;
+    document.getElementById("job-segmentation-body").innerHTML =
+      items.map(it => `<tr><td>Item ${escapeHtml(String(it.item_number))}</td><td>${escapeHtml(String(it.pages))}</td>`
+        + `<td>${escapeHtml(String(it.rang || "—"))}</td><td>${it.objectives_a ?? "—"} / ${it.objectives_b ?? "—"}</td></tr>`).join("")
+      + sections.map(s => `<tr><td><em>${escapeHtml(String(s.label))}</em></td><td>${escapeHtml(String(s.pages))}</td>`
+        + `<td>—</td><td>—</td></tr>`).join("")
+      + (seg.blank_pages ? `<tr><td><em>pages blanches</em></td><td>${escapeHtml(String(seg.blank_pages))}</td><td>—</td><td>—</td></tr>` : "");
+    document.getElementById("job-segmentation-warnings").innerHTML =
+      warnings.map(w => `<li>${escapeHtml(String(w))}</li>`).join("");
   }
 
   function renderJobItems(items) {

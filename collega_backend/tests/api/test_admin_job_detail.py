@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import types
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -25,6 +26,7 @@ def make_job(job_id=None, college_id=None, status="processing"):
         error_message=None,
         input_tokens=1_000_000,
         output_tokens=1_000_000,
+        segmentation_report=None,
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
     )
@@ -121,6 +123,36 @@ class TestJobDetail:
         assert data["input_tokens"] == 1_000_000
         assert data["output_tokens"] == 1_000_000
         assert data["cost_eur"] == 16.56
+        assert data["segmentation"] is None
+
+    async def test_exposes_segmentation_report_without_page_detail(self, client: AsyncClient, mock_db):
+        """Chantier 4 : items → pages, sections, warnings (pas le détail page par page)."""
+        job = make_job()
+        job.segmentation_report = json.dumps(
+            {
+                "page_count": 4,
+                "items": [{"item_number": 212, "pages": "1-3", "rang": "A", "objectives_a": 8, "objectives_b": 0}],
+                "sections": [{"label": "sommaire", "pages": "0"}],
+                "blank_pages": "",
+                "warnings": ["p2 : en-tête 21 ignoré (item courant 212)"],
+                "pages": [{"page": 0, "kind": "section", "label": "sommaire", "signals": []}],
+            }
+        )
+        mock_db.get = AsyncMock(side_effect=[job, make_college(job.college_id)])
+        mock_db.execute = AsyncMock(side_effect=[_scalars_result([]), _tuples_result([])])
+
+        resp = await client.get(f"/v1/admin/jobs/{job.id}", auth=ADMIN_AUTH)
+        seg = resp.json()["data"]["segmentation"]
+        assert seg["items"][0] == {
+            "item_number": 212,
+            "pages": "1-3",
+            "rang": "A",
+            "objectives_a": 8,
+            "objectives_b": 0,
+        }
+        assert seg["sections"] == [{"label": "sommaire", "pages": "0"}]
+        assert seg["warnings"] == ["p2 : en-tête 21 ignoré (item courant 212)"]
+        assert "pages" not in seg
 
     async def test_handles_missing_college_gracefully(self, client: AsyncClient, mock_db):
         job = make_job()

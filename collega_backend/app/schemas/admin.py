@@ -249,6 +249,8 @@ class JobDetailData(BaseModel):
     input_tokens: int | None = None
     output_tokens: int | None = None
     cost_eur: float = 0.0
+    # Chantier 4 — rapport de découpage : items → pages, sections, warnings. NULL = import antérieur.
+    segmentation: dict | None = None
 
 
 class JobDetailResponseWrapped(BaseModel):

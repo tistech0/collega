@@ -75,6 +75,7 @@ from app.services.content.purge import delete_college_pdfs, purge_unreferenced_c
 from app.services.generation.token_cost import compute_cost_eur
 from app.services.jobs.arq_control import abort_arq_job
 from app.services.jobs.job_failure import fail_job
+from app.services.ocr.item_detector import segmentation_overview
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["admin"])
@@ -693,6 +694,7 @@ async def get_job_detail(
             input_tokens=job.input_tokens,
             output_tokens=job.output_tokens,
             cost_eur=compute_cost_eur(job.input_tokens, job.output_tokens),
+            segmentation=segmentation_overview(job.segmentation_report),
             items=items,
             timeline=[
                 JobEventData(
