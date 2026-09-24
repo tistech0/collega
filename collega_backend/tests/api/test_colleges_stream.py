@@ -18,6 +18,7 @@ from httpx import AsyncClient
 from app.api.v1.colleges import status as colleges_module
 from app.deps import get_current_user_short_session
 from app.models.college import College
+from app.models.generation_job import GenerationJob
 from tests.api_pg import login_as
 from tests.factories import make_college, make_item, make_job, make_user
 
@@ -245,3 +246,23 @@ async def test_first_import_summary_is_not_exposed(pg_client, pg_factory):
     login_as(user)
     status = (await pg_client.get(f"/v1/colleges/{college.id}/status")).json()["data"]
     assert status["summary"] is None
+
+
+@pytest.mark.pg
+async def test_first_import_summary_exposed_only_with_insufficient_items(pg_client, pg_factory):
+    """Premier import : pas de résumé (rien n'a « changé »), sauf items sans contenu
+    suffisant à signaler (chantier 4)."""
+    async with pg_factory() as db:
+        user = await make_user(db)
+        college = await make_college(db, user, status="generation_complete")
+        done = await make_job(db, college, status="generation_complete")
+        done.summary_json = json.dumps({"added": 3, "reimport": False, "insufficient_items": []})
+        await db.commit()
+    login_as(user)
+    assert (await pg_client.get(f"/v1/colleges/{college.id}/status")).json()["data"]["summary"] is None
+
+    flagged = {"added": 3, "reimport": False, "insufficient_items": [215]}
+    async with pg_factory() as db:
+        (await db.get(GenerationJob, done.id)).summary_json = json.dumps(flagged)
+        await db.commit()
+    assert (await pg_client.get(f"/v1/colleges/{college.id}/status")).json()["data"]["summary"] == flagged

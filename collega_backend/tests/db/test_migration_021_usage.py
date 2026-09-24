@@ -115,3 +115,23 @@ async def test_claude_usage_schema(pg_engine):
         ("ix_claude_usage_user_id_created_at", ("user_id", "created_at")),
     ]
     assert len(checks) == 1 and all(k in checks[0] for k in ("generation", "regeneration", "evaluation"))
+
+
+async def test_card_type_and_insufficient_text_schema(pg_engine):
+    """021 : `cas_clinique` accepté par ck_flash_cards_card_type ; drapeaux « texte insuffisant »."""
+
+    def _schema(sync_conn):
+        insp = inspect(sync_conn)
+        checks = {c["name"]: c["sqltext"] for c in insp.get_check_constraints("flash_cards")}
+        flags = {
+            table: next(
+                (str(c["type"]), c["nullable"]) for c in insp.get_columns(table) if c["name"] == "insufficient_text"
+            )
+            for table in ("item_generations", "job_items")
+        }
+        return checks["ck_flash_cards_card_type"], flags
+
+    async with pg_engine.connect() as conn:
+        card_type_check, flags = await conn.run_sync(_schema)
+    assert all(t in card_type_check for t in ("classique", "definition", "cas_clinique"))
+    assert flags == {"item_generations": ("BOOLEAN", False), "job_items": ("BOOLEAN", False)}

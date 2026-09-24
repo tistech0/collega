@@ -10,7 +10,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, false, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -47,6 +47,9 @@ class ItemGeneration(Base):
     model: Mapped[str] = mapped_column(String(100), nullable=False)
     input_tokens: Mapped[int] = mapped_column(Integer, nullable=False)
     output_tokens: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Claude a jugé le texte sans vrai contenu d'enseignement : 0 fiche, conservée
+    # comme une autre génération (un réimport ne repaie pas l'item).
+    insufficient_text: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
 
@@ -77,6 +80,8 @@ class JobItem(Base):
     generation_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("item_generations.id"), nullable=True
     )
+    # Génération « texte insuffisant » : item listé dans le résumé d'import.
+    insufficient_text: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
 
 
 class CollegePage(Base):

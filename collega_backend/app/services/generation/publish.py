@@ -10,6 +10,10 @@ Une seule transaction, collège verrouillé. Items rapprochés par numéro :
 - disparu : item supprimé (fiches en cascade) — sauf si plus de la moitié des items
   disparaissent d'un réimport : mauvais PDF probable, rien n'est modifié
   (`ImportRejected`).
+Chantier 4 : `flash_cards.rang` = rang de la fiche rendu par Claude (à défaut, celui
+de l'item) ; une génération « texte insuffisant » (0 fiche) ne remplace jamais un
+contenu en service ; les items concernés sont listés dans le résumé
+(`insufficient_items`, premier import compris).
 Rejouable : un import qui n'est plus `ocr_complete` (déjà basculé, stoppé) n'est
 pas republié. Ne commit pas (l'appelant commit), ne touche à aucun fichier.
 """
@@ -19,7 +23,7 @@ from __future__ import annotations
 import json
 import logging
 import uuid
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from sqlalchemy import delete, func, select
@@ -34,6 +38,7 @@ from app.models.generation_job import GenerationJob
 from app.models.item import Item
 from app.models.user import User
 from app.services.content.store import generation_cards
+from app.services.generation.claude_client import CARD_RANGS
 from app.services.jobs.job_events import record_job_event
 
 logger = logging.getLogger(__name__)
@@ -59,6 +64,8 @@ class ImportSummary:
     claude_calls: int = 0
     quota_refunded: bool = False
     reimport: bool = False
+    # Items jugés sans contenu suffisant par Claude (0 fiche) : à vérifier dans le PDF.
+    insufficient_items: list[int] = field(default_factory=list)
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -121,25 +128,32 @@ async def publish_job(db: AsyncSession, job_id: uuid.UUID, *, claude_calls: int)
             "en disparaîtraient. Rien n'a été modifié."
         )
 
-    summary = ImportSummary(claude_calls=claude_calls, reimport=was_ready)
+    summary = ImportSummary(
+        claude_calls=claude_calls,
+        reimport=was_ready,
+        insufficient_items=sorted(n for n, d in drafts.items() if d.insufficient_text),
+    )
+
+    def draft_cards(draft: JobItem) -> list[dict]:
+        gen = generations.get(draft.generation_id) if draft.generation_id else None
+        return generation_cards(gen) if gen is not None else []
 
     def add_cards(item: Item, draft: JobItem) -> None:
-        gen = generations.get(draft.generation_id) if draft.generation_id else None
-        if gen is None:
-            return
-        for c in generation_cards(gen):
+        gen_id = draft.generation_id
+        for c in draft_cards(draft):
             db.add(
                 FlashCard(
                     item_id=item.id,
                     college_id=college.id,
                     user_id=college.user_id,
                     card_type=c["card_type"],
-                    rang=item.rang,
+                    # Rang de la fiche (p2) ; générations antérieures : rang de l'item.
+                    rang=c.get("rang") if c.get("rang") in CARD_RANGS else item.rang,
                     recto=c["recto"],
                     verso=c["verso"],
                     ocr_confidence_score=item.ocr_confidence_score,
                     low_confidence=item.low_confidence,
-                    generation_id=gen.id,
+                    generation_id=gen_id,
                 )
             )
 
@@ -154,16 +168,16 @@ async def publish_job(db: AsyncSession, job_id: uuid.UUID, *, claude_calls: int)
             summary.added += 1
         elif item.text_hash == draft.text_hash:
             _copy_metadata(item, draft)
-            if card_counts.get(item.id, 0) == 0 and draft.generation_id is not None:
+            if card_counts.get(item.id, 0) == 0 and draft_cards(draft):
                 add_cards(item, draft)  # item resté sans fiche : il en reçoit enfin
                 summary.changed += 1
             else:
                 summary.unchanged += 1
-        elif draft.generation_id is None:
-            # Modifié mais Claude n'a rien rendu d'exploitable : on garde l'ancien
-            # contenu (et son empreinte) plutôt que de le perdre ; retenté au prochain import.
+        elif not draft_cards(draft):
+            # Modifié mais Claude n'a rien rendu d'exploitable (ou texte insuffisant) : on
+            # garde l'ancien contenu (et son empreinte) plutôt que de le perdre.
             _copy_metadata(item, draft)
-            logger.warning("Item %d modifié sans génération : ancien contenu conservé", number)
+            logger.warning("Item %d modifié sans fiche générée : ancien contenu conservé", number)
             summary.unchanged += 1
         else:
             _copy_metadata(item, draft)

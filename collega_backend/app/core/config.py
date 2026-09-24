@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     reload_count_max: int = 2
     monthly_reloads_max: int = 3
 
+    # Items générés en parallèle par import (chantier 4) : appels Claude simultanés.
+    # 429 répétés au contrôle de fumée → 2.
+    generation_concurrency: int = 4
+
     # Taux de conversion USD→EUR pour le calcul de coût des tokens Claude
     # (Story 7.8). Valeur par défaut ici (PAS dans le .env prod NAS, cf. mémoire
     # projet) ; surchargeable via la variable d'env USD_EUR_RATE si besoin.

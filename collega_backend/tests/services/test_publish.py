@@ -206,6 +206,7 @@ async def test_summary_persisted_on_job(pg_session):
         "claude_calls": 1,
         "quota_refunded": False,
         "reimport": True,
+        "insufficient_items": [],
     }
     assert job.hash_shared is False
 
@@ -266,3 +267,71 @@ async def test_first_import_is_never_rejected(pg_session):
     await make_draft(pg_session, job, 304, "t", cards("Q"))
     await pg_session.commit()
     assert (await publish_job(pg_session, job.id, claude_calls=1)).reimport is False
+
+
+async def test_card_rang_is_published_per_card_defaulting_to_item_rang(pg_session):
+    _, college, job = await _setup(pg_session, status="ocr_complete")
+    await make_draft(
+        pg_session,
+        job,
+        304,
+        "texte",
+        [
+            {"card_type": "classique", "rang": "A", "recto": "QA", "verso": "R"},
+            {"card_type": "classique", "rang": "B", "recto": "QB", "verso": "R"},
+            {"card_type": "classique", "recto": "Q sans rang", "verso": "R"},  # génération p1
+        ],
+        rang="B",
+    )
+    await pg_session.commit()
+    await publish_job(pg_session, job.id, claude_calls=1)
+    await pg_session.commit()
+    rows = (await pg_session.execute(select(FlashCard.recto, FlashCard.rang))).tuples().all()
+    assert sorted(rows) == [("Q sans rang", "B"), ("QA", "A"), ("QB", "B")]
+
+
+async def test_cas_clinique_card_is_accepted_by_the_database(pg_session):
+    _, college, job = await _setup(pg_session, status="ocr_complete")
+    await make_draft(
+        pg_session, job, 304, "texte", [{"card_type": "cas_clinique", "rang": "A", "recto": "Cas ?", "verso": "R"}]
+    )
+    await pg_session.commit()
+    await publish_job(pg_session, job.id, claude_calls=1)
+    await pg_session.commit()
+    assert (await pg_session.execute(select(FlashCard.card_type))).scalars().all() == ["cas_clinique"]
+
+
+async def test_summary_lists_insufficient_items_on_first_import(pg_session):
+    _, college, job = await _setup(pg_session, status="ocr_complete")
+    await make_draft(pg_session, job, 304, "texte", cards("Q"))
+    await make_draft(pg_session, job, 305, "sommaire", [], insufficient_text=True)
+    await make_draft(pg_session, job, 215, "objectifs seuls", [], insufficient_text=True)
+    await pg_session.commit()
+    summary = await publish_job(pg_session, job.id, claude_calls=3)
+    await pg_session.commit()
+    assert summary.insufficient_items == [215, 305]
+    assert (summary.added, summary.cards) == (3, 1)
+    await pg_session.refresh(job)
+    assert json.loads(job.summary_json)["insufficient_items"] == [215, 305]
+
+
+async def test_unchanged_insufficient_item_counts_as_unchanged(pg_session):
+    _, college, job = await _setup(pg_session)
+    await make_item(pg_session, college, 305, text="sommaire")  # publié sans fiche
+    await make_draft(pg_session, job, 305, "sommaire", [], insufficient_text=True)
+    await pg_session.commit()
+    summary = await publish_job(pg_session, job.id, claude_calls=0)
+    await pg_session.commit()
+    assert (summary.changed, summary.unchanged, summary.insufficient_items) == (0, 1, [305])
+
+
+async def test_changed_item_now_insufficient_keeps_old_content(pg_session):
+    _, college, job = await _setup(pg_session)
+    item = await make_item(pg_session, college, 304, text="ancien texte")
+    old = await make_card(pg_session, item, recto="ancienne")
+    await make_draft(pg_session, job, 304, "texte tronqué", [], insufficient_text=True)
+    await pg_session.commit()
+    summary = await publish_job(pg_session, job.id, claude_calls=1)
+    await pg_session.commit()
+    assert (summary.changed, summary.unchanged, summary.insufficient_items) == (0, 1, [304])
+    assert [c.id for c in (await pg_session.execute(select(FlashCard))).scalars()] == [old.id]

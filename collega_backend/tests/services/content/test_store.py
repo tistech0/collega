@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import func, select
 
-from app.models.content import ItemGeneration, OcrPage
+from app.models.content import ItemGeneration, ItemText, OcrPage
 from app.services.content import store
 from app.services.content.fingerprint import item_hash
 
@@ -22,7 +22,32 @@ async def test_item_text_keyed_by_normalized_hash_keeps_raw_text(pg_session):
     h = await store.put_item_text(pg_session, ["Le foie\nsain\n233", "234\nsuite"])
     await pg_session.commit()
     assert h == item_hash(["Le foie\nsain\n999", "1000\nsuite"])
+    # Affichage (régénération) : pages jointes par des retours à la ligne.
     assert await store.get_item_text(pg_session, h) == "Le foie\nsain\n233\n234\nsuite"
+    # Génération : les pages se redécoupent (séparateur de page « \f » dans item_texts).
+    assert await store.get_item_pages(pg_session, h) == ["Le foie\nsain\n233", "234\nsuite"]
+
+
+async def test_form_feed_inside_a_page_does_not_split_it(pg_session):
+    pages = ["p1 ligne\fsuite", "p2"]
+    h = await store.put_item_text(pg_session, pages)
+    await pg_session.commit()
+    assert h == item_hash(pages)  # empreinte calculée sur les pages d'origine, inchangée
+    assert await store.get_item_pages(pg_session, h) == ["p1 ligne\nsuite", "p2"]
+
+
+async def test_old_item_text_without_page_separator_is_one_page(pg_session):
+    pg_session.add(ItemText(hash="h" * 64, text="ancien\ntexte"))
+    await pg_session.commit()
+    assert await store.get_item_pages(pg_session, "h" * 64) == ["ancien\ntexte"]
+    assert await store.get_item_pages(pg_session, "x" * 64) is None
+
+
+async def test_insufficient_generation_is_stored_with_its_flag(pg_session):
+    h = await store.put_item_text(pg_session, ["sommaire"])
+    gen = await store.put_generation(pg_session, h, "v1", [], "m", 10, 5, insufficient_text=True)
+    await pg_session.commit()
+    assert gen.insufficient_text is True and store.generation_cards(gen) == []
 
 
 async def test_generation_is_unique_per_hash_and_version(pg_session):

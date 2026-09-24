@@ -90,17 +90,21 @@ async def make_draft(
     db: AsyncSession,
     job: GenerationJob,
     number: int,
-    text: str,
+    text: str | list[str],
     cards: list[dict] | None = None,
     *,
     version: str = "claude-sonnet-4-6:p1",
     rang: str = "A",
+    insufficient_text: bool = False,
 ) -> JobItem:
-    """Item détecté par l'import `job` ; `cards` non None → génération d'origine déjà faite."""
-    text_hash = await store.put_item_text(db, [text])
+    """Item détecté par l'import `job` (`text` : texte d'une page ou liste des pages) ;
+    `cards` non None → génération d'origine déjà faite."""
+    text_hash = await store.put_item_text(db, [text] if isinstance(text, str) else text)
     generation_id = None
     if cards is not None:
-        gen = await store.put_generation(db, text_hash, version, cards, "claude-sonnet-4-6", 10, 5)
+        gen = await store.put_generation(
+            db, text_hash, version, cards, "claude-sonnet-4-6", 10, 5, insufficient_text=insufficient_text
+        )
         generation_id = gen.id
     draft = JobItem(
         job_id=job.id,
@@ -113,6 +117,7 @@ async def make_draft(
         low_confidence=False,
         text_hash=text_hash,
         generation_id=generation_id,
+        insufficient_text=insufficient_text,
     )
     db.add(draft)
     await db.flush()

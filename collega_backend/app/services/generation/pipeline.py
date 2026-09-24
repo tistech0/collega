@@ -11,20 +11,35 @@ Pour chaque item du brouillon (`job_items`) :
   validée immédiatement : une relance (crash, redéploiement) ne repaie jamais un
   item déjà généré.
 Aucune session n'est ouverte pendant un appel Claude.
+
+Chantier 4 : items générés en parallèle (`settings.generation_concurrency` appels
+simultanés), chacun dans sa tâche avec ses sessions courtes et son commit ; seul
+l'orchestrateur tient l'avancement (items faits, fiches, aperçu). Stop : les appels
+en vol sont annulés, les items validés restent acquis et l'import reste reprenable.
+Erreur d'une tâche (API indisponible après les réessais du SDK) : les autres sont
+annulées et l'erreur remonte (le worker passe l'import en échec, `fail_job`).
+Les pages de l'item sont relues dans `item_texts` (séparateur de page stable,
+`store.PAGE_SEPARATOR`) pour que `clean_for_prompt` traite les en-têtes répétés.
+Texte insuffisant : génération à 0 fiche conservée (jamais repayée), item marqué
+`job_items.insufficient_text` et listé dans le résumé d'import.
 """
 
 from __future__ import annotations
 
+import asyncio
+import itertools
 import json
 import logging
 import uuid
-from collections.abc import Awaitable, Callable, Sequence
+from collections.abc import Awaitable, Callable, Iterator, Sequence
+from dataclasses import dataclass
 from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy import update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.core.config import settings
 from app.models.college import College
 from app.models.content import ItemGeneration, JobItem
 from app.models.flash_card import FlashCard
@@ -127,73 +142,135 @@ async def generate_job_items(
     claude_calls = 0
     await _report(progress, college_id, items_done=items_done, items_total=total, cards=cards, preview=latest)
 
-    for item_number, title, text_hash in todo:
-        async with session_factory() as db:
-            if await _job_status(db, job_id) != "ocr_complete":
-                logger.info("Génération du job %s arrêtée avant l'item %d", job_id, item_number)
-                return None
-            gen = await store.find_generation(db, text_hash, GENERATION_VERSION)
-            text = None if gen is not None else await store.get_item_text(db, text_hash)
+    semaphore = asyncio.Semaphore(max(1, settings.generation_concurrency))
+    event_numbers = itertools.count(items_done + 1)
 
-        result = None
-        if gen is None:
-            # Le texte d'item est stocké d'un seul tenant (pages jointes par « \n », sans
-            # séparateur stable) : il est envoyé comme une seule « page » — la règle des
-            # en-têtes répétés de clean_for_prompt ne s'y applique donc pas (tâche 6).
-            result = await claude.generate_cards(item_number, title or "", [text or ""])
-            # Seul un appel réellement facturé compte (texte vide : aucun appel fait). Il est
-            # enregistré tout de suite : compté même si l'import est ensuite arrêté ou échoue.
-            if result.input_tokens or result.output_tokens:
-                claude_calls += 1
-                await record_usage(
-                    session_factory,
-                    kind="generation",
-                    model=result.model,
-                    input_tokens=result.input_tokens,
-                    output_tokens=result.output_tokens,
-                    user_id=user_id,
-                    college_id=college_id,
-                    job_id=job_id,
-                )
-
-        async with session_factory() as db:
-            job = await db.get(GenerationJob, job_id)
-            if job is None:
-                return None
-            if result is not None:
-                if result.cards:
-                    gen = await store.put_generation(
-                        db,
-                        text_hash,
-                        GENERATION_VERSION,
-                        [
-                            {"card_type": c.card_type, "rang": c.rang, "recto": c.recto, "verso": c.verso}
-                            for c in result.cards
-                        ],
-                        GENERATION_MODEL,
-                        result.input_tokens,
-                        result.output_tokens,
-                    )
-                else:
-                    logger.warning("Item %d : aucune fiche exploitable (sera retenté au prochain import)", item_number)
-            if gen is not None:
-                await db.execute(
-                    sa_update(JobItem)
-                    .where(JobItem.job_id == job_id, JobItem.item_number == item_number)
-                    .values(generation_id=gen.id)
-                )
-            # Un événement par item : trace pour l'admin et « progression » pour le cron
-            # des jobs bloqués (la console n'affiche que le dernier d'une série).
-            await record_job_event(
-                db, job_id, "generation_progress", message=f"item {item_number}", page=items_done + 1, total=total
+    async def generate_one(item_number: int, title: str | None, text_hash: str) -> _ItemOutcome | None:
+        async with semaphore:
+            return await _generate_item(
+                session_factory,
+                claude,
+                job_id=job_id,
+                user_id=user_id,
+                college_id=college_id,
+                item_number=item_number,
+                title=title,
+                text_hash=text_hash,
+                total=total,
+                event_numbers=event_numbers,
             )
-            await db.commit()
 
-        items_done += 1
-        if gen is not None:
-            new_cards = store.generation_cards(gen)
-            cards += len(new_cards)
-            latest = ([c["recto"] for c in reversed(new_cards)] + latest)[:PREVIEW_SIZE]
-        await _report(progress, college_id, items_done=items_done, items_total=total, cards=cards, preview=latest)
+    pending = {asyncio.create_task(generate_one(*t), name=f"generation-item-{t[0]}") for t in todo}
+    try:
+        while pending:
+            done, pending = await asyncio.wait(pending, return_when=asyncio.FIRST_COMPLETED)
+            # Erreur ou annulation d'une tâche : les autres sont annulées (finally), le job
+            # échoue par l'appelant (fail_job) ou reste reprenable (CancelledError).
+            failed = [t for t in done if t.cancelled() or t.exception() is not None]
+            if failed:
+                failed[0].result()
+            results = [t.result() for t in done]
+            outcomes = [o for o in results if o is not None]
+            if len(outcomes) < len(results):
+                return None  # Stop, job ou collège supprimé
+            # Seul l'orchestrateur tient les compteurs d'avancement.
+            for outcome in outcomes:
+                claude_calls += outcome.billed
+                items_done += 1
+                cards += len(outcome.cards)
+                latest = ([c["recto"] for c in reversed(outcome.cards)] + latest)[:PREVIEW_SIZE]
+            await _report(progress, college_id, items_done=items_done, items_total=total, cards=cards, preview=latest)
+    finally:
+        # Stop, erreur ou interruption du worker : les appels en vol sont abandonnés ;
+        # les items déjà validés restent acquis (reprise sans repayer).
+        for task in pending:
+            task.cancel()
+        if pending:
+            await asyncio.gather(*pending, return_exceptions=True)
 
     return claude_calls
+
+
+@dataclass
+class _ItemOutcome:
+    cards: list[dict[str, Any]]
+    billed: bool
+
+
+async def _generate_item(
+    session_factory: async_sessionmaker[AsyncSession],
+    claude: Any,
+    *,
+    job_id: uuid.UUID,
+    user_id: uuid.UUID,
+    college_id: uuid.UUID,
+    item_number: int,
+    title: str | None,
+    text_hash: str,
+    total: int,
+    event_numbers: Iterator[int],
+) -> _ItemOutcome | None:
+    """Génère (ou réutilise) la génération d'un item et la valide aussitôt (commit
+    par item). None : import arrêté (Stop, job ou collège supprimé)."""
+    async with session_factory() as db:
+        if await _job_status(db, job_id) != "ocr_complete":
+            logger.info("Génération du job %s arrêtée avant l'item %d", job_id, item_number)
+            return None
+        gen = await store.find_generation(db, text_hash, GENERATION_VERSION)
+        pages = None if gen is not None else await store.get_item_pages(db, text_hash)
+
+    result = None
+    if gen is None:
+        result = await claude.generate_cards(item_number, title or "", pages or [""])
+        # Seul un appel réellement facturé compte (texte vide : aucun appel fait). Il est
+        # enregistré tout de suite : compté même si l'import est ensuite arrêté ou échoue.
+        if result.input_tokens or result.output_tokens:
+            await record_usage(
+                session_factory,
+                kind="generation",
+                model=result.model,
+                input_tokens=result.input_tokens,
+                output_tokens=result.output_tokens,
+                user_id=user_id,
+                college_id=college_id,
+                job_id=job_id,
+            )
+
+    async with session_factory() as db:
+        job = await db.get(GenerationJob, job_id)
+        if job is None:
+            return None
+        if result is not None:
+            if result.cards or result.insufficient_text:
+                # Texte insuffisant : génération à 0 fiche gardée comme les autres — un
+                # réimport du même texte ne repaie pas l'item.
+                gen = await store.put_generation(
+                    db,
+                    text_hash,
+                    GENERATION_VERSION,
+                    [
+                        {"card_type": c.card_type, "rang": c.rang, "recto": c.recto, "verso": c.verso}
+                        for c in result.cards
+                    ],
+                    GENERATION_MODEL,
+                    result.input_tokens,
+                    result.output_tokens,
+                    insufficient_text=result.insufficient_text,
+                )
+            else:
+                logger.warning("Item %d : aucune fiche exploitable (sera retenté au prochain import)", item_number)
+        if gen is not None:
+            await db.execute(
+                sa_update(JobItem)
+                .where(JobItem.job_id == job_id, JobItem.item_number == item_number)
+                .values(generation_id=gen.id, insufficient_text=gen.insufficient_text)
+            )
+        # Un événement par item : trace pour l'admin et « progression » pour le cron
+        # des jobs bloqués (la console n'affiche que le dernier d'une série).
+        await record_job_event(
+            db, job_id, "generation_progress", message=f"item {item_number}", page=next(event_numbers), total=total
+        )
+        await db.commit()
+
+    billed = result is not None and bool(result.input_tokens or result.output_tokens)
+    return _ItemOutcome(cards=store.generation_cards(gen) if gen is not None else [], billed=billed)

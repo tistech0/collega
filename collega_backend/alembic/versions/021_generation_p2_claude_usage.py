@@ -6,6 +6,10 @@
   évaluation). L'historique des jobs y est repris (une ligne `generation` au tarif
   `claude-sonnet-4-6` par job ayant des tokens, datée du job), puis
   generation_jobs.input_tokens/output_tokens sont supprimées.
+- flash_cards.card_type accepte `cas_clinique` (prompt p2).
+- Texte insuffisant (Claude : pas de vrai contenu d'enseignement) :
+  item_generations.insufficient_text (génération à 0 fiche conservée, jamais repayée)
+  et job_items.insufficient_text (item listé dans le résumé d'import).
 
 Revision ID: 021
 Revises: 020
@@ -55,8 +59,25 @@ def upgrade() -> None:
     op.drop_column("generation_jobs", "input_tokens")
     op.drop_column("generation_jobs", "output_tokens")
 
+    op.drop_constraint("ck_flash_cards_card_type", "flash_cards", type_="check")
+    op.create_check_constraint(
+        "ck_flash_cards_card_type", "flash_cards", "card_type IN ('classique', 'definition', 'cas_clinique')"
+    )
+    op.add_column(
+        "item_generations",
+        sa.Column("insufficient_text", sa.Boolean(), nullable=False, server_default=sa.false()),
+    )
+    op.add_column("job_items", sa.Column("insufficient_text", sa.Boolean(), nullable=False, server_default=sa.false()))
+
 
 def downgrade() -> None:
+    op.drop_column("job_items", "insufficient_text")
+    op.drop_column("item_generations", "insufficient_text")
+    # Les fiches `cas_clinique` redeviennent des fiches classiques (même révision : on retourne la carte).
+    op.execute("UPDATE flash_cards SET card_type = 'classique' WHERE card_type = 'cas_clinique'")
+    op.drop_constraint("ck_flash_cards_card_type", "flash_cards", type_="check")
+    op.create_check_constraint("ck_flash_cards_card_type", "flash_cards", "card_type IN ('classique', 'definition')")
+
     op.add_column("generation_jobs", sa.Column("input_tokens", sa.Integer(), nullable=True))
     op.add_column("generation_jobs", sa.Column("output_tokens", sa.Integer(), nullable=True))
     # Les tokens de génération reviennent sur leur job ; régénérations, évaluations et

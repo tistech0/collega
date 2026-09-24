@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class FlashCard(Base):
     __tablename__ = "flash_cards"
     __table_args__ = (
-        CheckConstraint("card_type IN ('classique', 'definition')", name="ck_flash_cards_card_type"),
+        CheckConstraint("card_type IN ('classique', 'definition', 'cas_clinique')", name="ck_flash_cards_card_type"),
         CheckConstraint("rang IN ('A', 'B', 'C')", name="ck_flash_cards_rang"),
         CheckConstraint(
             "user_feedback IN ('positive', 'negative')",

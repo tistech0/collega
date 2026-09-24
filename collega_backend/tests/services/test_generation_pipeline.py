@@ -3,6 +3,8 @@
 import asyncio
 import json
 
+import anthropic
+import httpx
 import pytest
 from sqlalchemy import func, select
 
@@ -26,11 +28,18 @@ pytestmark = pytest.mark.pg
 
 
 class FakeClaude:
-    def __init__(self, *, fail_on_call: int | None = None, empty_for: set[int] = frozenset()):
+    def __init__(
+        self,
+        *,
+        fail_on_call: int | None = None,
+        empty_for: set[int] = frozenset(),
+        insufficient_for: set[int] = frozenset(),
+    ):
         self.calls: list[int] = []
         self.args: list[tuple[int, str, list[str]]] = []
         self.fail_on_call = fail_on_call
         self.empty_for = empty_for
+        self.insufficient_for = insufficient_for
 
     async def generate_cards(self, item_number, title, pages, *, effort="medium"):
         self.calls.append(item_number)
@@ -39,16 +48,18 @@ class FakeClaude:
             raise RuntimeError("Claude indisponible")
         if item_number in self.empty_for:
             return _result([], 50, 5)
+        if item_number in self.insufficient_for:
+            return _result([], 80, 8, insufficient_text=True)
         return _result([FlashCardData("classique", "B", f"Q{item_number} ?", f"R{item_number}")], 100, 10)
 
 
-def _result(cards, input_tokens, output_tokens):
+def _result(cards, input_tokens, output_tokens, *, insufficient_text=False):
     return CardGenResult(
         cards=cards,
         input_tokens=input_tokens,
         output_tokens=output_tokens,
         model="claude-sonnet-5",
-        insufficient_text=False,
+        insufficient_text=insufficient_text,
         stop_reason="end_turn" if input_tokens else None,
     )
 
@@ -72,13 +83,19 @@ def notifications(monkeypatch):
     return spy
 
 
+@pytest.fixture
+def sequential(monkeypatch):
+    """Un item à la fois : pour les scénarios qui dépendent de l'ordre des appels."""
+    monkeypatch.setattr(settings, "generation_concurrency", 1)
+
+
 @pytest.fixture(autouse=True)
 def storage(tmp_path, monkeypatch):
     monkeypatch.setattr(settings, "pdf_storage_path", str(tmp_path))
     return tmp_path
 
 
-async def _ready_job(pg_factory, drafts: dict[int, str], *, college_status="ocr_complete", user=None):
+async def _ready_job(pg_factory, drafts: dict[int, str | list[str]], *, college_status="ocr_complete", user=None):
     async with pg_factory() as db:
         user = user or await make_user(db)
         college = await make_college(db, user, status=college_status, ref_id=34)
@@ -113,12 +130,12 @@ async def test_generates_each_draft_and_publishes(pg_factory, notifications):
     assert notifications.sent == [("complete", 34, None)]  # premier import : message simple
 
 
-async def test_passes_title_and_text_and_stores_card_rang(pg_factory, notifications):
-    _, college, job = await _ready_job(pg_factory, {304: "texte 304"})
+async def test_passes_title_and_pages_and_stores_card_rang(pg_factory, notifications):
+    _, college, job = await _ready_job(pg_factory, {304: ["page 1 de 304", "page 2 de 304"]})
     claude = FakeClaude()
     await _run(pg_factory, college, job, claude)
-    # Texte d'item stocké d'un seul tenant : envoyé comme une seule page.
-    assert claude.args == [(304, "Item 304", ["texte 304"])]
+    # Pages de l'item redécoupées (séparateur « \f » dans item_texts) pour clean_for_prompt.
+    assert claude.args == [(304, "Item 304", ["page 1 de 304", "page 2 de 304"])]
     async with pg_factory() as s:
         gen = (await s.execute(select(ItemGeneration))).scalar_one()
         assert json.loads(gen.cards_json) == [
@@ -158,7 +175,7 @@ async def test_new_generation_version_calls_claude_again(pg_factory, notificatio
         assert (await s.execute(select(func.count()).select_from(ItemGeneration))).scalar_one() == 2
 
 
-async def test_error_midway_then_relaunch_does_not_repay(pg_factory, notifications, monkeypatch):
+async def test_error_midway_then_relaunch_does_not_repay(pg_factory, notifications, monkeypatch, sequential):
     user, college, job = await _ready_job(pg_factory, {301: "a", 302: "b", 303: "c"})
     monkeypatch.setattr(generation_worker, "async_session_factory", pg_factory)
     monkeypatch.setattr(generation_worker, "ClaudeClient", lambda: FakeClaude(fail_on_call=2))
@@ -185,7 +202,7 @@ async def test_error_midway_then_relaunch_does_not_repay(pg_factory, notificatio
     assert claude.calls == [302, 303]
 
 
-async def test_interruption_then_arq_retry_does_not_repay(pg_factory, notifications, monkeypatch):
+async def test_interruption_then_arq_retry_does_not_repay(pg_factory, notifications, monkeypatch, sequential):
     _, college, job = await _ready_job(pg_factory, {301: "a", 302: "b", 303: "c"})
 
     class Interrupting(FakeClaude):
@@ -216,7 +233,7 @@ async def test_tokens_accumulated_even_without_cards(pg_factory, notifications):
         assert (await s.execute(select(func.count()).select_from(Item))).scalar_one() == 1
 
 
-async def test_stop_between_items(pg_factory, notifications):
+async def test_stop_between_items(pg_factory, notifications, sequential):
     _, college, job = await _ready_job(pg_factory, {301: "a", 302: "b"})
 
     class StopAfterFirst(FakeClaude):
@@ -236,7 +253,7 @@ async def test_stop_between_items(pg_factory, notifications):
         assert (await s.execute(select(func.count()).select_from(Item))).scalar_one() == 0
 
 
-async def test_deleted_account_stops_generation(pg_factory, notifications):
+async def test_deleted_account_stops_generation(pg_factory, notifications, sequential):
     user, college, job = await _ready_job(pg_factory, {301: "a", 302: "b"})
 
     class DeleteAfterFirst(FakeClaude):
@@ -288,7 +305,7 @@ async def test_same_pdf_reimport_end_to_end(pg_factory, notifications, storage):
     assert [p.name for p in storage.glob("*.pdf")] == [pdf2.name]
 
 
-async def test_progress_reported_per_item(pg_factory, notifications):
+async def test_progress_reported_per_item(pg_factory, notifications, sequential):
     _, college, job = await _ready_job(pg_factory, {301: "a", 302: "b"})
     seen = []
 
@@ -374,3 +391,144 @@ async def test_rejected_publish_fails_job_and_keeps_content(pg_factory, notifica
         assert (await s.execute(select(func.count()).select_from(FlashCard))).scalar_one() == 4
         assert (await s.get(College, college.id)).reload_count == 0  # quota rendu
     assert notifications.sent[-1] == ("failed", 34, True)
+
+
+# --- Chantier 4 : génération en parallèle, texte insuffisant -----------------------
+
+
+async def _drafts_again(pg_factory, college, texts):
+    """Nouvel import du même collège avec les mêmes textes d'items."""
+    async with pg_factory() as db:
+        job = await make_job(db, await db.get(College, college.id), status="ocr_complete")
+        for n, t in texts.items():
+            await make_draft(db, job, n, t, None)
+        await db.commit()
+    return job
+
+
+async def test_items_generated_in_parallel_up_to_the_concurrency(pg_factory, notifications, monkeypatch):
+    monkeypatch.setattr(settings, "generation_concurrency", 4)
+    _, college, job = await _ready_job(pg_factory, {300 + n: f"texte {n}" for n in range(10)})
+
+    class Slow(FakeClaude):
+        active = peak = 0
+
+        async def generate_cards(self, item_number, title, pages, *, effort="medium"):
+            Slow.active += 1
+            Slow.peak = max(Slow.peak, Slow.active)
+            try:
+                await asyncio.sleep(0.05)
+                return await super().generate_cards(item_number, title, pages)
+            finally:
+                Slow.active -= 1
+
+    seen = []
+
+    async def progress(college_id, **kw):
+        seen.append((kw["items_done"], kw["cards"], list(kw["preview"])))
+
+    claude = Slow()
+    result = await run_generation(pg_factory, college.id, job.id, claude, progress=progress)
+    assert Slow.peak == 4
+    assert sorted(claude.calls) == list(range(300, 310))
+    assert (result["added"], result["cards"], result["claude_calls"]) == (10, 10, 10)
+    assert len(await _usage(pg_factory)) == 10
+    # Avancement publié par le seul orchestrateur après chaque lot d'items terminés :
+    # strictement croissant, cohérent (1 fiche par item) et complet à la fin.
+    steps = [(done, cards) for done, cards, _ in seen]
+    assert steps[0] == (0, 0) and steps[-1] == (10, 10)
+    assert all(a < b for (a, _), (b, _) in zip(steps, steps[1:], strict=False))
+    assert all(done == cards for done, cards in steps)
+    assert len(seen[-1][2]) == 3
+
+
+async def test_stop_cancels_in_flight_calls_and_keeps_committed_items(pg_factory, notifications, monkeypatch):
+    monkeypatch.setattr(settings, "generation_concurrency", 2)
+    texts = {n: f"texte {n}" for n in range(301, 307)}
+    _, college, job = await _ready_job(pg_factory, texts)
+    in_flight_303 = asyncio.Event()
+    cancelled: list[int] = []
+
+    class StopDuring(FakeClaude):
+        async def generate_cards(self, item_number, title, pages, *, effort="medium"):
+            if item_number == 303:
+                self.calls.append(item_number)
+                in_flight_303.set()
+                try:
+                    await asyncio.sleep(30)
+                except asyncio.CancelledError:
+                    cancelled.append(item_number)
+                    raise
+            if item_number == 302:
+                await asyncio.wait_for(in_flight_303.wait(), 5)
+                async with pg_factory() as s:  # Stop pendant l'appel de 302 (303 en vol)
+                    (await s.get(GenerationJob, job.id)).status = "failed"
+                    await s.commit()
+            return await super().generate_cards(item_number, title, pages)
+
+    claude = StopDuring()
+    result = await asyncio.wait_for(_run(pg_factory, college, job, claude), 10)
+    assert result["error"] == "cancelled"
+    assert sorted(claude.calls) == [301, 302, 303] and cancelled == [303]
+    # Appels terminés comptés et générations conservées ; l'appel annulé n'a rien rendu.
+    assert len(await _usage(pg_factory)) == 2
+    async with pg_factory() as s:
+        assert (await s.execute(select(func.count()).select_from(ItemGeneration))).scalar_one() == 2
+
+    # L'import est relancé : seuls les items non générés repassent par Claude.
+    job2 = await _drafts_again(pg_factory, college, texts)
+    claude = FakeClaude()
+    result = await _run(pg_factory, college, job2, claude)
+    assert sorted(claude.calls) == [303, 304, 305, 306]
+    assert (result["added"], result["cards"], result["claude_calls"]) == (6, 6, 4)
+
+
+async def test_api_error_fails_job_and_cancels_other_calls(pg_factory, notifications, monkeypatch):
+    monkeypatch.setattr(settings, "generation_concurrency", 3)
+    _, college, job = await _ready_job(pg_factory, {301: "a", 302: "b", 303: "c"})
+    others_in_flight = asyncio.Event()
+    cancelled: list[int] = []
+
+    class ApiDown(FakeClaude):
+        async def generate_cards(self, item_number, title, pages, *, effort="medium"):
+            self.calls.append(item_number)
+            if item_number == 302:
+                await asyncio.wait_for(others_in_flight.wait(), 5)
+                # Erreur d'API restée après les réessais du SDK.
+                raise anthropic.APIConnectionError(request=httpx.Request("POST", "https://api.anthropic.com"))
+            if {301, 303} <= set(self.calls):
+                others_in_flight.set()
+            try:
+                await asyncio.sleep(30)
+            except asyncio.CancelledError:
+                cancelled.append(item_number)
+                raise
+            raise AssertionError("jamais atteint")
+
+    monkeypatch.setattr(generation_worker, "async_session_factory", pg_factory)
+    monkeypatch.setattr(generation_worker, "ClaudeClient", ApiDown)
+    with pytest.raises(anthropic.APIConnectionError):
+        await asyncio.wait_for(generation_worker.generate_college_cards({}, str(college.id), str(job.id), "x.pdf"), 10)
+    assert sorted(cancelled) == [301, 303]
+    async with pg_factory() as s:
+        assert (await s.get(GenerationJob, job.id)).status == "failed"
+        assert (await s.get(College, college.id)).status == "failed"
+    assert notifications.sent == [("failed", 34, False)]
+
+
+async def test_insufficient_item_is_listed_and_never_repaid(pg_factory, notifications):
+    texts = {304: "vrai contenu", 305: "sommaire seul"}
+    _, college, job = await _ready_job(pg_factory, texts)
+    result = await _run(pg_factory, college, job, FakeClaude(insufficient_for={305}))
+    assert (result["insufficient_items"], result["added"], result["cards"]) == ([305], 2, 1)
+    assert [r[2:4] for r in await _usage(pg_factory)].count((80, 8)) == 1  # appel payé, compté
+    async with pg_factory() as s:
+        gens = (await s.execute(select(ItemGeneration))).scalars().all()
+        assert sorted(g.insufficient_text for g in gens) == [False, True]
+
+    # Réimport du même PDF : l'item insuffisant n'est pas retenté (0 appel) et reste signalé.
+    job2 = await _drafts_again(pg_factory, college, texts)
+    claude = FakeClaude(insufficient_for={305})
+    result = await _run(pg_factory, college, job2, claude)
+    assert claude.calls == []
+    assert (result["insufficient_items"], result["claude_calls"], result["unchanged"]) == ([305], 0, 2)
