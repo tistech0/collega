@@ -82,7 +82,9 @@ def _repeated_header_footer_lines(pages_lines: list[list[str]]) -> set[str]:
         for norm in {_normalize_line(line) for line in lines if line}:
             counts[norm] = counts.get(norm, 0) + 1
     threshold = _HEADER_MIN_SHARE * len(pages_lines)
-    return {norm for norm, n in counts.items() if n >= threshold}
+    # Un rang isolé (« A », « B »…) se répète d'une page à l'autre sans être un en-tête.
+    rang_markers = {_normalize_line(marker) for marker in _RANG_MARKERS}
+    return {norm for norm, n in counts.items() if n >= threshold and norm not in rang_markers}
 
 
 def _collapse_blank_runs(lines: list[str]) -> list[str]:

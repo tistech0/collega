@@ -212,6 +212,19 @@ def test_digit_and_letters_content_lines_survive_cleaning(college_data):
     assert checked > 0
 
 
+def test_repeated_rang_marker_is_never_removed_as_header():
+    """Revue finale (Minor 1) : un rang isolé (« A ») présent sur ≥ 50 % des pages d'un
+    item de ≥ 3 pages n'est pas un en-tête répété — il reste dans le texte envoyé."""
+    pages = [
+        "EN-TÊTE DU COLLÈGE\nObjectif un\nA\nContenu de la première page",
+        "EN-TÊTE DU COLLÈGE\nObjectif deux\nA\nContenu de la deuxième page",
+        "EN-TÊTE DU COLLÈGE\nObjectif trois\nB\nContenu de la troisième page",
+    ]
+    lines = clean_for_prompt(pages).splitlines()
+    assert "EN-TÊTE DU COLLÈGE" not in lines
+    assert lines.count("A") == 2 and lines.count("B") == 1
+
+
 def test_rang_marker_lines_survive_in_private_fixtures(college_data):
     """Régression round 1 : le rang (A/B/C/A*/B*) isolé sur sa ligne dans un tableau
     d'objectifs ne doit pas être retiré par la règle des fragments."""
