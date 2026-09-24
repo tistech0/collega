@@ -171,7 +171,7 @@ Objectif : chaque item reçoit **toutes ses pages et seulement les siennes**. Ex
   - remet à zéro les compteurs de réimport/quota des utilisatrices ;
   - **conserve** les comptes, les abonnements et `claude_usage` (`college_id`/`job_id` passent à NULL).
   - Le script affiche les comptes avant/après et refuse de tourner sans `--confirm`.
-- Le déploiement du chantier 4 (avec le vidage) se fait **au retour de l'utilisateur**, en même temps que celui du chantier 2 (voir la passation). L'utilisateur réimporte ensuite ses collèges depuis l'app ; la session surveille les logs (découpage, `insufficient_text`, coût par collège) et rapporte le nombre de fiches par item.
+- Le chantier 4 est déployé dès qu'il est fini, vidage compris (voir la passation). L'utilisateur réimporte ensuite ses collèges depuis l'app ; la session surveille les logs (découpage, `insufficient_text`, coût par collège) et rapporte le nombre de fiches par item.
 
 ## 9. Contrôle de fumée (avant déploiement)
 
