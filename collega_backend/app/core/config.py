@@ -1,11 +1,11 @@
+import ipaddress
 import logging
+from typing import Annotated, Literal
 
-from pydantic import Field, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field, field_validator, model_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
-
-_KNOWN_ENVIRONMENTS = frozenset({"development", "production"})
 
 # Listes fermées de placeholders connus (issus de `.env.example`). On préfère
 # une égalité explicite à une recherche par substring, qui rejetait à tort des
@@ -31,12 +31,18 @@ class Settings(BaseSettings):
         env_file=".env", env_file_encoding="utf-8", extra="ignore", hide_input_in_errors=True
     )
 
-    environment: str = "development"  # "development" | "production"
+    # Obligatoire (chantier 2 § 6) : absente ou hors liste → démarrage refusé. Une typo
+    # (`prod`) n'est plus traitée silencieusement comme `development`.
+    environment: Literal["development", "production", "test"]
 
     database_url: str
     redis_url: str
     # Tests : "memory://" (compteurs par processus, plus de Redis local requis).
     rate_limit_storage_uri: str = ""
+    # Proxys dont on croit les en-têtes CF-Connecting-IP / X-Forwarded-For (chantier 2 § 4).
+    # Défaut : réseau Docker de Nginx Proxy Manager. Variable TRUSTED_PROXY_IPS : réseaux
+    # (CIDR) ou adresses séparés par des virgules ; vide = aucun proxy de confiance.
+    trusted_proxy_ips: Annotated[list[str], NoDecode] = ["172.16.0.0/12"]
     secret_key: str
     claude_api_key: str = ""
 
@@ -70,6 +76,25 @@ class Settings(BaseSettings):
     apns_bundle_id: str = "com.lesurmatthis.collega"
     apns_use_sandbox: bool = True
 
+    @field_validator("trusted_proxy_ips", mode="before")
+    @classmethod
+    def _split_trusted_proxy_ips(cls, value: object) -> object:
+        if isinstance(value, str):
+            return [part.strip() for part in value.split(",") if part.strip()]
+        return value
+
+    @field_validator("trusted_proxy_ips")
+    @classmethod
+    def _check_trusted_proxy_ips(cls, value: list[str]) -> list[str]:
+        # Un réseau mal saisi refuse le démarrage (sinon l'IP client retomberait
+        # silencieusement sur celle du proxy : toutes les utilisatrices partageraient un compteur).
+        for network in value:
+            try:
+                ipaddress.ip_network(network, strict=False)
+            except ValueError:
+                raise ValueError(f"TRUSTED_PROXY_IPS: réseau invalide {network!r}") from None
+        return value
+
     @model_validator(mode="after")
     def _require_webhook_secret(self) -> "Settings":
         if not self.revenuecat_webhook_secret:
@@ -78,19 +103,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _validate_production_secrets(self) -> "Settings":
-        # Strip + lower : `ENVIRONMENT=" production "` (espaces dans .env) ne
-        # doit pas être traité silencieusement comme `development`.
-        env_normalized = self.environment.strip().lower()
-        is_prod = env_normalized == "production"
-
-        # Toute valeur autre que `development`/`production` est probablement
-        # une typo (`prod`, `prd`, `PROD`) — fail-open silencieux interdit.
-        if env_normalized not in _KNOWN_ENVIRONMENTS:
-            logger.warning(
-                "Unknown ENVIRONMENT=%r — treated as development. Expected one of: %s.",
-                self.environment,
-                ", ".join(sorted(_KNOWN_ENVIRONMENTS)),
-            )
+        is_prod = self.environment == "production"
 
         issues: list[str] = []
 

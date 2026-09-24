@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import types
 import uuid
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, patch
 
 from httpx import AsyncClient
@@ -12,24 +13,29 @@ VALID_SECRET = "test-rc-secret"
 VALID_AUTH_HEADER = VALID_SECRET
 
 
-def make_user(user_id=None, is_subscribed=False):
+def make_user(user_id=None, is_subscribed=False, subscription_event_at=None):
     return types.SimpleNamespace(
         id=user_id or uuid.uuid4(),
         email="user@test.com",
         is_beta=False,
         is_subscribed=is_subscribed,
         monthly_reloads=0,
+        subscription_event_at=subscription_event_at,
     )
 
 
-def webhook_payload(event_type: str, app_user_id: str | None = None) -> dict:
-    return {
-        "event": {
-            "type": event_type,
-            "app_user_id": app_user_id or str(uuid.uuid4()),
-        },
-        "api_version": "1.0",
-    }
+def webhook_payload(event_type: str, app_user_id: str | None = None, event_timestamp_ms: int | None = None) -> dict:
+    event: dict = {"type": event_type, "app_user_id": app_user_id or str(uuid.uuid4())}
+    if event_timestamp_ms is not None:
+        event["event_timestamp_ms"] = event_timestamp_ms
+    return {"event": event, "api_version": "1.0"}
+
+
+def _ms(dt: datetime) -> int:
+    return int(dt.timestamp() * 1000)
+
+
+STORED_AT = datetime(2026, 9, 20, 12, 0, tzinfo=UTC)
 
 
 class TestRevenueCatWebhook:
@@ -210,3 +216,110 @@ class TestRevenueCatWebhook:
                 headers={"Authorization": VALID_AUTH_HEADER},
             )
         assert resp.status_code == 422
+
+
+class TestAuthBeforeBody:
+    """Chantier 2 § 5 : le secret est vérifié AVANT toute lecture du corps."""
+
+    async def test_401_without_secret_even_with_invalid_body(self, client: AsyncClient):
+        resp = await client.post(
+            "/v1/webhooks/revenuecat",
+            content=b"{not json",
+            headers={"Content-Type": "application/json"},
+        )
+        assert resp.status_code == 401
+        assert resp.json()["detail"]["code"] == "INVALID_SIGNATURE"
+
+    async def test_401_wrong_secret_with_schema_invalid_body(self, client: AsyncClient):
+        resp = await client.post(
+            "/v1/webhooks/revenuecat",
+            json={"event": {}},
+            headers={"Authorization": "wrong-secret"},
+        )
+        assert resp.status_code == 401
+
+    async def test_secret_and_malformed_json_422_validation_error(self, client: AsyncClient, mock_db):
+        resp = await client.post(
+            "/v1/webhooks/revenuecat",
+            content=b"{not json",
+            headers={"Authorization": VALID_AUTH_HEADER, "Content-Type": "application/json"},
+        )
+        assert resp.status_code == 422
+        assert resp.json()["detail"]["code"] == "VALIDATION_ERROR"
+        mock_db.get.assert_not_called()
+
+    async def test_secret_and_schema_invalid_body_422_validation_error(self, client: AsyncClient, mock_db):
+        resp = await client.post(
+            "/v1/webhooks/revenuecat",
+            json={"event": {"type": "RENEWAL"}},
+            headers={"Authorization": VALID_AUTH_HEADER},
+        )
+        assert resp.status_code == 422
+        detail = resp.json()["detail"]
+        assert detail["code"] == "VALIDATION_ERROR"
+        assert detail["errors"][0]["loc"] == ["body", "event", "app_user_id"]
+        # Jamais la valeur reçue dans la réponse.
+        assert all("input" not in e for e in detail["errors"])
+
+
+class TestEventOrdering:
+    """Chantier 2 § 5 : un événement antérieur au dernier appliqué est ignoré (`stale`)."""
+
+    async def _post(self, client: AsyncClient, payload: dict):
+        return await client.post("/v1/webhooks/revenuecat", json=payload, headers={"Authorization": VALID_AUTH_HEADER})
+
+    async def test_older_event_is_stale_and_changes_nothing(self, client: AsyncClient, mock_db):
+        user = make_user(is_subscribed=True, subscription_event_at=STORED_AT)
+        mock_db.get = AsyncMock(return_value=user)
+        older = _ms(datetime(2026, 9, 19, 12, 0, tzinfo=UTC))
+
+        resp = await self._post(client, webhook_payload("EXPIRATION", str(user.id), older))
+
+        assert resp.status_code == 200
+        assert resp.json() == {"data": {"status": "stale"}}
+        assert user.is_subscribed is True
+        assert user.subscription_event_at == STORED_AT
+        mock_db.commit.assert_not_called()
+
+    async def test_newer_event_applied_and_timestamp_stored(self, client: AsyncClient, mock_db):
+        user = make_user(is_subscribed=True, subscription_event_at=STORED_AT)
+        mock_db.get = AsyncMock(return_value=user)
+        newer_dt = datetime(2026, 9, 21, 8, 30, 15, 123000, tzinfo=UTC)
+
+        resp = await self._post(client, webhook_payload("EXPIRATION", str(user.id), _ms(newer_dt)))
+
+        assert resp.status_code == 200
+        assert resp.json()["data"] == {"status": "updated", "is_subscribed": False}
+        assert user.is_subscribed is False
+        assert user.subscription_event_at == newer_dt
+        mock_db.commit.assert_called_once()
+
+    async def test_first_timestamped_event_applied(self, client: AsyncClient, mock_db):
+        user = make_user(is_subscribed=False, subscription_event_at=None)
+        mock_db.get = AsyncMock(return_value=user)
+
+        resp = await self._post(client, webhook_payload("INITIAL_PURCHASE", str(user.id), _ms(STORED_AT)))
+
+        assert resp.status_code == 200
+        assert user.is_subscribed is True
+        assert user.subscription_event_at == STORED_AT
+
+    async def test_event_without_timestamp_applied_timestamp_unchanged(self, client: AsyncClient, mock_db):
+        user = make_user(is_subscribed=True, subscription_event_at=STORED_AT)
+        mock_db.get = AsyncMock(return_value=user)
+
+        resp = await self._post(client, webhook_payload("CANCELLATION", str(user.id)))
+
+        assert resp.status_code == 200
+        assert user.is_subscribed is False
+        assert user.subscription_event_at == STORED_AT
+        mock_db.commit.assert_called_once()
+
+    async def test_user_row_locked_for_update(self, client: AsyncClient, mock_db):
+        # Deux webhooks concurrents pour la même utilisatrice se sérialisent sur la ligne.
+        user = make_user()
+        mock_db.get = AsyncMock(return_value=user)
+
+        await self._post(client, webhook_payload("RENEWAL", str(user.id), _ms(STORED_AT)))
+
+        assert mock_db.get.await_args.kwargs.get("with_for_update") is True

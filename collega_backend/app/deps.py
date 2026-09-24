@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.errors import AppError, forbidden, unauthorized
+from app.core.limiter import admin_auth_retry_after, get_client_ip, record_admin_auth_failure
 from app.core.security import JWTError, decode_token, token_version_ok
 
 _http_basic = HTTPBasic()
@@ -59,12 +60,24 @@ async def get_arq(request: Request) -> ArqRedis:
 
 
 async def get_admin_user(
+    request: Request,
     credentials: HTTPBasicCredentials = Depends(_http_basic),
 ) -> bool:
     """Protège toutes les routes /v1/admin/ par HTTP Basic Auth.
 
-    Utilise secrets.compare_digest pour éviter les timing attacks.
+    Utilise secrets.compare_digest pour éviter les timing attacks. Seuls les **échecs**
+    comptent pour la limite (10/min par IP, chantier 2 § 4) : la console enchaîne plusieurs
+    requêtes par écran. Budget épuisé → 429 avant même de comparer les identifiants.
     """
+    ip = get_client_ip(request)
+    retry_after = admin_auth_retry_after(ip)
+    if retry_after is not None:
+        raise AppError(
+            429,
+            "RATE_LIMITED",
+            "Trop de requêtes, réessayez plus tard",
+            headers={"Retry-After": str(retry_after)},
+        )
     correct_username = secrets.compare_digest(
         credentials.username.encode("utf-8"),
         settings.admin_username.encode("utf-8"),
@@ -74,6 +87,7 @@ async def get_admin_user(
         settings.admin_password.encode("utf-8"),
     )
     if not (correct_username and correct_password):
+        record_admin_auth_failure(ip)
         raise AppError(
             401,
             "INVALID_ADMIN_CREDENTIALS",

@@ -14,7 +14,7 @@
 
 - Migration du chantier : **020** (`020_token_version_subscription_event_at.py`, `down_revision` = identifiant réel de la 019) : `users.token_version INT NOT NULL DEFAULT 0`, `users.subscription_event_at TIMESTAMPTZ NULL`.
 - HS256 inchangé ; access 30 min, refresh 30 jours ; `security.JWTError` reste exporté (= `jwt.PyJWTError`).
-- Grâce de rotation : 60 s. Mot de passe provisoire : 16 caractères via `secrets.token_urlsafe` (tronqué à 16), jamais journalisé.
+- Grâce de rotation : 120 s (portée de 60 à 120 s par la revue finale, I4). Mot de passe provisoire : 16 caractères via `secrets.token_urlsafe` (tronqué à 16), jamais journalisé.
 - Limites : login 5/min/IP (inchangé) ; `/v1/auth/refresh` 30/min/IP ; échecs d'auth admin 10/min/IP ; `/v1/drill/evaluate-semantic` 30/min/utilisatrice ; régénération de fiche 10/h/utilisatrice. `max_length=2000` sur `user_answer` et `user_note`.
 - Redis indisponible : vérification de révocation → on laisse passer + warning ; révocation (logout/rotation) → warning, la réponse n'échoue pas ; limiteur `swallow_errors=True`.
 - `ENVIRONMENT` ∈ {`development`, `production`, `test`}, obligatoire.
@@ -46,16 +46,16 @@ def token_version_ok(payload: dict, current_version: int) -> bool      # "tv" ab
 
 ```python
 # app/core/token_store.py — client redis.asyncio paresseux (settings.redis_url), remplaçable en test
-GRACE_S = 60
-async def revoke_refresh(jti: str, ttl_s: int) -> None        # SET revoked:jti:{jti} 1 EX ttl ; SET refresh:grace:{jti} 1 EX 60 ; erreur Redis → warning
+GRACE_S = 120
+async def revoke_refresh(jti: str, ttl_s: int) -> None        # SET revoked:jti:{jti} 1 EX ttl ; SET refresh:grace:{jti} 1 EX 120 (rotation seulement, jamais au logout) ; erreur Redis → warning
 async def refresh_state(jti: str) -> Literal["active", "grace", "reused"]  # erreur Redis → warning + "active"
 def set_client_for_tests(client) -> None
 ```
-- `POST /v1/auth/refresh` (algorithme exact de la spec § 2) : décode, `type == "refresh"`, `tv` ok sinon 401 `TOKEN_REVOKED` ; si le jeton porte un `jti` : `reused` → `UPDATE users SET token_version = token_version + 1`, commit, 401 `TOKEN_REUSED`, warning (sans jeton) ; `active` → `revoke_refresh(jti, ttl = exp - now)` ; `grace` → pas de nouvelle révocation ; puis nouveau couple access + refresh. Jeton ancien sans `jti` : nouveau couple (pas de révocation possible).
+- `POST /v1/auth/refresh` (algorithme exact de la spec § 2) : décode, `type == "refresh"`, `tv` ok sinon 401 `TOKEN_REVOKED` ; si le jeton porte un `jti` : `reused` → `UPDATE users SET token_version = token_version + 1`, commit, 401 `TOKEN_REUSED`, warning (sans jeton) ; `active` → `revoke_refresh(jti, ttl = exp - now)` ; `grace` → pas de nouvelle révocation ; puis nouveau couple access + refresh. Jeton ancien sans `jti` : `jti` dérivé de l'empreinte de sa partie signée (revue finale, I2), même rotation / grâce / révocation.
 - `POST /v1/auth/logout` (access token requis, 204, idempotent) : si `refresh_token` fourni, décodé et `sub == user.id` → `revoke_refresh` ; `user.apns_token = None` ; commit.
 - `POST /v1/admin/users/{id}/reset-password` → `{"data": {"temporary_password": "..."}}` ; hache, `token_version += 1`, commit ; 404 `USER_NOT_FOUND`. Console : bouton « Réinitialiser le mot de passe » sur la fiche utilisatrice (confirmation), boîte avec le mot de passe et bouton Copier.
 - Login à temps constant : `_DUMMY_HASH = hash_password(secrets.token_urlsafe(16))` calculé une fois ; e-mail inconnu → `verify_password(body.password, _DUMMY_HASH)` avant le 401.
-- Tests pg + Redis réel : rotation → nouveau couple, ancien refresh accepté dans les 60 s (grace), refusé ensuite (supprimer la clé grace pour simuler l'expiration) avec `token_version` incrémentée et 401 `TOKEN_REUSED`, puis l'access token émis avant → 401 `TOKEN_REVOKED` ; jeton sans `tv` accepté tant que version 0 ; logout : refresh révoqué (refresh ensuite → `TOKEN_REUSED` hors grâce), `apns_token` effacé, 2e appel 204 ; Redis coupé (client pointant sur un port fermé) : refresh et login passent, warning dans `caplog` ; reset-password : le mot de passe provisoire permet le login, l'ancien refresh → 401.
+- Tests pg + Redis réel : rotation → nouveau couple, ancien refresh accepté dans les 120 s (grace), refusé ensuite (supprimer la clé grace pour simuler l'expiration) avec `token_version` incrémentée et 401 `TOKEN_REUSED`, puis l'access token émis avant → 401 `TOKEN_REVOKED` ; jeton sans `tv` accepté tant que version 0 ; logout : refresh révoqué (refresh ensuite → `TOKEN_REUSED` hors grâce), `apns_token` effacé, 2e appel 204 ; Redis coupé (client pointant sur un port fermé) : refresh et login passent, warning dans `caplog` ; reset-password : le mot de passe provisoire permet le login, l'ancien refresh → 401.
 - [ ] TDD ; suite verte ; commit.
 
 ### Task 3: IP client, limites, tailles (§ 4)

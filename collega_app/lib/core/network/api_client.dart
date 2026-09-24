@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -12,9 +14,11 @@ const _kIsBeta = 'is_beta';
 const _kIsSubscribed = 'is_subscribed';
 
 class ApiClient {
-  ApiClient(this._storage, {this.onForceLogout})
-      : _dio = _buildDio(),
-        _refreshDio = _buildDio() {
+  /// [dio] / [refreshDio] : injectables pour les tests (adapter scripté) ;
+  /// en production, toujours construits via [_buildDio].
+  ApiClient(this._storage, {this.onForceLogout, Dio? dio, Dio? refreshDio})
+      : _dio = dio ?? _buildDio(),
+        _refreshDio = refreshDio ?? _buildDio() {
     _setupInterceptors();
   }
 
@@ -26,6 +30,14 @@ class ApiClient {
   Future<bool>? _refreshFuture;
 
   Dio get dio => _dio;
+
+  /// Dio SANS l'intercepteur 401→refresh→retry de [dio] — même base URL et
+  /// mêmes en-têtes (Cloudflare Access) via [_buildDio]. À utiliser pour tout
+  /// appel qui doit maîtriser lui-même le jeton envoyé (ex. logout après
+  /// rotation défensive) : avec [dio], un 401 en cours d'appel déclencherait
+  /// une rotation interne puis un retry rejouant le corps figé AVANT rotation
+  /// (fix round 1, chantier 2 § 8 task 5).
+  Dio get rawDio => _refreshDio;
 
   static Dio _buildDio() {
     return Dio(
@@ -86,11 +98,43 @@ class ApiClient {
     return _refreshFuture!;
   }
 
-  /// Force un refresh défensif de l'access_token, utile AVANT une connexion SSE
-  /// (Story 7.2 AC #5 — JWT figé entre background/foreground).
+  /// Marge sous laquelle l'access_token est considéré comme expirant.
+  static const _kFreshnessMargin = Duration(minutes: 2);
+
+  /// Refresh défensif de l'access_token, utile AVANT une connexion SSE
+  /// (Story 7.2 AC #5 — JWT figé entre background/foreground) ou un logout.
+  ///
+  /// Ne tourne le refresh token QUE si l'access_token stocké expire dans moins
+  /// de 2 minutes (ou est absent / illisible) : chaque rotation inutile est
+  /// une occasion de perdre la réponse sur un réseau mobile instable et de
+  /// finir déconnectée (I4, revue finale chantier 2). `exp` est lu localement,
+  /// sans vérifier la signature (le serveur reste seul juge).
   /// Retourne `true` si le token est valide ou a été rafraîchi avec succès.
   /// Gère les appels concurrents via le verrou interne `_isRefreshing` / `_refreshFuture`.
-  Future<bool> ensureFreshAccessToken() => _getRefresh();
+  Future<bool> ensureFreshAccessToken() async {
+    if (_isRefreshing) return _refreshFuture!;
+    final token = await _storage.read(key: _kAccessToken);
+    final exp = _jwtExpiry(token);
+    if (exp != null && exp.difference(DateTime.now()) >= _kFreshnessMargin) {
+      return true;
+    }
+    return _getRefresh();
+  }
+
+  /// `exp` du JWT (payload décodé sans vérification) ; `null` si absent ou malformé.
+  static DateTime? _jwtExpiry(String? token) {
+    if (token == null) return null;
+    final parts = token.split('.');
+    if (parts.length != 3) return null;
+    try {
+      final payload = jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))));
+      final exp = payload is Map ? payload['exp'] : null;
+      if (exp is! num) return null;
+      return DateTime.fromMillisecondsSinceEpoch((exp * 1000).round());
+    } catch (_) {
+      return null;
+    }
+  }
 
   Future<bool> _tryRefresh() async {
     final refreshToken = await _storage.read(key: _kRefreshToken);
@@ -100,8 +144,21 @@ class ApiClient {
         '/v1/auth/refresh',
         data: {'refresh_token': refreshToken},
       );
-      final newToken = (response.data!['data'] as Map)['access_token'] as String;
-      await _storage.write(key: _kAccessToken, value: newToken);
+      final data = response.data!['data'] as Map;
+      // Les deux jetons sont extraits/validés AVANT toute écriture : un
+      // refresh_token malformé (type inattendu) doit faire échouer TOUT le
+      // refresh — jamais laisser un access_token déjà écrit alors que
+      // l'appel est remonté en échec (refresh partiellement appliqué).
+      final newAccessToken = data['access_token'] as String;
+      final newRefreshToken = data['refresh_token'] as String?;
+      // Rotation : le refresh_token renvoyé est nouveau à chaque appel (reuse
+      // detection côté serveur) — on l'enregistre s'il est présent et non vide,
+      // AVANT l'access_token : si l'app est tuée entre les deux écritures, le
+      // refresh tourné est conservé (l'ancien serait une réutilisation).
+      if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
+        await _storage.write(key: _kRefreshToken, value: newRefreshToken);
+      }
+      await _storage.write(key: _kAccessToken, value: newAccessToken);
       return true;
     } catch (_) {
       return false;

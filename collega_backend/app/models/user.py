@@ -35,6 +35,8 @@ class User(Base):
     # Incrémentée pour révoquer tous les jetons émis (réutilisation d'un refresh,
     # mot de passe réinitialisé) : un jeton dont `tv` est inférieur est refusé.
     token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    # Horodatage du dernier événement RevenueCat appliqué : un événement plus ancien est ignoré.
+    subscription_event_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

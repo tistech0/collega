@@ -105,8 +105,11 @@ async def _rate_limit_handler(request: Request, exc: Exception) -> JSONResponse:
 
 
 async def _internal_error_handler(request: Request, exc: Exception) -> JSONResponse:
-    # Journalisée (trace comprise) ; la réponse ne contient aucun détail interne.
-    logger.exception("Erreur interne sur %s %s", request.method, request.url.path, exc_info=exc)
+    # Journalisée (trace comprise) ; la réponse ne contient aucun détail interne. Gabarit de
+    # route plutôt que chemin réel : un identifiant sensible (upload_id) n'est jamais écrit.
+    route = request.scope.get("route")
+    path = getattr(route, "path", None) or request.url.path
+    logger.exception("Erreur interne sur %s %s", request.method, path, exc_info=exc)
     return _error_response(500, "INTERNAL_ERROR", "Erreur interne")
 
 

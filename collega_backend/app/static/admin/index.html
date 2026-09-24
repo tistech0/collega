@@ -65,6 +65,8 @@
     .btn-danger:hover { background: #911414; }
     .btn-warn { background: #fff; color: #8a4b00; border: 1px solid #e0a96d; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: .875rem; }
 
+    .temp-password-box { margin: 0 0 16px; padding: 16px; border: 1px solid #e0a96d; border-radius: 8px; background: #fff8ef; }
+    .temp-password-box code { display: inline-block; margin: 8px 12px 8px 0; padding: 6px 10px; font-size: 1.05rem; background: #fff; border: 1px solid #d1d9d2; border-radius: 6px; user-select: all; }
     .btn-sm { padding: 5px 10px; border-radius: 6px; font-size: .8rem; cursor: pointer; border: 1px solid #d1d9d2; background: #fff; }
     .btn-sm:hover { border-color: #1b6b3a; }
     .btn-link { background: transparent; border: none; color: #1b6b3a; cursor: pointer; font-size: .8rem; text-decoration: underline; padding: 0; }
@@ -182,6 +184,14 @@
       <table>
         <tbody id="detail-fields"></tbody>
       </table>
+      <div class="detail-actions">
+        <button class="btn-warn" id="reset-password-btn">Réinitialiser le mot de passe</button>
+      </div>
+      <div id="temp-password-box" class="temp-password-box" style="display:none">
+        <div>Mot de passe provisoire (affiché une seule fois — à transmettre à l'utilisatrice) :</div>
+        <code id="temp-password-value"></code>
+        <button class="btn-sm" id="temp-password-copy">Copier</button>
+      </div>
       <h3 class="subsection-title">Collèges</h3>
       <div id="detail-colleges-empty" class="empty-state" style="display:none; padding:24px">Aucun collège.</div>
       <table id="detail-colleges-table" style="display:none">
@@ -360,6 +370,7 @@
 
   function handleUnauthorized() {
     creds = null;
+    hideTemporaryPassword();
     document.getElementById("logout-btn").style.display = "none";
     showSection("login-section");
     const errEl = document.getElementById("login-error");
@@ -375,6 +386,7 @@
 
   function logout() {
     creds = null;
+    hideTemporaryPassword();
     document.getElementById("logout-btn").style.display = "none";
     document.getElementById("username").value = "";
     document.getElementById("password").value = "";
@@ -635,6 +647,8 @@
       const { data } = await readJson(res);
 
       document.getElementById("detail-email").textContent = data.email;
+      hideTemporaryPassword();
+      document.getElementById("reset-password-btn").onclick = () => resetPassword(data.user_id, data.email);
       const fields = document.getElementById("detail-fields");
       fields.innerHTML = `
         <tr><th>ID</th><td>${data.user_id}</td></tr>
@@ -652,6 +666,37 @@
     } catch (e) {
       if (e.code === "unauthorized") return;  // UI déjà basculée sur le login
       loader.textContent = "Erreur de chargement.";
+    }
+  }
+
+  // Récupération de compte (chantier 2) : le mot de passe provisoire n'est affiché
+  // qu'ici, une seule fois ; il n'est ni stocké ni journalisé.
+  function hideTemporaryPassword() {
+    document.getElementById("temp-password-box").style.display = "none";
+    document.getElementById("temp-password-value").textContent = "";
+    document.getElementById("temp-password-copy").onclick = null;
+  }
+
+  async function resetPassword(userId, email) {
+    if (!confirm(`Réinitialiser le mot de passe de ${email} ? Tous ses appareils seront déconnectés.`)) return;
+    try {
+      const res = await apiFetch(`/v1/admin/users/${userId}/reset-password`, { method: "POST" });
+      if (!res.ok) { toast("Échec de la réinitialisation", true); return; }
+      const { data } = await readJson(res);
+      document.getElementById("temp-password-value").textContent = data.temporary_password;
+      document.getElementById("temp-password-copy").onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(data.temporary_password);
+          toast("Copié ✓");
+        } catch (_) {
+          toast("Copie impossible — sélectionner le texte", true);
+        }
+      };
+      document.getElementById("temp-password-box").style.display = "block";
+      toast("Mot de passe réinitialisé ✓");
+    } catch (e) {
+      if (e.code === "unauthorized") return;  // UI déjà basculée sur le login
+      toast("Échec de la réinitialisation", true);
     }
   }
 

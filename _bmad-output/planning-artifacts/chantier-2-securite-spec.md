@@ -15,11 +15,11 @@ Contexte : `audit-back-infra-2026-09-23.md` (constat 5 et « Sécurité (hors ta
 
 - **PyJWT** remplace `python-jose` (`pyproject.toml`, `app/core/security.py`). HS256 inchangé. `security.JWTError` reste exporté (= `jwt.PyJWTError`) pour les appelants (`deps.py`, `auth.py`).
 - Tous les jetons portent `jti` (uuid4 hex) et `tv` (= `users.token_version` au moment de l'émission). Durées inchangées : access 30 min, refresh 30 jours.
-- `users.token_version` INT NOT NULL DEFAULT 0 (migration 019). Tout jeton dont `tv` < version courante (ou sans `tv`, émis avant ce chantier) est refusé **sauf** période de transition : un jeton sans `tv` est accepté tant que `version == 0` (les sessions existantes ne sautent pas au déploiement).
+- `users.token_version` INT NOT NULL DEFAULT 0 (migration 020). Tout jeton dont `tv` < version courante (ou sans `tv`, émis avant ce chantier) est refusé **sauf** période de transition : un jeton sans `tv` est accepté tant que `version == 0` (les sessions existantes ne sautent pas au déploiement).
 - **Rotation** (`POST /v1/auth/refresh`) :
   1. décoder le refresh (type `refresh`, signature, `exp`) ; vérifier `tv` ;
-  2. si son `jti` est **révoqué** : si révoqué depuis ≤ 60 s (clé `refresh:grace:{jti}` présente) → accepter (requêtes parallèles) ; sinon **réutilisation** → `users.token_version += 1`, 401 `TOKEN_REUSED` ;
-  3. sinon : révoquer le `jti` (`SET revoked:jti:{jti} 1 EX <reste de vie>` + `SET refresh:grace:{jti} 1 EX 60`), émettre **un nouvel access + un nouveau refresh**.
+  2. si son `jti` est **révoqué** : si révoqué depuis ≤ 120 s (clé `refresh:grace:{jti}` présente) → accepter (requêtes parallèles) ; sinon **réutilisation** → `users.token_version += 1`, 401 `TOKEN_REUSED` ;
+  3. sinon : révoquer le `jti` (`SET revoked:jti:{jti} 1 EX <reste de vie>` + `SET refresh:grace:{jti} 1 EX 120`), émettre **un nouvel access + un nouveau refresh**.
   - Réponse : même forme `TokenResponse` (le `refresh_token` est désormais nouveau).
 - **`POST /v1/auth/logout`** (authentifié par l'access token ; corps `{"refresh_token": "..."}` optionnel) : révoque le refresh fourni (s'il appartient à l'utilisatrice), met `users.apns_token = NULL`, 204. Idempotent.
 - **Redis indisponible** pendant une vérification de révocation : on **laisse passer** et on journalise un warning (décision PL 2026-06-19). Pendant une révocation (logout/rotation) : on journalise, la réponse n'échoue pas.
@@ -44,7 +44,7 @@ Contexte : `audit-back-infra-2026-09-23.md` (constat 5 et « Sécurité (hors ta
 ## 5. Webhook RevenueCat
 
 - Vérification du Bearer secret **avant** la validation du corps (la route lit le corps brut après l'auth ; plus de 422 non authentifiée).
-- `users.subscription_event_at` TIMESTAMPTZ NULL (migration 019) : un événement dont `event_timestamp_ms` est antérieur à la valeur stockée est ignoré (`{"status": "stale"}`) ; sinon appliqué et la valeur mise à jour. Événement sans horodatage : appliqué (compatibilité).
+- `users.subscription_event_at` TIMESTAMPTZ NULL (migration 020) : un événement dont `event_timestamp_ms` est antérieur à la valeur stockée est ignoré (`{"status": "stale"}`) ; sinon appliqué et la valeur mise à jour. Événement sans horodatage : appliqué (compatibilité).
 
 ## 6. Configuration et journaux
 
@@ -60,7 +60,7 @@ Contexte : `audit-back-infra-2026-09-23.md` (constat 5 et « Sécurité (hors ta
 
 - `api_client.dart` : `_tryRefresh` enregistre aussi le nouveau `refresh_token` renvoyé.
 - `auth_repository.logout()` : appelle `POST /v1/auth/logout` (best-effort, n'empêche jamais la déconnexion locale) avant d'effacer le stockage.
-- Déploiement conjoint : une app non mise à jour sera déconnectée une fois (réutilisation détectée) — accepté ; nouvelle build iPhone prévue avant le 28/09.
+- Déploiement conjoint : une app non mise à jour continue de fonctionner avec sa session d'avant le déploiement jusqu'à son premier renouvellement après le déploiement, puis elle est déconnectée une fois au renouvellement suivant (réutilisation détectée : elle n'enregistre pas le refresh tourné) — accepté ; installer la nouvelle build iPhone juste après le déploiement.
 
 ## 9. Documents
 
@@ -71,7 +71,7 @@ Contexte : `audit-back-infra-2026-09-23.md` (constat 5 et « Sécurité (hors ta
 
 - Unitaires : `get_client_ip` (tous les cas d'en-têtes et de proxies), création/décodage PyJWT (`jti`, `tv`, expiré → `JWTError`), messages.
 - Postgres + **Redis réel** (service `redis-test` ajouté à `docker-compose.test.yml`, `127.0.0.1:56379`) :
-  - rotation : nouveau couple, ancien refresh accepté dans les 60 s, refusé ensuite avec incrément de `token_version` ;
+  - rotation : nouveau couple, ancien refresh accepté dans les 120 s, refusé ensuite avec incrément de `token_version` ;
   - `tv` périmé → 401 sur une route protégée et au refresh ; jeton sans `tv` accepté tant que version 0 ;
   - logout : refresh révoqué, `apns_token` effacé, idempotent ;
   - Redis coupé (URL invalide) : refresh et login passent, warning journalisé ;
@@ -81,4 +81,4 @@ Contexte : `audit-back-infra-2026-09-23.md` (constat 5 et « Sécurité (hors ta
 
 ## 11. Déploiement
 
-Dump avant ; `compose pull/up` (migration 019) ; nouvelle build de l'app sur l'iPhone ; configuration Cloudflare Access admin par l'utilisateur (guidée) ; vérifications : login, refresh (rotation visible dans les logs), logout, `/admin` depuis l'extérieur → page Access, webhook RevenueCat de test (secret réel depuis le NAS) → 200.
+Dump avant ; `compose pull/up` (migration 020) ; nouvelle build de l'app sur l'iPhone ; configuration Cloudflare Access admin par l'utilisateur (guidée) ; vérifications : login, refresh (rotation visible dans les logs), logout, `/admin` depuis l'extérieur → page Access, webhook RevenueCat de test (secret réel depuis le NAS) → 200.

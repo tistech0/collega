@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel, ValidationError
+from fastapi import APIRouter, Depends, Request
+from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import database
 from app.core.database import get_db
 from app.core.errors import AppError, not_found, unprocessable
+from app.core.limiter import limiter, user_id_key
 from app.deps import require_subscription
 from app.models.flash_card import FlashCard
 from app.services.generation.claude_client import ClaudeClient, ClaudeJsonError, Usage
@@ -20,7 +21,7 @@ router = APIRouter(tags=["drill"])
 
 
 class SemanticEvalRequest(BaseModel):
-    user_answer: str
+    user_answer: str = Field(max_length=2000)
 
 
 # Sortie structurée demandée à Claude (Haiku 4.5) pour l'évaluation.
@@ -41,7 +42,9 @@ class SemanticEvalResult(BaseModel):
 
 
 @router.post("/flash-cards/{card_id}/evaluate-semantic")
+@limiter.limit("30/minute", key_func=user_id_key)
 async def evaluate_semantic(
+    request: Request,
     card_id: uuid.UUID,
     body: SemanticEvalRequest,
     current_user=Depends(require_subscription),

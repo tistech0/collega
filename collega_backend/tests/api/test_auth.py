@@ -110,6 +110,16 @@ class TestLogin:
         assert resp.status_code == 401
         assert resp.json()["detail"]["code"] == "INVALID_CREDENTIALS"
 
+    async def test_login_email_inconnu_verifie_quand_meme_un_hash(self, client: AsyncClient, mock_db):
+        """Temps constant : bcrypt tourne aussi quand l'e-mail est inconnu (hash factice)."""
+        from app.api.v1 import auth as auth_module
+
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
+        with patch.object(auth_module, "verify_password", return_value=False) as verify:
+            resp = await client.post("/v1/auth/login", json={"email": "inconnue@example.com", "password": "x"})
+        assert resp.status_code == 401
+        verify.assert_called_once_with("x", auth_module._DUMMY_HASH)
+
 
 class TestRefresh:
     async def test_refresh_success(self, client: AsyncClient, mock_db):
@@ -124,7 +134,9 @@ class TestRefresh:
         assert resp.status_code == 200
         body = resp.json()
         assert "access_token" in body["data"]
-        assert body["data"]["refresh_token"] == refresh_token
+        # Rotation (chantier 2) : un nouveau refresh est émis à chaque renouvellement.
+        assert body["data"]["refresh_token"] != refresh_token
+        assert decode_token(body["data"]["refresh_token"])["type"] == "refresh"
 
     async def test_refresh_emet_la_token_version_courante(self, client: AsyncClient, mock_db):
         user = make_user(token_version=2)

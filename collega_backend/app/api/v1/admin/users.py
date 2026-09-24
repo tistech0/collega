@@ -1,13 +1,14 @@
-"""Routes admin — utilisateurs : liste, création, bêta, reset du quota, détail.
+"""Routes admin — utilisateurs : liste, création, bêta, reset du quota, mot de passe, détail.
 
 Toutes les routes sont protégées par HTTP Basic Auth.
 """
 
 from __future__ import annotations
 
+import secrets
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy import select
 from sqlalchemy import update as sa_update
 from sqlalchemy.exc import IntegrityError
@@ -25,6 +26,8 @@ from app.schemas.admin import (
     BetaUpdateResponseWrapped,
     CreateUserRequest,
     CreateUserResponseWrapped,
+    ResetPasswordData,
+    ResetPasswordResponseWrapped,
     ResetQuotaResponseWrapped,
     UserBetaData,
     UserCollegeSummary,
@@ -166,6 +169,38 @@ async def reset_user_quota(
             monthly_reloads_max=monthly_reloads_max,
         )
     )
+
+
+# ── Chantier 2 § 3 — Récupération de compte (côté admin seulement) ───────────
+
+TEMPORARY_PASSWORD_LENGTH = 16
+
+
+@router.post("/users/{user_id}/reset-password", response_model=ResetPasswordResponseWrapped)
+async def reset_user_password(
+    user_id: uuid.UUID,
+    response: Response,
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> ResetPasswordResponseWrapped:
+    """Génère un mot de passe provisoire et déconnecte tous les appareils.
+
+    Le mot de passe est renvoyé une seule fois et n'est jamais journalisé.
+    `token_version + 1` (UPDATE atomique) invalide tous les jetons déjà émis.
+    """
+    user = await db.get(User, user_id)
+    if user is None:
+        raise not_found("USER_NOT_FOUND", f"User {user_id} not found")
+    temporary_password = secrets.token_urlsafe(TEMPORARY_PASSWORD_LENGTH)[:TEMPORARY_PASSWORD_LENGTH]
+    await db.execute(
+        sa_update(User)
+        .where(User.id == user_id)
+        .values(hashed_password=hash_password(temporary_password), token_version=User.token_version + 1)
+    )
+    await db.commit()
+    # Réponse porteuse d'un secret : jamais mise en cache (navigateur, proxy).
+    response.headers["Cache-Control"] = "no-store"
+    return ResetPasswordResponseWrapped(data=ResetPasswordData(temporary_password=temporary_password))
 
 
 @router.get("/users/{user_id}", response_model=UserDetailResponseWrapped)

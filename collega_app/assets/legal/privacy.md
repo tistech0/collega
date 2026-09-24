@@ -64,7 +64,8 @@ pour vérifier l'état actif/inactif.
   Supprimées **définitivement et immédiatement** à la suppression du compte (cf. § 7).
 - **PDF importés** : conservés tant que le collège associé est dans ton compte.
 - **Texte extrait des PDF** : conservé tant que le collège associé est dans ton compte, supprimé avec lui.
-- **Logs serveur** : 12 mois maximum (rotation automatique).
+- **Logs serveur** : rotation automatique des conteneurs applicatifs (3 fichiers de 50 Mo maximum
+  chacun par service), soit une rétention réelle de quelques jours à quelques semaines selon le trafic.
 - **Token APNs** : supprimé dès le revoke d'autorisation iOS ou la déconnexion.
 
 ---
@@ -121,7 +122,9 @@ L'Application met en œuvre des mesures techniques et organisationnelles adapté
 - chiffrement HTTPS / TLS de bout en bout côté API ;
 - mots de passe stockés sous forme de **hash bcrypt** (jamais en clair) ;
 - tokens JWT stockés dans le **Keychain iOS** (`flutter_secure_storage`) ;
-- séparation backend / frontend ; rate limiting des routes sensibles (login, refresh, suppression de compte) ;
+- séparation backend / frontend ; limitation du débit sur les routes sensibles : connexion (5 tentatives
+  par minute et par adresse IP), renouvellement de session (30 requêtes par minute et par IP), ainsi que
+  suppression de compte et autres actions sensibles ;
 - backups réguliers de la base de données PostgreSQL côté éditeur.
 
 En cas de violation de données, l'éditeur s'engage à notifier la CNIL et les utilisateurs concernés

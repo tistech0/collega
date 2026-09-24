@@ -18,6 +18,7 @@ from app.api.v1.flash_cards import router as flash_cards_router
 from app.api.v1.health import router as health_router
 from app.api.v1.notifications import router as notifications_router
 from app.api.v1.search import router as search_router
+from app.core import token_store
 from app.core.config import settings
 from app.core.database import engine
 from app.core.errors import install_error_handlers
@@ -114,6 +115,10 @@ async def lifespan(app: FastAPI):
                 await pool.aclose()
             except Exception as exc:  # pragma: no cover - cleanup non bloquant
                 logger.warning("ARQ pool aclose() during shutdown failed: %s", exc)
+        try:
+            await token_store.close()
+        except Exception as exc:  # pragma: no cover - cleanup non bloquant
+            logger.warning("token_store close() during shutdown failed: %s", exc)
         await engine.dispose()
 
 
