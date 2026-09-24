@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -153,5 +156,105 @@ void main() {
       second.dispose();
       expect(await db.select(db.userColleges).get(), isEmpty);
     });
+  });
+  group('purge des collèges disparus du serveur (revue finale chantier 4, I1)', () {
+    const alive = UserCollegeStatus(
+      refId: 3, collegeId: 'c-3', status: 'generation_complete', cardCountA: 1, cardCountB: 0, cardCountC: 0,
+    );
+
+    Future<void> seed(AppDatabase db) async {
+      for (final college in ['c-3', 'c-dead']) {
+        await db.into(db.items).insert(ItemsCompanion.insert(
+              id: 'item-$college', collegeId: college, itemNumber: 1, rang: 'A',
+            ));
+        await db.into(db.flashCards).insert(FlashCardsCompanion.insert(
+              id: 'card-$college', itemId: 'item-$college', collegeId: college,
+              cardType: 'classique', rang: 'A', recto: 'Q', verso: 'R',
+            ));
+        await db.into(db.planningSessions).insert(PlanningSessionsCompanion.insert(
+              id: 'plan-$college', planningConfigId: 'cfg', sessionDateEpochDay: 1, collegeId: college, maxCards: 10,
+            ));
+        await db.into(db.collegeImports).insert(CollegeImportsCompanion.insert(
+              id: college, refId: 3, jobId: 'job-$college', status: 'generation_complete',
+              updatedAt: DateTime.utc(2026, 9, 1),
+            ));
+      }
+      // Session du jour commencée qui mélange les deux collèges, session vivante
+      // seule, et session terminée (historique de la semaine) avec une fiche morte.
+      await db.into(db.dailySessions).insert(DailySessionsCompanion.insert(
+            day: const Value(100), queueJson: jsonEncode(['card-c-3', 'card-c-dead']),
+            startedAtMs: const Value(1),
+          ));
+      await db.into(db.dailySessions).insert(DailySessionsCompanion.insert(
+            day: const Value(99), queueJson: jsonEncode(['card-c-3']),
+          ));
+      await db.into(db.dailySessions).insert(DailySessionsCompanion.insert(
+            day: const Value(98), queueJson: jsonEncode(['card-c-dead']),
+            startedAtMs: const Value(1), completedAtMs: const Value(2),
+          ));
+      await db.into(db.reviewLog).insert(ReviewLogCompanion.insert(
+            cardId: 'card-c-dead', collegeId: 'c-dead', rang: 'A', drillLevel: 'bien', reviewedAtMs: 1, day: 98,
+          ));
+    }
+
+    test('succès réseau : les lignes locales des collèges absents sont supprimées', () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      await seed(db);
+
+      final container = _makeContainer(_FakeCollegesRepository(result: [alive]), db: db);
+      addTearDown(container.dispose);
+      await container.read(collegesProvider.future);
+
+      expect((await db.select(db.flashCards).get()).map((r) => r.id), ['card-c-3']);
+      expect((await db.select(db.items).get()).map((r) => r.id), ['item-c-3']);
+      expect((await db.select(db.planningSessions).get()).map((r) => r.id), ['plan-c-3']);
+      expect((await db.select(db.collegeImports).get()).map((r) => r.id), ['c-3']);
+      // Session non terminée qui citait une fiche morte : oubliée (recalculée) ;
+      // les autres restent (la session terminée compte dans la semaine).
+      expect((await db.select(db.dailySessions).get()).map((r) => r.day).toSet(), {99, 98});
+      // Journal des révisions : historique réel, gardé (Progression).
+      expect(await db.select(db.reviewLog).get(), hasLength(1));
+    });
+
+    test('liste vide du serveur (vidage de la prod) : tout le contenu local part', () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      await seed(db);
+
+      final container = _makeContainer(_FakeCollegesRepository(result: const []), db: db);
+      addTearDown(container.dispose);
+      await container.read(collegesProvider.future);
+
+      expect(await db.select(db.flashCards).get(), isEmpty);
+      expect(await db.select(db.items).get(), isEmpty);
+      expect((await db.select(db.dailySessions).get()).map((r) => r.day).toSet(), {98});
+    });
+
+    for (final failure in ['offline', 'serverError']) {
+      test('échec du chargement ($failure) : rien n’est supprimé', () async {
+        final db = AppDatabase.forTesting(NativeDatabase.memory());
+        addTearDown(db.close);
+        await seed(db);
+        // Cache des collèges présent : l'échec est servi depuis le cache, sans purge.
+        await db.into(db.userColleges).insert(UserCollegesCompanion.insert(
+              refId: const Value(3), collegeId: 'c-3', status: 'generation_complete',
+              cardCountA: 1, cardCountB: 0, cardCountC: 0,
+            ));
+        final repo = _FakeCollegesRepository(result: [alive]);
+        if (failure == 'offline') repo.offline = true;
+        if (failure == 'serverError') repo.serverError = true;
+
+        final container = _makeContainer(repo, db: db);
+        addTearDown(container.dispose);
+        await container.read(collegesProvider.future);
+
+        expect(await db.select(db.flashCards).get(), hasLength(2));
+        expect(await db.select(db.items).get(), hasLength(2));
+        expect(await db.select(db.planningSessions).get(), hasLength(2));
+        expect(await db.select(db.collegeImports).get(), hasLength(2));
+        expect(await db.select(db.dailySessions).get(), hasLength(3));
+      });
+    }
   });
 }

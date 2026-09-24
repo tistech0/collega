@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/network/network_errors.dart';
+import 'package:collega_app/features/colleges/data/college_cards_sync.dart';
 import 'package:collega_app/features/colleges/data/colleges_repository.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
@@ -57,6 +58,9 @@ extension on CollegesNotifier {
                   cardCountC: s.cardCountC,
                 ),
             ]));
+        // Liste fraîche du serveur : le contenu local des collèges disparus
+        // (vidage, suppression) part. Jamais sur un échec (cache hors-ligne).
+        await pruneStaleColleges(db, {for (final s in fresh) s.collegeId});
       });
       return (fresh, false);
     } on DioException catch (e) {

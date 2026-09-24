@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
@@ -59,5 +61,40 @@ Future<void> syncItemsToDrift(AppDatabase db, String collegeId, List<ItemModel> 
           ),
       ],
     );
+  });
+}
+
+/// Oublie le contenu local des collèges que le serveur n'a plus (revue finale du
+/// chantier 4 : après un vidage de la prod, « Aujourd'hui » mêlait des fiches
+/// mortes — 404 à l'évaluation). À n'appeler qu'après un chargement RÉUSSI de la
+/// liste des collèges : [keep] = leurs ids ; une liste vide purge tout.
+///
+/// Supprimés : fiches, items, sessions de planning, imports suivis ; les sessions
+/// du jour non terminées qui citent une fiche supprimée (recalculées à la
+/// prochaine lecture). Gardés : les sessions terminées (semaine « faite ») et le
+/// journal des révisions (historique réel de la Progression, jamais renvoyé au serveur).
+Future<void> pruneStaleColleges(AppDatabase db, Set<String> keep) async {
+  final ids = keep.toList();
+  await db.transaction(() async {
+    final deadCards = await (db.selectOnly(db.flashCards)
+          ..addColumns([db.flashCards.id])
+          ..where(db.flashCards.collegeId.isNotIn(ids)))
+        .map((row) => row.read(db.flashCards.id)!)
+        .get();
+    await (db.delete(db.flashCards)..where((t) => t.collegeId.isNotIn(ids))).go();
+    await (db.delete(db.items)..where((t) => t.collegeId.isNotIn(ids))).go();
+    await (db.delete(db.planningSessions)..where((t) => t.collegeId.isNotIn(ids))).go();
+    await (db.delete(db.collegeImports)..where((t) => t.id.isNotIn(ids))).go();
+
+    if (deadCards.isEmpty) return;
+    final dead = deadCards.toSet();
+    final open = await (db.select(db.dailySessions)..where((t) => t.completedAtMs.isNull())).get();
+    final stale = [
+      for (final s in open)
+        if ((jsonDecode(s.queueJson) as List).any(dead.contains)) s.day,
+    ];
+    if (stale.isNotEmpty) {
+      await (db.delete(db.dailySessions)..where((t) => t.day.isIn(stale))).go();
+    }
   });
 }
