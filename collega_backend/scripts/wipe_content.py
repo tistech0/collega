@@ -26,16 +26,33 @@ Remet à zéro `users.monthly_reloads` et `users.monthly_reloads_reset_at` pour
 toutes les utilisatrices. `colleges.reload_count` n'a rien à recevoir : les
 collèges disparaissent avec le reste.
 
+Refuse de tourner (rien n'est touché, code de sortie 1) :
+- sans `--confirm` ;
+- si un import est en cours (`generation_jobs.status` dans
+  `app.services.imports.ACTIVE_JOB_STATUSES` : `pending`, `processing`,
+  `ocr_complete`) — un job en vol perdrait son collège en cours d'écriture.
+  Arrêter le worker avant de vider (`docker compose stop worker`), le
+  relancer après (`docker compose start worker`) : c'est le worker qui fait
+  avancer un import, pas l'api.
+
 Redis : rien à vider — le chantier 4 n'y stocke aucun contenu, seulement des
-verrous et de l'état d'upload à courte durée de vie (TTL) et le rate limiting.
+verrous et de l'état d'upload à courte durée de vie (TTL) et le rate
+limiting. Les clés d'upload par morceaux (Story 7.11) qui pointaient vers un
+dossier `uploads/<id>` maintenant supprimé expirent d'elles-mêmes (TTL) ; rien
+à purger côté Redis pour elles.
 
 Un seul commit pour la partie base ; les fichiers ne sont supprimés qu'après
 ce commit. Affiche les comptes avant/après (table et nombre seulement, jamais
-de texte de page ou de fiche). Refuse de tourner sans `--confirm` (rien n'est
-touché, code de sortie 1).
+de texte de page ou de fiche).
 
-Dans le conteneur api (l'image contient `scripts/`) :
-  docker exec collega-api-1 python scripts/wipe_content.py --confirm
+Invocation dans le conteneur api (l'image contient `scripts/`) — EN MODULE,
+pas en chemin de fichier : lancé comme fichier (`python scripts/wipe_content.py`),
+`sys.path[0]` devient `/app/scripts` et l'import `from app.core.config import
+settings` échoue (`ModuleNotFoundError: app`) :
+
+  docker compose stop worker
+  docker exec collega-api-1 python -m scripts.wipe_content --confirm
+  docker compose start worker
 """
 
 from __future__ import annotations
@@ -61,6 +78,7 @@ from app.models.generation_job_event import GenerationJobEvent
 from app.models.item import Item
 from app.models.item_title import ItemTitle
 from app.models.user import User
+from app.services.imports import ACTIVE_JOB_STATUSES
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +112,16 @@ async def table_counts(db: AsyncSession) -> dict[str, int]:
     }
 
 
+async def count_active_jobs(db: AsyncSession) -> int:
+    """Imports en cours (`ACTIVE_JOB_STATUSES`) : un vidage pendant l'un d'eux
+    supprimerait le collège sous les pieds du worker qui le traite."""
+    return (
+        await db.execute(
+            select(func.count()).select_from(GenerationJob).where(GenerationJob.status.in_(ACTIVE_JOB_STATUSES))
+        )
+    ).scalar_one()
+
+
 async def wipe_db(db: AsyncSession) -> None:
     """Supprime le contenu et remet à zéro les compteurs des utilisatrices. Ne
     commit pas (à la charge de l'appelant, une seule transaction).
@@ -114,11 +142,13 @@ async def wipe_db(db: AsyncSession) -> None:
 
 def wipe_files(pdf_dir: Path) -> dict[str, int]:
     """Supprime les PDF (`*.pdf`, à la racine de `pdf_dir`) et le dossier
-    `uploads/`. Renvoie le nombre de fichiers et de dossiers supprimés."""
+    `uploads/`. Renvoie le nombre de fichiers et de dossiers réellement
+    supprimés (jamais ce qu'on a tenté : un échec est compté « non supprimé »
+    et journalisé, pas rapporté comme fait)."""
     removed_pdfs = 0
     for pdf in pdf_dir.glob("*.pdf"):
         try:
-            pdf.unlink(missing_ok=True)
+            pdf.unlink()  # le fichier vient d'être listé : une disparition entre-temps est une vraie erreur
             removed_pdfs += 1
         except OSError:
             logger.warning("PDF non supprimé : %s", pdf, exc_info=True)
@@ -126,8 +156,13 @@ def wipe_files(pdf_dir: Path) -> dict[str, int]:
     uploads_dir = pdf_dir / "uploads"
     removed_uploads = 0
     if uploads_dir.exists():
-        removed_uploads = sum(1 for _ in uploads_dir.iterdir())
-        shutil.rmtree(uploads_dir, ignore_errors=True)
+        before = set(uploads_dir.iterdir())
+        try:
+            shutil.rmtree(uploads_dir)
+        except OSError:
+            logger.warning("uploads/ non entièrement supprimé : %s", uploads_dir, exc_info=True)
+        after = set(uploads_dir.iterdir()) if uploads_dir.exists() else set()
+        removed_uploads = len(before - after)
     return {"pdfs": removed_pdfs, "uploads": removed_uploads}
 
 
@@ -138,11 +173,20 @@ def _print_report(before: dict[str, int], after: dict[str, int], files: dict[str
     print(f"Fichiers supprimés : {files['pdfs']} PDF, {files['uploads']} dossier(s) uploads/")
 
 
-async def run(database_url: str, pdf_dir: Path) -> None:
+async def run(database_url: str, pdf_dir: Path) -> int:
+    """Renvoie le code de sortie : 0 fait, 1 refusé (rien touché — import en cours)."""
     engine = create_async_engine(database_url)
     try:
         session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
         async with session_factory() as db:
+            active = await count_active_jobs(db)
+            if active:
+                print(
+                    f"Vidage refusé : {active} import(s) en cours. Arrêter le worker"
+                    " (docker compose stop worker) et réessayer.",
+                    file=sys.stderr,
+                )
+                return 1
             before = await table_counts(db)
             await wipe_db(db)
             await db.commit()
@@ -151,6 +195,7 @@ async def run(database_url: str, pdf_dir: Path) -> None:
         await engine.dispose()
     files = wipe_files(pdf_dir)
     _print_report(before, after, files)
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -160,8 +205,7 @@ def main(argv: list[str] | None = None) -> int:
     if not args.confirm:
         print("Vidage refusé : relancer avec --confirm.", file=sys.stderr)
         return 1
-    asyncio.run(run(settings.database_url, Path(settings.pdf_storage_path)))
-    return 0
+    return asyncio.run(run(settings.database_url, Path(settings.pdf_storage_path)))
 
 
 if __name__ == "__main__":

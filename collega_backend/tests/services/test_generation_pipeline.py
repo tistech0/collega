@@ -585,6 +585,7 @@ async def test_cancellation_twice_still_persists_it(pg_factory, notifications, s
     persisting = asyncio.Event()
     release = asyncio.Event()
     original_persist = pipeline._persist_item
+    cancel_again_task: asyncio.Task | None = None
 
     async def slow_persist(*args, **kwargs):
         if kwargs.get("item_number") == 302:
@@ -596,6 +597,7 @@ async def test_cancellation_twice_still_persists_it(pg_factory, notifications, s
 
     class CancelledTwiceAfterCall(FakeClaude):
         async def generate_cards(self, item_number, title, pages, *, effort="medium"):
+            nonlocal cancel_again_task
             r = await super().generate_cards(item_number, title, pages)
             if item_number == 302:
                 task = asyncio.current_task()
@@ -606,11 +608,13 @@ async def test_cancellation_twice_still_persists_it(pg_factory, notifications, s
                     task.cancel()  # deuxième annulation, pendant l'attente protégée
                     release.set()
 
-                asyncio.ensure_future(cancel_again())
+                cancel_again_task = asyncio.ensure_future(cancel_again())
             return r
 
     with pytest.raises(asyncio.CancelledError):
         await asyncio.wait_for(_run(pg_factory, college, job, CancelledTwiceAfterCall()), 5)
+    assert cancel_again_task is not None
+    await cancel_again_task  # déjà terminée (release.set() précède la fin du run) : on le vérifie proprement
     # L'appel payé de 302 est bien enregistré malgré la double annulation.
     assert len(await _usage(pg_factory)) == 2
     async with pg_factory() as s:

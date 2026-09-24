@@ -115,6 +115,6 @@
 
 - [ ] Audit (chantier 4 fait, mesures), Kage (règles de découpage, prompt p2, « modifier le nettoyage ou le prompt = incrémenter PROMPT_VERSION »), `CLAUDE.md` si besoin.
 - [ ] Revue indépendante ; corrections.
-- [ ] Déploiement : dump (deploy.sh), migration 021, puis `docker exec collega-api-1 python scripts/wipe_content.py --confirm` ; comptes affichés ; `/health`.
+- [ ] Déploiement : dump (deploy.sh), migration 021, `docker compose stop worker` (aucun import en cours pendant le vidage), puis `docker exec collega-api-1 python -m scripts.wipe_content --confirm` (invocation en module : `python scripts/wipe_content.py` échoue dans le conteneur — `sys.path[0]` devient `/app/scripts`, `ModuleNotFoundError: app`) ; comptes affichés ; `docker compose start worker` ; `/health`.
 - [ ] Nouvelle build iPhone si l'appareil est branché.
 - [ ] Surveillance des logs au réimport par l'utilisateur (découpage, `insufficient_text`, coût par collège) — ou, s'il n'a pas encore réimporté, le rapport final le lui demande.

@@ -1,8 +1,12 @@
 """Vidage complet du contenu (chantier 4, spec § 8), Postgres réel."""
 
 import asyncio
+import os
+import subprocess
+import sys
 import uuid
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 from sqlalchemy import func, select
@@ -15,9 +19,11 @@ from app.models.item_title import ItemTitle
 from app.models.user import User
 from app.services.content import store
 from app.services.jobs.job_events import record_job_event
-from scripts.wipe_content import main, table_counts, wipe_db, wipe_files
+from scripts.wipe_content import count_active_jobs, main, run, table_counts, wipe_db, wipe_files
 from tests.factories import cards, make_card, make_college, make_draft, make_item, make_job, make_job_page, make_user
 from tests.pg import TEST_PG_URL
+
+_BACKEND_DIR = Path(__file__).resolve().parents[2]
 
 pytestmark = pytest.mark.pg
 
@@ -122,6 +128,31 @@ async def test_wipe_is_a_single_transaction_scoped_to_the_caller(pg_session):
     assert after == before
 
 
+async def test_count_active_jobs_counts_only_active_statuses(pg_session):
+    _, _, college, job = await _seed(pg_session)  # job : generation_complete (pas actif)
+    await make_job(pg_session, college, status="processing")
+    await make_job(pg_session, college, status="failed")
+    await pg_session.commit()
+    assert await count_active_jobs(pg_session) == 1
+
+
+async def test_refuses_when_an_import_is_active(pg_session, tmp_path, capsys):
+    """Important 2 (revue) : un import en cours (`ACTIVE_JOB_STATUSES`) fait
+    refuser le vidage, base et fichiers intacts."""
+    user, other_user, college, job = await _seed(pg_session)
+    job.status = "ocr_complete"  # génération Claude pas terminée
+    await pg_session.commit()
+    before = await table_counts(pg_session)
+    (tmp_path / "garde.pdf").write_bytes(b"%PDF")
+
+    code = await run(TEST_PG_URL, tmp_path)
+
+    assert code == 1
+    assert "en cours" in capsys.readouterr().err
+    assert (tmp_path / "garde.pdf").exists()  # les fichiers ne sont jamais atteints
+    assert await table_counts(pg_session) == before  # rien touché en base, même connexion
+
+
 def test_wipe_files_removes_pdfs_and_uploads_dir(tmp_path):
     (tmp_path / "a.pdf").write_bytes(b"%PDF")
     (tmp_path / "b.pdf").write_bytes(b"%PDF")
@@ -147,6 +178,33 @@ def test_wipe_files_handles_missing_uploads_dir(tmp_path):
 def test_refuses_without_confirm(capsys):
     assert main([]) == 1
     assert "confirm" in capsys.readouterr().err
+
+
+def test_module_entry_point_refuses_without_confirm():
+    """Important 1 (revue) : couvre le vrai point d'entrée prod, `python -m
+    scripts.wipe_content` (`python scripts/wipe_content.py` échoue dans le
+    conteneur : `sys.path[0]` devient `/app/scripts`, `ModuleNotFoundError:
+    app` — cf. docstring du script)."""
+    env = {
+        **os.environ,
+        "DATABASE_URL": TEST_PG_URL,
+        "REDIS_URL": "redis://localhost:6379/0",
+        "SECRET_KEY": "test-secret-key-for-pytest-only",
+        "REVENUECAT_WEBHOOK_SECRET": "test-rc-secret",
+        "CLAUDE_API_KEY": "test-key",
+        "ADMIN_USERNAME": "admin",
+        "ADMIN_PASSWORD": "testpass",
+    }
+    result = subprocess.run(
+        [sys.executable, "-m", "scripts.wipe_content"],
+        cwd=_BACKEND_DIR,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode != 0
+    assert "confirm" in result.stderr
 
 
 async def test_confirm_wipes_via_main(pg_engine, pg_factory, tmp_path, monkeypatch, capsys):

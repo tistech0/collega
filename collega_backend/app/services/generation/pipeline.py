@@ -270,12 +270,22 @@ async def _generate_item(
         # Une deuxième annulation peut arriver pendant qu'on attend la fin de la
         # persistance (elle aussi doit être protégée, sinon l'appel payé risque de
         # ne jamais être enregistré) : on reste protégé jusqu'à ce que `persist`
-        # soit vraiment terminée, puis on relaie l'annulation.
+        # soit vraiment terminée, puis on relaie l'annulation reçue ici (celle de
+        # cette tâche, pas un échec de `persist`, journalisé ci-dessous s'il y en
+        # a un — jamais perdu silencieusement).
         while not persist.done():
             try:
                 await asyncio.shield(persist)
             except asyncio.CancelledError:
                 continue
+            except Exception:  # noqa: BLE001 — retrouvé ci-dessous via persist.exception()
+                continue
+        if not persist.cancelled() and (exc := persist.exception()) is not None:
+            logger.warning(
+                "Item %d : persistance en échec après annulation (sera retentée au prochain import) : %r",
+                item_number,
+                exc,
+            )
         raise
 
 
