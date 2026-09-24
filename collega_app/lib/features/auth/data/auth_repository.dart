@@ -127,8 +127,9 @@ class AuthRepository {
   /// EN INTERNE puis rejouerait la requête avec le corps déjà sérialisé
   /// AVANT rotation (`{refresh_token: R1}`), alors que le refresh token
   /// courant est désormais R2 : R2 ne serait jamais révoqué côté serveur.
-  /// On force donc une rotation défensive AVANT de lire les jetons (verrou
-  /// partagé d'`ApiClient`, best-effort), puis on poste sur [_logoutDio] qui
+  /// On fait donc une rotation défensive AVANT de lire les jetons (seulement
+  /// si l'access expire dans < 2 min ; verrou partagé d'`ApiClient`,
+  /// best-effort), puis on poste sur [_logoutDio] qui
   /// n'a PAS cet intercepteur : le jeton lu est bien celui envoyé, sans retry
   /// différé.
   Future<void> logout() async {

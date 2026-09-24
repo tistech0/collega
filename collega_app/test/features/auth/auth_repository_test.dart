@@ -452,6 +452,37 @@ void main() {
     });
   });
 
+  group('AuthRepository.logout — access encore valide (I4)', () {
+    test('access valide > 2 min → pas de rotation, logout avec les jetons stockés', () async {
+      String part(Map<String, Object> m) => base64Url.encode(utf8.encode(jsonEncode(m))).replaceAll('=', '');
+      final exp = DateTime.now().add(const Duration(minutes: 10)).millisecondsSinceEpoch ~/ 1000;
+      final access = '${part({'alg': 'HS256'})}.${part({'sub': 'u', 'exp': exp})}.c2ln';
+      final storage = _FakeSecureStorage(initial: {'access_token': access, 'refresh_token': 'R1'});
+      final rawAdapter = _ScriptedAdapter([204]);
+      final interceptedAdapter = _ScriptedAdapter([]);
+      final apiClient = ApiClient(
+        storage,
+        dio: _plainDio(interceptedAdapter),
+        refreshDio: _plainDio(rawAdapter),
+      );
+      final repo = AuthRepository(
+        dio: apiClient.dio,
+        storage: storage,
+        logoutDio: apiClient.rawDio,
+        ensureFreshAccessToken: apiClient.ensureFreshAccessToken,
+      );
+
+      await repo.logout();
+
+      expect(rawAdapter.callCount, 1);
+      final logoutSent = rawAdapter.requests.single;
+      expect(logoutSent.path, '/v1/auth/logout');
+      expect(logoutSent.headers['Authorization'], 'Bearer $access');
+      expect(logoutSent.data, {'refresh_token': 'R1'});
+      expect(await storage.read(key: 'refresh_token'), isNull);
+    });
+  });
+
   group('AuthRepository.deleteAccount (Story 7.3 — safe delete)', () {
     test('pas de token → errorMessage explicite, pas de wipe', () async {
       final storage = _FakeSecureStorage();

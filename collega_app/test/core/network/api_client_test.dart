@@ -101,6 +101,13 @@ class _ScriptedAdapter implements HttpClientAdapter {
 Dio _scriptedDio(HttpClientAdapter adapter) =>
     Dio(BaseOptions(baseUrl: 'http://test'))..httpClientAdapter = adapter;
 
+/// JWT factice (signature non vérifiée côté app) expirant dans [expiresIn].
+String _jwt(Duration expiresIn) {
+  String part(Map<String, Object> m) => base64Url.encode(utf8.encode(jsonEncode(m))).replaceAll('=', '');
+  final exp = DateTime.now().add(expiresIn).millisecondsSinceEpoch ~/ 1000;
+  return '${part({'alg': 'HS256', 'typ': 'JWT'})}.${part({'sub': 'u', 'type': 'access', 'exp': exp})}.c2ln';
+}
+
 void main() {
   group('ApiClient._tryRefresh (via ensureFreshAccessToken) — rotation (chantier 2 § 8 task 5)', () {
     test('refresh réussi → access_token ET refresh_token (nouveau) stockés', () async {
@@ -172,6 +179,20 @@ void main() {
       expect(await storage.read(key: 'refresh_token'), 'old-refresh');
     });
 
+    test('écriture : refresh_token AVANT access_token (m1)', () async {
+      final storage = _FakeSecureStorage(initial: {'refresh_token': 'old-refresh'});
+      final adapter = _ScriptedAdapter([
+        {
+          'data': {'access_token': 'new-access', 'refresh_token': 'new-refresh'},
+        },
+      ]);
+      final client = ApiClient(storage, refreshDio: _scriptedDio(adapter));
+
+      await client.ensureFreshAccessToken();
+
+      expect(storage.writtenKeys, ['refresh_token', 'access_token']);
+    });
+
     test('appels concurrents → un seul appel réseau (verrou _isRefreshing/_refreshFuture)', () async {
       final storage = _FakeSecureStorage(initial: {'refresh_token': 'old-refresh'});
       final adapter = _ScriptedAdapter([
@@ -185,6 +206,83 @@ void main() {
         client.ensureFreshAccessToken(),
         client.ensureFreshAccessToken(),
       ]);
+
+      expect(results, [true, true]);
+      expect(adapter.callCount, 1);
+    });
+  });
+
+  group('ensureFreshAccessToken — refresh seulement si l\'access expire dans < 2 min (I4)', () {
+    test('access valide encore 10 min → aucun appel réseau, true', () async {
+      final access = _jwt(const Duration(minutes: 10));
+      final storage = _FakeSecureStorage(initial: {'access_token': access, 'refresh_token': 'r'});
+      final adapter = _ScriptedAdapter([]);
+      final client = ApiClient(storage, refreshDio: _scriptedDio(adapter));
+
+      expect(await client.ensureFreshAccessToken(), isTrue);
+      expect(adapter.callCount, 0);
+      expect(await storage.read(key: 'access_token'), access);
+      expect(await storage.read(key: 'refresh_token'), 'r');
+    });
+
+    test('access expirant dans 1 min → refresh', () async {
+      final storage = _FakeSecureStorage(
+        initial: {'access_token': _jwt(const Duration(minutes: 1)), 'refresh_token': 'r'},
+      );
+      final adapter = _ScriptedAdapter([
+        {
+          'data': {'access_token': 'new-access', 'refresh_token': 'new-refresh'},
+        },
+      ]);
+      final client = ApiClient(storage, refreshDio: _scriptedDio(adapter));
+
+      expect(await client.ensureFreshAccessToken(), isTrue);
+      expect(adapter.callCount, 1);
+      expect(await storage.read(key: 'refresh_token'), 'new-refresh');
+    });
+
+    test('access déjà expiré → refresh', () async {
+      final storage = _FakeSecureStorage(
+        initial: {'access_token': _jwt(const Duration(minutes: -5)), 'refresh_token': 'r'},
+      );
+      final adapter = _ScriptedAdapter([
+        {
+          'data': {'access_token': 'new-access', 'refresh_token': 'new-refresh'},
+        },
+      ]);
+      final client = ApiClient(storage, refreshDio: _scriptedDio(adapter));
+
+      expect(await client.ensureFreshAccessToken(), isTrue);
+      expect(adapter.callCount, 1);
+    });
+
+    for (final malformed in ['pas-un-jwt', 'a.b.c', 'a.${base64Url.encode(utf8.encode('{"sub":"u"}'))}.c']) {
+      test('access malformé ou sans exp ($malformed) → refresh', () async {
+        final storage = _FakeSecureStorage(initial: {'access_token': malformed, 'refresh_token': 'r'});
+        final adapter = _ScriptedAdapter([
+          {
+            'data': {'access_token': 'new-access', 'refresh_token': 'new-refresh'},
+          },
+        ]);
+        final client = ApiClient(storage, refreshDio: _scriptedDio(adapter));
+
+        expect(await client.ensureFreshAccessToken(), isTrue);
+        expect(adapter.callCount, 1);
+      });
+    }
+
+    test('access expirant bientôt, appels concurrents → un seul refresh', () async {
+      final storage = _FakeSecureStorage(
+        initial: {'access_token': _jwt(const Duration(seconds: 30)), 'refresh_token': 'r'},
+      );
+      final adapter = _ScriptedAdapter([
+        {
+          'data': {'access_token': 'new-access', 'refresh_token': 'new-refresh'},
+        },
+      ]);
+      final client = ApiClient(storage, refreshDio: _scriptedDio(adapter));
+
+      final results = await Future.wait([client.ensureFreshAccessToken(), client.ensureFreshAccessToken()]);
 
       expect(results, [true, true]);
       expect(adapter.callCount, 1);
