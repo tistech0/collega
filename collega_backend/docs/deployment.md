@@ -82,6 +82,68 @@ sans authentification supplémentaire.
 Le `docker-compose.yml` (dev) expose `5432` et `6379` sur `127.0.0.1` seulement,
 pour les outils dev locaux (TablePlus, RedisInsight).
 
+## Console admin : Cloudflare Access
+
+Depuis le chantier 2 (sécurité), la console admin (`/admin` et `/v1/admin`) est protégée
+**depuis l'extérieur** par Cloudflare Access (code par e-mail à usage unique), en plus du
+Basic Auth applicatif existant. Sur le LAN, seul le Basic Auth s'applique (avec sa limite
+d'essais, 10/min par IP). L'application `collega-admin` est **distincte** de l'application
+Access existante pour le service token de l'app (`collegatest`), qui reste inchangée — l'app
+mobile n'appelle jamais `/v1/admin`.
+
+### Configuration (à faire une fois, dans le dashboard Cloudflare Zero Trust)
+
+1. Ouvrir le dashboard **Cloudflare Zero Trust** → **Access** → **Applications**.
+2. **Add an application** → **Self-hosted**.
+3. Nommer l'application `collega-admin`.
+4. Renseigner les **destinations** (« Public hostname ») :
+   - `collegatest.matthislesur.com/admin`
+   - `collegatest.matthislesur.com/v1/admin`
+5. Créer une policy nommée par ex. « Admin » avec l'action **Allow**, règle **Include** →
+   **Emails** → `contact@matthislesur.com`.
+6. Méthode de connexion (« Login method ») : **One-time PIN** (code envoyé par e-mail).
+7. Enregistrer. Ne pas modifier l'application Access existante qui protège le chemin utilisé
+   par le service token de l'app mobile (`collegatest`) : elle continue de couvrir le reste de
+   `collegatest.matthislesur.com` sans exiger de PIN pour les appels authentifiés par service
+   token.
+
+### Vérification
+
+Depuis l'extérieur du LAN (4G, ou en forçant la résolution DNS pour simuler l'extérieur) :
+
+```sh
+# IP publique actuelle de Cloudflare pour le sous-domaine (résolution DNS externe) :
+dig +short @1.1.1.1 collegatest.matthislesur.com
+
+# /admin doit rediriger (302) vers la page de connexion Access :
+curl -i --resolve collegatest.matthislesur.com:443:<IP Cloudflare> \
+  https://collegatest.matthislesur.com/admin
+
+# /v1/colleges avec le service token de l'app doit rester inchangé (pas de PIN demandé) :
+curl -i --resolve collegatest.matthislesur.com:443:<IP Cloudflare> \
+  -H "CF-Access-Client-Id: <client id>" -H "CF-Access-Client-Secret: <client secret>" \
+  https://collegatest.matthislesur.com/v1/colleges
+```
+
+`/admin` doit répondre `302` vers la page de connexion Cloudflare Access ; `/v1/colleges`
+avec le service token doit répondre comme avant (pas de redirection Access).
+
+### Adresse IP cliente et proxys de confiance
+
+`get_client_ip()` (`app/core/limiter.py`) ne fait confiance à `CF-Connecting-IP` (ou au
+dernier élément de `X-Forwarded-For`) que si la requête arrive d'un **proxy de confiance**
+(`settings.trusted_proxy_ips`, variable d'env `TRUSTED_PROXY_IPS`, défaut : réseau Docker de
+Nginx Proxy Manager `172.16.0.0/12`) — jamais depuis le premier élément de
+`X-Forwarded-For`, falsifiable par le client. Concrètement : `CF-Connecting-IP` n'est retenu
+que si le dernier saut de `X-Forwarded-For` est lui-même un proxy de confiance (requête
+entrée par `cloudflared`) ; sinon (LAN) c'est ce dernier saut qui fait foi.
+
+**Ne jamais démarrer uvicorn avec `--forwarded-allow-ips=*`** : cela reviendrait à faire
+confiance à n'importe quelle IP source pour falsifier son adresse via les en-têtes de
+proxy, ce que `get_client_ip()` empêche précisément en restreignant la confiance à
+`TRUSTED_PROXY_IPS`. Les commandes `uvicorn` du `Dockerfile` et des `docker-compose*.yml`
+n'utilisent pas ce flag ; ne pas l'ajouter.
+
 ## Service map (prod)
 
 | Service  | Image                                | Ports exposés    | Réseau         |
