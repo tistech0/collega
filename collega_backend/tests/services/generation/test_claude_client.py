@@ -283,6 +283,8 @@ async def test_regenerate_sends_same_settings_and_one_card_schema():
     content = kw["messages"][0]["content"]
     assert "Q vague ?" in content and "trop vague" in content and "Le foie {source}" in content
     assert "Item 304 — Tumeurs du foie" in content
+    # La remarque de l'utilisatrice est isolée dans sa balise (donnée, jamais consigne).
+    assert "<remarque>\ntrop vague\n</remarque>" in content
 
 
 async def test_regenerate_unusable_response_keeps_usage():

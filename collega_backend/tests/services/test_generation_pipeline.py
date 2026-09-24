@@ -7,6 +7,7 @@ import pytest
 from sqlalchemy import func, select
 
 from app.core.config import settings
+from app.models.claude_usage import ClaudeUsage
 from app.models.college import College
 from app.models.content import ItemGeneration
 from app.models.flash_card import FlashCard
@@ -88,19 +89,27 @@ async def _ready_job(pg_factory, drafts: dict[int, str], *, college_status="ocr_
     return user, college, job
 
 
+async def _usage(pg_factory):
+    async with pg_factory() as s:
+        rows = (await s.execute(select(ClaudeUsage).order_by(ClaudeUsage.created_at))).scalars().all()
+    return [(r.kind, r.model, r.input_tokens, r.output_tokens, r.user_id, r.college_id, r.job_id) for r in rows]
+
+
 async def _run(pg_factory, college, job, claude, **kw):
     return await run_generation(pg_factory, college.id, job.id, claude, progress=None, **kw)
 
 
 async def test_generates_each_draft_and_publishes(pg_factory, notifications):
-    _, college, job = await _ready_job(pg_factory, {304: "texte 304", 305: "texte 305"})
+    user, college, job = await _ready_job(pg_factory, {304: "texte 304", 305: "texte 305"})
     claude = FakeClaude()
     result = await _run(pg_factory, college, job, claude)
     assert claude.calls == [304, 305]
     assert (result["added"], result["cards"], result["claude_calls"]) == (2, 2, 2)
     async with pg_factory() as s:
         j = await s.get(GenerationJob, job.id)
-        assert (j.status, j.input_tokens, j.output_tokens, j.hash_shared) == ("generation_complete", 200, 20, False)
+        assert (j.status, j.hash_shared) == ("generation_complete", False)
+    # Une ligne claude_usage par appel facturé.
+    assert await _usage(pg_factory) == [("generation", "claude-sonnet-5", 100, 10, user.id, college.id, job.id)] * 2
     assert notifications.sent == [("complete", 34, None)]  # premier import : message simple
 
 
@@ -157,6 +166,9 @@ async def test_error_midway_then_relaunch_does_not_repay(pg_factory, notificatio
         await generation_worker.generate_college_cards({}, str(college.id), str(job.id), "x.pdf")
     async with pg_factory() as s:
         assert (await s.get(GenerationJob, job.id)).status == "failed"
+    # Job échoué : l'appel facturé avant l'erreur reste compté.
+    assert await _usage(pg_factory) == [("generation", "claude-sonnet-5", 100, 10, user.id, college.id, job.id)]
+    async with pg_factory() as s:
         assert (await s.get(College, college.id)).status == "failed"
         assert (await s.execute(select(func.count()).select_from(ItemGeneration))).scalar_one() == 1
     assert notifications.sent == [("failed", 34, False)]
@@ -198,9 +210,8 @@ async def test_tokens_accumulated_even_without_cards(pg_factory, notifications):
     _, college, job = await _ready_job(pg_factory, {304: "texte"})
     result = await _run(pg_factory, college, job, FakeClaude(empty_for={304}))
     assert result["cards"] == 0
+    assert [r[:4] for r in await _usage(pg_factory)] == [("generation", "claude-sonnet-5", 50, 5)]
     async with pg_factory() as s:
-        j = await s.get(GenerationJob, job.id)
-        assert (j.input_tokens, j.output_tokens) == (50, 5)
         assert (await s.execute(select(func.count()).select_from(ItemGeneration))).scalar_one() == 0
         assert (await s.execute(select(func.count()).select_from(Item))).scalar_one() == 1
 
@@ -219,6 +230,8 @@ async def test_stop_between_items(pg_factory, notifications):
     claude = StopAfterFirst()
     result = await _run(pg_factory, college, job, claude)
     assert result["error"] == "cancelled" and claude.calls == [301]
+    # Import arrêté pendant l'appel : l'appel facturé reste compté.
+    assert [r[:4] for r in await _usage(pg_factory)] == [("generation", "claude-sonnet-5", 100, 10)]
     async with pg_factory() as s:
         assert (await s.execute(select(func.count()).select_from(Item))).scalar_one() == 0
 
@@ -237,6 +250,8 @@ async def test_deleted_account_stops_generation(pg_factory, notifications):
     claude = DeleteAfterFirst()
     result = await _run(pg_factory, college, job, claude)
     assert result["error"] == "cancelled" and claude.calls == [301]
+    # Compte supprimé pendant l'appel : l'appel reste compté, sans lien.
+    assert await _usage(pg_factory) == [("generation", "claude-sonnet-5", 100, 10, None, None, None)]
 
 
 async def test_same_pdf_reimport_end_to_end(pg_factory, notifications, storage):

@@ -9,20 +9,24 @@ from httpx import AsyncClient
 ADMIN_AUTH = ("admin", "testpass")
 
 
+def _results(users_total, status_rows, usage_rows=()):
+    """db.execute : 1) nombre d'utilisateurs, 2) jobs par statut, 3) coût 30 jours par modèle."""
+    return [
+        MagicMock(scalar_one=MagicMock(return_value=users_total)),
+        MagicMock(all=MagicMock(return_value=status_rows)),
+        MagicMock(all=MagicMock(return_value=list(usage_rows))),
+    ]
+
+
 class TestOverview:
     async def test_401_without_credentials(self, client: AsyncClient):
         resp = await client.get("/v1/admin/overview")
         assert resp.status_code == 401
 
     async def test_aggregates_users_and_jobs(self, client: AsyncClient, mock_db):
-        # Mock indépendant de l'ordre des requêtes : chaque résultat sait
-        # répondre à .scalar_one() (count users) ET .all() (group_by statuts),
-        # donc un éventuel réordonnancement des db.execute ne fausse rien.
-        result = MagicMock(
-            scalar_one=MagicMock(return_value=5),
-            all=MagicMock(return_value=[("failed", 2), ("generation_complete", 7)]),
+        mock_db.execute = AsyncMock(
+            side_effect=_results(5, [("failed", 2), ("generation_complete", 7)], [("claude-sonnet-4-6", 1_000_000, 0)])
         )
-        mock_db.execute = AsyncMock(return_value=result)
 
         resp = await client.get("/v1/admin/overview", auth=ADMIN_AUTH)
         assert resp.status_code == 200
@@ -41,13 +45,10 @@ class TestOverview:
         assert data["jobs_by_status"]["generation_complete"] == 7
         assert data["jobs_by_status"]["pending"] == 0
         assert data["jobs_failed"] == 2
+        assert data["cost_last_30_days_eur"] == 2.76  # 1M in Sonnet 4.6 = 3 USD × 0.92
 
     async def test_zero_state(self, client: AsyncClient, mock_db):
-        result = MagicMock(
-            scalar_one=MagicMock(return_value=0),
-            all=MagicMock(return_value=[]),
-        )
-        mock_db.execute = AsyncMock(return_value=result)
+        mock_db.execute = AsyncMock(side_effect=_results(0, []))
 
         resp = await client.get("/v1/admin/overview", auth=ADMIN_AUTH)
         assert resp.status_code == 200
@@ -55,3 +56,4 @@ class TestOverview:
         assert data["users_total"] == 0
         assert data["jobs_failed"] == 0
         assert all(v == 0 for v in data["jobs_by_status"].values())
+        assert data["cost_last_30_days_eur"] == 0.0

@@ -5,9 +5,11 @@ from __future__ import annotations
 import logging
 import uuid
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.database import async_session_factory
+from app.models.claude_usage import ClaudeUsage
 from app.models.college import College, CollegeStatus
 from app.models.generation_job import GenerationJob
 from app.models.user import User
@@ -65,7 +67,10 @@ async def run_generation(
         was_ready = college.status == CollegeStatus.generation_complete
         # Une relance ARQ ne compte que ses propres appels : le job a-t-il consommé
         # des tokens (tentatives précédentes comprises) ? C'est ce qui décide du quota.
-        total_calls = calls if (job.input_tokens or 0) == 0 else max(calls, 1)
+        billed = (
+            await db.execute(select(ClaudeUsage.id).where(ClaudeUsage.job_id == job_id).limit(1))
+        ).first() is not None
+        total_calls = max(calls, 1) if billed else calls
         try:
             summary = await publish_job(db, job_id, claude_calls=total_calls)
         except ImportRejected as rejected:

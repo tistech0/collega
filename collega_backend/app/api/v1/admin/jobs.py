@@ -10,12 +10,13 @@ from datetime import UTC, datetime
 
 from arq.connections import ArqRedis
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import async_session_factory, get_db
 from app.core.errors import conflict, not_found
 from app.deps import get_admin_user, get_arq_optional
+from app.models.claude_usage import ClaudeUsage
 from app.models.college import College
 from app.models.generation_job import GenerationJob
 from app.models.generation_job_event import GenerationJobEvent
@@ -31,7 +32,7 @@ from app.schemas.admin import (
     StopJobResponseWrapped,
 )
 from app.services import imports
-from app.services.generation.token_cost import compute_cost_eur
+from app.services.generation.token_cost import UsageTotals
 from app.services.jobs.arq_control import abort_arq_job
 from app.services.jobs.job_failure import fail_job
 from app.services.ocr.item_detector import segmentation_overview
@@ -114,6 +115,22 @@ async def get_job_detail(
     )
     items = [ItemOcrData(item_number=r[0], ocr_confidence_score=r[1], low_confidence=r[2]) for r in items_result.all()]
 
+    # Coût du job : appels facturés enregistrés dans claude_usage, au tarif de chaque modèle.
+    usage_result = await db.execute(
+        select(
+            ClaudeUsage.model,
+            func.sum(ClaudeUsage.input_tokens),
+            func.sum(ClaudeUsage.output_tokens),
+            func.count(),
+        )
+        .where(ClaudeUsage.job_id == job_id)
+        .group_by(ClaudeUsage.model)
+    )
+    usage, claude_calls = UsageTotals(), 0
+    for model, u_input, u_output, calls in usage_result.all():
+        usage.add(model, u_input, u_output)
+        claude_calls += calls
+
     return JobDetailResponseWrapped(
         data=JobDetailData(
             job_id=str(job.id),
@@ -130,9 +147,10 @@ async def get_job_detail(
             ocr_page_progress=college.ocr_page_progress if college else 0,
             total_pages=college.total_pages if college else None,
             college_status=college.status if college else "unknown",
-            input_tokens=job.input_tokens,
-            output_tokens=job.output_tokens,
-            cost_eur=compute_cost_eur(job.input_tokens, job.output_tokens),
+            input_tokens=usage.input_tokens,
+            output_tokens=usage.output_tokens,
+            cost_eur=usage.cost_eur,
+            claude_calls=claude_calls,
             segmentation=segmentation_overview(job.segmentation_report),
             items=items,
             timeline=[

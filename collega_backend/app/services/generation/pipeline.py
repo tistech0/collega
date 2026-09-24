@@ -32,6 +32,7 @@ from app.models.generation_job import GenerationJob
 from app.models.item import Item
 from app.services.content import store
 from app.services.generation.claude_client import GENERATION_MODEL, GENERATION_VERSION
+from app.services.generation.usage import record_usage
 from app.services.jobs.job_events import record_job_event
 
 logger = logging.getLogger(__name__)
@@ -86,7 +87,7 @@ async def generate_job_items(
         job = await db.get(GenerationJob, job_id)
         if job is None:
             return None
-        college_id = job.college_id
+        college_id, user_id = job.college_id, job.user_id
         drafts = (
             (await db.execute(select(JobItem).where(JobItem.job_id == job_id).order_by(JobItem.item_number)))
             .scalars()
@@ -140,18 +141,26 @@ async def generate_job_items(
             # séparateur stable) : il est envoyé comme une seule « page » — la règle des
             # en-têtes répétés de clean_for_prompt ne s'y applique donc pas (tâche 6).
             result = await claude.generate_cards(item_number, title or "", [text or ""])
-            # Seul un appel réellement facturé compte (texte vide : aucun appel fait).
+            # Seul un appel réellement facturé compte (texte vide : aucun appel fait). Il est
+            # enregistré tout de suite : compté même si l'import est ensuite arrêté ou échoue.
             if result.input_tokens or result.output_tokens:
                 claude_calls += 1
+                await record_usage(
+                    session_factory,
+                    kind="generation",
+                    model=result.model,
+                    input_tokens=result.input_tokens,
+                    output_tokens=result.output_tokens,
+                    user_id=user_id,
+                    college_id=college_id,
+                    job_id=job_id,
+                )
 
         async with session_factory() as db:
             job = await db.get(GenerationJob, job_id)
             if job is None:
                 return None
             if result is not None:
-                # Tokens facturés même sans fiche exploitable (réponse illisible).
-                job.input_tokens = (job.input_tokens or 0) + result.input_tokens
-                job.output_tokens = (job.output_tokens or 0) + result.output_tokens
                 if result.cards:
                     gen = await store.put_generation(
                         db,

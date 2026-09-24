@@ -211,6 +211,8 @@ class OverviewData(BaseModel):
     users_total: int
     jobs_by_status: dict[str, int]
     jobs_failed: int
+    # Chantier 4 — coût Claude des 30 derniers jours (tous appels, lu dans claude_usage).
+    cost_last_30_days_eur: float = 0.0
 
 
 class OverviewResponseWrapped(BaseModel):
@@ -245,10 +247,11 @@ class JobDetailData(BaseModel):
     college_status: str
     items: list[ItemOcrData]
     timeline: list[JobEventData]
-    # Story 7.8 — coût/import (additif). NULL = job non mesuré (antérieur migration 014).
-    input_tokens: int | None = None
-    output_tokens: int | None = None
+    # Coût du job, lu dans claude_usage (chantier 4) : somme des appels facturés.
+    input_tokens: int = 0
+    output_tokens: int = 0
     cost_eur: float = 0.0
+    claude_calls: int = 0
     # Chantier 4 — rapport de découpage : items → pages, sections, warnings. NULL = import antérieur.
     segmentation: dict | None = None
 
@@ -310,21 +313,26 @@ class AdminFeedbackResponseWrapped(BaseModel):
     total: int
 
 
-# ── Story 7.8 — Coût : agrégat usage tokens + € (global / par user) ───────────
+# ── Coût : agrégat usage tokens + € lu dans claude_usage (story 7.8, chantier 4) ─
 
 
-class UsageByUserData(BaseModel):
-    user_id: str
-    email: str
+class UsageTotalsData(BaseModel):
     input_tokens: int
     output_tokens: int
     cost_eur: float
 
 
-class UsageData(BaseModel):
-    input_tokens: int
-    output_tokens: int
-    cost_eur: float
+class UsageByUserData(UsageTotalsData):
+    # NULL : compte supprimé (ses appels restent dans les totaux).
+    user_id: str | None
+    email: str | None
+    last_30_days: UsageTotalsData
+
+
+class UsageData(UsageTotalsData):
+    last_30_days: UsageTotalsData
+    by_kind: dict[str, UsageTotalsData]
+    by_model: dict[str, UsageTotalsData]
     by_user: list[UsageByUserData]
 
 

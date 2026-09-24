@@ -24,8 +24,6 @@ def make_job(job_id=None, college_id=None, status="processing"):
         hash_shared=False,
         card_count=12,
         error_message=None,
-        input_tokens=1_000_000,
-        output_tokens=1_000_000,
         segmentation_report=None,
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC),
@@ -83,8 +81,11 @@ class TestJobDetail:
             make_event("ocr_complete", t0 + timedelta(seconds=10), message="8 items"),
         ]
         items_rows = [(1, 0.92, False), (2, 0.4, True)]
-        # db.execute : 1) events (scalars().all()), 2) items (.all())
-        mock_db.execute = AsyncMock(side_effect=[_scalars_result(events), _tuples_result(items_rows)])
+        usage_rows = [("claude-sonnet-4-6", 1_000_000, 1_000_000, 3)]
+        # db.execute : 1) events (scalars().all()), 2) items (.all()), 3) usage (.all())
+        mock_db.execute = AsyncMock(
+            side_effect=[_scalars_result(events), _tuples_result(items_rows), _tuples_result(usage_rows)]
+        )
 
         resp = await client.get(f"/v1/admin/jobs/{job.id}", auth=ADMIN_AUTH)
         assert resp.status_code == 200
@@ -119,10 +120,11 @@ class TestJobDetail:
         assert data["items"][0]["item_number"] == 1
         assert data["items"][1]["low_confidence"] is True
 
-        # Story 7.8 — coût/import (additif). 1M in + 1M out = (3+15) USD × 0.92 = 16.56 €.
+        # Coût lu dans claude_usage. 1M in + 1M out Sonnet 4.6 = (3+15) USD × 0.92 = 16.56 €.
         assert data["input_tokens"] == 1_000_000
         assert data["output_tokens"] == 1_000_000
         assert data["cost_eur"] == 16.56
+        assert data["claude_calls"] == 3
         assert data["segmentation"] is None
 
     async def test_exposes_segmentation_report_without_page_detail(self, client: AsyncClient, mock_db):
@@ -139,7 +141,7 @@ class TestJobDetail:
             }
         )
         mock_db.get = AsyncMock(side_effect=[job, make_college(job.college_id)])
-        mock_db.execute = AsyncMock(side_effect=[_scalars_result([]), _tuples_result([])])
+        mock_db.execute = AsyncMock(side_effect=[_scalars_result([]), _tuples_result([]), _tuples_result([])])
 
         resp = await client.get(f"/v1/admin/jobs/{job.id}", auth=ADMIN_AUTH)
         seg = resp.json()["data"]["segmentation"]
@@ -158,7 +160,7 @@ class TestJobDetail:
         job = make_job()
         # job présent mais college absent (orphan) → valeurs par défaut, pas de 500
         mock_db.get = AsyncMock(side_effect=[job, None])
-        mock_db.execute = AsyncMock(side_effect=[_scalars_result([]), _tuples_result([])])
+        mock_db.execute = AsyncMock(side_effect=[_scalars_result([]), _tuples_result([]), _tuples_result([])])
 
         resp = await client.get(f"/v1/admin/jobs/{job.id}", auth=ADMIN_AUTH)
         assert resp.status_code == 200

@@ -127,6 +127,7 @@
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-value" id="kpi-users">—</div><div class="kpi-label">Utilisateurs</div></div>
         <div class="kpi-card kpi-alert"><div class="kpi-value" id="kpi-failed">—</div><div class="kpi-label">Jobs en échec</div></div>
+        <div class="kpi-card"><div class="kpi-value" id="kpi-cost-30d">—</div><div class="kpi-label">Coût Claude 30 j (€)</div></div>
       </div>
       <h3 class="subsection-title">Jobs par statut</h3>
       <table>
@@ -293,13 +294,24 @@
     <div id="cost-content" style="display:none">
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-value" id="kpi-cost-eur">—</div><div class="kpi-label">Coût total (€)</div></div>
+        <div class="kpi-card"><div class="kpi-value" id="kpi-cost-30d-eur">—</div><div class="kpi-label">30 derniers jours (€)</div></div>
         <div class="kpi-card"><div class="kpi-value" id="kpi-cost-in">—</div><div class="kpi-label">Tokens input</div></div>
         <div class="kpi-card"><div class="kpi-value" id="kpi-cost-out">—</div><div class="kpi-label">Tokens output</div></div>
       </div>
+      <h3 class="subsection-title">Par type d'appel</h3>
+      <table>
+        <thead><tr><th>Type</th><th>Tokens input</th><th>Tokens output</th><th>Coût (€)</th></tr></thead>
+        <tbody id="cost-kinds-body"></tbody>
+      </table>
+      <h3 class="subsection-title">Par modèle</h3>
+      <table>
+        <thead><tr><th>Modèle</th><th>Tokens input</th><th>Tokens output</th><th>Coût (€)</th></tr></thead>
+        <tbody id="cost-models-body"></tbody>
+      </table>
       <h3 class="subsection-title">Par utilisateur</h3>
       <div id="cost-users-empty" class="empty-state" style="display:none; padding:24px">Aucune conso mesurée.</div>
       <table id="cost-users-table" style="display:none">
-        <thead><tr><th>Email</th><th>Tokens input</th><th>Tokens output</th><th>Coût (€)</th></tr></thead>
+        <thead><tr><th>Email</th><th>Tokens input</th><th>Tokens output</th><th>Coût (€)</th><th>30 derniers jours (€)</th></tr></thead>
         <tbody id="cost-users-body"></tbody>
       </table>
       <p style="font-size:.8rem; color:#888; margin-top:12px">Le coût par import est visible dans le détail d'un import (onglet Imports).</p>
@@ -440,6 +452,7 @@
 
       document.getElementById("kpi-users").textContent = data.users_total;
       document.getElementById("kpi-failed").textContent = data.jobs_failed;
+      document.getElementById("kpi-cost-30d").textContent = "€ " + data.cost_last_30_days_eur.toFixed(2);
 
       const labels = {
         pending: "En attente", processing: "En cours", ocr_complete: "OCR terminé",
@@ -772,8 +785,9 @@
         <tr><th>Hash partagé</th><td>${data.hash_shared ? "Oui" : "Non"}</td></tr>
         <tr><th>arq_job_id</th><td>${data.arq_job_id ? escapeHtml(data.arq_job_id) : "—"}</td></tr>
         <tr><th>Erreur</th><td>${data.error_message ? escapeHtml(data.error_message) : "—"}</td></tr>
+        <tr><th>Appels Claude</th><td>${data.claude_calls}</td></tr>
         <tr><th>Coût (tokens)</th><td>${fmtTokens(data.input_tokens, data.output_tokens)}</td></tr>
-        <tr><th>Coût (€)</th><td>${data.input_tokens == null ? "<span style='color:#888'>non mesuré</span>" : "€ " + data.cost_eur.toFixed(4)}</td></tr>
+        <tr><th>Coût (€)</th><td>€ ${data.cost_eur.toFixed(4)}</td></tr>
         <tr><th>Créé le</th><td>${fmtDate(data.created_at)}</td></tr>
         <tr><th>MAJ le</th><td>${fmtDate(data.updated_at)}</td></tr>`;
 
@@ -1008,6 +1022,10 @@
       const { data } = await readJson(res);
 
       document.getElementById("kpi-cost-eur").textContent = "€ " + data.cost_eur.toFixed(2);
+      document.getElementById("kpi-cost-30d-eur").textContent = "€ " + data.last_30_days.cost_eur.toFixed(2);
+      const kindLabels = { generation: "Génération", regeneration: "Régénération", evaluation: "Évaluation" };
+      fillCostRows("cost-kinds-body", Object.entries(data.by_kind), k => kindLabels[k] || k);
+      fillCostRows("cost-models-body", Object.entries(data.by_model), m => m);
       document.getElementById("kpi-cost-in").textContent = fmtNumber(data.input_tokens);
       document.getElementById("kpi-cost-out").textContent = fmtNumber(data.output_tokens);
 
@@ -1022,10 +1040,11 @@
         data.by_user.forEach(u => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${escapeHtml(u.email)}</td>
+            <td>${u.email == null ? "<span style='color:#888'>compte supprimé</span>" : escapeHtml(u.email)}</td>
             <td>${fmtNumber(u.input_tokens)}</td>
             <td>${fmtNumber(u.output_tokens)}</td>
-            <td>€ ${u.cost_eur.toFixed(4)}</td>`;
+            <td>€ ${u.cost_eur.toFixed(4)}</td>
+            <td>€ ${u.last_30_days.cost_eur.toFixed(4)}</td>`;
           body.appendChild(tr);
         });
         table.style.display = "";
@@ -1039,12 +1058,25 @@
     }
   }
 
+  function fillCostRows(bodyId, entries, label) {
+    const body = document.getElementById(bodyId);
+    body.innerHTML = "";
+    entries.forEach(([key, t]) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(label(key))}</td>
+        <td>${fmtNumber(t.input_tokens)}</td>
+        <td>${fmtNumber(t.output_tokens)}</td>
+        <td>€ ${t.cost_eur.toFixed(4)}</td>`;
+      body.appendChild(tr);
+    });
+  }
+
   function fmtNumber(n) {
     return (n == null ? 0 : n).toLocaleString("fr-FR");
   }
 
   function fmtTokens(input, output) {
-    if (input == null) return "<span style='color:#888'>non mesuré</span>";
     return `${fmtNumber(input)} in / ${fmtNumber(output)} out`;
   }
 

@@ -8,6 +8,7 @@ import uuid
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import database
 from app.core.database import get_db
 from app.core.errors import AppError, conflict, not_found, unprocessable
 from app.core.limiter import limiter
@@ -22,6 +23,7 @@ from app.schemas.college import (
 )
 from app.services.content import store
 from app.services.generation.claude_client import ClaudeClient
+from app.services.generation.usage import record_usage
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["flash-cards"])
@@ -85,9 +87,18 @@ async def regenerate_card(
         )
 
     claude = ClaudeClient()
-    # L'usage de la régénération (regen.input_tokens/output_tokens) sera enregistré
-    # par la comptabilité claude_usage (chantier 4, tâche 5).
     regen = await claude.regenerate_single_card(card, item, source_text, body.user_note)
+    # Appel facturé compté même si la réponse est inutilisable ; APIError : usage à 0, rien.
+    if regen.input_tokens or regen.output_tokens:
+        await record_usage(
+            database.async_session_factory,
+            kind="regeneration",
+            model=regen.model,
+            input_tokens=regen.input_tokens,
+            output_tokens=regen.output_tokens,
+            user_id=current_user.id,
+            college_id=card.college_id,
+        )
     new_card_data = regen.card
     if new_card_data is None:
         raise AppError(503, "REGENERATION_FAILED", "Régénération échouée")

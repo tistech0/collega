@@ -3,9 +3,11 @@
 from unittest.mock import AsyncMock
 
 import pytest
+from sqlalchemy import select
 
 from app.api.v1 import drill as drill_module
 from app.deps import require_subscription
+from app.models.claude_usage import ClaudeUsage
 from app.services.generation.claude_client import ClaudeJsonError, Usage
 from tests.api_pg import login_as
 from tests.factories import make_card, make_college, make_item, make_user
@@ -25,6 +27,14 @@ async def _seed(pg_factory):
     return user, card
 
 
+async def _usage_rows(pg_factory):
+    async with pg_factory() as s:
+        return [
+            (r.kind, r.model, r.input_tokens, r.output_tokens, r.user_id, r.college_id, r.job_id)
+            for r in (await s.execute(select(ClaudeUsage))).scalars()
+        ]
+
+
 async def test_evaluate_uses_structured_schema(pg_client, pg_factory, monkeypatch):
     from app.main import app
 
@@ -38,8 +48,13 @@ async def test_evaluate_uses_structured_schema(pg_client, pg_factory, monkeypatc
 
     assert resp.status_code == 200
     assert resp.json()["data"] == {"result": "partial", "feedback": "Incomplet."}
-    _prompt, schema = ask.await_args.args
+    prompt, schema = ask.await_args.args
     assert schema is drill_module.EVAL_SCHEMA
+    # La sortie structurée impose le format : plus de consigne JSON dans le prompt.
+    assert "JSON" not in prompt
+    assert await _usage_rows(pg_factory) == [
+        ("evaluation", "claude-haiku-4-5-20251001", 80, 15, user.id, card.college_id, None)
+    ]
 
 
 async def test_evaluate_unusable_response_is_502(pg_client, pg_factory, monkeypatch):
@@ -53,3 +68,5 @@ async def test_evaluate_unusable_response_is_502(pg_client, pg_factory, monkeypa
     resp = await pg_client.post(f"/v1/flash-cards/{card.id}/evaluate-semantic", json={"user_answer": "bof"})
 
     assert resp.status_code == 502 and resp.json()["detail"]["code"] == "CLAUDE_EVAL_FAILED"
+    # Réponse illisible mais facturée : l'appel est compté.
+    assert [r[:4] for r in await _usage_rows(pg_factory)] == [("evaluation", "claude-haiku-4-5-20251001", 80, 15)]
