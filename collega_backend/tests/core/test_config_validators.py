@@ -211,7 +211,7 @@ class TestStripAndStrictness:
             )
 
 
-def test_generation_concurrency_defaults_to_4_and_is_at_least_1():
-    assert _make_settings(**_base_settings_kwargs()).generation_concurrency == 4
+def test_generation_concurrency_defaults_to_2_and_is_at_least_1():
+    assert _make_settings(**_base_settings_kwargs()).generation_concurrency == 2
     with pytest.raises(ValidationError):
         _make_settings(**_base_settings_kwargs(generation_concurrency=0))

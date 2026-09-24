@@ -51,8 +51,10 @@ class Settings(BaseSettings):
     monthly_reloads_max: int = 3
 
     # Items générés en parallèle par import (chantier 4) : appels Claude simultanés.
-    # 429 répétés au contrôle de fumée → 2.
-    generation_concurrency: int = Field(4, ge=1)
+    # 2 par défaut (revue finale) : le parallélisme n'a jamais été mesuré contre les
+    # limites de débit réelles du compte, et plusieurs imports peuvent tourner à la fois
+    # (worker max_jobs 10). À relever par la variable GENERATION_CONCURRENCY si besoin.
+    generation_concurrency: int = Field(2, ge=1)
 
     # Taux de conversion USD→EUR pour le calcul de coût des tokens Claude
     # (Story 7.8). Valeur par défaut ici (PAS dans le .env prod NAS, cf. mémoire

@@ -162,7 +162,7 @@ Objectif : chaque item reçoit **toutes ses pages et seulement les siennes**. Ex
 
 ## 8. Génération en parallèle, déploiement et vidage
 
-- **Parallèle** : `asyncio.Semaphore(settings.generation_concurrency)` (défaut **4**) dans `pipeline.py`, chaque tâche avec sa session courte et son commit par item. Annulation : tâches en vol annulées, items commités conservés, job reprenable. Erreur d'API après les réessais du SDK : le job échoue (quota remboursé si réimport), les autres tâches sont annulées. 429 répétés au contrôle de fumée → défaut 2.
+- **Parallèle** : `asyncio.Semaphore(settings.generation_concurrency)` (défaut **2** — revue finale : jamais mesuré contre les limites de débit réelles du compte, plusieurs imports simultanés possibles) dans `pipeline.py`, chaque tâche avec sa session courte et son commit par item. Annulation : tâches en vol annulées, items commités conservés, job reprenable. Erreur d'API après les réessais du SDK : le job échoue (quota remboursé si réimport), les autres tâches sont annulées. 429 répétés au contrôle de fumée → défaut 2.
 - **Avant le déploiement** : export des textes de pages des 3 collèges (fixtures § 4) et dump complet.
 - **Vidage** (script `scripts/wipe_content.py --confirm`, exécuté une fois après la migration, avec l'OK déjà donné par l'utilisateur) :
   - supprime tous les collèges et, en cascade, items, fiches, révisions, jobs, événements, brouillons, `college_pages` ;

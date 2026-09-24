@@ -18,7 +18,7 @@
 - Fiches : types `classique` | `definition` | `cas_clinique` ; rang de fiche `A` | `B` ; au plus 40 par item (tronqué + warning) ; `insufficient_text: true` → 0 fiche, item listé dans le résumé.
 - Modifier `clean_for_prompt` ou le prompt impose d'incrémenter `PROMPT_VERSION`. L'empreinte (`fingerprint.item_hash`) et `item_texts` restent calculés sur le texte brut.
 - Contenu sous droits : aucun texte de page dans git ni dans les logs ; fixtures privées ignorées proprement (`pytest.skip`) si absentes (CI).
-- Concurrence : `settings.generation_concurrency` (défaut 4).
+- Concurrence : `settings.generation_concurrency` (défaut 2 depuis la revue finale ; 4 à l'origine).
 - Tests : backend (`TEST_PG_URL` vers la base dédiée indiquée dans le brief), `flutter test` par dossier, goldens tagués `golden`.
 
 ---
@@ -77,7 +77,7 @@
 
 ### Task 6: Pipeline p2 parallèle, rang par fiche, résumé — spec § 7, § 8 « Parallèle »
 
-**Files:** `app/services/generation/pipeline.py`, `app/services/generation/publish.py`, `app/workers/generation_worker.py`, `app/core/config.py` (`generation_concurrency: int = 4`), migration 021 (contrainte `ck_flash_cards_card_type` avec `cas_clinique`), `tests/services/test_generation_pipeline.py`, `tests/services/test_publish.py`.
+**Files:** `app/services/generation/pipeline.py`, `app/services/generation/publish.py`, `app/workers/generation_worker.py`, `app/core/config.py` (`generation_concurrency: int = 2`, 4 avant la revue finale), migration 021 (contrainte `ck_flash_cards_card_type` avec `cas_clinique`), `tests/services/test_generation_pipeline.py`, `tests/services/test_publish.py`.
 
 - Pipeline : `asyncio.Semaphore(settings.generation_concurrency)` ; une tâche par item avec session courte et commit par item (logique actuelle conservée : génération réutilisée par empreinte+version, item inchangé gardé) ; `record_usage` après chaque appel ; appels via `clean_for_prompt(pages)` (les pages d'un item sont relues depuis `item_texts` — stocker le texte d'item avec un séparateur de page stable pour pouvoir le redécouper, ou relire les `job_pages` ; choisir et documenter). Annulation (Stop) : tâches en vol annulées, items commités conservés. Erreur d'API après les réessais du SDK : le job échoue (chemin existant `fail_job`, quota remboursé), les autres tâches annulées.
 - `item_generations.cards_json` contient `rang` par fiche ; `publish` écrit `flash_cards.rang` = rang de la fiche (défaut : rang de l'item) et accepte `cas_clinique`.
