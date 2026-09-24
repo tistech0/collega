@@ -1,6 +1,19 @@
-"""Normalisation pure du texte extrait des PDF (partagée par l'extraction et le découpage)."""
+"""Normalisation pure du texte extrait des PDF (partagée par l'extraction, le découpage
+et l'allègement du texte envoyé à Claude)."""
 
 from __future__ import annotations
+
+import re
+
+# Motifs de filigrane relevés en prod (spec chantier 4 § 5), insensibles à la casse :
+# « Pour avoir plus d'exclusivités rejoindre nous sur www.amis-med.com… »,
+# « Il a été diffusé exclusivement et gratuitement sur le forum © SBA-MEDECINE »,
+# « pour plus des livres médicaux gratuits… www.sba-medecin… », « Faille_V2 ».
+WATERMARK_PATTERN = re.compile(
+    r"Pour avoir plus d.exclusivit|amis-med\.com|Faille_V2|livres m.dicaux gratuits|sba-m.decine"
+    r"|diffus. exclusivement",
+    re.IGNORECASE,
+)
 
 # Part minimale de paires identiques pour considérer une ligne comme doublée
 _DOUBLED_PAIRS_RATIO = 0.8

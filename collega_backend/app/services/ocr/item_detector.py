@@ -47,7 +47,7 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 from app.services.ocr.item_titles import clean_title, is_valid_title
-from app.services.ocr.text_normalize import undouble
+from app.services.ocr.text_normalize import WATERMARK_PATTERN, undouble
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +56,8 @@ PageKind = Literal["item", "section", "blank"]
 PageTables = list[list[list[str]]]  # list[table] → table = list[row] → row = list[cell]
 
 # ── R0 ────────────────────────────────────────────────────────────────────────
-_WATERMARK = re.compile(
-    r"Pour avoir plus d.exclusivit|amis-med\.com|Faille_V2|livres m.dicaux gratuits|sba-m.decine"
-    r"|diffus. exclusivement",
-    re.IGNORECASE,
-)
+# Motif de filigrane partagé avec l'allègement du texte envoyé à Claude (spec § 5).
+_WATERMARK = WATERMARK_PATTERN
 _BLANK_MAX_CHARS = 40
 
 # ── R1 ────────────────────────────────────────────────────────────────────────
