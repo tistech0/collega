@@ -1,0 +1,39 @@
+---
+type: "Decision"
+title: "Revue qualité des fiches prod 2026-09-24 et chantier 4"
+description: "Revue des 504 fiches de prod 66 items, collèges 3 cancéro, 12 hémato, 34 pneumo générées par claude sonnet 4 6 avec le prompt p1 : fidélité bonne 7,5 9/10 , mais couverture du rang A 3/10 8 fiches par item quelle que soi"
+resource: "_bmad-output/planning-artifacts/chantier-4-couts-claude-spec.md"
+tags: ["session-learning", "generation", "prompt", "segmentation", "quality"]
+timestamp: "2026-09-24T17:11:33.398Z"
+x-kage-id: "repo:git-github-com-tistech0-collega:decision:revue-qualit-des-fiches-prod-2026-09-24-et-chantier-4-1790269893398"
+x-kage-type: "decision"
+x-kage-status: "approved"
+x-kage-scope: "repo"
+x-kage-visibility: "team"
+x-kage-verified: "unverified"
+x-kage-paths: ["_bmad-output/planning-artifacts/chantier-4-couts-claude-spec.md", "collega_backend/app/services/ocr/item_detector.py", "collega_backend/app/services/generation/claude_client.py"]
+---
+
+# Revue qualité des fiches prod 2026-09-24 et chantier 4
+
+> Revue des 504 fiches de prod 66 items, collèges 3 cancéro, 12 hémato, 34 pneumo générées par claude sonnet 4 6 avec l…
+
+Revue des 504 fiches de prod (66 items, collèges 3 cancéro, 12 hémato, 34 pneumo) générées par claude-sonnet-4-6 avec le prompt p1 : fidélité bonne (7,5-9/10), mais couverture du rang A 3/10 (8 fiches par item quelle que soit la taille du texte, médiane 38 k caractères ; besoin estimé 18-20 fiches par item, 8 à 40). Première cause : découpage des items cassé dans item_detector.py (en-tête courant « Item 21 2 » lu comme item 21, pages perdues, débordement sur l'item suivant quand l'en-tête n'est pas lu alors que « OBJECTIFS : N° x » l'est, dossiers progressifs/corrigés de fin de livre rattachés au dernier item, tableaux pivotés extraits à l'envers par pdfplumber). Autres défauts : invention quand le texte est pauvre (item 215, 306), listes longues, questions doubles, « (Rang B) » au recto, item 320 à 0 fiche (JSON illisible probable). Décisions validées : Sonnet 5, prompt p2 proportionnel (0-40 fiches, chaque objectif A couvert d'abord, rang par fiche, type cas_clinique), correction du découpage, vidage du contenu au déploiement puis réimport par l'utilisateur. Spec : chantier-4-couts-claude-spec.md.
+Evidence: Export SQL des items/fiches de prod et revue par 3 agents, un par collège, le 2026-09-24
+
+## Verification
+
+Export SQL des items/fiches de prod et revue par 3 agents, un par collège, le 2026-09-24
+
+# Citations
+
+[1] explicit_capture (2026-09-24T17:11:33.398Z)
+
+## Kage state
+
+Machine state for lossless round-trip; OKF consumers can ignore it.
+
+```json kage-state
+{"schema_version":2,"id":"repo:git-github-com-tistech0-collega:decision:revue-qualit-des-fiches-prod-2026-09-24-et-chantier-4-1790269893398","title":"Revue qualité des fiches prod 2026-09-24 et chantier 4","summary":"Revue des 504 fiches de prod 66 items, collèges 3 cancéro, 12 hémato, 34 pneumo générées par claude sonnet 4 6 avec le prompt p1 : fidélité bonne 7,5 9/10 , mais couverture du rang A 3/10 8 fiches par item quelle que soi","body":"Revue des 504 fiches de prod (66 items, collèges 3 cancéro, 12 hémato, 34 pneumo) générées par claude-sonnet-4-6 avec le prompt p1 : fidélité bonne (7,5-9/10), mais couverture du rang A 3/10 (8 fiches par item quelle que soit la taille du texte, médiane 38 k caractères ; besoin estimé 18-20 fiches par item, 8 à 40). Première cause : découpage des items cassé dans item_detector.py (en-tête courant « Item 21 2 » lu comme item 21, pages perdues, débordement sur l'item suivant quand l'en-tête n'est pas lu alors que « OBJECTIFS : N° x » l'est, dossiers progressifs/corrigés de fin de livre rattachés au dernier item, tableaux pivotés extraits à l'envers par pdfplumber). Autres défauts : invention quand le texte est pauvre (item 215, 306), listes longues, questions doubles, « (Rang B) » au recto, item 320 à 0 fiche (JSON illisible probable). Décisions validées : Sonnet 5, prompt p2 proportionnel (0-40 fiches, chaque objectif A couvert d'abord, rang par fiche, type cas_clinique), correction du découpage, vidage du contenu au déploiement puis réimport par l'utilisateur. Spec : chantier-4-couts-claude-spec.md.\nEvidence: Export SQL des items/fiches de prod et revue par 3 agents, un par collège, le 2026-09-24","type":"decision","scope":"repo","visibility":"team","sensitivity":"internal","status":"approved","confidence":0.7,"tags":["session-learning","generation","prompt","segmentation","quality"],"paths":["_bmad-output/planning-artifacts/chantier-4-couts-claude-spec.md","collega_backend/app/services/ocr/item_detector.py","collega_backend/app/services/generation/claude_client.py"],"stack":[],"source_refs":[{"kind":"explicit_capture","captured_at":"2026-09-24T17:11:33.398Z"}],"context":{"fact":"Revue des 504 fiches de prod (66 items, collèges 3 cancéro, 12 hémato, 34 pneumo) générées par claude-sonnet-4-6 avec le prompt p1 : fidélité bonne (7,5-9/10), mais couverture du rang A 3/10 (8 fiches par item quelle que soit la taille du texte, médiane 38 k caractères ; besoin estimé 18-20 fiches par item, 8 à 40). Première cause : découpage des items cassé dans item_detector.py (en-tête courant « Item 21 2 » lu comme item 21, pages perdues, débordement sur l'item suivant quand l'en-tête n'est pas lu alors que « OBJECTIFS : N° x » l'est, dossiers progressifs/corrigés de fin de livre rattachés au dernier item, tableaux pivotés extraits à l'envers par pdfplumber). Autres défauts : invention quand le texte est pauvre (item 215, 306), listes longues, questions doubles, « (Rang B) » au recto, item 320 à 0 fiche (JSON illisible probable). Décisions validées : Sonnet 5, prompt p2 proportionnel (0-40 fiches, chaque objectif A couvert d'abord, rang par fiche, type cas_clinique), correction du découpage, vidage du contenu au déploiement puis réimport par l'utilisateur. Spec : chantier-4-couts-claude-spec.md.\nEvidence: Export SQL des items/fiches de prod et revue par 3 agents, un par collège, le 2026-09-24","verification":"Export SQL des items/fiches de prod et revue par 3 agents, un par collège, le 2026-09-24"},"freshness":{"ttl_days":365,"last_verified_at":"2026-09-24T17:11:33.398Z","path_fingerprints":[{"path":"_bmad-output/planning-artifacts/chantier-4-couts-claude-spec.md","sha256":"61204bc4dabc14ea5fe9e406f50359bbf70766e10e7b44861f1188131bcc89b5","size":17579},{"path":"collega_backend/app/services/ocr/item_detector.py","sha256":"67395146f60a92fbdcc8655f4acb779f1b536d59898f947db69241e787f2ef83","size":15898},{"path":"collega_backend/app/services/generation/claude_client.py","sha256":"787333fc483986ec52ff28bd482c4f0cbd213a71a0a9f11aeb16e850cba5c081","size":8111}],"path_fingerprint_policy":"source_hash_staleness","verification":"repo_local_agent_capture"},"edges":[],"quality":{"reviewer":"repo-local-agent","votes_up":0,"votes_down":0,"uses_30d":0,"reports_stale":0,"review_boundary":"git_or_pr","promotion_requires_review":true,"discovery_tokens":4000,"discovery_tokens_estimated":true,"score":100,"reasons":["high-value memory type","has source evidence","grounded to repo paths","tagged","concise but substantive","actionable rationale or verification"],"risks":[],"duplicate_candidates":[],"stale_reasons":[],"estimated_tokens_saved":304},"created_at":"2026-09-24T17:11:33.398Z","updated_at":"2026-09-24T17:11:33.398Z","author_branch":"main"}
+```
+
