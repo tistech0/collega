@@ -1,6 +1,7 @@
 """Génération par item, réutilisation et worker de génération (chantier 1), Postgres réel."""
 
 import asyncio
+import contextlib
 import json
 
 import anthropic
@@ -574,6 +575,78 @@ async def test_cancellation_right_after_the_call_still_persists_it(pg_factory, n
     claude = FakeClaude()
     result = await _run(pg_factory, college, job, claude)  # relance ARQ du même job
     assert claude.calls == [303] and result["added"] == 3
+
+
+async def test_cancellation_twice_still_persists_it(pg_factory, notifications, sequential, monkeypatch):
+    """Revue tâche 6 (durcissement différé) : une deuxième annulation pendant la
+    persistance ne doit pas laisser l'appel payé non enregistré."""
+    texts = {301: "a", 302: "b", 303: "c"}
+    _, college, job = await _ready_job(pg_factory, texts)
+    persisting = asyncio.Event()
+    release = asyncio.Event()
+    original_persist = pipeline._persist_item
+
+    async def slow_persist(*args, **kwargs):
+        if kwargs.get("item_number") == 302:
+            persisting.set()
+            await release.wait()  # laisse le temps à la deuxième annulation d'arriver
+        return await original_persist(*args, **kwargs)
+
+    monkeypatch.setattr(pipeline, "_persist_item", slow_persist)
+
+    class CancelledTwiceAfterCall(FakeClaude):
+        async def generate_cards(self, item_number, title, pages, *, effort="medium"):
+            r = await super().generate_cards(item_number, title, pages)
+            if item_number == 302:
+                task = asyncio.current_task()
+                task.cancel()  # première annulation, livrée au prochain await (le shield de persist)
+
+                async def cancel_again():
+                    await persisting.wait()  # persist a commencé mais n'a pas encore écrit
+                    task.cancel()  # deuxième annulation, pendant l'attente protégée
+                    release.set()
+
+                asyncio.ensure_future(cancel_again())
+            return r
+
+    with pytest.raises(asyncio.CancelledError):
+        await asyncio.wait_for(_run(pg_factory, college, job, CancelledTwiceAfterCall()), 5)
+    # L'appel payé de 302 est bien enregistré malgré la double annulation.
+    assert len(await _usage(pg_factory)) == 2
+    async with pg_factory() as s:
+        assert (await s.execute(select(func.count()).select_from(ItemGeneration))).scalar_one() == 2
+        assert (await s.get(GenerationJob, job.id)).status == "ocr_complete"
+    claude = FakeClaude()
+    result = await _run(pg_factory, college, job, claude)  # relance ARQ du même job
+    assert claude.calls == [303] and result["added"] == 3
+
+
+def test_primary_failure_prefers_a_real_error_over_a_cancellation():
+    """Revue tâche 6 (durcissement différé) : dans un lot où une tâche échoue
+    vraiment et une autre est seulement annulée, la vraie erreur doit remonter
+    (pour `fail_job`), quel que soit l'ordre des tâches dans le lot."""
+
+    async def boom():
+        raise RuntimeError("vraie erreur")
+
+    async def stalls():
+        await asyncio.sleep(30)
+
+    async def _scenario():
+        err_task = asyncio.create_task(boom())
+        cancel_task = asyncio.create_task(stalls())
+        await asyncio.sleep(0)  # laisse boom() s'exécuter et se terminer
+        cancel_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await cancel_task
+        assert err_task.done() and cancel_task.cancelled()
+
+        for failed in ([cancel_task, err_task], [err_task, cancel_task]):
+            primary = pipeline._primary_failure(failed)
+            assert primary is err_task
+        assert isinstance(err_task.exception(), RuntimeError)  # retirée : pas de warning asyncio
+
+    asyncio.run(_scenario())
 
 
 async def test_every_task_error_is_logged(pg_factory, notifications, monkeypatch, caplog):

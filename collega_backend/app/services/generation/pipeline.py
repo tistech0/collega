@@ -171,9 +171,11 @@ async def generate_job_items(
             # échoue par l'appelant (fail_job) ou reste reprenable (CancelledError).
             failed = [t for t in done if t.cancelled() or t.exception() is not None]
             if failed:
-                for other in failed[1:]:
-                    _log_task_error(other)
-                failed[0].result()
+                primary = _primary_failure(failed)
+                for other in failed:
+                    if other is not primary:
+                        _log_task_error(other)
+                primary.result()
             results = [t.result() for t in done]
             outcomes = [o for o in results if o is not None]
             if len(outcomes) < len(results):
@@ -196,6 +198,14 @@ async def generate_job_items(
                 _log_task_error(task)
 
     return claude_calls
+
+
+def _primary_failure(failed: list[asyncio.Task[Any]]) -> asyncio.Task[Any]:
+    """Choisit la tâche à remonter dans un lot où plusieurs ont échoué. Une tâche
+    annulée seulement parce qu'une autre échouait ne doit jamais masquer l'erreur
+    réelle (sinon `fail_job` reçoit une CancelledError au lieu de la vraie cause) :
+    priorité à une tâche en erreur ; à défaut, la première tâche annulée."""
+    return next((t for t in failed if not t.cancelled()), failed[0])
 
 
 def _log_task_error(task: asyncio.Task[Any]) -> None:
@@ -257,7 +267,15 @@ async def _generate_item(
     try:
         return await asyncio.shield(persist)
     except asyncio.CancelledError:
-        await persist
+        # Une deuxième annulation peut arriver pendant qu'on attend la fin de la
+        # persistance (elle aussi doit être protégée, sinon l'appel payé risque de
+        # ne jamais être enregistré) : on reste protégé jusqu'à ce que `persist`
+        # soit vraiment terminée, puis on relaie l'annulation.
+        while not persist.done():
+            try:
+                await asyncio.shield(persist)
+            except asyncio.CancelledError:
+                continue
         raise
 
 
