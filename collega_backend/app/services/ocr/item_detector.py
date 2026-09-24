@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import re
 import unicodedata
 from dataclasses import dataclass, field
@@ -64,14 +65,17 @@ _BLANK_MAX_CHARS = 40
 
 # ── R1 ────────────────────────────────────────────────────────────────────────
 _HEADER_LINES = 5
-_HEADER_ITEM = re.compile(
-    r"^(?:[\W_]{0,4}|w\s+|-\s*/\s*)(?:i?t?em)\s*n?°?\s*((?:\d\s?){1,3})(\s*bis)?\b", re.IGNORECASE
-)
+_HEADER_PREFIX = r"^(?:[\W_]{0,4}|w\s+|-\s*/\s*)"
+_HEADER_ITEM = re.compile(_HEADER_PREFIX + r"(?:i?t?em)\s*n?°?\s*((?:\d\s?){1,3})(\s*bis)?\b", re.IGNORECASE)
+# Chapitre commun à deux items : « Items 213 et 214 », « Items 213, 214 », « Items 213-214 »
+_HEADER_ITEMS = re.compile(_HEADER_PREFIX + r"items\s*(\d{1,3})\s*(?:et|,|-|–|&)\s*(\d{1,3})\b", re.IGNORECASE)
+# En-tête « propre » du repli (format de l'ancien détecteur) : pas de forme abîmée ni de puce.
+_CLEAN_HEADER = re.compile(r"^[.,'’ \t]{0,3}items?\s*n?°?\s*\d", re.IGNORECASE)
 
 # ── R2 / R3 ───────────────────────────────────────────────────────────────────
 # « OBJECTIFS: N° 304. Tumeurs du foie… » (variantes OCR : « OBJECTIFS : », « N"o300. »)
-_OBJECTIFS = re.compile(r"OBJECTIFS?\s*:?\s*N\s*[°º\"'o]{0,3}\s*(\d{1,3})\s*[.\-–:]?[ \t]*([^\n]*)")
-_RANG_TABLE = re.compile(r"\bRang\b.{0,40}\bRubrique\b", re.IGNORECASE)
+# Le mot « OBJECTIFS » en toute casse ; « N » strict (« objectifs nutritionnels » n'en est pas un).
+_OBJECTIFS = re.compile(r"(?i:OBJECTIFS?)\s*:?\s*N\s*[°º\"'o]{0,3}\s*(\d{1,3})\s*[.\-–:]?[ \t]*([^\n]*)")
 _CHAPITRE = re.compile(r"^CHAPITRE\b")
 _CEP_FIRST_LINE = re.compile(r"Coll[èe]ge des Enseignants")
 _RANG_TABLE_LINES = 40
@@ -87,6 +91,11 @@ _R6_TITLE_PREFIX = 25
 # Le référentiel officiel ne restreint K que s'il est complet (367 items EDN, marge pour
 # les numéros retirés) ; un référentiel partiel sert seulement aux titres (R6).
 _COMPLETE_REFERENTIAL = 300
+
+# ── Filets de sécurité (livres d'un format inconnu) ───────────────────────────
+_MAX_SECTION_CONTENT_PAGES = 30
+_FRONT_MATTER_MAX_SHARE = 0.10
+_MIN_ITEM_COVERAGE = 0.5
 
 # ── R7 ────────────────────────────────────────────────────────────────────────
 _SECTION_PATTERNS = [
@@ -107,7 +116,6 @@ _FRONT_MATTER = frozenset(
 _CHAPTER_WITHOUT_ITEM = "chapitre sans item"
 _DOSSIERS = "dossiers progressifs"
 _FRONT_LABEL = "liminaire"
-_UNASSIGNED = "non rattachée"
 
 # ── Rang (§ 3) ────────────────────────────────────────────────────────────────
 # En-tête du tableau d'objectifs : « Rubrique » en début de ligne, précédé de « Rang » ou suivi
@@ -295,10 +303,29 @@ class _Page:
     section: str | None = None
     toc: bool = False
     signals: list[str] = field(default_factory=list)
+    shared: int | None = None  # 2e numéro d'un chapitre « Items N et M »
+    clean_header: int | None = None  # en-tête « Item N » propre (repli)
 
 
 def _table_has_rang_header(tables: PageTables) -> bool:
-    return any(_RANG_TABLE.search(" ".join(str(c) for c in row if c)) for table in tables for row in table if row)
+    return any(_is_rang_header(" ".join(str(c) for c in row if c)) for table in tables for row in table if row)
+
+
+def _parse_header(p: _Page) -> None:
+    """R1 : 1er en-tête « Item N » (ou « Items N et M ») des 5 premières lignes."""
+    for line in p.lines[:_HEADER_LINES]:
+        candidates = header_candidates(line)
+        shared = _HEADER_ITEMS.match(line)
+        if shared and not candidates:
+            candidates, p.shared = [int(shared.group(1))], int(shared.group(2))
+        if candidates:
+            p.header = candidates
+            p.signals.append("en-tête:" + "/".join(str(n) for n in candidates))
+            if p.shared is not None:
+                p.signals.append(f"chapitre partagé:{p.shared}")
+            if _CLEAN_HEADER.match(line):
+                p.clean_header = candidates[0]
+            return
 
 
 def _parse_page(idx: int, text: str, tables: PageTables) -> _Page:
@@ -306,12 +333,7 @@ def _parse_page(idx: int, text: str, tables: PageTables) -> _Page:
     p = _Page(idx, lines, blank=len("".join(lines)) < _BLANK_MAX_CHARS)
     if p.blank:
         return p
-    for line in lines[:_HEADER_LINES]:
-        candidates = header_candidates(line)
-        if candidates:
-            p.header = candidates
-            p.signals.append("en-tête:" + "/".join(str(n) for n in candidates))
-            break
+    _parse_header(p)
     m = _OBJECTIFS.search(text)
     if m:
         p.objectifs = int(m.group(1))
@@ -325,7 +347,7 @@ def _parse_page(idx: int, text: str, tables: PageTables) -> _Page:
     if p.header and (
         _CHAPITRE.match(lines[0])
         or _CEP_FIRST_LINE.search(lines[0])
-        or _RANG_TABLE.search("\n".join(lines[:_RANG_TABLE_LINES]))
+        or any(_is_rang_header(line) for line in lines[:_RANG_TABLE_LINES])
         or _table_has_rang_header(tables)
     ):
         p.strong = p.header[0]
@@ -334,7 +356,7 @@ def _parse_page(idx: int, text: str, tables: PageTables) -> _Page:
         p.strong = p.objectifs
     # R7 : sections hors item
     head = " ".join(lines[:8])
-    if _CHAPITRE.match(lines[0]) and not re.search(r"\bItem\s*\d", head, re.IGNORECASE):
+    if _CHAPITRE.match(lines[0]) and not re.search(r"\bItems?\s*\d", head, re.IGNORECASE):
         title = " ".join(line for line in lines[1:4] if not line.isdigit())
         p.section = _DOSSIERS if re.search(r"dossiers? progressifs", title, re.IGNORECASE) else _CHAPTER_WITHOUT_ITEM
     else:
@@ -374,16 +396,23 @@ def _r6_toc_titles(pages: list[_Page]) -> dict[int, str]:
     return titles
 
 
-def _known_numbers(pages: list[_Page], known_titles: dict[int, str] | None) -> set[int]:
-    """R4 : numéros sûrs du livre."""
-    k: set[int] = set()
+def _sure_numbers(pages: list[_Page]) -> dict[int, str]:
+    """Numéros sûrs (sommaire, OBJECTIFS, ouverture forte) → source, pour le rapport."""
+    sources: dict[int, str] = {}
     for p in pages:
         if p.toc:
-            k |= {int(n) for n in _TOC_ITEM_LINE.findall("\n".join(p.lines))}
+            for n in _TOC_ITEM_LINE.findall("\n".join(p.lines)):
+                sources.setdefault(int(n), "du sommaire")
         if p.objectifs is not None:
-            k.add(p.objectifs)
+            sources.setdefault(p.objectifs, "d'OBJECTIFS")
         if p.strong is not None:
-            k.add(p.strong)
+            sources.setdefault(p.strong, "d'une page d'ouverture")
+    return sources
+
+
+def _known_numbers(pages: list[_Page], known_titles: dict[int, str] | None) -> set[int]:
+    """R4 : numéros sûrs du livre (un chiffre accepté ici ; pas pour les en-têtes répétés)."""
+    k: set[int] = set(_sure_numbers(pages))
     counts: dict[int, int] = {}
     for p in pages:
         if p.header and not p.toc:
@@ -394,10 +423,14 @@ def _known_numbers(pages: list[_Page], known_titles: dict[int, str] | None) -> s
         for n, c in counts.items()
         if c >= 2 and len(str(n)) >= 2 and not any(s != n and str(s).startswith(str(n)) for s in k)
     }
-    # Référentiel partiel (quelques titres posés à la main) : il exclurait presque tout.
-    if known_titles and len(known_titles) >= _COMPLETE_REFERENTIAL:
-        k = {n for n in k if n in known_titles}
+    if _complete(known_titles):
+        k = {n for n in k if n in known_titles}  # type: ignore[operator]
     return k
+
+
+def _complete(known_titles: dict[int, str] | None) -> bool:
+    """Référentiel partiel (quelques titres posés à la main) : il exclurait presque tout de K."""
+    return bool(known_titles) and len(known_titles or {}) >= _COMPLETE_REFERENTIAL
 
 
 def _resolve(p: _Page, current: int | None, known: set[int]) -> int | None:
@@ -614,6 +647,47 @@ def _titles_from_toc(page_texts: list[str]) -> dict[int, str]:
 # ── Détecteur ─────────────────────────────────────────────────────────────────
 
 
+def _safety_warnings(
+    parsed: list[_Page], assign: list[int | str | None], sure: dict[int, str], report: SegmentationReport
+) -> None:
+    """Warnings du rapport pour un livre d'un format inattendu (sans texte de page)."""
+    warnings = report.warnings
+    opened = {a for a in assign if isinstance(a, int)}
+    # Numéro sûr jamais ouvert
+    for number in sorted(n for n in sure if n not in opened):
+        warnings.append(f"numéro {number} {sure[number]} sans item")
+    # Chapitre commun à deux items : le 2e numéro n'a pas de pages à lui
+    shared = sorted({(a, p.shared) for p, a in zip(parsed, assign, strict=True) if p.shared and isinstance(a, int)})
+    warnings += [f"item {n} : l'item {m} partage son chapitre (pas de pages propres)" for n, m in shared]
+    # Sections : trop longues, liminaires au-delà du début du livre, contenu hors item
+    front_limit = max(1, math.ceil(len(parsed) * _FRONT_MATTER_MAX_SHARE))
+    first_item = next((i for i, a in enumerate(assign) if isinstance(a, int)), len(assign))
+    runs: list[tuple[str, list[int]]] = []
+    late_front: dict[str, list[int]] = {}
+    outside: dict[str, list[int]] = {}
+    for i, (p, a) in enumerate(zip(parsed, assign, strict=True)):
+        if p.blank or not isinstance(a, str):
+            if isinstance(a, int):
+                runs.append(("", []))
+            continue
+        if not runs or runs[-1][0] != a:
+            runs.append((a, []))
+        runs[-1][1].append(i)
+        if a in _FRONT_MATTER | {_FRONT_LABEL} and i >= front_limit:
+            late_front.setdefault(a, []).append(i)
+        if p.section is None and i > first_item:
+            outside.setdefault(a, []).append(i)
+    for label, pages in runs:
+        if len(pages) > _MAX_SECTION_CONTENT_PAGES:
+            warnings.append(f"section « {label} » : {len(pages)} pages de contenu (p{page_ranges(pages)})")
+    for label, pages in late_front.items():
+        warnings.append(f"section « {label} » au-delà des premiers 10 % du livre (p{page_ranges(pages)})")
+    for label, pages in outside.items():
+        warnings.append(f"p{page_ranges(pages)} : contenu hors item (section « {label} »)")
+    if not opened:
+        warnings.append("découpage suspect : aucun item détecté")
+
+
 class ItemDetector:
     """Découpe un collège en items (règles R0-R10) et lit le rang de leurs objectifs."""
 
@@ -650,6 +724,11 @@ class ItemDetector:
 
         report = SegmentationReport()
         assign = self._assign(parsed, known, norm_titles, report)
+        assign = self._check_coverage(parsed, assign, report)
+        sure = _sure_numbers(parsed)
+        if _complete(known_titles):
+            sure = {n: src for n, src in sure.items() if n in known_titles}  # type: ignore[operator]
+        _safety_warnings(parsed, assign, sure, report)
 
         items = self._build_items(page_texts, scores, tables, parsed, assign, report)
         logger.debug("Découpage : %s", report.summary())
@@ -703,12 +782,47 @@ class ItemDetector:
                     warnings.append(f"p{i} : réouverture de l'item {target}")
                 current, section = target, None
                 opened.add(target)
-            if current is not None:
-                assign[i] = current
+            assign[i] = current if current is not None else section
+        return assign
+
+    @staticmethod
+    def _assign_fallback(parsed: list[_Page]) -> list[int | str | None]:
+        """Repli (ancien détecteur) : tout en-tête « Item N » propre ou signal fort ouvre ou
+        poursuit l'item N ; les sections ferment toujours l'item courant."""
+        assign: list[int | str | None] = [None] * len(parsed)
+        current: int | None = None
+        section = _FRONT_LABEL
+        for i, p in enumerate(parsed):
+            if p.blank:
+                continue
+            if p.section and p.strong is None and not (current is not None and p.section in _FRONT_MATTER):
+                current, section = None, p.section
             else:
-                assign[i] = section or _UNASSIGNED
-                if section is None:
-                    warnings.append(f"p{i} : page de contenu non rattachée")
+                target = p.strong if p.strong is not None else p.clean_header
+                if target is not None:
+                    current = target
+            assign[i] = current if current is not None else section
+        return assign
+
+    @classmethod
+    def _check_coverage(
+        cls, parsed: list[_Page], assign: list[int | str | None], report: SegmentationReport
+    ) -> list[int | str | None]:
+        """Découpage suspect (aucun item, ou items < 50 % des pages de contenu) : repli."""
+        content = sum(1 for p in parsed if not p.blank)
+        covered = sum(1 for p, a in zip(parsed, assign, strict=True) if not p.blank and isinstance(a, int))
+        if content and covered >= _MIN_ITEM_COVERAGE * content:
+            return assign
+        fallback = cls._assign_fallback(parsed)
+        fb_covered = sum(1 for p, a in zip(parsed, fallback, strict=True) if not p.blank and isinstance(a, int))
+        if fb_covered > covered:
+            # Les warnings du 1er passage décrivent un découpage abandonné.
+            report.warnings[:] = [
+                f"découpage suspect ({covered}/{content} pages de contenu dans un item) : repli sur les "
+                f"en-têtes « Item N » ({fb_covered}/{content})"
+            ]
+            return fallback
+        report.warnings.append(f"découpage suspect ({covered}/{content} pages de contenu dans un item)")
         return assign
 
     @staticmethod

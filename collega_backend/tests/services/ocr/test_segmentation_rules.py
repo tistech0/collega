@@ -477,3 +477,110 @@ class TestObjectiveRang:
         result = seg(pages, page_tables=[[table], []])
         assert (result.items[0].rang, result.items[0].objectives_a, result.items[0].objectives_b) == ("A", 0, 0)
         assert any("rang inconnu" in w for w in result.report.warnings)
+
+
+# ── Filets de sécurité (revue, round 1) : livres différents des 3 fixtures ─────
+
+
+def content(n: int = 3) -> list[str]:
+    return [page(f"Suite du chapitre, page de cours {i}") for i in range(n)]
+
+
+def warned(result: SegmentationResult, *needles: str) -> bool:
+    return any(all(n in w for n in needles) for w in result.report.warnings)
+
+
+class TestSafetyNets:
+    def test_opening_page_only_header_falls_back(self):
+        """« Item N » sur la seule page d'ouverture, sans en-tête courant ni tableau : repli."""
+        pages = [page("Item 42", "Titre du chapitre"), *content(), page("Item 43", "Autre titre"), *content()]
+        result = seg(pages)
+        assert spans(result) == [(42, 0, 3), (43, 4, 7)]
+        assert warned(result, "découpage suspect", "repli")
+
+    def test_toc_does_not_swallow_the_book(self):
+        toc = "SOMMAIRE\nItem 42 ....... 1\nItem 43 ....... 5\nItem 44 ....... 9\n"
+        pages = [toc, page("Item 42", "Titre"), *content(), page("Item 43", "Titre"), *content()]
+        result = seg(pages)
+        assert spans(result) == [(42, 1, 4), (43, 5, 8)]
+        assert warned(result, "numéro 44", "sans item")
+
+    def test_one_digit_items_from_toc_and_strong_openings(self):
+        toc = "SOMMAIRE\nItem 7 ....... 1\nItem 8 ....... 4\nItem 9 ....... 7\n"
+        pages = [
+            toc,
+            page("Item 7", "Rang Rubrique Intitulé", "A Définition x"),
+            page("Item 7"),
+            page("Item 7"),
+            page("Item 8", "Rang Rubrique Intitulé", "B Définition x"),
+            page("Item 8"),
+        ]
+        result = seg(pages)
+        assert spans(result) == [(7, 1, 3), (8, 4, 5)]
+        assert warned(result, "numéro 9", "sans item")
+
+    @pytest.mark.parametrize("header", ["Items 213 et 214", "Items 213, 214", "Items 213-214"])
+    def test_chapter_shared_by_two_items_opens_first(self, header):
+        pages = [
+            page("CHAPITRE", "12", header, "Thrombopénies et purpuras"),
+            *content(),
+            page("CHAPITRE", "13", "Item 215", "Purpuras"),
+            page("Item 215"),
+        ]
+        result = seg(pages)
+        assert spans(result) == [(213, 0, 3), (215, 4, 5)]
+        assert warned(result, "214", "213", "partage")
+
+    def test_lower_case_objectifs_opens_item(self):
+        pages = [page("Objectifs : N° 42. Tumeurs"), *content(), page("Objectifs : N° 43. Autres"), *content()]
+        assert spans(seg(pages)) == [(42, 0, 3), (43, 4, 7)]
+
+    def test_objectifs_n_stays_strict(self):
+        """« objectifs nutritionnels » n'est pas une ligne OBJECTIFS."""
+        pages = [page("Item 42", "OBJECTIFS: N° 42. Titre"), page("Les objectifs nutritionnels 12 sont")]
+        assert spans(seg(pages)) == [(42, 0, 1)]
+
+    def test_long_section_warning(self):
+        pages = [page("Item 42", "OBJECTIFS: N° 42. Titre"), *content(40), page("CHAPITRE", "2", "Hématopoïèse")]
+        pages += content(31)
+        result = seg(pages)
+        assert warned(result, "chapitre sans item", "32 pages de contenu")
+
+    def test_front_matter_beyond_ten_percent_warning(self):
+        toc = "SOMMAIRE\nItem 42 ....... 1\nItem 43 ....... 5\nItem 44 ....... 9\n"
+        result = seg([toc, *content(19)])
+        assert result.items == []
+        assert warned(result, "sommaire", "10 %")
+        assert warned(result, "découpage suspect")
+
+    def test_low_coverage_falls_back_and_reports_content_outside_items(self):
+        pages = [
+            page("Item 42", "OBJECTIFS: N° 42. Titre"),
+            page("Item 42"),
+            page("Entraînement"),
+            *content(2),
+            page("Item 43", "Titre"),
+            *content(4),
+            page("Item 44", "Titre"),
+            *content(4),
+        ]
+        result = seg(pages)
+        assert spans(result) == [(42, 0, 1), (43, 5, 9), (44, 10, 14)]
+        assert warned(result, "repli")
+        assert warned(result, "p3-4 : contenu hors item", "dossiers progressifs")
+
+    def test_content_outside_items_after_chapter_without_item(self):
+        pages = [page("Item 42", "OBJECTIFS: N° 42. Titre"), *content(3), page("CHAPITRE", "1", "Généralités")]
+        pages += content(2) + [page("Item 43", "OBJECTIFS: N° 43. Titre"), *content(2)]
+        result = seg(pages)
+        assert spans(result) == [(42, 0, 3), (43, 7, 9)]
+        assert warned(result, "p5-6 : contenu hors item", "chapitre sans item")
+        assert not warned(result, "p4 ")  # la page qui porte le signal de section n'est pas signalée
+
+    def test_front_matter_content_is_not_reported_outside_items(self):
+        pages = [page("Texte de couverture"), page("Item 290", "OBJECTIFS: N° 290. Titre"), page("Item 290")]
+        assert not warned(seg(pages), "contenu hors item")
+
+    def test_zero_items_is_suspect(self):
+        result = seg([page("Un livre sans aucun numéro d'item")] * 3)
+        assert result.items == [] and warned(result, "découpage suspect")

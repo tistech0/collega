@@ -6,6 +6,7 @@ pages, aucun texte) est committée dans tests/fixtures/segmentation/.
 """
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -66,7 +67,28 @@ def test_no_content_page_left_out(case):
     assigned = {p: i.item_number for i in result.items for p in i.pages}
     lost = [p for p, n in _content_pages_of(truth).items() if assigned.get(p) != n]
     assert lost == []
-    assert not [w for w in result.report.warnings if "non rattachée" in w]
+
+
+def _expand(ranges: str) -> list[int]:
+    pages: list[int] = []
+    for part in ranges.split(","):
+        a, _, b = part.partition("-")
+        pages += range(int(a), int(b or a) + 1)
+    return pages
+
+
+def test_content_outside_items_is_only_in_true_sections(case):
+    """Les pages signalées « contenu hors item » sont de vraies sections hors item."""
+    truth, result = case
+    flagged = [
+        p
+        for w in result.report.warnings
+        if (m := re.match(r"p([\d,-]+) : contenu hors item", w))
+        for p in _expand(m.group(1))
+    ]
+    sections = {p for s in truth["non_item_sections"] for p in range(s["start_page"], s["end_page"] + 1)}
+    assert set(flagged) <= sections
+    assert not [w for w in result.report.warnings if "découpage suspect" in w or "sans item" in w]
 
 
 def test_no_section_page_inside_an_item(case):

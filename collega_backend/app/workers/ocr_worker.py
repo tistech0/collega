@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 _ocr_processor = OcrProcessor()
 _confidence_scorer = ConfidenceScorer()
 _LOGGED_WARNINGS = 20  # le rapport complet est dans generation_jobs.segmentation_report
+NO_ITEMS_MESSAGE = "Aucun item détecté dans ce PDF"
 _item_detector = ItemDetector()
 
 
@@ -218,7 +219,16 @@ async def _finish_ocr(
         logger.info("Découpage du job %s : %s", job_id, report.summary())
         if report.warnings:
             logger.warning("Découpage du job %s : %s", job_id, " ; ".join(report.warnings[:_LOGGED_WARNINGS]))
-        await record_job_event(db, job_id, "items_detected", message=f"{len(items)} items")
+        message = _items_message(len(items), report)
+        await record_job_event(db, job_id, "items_detected", message=message)
+        if not items:
+            # Rien à générer : échec propre, sans génération ni appel Claude.
+            job = await db.get(GenerationJob, job_id)
+            if job is not None:
+                job.segmentation_report = report.to_json()
+            await db.commit()
+            await fail_job(session_factory, job_id, NO_ITEMS_MESSAGE)
+            return {"error": "no_items"}
         for detected, pages in items:
             text_hash = await store.put_item_text(db, pages)
             db.add(
@@ -242,7 +252,7 @@ async def _finish_ocr(
         job.segmentation_report = report.to_json()
         if college.status != CollegeStatus.generation_complete:
             college.status = CollegeStatus.ocr_complete
-        await record_job_event(db, job_id, "ocr_complete", message=f"{len(items)} items")
+        await record_job_event(db, job_id, "ocr_complete", message=message)
         await db.commit()
         logger.info("OCR complete for college %s — %d items détectés", college_id, len(items))
 
@@ -303,7 +313,16 @@ async def official_titles(db: AsyncSession) -> dict[int, str] | None:
 
 def with_pages(items: list[DetectedItem], texts: list[str]) -> list[tuple[DetectedItem, list[str]]]:
     """Le texte d'un item est la concaténation de ses pages (`DetectedItem.pages`)."""
+    for d in items:
+        if not d.pages:
+            raise ValueError(f"Item {d.item_number} sans pages : découpage incohérent")
     return [(d, [texts[p] for p in d.pages]) for d in items]
+
+
+def _items_message(count: int, report: SegmentationReport) -> str:
+    """« 21 items, 3 avertissements de découpage » (événements du job)."""
+    warnings = len(report.warnings)
+    return f"{count} items, {warnings} avertissement{'s' if warnings > 1 else ''} de découpage"
 
 
 async def _resolve_title(db: AsyncSession, college_id: uuid.UUID, detected: DetectedItem) -> str | None:

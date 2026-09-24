@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.models.college import College
 from app.models.content import JobItem, JobPage, OcrPage
 from app.models.generation_job import GenerationJob
+from app.models.generation_job_event import GenerationJobEvent
 from app.models.item import Item
 from app.models.item_title import ItemTitle
 from app.services.ocr.item_detector import DetectedItem, PageAssignment, SegmentationReport, SegmentationResult
@@ -348,3 +349,51 @@ async def test_segmentation_report_is_stored_and_official_titles_passed(pg_facto
     assert [i["item_number"] for i in data["items"]] == [304, 305]
     assert data["warnings"] == ["p9 : exemple"]
     assert "texte A" not in stored
+
+
+def test_with_pages_rejects_item_without_pages():
+    item = DetectedItem(
+        item_number=1, rang="A", chapter_title="", ocr_text="", start_page=0, end_page=0, ocr_confidence_score=0.9
+    )
+    with pytest.raises(ValueError):
+        with_pages([item], ["p0"])
+
+
+async def test_event_messages_carry_segmentation_warning_count(pg_factory, seed):
+    college, job = await seed()
+    await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor(PAGES), detector=FakeDetector())
+    async with pg_factory() as s:
+        events = (
+            await s.execute(
+                select(GenerationJobEvent.event_type, GenerationJobEvent.message).where(
+                    GenerationJobEvent.generation_job_id == job.id,
+                    GenerationJobEvent.event_type.in_(["items_detected", "ocr_complete"]),
+                )
+            )
+        ).all()
+    assert sorted(events) == [
+        ("items_detected", "2 items, 1 avertissement de découpage"),
+        ("ocr_complete", "2 items, 1 avertissement de découpage"),
+    ]
+
+
+async def test_no_item_fails_the_job_without_generation(pg_factory, seed):
+    """Découpage sans aucun item (même après le repli) : échec propre, rien en file, aucun coût."""
+    college, job = await seed()
+    redis = FakeRedis()
+    result = await run_ocr(
+        pg_factory,
+        college.id,
+        job.id,
+        "x.pdf",
+        processor=FakeProcessor(["Une page de texte sans aucun numéro d'item, assez longue."] * 3),
+        ctx={"redis": redis},
+    )
+    assert result["error"] == "no_items"
+    assert redis.calls == []
+    async with pg_factory() as s:
+        stored = await s.get(GenerationJob, job.id)
+        assert (stored.status, stored.error_message) == ("failed", "Aucun item détecté dans ce PDF")
+        assert "découpage suspect" in json.loads(stored.segmentation_report)["warnings"][-1]
+        assert (await s.get(College, college.id)).status == "failed"
+    assert await _count(pg_factory, JobItem, job_id=job.id) == 0
