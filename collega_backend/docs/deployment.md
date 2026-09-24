@@ -144,6 +144,18 @@ proxy, ce que `get_client_ip()` empêche précisément en restreignant la confia
 `TRUSTED_PROXY_IPS`. Les commandes `uvicorn` du `Dockerfile` et des `docker-compose*.yml`
 n'utilisent pas ce flag ; ne pas l'ajouter.
 
+### Journaux d'accès : chemins masqués
+
+Le journal d'accès d'uvicorn (`uvicorn.access`) passe par un filtre installé par
+`configure_logging()` (`app/core/logging.py`) : la query string est supprimée (termes de
+recherche `q=`) et tout UUID du chemin (collège, upload…) devient `<id>` ; méthode, chemin
+masqué et statut restent journalisés.
+
+**Hors dépôt** : le journal d'accès de Nginx Proxy Manager (proxy host 53) enregistre lui
+aussi l'URI complète, query string comprise. Sa configuration n'est pas versionnée ici :
+à traiter côté NPM (format de log sans `$request_uri`/`$args`, ou désactivation du
+journal d'accès de ce proxy host) et à garder en tête pour la durée de conservation.
+
 ## Service map (prod)
 
 | Service  | Image                                | Ports exposés    | Réseau         |
