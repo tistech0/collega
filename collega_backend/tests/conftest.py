@@ -13,7 +13,7 @@ pytest_plugins = ["tests.pg", "tests.api_pg", "tests.sqlite_db"]
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./test.db")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
 os.environ.setdefault("RATE_LIMIT_STORAGE_URI", "memory://")
-os.environ.setdefault("SECRET_KEY", "test-secret-key-for-pytest-only")
+os.environ.setdefault("SECRET_KEY", "test-secret-key-for-pytest-only-32b-minimum")
 os.environ.setdefault("CLAUDE_API_KEY", "test-key")
 os.environ.setdefault("ADMIN_USERNAME", "admin")
 os.environ.setdefault("ADMIN_PASSWORD", "testpass")

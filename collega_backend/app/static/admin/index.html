@@ -653,6 +653,7 @@
   function hideTemporaryPassword() {
     document.getElementById("temp-password-box").style.display = "none";
     document.getElementById("temp-password-value").textContent = "";
+    document.getElementById("temp-password-copy").onclick = null;
   }
 
   async function resetPassword(userId, email) {

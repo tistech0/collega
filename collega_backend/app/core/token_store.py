@@ -12,7 +12,8 @@ PL 2026-06-19). Ni jeton ni `jti` n'apparaissent dans les journaux.
 from __future__ import annotations
 
 import logging
-from typing import Literal
+from collections.abc import Awaitable
+from typing import Any, Literal, cast
 
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
@@ -53,15 +54,49 @@ def _grace_key(jti: str) -> str:
     return f"refresh:grace:{jti}"
 
 
-async def revoke_refresh(jti: str, ttl_s: int) -> None:
-    """Révoque le refresh `jti` pour `ttl_s` secondes (reste de vie, 1 s minimum) + grâce de 60 s."""
+# Révocation atomique et « premier arrivé » : seul le SET NX gagnant arme la grâce ; un
+# jeton déjà révoqué n'est jamais modifié (pas de réarmement de la grâce).
+# Retour : 1 = révoqué par cet appel, 2 = déjà révoqué et en grâce, 0 = déjà révoqué hors grâce.
+_REVOKE_SCRIPT = """
+if redis.call('SET', KEYS[1], '1', 'EX', ARGV[1], 'NX') then
+  if ARGV[2] == '1' then
+    redis.call('SET', KEYS[2], '1', 'EX', ARGV[3])
+  end
+  return 1
+end
+if redis.call('EXISTS', KEYS[2]) == 1 then
+  return 2
+end
+return 0
+"""
+
+_REVOKE_RESULT: dict[int, RefreshState] = {1: "active", 2: "grace", 0: "reused"}
+
+
+async def revoke_refresh(jti: str, ttl_s: int, *, grace: bool = True) -> RefreshState:
+    """Révoque le refresh `jti` pour `ttl_s` secondes (reste de vie, 1 s minimum).
+
+    `grace=True` (rotation) : arme aussi `refresh:grace:{jti}` 60 s pour les requêtes
+    parallèles ; `grace=False` (logout) : révocation immédiate, sans grâce.
+    Renvoie l'état du jeton AVANT l'appel : `active` si cet appel l'a révoqué (ou si
+    Redis est indisponible), sinon `grace` / `reused` selon la révocation existante.
+    """
     try:
-        async with _get_client().pipeline(transaction=True) as pipe:
-            pipe.set(_revoked_key(jti), 1, ex=max(1, int(ttl_s)))
-            pipe.set(_grace_key(jti), 1, ex=GRACE_S)
-            await pipe.execute()
+        # redis-py type `eval` en « Awaitable | valeur » (clients sync/async) : on précise l'async.
+        pending = _get_client().eval(
+            _REVOKE_SCRIPT,
+            2,
+            _revoked_key(jti),
+            _grace_key(jti),
+            str(max(1, int(ttl_s))),
+            "1" if grace else "0",
+            str(GRACE_S),
+        )
+        result = await cast(Awaitable[Any], pending)
     except (RedisError, OSError, TimeoutError) as exc:
         logger.warning("Redis indisponible : révocation du refresh token non enregistrée (%s)", type(exc).__name__)
+        return "active"
+    return _REVOKE_RESULT.get(int(result), "reused")
 
 
 async def refresh_state(jti: str) -> RefreshState:
@@ -74,3 +109,11 @@ async def refresh_state(jti: str) -> RefreshState:
     if revoked is None:
         return "active"
     return "grace" if grace is not None else "reused"
+
+
+async def close() -> None:
+    """Ferme le client (arrêt de l'application)."""
+    global _client
+    client, _client = _client, None
+    if client is not None:
+        await client.aclose()

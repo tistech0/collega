@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -87,6 +88,20 @@ class TestRotation:
         assert decode_token(tokens["refresh_token"])["tv"] == 1
         assert (await pg_client.get("/v1/auth/me", headers=_bearer(tokens["access_token"]))).status_code == 200
 
+    async def test_deux_refresh_concurrents_reussissent_sans_rearmer_la_grace(self, pg_client, pg_factory, token_redis):
+        user = await _make_user(pg_factory)
+        refresh = (await _login(pg_client, user.email)).json()["data"]["refresh_token"]
+
+        first, second = await asyncio.gather(_refresh(pg_client, refresh), _refresh(pg_client, refresh))
+        assert first.status_code == 200 and second.status_code == 200
+        assert first.json()["data"]["refresh_token"] != second.json()["data"]["refresh_token"]
+
+        # Une nouvelle présentation dans la grâce ne réarme pas la clé (TTL raccourci conservé).
+        await token_redis.expire(_grace_key(refresh), 30)
+        assert (await _refresh(pg_client, refresh)).status_code == 200
+        assert 0 < await token_redis.ttl(_grace_key(refresh)) <= 30
+        assert (await _reload(pg_factory, user.id)).token_version == 0
+
     async def test_jeton_ancien_sans_tv_ni_jti_accepte_en_version_0(self, pg_client, pg_factory, token_redis):
         user = await _make_user(pg_factory)
         legacy = jwt.encode(
@@ -113,11 +128,18 @@ class TestLogout:
         assert (await _reload(pg_factory, user.id)).apns_token is None
         assert await token_redis.get(f"revoked:jti:{decode_token(refresh)['jti']}") == b"1"
 
-        # Idempotent.
+        # Sans grâce : la clé de grâce n'existe pas.
+        assert await token_redis.exists(_grace_key(refresh)) == 0
+        revoked_key = f"revoked:jti:{decode_token(refresh)['jti']}"
+        await token_redis.expire(revoked_key, 500)
+
+        # Idempotent : l'état existant n'est pas touché.
         resp = await pg_client.post("/v1/auth/logout", headers=_bearer(access), json={"refresh_token": refresh})
         assert resp.status_code == 204
+        assert await token_redis.exists(_grace_key(refresh)) == 0
+        assert 0 < await token_redis.ttl(revoked_key) <= 500
 
-        await token_redis.delete(_grace_key(refresh))
+        # Refresh immédiat (la grâce n'est PAS supprimée par le test) → réutilisation.
         resp = await _refresh(pg_client, refresh)
         assert resp.status_code == 401
         assert resp.json()["detail"]["code"] == "TOKEN_REUSED"
@@ -185,6 +207,12 @@ class TestResetPassword:
         assert resp.json()["detail"]["code"] == "TOKEN_REVOKED"
         resp = await pg_client.get("/v1/auth/me", headers=_bearer(tokens["access_token"]))
         assert resp.status_code == 401
+
+    async def test_reponse_jamais_mise_en_cache(self, pg_client, pg_factory, token_redis):
+        user = await _make_user(pg_factory)
+        resp = await pg_client.post(f"/v1/admin/users/{user.id}/reset-password", auth=ADMIN_AUTH)
+        assert resp.status_code == 200
+        assert resp.headers["cache-control"] == "no-store"
 
     async def test_utilisatrice_inconnue_404(self, pg_client, token_redis):
         resp = await pg_client.post(f"/v1/admin/users/{uuid.uuid4()}/reset-password", auth=ADMIN_AUTH)

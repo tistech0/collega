@@ -8,7 +8,7 @@ from __future__ import annotations
 import secrets
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy import select
 from sqlalchemy import update as sa_update
 from sqlalchemy.exc import IntegrityError
@@ -179,6 +179,7 @@ TEMPORARY_PASSWORD_LENGTH = 16
 @router.post("/users/{user_id}/reset-password", response_model=ResetPasswordResponseWrapped)
 async def reset_user_password(
     user_id: uuid.UUID,
+    response: Response,
     _: bool = Depends(get_admin_user),
     db: AsyncSession = Depends(get_db),
 ) -> ResetPasswordResponseWrapped:
@@ -197,6 +198,8 @@ async def reset_user_password(
         .values(hashed_password=hash_password(temporary_password), token_version=User.token_version + 1)
     )
     await db.commit()
+    # Réponse porteuse d'un secret : jamais mise en cache (navigateur, proxy).
+    response.headers["Cache-Control"] = "no-store"
     return ResetPasswordResponseWrapped(data=ResetPasswordData(temporary_password=temporary_password))
 
 

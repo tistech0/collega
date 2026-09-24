@@ -114,16 +114,16 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
     # Jeton émis avant le chantier 2 (sans `jti`) : pas de révocation possible, il est
     # simplement remplacé par un couple rotatif.
     if isinstance(jti, str) and jti:
-        state = await token_store.refresh_state(jti)
+        # Révocation atomique « premier arrivé » : l'état renvoyé est celui d'avant l'appel.
+        state = await token_store.revoke_refresh(jti, _remaining_lifetime_s(payload))
         if state == "reused":
             # UPDATE atomique : deux réutilisations concurrentes incrémentent bien deux fois.
             await db.execute(sa_update(User).where(User.id == user.id).values(token_version=User.token_version + 1))
             await db.commit()
             logger.warning("Réutilisation d'un refresh token révoqué : sessions coupées (user=%s)", user.id)
             raise unauthorized("TOKEN_REUSED", "Session révoquée — reconnectez-vous")
-        if state == "active":
-            await token_store.revoke_refresh(jti, _remaining_lifetime_s(payload))
-        # state == "grace" : déjà révoqué il y a moins de 60 s (requête parallèle) → accepté.
+        # "active" : révoqué par cette requête ; "grace" : révoqué il y a moins de 60 s par
+        # une requête parallèle → accepté sans toucher à l'état existant.
 
     return {"data": _token_pair(user).model_dump()}
 
@@ -149,7 +149,8 @@ async def logout(
             and isinstance(jti, str)
             and jti
         ):
-            await token_store.revoke_refresh(jti, _remaining_lifetime_s(payload))
+            # Sans grâce : un refresh déconnecté est refusé immédiatement (TOKEN_REUSED).
+            await token_store.revoke_refresh(jti, _remaining_lifetime_s(payload), grace=False)
     current_user.apns_token = None
     await db.commit()
     return Response(status_code=204)
