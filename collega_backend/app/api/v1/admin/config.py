@@ -41,8 +41,9 @@ async def update_config(
     _: bool = Depends(get_admin_user),
     db: AsyncSession = Depends(get_db),
 ) -> ConfigResponseWrapped:
-    """Met à jour la configuration anti-spam en base : vue par l'API et le worker
-    en 30 s au plus (cache par processus), conservée au redémarrage."""
+    """Met à jour la configuration anti-spam en base : vue par tous les processus API
+    en 30 s au plus (cache par processus, le worker ne lit pas ces réglages), conservée
+    au redémarrage."""
     if body.reload_count_max is not None:
         await app_settings.set_setting(db, app_settings.RELOAD_COUNT_MAX, body.reload_count_max)
     if body.monthly_reloads_max is not None:

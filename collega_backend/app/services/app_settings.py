@@ -1,8 +1,9 @@
 """Réglages applicatifs en base (chantier 5, R4 — spec § 6).
 
 Lecture via un cache mémoire de 30 s par processus, invalidé localement à
-l'écriture : l'API, le worker et les autres processus voient une nouvelle valeur
-en 30 s au plus. Sans ligne en base, la valeur par défaut (celle du `.env`) s'applique.
+l'écriture : chaque processus API (uniquement — le worker ne lit pas ces réglages)
+voit une nouvelle valeur en 30 s au plus. Sans ligne en base, la valeur par défaut
+(celle du `.env`) s'applique.
 """
 
 from __future__ import annotations
