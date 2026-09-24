@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad; python3 - <<'EOF'\nimport json,re,collections\nfor name in (\"pneumo\",\"cancero\"):\n    d=json.load(open(f\"results_{name}.json\")); t=d[\"passes\"][0][\"item_texts\"]\n    k=sorted(t, key=lambda n: len(t[n]))[len(t)//2]; lines=t[k].splitlines()\n    idx=[i for i,l in enumerate(lines) if re.fullmatch(r\"\\s*\\d+\\s*\",l)][:4]\n    print(\"==\",name,\"item\",k)\n    for i in idx: print(\"   ...\", \" | \".join(l[:50] for l in lines[max(0,i-1):i+2]))\n    # lignes répétées dans l'item (en-têtes/pieds cour… [+165 chars truncated]",
+  "summary": "cd /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad; python3 - <<'EOF'\nimport json,re,collections\nfor name in (\"pneumo\",\"cancero\"):\n    d=json.load(open(f\"results_{name}.json\")); t=d[\"passes\"][0][\"item_texts\"]\n    k=sorted(t, key=lambda n: len(t[n]))[l",
+  "text": "cd /private/tmp/claude-501/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/scratchpad; python3 - <<'EOF'\nimport json,re,collections\nfor name in (\"pneumo\",\"cancero\"):\n    d=json.load(open(f\"results_{name}.json\")); t=d[\"passes\"][0][\"item_texts\"]\n    k=sorted(t, key=lambda n: len(t[n]))[len(t)//2]; lines=t[k].splitlines()\n    idx=[i for i,l in enumerate(lines) if re.fullmatch(r\"\\s*\\d+\\s*\",l)][:4]\n    print(\"==\",name,\"item\",k)\n    for i in idx: print(\"   ...\", \" | \".join(l[:50] for l in lines[max(0,i-1):i+2]))\n    # lignes répétées dans l'item (en-têtes/pieds courants)\n    c=collections.Counter(l.strip() for l in lines if l.strip()); rep=[(l,n) for l,n in c.most_common(6) if n>=3]\n    print(\"   lignes répétées:\", rep[:5])\nEOF: == pneumo item 75 ... et le Collège Universitaire National des enseignan | 1 | Il a été diffusé exclusivement et gratuitement sur lignes répétées: [('Il a été diffusé exclusivement et gratuitement sur le forum © SBA-MEDECINE,', 12), ('pour plus des livres médicaux gratuits, préparation ECNi R2C,.... visitez: www.sba-medecine.com depuis 2009', 12), ('OUI 1 q', 3), ('NON 0 q', 3)] == cancero item 304 ... Rang Rubrique Intitulé | 1 | B Définition Connaître les principaux types histol ... B Diagnostic positif Connaître la démarche diagnos | 9 | Tu MEURS DU FOIE 2 2 ◄ ... en provoquant des mutations de p53. | 233 | TUMEURS DU FOIE ◄ ... Figure 1. Métastase hépatique d'un cancer du côlon | 234 | ► ÎUMEURS DU FOIE lignes répétées: [('Item 304', 7), ('1', 5), ('B', 3), ('-', 3)]",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "3cf62f1a5df53ff29fb2c2c5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:09:59.804Z",
+  "stored_at": "2026-09-23T20:09:59.805Z"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bfcuzc7fq</task-id>\n<summary>Monitor event: \"logs prod réimport PNEUMO (API + worker)\"</summary>\n<event>[worker] 05:27:59:   0.02s → 77d8cdd4de3e43dbbcb68f26c5d38ae0:process_college_ocr('ed9a1032-24f5-4243-8ad2-2d71ff9eae44', '207f5b0e-dcc9-4c42-85c1-38f79042b135',…)\n[worker] 2026-09-24 05:27:59,569 INFO app.workers.ocr_worker OCR college ed9a1032-24f5-4243-8ad2-2d71ff9eae44 — 355 pages (0 déjà faites)\n[api] INFO:     172.26.0.4:57344 - \"GET /v1/colleges HTTP/1.1\" 401 Unauthorized\n[api] 2026-09-24 05:27:59,270 INFO app.api.v1.colleges PDF saved for college ed9a1032-24f5-4243-8ad2-2d71ff9eae44 (ref_id=34) at /tmp/collega_pdfs/ed9a1032-24f5-4243-8ad2-2d71ff9eae44_207f5b0e-dcc9-4c42-85c1-38f79042b135.pdf\n[api] 2026-09-24 05:27:59,297 INFO app.api.v1.colleges OCR job 207f5b0e-dcc9-4c42-85c1-38f79042b135 enqueued for college ed9a1032-24f5-4243-8ad2-2d71ff9eae44\n[api] INFO:     172.26.0.4:38238 - \"POST /v1/colleges/34/import HTTP/1.1\" 202 Accepted\n[api] INFO:     172.26.0.4:38268 - \"GET /v1/colleges/ed9a1032-24f5-4243-8ad2-2d71ff9eae44/stream HTTP/1.1\" 200 OK</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bfcuzc7fq</task-id> <summary>Monitor event: \"logs prod réimport PNEUMO (API + worker)\"</summary> <event>[worker] 05:27:59: 0.02s → 77d8cdd4de3e43dbbcb68f26c5d38ae0:process_college_ocr('ed9a1032-24f5-4243-8ad2-2d",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "ca53e48ea7e3853b5a3ee01e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-24T05:28:05.509Z",
+  "stored_at": "2026-09-24T05:28:05.509Z",
+  "low_signal": true
+}

@@ -709,6 +709,59 @@ void main() {
     });
   });
 
+  group('résumé et échec d’un réimport (chantier 1)', () {
+    Future<CollegeImportNotifier> streaming(ProviderContainer container) async {
+      final notifier = container.read(collegeImportProvider.notifier);
+      await container.read(collegeImportProvider.future);
+      notifier.debugSetState(const ImportStreaming(
+        collegeId: 'c', jobId: 'j', ocrProgress: 80, totalPages: 80, status: 'ocr_complete',
+      ));
+      return notifier;
+    }
+
+    test('generation_complete avec résumé → ImportComplete.summary', () async {
+      final container = _makeContainer(_FakeCollegeImportRepository());
+      addTearDown(container.dispose);
+      final notifier = await streaming(container);
+      notifier.debugHandleSseEvent({
+        'event': 'generation_complete',
+        'data': {'college_id': 'c', 'summary': {'changed': 0, 'added': 0, 'removed': 0, 'unchanged': 24, 'quota_refunded': true}},
+      }, 'c');
+      final s = container.read(collegeImportProvider).value! as ImportComplete;
+      expect(s.summary!.nothingChanged, isTrue);
+      expect(s.summary!.quotaRefunded, isTrue);
+    });
+
+    test('generation_complete d’un premier import → pas de résumé', () async {
+      final container = _makeContainer(_FakeCollegeImportRepository());
+      addTearDown(container.dispose);
+      final notifier = await streaming(container);
+      notifier.debugHandleSseEvent({'event': 'generation_complete', 'data': {'college_id': 'c', 'summary': null}}, 'c');
+      expect((container.read(collegeImportProvider).value! as ImportComplete).summary, isNull);
+    });
+
+    test('generation_failed d’un réimport → reimport_failed', () async {
+      final container = _makeContainer(_FakeCollegeImportRepository());
+      addTearDown(container.dispose);
+      final notifier = await streaming(container);
+      notifier.debugHandleSseEvent(
+          {'event': 'generation_failed', 'data': {'college_id': 'c', 'message': 'x', 'reimport': true}}, 'c');
+      expect((container.read(collegeImportProvider).value! as ImportError).message, 'reimport_failed');
+    });
+
+    test('reconnectIfActive : réimport en échec d’après /status → reimport_failed', () async {
+      final repo = _FakeCollegeImportRepository(
+        statusOverride: CollegeStatusResponse(
+          collegeId: 'college-uuid-15', refId: 15, status: 'failed', ocrProgress: 0, reimport: true,
+        ),
+      );
+      final container = _makeContainer(repo, apiClient: _FakeApiClient());
+      addTearDown(container.dispose);
+      await container.read(collegeImportProvider.notifier).reconnectIfActive('college-uuid-15');
+      expect((container.read(collegeImportProvider).valueOrNull! as ImportError).message, 'reimport_failed');
+    });
+  });
+
   group('avancement de la génération (8.13)', () {
     test('generation_progress : fiches prêtes et items au fil de l’eau', () async {
       final container = _makeContainer(_FakeCollegeImportRepository());

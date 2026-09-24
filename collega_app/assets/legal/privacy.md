@@ -1,6 +1,6 @@
 # Politique de Confidentialité
 
-**Version : 2026-05-22**
+**Version : 2026-09-24**
 
 La présente politique décrit comment **Collega** (« l'Application ») collecte, traite et
 protège tes données personnelles conformément au Règlement Général sur la Protection des Données
@@ -27,6 +27,7 @@ L'éditeur agit seul comme responsable du traitement au sens du RGPD.
 | Année d'études (facultatif) | Profil | Statistiques d'usage agrégées |
 | Faculté (facultatif) | Profil | Statistiques d'usage agrégées |
 | PDF de collèges importés | Import utilisateur | Génération de fiches de révision |
+| Texte extrait des PDF | Traitement de l’import | Génération et régénération des fiches |
 | Texte de fiches généré | Pipeline IA | Affichage et révision dans l'Application |
 | Évaluations de drill (à revoir / bien / maîtrisé) | Usage | Planning adaptatif, statistiques de progression |
 | Token APNs (notifications push) | iOS, sur autorisation explicite | Rappels quotidiens et notifications de fin de génération |
@@ -62,6 +63,7 @@ pour vérifier l'état actif/inactif.
 - **Données du compte (email, profil, fiches, drills)** : conservées tant que ton compte est actif.
   Supprimées **définitivement et immédiatement** à la suppression du compte (cf. § 7).
 - **PDF importés** : conservés tant que le collège associé est dans ton compte.
+- **Texte extrait des PDF** : conservé tant que le collège associé est dans ton compte, supprimé avec lui.
 - **Logs serveur** : 12 mois maximum (rotation automatique).
 - **Token APNs** : supprimé dès le revoke d'autorisation iOS ou la déconnexion.
 

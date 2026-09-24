@@ -25,6 +25,9 @@ docker exec collega-restore-test pg_isready -U postgres   # attendre « acceptin
 zcat /mnt/user/nas-backup/dumps/collega-db-1.sql.gz | docker exec -i collega-restore-test psql -U postgres -q -o /dev/null
 docker exec collega-restore-test psql -U postgres -d collega -Atc \
   "select count(*) from users; select count(*) from colleges; select count(*) from flash_cards"
+# Depuis le chantier 1 (migration 018) : contenu par empreinte, dans le même dump.
+docker exec collega-restore-test psql -U postgres -d collega -Atc \
+  "select count(*) from ocr_pages; select count(*) from item_texts; select count(*) from item_generations"
 # Le code de l'app sur la base restaurée (migrations comprises) :
 docker run --rm --network collega-restore-net \
   -e DATABASE_URL=postgresql+asyncpg://postgres@db:5432/collega -e REDIS_URL=redis://localhost:6379/0 \
@@ -37,7 +40,7 @@ docker rm -f collega-restore-test && docker network rm collega-restore-net
 Résultat attendu, et ce qui est normal :
 - **exactement 2 erreurs** au rejeu : `current user cannot be dropped` et `role "postgres" already exists`. Le dump est un `pg_dumpall --clean` qui tente de recréer le rôle `postgres` ; sans conséquence. (Ce sont les « 2 erreurs de rejeu » du journal `backup-verify`.)
 - le dump restaure aussi le **mot de passe de prod** du rôle `postgres` : c'est pour cela que le conteneur jetable est en `trust`.
-- `items.ocr_text` est vide pour les imports de plus de 24 h : c'est la purge `cleanup_ocr_text`, pas une perte. C'est elle qui fait fondre le dump d'un jour à l'autre.
+- (Dumps antérieurs à la migration 018) `items.ocr_text` était vidé 24 h après l'import par l'ancienne purge `cleanup_ocr_text` : pas une perte. Depuis le chantier 1, le texte est conservé (`ocr_pages`, `item_texts`) et le dump grossit avec les collèges.
 - la version Alembic du dump peut être en retard sur le code si une migration a été déployée dans la journée : `alembic upgrade head` (service `migrate`) la rattrape.
 
 Résultat du 2026-09-23 : 4 utilisateurs, 2 collèges, 44 items, 341 fiches restaurés ; migrations 015 → 017 appliquées sans erreur.

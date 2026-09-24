@@ -1,6 +1,5 @@
 """Story 8.0 — logique de données de la migration 015 (référentiel item_titles), sur SQLite."""
 import importlib.util
-import types
 import uuid
 from pathlib import Path
 
@@ -11,13 +10,6 @@ import app.models  # noqa: F401
 from app.core.database import Base
 from app.models.item import Item
 from app.models.item_title import ItemTitle
-
-# Le dossier local `alembic/` (versions) masque le paquet alembic dans les tests :
-# on fournit un `op` factice, seule `seed_and_backfill` est exercée ici.
-import alembic  # noqa: E402
-
-if not hasattr(alembic, "op"):
-    alembic.op = types.SimpleNamespace()
 
 _spec = importlib.util.spec_from_file_location(
     "migration_015",

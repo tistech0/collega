@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "branch": "feat/chantier-1-fiabilite-imports",
+  "head": "92d3e216ab5913ba0abe29225b6fc15948bfc855",
+  "merge_base": "0a522d91fba5a33095074066a670d93aeac2d683",
+  "changed_files": [
+    ".agent_memory/packets/repo_map-collega-repo-overview-cf8b6e00.md",
+    ".agent_memory/packets/repo_map-collega-repo-structure-0317f7c1.md",
+    ".agent_memory/packets/workflow-change-memory-feat-chantier-1-fiabilite-imports-4431e2ff.md"
+  ],
+  "diff_stat": ".agent_memory/packets/repo_map-collega-repo-overview-cf8b6e00.md                         |  4 +--\n .agent_memory/packets/repo_map-collega-repo-structure-0317f7c1.md                        |  4 +--\n .../packets/workflow-change-memory-feat-chantier-1-fiabilite-imports-4431e2ff.md         | 64 +++++++++++---------------------------------\n .agent_memory/review/branch-summary-feat-chantier-1-fiabilite-imports.json               | 52 +++++------------------------------\n .agent_memory/review/memory-review.md                                                    | 59 +++++++---------------------------------\n 5 files changed, 34 insertions(+), 149 deletions(-)",
+  "generated_at": "2026-09-24T05:30:15.327Z",
+  "source": "git_diff",
+  "repo_memory_written": true,
+  "promotion_review_required": true
+}

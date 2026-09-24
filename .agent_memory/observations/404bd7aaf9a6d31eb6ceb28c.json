@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bfcuzc7fq</task-id>\n<summary>Monitor event: \"logs prod réimport PNEUMO (API + worker)\"</summary>\n<event>[worker] 05:30:00:   1.00s → cron:cleanup_stale_uploads()\n[worker] 2026-09-24 05:30:00,573 INFO app.workers.cleanup_worker Purged 0 stale chunked uploads\n[worker] 05:30:00:   0.00s ← cron:cleanup_stale_uploads ● 0</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bfcuzc7fq</task-id> <summary>Monitor event: \"logs prod réimport PNEUMO (API + worker)\"</summary> <event>[worker] 05:30:00: 1.00s → cron:cleanup_stale_uploads() [worker] 2026-09-24 05:30:00,573 INFO app.workers.c",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "404bd7aaf9a6d31eb6ceb28c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-24T05:30:01.069Z",
+  "stored_at": "2026-09-24T05:30:01.069Z",
+  "low_signal": true
+}

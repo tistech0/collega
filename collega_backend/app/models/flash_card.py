@@ -44,6 +44,10 @@ class FlashCard(Base):
     ocr_confidence_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     low_confidence: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     user_feedback: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    # Sortie Claude d'origine ; NULL = fiche antérieure au chantier 1 ou régénérée par l'utilisatrice.
+    generation_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("item_generations.id", ondelete="SET NULL"), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

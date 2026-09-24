@@ -268,7 +268,7 @@ class TestDeleteAccount:
         )
         assert response.status_code == 200
         mock_db.delete.assert_awaited_once_with(user)
-        mock_db.commit.assert_awaited_once()
+        mock_db.commit.assert_awaited()  # + commit de la purge du contenu (chantier 1)
 
     async def test_delete_account_unauthorized(self, client: AsyncClient, mock_db):
         response = await client.delete("/v1/auth/account")

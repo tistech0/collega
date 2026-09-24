@@ -64,6 +64,9 @@ class CollegeStatusData(BaseModel):
     ocr_page_progress: int
     total_pages: int | None
     job_id: str | None
+    # Chantier 1 : résumé du dernier réimport réussi, et échec d'un réimport (contenu intact).
+    summary: dict | None = None
+    reimport: bool = False
 
 
 class CollegeStatusResponseWrapped(BaseModel):

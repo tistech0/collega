@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; kage reverify --project . --packet \"repo:git-github-com-tistech0-collega:runbook:d-ployer-le-backend-collega-sur-le-nas-build-amd64-push-docker-hub-compose-pull-\" --evidence \"settings.py : crons changés (fail_stale_jobs, purge_content), procédure de déploiement inchangée\" 2>&1 | tail -1",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; kage reverify --project . --packet \"repo:git-github-com-tistech0-collega:runbook:d-ployer-le-backend-collega-sur-le-nas-build-amd64-push-docker-hub-compose-pull-\" --evidence \"settings.py : crons changés (fail_stale_jobs, purge_content), procédure de déploiement inchang",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; kage reverify --project . --packet \"repo:git-github-com-tistech0-collega:runbook:d-ployer-le-backend-collega-sur-le-nas-build-amd64-push-docker-hub-compose-pull-\" --evidence \"settings.py : crons changés (fail_stale_jobs, purge_content), procédure de déploiement inchangée\" 2>&1 | tail -1: evidence recorded for changed path(s): collega_backend/app/workers/settings.py",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "fdd0e6da7cbe0e73abfe21d8",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:16:01.650Z",
+  "stored_at": "2026-09-23T21:16:01.651Z"
+}

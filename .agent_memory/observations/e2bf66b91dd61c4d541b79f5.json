@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; find . -name \"*.pdf\" -not -path \"*/node_modules/*\" -not -path \"*/Pods/*\" -not -path \"*/build/*\" 2>/dev/null | head; ssh nas 'ls -la /mnt/user/appdata/collega/pdfs/ | head -20'",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\"; find . -name \"*.pdf\" -not -path \"*/node_modules/*\" -not -path \"*/Pods/*\" -not -path \"*/build/*\" 2>/dev/null | head; ssh nas 'ls -la /mnt/user/appdata",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "e2bf66b91dd61c4d541b79f5",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:06:17.171Z",
+  "stored_at": "2026-09-23T20:06:17.172Z"
+}

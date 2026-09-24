@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; sed -n '/\\[tool.pytest/,/^\\[/p' pyproject.toml; cat app/core/limiter.py; grep -n \"if config.config_file_name\\|asyncio.run\\|def run_migrations_online\" -A3 alembic/env.py",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; sed -n '/\\[tool.pytest/,/^\\[/p' pyproject.toml; cat app/core/limiter.py; grep -n \"if config.config_file_name\\|asyncio.run\\|def run_mi",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "145088b89bb1542305469a67",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:50:43.802Z",
+  "stored_at": "2026-09-23T20:50:43.802Z"
+}

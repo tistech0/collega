@@ -30,6 +30,8 @@ class Settings(BaseSettings):
 
     database_url: str
     redis_url: str
+    # Tests : "memory://" (compteurs par processus, plus de Redis local requis).
+    rate_limit_storage_uri: str = ""
     secret_key: str
     claude_api_key: str = ""
 

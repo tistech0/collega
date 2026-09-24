@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n scripts/backfill_content_store.py && grep -n \"claude_calls\\|same_pdf\\|0 appel\\|no_change\\|aucun\" tests/services/test_generation_pipeline.py | head -40",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n scripts/backfill_content_store.py && grep -n \"claude_calls\\|same_pdf\\|0 appel\\|no_change\\|aucun\" tests/services/test_generation_pipeline.py | head -40: ucun'}\" 114 ) 115 if dry_run: 116 await db.rollback() 117 else: 118 await db.commit() 119 pr",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && cat -n scripts/backfill_content_store.py && grep -n \"claude_calls\\|same_pdf\\|0 appel\\|no_change\\|aucun\" tests/services/test_generation_pipeline.py | head -40: ucun'}\" 114 ) 115 if dry_run: 116 await db.rollback() 117 else: 118 await db.commit() 119 print(\"--dry-run : aucune écriture\" if dry_run else \"Stockage de contenu rempli\") 120 121 122 def main() -> None: 123 parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter) 124 parser.add_argument(\"--dry-run\", action=\"store_true\") 125 parser.add_argument(\"--college\", type=uuid.UUID, default=None) 126 args = parser.parse_args() 127 asyncio.run(run(args.dry_run, args.college)) 128 129 130 if __name__ == \"__main__\": 131 main() 91: assert (result[\"added\"], result[\"cards\"], result[\"claude_calls\"]) == (2, 2, 2) 110: assert claude.calls == [] and result[\"claude_calls\"] == 0 219:async def test_same_pdf_reimport_end_to_end(pg_factory, notifications, storage): 220: \"\"\"OCR → génération → réimport du même PDF : 0 appel Claude, quota rendu, fiches intactes.\"\"\"",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "4e6b5279fd2222cc3ade80e4",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:16:37.767Z",
+  "stored_at": "2026-09-23T21:16:37.768Z"
+}

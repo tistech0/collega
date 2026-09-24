@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"_updateDriftProgress\\|status:\" lib/features/colleges/colleges_import_providers.dart | head -40; grep -n \"void _updateDriftProgress\" -A30 lib/features/colleges/colleges_import_providers.dart",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_app\" && grep -n \"_updateDriftProgress\\|status:\" lib/features/colleges/colleges_import_providers.dart | head -40; grep -n \"void _updateDriftProg",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "53c62f72344618651c3185e1",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:19:07.143Z",
+  "stored_at": "2026-09-23T21:19:07.144Z"
+}

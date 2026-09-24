@@ -11,4 +11,7 @@ def get_client_ip(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
 
-limiter = Limiter(key_func=get_client_ip, storage_uri=settings.redis_url)
+limiter = Limiter(
+    key_func=get_client_ip,
+    storage_uri=settings.rate_limit_storage_uri or settings.redis_url,
+)

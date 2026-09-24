@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "je vais faire le reimport de pnuemo sdurveille les logs",
+  "summary": "je vais faire le reimport de pnuemo sdurveille les logs",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "d3623d49dc2d15847a557bbb",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-24T05:27:43.102Z",
+  "stored_at": "2026-09-24T05:27:43.103Z",
+  "low_signal": true
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n -i \"24\\|ocr\\|texte\\|pdf\" collega_app/assets/legal/privacy.md | head -20; grep -rn \"regenerate\\|Régénérer\\|régénér\" collega_app/lib --include=*.dart 2>/dev/null | grep -v \"\\.g\\.dart\" | head -5; grep -rln \"regenerate\" collega_app/lib | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n -i \"24\\|ocr\\|texte\\|pdf\" collega_app/assets/legal/privacy.md | head -20; grep -rn \"regenerate\\|Régénérer\\|régénér\" collega_app/lib --include=*.dart 2>/dev/null | grep -v \"\\.g\\.dart\" | head -5; grep -rln \"regenerate\" collega_app/lib | head: 29:| PDF de collèges ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n -i \"24\\|ocr\\|texte\\|pdf\" collega_app/assets/legal/privacy.md | head -20; grep -rn \"regenerate\\|Régénérer\\|régénér\" collega_app/lib --include=*.dart 2>/dev/null | grep -v \"\\.g\\.dart\" | head -5; grep -rln \"regenerate\" collega_app/lib | head: 29:| PDF de collèges importés | Import utilisateur | Génération de fiches de révision | 30:| Texte de fiches généré | Pipeline IA | Affichage et révision dans l'Application | 64:- **PDF importés** : conservés tant que le collège associé est dans ton compte. 77:| **Anthropic** (Claude API) | Génération des fiches à partir des PDF | États-Unis | Clauses contractuelles types UE (DPA Anthropic). Les PDF transmis sont traités pour la génération puis conservés selon la politique de rétention de l'API Anthropic (30 jours par défaut, prolongation possible en cas d'enquête liée aux conditions d'utilisation Anthropic). | (eval):1: no matches found: --include=*.dart collega_app/lib/features/colleges/colleges_detail_providers.dart collega_app/lib/features/colleges/data/college_detail_repository.dart collega_app/lib/features/colleges/presentation/item_detail_screen.dart",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "7b1e0cd58c2f7bcbfa52307f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T19:54:20.532Z",
+  "stored_at": "2026-09-23T19:54:20.532Z"
+}

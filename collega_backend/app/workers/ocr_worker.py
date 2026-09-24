@@ -1,25 +1,30 @@
-"""Worker ARQ pour le traitement OCR des PDFs de collèges médicaux.
+"""Worker ARQ : OCR d'un PDF de collège (chantier 1).
 
-Exécuté en tâche de fond par ARQ. Reprend depuis la dernière page en cas
-d'interruption (NFR11). Les textes OCR, scores et tables accumulés sont stockés
-dans generation_jobs.page_texts_json pour garantir une détection d'items correcte
-sur le document complet, même en cas de reprise partielle.
+Chaque page extraite est stockée une seule fois par empreinte (`ocr_pages`) et
+rattachée à l'import (`job_pages`) : une reprise après interruption repart de la
+dernière page faite. Les items détectés sont écrits dans le brouillon de l'import
+(`job_items`) — le contenu en service (`items`, `flash_cards`) n'est touché qu'à
+la bascule, après la génération. Un réimport laisse donc le collège consultable.
 """
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import uuid
 
-from sqlalchemy import delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.database import async_session_factory
 from app.models.college import College, CollegeStatus
+from app.models.content import JobItem, JobPage
 from app.models.generation_job import GenerationJob
-from app.models.item import Item
+from app.services.content import store
 from app.services.jobs.job_events import record_job_event
+from app.services.jobs.job_failure import fail_job
 from app.services.ocr.confidence_scorer import ConfidenceScorer
 from app.services.ocr.item_detector import DetectedItem, ItemDetector
 from app.services.ocr.item_titles import lookup_title, record_title
@@ -33,47 +38,225 @@ _confidence_scorer = ConfidenceScorer()
 _item_detector = ItemDetector()
 
 
-async def process_college_ocr(
-    ctx: dict,
-    college_id: str,
-    job_id: str,
+async def process_college_ocr(ctx: dict, college_id: str, job_id: str, pdf_path: str) -> dict:
+    """Tâche ARQ. Une erreur passe l'import en échec sans toucher au contenu en
+    service. Une interruption (CancelledError : redéploiement, arrêt du worker) le
+    laisse actif : ARQ le reprend au redémarrage depuis la dernière page faite ; s'il
+    n'est jamais repris (timeout), le cron des jobs bloqués le passe en échec."""
+    job_uuid = uuid.UUID(job_id)
+    try:
+        return await run_ocr(async_session_factory, uuid.UUID(college_id), job_uuid, pdf_path, ctx=ctx)
+    except Exception as exc:
+        logger.exception("OCR failed for college %s: %r", college_id, exc)
+        await fail_job(async_session_factory, job_uuid, f"OCR : {exc!r}"[:500])
+        raise
+
+
+def file_sha256(path: str) -> str:
+    """Empreinte du PDF (affichée par la console admin), lue par blocs."""
+    digest = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+async def _job_status(db: AsyncSession, job_id: uuid.UUID) -> str | None:
+    return (
+        await db.execute(select(GenerationJob.status).where(GenerationJob.id == job_id))
+    ).scalar_one_or_none()
+
+
+async def run_ocr(
+    session_factory: async_sessionmaker[AsyncSession],
+    college_id: uuid.UUID,
+    job_id: uuid.UUID,
     pdf_path: str,
+    *,
+    processor=None,
+    detector=None,
+    ctx: dict | None = None,
 ) -> dict:
-    """Traite l'OCR d'un PDF de collège page par page avec reprise automatique.
+    processor = processor or _ocr_processor
+    detector = detector or _item_detector
+    base = {"college_id": str(college_id), "job_id": str(job_id)}
 
-    Args:
-        ctx: contexte ARQ (contient redis pool)
-        college_id: UUID du college à traiter
-        job_id: UUID du GenerationJob associé
-        pdf_path: chemin absolu vers le PDF uploadé
-    """
-    async with async_session_factory() as db:
-        college = await db.get(College, uuid.UUID(college_id))
-        if college is None:
-            logger.error("College %s not found — aborting OCR job", college_id)
-            return {"error": "college_not_found"}
+    async with session_factory() as db:
+        college = await db.get(College, college_id)
+        job = await db.get(GenerationJob, job_id)
+        if college is not None and job is not None and job.status == "ocr_complete":
+            # Reprise après une interruption survenue juste après la fin de l'OCR :
+            # la génération n'a peut-être jamais été mise en file.
+            await _enqueue_generation(db, job, pdf_path, ctx)
+            return {**base, "resumed": "generation_enqueued"}
+        if college is None or job is None or job.status not in ("pending", "processing"):
+            logger.info("OCR job %s ignoré (état %s)", job_id, job.status if job else "absent")
+            return {**base, "error": "invalid_job_state"}
+        first_import = college.status != CollegeStatus.generation_complete
 
-        job = await db.get(GenerationJob, uuid.UUID(job_id))
-        if job is None:
-            logger.error("GenerationJob %s not found — aborting OCR job", job_id)
-            return {"error": "job_not_found"}
+        total_pages = await asyncio.to_thread(processor.count_pages, pdf_path)
+        if total_pages == 0:
+            await fail_job(session_factory, job_id, "PDF vide ou illisible (0 page)")
+            return {**base, "error": "empty_pdf"}
 
-        try:
-            result = await _run_ocr(db, college, job, pdf_path, ctx)
-            return result
-        except Exception as exc:  # noqa: BLE001
-            logger.exception("OCR failed for college %s: %s", college_id, exc)
-            job.status = "failed"
-            job.error_message = str(exc)
-            college.status = CollegeStatus.failed
-            await record_job_event(db, job.id, "failed", message=str(exc))
-            await db.commit()
-            raise
+        done = (
+            await db.execute(select(func.count()).select_from(JobPage).where(JobPage.job_id == job_id))
+        ).scalar_one()
+        college.total_pages = total_pages
+        college.ocr_page_progress = done
+        # Nouvel import : l'avancement de la génération précédente ne s'affiche plus (8.13).
+        college.generation_items_done = 0
+        college.generation_items_total = None
+        college.generation_cards = 0
+        college.generation_preview = None
+        if first_import:
+            college.status = CollegeStatus.processing
+        if job.pdf_hash is None:
+            try:
+                job.pdf_hash = await asyncio.to_thread(file_sha256, pdf_path)
+            except OSError:
+                logger.warning("Empreinte du PDF %s non calculée", pdf_path, exc_info=True)
+        job.status = "processing"
+        await record_job_event(db, job.id, "ocr_started", total=total_pages)
+        await db.commit()
+        done_pages = set(
+            (await db.execute(select(JobPage.page_number).where(JobPage.job_id == job_id))).scalars()
+        )
+
+    progress_step = max(1, total_pages // 20)
+    logger.info("OCR college %s — %d pages (%d déjà faites)", college_id, total_pages, len(done_pages))
+
+    for page_num in range(total_pages):
+        if page_num in done_pages:
+            continue
+        async with session_factory() as db:
+            status = await _job_status(db, job_id)
+        if status != "processing":
+            logger.info("OCR job %s arrêté (statut %s) avant la page %d", job_id, status, page_num + 1)
+            return {**base, "error": "cancelled"}
+
+        result = await asyncio.to_thread(processor.process_page, pdf_path, page_num)
+
+        async with session_factory() as db:
+            try:
+                page_hash = await store.put_page(db, result.text, result.tables, result.confidence_score, result.method)
+                db.add(JobPage(job_id=job_id, page_number=page_num, page_hash=page_hash))
+                college = await db.get(College, college_id)
+                if college is None:
+                    return {**base, "error": "cancelled"}
+                college.ocr_page_progress = len(done_pages) + 1
+                if (page_num + 1) % progress_step == 0 or page_num + 1 == total_pages:
+                    await record_job_event(db, job_id, "ocr_progress", page=page_num + 1, total=total_pages)
+                await db.commit()
+            except IntegrityError:
+                # Collège ou compte supprimé pendant la page (FK) : arrêt propre, rien à relancer.
+                await db.rollback()
+                if await _job_status(db, job_id) is None:
+                    return {**base, "error": "cancelled"}
+                raise
+        done_pages.add(page_num)
+
+    async with session_factory() as db:
+        if await _job_status(db, job_id) != "processing":
+            return {**base, "error": "cancelled"}
+        items = await _detect_items(db, job_id, detector)
+        await record_job_event(db, job_id, "items_detected", message=f"{len(items)} items")
+        for detected, pages in items:
+            text_hash = await store.put_item_text(db, pages)
+            db.add(
+                JobItem(
+                    job_id=job_id,
+                    item_number=detected.item_number,
+                    rang=detected.rang,
+                    chapter_title=await _resolve_title(db, college_id, detected),
+                    start_page=detected.start_page,
+                    end_page=detected.end_page,
+                    ocr_confidence_score=detected.ocr_confidence_score,
+                    low_confidence=_confidence_scorer.is_low_confidence(detected.ocr_confidence_score),
+                    text_hash=text_hash,
+                )
+            )
+        job = await db.get(GenerationJob, job_id)
+        college = await db.get(College, college_id)
+        if job is None or college is None:
+            return {**base, "error": "cancelled"}
+        job.status = "ocr_complete"
+        if college.status != CollegeStatus.generation_complete:
+            college.status = CollegeStatus.ocr_complete
+        await record_job_event(db, job_id, "ocr_complete", message=f"{len(items)} items")
+        await db.commit()
+        logger.info("OCR complete for college %s — %d items détectés", college_id, len(items))
+
+        await _enqueue_generation(db, job, pdf_path, ctx)
+
+    return {**base, "item_count": len(items), "total_pages": total_pages}
 
 
-async def _resolve_title(
-    db: AsyncSession, college_id: uuid.UUID, detected: DetectedItem
-) -> str | None:
+def generation_arq_id(job_id: uuid.UUID) -> str:
+    """Identifiant ARQ fixe de la génération d'un import : une remise en file
+    (reprise de l'OCR) ne la duplique jamais."""
+    return f"gen:{job_id}"
+
+
+async def _enqueue_generation(db: AsyncSession, job: GenerationJob, pdf_path: str, ctx: dict | None) -> None:
+    if not ctx or "redis" not in ctx:
+        return
+    try:
+        await ctx["redis"].enqueue_job(
+            "generate_college_cards", str(job.college_id), str(job.id), pdf_path, _job_id=generation_arq_id(job.id)
+        )
+        # GOTCHA Stop (Story 7.7) : arq_job_id doit pointer sur le job ARQ de la
+        # génération, sinon Stop ne pourrait plus l'annuler.
+        job.arq_job_id = generation_arq_id(job.id)
+        await db.commit()
+    except Exception as exc:  # noqa: BLE001
+        # Sans génération en file, l'import resterait ocr_complete : le cron des
+        # jobs bloqués le passera en échec (quota rendu) et l'utilisatrice relancera.
+        logger.error("Failed to enqueue generation for job %s: %s", job.id, exc)
+
+
+async def _detect_items(db: AsyncSession, job_id: uuid.UUID, detector) -> list[tuple[DetectedItem, list[str]]]:
+    """Détection sur toutes les pages de l'import, relues depuis le stockage.
+    Renvoie chaque item avec le texte de ses pages (base de son empreinte)."""
+    rows = (
+        await db.execute(select(JobPage).where(JobPage.job_id == job_id).order_by(JobPage.page_number))
+    ).scalars().all()
+    pages = await store.load_pages(db, [r.page_hash for r in rows])
+    texts = [pages[r.page_hash].text for r in rows]
+    scores = [pages[r.page_hash].confidence for r in rows]
+    tables = [json.loads(pages[r.page_hash].tables_json) for r in rows]
+    return with_pages(dedupe_items(detector.detect_items(texts, scores, tables)), texts)
+
+
+def with_pages(items: list[DetectedItem], texts: list[str]) -> list[tuple[DetectedItem, list[str]]]:
+    """Le texte d'un item est la concaténation de ses pages start..end (ItemDetector)."""
+    return [(d, texts[d.start_page : d.end_page + 1]) for d in items]
+
+
+def dedupe_items(detected_items: list[DetectedItem]) -> list[DetectedItem]:
+    """Un item par numéro (edge case : même numéro sur deux sections du PDF) :
+    l'occurrence au contenu le plus long ; à contenu égal, le meilleur rang (A > B > C)."""
+    deduped: dict[int, DetectedItem] = {}
+    for det in detected_items:
+        prev = deduped.get(det.item_number)
+        if prev is None or len(det.ocr_text) > len(prev.ocr_text):
+            deduped[det.item_number] = det
+        elif _RANG_PRIORITY.get(det.rang, 99) < _RANG_PRIORITY.get(prev.rang, 99):
+            deduped[det.item_number] = DetectedItem(
+                item_number=prev.item_number,
+                rang=det.rang,
+                chapter_title=prev.chapter_title,
+                ocr_text=prev.ocr_text,
+                start_page=prev.start_page,
+                end_page=prev.end_page,
+                ocr_confidence_score=prev.ocr_confidence_score,
+            )
+    if len(deduped) < len(detected_items):
+        logger.info("Dedup: %d → %d items", len(detected_items), len(deduped))
+    return list(deduped.values())
+
+
+async def _resolve_title(db: AsyncSession, college_id: uuid.UUID, detected: DetectedItem) -> str | None:
     """Story 8.0 — cascade du titre d'un item.
 
     1. Titre extrait de l'en-tête (déjà filtré par le détecteur) → gardé et versé au
@@ -85,7 +268,10 @@ async def _resolve_title(
     number = detected.item_number
     if detected.chapter_title:
         try:
-            await record_title(db, number, detected.chapter_title)
+            # Point de sauvegarde : un échec du référentiel ne doit pas annuler la
+            # transaction de l'import (brouillon d'items en cours d'écriture).
+            async with db.begin_nested():
+                await record_title(db, number, detected.chapter_title)
         except Exception:  # noqa: BLE001
             logger.exception("Référentiel item_titles : échec d'écriture pour l'item %d", number)
         return detected.chapter_title
@@ -98,216 +284,5 @@ async def _resolve_title(
     if title:
         return title
 
-    logger.warning(
-        "Item %d du collège %s sans titre (ni en-tête ni référentiel)", number, college_id
-    )
+    logger.warning("Item %d du collège %s sans titre (ni en-tête ni référentiel)", number, college_id)
     return None
-
-
-async def _run_ocr(
-    db: AsyncSession,
-    college: College,
-    job: GenerationJob,
-    pdf_path: str,
-    ctx: dict | None = None,
-) -> dict:
-    # 1. Charger les données déjà accumulées (reprise après interruption)
-    previous_texts: list[str] = []
-    previous_scores: list[float] = []
-    previous_tables: list[list[list[list[str]]]] = []
-
-    if job.page_texts_json:
-        stored = json.loads(job.page_texts_json)
-        previous_texts = stored.get("texts", [])
-        previous_scores = stored.get("scores", [])
-        previous_tables = stored.get("tables", [])
-
-    # La reprise est déterminée par les données déjà stockées, pas par ocr_page_progress.
-    # Cela garantit que la détection d'items opère toujours sur le document complet.
-    start_page = len(previous_texts)
-
-    # 2. Compter les pages totales (opération bloquante — exécutée dans thread pool)
-    total_pages = await asyncio.to_thread(_ocr_processor.count_pages, pdf_path)
-
-    if total_pages == 0:
-        logger.warning("Empty or unreadable PDF for college %s — aborting", college.id)
-        job.status = "failed"
-        job.error_message = "PDF is empty or unreadable (0 pages detected)"
-        college.status = CollegeStatus.failed
-        await record_job_event(
-            db, job.id, "failed", message="PDF is empty or unreadable (0 pages detected)"
-        )
-        await db.commit()
-        return {"college_id": str(college.id), "job_id": str(job.id), "error": "empty_pdf"}
-
-    college.total_pages = total_pages
-    college.status = CollegeStatus.processing
-    college.ocr_page_progress = start_page
-    # Nouvel import : l'avancement de la génération précédente ne s'affiche plus (8.13).
-    college.generation_items_done = 0
-    college.generation_items_total = None
-    college.generation_cards = 0
-    college.generation_preview = None
-    job.status = "processing"
-    await record_job_event(db, job.id, "ocr_started", total=total_pages)
-    await db.commit()
-
-    # Throttle ocr_progress : borner à ~20 events quel que soit le volume de pages.
-    progress_step = max(1, total_pages // 20)
-
-    logger.info(
-        "Starting OCR for college %s — %d pages (resuming from page %d)",
-        college.id,
-        total_pages,
-        start_page,
-    )
-
-    # 3. Boucle OCR page par page (opérations bloquantes dans thread pool)
-    page_texts: list[str] = list(previous_texts)
-    page_scores: list[float] = list(previous_scores)
-    page_tables: list[list[list[list[str]]]] = list(previous_tables)
-
-    for page_num in range(start_page, total_pages):
-        # Garde anti-race (review 7.7 D1) : si l'admin a forcé l'arrêt
-        # (Stop → status="failed") pendant l'OCR, ne pas poursuivre ni écraser ce
-        # statut. La session est propre ici (commit de la page précédente / de
-        # ocr_started), donc cette lecture reflète l'état réel en base.
-        current_status = (
-            await db.execute(
-                select(GenerationJob.status).where(GenerationJob.id == job.id)
-            )
-        ).scalar_one_or_none()
-        if current_status == "failed":
-            logger.info(
-                "OCR job %s annulé par l'admin — arrêt avant la page %d",
-                job.id,
-                page_num + 1,
-            )
-            return {"college_id": str(college.id), "job_id": str(job.id), "error": "cancelled"}
-
-        page_result = await asyncio.to_thread(
-            _ocr_processor.process_page, pdf_path, page_num
-        )
-        page_texts.append(page_result.text)
-        page_scores.append(page_result.confidence_score)
-        page_tables.append(page_result.tables)
-
-        # Persiste la progression + données pour permettre une reprise correcte (NFR11)
-        college.ocr_page_progress = page_num + 1
-        job.page_texts_json = json.dumps({
-            "texts": page_texts,
-            "scores": page_scores,
-            "tables": page_tables,
-        })
-        # Event timeline throttlé (toutes les progress_step pages + dernière page)
-        if (page_num + 1) % progress_step == 0 or page_num + 1 == total_pages:
-            await record_job_event(
-                db, job.id, "ocr_progress", page=page_num + 1, total=total_pages
-            )
-        await db.commit()
-
-        logger.debug(
-            "OCR page %d/%d done (score=%.2f, tables=%d)",
-            page_num + 1,
-            total_pages,
-            page_result.confidence_score,
-            len(page_result.tables),
-        )
-
-    # 4. Supprimer les items existants avant réinsertion (gestion des retries ARQ)
-    await db.execute(delete(Item).where(Item.college_id == college.id))
-
-    # 5. Détecter les items ECNi sur le document complet
-    # Le detector utilise les tables pdfplumber pour extraire les rangs A/B/C
-    # depuis le tableau "Rang | Rubrique | Intitulé" de chaque page d'en-tête d'item.
-    detected_items = _item_detector.detect_items(page_texts, page_scores, page_tables)
-    logger.info("Detected %d items in college %s", len(detected_items), college.id)
-
-    # Dédupliquer par item_number (edge case : même item_number sur deux sections du PDF)
-    # Stratégie : garder l'occurrence avec le plus de contenu texte ; en cas d'égalité,
-    # préférer le rang de plus haute priorité (A > B > C).
-    deduped: dict[int, DetectedItem] = {}
-    for det in detected_items:
-        if det.item_number not in deduped:
-            deduped[det.item_number] = det
-        else:
-            prev = deduped[det.item_number]
-            # Préférer l'occurrence avec le plus de contenu
-            if len(det.ocr_text) > len(prev.ocr_text):
-                deduped[det.item_number] = det
-            elif _RANG_PRIORITY.get(det.rang, 99) < _RANG_PRIORITY.get(prev.rang, 99):
-                # Même quantité de contenu mais rang meilleur — mettre à jour le rang
-                deduped[det.item_number] = DetectedItem(
-                    item_number=prev.item_number,
-                    rang=det.rang,
-                    chapter_title=prev.chapter_title,
-                    ocr_text=prev.ocr_text,
-                    start_page=prev.start_page,
-                    end_page=prev.end_page,
-                    ocr_confidence_score=prev.ocr_confidence_score,
-                )
-
-    final_items = list(deduped.values())
-    if len(final_items) < len(detected_items):
-        logger.info(
-            "Dedup: %d → %d items (removed %d duplicates)",
-            len(detected_items),
-            len(final_items),
-            len(detected_items) - len(final_items),
-        )
-
-    await record_job_event(
-        db, job.id, "items_detected", message=f"{len(final_items)} items"
-    )
-
-    # 6. Insérer les items en base (titre : en-tête → référentiel partagé → NULL)
-    for detected in final_items:
-        item_score = detected.ocr_confidence_score
-        item = Item(
-            college_id=college.id,
-            item_number=detected.item_number,
-            rang=detected.rang,
-            chapter_title=await _resolve_title(db, college.id, detected),
-            ocr_text=detected.ocr_text,
-            ocr_confidence_score=item_score,
-            low_confidence=_confidence_scorer.is_low_confidence(item_score),
-            start_page=detected.start_page,
-            end_page=detected.end_page,
-        )
-        db.add(item)
-
-    # 7. Nettoyage et statuts finaux
-    job.page_texts_json = None  # données intermédiaires non nécessaires après completion
-    college.status = CollegeStatus.ocr_complete
-    job.status = "ocr_complete"
-    await record_job_event(
-        db, job.id, "ocr_complete", message=f"{len(final_items)} items"
-    )
-    await db.commit()
-
-    logger.info("OCR complete for college %s — %d items created", college.id, len(final_items))
-
-    if ctx and "redis" in ctx:
-        try:
-            gen_job = await ctx["redis"].enqueue_job(
-                "generate_college_cards",
-                str(college.id),
-                str(job.id),
-                pdf_path,
-            )
-            # GOTCHA Stop (Story 7.7) : repointer arq_job_id sur le job ARQ de la
-            # phase génération. Sinon arq_job_id reste l'id OCR (déjà terminé) et
-            # Stop ne pourrait pas annuler pendant la génération. Best-effort.
-            if gen_job is not None:
-                job.arq_job_id = gen_job.job_id
-                await db.commit()
-            logger.info("Generation job enqueued for college %s job %s", college.id, job.id)
-        except Exception as exc:
-            logger.error("Failed to enqueue generation job for college %s: %s", college.id, exc)
-
-    return {
-        "college_id": str(college.id),
-        "job_id": str(job.id),
-        "item_count": len(final_items),
-        "total_pages": total_pages,
-    }

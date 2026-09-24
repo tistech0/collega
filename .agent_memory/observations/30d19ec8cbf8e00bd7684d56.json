@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff main...feat/chantier-1-fiabilite-imports --stat -- collega_app | tail -20; git diff main...feat/chantier-1-fiabilite-imports -- collega_app/lib",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff main...feat/chantier-1-fiabilite-imports --stat -- collega_app | tail -20; git diff main...feat/chantier-1-fiabilite-imports -- collega_app/lib: ss ImportError extends CollegeImportState { diff --git a/collega_app/lib/features/colleges/presentation/import_pr",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\" && git diff main...feat/chantier-1-fiabilite-imports --stat -- collega_app | tail -20; git diff main...feat/chantier-1-fiabilite-imports -- collega_app/lib: ss ImportError extends CollegeImportState { diff --git a/collega_app/lib/features/colleges/presentation/import_progress_screen.dart b/collega_app/lib/features/colleges/presentation/import_progress_screen.dart index 77d7e66..fa8095a 100644 --- a/collega_app/lib/features/colleges/presentation/import_progress_screen.dart +++ b/collega_app/lib/features/colleges/presentation/import_progress_screen.dart @@ -70,6 +70,10 @@ class _ImportProgressScreenState extends ConsumerState<ImportProgressScreen> { if (_finished || !mounted) return; _finished = true; CgHaptics.success(); + // Réimport : ce qui a changé. Toast sur l'overlay racine, il survit à la navigation. + final done = ref.read(collegeImportProvider).valueOrNull; + final summary = done is ImportComplete ? done.summary : null; + if (summary != null) showCgToast(context, importSummaryText(summary)); context.go('/colleges/${widget.refId}'); }",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "30d19ec8cbf8e00bd7684d56",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:19:00.852Z",
+  "stored_at": "2026-09-23T21:19:00.852Z"
+}

@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rn \"NFR9\\b\\|NFR9 \\|NFR9:\" _bmad-output/planning-artifacts/*.md | head -5; grep -n \"réimport\\|reimport\\|Réimport\" _bmad-output/planning-artifacts/ux-design-specification-v2.md | head -10; grep -n \"disparu\\|delete\\|supprim\" collega_app/lib/features/colleges/data/college_cards_sync.dart | head",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rn \"NFR9\\b\\|NFR9 \\|NFR9:\" _bmad-output/planning-artifacts/*.md | head -5; grep -n \"réimport\\|reimport\\|Réimport\" _bmad-output/planning-artifacts/ux-design-specification-v2.md | head -10; grep -n \"disparu\\|delete\\|supprim\" collega_app/lib/features/colleges/data/co",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -rn \"NFR9\\b\\|NFR9 \\|NFR9:\" _bmad-output/planning-artifacts/*.md | head -5; grep -n \"réimport\\|reimport\\|Réimport\" _bmad-output/planning-artifacts/ux-design-specification-v2.md | head -10; grep -n \"disparu\\|delete\\|supprim\" collega_app/lib/features/colleges/data/college_cards_sync.dart | head: après génération (NFR9) _bmad-output/planning-artifacts/architecture.md:416: └── cleanup_worker.py # suppression ocr_text ≤ 24h (NFR9) _bmad-output/planning-artifacts/architecture.md:469:| NFR9 OCR text ≤ 24h | `cleanup_worker.py` ARQ cron | 487: A2([Réimport]) --> H{Quota} 490: H -->|OK| H3[Confirmation « Réimport 1/2 · 1/3 ce mois »] --> D 720:- Les titres valides extraits alimentent un **référentiel partagé** `item_number → titre` (les items de l'ECN sont universels) ; un item sans titre exploitable est complété par correspondance de numéro, libellé le plus fréquent. Une migration peuple le référentiel depuis l'existant puis backfille les items sans titre — sans réimport ni appel Claude. 9:/// Les fiches que le serveur n'a plus (supprimées, régénérées) disparaissent. 11:/// Une liste vide ne supprime rien : un collège prêt a toujours des fiches, une 38: await (db.delete(db.flashCards)",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "cf974367c028b7133bb38ac6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T19:51:54.194Z",
+  "stored_at": "2026-09-23T19:51:54.194Z"
+}

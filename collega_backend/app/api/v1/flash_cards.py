@@ -18,6 +18,7 @@ from app.schemas.college import (
     FlashCardRegenerateRequest,
     FlashCardResponseWrapped,
 )
+from app.services.content import store
 from app.services.generation.claude_client import ClaudeClient
 
 logger = logging.getLogger(__name__)
@@ -80,8 +81,18 @@ async def regenerate_card(
             detail={"code": "ITEM_NOT_FOUND", "message": "Item source introuvable"},
         )
 
+    source_text = await store.get_item_text(db, item.text_hash) if item.text_hash else None
+    if not source_text:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "SOURCE_UNAVAILABLE",
+                "message": "Le texte source de cet item n'est pas disponible : réimporte le PDF pour pouvoir régénérer.",
+            },
+        )
+
     claude = ClaudeClient()
-    new_card_data = await claude.regenerate_single_card(card, item, body.user_note)
+    new_card_data = await claude.regenerate_single_card(card, item, source_text, body.user_note)
     if new_card_data is None:
         raise HTTPException(
             status_code=503,
@@ -92,6 +103,7 @@ async def regenerate_card(
     card.recto = new_card_data.recto
     card.verso = new_card_data.verso
     card.user_feedback = None
+    card.generation_id = None  # plus la sortie d'origine de Claude : jamais partagée
     await db.commit()
     await db.refresh(card)
 

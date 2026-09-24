@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bfcuzc7fq</task-id>\n<summary>Monitor event: \"logs prod réimport PNEUMO (API + worker)\"</summary>\n<event>[worker] 05:28:42: recording health: Sep-24 05:28:42 j_complete=64 j_failed=0 j_retried=0 j_ongoing=1 queued=1</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bfcuzc7fq</task-id> <summary>Monitor event: \"logs prod réimport PNEUMO (API + worker)\"</summary> <event>[worker] 05:28:42: recording health: Sep-24 05:28:42 j_complete=64 j_failed=0 j_retried=0 j_ongoing=1 queue",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "61a4efef97b029de68c237cf",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-24T05:28:42.609Z",
+  "stored_at": "2026-09-24T05:28:42.609Z",
+  "low_signal": true
+}

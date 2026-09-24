@@ -8,6 +8,7 @@ import os
 # Doit être défini AVANT l'import du module settings (module-level Settings())
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./test.db")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
+os.environ.setdefault("RATE_LIMIT_STORAGE_URI", "memory://")
 os.environ.setdefault("SECRET_KEY", "test-secret-key-for-pytest-only")
 os.environ.setdefault("CLAUDE_API_KEY", "test-key")
 os.environ.setdefault("ADMIN_USERNAME", "admin")
@@ -59,6 +60,14 @@ def make_mock_db():
 @pytest.fixture
 def mock_db():
     return make_mock_db()
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    from app.core.limiter import limiter
+
+    limiter.reset()
+    yield
 
 
 @pytest.fixture(autouse=True)

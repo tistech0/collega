@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; cat app/services/jobs/job_events.py | sed -n 1,60p; sed -n 130,175p app/services/notifications/apns_service.py; grep -n \"event_type\\|CheckConstraint\" app/models/generation_job_event.py; ls tests/services | grep -i notif",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; cat app/services/jobs/job_events.py | sed -n 1,60p; sed -n 130,175p app/services/notifications/apns_service.py; grep -n \"event_type\\|CheckConstraint\" app/models/generation_job_event.py; ls tests/services | grep -i notif: e: NotificationService | None = ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\"; cat app/services/jobs/job_events.py | sed -n 1,60p; sed -n 130,175p app/services/notifications/apns_service.py; grep -n \"event_type\\|CheckConstraint\" app/models/generation_job_event.py; ls tests/services | grep -i notif: e: NotificationService | None = None def get_notification_service( request: \"Request | None\" = None, ctx: dict[str, Any] | None = None, ) -> NotificationService: \"\"\"Récupère le singleton notification service. Priorité de résolution : 1. `request.app.state.notification_service` (route FastAPI) 2. `ctx[\"notification_service\"]` (worker ARQ) 3. `_service_instance` module-level (fallback rétrocompat tests + appels hors contexte lifespan/worker — instancié paresseusement à la 1re demande) \"\"\" if request is not None: svc = getattr(request.app.state, \"notification_service\", None) if svc is not None: return svc if ctx is not None: svc = ctx.get(\"notification_service\") if svc is not None: return svc global _service_instance if _service_instance is None: _service_instance = create_notification_service() return _service_instance 35: event_type: Mapped[str] = mapped_column(String(50), nullable=False)",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "41a122250bf6d1aa965f727e",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T20:55:24.992Z",
+  "stored_at": "2026-09-23T20:55:24.992Z"
+}

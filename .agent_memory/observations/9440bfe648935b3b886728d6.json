@@ -1,0 +1,17 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git show main:collega_backend/app/workers/ocr_worker.py | grep -n \"reload\\|refund\\|rendu\" ; git show main:collega_backend/app/workers/generation_worker.py | grep -n \"reload\\|refund\\|rendu\"; git show main:collega_backend/app/services/generation/card_generator.py | grep -n \"reload\\|refund\" ; sed -n 120,180p app/api/v1/colleges.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git show main:collega_backend/app/workers/ocr_worker.py | grep -n \"reload\\|refund\\|rendu\" ; git show main:collega_backend/app/workers/generation_worker.py | grep -n \"reload\\|refund\\|rendu\"; git show main:collega_backend/app/services/generation/card_ge",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && git show main:collega_backend/app/workers/ocr_worker.py | grep -n \"reload\\|refund\\|rendu\" ; git show main:collega_backend/app/workers/generation_worker.py | grep -n \"reload\\|refund\\|rendu\"; git show main:collega_backend/app/services/generation/card_generator.py | grep -n \"reload\\|refund\" ; sed -n 120,180p app/api/v1/colleges.py: ception: return HTTPException( status_code=409, detail={\"code\": \"JOB_IN_PROGRESS\", \"message\": \"Un import est déjà en cours pour ce collège\"}, ) def _invalid_ref_id(ref_id: int) -> None: if not (1 <= ref_id <= 39): raise HTTPException( status_code=422, detail={\"code\": \"INVALID_REF_ID\", \"message\": \"ref_id must be between 1 and 39\"}, ) async def _select_college(db: AsyncSession, user: User, ref_id: int) -> College | None: result = await db.execute( select(College) .where(College.user_id == user.id) .where(College.college_ref_id == ref_id) ) return result.scalar_one_or_none() async def _get_or_create_college(db: AsyncSession, user: User, ref_id: int) -> College: college = await _select_college(db, user, ref_id) if college is None: college = College(user_id=user.id, college_ref_id=ref_id) db.add(college) try: await db.flush() except IntegrityError: await db.rollback() raise _job_in_progress()",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "9440bfe648935b3b886728d6",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:18:10.884Z",
+  "stored_at": "2026-09-23T21:18:10.884Z",
+  "low_signal": true
+}

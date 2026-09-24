@@ -131,6 +131,32 @@ void main() {
     expect(visited, ['/colleges/3']);
   });
 
+  testWidgets('réimport terminé : le résumé s’affiche en toast à l’ouverture du collège', (tester) async {
+    _phone(tester);
+    _Import.initial = _generating;
+    final visited = <String>[];
+    await tester.pumpWidget(_app(visited: visited));
+    await tester.pumpAndSettle();
+    _notifier(tester).emit(const ImportComplete(
+      collegeId: 'c3',
+      summary: ImportSummary(changed: 3, added: 1, removed: 0, unchanged: 20, quotaRefunded: false),
+    ));
+    await tester.pump();
+    expect(visited, ['/colleges/3']);
+    expect(find.text('3 items mis à jour, 1 nouveau, 20 inchangés'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+  });
+
+  testWidgets('réimport en échec confirmé par le serveur : fiches actuelles intactes', (tester) async {
+    _phone(tester);
+    _Import.initial = _generating;
+    await tester.pumpWidget(_app());
+    await tester.pumpAndSettle();
+    _notifier(tester).emit(const ImportError(message: 'reimport_failed'));
+    await tester.pumpAndSettle();
+    expect(find.text('Le réimport n’a pas abouti. Tes fiches actuelles sont intactes.'), findsOneWidget);
+  });
+
   testWidgets('échec : état d’erreur, « Relancer l’import »', (tester) async {
     _phone(tester);
     _Import.initial = _generating;

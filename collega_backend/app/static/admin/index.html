@@ -803,9 +803,12 @@
     if (!events || !events.length) { ul.style.display = "none"; empty.style.display = "block"; return; }
     empty.style.display = "none";
     ul.style.display = "";
+    // Chantier 1 : un « generation_progress » par item — n'afficher que le dernier d'une série.
+    events = events.filter((e, i) => !(e.event_type === "generation_progress"
+      && events[i + 1] && events[i + 1].event_type === "generation_progress"));
     events.forEach(e => {
       const li = document.createElement("li");
-      if (e.event_type === "failed") li.className = "tl-failed";
+      if (e.event_type === "failed" || e.event_type === "stale") li.className = "tl-failed";
       if (e.event_type === "cancelled") li.className = "tl-cancelled";
       let meta = "";
       if (e.page != null && e.total != null) meta = ` (${e.page}/${e.total})`;

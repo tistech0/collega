@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class GenerationJobEvent(Base):
     """Événement de timeline persisté pour un GenerationJob (Story 7.7).
 
-    Écrit par le pipeline (ocr_worker / generation_worker / card_generator) pour
+    Écrit par le pipeline (ocr_worker / generation_worker / publish) pour
     rendre l'avancement d'un import lisible au refresh, sans fouiller Redis/psql.
     L'écriture est défensive (cf. `record_job_event`) : un échec d'event ne doit
     jamais casser le pipeline.

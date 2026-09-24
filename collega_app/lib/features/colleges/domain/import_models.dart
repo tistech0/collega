@@ -17,6 +17,52 @@ class ImportStartResponse {
       );
 }
 
+/// Ce qu'un réimport a changé (chantier 1) : le serveur ne régénère que les items
+/// dont le contenu a changé, et rend le quota si rien n'a nécessité Claude.
+class ImportSummary {
+  const ImportSummary({
+    required this.changed,
+    required this.added,
+    required this.removed,
+    required this.unchanged,
+    required this.quotaRefunded,
+  });
+
+  factory ImportSummary.fromJson(Map<String, dynamic> json) => ImportSummary(
+        changed: json['changed'] as int? ?? 0,
+        added: json['added'] as int? ?? 0,
+        removed: json['removed'] as int? ?? 0,
+        unchanged: json['unchanged'] as int? ?? 0,
+        quotaRefunded: json['quota_refunded'] as bool? ?? false,
+      );
+
+  static ImportSummary? maybeFromJson(Object? json) =>
+      json is Map<String, dynamic> ? ImportSummary.fromJson(json) : null;
+
+  final int changed;
+  final int added;
+  final int removed;
+  final int unchanged;
+  final bool quotaRefunded;
+
+  bool get nothingChanged => changed == 0 && added == 0 && removed == 0;
+}
+
+/// « 3 items mis à jour, 1 nouveau, 20 inchangés » ; « Aucun changement dans ce PDF :
+/// réimport non décompté ». Mêmes règles que la notification envoyée par le serveur.
+String importSummaryText(ImportSummary s) {
+  if (s.nothingChanged) {
+    return s.quotaRefunded ? 'Aucun changement dans ce PDF : réimport non décompté' : 'Aucun changement dans ce PDF';
+  }
+  String plural(int n, String one, String many) => '$n ${n == 1 ? one : many}';
+  return [
+    if (s.changed > 0) plural(s.changed, 'item mis à jour', 'items mis à jour'),
+    if (s.added > 0) plural(s.added, 'nouveau', 'nouveaux'),
+    if (s.removed > 0) plural(s.removed, 'supprimé', 'supprimés'),
+    if (s.unchanged > 0) plural(s.unchanged, 'inchangé', 'inchangés'),
+  ].join(', ');
+}
+
 class CollegeStatusResponse {
   const CollegeStatusResponse({
     required this.collegeId,
@@ -25,14 +71,21 @@ class CollegeStatusResponse {
     required this.ocrProgress,
     this.totalPages,
     this.jobId,
+    this.summary,
+    this.reimport = false,
   });
 
   final String collegeId;
   final int refId;
+  /// Statut de l'import en cours ou du dernier import (le collège, lui, reste prêt
+  /// pendant un réimport).
   final String status;
   final int ocrProgress;
   final int? totalPages;
   final String? jobId;
+  final ImportSummary? summary;
+  /// Échec d'un réimport : les fiches actuelles sont intactes.
+  final bool reimport;
 
   factory CollegeStatusResponse.fromJson(Map<String, dynamic> json) =>
       CollegeStatusResponse(
@@ -42,6 +95,8 @@ class CollegeStatusResponse {
         ocrProgress: json['ocr_page_progress'] as int? ?? 0,
         totalPages: json['total_pages'] as int?,
         jobId: json['job_id'] as String?,
+        summary: ImportSummary.maybeFromJson(json['summary']),
+        reimport: json['reimport'] as bool? ?? false,
       );
 }
 
@@ -115,8 +170,10 @@ class ImportStreaming extends CollegeImportState {
 }
 
 class ImportComplete extends CollegeImportState {
-  const ImportComplete({required this.collegeId});
+  const ImportComplete({required this.collegeId, this.summary});
   final String collegeId;
+  /// Présent après un réimport : ce qui a changé.
+  final ImportSummary? summary;
 }
 
 class ImportError extends CollegeImportState {

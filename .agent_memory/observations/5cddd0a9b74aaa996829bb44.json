@@ -1,0 +1,17 @@
+{
+  "type": "tool_use",
+  "tool": "mcp__kage__kage_pr_check",
+  "path": "",
+  "command": "",
+  "summary": "mcp__kage__kage_pr_check: [{'type': 'text', 'text': '✓ No team memory invalidated by this change\\n\\n{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"branch\": \"feat/chantier-1-fiabilite-imports\",\\n \"head\": \"92d3e216ab5913ba0abe29225b6fc15948bfc855\",\\n \"changed_files\": [],\\n \"validation\": {\\n",
+  "text": "[{'type': 'text', 'text': '✓ No team memory invalidated by this change\\n\\n{\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"branch\": \"feat/chantier-1-fiabilite-imports\",\\n \"head\": \"92d3e216ab5913ba0abe29225b6fc15948bfc855\",\\n \"changed_files\": [],\\n \"validation\": {\\n \"ok\": true,\\n \"errors\": [],\\n \"warnings\": [\\n \".agent_memory/packets/repo_map-collega-repo-overview-cf8b6e00.md: low memory quality score 54\"\\n ]\\n },\\n \"stale_packets\": [],\\n \"memory_packet_changes\": [],\\n \"code_graph_current\": true,\\n \"memory_graph_current\": true,\\n \"memory_reconciliation\": {\\n \"ok\": true,\\n \"project_dir\": \"/Users/lesurmatthis/dev/projet perso/collega\",\\n \"generated_at\": \"2026-09-23T21:47:22.098Z\",\\n \"touched_paths\": [\\n \"Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/tool-results/b5va8juhj.txt\",\\n \"Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/tool-results/b6ao4x3k2.txt\",\\n \"Users/lesurmatthis/.claude/projects/-Users-lesurmatthis-dev-projet-perso-collega/86230cb2-05e0-4d08-ab01-78d2ad94eea8/tool-results/bx9445ni1.txt\",\\n \"User",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5cddd0a9b74aaa996829bb44",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:47:22.343Z",
+  "stored_at": "2026-09-23T21:47:22.343Z",
+  "low_signal": true
+}

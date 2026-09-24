@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Monitor",
+  "path": "",
+  "command": "ssh nas 'docker logs -f --since 1m collega-worker-1 2>&1 | sed -u \"s/^/[worker] /\" & docker logs -f --since 1m collega-api-1 2>&1 | sed -u \"s/^/[api] /\" & wait' | grep --line-buffered -E \"import|Import|OCR|ocr|items_detected|Génération|génération|generation|publié|Publish|échec|failed|Failed|ERROR|Error|Traceback|Exception|PDF|chunked|upload|/stream|/status|complete| 4[0-9][0-9] | 5[0-9][0-9] |arrêt|bloqué|↻|●|!\"",
+  "summary": "ssh nas 'docker logs -f --since 1m collega-worker-1 2>&1 | sed -u \"s/^/[worker] /\" & docker logs -f --since 1m collega-api-1 2>&1 | sed -u \"s/^/[api] /\" & wait' | grep --line-buffered -E \"import|Import|OCR|ocr|items_detected|Génération|génération|generation|publié|Publish|échec|failed|Failed|ERROR|Error|Traceback|Excep",
+  "text": "ssh nas 'docker logs -f --since 1m collega-worker-1 2>&1 | sed -u \"s/^/[worker] /\" & docker logs -f --since 1m collega-api-1 2>&1 | sed -u \"s/^/[api] /\" & wait' | grep --line-buffered -E \"import|Import|OCR|ocr|items_detected|Génération|génération|generation|publié|Publish|échec|failed|Failed|ERROR|Error|Traceback|Exception|PDF|chunked|upload|/stream|/status|complete| 4[0-9][0-9] | 5[0-9][0-9] |arrêt|bloqué|↻|●|!\": bfcuzc7fq",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "5c760d91d82191cfc2c3f36f",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-24T05:28:00.100Z",
+  "stored_at": "2026-09-24T05:28:00.101Z"
+}

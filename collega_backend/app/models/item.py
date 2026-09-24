@@ -32,7 +32,8 @@ class Item(Base):
     item_number: Mapped[int] = mapped_column(Integer, nullable=False)
     rang: Mapped[str] = mapped_column(String(1), nullable=False)
     chapter_title: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    ocr_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Empreinte du texte de l'item (item_texts) : décide « inchangé → fiches gardées » au réimport.
+    text_hash: Mapped[str | None] = mapped_column(String(64), ForeignKey("item_texts.hash"), nullable=True)
     ocr_confidence_score: Mapped[float] = mapped_column(
         Float, nullable=False, default=0.0
     )

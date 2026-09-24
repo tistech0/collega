@@ -1,0 +1,16 @@
+{
+  "type": "command_result",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 700,810p app/api/v1/admin.py && cat app/services/jobs/arq_control.py",
+  "summary": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 700,810p app/api/v1/admin.py && cat app/services/jobs/arq_control.py: . Ajoute le job à l'abort set et attend son résultat jusqu'à `timeout`. L'abort n'est honoré que si le worker tourne avec `allow_abort_jobs=True`. Retourne True si l'abort a ",
+  "text": "cd \"/Users/lesurmatthis/dev/projet perso/collega/collega_backend\" && sed -n 700,810p app/api/v1/admin.py && cat app/services/jobs/arq_control.py: . Ajoute le job à l'abort set et attend son résultat jusqu'à `timeout`. L'abort n'est honoré que si le worker tourne avec `allow_abort_jobs=True`. Retourne True si l'abort a été confirmé, False sinon (job déjà terminé, timeout, Redis indisponible…). N'élève jamais : l'endpoint force le statut DB indépendamment du résultat. \"\"\" pool = None try: from arq import create_pool # type: ignore[import] from arq.jobs import Job # type: ignore[import] from app.core.redis import redis_settings pool = await create_pool(redis_settings) job = Job(job_id=arq_job_id, redis=pool) return await job.abort(timeout=timeout) except Exception as exc: # noqa: BLE001 — best-effort, l'endpoint reste seul garant du statut DB logger.warning(\"abort_arq_job failed for %s: %s\", arq_job_id, exc) return False finally: if pool is not None: try: await pool.close() except Exception: # noqa: BLE001 — cleanup non bloquant pass",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "897d77879ccc42f601a0b98c",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T21:17:07.352Z",
+  "stored_at": "2026-09-23T21:17:07.352Z"
+}

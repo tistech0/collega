@@ -1,0 +1,15 @@
+{
+  "type": "tool_use",
+  "tool": "Bash",
+  "path": "",
+  "command": "cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n -i \"24\\|ocr\\|texte\\|pdf\" collega_app/assets/legal/privacy.md | head -20; grep -rn \"regenerate\\|Régénérer\\|régénér\" collega_app/lib --include=*.dart 2>/dev/null | grep -v \"\\.g\\.dart\" | head -5; grep -rln \"regenerate\" collega_app/lib | head",
+  "summary": "About to run: cd \"/Users/lesurmatthis/dev/projet perso/collega\"; grep -n -i \"24\\|ocr\\|texte\\|pdf\" collega_app/assets/legal/privacy.md | head -20; grep -rn \"regenerate\\|Régénérer\\|régénér\" collega_app/lib --include=",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "b6ac5df21b404ccf7917d99b",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-23T19:54:20.214Z",
+  "stored_at": "2026-09-23T19:54:20.215Z"
+}

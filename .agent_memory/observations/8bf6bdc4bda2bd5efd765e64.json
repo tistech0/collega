@@ -1,0 +1,14 @@
+{
+  "type": "user_prompt",
+  "text": "<task-notification>\n<task-id>bfcuzc7fq</task-id>\n<summary>Monitor event: \"logs prod réimport PNEUMO (API + worker)\"</summary>\n<event>[worker] 2026-09-24 05:29:21,132 INFO app.services.generation.publish Import 207f5b0e-dcc9-4c42-85c1-38f79042b135 publié : {'changed': 0, 'added': 0, 'removed': 0, 'unchanged': 21, 'cards': 164, 'claude_calls': 0, 'quota_refunded': True, 'reimport': True}\n[worker] 05:29:21:   0.15s ← gen:207f5b0e-dcc9-4c42-85c1-38f79042b135:generate_college_cards ● {'college_id': 'ed9a1032-24f5-4243-8ad2-2d71ff9eae44', 'job_id': '207f5b0e-dcc9…</event>\nIf this event is something the user would act on now, send a PushNotification. Routine or benign output doesn't need one.\n</task-notification>",
+  "summary": "<task-notification> <task-id>bfcuzc7fq</task-id> <summary>Monitor event: \"logs prod réimport PNEUMO (API + worker)\"</summary> <event>[worker] 2026-09-24 05:29:21,132 INFO app.services.generation.publish Import 207f5b0e-dcc9-4c42-85c1-38f790",
+  "session_id": "86230cb2-05e0-4d08-ab01-78d2ad94eea8",
+  "agent": "claude-code",
+  "schema_version": 1,
+  "id": "8bf6bdc4bda2bd5efd765e64",
+  "project_dir": "/Users/lesurmatthis/dev/projet perso/collega",
+  "repo_key": "git-github-com-tistech0-collega",
+  "timestamp": "2026-09-24T05:29:28.272Z",
+  "stored_at": "2026-09-24T05:29:28.272Z",
+  "low_signal": true
+}

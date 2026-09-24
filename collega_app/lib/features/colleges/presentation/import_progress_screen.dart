@@ -70,6 +70,10 @@ class _ImportProgressScreenState extends ConsumerState<ImportProgressScreen> {
     if (_finished || !mounted) return;
     _finished = true;
     CgHaptics.success();
+    // Réimport : ce qui a changé. Toast sur l'overlay racine, il survit à la navigation.
+    final done = ref.read(collegeImportProvider).valueOrNull;
+    final summary = done is ImportComplete ? done.summary : null;
+    if (summary != null) showCgToast(context, importSummaryText(summary));
     context.go('/colleges/${widget.refId}');
   }
 
