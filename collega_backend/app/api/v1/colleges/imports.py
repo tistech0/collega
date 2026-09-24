@@ -7,11 +7,12 @@ import uuid
 from pathlib import Path
 
 from arq.connections import ArqRedis
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile
+from fastapi import APIRouter, Depends, Request, Response, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.errors import AppError, conflict, not_found, unprocessable
 from app.deps import get_arq, require_subscription
 from app.models.user import User
 from app.schemas.college import (
@@ -60,7 +61,7 @@ async def import_college_pdf(
 
     try:
         await assert_pdf_readable(pdf_file_path)
-    except HTTPException:
+    except AppError:
         # Quota (UPDATE non validé) annulé : un PDF endommagé ne coûte rien.
         pdf_file_path.unlink(missing_ok=True)
         await db.rollback()
@@ -82,11 +83,8 @@ async def get_upload_store(arq: ArqRedis = Depends(get_arq)) -> ChunkedUploadSto
     return ChunkedUploadStore(arq, Path(settings.pdf_storage_path))
 
 
-def _upload_not_found() -> HTTPException:
-    return HTTPException(
-        status_code=404,
-        detail={"code": "UPLOAD_NOT_FOUND", "message": "Upload inconnu ou expiré — relancer l'import"},
-    )
+def _upload_not_found() -> AppError:
+    return not_found("UPLOAD_NOT_FOUND", "Upload inconnu ou expiré — relancer l'import")
 
 
 @router.post(
@@ -151,10 +149,7 @@ async def put_chunked_import_part(
     try:
         await store.write_part(state, n, request.stream())
     except (PartSizeError, InvalidPartIndex) as exc:
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "INVALID_PART", "message": f"Morceau invalide : {exc}"},
-        ) from exc
+        raise unprocessable("INVALID_PART", f"Morceau invalide : {exc}") from exc
     return Response(status_code=204)
 
 
@@ -175,10 +170,7 @@ async def complete_chunked_import(
     if state is None or state.user_id != str(current_user.id):
         raise _upload_not_found()
     if not state.is_complete:
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "UPLOAD_INCOMPLETE", "message": "Morceaux manquants", "missing": state.missing},
-        )
+        raise conflict("UPLOAD_INCOMPLETE", "Morceaux manquants", missing=state.missing)
     with open(store.part_path(state.upload_id, 0), "rb") as f:
         if not f.read(len(imports.PDF_MAGIC)).startswith(imports.PDF_MAGIC):
             await store.claim(state.upload_id)
@@ -198,7 +190,7 @@ async def complete_chunked_import(
         await assert_pdf_readable(assembled)
         limits = await app_settings.anti_spam_limits(db)
         data = await imports.start_import_from_file(db, arq, current_user, claimed.ref_id, assembled, limits)
-    except HTTPException as exc:
+    except AppError as exc:
         assembled.unlink(missing_ok=True)
         if exc.status_code == 503:
             # File indisponible : on garde les morceaux pour permettre un nouveau complete sans re-upload

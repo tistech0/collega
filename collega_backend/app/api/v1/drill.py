@@ -5,11 +5,12 @@ from __future__ import annotations
 import json
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.errors import AppError, not_found, unprocessable
 from app.deps import require_subscription
 from app.models.flash_card import FlashCard
 from app.services.generation.claude_client import ClaudeClient
@@ -35,9 +36,9 @@ async def evaluate_semantic(
 ):
     card = await db.get(FlashCard, card_id)
     if card is None or card.user_id != current_user.id:
-        raise HTTPException(404, detail={"code": "CARD_NOT_FOUND"})
+        raise not_found("CARD_NOT_FOUND", "Fiche introuvable")
     if card.card_type != "definition":
-        raise HTTPException(422, detail={"code": "NOT_DEFINITION_CARD"})
+        raise unprocessable("NOT_DEFINITION_CARD", "Cette fiche n'est pas une définition")
 
     claude = ClaudeClient()
     prompt = (
@@ -56,4 +57,4 @@ async def evaluate_semantic(
         result_json = await claude.ask_json(prompt)
         return {"data": SemanticEvalResult(**result_json).model_dump()}
     except (ValueError, json.JSONDecodeError, ValidationError):
-        raise HTTPException(502, detail={"code": "CLAUDE_EVAL_FAILED"}) from None
+        raise AppError(502, "CLAUDE_EVAL_FAILED", "Évaluation de la réponse impossible — réessayez") from None

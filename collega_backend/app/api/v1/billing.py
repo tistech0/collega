@@ -6,11 +6,12 @@ import logging
 import secrets
 import uuid
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.errors import not_found, unauthorized, unprocessable
 from app.schemas.billing import RevenueCatWebhookPayload
 
 logger = logging.getLogger(__name__)
@@ -29,10 +30,7 @@ async def revenuecat_webhook(
     """Traite les events RevenueCat et met à jour user.is_subscribed."""
     auth_token = authorization.removeprefix("Bearer ") if authorization else None
     if not auth_token or not secrets.compare_digest(auth_token.encode(), settings.revenuecat_webhook_secret.encode()):
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "INVALID_SIGNATURE", "message": "Invalid or missing Authorization"},
-        )
+        raise unauthorized("INVALID_SIGNATURE", "Invalid or missing Authorization")
 
     event_type = payload.event.type
 
@@ -43,19 +41,13 @@ async def revenuecat_webhook(
     try:
         user_id = uuid.UUID(payload.event.app_user_id)
     except ValueError:
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "INVALID_USER_ID", "message": "app_user_id is not a valid UUID"},
-        ) from None
+        raise unprocessable("INVALID_USER_ID", "app_user_id is not a valid UUID") from None
 
     from app.models.user import User
 
     user = await db.get(User, user_id)
     if user is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "USER_NOT_FOUND", "message": f"User {user_id} not found"},
-        )
+        raise not_found("USER_NOT_FOUND", f"User {user_id} not found")
 
     user.is_subscribed = event_type in _ACTIVE_EVENTS
     await db.commit()

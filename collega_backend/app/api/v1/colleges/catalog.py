@@ -5,11 +5,12 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.errors import not_found
 from app.core.time_utils import next_month_reset as _next_month_reset
 from app.deps import get_current_user
 from app.models.college import College
@@ -75,10 +76,7 @@ async def get_college_reload_limits(
     )
     college = result.scalar_one_or_none()
     if college is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": "Collège non trouvé"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", "Collège non trouvé")
 
     now = datetime.now(UTC)
     is_month_reset = current_user.monthly_reloads_reset_at is None or now >= current_user.monthly_reloads_reset_at

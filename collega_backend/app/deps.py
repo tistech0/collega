@@ -3,12 +3,13 @@ import secrets
 import uuid
 
 from arq.connections import ArqRedis
-from fastapi import Depends, Header, HTTPException, Request
+from fastapi import Depends, Header, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.errors import AppError, forbidden, unauthorized
 from app.core.security import JWTError, decode_token
 
 _http_basic = HTTPBasic()
@@ -53,10 +54,7 @@ async def get_arq(request: Request) -> ArqRedis:
     """Pool ARQ de l'application ; 503 QUEUE_UNAVAILABLE si Redis reste injoignable."""
     pool = await get_arq_optional(request)
     if pool is None:
-        raise HTTPException(
-            status_code=503,
-            detail={"code": "QUEUE_UNAVAILABLE", "message": "File d'attente indisponible — réessayez"},
-        )
+        raise AppError(503, "QUEUE_UNAVAILABLE", "File d'attente indisponible — réessayez")
     return pool
 
 
@@ -76,9 +74,10 @@ async def get_admin_user(
         settings.admin_password.encode("utf-8"),
     )
     if not (correct_username and correct_password):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid credentials",
+        raise AppError(
+            401,
+            "INVALID_ADMIN_CREDENTIALS",
+            "Identifiants administrateur invalides",
             headers={"WWW-Authenticate": "Basic"},
         )
     return True
@@ -97,39 +96,24 @@ async def get_current_user(
     from app.models.user import User
 
     if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "UNAUTHORIZED", "message": "Token requis"},
-        )
+        raise unauthorized("UNAUTHORIZED", "Token requis")
     token = authorization.removeprefix("Bearer ")
     try:
         payload = decode_token(token)
         if payload.get("type") != "access":
             raise JWTError("Not an access token")
     except JWTError:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "TOKEN_EXPIRED", "message": "Token invalide ou expiré"},
-        ) from None
+        raise unauthorized("TOKEN_EXPIRED", "Token invalide ou expiré") from None
     user_id = payload.get("sub")
     if not user_id:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "UNAUTHORIZED", "message": "Token invalide"},
-        )
+        raise unauthorized("UNAUTHORIZED", "Token invalide")
     try:
         user_uuid = uuid.UUID(user_id)
     except ValueError:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "UNAUTHORIZED", "message": "Token invalide"},
-        ) from None
+        raise unauthorized("UNAUTHORIZED", "Token invalide") from None
     user = await db.get(User, user_uuid)
     if not user:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "USER_NOT_FOUND", "message": "Utilisateur introuvable"},
-        )
+        raise unauthorized("USER_NOT_FOUND", "Utilisateur introuvable")
     request.state.user_id = str(user.id)
     return user
 
@@ -153,8 +137,5 @@ async def get_current_user_short_session(
 async def require_subscription(user=Depends(get_current_user)):
     """Guard FR42 : vérifie is_subscribed OR is_beta avant tout appel Claude."""
     if not (user.is_subscribed or user.is_beta):
-        raise HTTPException(
-            status_code=403,
-            detail={"code": "SUBSCRIPTION_REQUIRED", "message": "Abonnement actif requis"},
-        )
+        raise forbidden("SUBSCRIPTION_REQUIRED", "Abonnement actif requis")
     return user

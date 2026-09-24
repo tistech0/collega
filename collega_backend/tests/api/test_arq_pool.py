@@ -6,7 +6,8 @@ import types
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from fastapi import HTTPException
+
+from app.core.errors import AppError
 
 
 @pytest.fixture
@@ -91,7 +92,7 @@ class TestGetArq:
 
         request = _request(arq=None, arq_connect=AsyncMock(return_value=None))
 
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(AppError) as exc:
             await get_arq(request)
         assert exc.value.status_code == 503
         assert exc.value.detail["code"] == "QUEUE_UNAVAILABLE"
@@ -99,7 +100,7 @@ class TestGetArq:
     async def test_sans_lifespan_503(self):
         from app.deps import get_arq
 
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(AppError) as exc:
             await get_arq(_request())
         assert exc.value.status_code == 503
 

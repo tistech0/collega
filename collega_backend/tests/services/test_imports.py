@@ -7,10 +7,11 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from fastapi import HTTPException, UploadFile
+from fastapi import UploadFile
 from sqlalchemy import func, select
 from starlette.datastructures import Headers
 
+from app.core.errors import AppError
 from app.models.generation_job import GenerationJob
 from app.services import imports
 from tests.factories import make_college, make_user
@@ -29,7 +30,7 @@ class TestSaveUpload:
 
     async def test_magic_invalide_422_et_aucun_fichier(self, tmp_path):
         dest = tmp_path / "a.pdf"
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(AppError) as exc:
             await imports.save_upload(_upload(b"PK\x03\x04 pas un pdf"), dest, max_size=None)
         assert exc.value.status_code == 422
         assert exc.value.detail["code"] == "INVALID_FILE_TYPE"
@@ -37,7 +38,7 @@ class TestSaveUpload:
 
     async def test_type_invalide_422(self, tmp_path):
         dest = tmp_path / "a.pdf"
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(AppError) as exc:
             await imports.save_upload(
                 _upload(b"%PDF-1.4", filename="a.txt", content_type="text/plain"), dest, max_size=None
             )
@@ -48,7 +49,7 @@ class TestSaveUpload:
     async def test_taille_depassee_413_et_fichier_supprime(self, tmp_path):
         dest = tmp_path / "a.pdf"
         content = b"%PDF-1.4 " + b"x" * (3 * 1024 * 1024)
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(AppError) as exc:
             await imports.save_upload(_upload(content), dest, max_size=2 * 1024 * 1024)
         assert exc.value.status_code == 413
         assert exc.value.detail["code"] == "FILE_TOO_LARGE"
@@ -81,7 +82,7 @@ class TestCreateJobAndEnqueue:
         arq = MagicMock()
         arq.enqueue_job = AsyncMock(side_effect=ConnectionError("redis down"))
 
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(AppError) as exc:
             await imports.create_job_and_enqueue(
                 sqlite_session, arq, college=college, user_id=user.id, job_id=uuid.uuid4(), pdf_path=pdf
             )
@@ -99,7 +100,7 @@ class TestAssertNoActiveJob:
         college = await make_college(sqlite_session, user)
         sqlite_session.add(GenerationJob(college_id=college.id, user_id=user.id, status="ocr_complete"))
         await sqlite_session.flush()
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(AppError) as exc:
             await imports.assert_no_active_job(sqlite_session, college)
         assert (exc.value.status_code, exc.value.detail["code"]) == (409, "JOB_IN_PROGRESS")
 
@@ -115,6 +116,6 @@ def test_validate_ref_id():
     imports.validate_ref_id(1)
     imports.validate_ref_id(39)
     for bad in (0, 40):
-        with pytest.raises(HTTPException) as exc:
+        with pytest.raises(AppError) as exc:
             imports.validate_ref_id(bad)
         assert exc.value.detail["code"] == "INVALID_REF_ID"

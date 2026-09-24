@@ -7,13 +7,14 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy import update as sa_update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.errors import conflict, not_found
 from app.core.security import hash_password
 from app.deps import get_admin_user
 from app.models.college import College
@@ -73,10 +74,7 @@ async def update_user_beta(
     """Active ou désactive le flag is_beta pour un utilisateur."""
     user = await db.get(User, user_id)
     if user is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "USER_NOT_FOUND", "message": f"User {user_id} not found"},
-        )
+        raise not_found("USER_NOT_FOUND", f"User {user_id} not found")
     user.is_beta = body.is_beta
     await db.commit()
     _, monthly_reloads_max = await app_settings.anti_spam_limits(db)
@@ -120,10 +118,7 @@ async def create_user(
         await db.commit()
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "EMAIL_ALREADY_EXISTS", "message": "Un compte avec cet email existe déjà."},
-        ) from None
+        raise conflict("EMAIL_ALREADY_EXISTS", "Un compte avec cet email existe déjà.") from None
     # Invariants d'un compte neuf : jamais abonné (RevenueCat le posera plus tard),
     # quota vierge. Pas de relecture nécessaire.
     _, monthly_reloads_max = await app_settings.anti_spam_limits(db)
@@ -153,10 +148,7 @@ async def reset_user_quota(
     """
     user = await db.get(User, user_id)
     if user is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "USER_NOT_FOUND", "message": f"User {user_id} not found"},
-        )
+        raise not_found("USER_NOT_FOUND", f"User {user_id} not found")
     # UPDATE atomique (pattern Story 7.2) : évite tout lost-update vs un réimport
     # concurrent qui incrémente monthly_reloads entre le read et le commit.
     # La réponse est construite à partir des valeurs connues post-reset
@@ -185,10 +177,7 @@ async def get_user_detail(
     """Détail d'un utilisateur : champs + ses collèges + ses generation_jobs."""
     user = await db.get(User, user_id)
     if user is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "USER_NOT_FOUND", "message": f"User {user_id} not found"},
-        )
+        raise not_found("USER_NOT_FOUND", f"User {user_id} not found")
 
     colleges_result = await db.execute(
         select(College).where(College.user_id == user_id).order_by(College.created_at.desc())

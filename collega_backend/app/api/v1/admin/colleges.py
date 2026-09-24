@@ -9,11 +9,12 @@ import logging
 import uuid
 
 from arq.connections import ArqRedis
-from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile
+from fastapi import APIRouter, Depends, Response, UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.errors import conflict, not_found
 from app.deps import get_admin_user, get_arq
 from app.models.college import College
 from app.models.flash_card import FlashCard
@@ -54,10 +55,7 @@ async def create_college(
     """Crée un nouveau collège pour un utilisateur existant."""
     user = await db.get(User, uuid.UUID(body.user_id))
     if user is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "USER_NOT_FOUND", "message": f"User {body.user_id} not found"},
-        )
+        raise not_found("USER_NOT_FOUND", f"User {body.user_id} not found")
     college = College(user_id=user.id, college_ref_id=body.college_ref_id)
     db.add(college)
     await db.commit()
@@ -91,10 +89,7 @@ async def process_college(
     # Valider que le college existe
     college = await db.get(College, college_id)
     if college is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", f"College {college_id} not found")
 
     await imports.assert_no_active_job(db, college)
 
@@ -121,10 +116,7 @@ async def get_college_status(
     """Retourne le statut OCR du college avec la progression par page."""
     college = await db.get(College, college_id)
     if college is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", f"College {college_id} not found")
 
     # Récupérer le dernier job
     latest_job_result = await db.execute(
@@ -157,10 +149,7 @@ async def get_college_stats(
     """Statistiques fiches par rang, scores OCR et hash-sharing pour un collège."""
     college = await db.get(College, college_id)
     if college is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", f"College {college_id} not found")
 
     # Compter les fiches par rang
     card_counts_result = await db.execute(
@@ -255,10 +244,7 @@ async def delete_college(
     """
     college = await db.get(College, college_id)
     if college is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", f"College {college_id} not found")
 
     # Garde-fou symétrique au verrou de process_college (review 7.7 D3) : refuser
     # la suppression si un job est encore actif, sinon le worker en cours
@@ -270,13 +256,7 @@ async def delete_college(
         .where(GenerationJob.status.in_(imports.ACTIVE_JOB_STATUSES))
     )
     if active_job.scalar_one_or_none() is not None:
-        raise HTTPException(
-            status_code=409,
-            detail={
-                "code": "JOB_ACTIVE",
-                "message": "An active job exists for this college — stop the import before deleting",
-            },
-        )
+        raise conflict("JOB_ACTIVE", "An active job exists for this college — stop the import before deleting")
 
     await db.delete(college)
     await db.commit()
@@ -309,10 +289,7 @@ async def get_college_cards(
     """
     college = await db.get(College, college_id)
     if college is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", f"College {college_id} not found")
 
     result = await db.execute(
         select(FlashCard, Item.item_number)
@@ -349,10 +326,7 @@ async def get_college_feedback(
     """
     college = await db.get(College, college_id)
     if college is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", f"College {college_id} not found")
 
     result = await db.execute(
         select(FlashCard, Item.item_number, User.email)

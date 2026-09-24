@@ -6,12 +6,13 @@ import asyncio
 import json
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import async_session_factory, get_db
+from app.core.errors import not_found
 from app.deps import get_current_user, get_current_user_short_session
 from app.models.college import College
 from app.models.generation_job import GenerationJob
@@ -43,10 +44,7 @@ async def get_college_status(
     """Retourne le statut OCR d'un collège appartenant à l'utilisateur."""
     college = await db.get(College, college_id)
     if college is None or college.user_id != current_user.id:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", f"College {college_id} not found")
 
     latest_job = await _latest_job(db, college_id)
     return CollegeStatusResponseWrapped(data=_status_data(college, latest_job))
@@ -128,10 +126,7 @@ async def stream_college_progress(
     async with async_session_factory() as session:
         college = await session.get(College, college_id)
     if college is None or college.user_id != current_user.id:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", f"College {college_id} not found")
 
     async def event_generator():  # type: ignore[return]
         last_progress = -1

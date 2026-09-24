@@ -282,9 +282,9 @@ class TestComplete:
 
         async def failing_start(db, arq, u, ref_id, pdf_file_path, limits):
             pdf_file_path.unlink(missing_ok=True)
-            from fastapi import HTTPException
+            from app.core.errors import AppError
 
-            raise HTTPException(status_code=503, detail={"code": "QUEUE_UNAVAILABLE", "message": "x"})
+            raise AppError(503, "QUEUE_UNAVAILABLE", "x")
 
         monkeypatch.setattr("app.services.imports.start_import_from_file", failing_start)
         resp = await client.post(f"/v1/colleges/import/{st.upload_id}/complete")

@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.errors import conflict, not_found
 from app.deps import get_current_user
 from app.models.college import College
 from app.models.flash_card import FlashCard
@@ -33,15 +34,9 @@ async def list_college_items(
     """Retourne tous les items d'un collège dont la génération est terminée."""
     college = await db.get(College, college_id)
     if college is None or college.user_id != current_user.id:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": "College not found"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", "College not found")
     if college.status != "generation_complete":
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "GENERATION_NOT_COMPLETE", "message": "Generation not yet complete"},
-        )
+        raise conflict("GENERATION_NOT_COMPLETE", "Generation not yet complete")
 
     items_result = await db.execute(select(Item).where(Item.college_id == college_id).order_by(Item.item_number))
     items = items_result.scalars().all()
@@ -89,15 +84,9 @@ async def list_college_cards(
     """
     college = await db.get(College, college_id)
     if college is None or college.user_id != current_user.id:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": "College not found"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", "College not found")
     if college.status != "generation_complete":
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "GENERATION_NOT_COMPLETE", "message": "Generation not yet complete"},
-        )
+        raise conflict("GENERATION_NOT_COMPLETE", "Generation not yet complete")
 
     cards_result = await db.execute(
         select(FlashCard)
@@ -132,22 +121,13 @@ async def list_item_cards(
     """Retourne toutes les flashcards d'un item, triées rang ASC puis card_type ASC."""
     college = await db.get(College, college_id)
     if college is None or college.user_id != current_user.id:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "COLLEGE_NOT_FOUND", "message": "College not found"},
-        )
+        raise not_found("COLLEGE_NOT_FOUND", "College not found")
     if college.status != "generation_complete":
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "GENERATION_NOT_COMPLETE", "message": "Generation not yet complete"},
-        )
+        raise conflict("GENERATION_NOT_COMPLETE", "Generation not yet complete")
 
     item = await db.get(Item, item_id)
     if item is None or item.college_id != college_id:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "ITEM_NOT_FOUND", "message": "Item not found"},
-        )
+        raise not_found("ITEM_NOT_FOUND", "Item not found")
 
     cards_result = await db.execute(
         select(FlashCard).where(FlashCard.item_id == item_id).order_by(FlashCard.rang, FlashCard.card_type)

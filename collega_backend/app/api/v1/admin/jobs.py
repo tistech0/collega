@@ -9,11 +9,12 @@ import uuid
 from datetime import UTC, datetime
 
 from arq.connections import ArqRedis
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import async_session_factory, get_db
+from app.core.errors import conflict, not_found
 from app.deps import get_admin_user, get_arq_optional
 from app.models.college import College
 from app.models.generation_job import GenerationJob
@@ -92,10 +93,7 @@ async def get_job_detail(
     """
     job = await db.get(GenerationJob, job_id)
     if job is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "JOB_NOT_FOUND", "message": f"Job {job_id} not found"},
-        )
+        raise not_found("JOB_NOT_FOUND", f"Job {job_id} not found")
 
     college = await db.get(College, job.college_id)
 
@@ -165,15 +163,9 @@ async def stop_job(
     """
     job = await db.get(GenerationJob, job_id)
     if job is None:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "JOB_NOT_FOUND", "message": f"Job {job_id} not found"},
-        )
+        raise not_found("JOB_NOT_FOUND", f"Job {job_id} not found")
     if job.status not in imports.ACTIVE_JOB_STATUSES:
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "JOB_NOT_ACTIVE", "message": "Job is not active — nothing to cancel"},
-        )
+        raise conflict("JOB_NOT_ACTIVE", "Job is not active — nothing to cancel")
 
     # Abort ARQ best-effort. L'arq_job_id pointe toujours sur le job ARQ actif
     # (OCR puis génération, cf. fix persistance dans ocr_worker). On REMONTE le

@@ -10,8 +10,7 @@ import asyncio
 import logging
 from pathlib import Path
 
-from fastapi import HTTPException
-
+from app.core.errors import AppError, unprocessable
 from app.services.ocr.ocr_processor import OcrProcessor
 
 logger = logging.getLogger(__name__)
@@ -19,8 +18,8 @@ logger = logging.getLogger(__name__)
 PDF_DAMAGED_MESSAGE = "Ce PDF est endommagé : il ne s'ouvre pas. Réessaie avec une autre copie."
 
 
-def pdf_damaged() -> HTTPException:
-    return HTTPException(status_code=422, detail={"code": "PDF_DAMAGED", "message": PDF_DAMAGED_MESSAGE})
+def pdf_damaged() -> AppError:
+    return unprocessable("PDF_DAMAGED", PDF_DAMAGED_MESSAGE)
 
 
 async def assert_pdf_readable(path: Path) -> int:

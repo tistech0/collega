@@ -3,10 +3,11 @@ import logging
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.errors import forbidden, unauthorized
 from app.core.limiter import limiter
 from app.core.security import (
     JWTError,
@@ -27,10 +28,7 @@ router = APIRouter(tags=["auth"])
 
 @router.post("/register", status_code=200)
 async def register(body: RegisterRequest):
-    raise HTTPException(
-        status_code=403,
-        detail={"code": "REGISTRATION_DISABLED", "message": "Les inscriptions sont fermées."},
-    )
+    raise forbidden("REGISTRATION_DISABLED", "Les inscriptions sont fermées.")
 
 
 @router.post("/login")
@@ -43,10 +41,7 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
     user = result.scalar_one_or_none()
 
     if user is None or not verify_password(body.password, user.hashed_password):
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "INVALID_CREDENTIALS", "message": "Identifiants incorrects"},
-        )
+        raise unauthorized("INVALID_CREDENTIALS", "Identifiants incorrects")
 
     token_response = TokenResponse(
         access_token=create_access_token(str(user.id)),
@@ -64,30 +59,18 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
         if payload.get("type") != "refresh":
             raise JWTError("Not a refresh token")
     except JWTError:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "TOKEN_EXPIRED", "message": "Refresh token invalide ou expiré"},
-        ) from None
+        raise unauthorized("TOKEN_EXPIRED", "Refresh token invalide ou expiré") from None
 
     user_id = payload.get("sub")
     if not user_id:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "TOKEN_EXPIRED", "message": "Refresh token invalide ou expiré"},
-        )
+        raise unauthorized("TOKEN_EXPIRED", "Refresh token invalide ou expiré")
     try:
         user_uuid = uuid.UUID(user_id)
     except ValueError:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "TOKEN_EXPIRED", "message": "Refresh token invalide ou expiré"},
-        ) from None
+        raise unauthorized("TOKEN_EXPIRED", "Refresh token invalide ou expiré") from None
     user = await db.get(User, user_uuid)
     if not user:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "USER_NOT_FOUND", "message": "Utilisateur introuvable"},
-        )
+        raise unauthorized("USER_NOT_FOUND", "Utilisateur introuvable")
 
     token_response = TokenResponse(
         access_token=create_access_token(str(user.id)),

@@ -14,13 +14,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from arq.connections import ArqRedis
-from fastapi import HTTPException, UploadFile
+from fastapi import UploadFile
 from sqlalchemy import select
 from sqlalchemy import update as sa_update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.errors import AppError, conflict, unprocessable
 from app.core.time_utils import next_month_reset
 from app.models.college import College
 from app.models.generation_job import GenerationJob
@@ -39,51 +40,39 @@ _CHUNK_SIZE = 1024 * 1024  # 1 MB — le PDF n'est jamais chargé entier en mém
 # ── Erreurs ──────────────────────────────────────────────────────────────────
 
 
-def job_in_progress() -> HTTPException:
-    return HTTPException(
-        status_code=409,
-        detail={"code": "JOB_IN_PROGRESS", "message": "Un import est déjà en cours pour ce collège"},
-    )
+def job_in_progress() -> AppError:
+    return conflict("JOB_IN_PROGRESS", "Un import est déjà en cours pour ce collège")
 
 
-def _invalid_file_type(message: str) -> HTTPException:
-    return HTTPException(status_code=422, detail={"code": "INVALID_FILE_TYPE", "message": message})
+def _invalid_file_type(message: str) -> AppError:
+    return unprocessable("INVALID_FILE_TYPE", message)
 
 
-def invalid_pdf_signature() -> HTTPException:
+def invalid_pdf_signature() -> AppError:
     return _invalid_file_type("Le fichier ne semble pas être un PDF valide")
 
 
-def file_too_large() -> HTTPException:
-    return HTTPException(
-        status_code=413,
-        detail={"code": "FILE_TOO_LARGE", "message": "Le PDF ne doit pas dépasser 500 MB"},
+def file_too_large() -> AppError:
+    return AppError(413, "FILE_TOO_LARGE", "Le PDF ne doit pas dépasser 500 MB")
+
+
+def _college_reload_limit(college: College, reload_count_max: int) -> AppError:
+    return conflict(
+        "COLLEGE_RELOAD_LIMIT",
+        f"Ce collège ne peut plus être retraité (limite : {reload_count_max})",
+        reload_count=college.reload_count,
+        reload_count_max=reload_count_max,
     )
 
 
-def _college_reload_limit(college: College, reload_count_max: int) -> HTTPException:
-    return HTTPException(
-        status_code=409,
-        detail={
-            "code": "COLLEGE_RELOAD_LIMIT",
-            "message": f"Ce collège ne peut plus être retraité (limite : {reload_count_max})",
-            "reload_count": college.reload_count,
-            "reload_count_max": reload_count_max,
-        },
-    )
-
-
-def _monthly_reload_limit(user: User, now: datetime, monthly_reloads_max: int) -> HTTPException:
+def _monthly_reload_limit(user: User, now: datetime, monthly_reloads_max: int) -> AppError:
     reset_at = user.monthly_reloads_reset_at or next_month_reset(now)
-    return HTTPException(
-        status_code=409,
-        detail={
-            "code": "MONTHLY_RELOAD_LIMIT",
-            "message": f"Limite mensuelle atteinte ({monthly_reloads_max} reimports/mois)",
-            "monthly_reloads": user.monthly_reloads,
-            "monthly_max": monthly_reloads_max,
-            "reset_at": reset_at.isoformat(),
-        },
+    return conflict(
+        "MONTHLY_RELOAD_LIMIT",
+        f"Limite mensuelle atteinte ({monthly_reloads_max} reimports/mois)",
+        monthly_reloads=user.monthly_reloads,
+        monthly_max=monthly_reloads_max,
+        reset_at=reset_at.isoformat(),
     )
 
 
@@ -92,10 +81,7 @@ def _monthly_reload_limit(user: User, now: datetime, monthly_reloads_max: int) -
 
 def validate_ref_id(ref_id: int) -> None:
     if not (1 <= ref_id <= 39):
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "INVALID_REF_ID", "message": "ref_id must be between 1 and 39"},
-        )
+        raise unprocessable("INVALID_REF_ID", "ref_id must be between 1 and 39")
 
 
 async def _select_college(db: AsyncSession, user: User, ref_id: int) -> College | None:
@@ -173,7 +159,7 @@ async def apply_reimport_quota(db: AsyncSession, user: User, college: College, l
 async def assert_import_allowed(db: AsyncSession, user: User, ref_id: int, limits: tuple[int, int]) -> College | None:
     """Gardes d'import en lecture seule (aucune écriture) — utilisées par POST /import/init
     (morceaux) avant de recevoir le moindre octet. Renvoie le College existant ou None.
-    Lève les mêmes HTTPException que le chemin d'import (422 INVALID_REF_ID, 409 JOB_IN_PROGRESS,
+    Lève les mêmes AppError que le chemin d'import (422 INVALID_REF_ID, 409 JOB_IN_PROGRESS,
     409 COLLEGE_RELOAD_LIMIT / MONTHLY_RELOAD_LIMIT) ; le quota réel est consommé à `complete`."""
     validate_ref_id(ref_id)
     college = await _select_college(db, user, ref_id)
@@ -270,10 +256,7 @@ async def create_job_and_enqueue(
         await db.delete(job)
         await db.commit()
         pdf_path.unlink(missing_ok=True)
-        raise HTTPException(
-            status_code=503,
-            detail={"code": "QUEUE_UNAVAILABLE", "message": "Impossible d'enqueuer le job OCR — réessayez"},
-        ) from exc
+        raise AppError(503, "QUEUE_UNAVAILABLE", "Impossible d'enqueuer le job OCR — réessayez") from exc
     return job
 
 
@@ -287,7 +270,7 @@ async def start_import_from_file(
         college = await get_or_create_college(db, user, ref_id)
         await assert_no_active_job(db, college)
         await apply_reimport_quota(db, user, college, limits)
-    except HTTPException:
+    except AppError:
         pdf_path.unlink(missing_ok=True)
         raise
 

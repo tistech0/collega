@@ -5,10 +5,11 @@ from __future__ import annotations
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.errors import AppError, conflict, not_found, unprocessable
 from app.core.limiter import limiter
 from app.deps import require_subscription
 from app.models.flash_card import FlashCard
@@ -33,10 +34,7 @@ async def _get_card_for_user(
 ) -> FlashCard:
     card = await db.get(FlashCard, card_id)
     if card is None or card.user_id != current_user.id:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "CARD_NOT_FOUND", "message": "Fiche introuvable"},
-        )
+        raise not_found("CARD_NOT_FOUND", "Fiche introuvable")
     return card
 
 
@@ -77,28 +75,19 @@ async def regenerate_card(
 
     item = await db.get(Item, card.item_id)
     if item is None:
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "ITEM_NOT_FOUND", "message": "Item source introuvable"},
-        )
+        raise unprocessable("ITEM_NOT_FOUND", "Item source introuvable")
 
     source_text = await store.get_item_text(db, item.text_hash) if item.text_hash else None
     if not source_text:
-        raise HTTPException(
-            status_code=409,
-            detail={
-                "code": "SOURCE_UNAVAILABLE",
-                "message": "Le texte source de cet item n'est pas disponible : réimporte le PDF pour pouvoir régénérer.",
-            },
+        raise conflict(
+            "SOURCE_UNAVAILABLE",
+            "Le texte source de cet item n'est pas disponible : réimporte le PDF pour pouvoir régénérer.",
         )
 
     claude = ClaudeClient()
     new_card_data = await claude.regenerate_single_card(card, item, source_text, body.user_note)
     if new_card_data is None:
-        raise HTTPException(
-            status_code=503,
-            detail={"code": "REGENERATION_FAILED", "message": "Régénération échouée"},
-        )
+        raise AppError(503, "REGENERATION_FAILED", "Régénération échouée")
 
     # P1: card_type n'est PAS modifié — anti-pattern spec ("NE PAS modifier card_type")
     card.recto = new_card_data.recto
