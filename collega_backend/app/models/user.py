@@ -32,6 +32,9 @@ class User(Base):
     )
     apns_token: Mapped[str | None] = mapped_column(String(512), nullable=True)
     reminder_hour_utc: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Incrémentée pour révoquer tous les jetons émis (réutilisation d'un refresh,
+    # mot de passe réinitialisé) : un jeton dont `tv` est inférieur est refusé.
+    token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

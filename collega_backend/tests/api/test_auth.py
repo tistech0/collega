@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from httpx import AsyncClient
 
-from app.core.security import create_access_token, create_refresh_token, hash_password
+from app.core.security import create_access_token, create_refresh_token, decode_token, hash_password
 from app.deps import get_current_user
 from app.main import app
 
@@ -26,6 +26,7 @@ def make_user(
     with_password=True,
     monthly_reloads_reset_at=None,
     reminder_hour_utc=None,
+    token_version=0,
 ):
     uid = user_id or uuid.uuid4()
     hashed = hash_password("password123") if with_password else "not-used"
@@ -41,6 +42,7 @@ def make_user(
         monthly_reloads=monthly_reloads,
         monthly_reloads_reset_at=monthly_reloads_reset_at,
         reminder_hour_utc=reminder_hour_utc,
+        token_version=token_version,
     )
 
 
@@ -76,6 +78,16 @@ class TestLogin:
         body = resp.json()
         assert "access_token" in body["data"]
         assert "refresh_token" in body["data"]
+
+    async def test_login_emet_la_token_version_courante(self, client: AsyncClient, mock_db):
+        user = make_user(token_version=4)
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=user)))
+
+        resp = await client.post("/v1/auth/login", json={"email": user.email, "password": "password123"})
+        assert resp.status_code == 200
+        data = resp.json()["data"]
+        assert decode_token(data["access_token"])["tv"] == 4
+        assert decode_token(data["refresh_token"])["tv"] == 4
 
     async def test_login_wrong_password(self, client: AsyncClient, mock_db):
         user = make_user()
@@ -114,6 +126,26 @@ class TestRefresh:
         assert "access_token" in body["data"]
         assert body["data"]["refresh_token"] == refresh_token
 
+    async def test_refresh_emet_la_token_version_courante(self, client: AsyncClient, mock_db):
+        user = make_user(token_version=2)
+        mock_db.get = AsyncMock(return_value=user)
+
+        resp = await client.post(
+            "/v1/auth/refresh", json={"refresh_token": create_refresh_token(str(user.id), token_version=2)}
+        )
+        assert resp.status_code == 200
+        assert decode_token(resp.json()["data"]["access_token"])["tv"] == 2
+
+    async def test_refresh_tv_perime_refuse(self, client: AsyncClient, mock_db):
+        user = make_user(token_version=2)
+        mock_db.get = AsyncMock(return_value=user)
+
+        resp = await client.post(
+            "/v1/auth/refresh", json={"refresh_token": create_refresh_token(str(user.id), token_version=1)}
+        )
+        assert resp.status_code == 401
+        assert resp.json()["detail"]["code"] == "TOKEN_REVOKED"
+
     async def test_refresh_invalid_token(self, client: AsyncClient, mock_db):
         resp = await client.post(
             "/v1/auth/refresh",
@@ -138,6 +170,59 @@ class TestGetCurrentUser:
     async def test_unauthorized_without_token(self, client: AsyncClient, mock_db):
         resp = await client.get("/v1/auth/me")
         assert resp.status_code == 401
+
+    async def test_tv_perime_renvoie_token_revoked(self, client: AsyncClient, mock_db):
+        user = make_user(with_password=False, token_version=2)
+        mock_db.get = AsyncMock(return_value=user)
+        token = create_access_token(str(user.id), token_version=1)
+
+        resp = await client.get("/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+        assert resp.status_code == 401
+        assert resp.json()["detail"]["code"] == "TOKEN_REVOKED"
+
+    async def test_jeton_sans_tv_accepte_si_version_0_refuse_sinon(self):
+        """Transition : un jeton émis avant le chantier 2 (sans `tv`) passe tant que version == 0."""
+        import jwt
+        import pytest
+        from fastapi import Request
+
+        from app.core.config import settings
+        from app.core.errors import AppError
+
+        user = make_user(with_password=False, token_version=0)
+        db = MagicMock(get=AsyncMock(return_value=user))
+        legacy = jwt.encode(
+            {"sub": str(user.id), "type": "access", "exp": datetime.now(UTC) + timedelta(minutes=5)},
+            settings.secret_key,
+            algorithm="HS256",
+        )
+        request = Request({"type": "http", "headers": [], "state": {}})
+        assert await get_current_user(request, f"Bearer {legacy}", db) is user
+
+        user.token_version = 1
+        with pytest.raises(AppError) as exc:
+            await get_current_user(request, f"Bearer {legacy}", db)
+        assert exc.value.status_code == 401
+        assert exc.value.code == "TOKEN_REVOKED"
+
+    async def test_short_session_applique_aussi_tv(self):
+        import pytest
+        from fastapi import Request
+
+        from app.core.errors import AppError
+        from app.deps import get_current_user_short_session
+
+        user = make_user(with_password=False, token_version=3)
+        session = MagicMock(get=AsyncMock(return_value=user))
+        factory = MagicMock()
+        factory.return_value.__aenter__ = AsyncMock(return_value=session)
+        factory.return_value.__aexit__ = AsyncMock(return_value=False)
+        token = create_access_token(str(user.id), token_version=2)
+        request = Request({"type": "http", "headers": [], "state": {}})
+        with patch("app.core.database.async_session_factory", factory), pytest.raises(AppError) as exc:
+            await get_current_user_short_session(request, f"Bearer {token}")
+        assert exc.value.status_code == 401
+        assert exc.value.code == "TOKEN_REVOKED"
 
     async def test_beta_user_flag_in_token_response(self, client: AsyncClient, mock_db):
         user = make_user(is_beta=True)

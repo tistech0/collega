@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.errors import AppError, forbidden, unauthorized
-from app.core.security import JWTError, decode_token
+from app.core.security import JWTError, decode_token, token_version_ok
 
 _http_basic = HTTPBasic()
 
@@ -114,6 +114,8 @@ async def get_current_user(
     user = await db.get(User, user_uuid)
     if not user:
         raise unauthorized("USER_NOT_FOUND", "Utilisateur introuvable")
+    if not token_version_ok(payload, user.token_version):
+        raise unauthorized("TOKEN_REVOKED", "Session révoquée — reconnectez-vous")
     request.state.user_id = str(user.id)
     return user
 

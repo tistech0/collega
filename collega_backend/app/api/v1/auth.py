@@ -14,6 +14,7 @@ from app.core.security import (
     create_access_token,
     create_refresh_token,
     decode_token,
+    token_version_ok,
     verify_password,
 )
 from app.core.time_utils import next_month_reset
@@ -46,8 +47,8 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
         raise unauthorized("INVALID_CREDENTIALS", "Identifiants incorrects")
 
     token_response = TokenResponse(
-        access_token=create_access_token(str(user.id)),
-        refresh_token=create_refresh_token(str(user.id)),
+        access_token=create_access_token(str(user.id), user.token_version),
+        refresh_token=create_refresh_token(str(user.id), user.token_version),
         is_beta=user.is_beta,
         is_subscribed=user.is_subscribed,
     )
@@ -73,9 +74,11 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
     user = await db.get(User, user_uuid)
     if not user:
         raise unauthorized("USER_NOT_FOUND", "Utilisateur introuvable")
+    if not token_version_ok(payload, user.token_version):
+        raise unauthorized("TOKEN_REVOKED", "Session révoquée — reconnectez-vous")
 
     token_response = TokenResponse(
-        access_token=create_access_token(str(user.id)),
+        access_token=create_access_token(str(user.id), user.token_version),
         refresh_token=body.refresh_token,
         is_beta=user.is_beta,
         is_subscribed=user.is_subscribed,
