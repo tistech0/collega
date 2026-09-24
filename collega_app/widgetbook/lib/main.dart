@@ -6,6 +6,7 @@ import 'package:collega_app/core/ui/theme/cg_theme.dart';
 
 import 'use_cases/cg_badge_use_cases.dart';
 import 'use_cases/cg_button_use_cases.dart';
+import 'use_cases/cg_card_type_tag_use_cases.dart';
 import 'use_cases/cg_drill_card_use_cases.dart';
 import 'use_cases/cg_field_use_cases.dart';
 import 'use_cases/cg_header_use_cases.dart';
@@ -56,6 +57,7 @@ class CollegaWidgetbook extends StatelessWidget {
           children: [
             cgBadgeComponent,
             cgButtonComponent,
+            cgCardTypeTagComponent,
             cgDrillCardComponent,
             cgFieldComponent,
             cgHeaderComponent,

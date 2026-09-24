@@ -191,6 +191,8 @@ class _DrillActiveState extends ConsumerState<_DrillActive> {
         question: card.recto,
         answer: card.verso,
         rank: card.rang,
+        // Cas clinique : se révise comme une classique (retournement), seule l'étiquette change.
+        cardType: CgCardType.parse(card.cardType),
         collegeName: collegeName,
         index: session.currentQueuePos + 1,
         total: session.queue.length,

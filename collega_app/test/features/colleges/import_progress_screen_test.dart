@@ -147,6 +147,43 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 3));
   });
 
+  testWidgets('premier import avec items insuffisants : la liste en toast, pas « N nouveaux »', (tester) async {
+    _phone(tester);
+    _Import.initial = _generating;
+    final visited = <String>[];
+    await tester.pumpWidget(_app(visited: visited));
+    await tester.pumpAndSettle();
+    _notifier(tester).emit(const ImportComplete(
+      collegeId: 'c3',
+      summary: ImportSummary(changed: 0, added: 40, removed: 0, unchanged: 0, quotaRefunded: false,
+          reimport: false, insufficientItems: [215, 230]),
+    ));
+    await tester.pump();
+    expect(visited, ['/colleges/3']);
+    expect(find.text('Pas assez de contenu : items 215, 230'), findsOneWidget);
+    expect(find.textContaining('nouveaux'), findsNothing);
+    // Affiché plus longtemps qu'un toast ordinaire (le temps de lire les numéros).
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.text('Pas assez de contenu : items 215, 230'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+  });
+
+  testWidgets('premier import sans rien à signaler : pas de toast', (tester) async {
+    _phone(tester);
+    _Import.initial = _generating;
+    final visited = <String>[];
+    await tester.pumpWidget(_app(visited: visited));
+    await tester.pumpAndSettle();
+    _notifier(tester).emit(const ImportComplete(
+      collegeId: 'c3',
+      summary: ImportSummary(changed: 0, added: 40, removed: 0, unchanged: 0, quotaRefunded: false, reimport: false),
+    ));
+    await tester.pump();
+    expect(visited, ['/colleges/3']);
+    expect(find.byType(CgToastCapsule), findsNothing);
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('réimport en échec confirmé par le serveur : fiches actuelles intactes', (tester) async {
     _phone(tester);
     _Import.initial = _generating;

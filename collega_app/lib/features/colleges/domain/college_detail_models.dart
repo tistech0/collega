@@ -136,3 +136,21 @@ class CollegeDetailError extends CollegeDetailState {
   const CollegeDetailError({required this.message});
   final String message;
 }
+
+/// Ordre des types dans la liste des fiches (chantier 4 § 7) : classique, cas
+/// clinique, définition ; un type inconnu se range avec les classiques.
+const _cardTypeOrder = {'classique': 0, 'cas_clinique': 1, 'definition': 2};
+const _rangOrder = {'A': 0, 'B': 1, 'C': 2};
+
+/// Fiches d'un item dans l'ordre d'affichage : par type, puis par rang de la fiche ;
+/// à égalité, l'ordre reçu est gardé.
+List<FlashCardModel> sortCardsForList(List<FlashCardModel> cards) {
+  final indexed = [for (var i = 0; i < cards.length; i++) (i, cards[i])];
+  indexed.sort((a, b) {
+    final byType = (_cardTypeOrder[a.$2.cardType] ?? 0).compareTo(_cardTypeOrder[b.$2.cardType] ?? 0);
+    if (byType != 0) return byType;
+    final byRang = (_rangOrder[a.$2.rang] ?? 3).compareTo(_rangOrder[b.$2.rang] ?? 3);
+    return byRang != 0 ? byRang : a.$1.compareTo(b.$1);
+  });
+  return [for (final (_, card) in indexed) card];
+}

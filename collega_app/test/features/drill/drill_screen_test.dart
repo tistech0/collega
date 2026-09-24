@@ -143,6 +143,38 @@ void main() {
       expect(find.byType(CgTabBar), findsNothing);
     });
 
+    testWidgets('rang affiché = rang de la fiche ; classique : aucune étiquette de type', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0, rang: 'B')])));
+      await tester.pumpAndSettle();
+      expect(find.text('Rang B'), findsOneWidget);
+      expect(find.text('Cas clinique'), findsNothing);
+      expect(find.text('Définition'), findsNothing);
+    });
+
+    testWidgets('cas clinique : étiquette « Cas clinique », se retourne comme une classique', (tester) async {
+      _phone(tester);
+      final repo = _Repo([_card(0, type: 'cas_clinique', rang: 'B'), _card(1)]);
+      await tester.pumpWidget(_app(repo));
+      await tester.pumpAndSettle();
+      expect(find.text('Cas clinique'), findsOneWidget);
+      expect(find.text('Rang B'), findsOneWidget);
+      // Pas de champ de saisie (mode définition) : un tap retourne la carte.
+      expect(find.byType(CgField), findsNothing);
+      await _flip(tester);
+      expect(find.text('Réponse 0.'), findsOneWidget);
+      await tester.tap(find.byKey(CgVerdictBar.buttonKey(CgVerdict.mastered)));
+      await tester.pumpAndSettle();
+      expect(repo.updated['card-0'], DrillEvaluationResult.maitrise);
+    });
+
+    testWidgets('définition : étiquette « Définition » sur le recto', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(_Repo([_card(0, type: 'definition')])));
+      await tester.pumpAndSettle();
+      expect(find.text('Définition'), findsOneWidget);
+    });
+
     testWidgets('session du jour : contexte « Session du jour »', (tester) async {
       _phone(tester);
       await tester.pumpWidget(_app(_Repo([_card(0)]), launch: const DrillLaunch(params: DrillSessionParams(collegeId: 'c3'))));

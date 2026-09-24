@@ -7,6 +7,7 @@ import 'package:collega_app/core/ui/components/cg_toast.dart';
 import 'package:collega_app/core/ui/gallery/cg_toast_gallery.dart';
 import 'package:collega_app/core/ui/tokens/cg_colors.dart';
 import 'package:collega_app/core/ui/tokens/cg_motion.dart';
+import 'package:collega_app/core/ui/tokens/cg_radius.dart';
 import 'package:collega_app/core/ui/tokens/cg_space.dart';
 import 'package:collega_app/core/ui/tokens/cg_type.dart';
 
@@ -64,9 +65,34 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(tester.getSize(find.byType(CgToastCapsule)).width, lessThanOrEqualTo(800));
     });
+    testWidgets('plusieurs lignes : passe à la ligne, bloc arrondi r-l', (tester) async {
+      const long = 'Pas assez de contenu : items 215, 216, 217, 218, 219, 220, 221, 222 et 3 autres';
+      await tester.pumpWidget(cgTestApp(const Center(child: CgToastCapsule(message: long, maxLines: 3))));
+      final text = tester.widget<Text>(find.text(long));
+      expect(text.maxLines, 3);
+      expect(text.softWrap, isTrue);
+      final box = tester.widget<DecoratedBox>(
+        find.descendant(of: find.byType(CgToastCapsule), matching: find.byType(DecoratedBox)),
+      );
+      expect((box.decoration as BoxDecoration).borderRadius, CgRadius.lAll);
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('showCgToast', () {
+    testWidgets('durée et lignes choisies par l’appelant', (tester) async {
+      final ctx = await _host(tester);
+      showCgToast(ctx, _msg, maxLines: 3, duration: const Duration(seconds: 5));
+      await tester.pump();
+      expect(tester.widget<Text>(find.text(_msg)).maxLines, 3);
+      await tester.pump(const Duration(seconds: 4));
+      expect(find.text(_msg), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(CgMotion.base);
+      await tester.pump(CgMotion.base);
+      expect(find.byType(CgToastCapsule), findsNothing);
+    });
+
     testWidgets('apparition en fondu + montée de 8 pt', (tester) async {
       final ctx = await _host(tester);
       showCgToast(ctx, _msg);

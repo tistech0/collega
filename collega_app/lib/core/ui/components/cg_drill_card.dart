@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart' show CupertinoScrollbar;
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 
+import 'package:collega_app/core/ui/components/cg_card_type_tag.dart';
 import 'package:collega_app/core/ui/components/cg_verdict_bar.dart';
 import 'package:collega_app/core/ui/foundation/cg_haptics.dart';
 import 'package:collega_app/core/ui/foundation/cg_icon.dart';
@@ -46,6 +47,7 @@ class CgDrillCard extends StatefulWidget {
     required this.question,
     required this.answer,
     required this.rank,
+    this.cardType = CgCardType.classique,
     required this.collegeName,
     required this.index,
     required this.total,
@@ -68,6 +70,10 @@ class CgDrillCard extends StatefulWidget {
 
   /// Rang de la fiche : `A`, `B` ou `C` (badge « Rang A »).
   final String rank;
+
+  /// Type de la fiche : « Cas clinique » / « Définition » à côté du rang ; rien
+  /// pour une classique.
+  final CgCardType cardType;
   final String collegeName;
 
   /// Position de la fiche dans la session, à partir de 1 (« 3 / 24 »).
@@ -722,7 +728,7 @@ class CgDrillCardState extends State<CgDrillCard> with TickerProviderStateMixin 
             Expanded(
               child: Semantics(
                 container: true,
-                label: 'Fiche rang ${widget.rank}, ${widget.collegeName}. Question : ${widget.question}',
+                label: '${_frontLabel()}. Question : ${widget.question}',
                 hint: !_open && widget.canFlip ? 'Touche pour voir la réponse' : null,
                 onTap: !_open && widget.canFlip ? flip : null,
                 excludeSemantics: true,
@@ -777,6 +783,13 @@ class CgDrillCardState extends State<CgDrillCard> with TickerProviderStateMixin 
         ),
       );
 
+  /// « Fiche rang A, cas clinique, Cancérologie » (le type seulement s'il est affiché).
+  String _frontLabel() => [
+        'Fiche rang ${widget.rank}',
+        if (widget.cardType.label case final type?) type.toLowerCase(),
+        widget.collegeName,
+      ].join(', ');
+
   Widget _meta(CgColors c) {
     return Row(children: [
       ConstrainedBox(
@@ -799,6 +812,10 @@ class CgDrillCardState extends State<CgDrillCard> with TickerProviderStateMixin 
           ),
         ),
       ),
+      if (widget.cardType.label != null) ...[
+        const SizedBox(width: CgSpace.s2),
+        CgCardTypeTag(widget.cardType, onAccent: true),
+      ],
       const SizedBox(width: CgSpace.s2),
       Flexible(
         child: Text(
