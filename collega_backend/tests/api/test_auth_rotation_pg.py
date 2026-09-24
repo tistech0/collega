@@ -66,7 +66,7 @@ class TestRotation:
         assert refresh2 != refresh1
         assert resp.json()["data"]["access_token"] != access1
 
-        # Requête parallèle dans les 60 s : ancien refresh accepté.
+        # Requête parallèle dans la grâce (GRACE_S) : ancien refresh accepté.
         resp = await _refresh(pg_client, refresh1)
         assert resp.status_code == 200
 

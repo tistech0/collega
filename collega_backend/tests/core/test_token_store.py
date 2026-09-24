@@ -23,7 +23,9 @@ class TestTokenStoreRedisReel:
         assert await token_redis.get(f"revoked:jti:{jti}") == b"1"
         assert 3590 <= await token_redis.ttl(f"revoked:jti:{jti}") <= 3600
         assert await token_redis.get(f"refresh:grace:{jti}") == b"1"
-        assert 0 < await token_redis.ttl(f"refresh:grace:{jti}") <= token_store.GRACE_S
+        # I4 : 120 s de grâce, réseau mobile instable (retries lents).
+        assert token_store.GRACE_S == 120
+        assert 60 < await token_redis.ttl(f"refresh:grace:{jti}") <= 120
 
     async def test_revoque_recemment_est_en_grace(self, token_redis):
         jti = _jti()
@@ -33,7 +35,7 @@ class TestTokenStoreRedisReel:
     async def test_revoque_hors_grace_est_reutilise(self, token_redis):
         jti = _jti()
         await token_store.revoke_refresh(jti, 3600)
-        await token_redis.delete(f"refresh:grace:{jti}")  # simule l'expiration des 60 s
+        await token_redis.delete(f"refresh:grace:{jti}")  # simule l'expiration de la grâce
         assert await token_store.refresh_state(jti) == "reused"
 
     async def test_ttl_minimal_une_seconde(self, token_redis):

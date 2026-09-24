@@ -22,7 +22,9 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-GRACE_S = 60
+# 120 s : sur réseau mobile instable, une réponse de rotation perdue puis rejouée
+# (retry lent) ne doit pas passer pour une réutilisation (I4, revue finale chantier 2).
+GRACE_S = 120
 # Délais courts : une panne Redis ne doit pas bloquer la connexion des utilisatrices.
 _SOCKET_TIMEOUT_S = 2.0
 
@@ -76,7 +78,7 @@ _REVOKE_RESULT: dict[int, RefreshState] = {1: "active", 2: "grace", 0: "reused"}
 async def revoke_refresh(jti: str, ttl_s: int, *, grace: bool = True) -> RefreshState:
     """Révoque le refresh `jti` pour `ttl_s` secondes (reste de vie, 1 s minimum).
 
-    `grace=True` (rotation) : arme aussi `refresh:grace:{jti}` 60 s pour les requêtes
+    `grace=True` (rotation) : arme aussi `refresh:grace:{jti}` `GRACE_S` s pour les requêtes
     parallèles ; `grace=False` (logout) : révocation immédiate, sans grâce.
     Renvoie l'état du jeton AVANT l'appel : `active` si cet appel l'a révoqué (ou si
     Redis est indisponible), sinon `grace` / `reused` selon la révocation existante.
@@ -100,7 +102,7 @@ async def revoke_refresh(jti: str, ttl_s: int, *, grace: bool = True) -> Refresh
 
 
 async def refresh_state(jti: str) -> RefreshState:
-    """`active` (jamais révoqué), `grace` (révoqué depuis ≤ 60 s) ou `reused` (révoqué avant)."""
+    """`active` (jamais révoqué), `grace` (révoqué depuis ≤ `GRACE_S` s) ou `reused` (révoqué avant)."""
     try:
         revoked, grace = await _get_client().mget(_revoked_key(jti), _grace_key(jti))
     except (RedisError, OSError, TimeoutError) as exc:
