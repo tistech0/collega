@@ -6,6 +6,7 @@ import 'package:collega_app/core/network/network_errors.dart';
 import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/colleges/domain/card_type.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
 import 'package:collega_app/features/colleges/domain/drill_stats.dart';
@@ -445,9 +446,9 @@ class _CardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = CgTheme.of(context).colors;
-    final type = CgCardType.parse(card.cardType);
+    final typeLabel = CardType.parse(card.cardType).label;
     // Rang et type de la fiche, lus avant la question (« Rang B, cas clinique. … »).
-    final tags = [if (showRank) 'Rang ${card.rang}', if (type.label case final label?) label.toLowerCase()];
+    final tags = [if (showRank) 'Rang ${card.rang}', if (typeLabel != null) typeLabel.toLowerCase()];
     final question = Semantics(
       key: ValueKey('item-card-${card.id}'),
       container: true,
@@ -470,7 +471,7 @@ class _CardTile extends StatelessWidget {
                     : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Wrap(spacing: CgSpace.s2, runSpacing: CgSpace.s1, children: [
                           if (showRank) CgBadge.rank(card.rang, short: true),
-                          CgCardTypeTag(type),
+                          CgCardTypeTag(typeLabel),
                         ]),
                         const SizedBox(height: CgSpace.s2),
                         Text(card.recto, style: CgType.head.copyWith(color: c.ink)),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/colleges/domain/card_type.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/domain/drill_state.dart';
@@ -192,7 +193,7 @@ class _DrillActiveState extends ConsumerState<_DrillActive> {
         answer: card.verso,
         rank: card.rang,
         // Cas clinique : se révise comme une classique (retournement), seule l'étiquette change.
-        cardType: CgCardType.parse(card.cardType),
+        typeLabel: CardType.parse(card.cardType).label,
         collegeName: collegeName,
         index: session.currentQueuePos + 1,
         total: session.queue.length,

@@ -50,7 +50,7 @@ Widget _card({
   String answer = _answer,
   int index = 3,
   int total = 24,
-  CgCardType cardType = CgCardType.classique,
+  String? typeLabel,
   Key? key,
 }) =>
     cgTestApp(
@@ -59,7 +59,7 @@ Widget _card({
         question: question,
         answer: answer,
         rank: 'A',
-        cardType: cardType,
+        typeLabel: typeLabel,
         collegeName: 'Cancérologie',
         index: index,
         total: total,
@@ -107,7 +107,7 @@ void main() {
       _phone(tester);
       await tester.pumpWidget(_card());
       expect(find.byType(CgCardTypeTag), findsNothing);
-      await tester.pumpWidget(_card(cardType: CgCardType.casClinique));
+      await tester.pumpWidget(_card(typeLabel: 'Cas clinique'));
       expect(find.text('Cas clinique'), findsOneWidget);
       expect(tester.widget<CgCardTypeTag>(find.byType(CgCardTypeTag)).onAccent, isTrue);
       expect(tester.getTopLeft(find.text('Cas clinique')).dx, greaterThan(tester.getTopRight(find.text('Rang A')).dx));
@@ -453,7 +453,7 @@ void main() {
     testWidgets('recto d’un cas clinique : le type est lu après le rang', (tester) async {
       _phone(tester);
       final handle = tester.ensureSemantics();
-      await tester.pumpWidget(_card(cardType: CgCardType.casClinique));
+      await tester.pumpWidget(_card(typeLabel: 'Cas clinique'));
       expect(find.bySemanticsLabel('Fiche rang A, cas clinique, Cancérologie. Question : $_question'), findsOneWidget);
       handle.dispose();
     });

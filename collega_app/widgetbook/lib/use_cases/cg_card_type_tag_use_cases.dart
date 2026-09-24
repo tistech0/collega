@@ -13,13 +13,14 @@ final WidgetbookComponent cgCardTypeTagComponent = WidgetbookComponent(
     WidgetbookUseCase(
       name: 'Interactif',
       builder: (context) {
-        final type = context.knobs.list(
-          label: 'Type',
-          options: CgCardType.values,
-          labelBuilder: (t) => t.name,
+        // Libellés de `CardType.label` (domaine) ; « aucun » = fiche classique.
+        final label = context.knobs.list<String?>(
+          label: 'Libellé',
+          options: const [null, 'Cas clinique', 'Définition'],
+          labelBuilder: (l) => l ?? 'aucun (classique)',
         );
         final onAccent = context.knobs.boolean(label: 'Sur le recto (accent)');
-        final tag = CgCardTypeTag(type, onAccent: onAccent);
+        final tag = CgCardTypeTag(label, onAccent: onAccent);
         return Center(
           child: onAccent
               ? ColoredBox(

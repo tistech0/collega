@@ -47,7 +47,7 @@ class CgDrillCard extends StatefulWidget {
     required this.question,
     required this.answer,
     required this.rank,
-    this.cardType = CgCardType.classique,
+    this.typeLabel,
     required this.collegeName,
     required this.index,
     required this.total,
@@ -71,9 +71,9 @@ class CgDrillCard extends StatefulWidget {
   /// Rang de la fiche : `A`, `B` ou `C` (badge « Rang A »).
   final String rank;
 
-  /// Type de la fiche : « Cas clinique » / « Définition » à côté du rang ; rien
-  /// pour une classique.
-  final CgCardType cardType;
+  /// Type de la fiche : « Cas clinique » / « Définition » à côté du rang ; null
+  /// (classique) : rien.
+  final String? typeLabel;
   final String collegeName;
 
   /// Position de la fiche dans la session, à partir de 1 (« 3 / 24 »).
@@ -786,7 +786,7 @@ class CgDrillCardState extends State<CgDrillCard> with TickerProviderStateMixin 
   /// « Fiche rang A, cas clinique, Cancérologie » (le type seulement s'il est affiché).
   String _frontLabel() => [
         'Fiche rang ${widget.rank}',
-        if (widget.cardType.label case final type?) type.toLowerCase(),
+        if (widget.typeLabel case final type?) type.toLowerCase(),
         widget.collegeName,
       ].join(', ');
 
@@ -812,9 +812,9 @@ class CgDrillCardState extends State<CgDrillCard> with TickerProviderStateMixin 
           ),
         ),
       ),
-      if (widget.cardType.label != null) ...[
+      if (widget.typeLabel != null) ...[
         const SizedBox(width: CgSpace.s2),
-        CgCardTypeTag(widget.cardType, onAccent: true),
+        CgCardTypeTag(widget.typeLabel, onAccent: true),
       ],
       const SizedBox(width: CgSpace.s2),
       Flexible(

@@ -213,7 +213,13 @@ class _LoadedDetailState extends ConsumerState<_LoadedDetail> {
   Widget build(BuildContext context) {
     final async = ref.watch(collegeDetailProvider(_collegeId));
     // Stats vivantes (watch Drift) : elles suivent les drills sans invalidation.
-    final statsByItem = ref.watch(collegeDrillStatsByItemProvider(_collegeId)).valueOrNull ?? const {};
+    // Filtre de rang : seulement les fiches de ce rang (rang de la fiche, chantier 4).
+    final rang = _rang;
+    final statsByItem = (rang == null
+            ? ref.watch(collegeDrillStatsByItemProvider(_collegeId))
+            : ref.watch(collegeDrillStatsByItemForRangProvider((_collegeId, rang))))
+        .valueOrNull ??
+        const {};
     final more = _MoreAction(onTap: _openActions);
     final state = async.valueOrNull;
 
@@ -246,9 +252,12 @@ class _LoadedDetailState extends ConsumerState<_LoadedDetail> {
   Widget _loaded(CollegeDetailLoaded state, Map<String, DrillStats> statsByItem, Widget more) {
     final all = [...state.items]..sort((a, b) => a.itemNumber.compareTo(b.itemNumber));
     final rang = _rang;
-    final shown = rang == null ? all : all.where((i) => i.rang == rang).toList();
-    // Non-vu recalé sur le total serveur de chaque item.
-    DrillStats statsOf(ItemModel i) => (statsByItem[i.id] ?? const DrillStats()).withTotal(i.totalCards);
+    // Rang des FICHES (chantier 4) : un item figure sous le rang X s'il a au moins
+    // une fiche de rang X, quel que soit son propre rang (badge inchangé).
+    int cardsOf(ItemModel i) => rang == null ? i.totalCards : i.cardCountFor(rang);
+    final shown = rang == null ? all : all.where((i) => cardsOf(i) > 0).toList();
+    // Non-vu recalé sur le total serveur de chaque item (du rang filtré).
+    DrillStats statsOf(ItemModel i) => (statsByItem[i.id] ?? const DrillStats()).withTotal(cardsOf(i));
     final header = shown.fold(const DrillStats(), (sum, i) {
       final s = statsOf(i);
       return DrillStats(
@@ -259,8 +268,8 @@ class _LoadedDetailState extends ConsumerState<_LoadedDetail> {
       );
     });
     final allCards = all.fold(0, (sum, i) => sum + i.totalCards);
-    final shownCards = shown.fold(0, (sum, i) => sum + i.totalCards);
-    // Le drill lit les fiches de l'iPhone : le bouton compte celles-là.
+    final shownCards = shown.fold(0, (sum, i) => sum + cardsOf(i));
+    // Le drill lit les fiches de l'iPhone (du rang filtré) : le bouton compte celles-là.
     final localCards = shown.fold(0, (sum, i) => sum + (statsByItem[i.id]?.total ?? 0));
     final drillCards = math.min(kDefaultSessionCards, localCards);
 
@@ -312,7 +321,7 @@ class _LoadedDetailState extends ConsumerState<_LoadedDetail> {
                 title: itemDisplayTitle(item.itemNumber, item.chapterTitle),
                 subtitle: [
                   'Item ${item.itemNumber}',
-                  _count(item.totalCards, 'fiche'),
+                  rang == null ? _count(item.totalCards, 'fiche') : '${_count(cardsOf(item), 'fiche')} de rang $rang',
                   if (item.lowConfidence) 'OCR à vérifier',
                 ].join(' · '),
                 leading: _RankLeading(rang: item.rang),
@@ -424,7 +433,7 @@ class _NoItemForRang extends StatelessWidget {
     final c = CgTheme.of(context).colors;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: CgSpace.s3),
-      child: Text('Aucun item de rang $rang dans ce collège.', style: CgType.bodyS.copyWith(color: c.ink2)),
+      child: Text('Aucune fiche de rang $rang dans ce collège.', style: CgType.bodyS.copyWith(color: c.ink2)),
     );
   }
 }

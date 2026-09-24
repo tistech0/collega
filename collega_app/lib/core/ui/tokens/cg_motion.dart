@@ -21,6 +21,9 @@ abstract final class CgMotion {
   static const skeletonPulse = Duration(milliseconds: 1200);
   static const toast = Duration(seconds: 2);
 
+  /// Toast à lire en entier (liste d'items, plusieurs lignes) : le temps de lire les numéros.
+  static const toastLong = Duration(seconds: 6);
+
   /// ease-out de la maquette : cubic-bezier(.2,.7,.2,1).
   static const Curve out = Cubic(0.2, 0.7, 0.2, 1);
 

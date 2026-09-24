@@ -58,6 +58,16 @@ final _stats = {
   'i300': const DrillStats(bien: 2, notSeen: 3),
 };
 
+/// Fixtures à un seul rang par item : ses stats sont celles de ce rang.
+Map<String, Map<String, DrillStats>> _byRang(Map<String, DrillStats> stats) {
+  final out = <String, Map<String, DrillStats>>{};
+  for (final i in _items) {
+    final s = stats[i.id];
+    if (s != null) out.putIfAbsent(i.rang, () => {})[i.id] = s;
+  }
+  return out;
+}
+
 class _Colleges extends CollegesNotifier {
   _Colleges(this.status);
   final UserCollegeStatus? status;
@@ -123,6 +133,7 @@ Widget _app({
   String start = '/colleges/3',
   bool direct = false,
   Map<String, DrillStats>? stats,
+  Map<String, Map<String, DrillStats>>? statsByRang,
   FutureOr<CollegeDetailState> Function()? detail,
   ReloadLimits? limits = _limitsOk,
   _Visit? visit,
@@ -183,6 +194,8 @@ Widget _app({
       collegesProvider.overrideWith(colleges ?? () => _Colleges(imported ? status ?? _status('generation_complete') : null)),
       collegeDetailProvider.overrideWith(() => _Detail(detail ?? () => CollegeDetailLoaded(items: _items))),
       collegeDrillStatsByItemProvider.overrideWith((ref, id) => Stream.value(stats ?? _stats)),
+      collegeDrillStatsByItemForRangProvider.overrideWith(
+          (ref, arg) => Stream.value((statsByRang ?? _byRang(stats ?? _stats))[arg.$2] ?? const {})),
       collegeImportRepositoryProvider.overrideWithValue(_ImportRepo(limits)),
       revisionPrefsProvider.overrideWith(_Prefs.new),
     ],
@@ -283,13 +296,45 @@ void main() {
       expect(find.text('Réviser le rang B · 5 fiches'), findsOneWidget);
     });
 
+    testWidgets('rang des fiches : un item A avec des fiches B figure sous « Rang B », comptes et drill de ses seules fiches B',
+        (tester) async {
+      _phone(tester);
+      final visit = _Visit();
+      const mixed = ItemModel(
+        id: 'i320', collegeId: 'c3', itemNumber: 320, rang: 'A', chapterTitle: 'Tumeurs de la vessie',
+        ocrConfidenceScore: 0.95, lowConfidence: false, cardCountA: 4, cardCountB: 2, cardCountC: 0,
+      );
+      await tester.pumpWidget(_app(
+        visit: visit,
+        detail: () => CollegeDetailLoaded(items: [..._items, mixed]),
+        statsByRang: {
+          ..._byRang(_stats),
+          'B': {..._byRang(_stats)['B']!, 'i320': const DrillStats(maitrise: 1, notSeen: 1)},
+        },
+      ));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rang B'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tumeurs de la vessie'), findsOneWidget);
+      expect(find.text('Item 320 · 2 fiches de rang B'), findsOneWidget);
+      // Le badge de l'item reste son propre rang.
+      final row = find.ancestor(of: find.text('Tumeurs de la vessie'), matching: find.byType(CgListRow));
+      expect(find.descendant(of: row, matching: find.text('A')), findsOneWidget);
+      // En-tête : fiches B seulement (col utérin 5 + vessie 2).
+      final bar = tester.widget<CgRankBar>(_rankBar(legend: true));
+      expect([bar.mastered, bar.good, bar.review, bar.unseen], [1, 2, 0, 4]);
+      await tester.tap(find.text('Réviser le rang B · 7 fiches'));
+      await tester.pumpAndSettle();
+      expect((visit.drillExtra! as DrillLaunch).params.rangs, ['B']);
+    });
+
     testWidgets('filtre sans item : message, pas de bouton', (tester) async {
       _phone(tester);
       await tester.pumpWidget(_app(detail: () => CollegeDetailLoaded(items: _items.where((i) => i.rang == 'A').toList())));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Rang C'));
       await tester.pumpAndSettle();
-      expect(find.text('Aucun item de rang C dans ce collège.'), findsOneWidget);
+      expect(find.text('Aucune fiche de rang C dans ce collège.'), findsOneWidget);
       expect(find.textContaining('Réviser'), findsNothing);
     });
   });

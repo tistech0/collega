@@ -29,9 +29,10 @@ class _ImportProgressScreenState extends ConsumerState<ImportProgressScreen> {
   late final AppLifecycleListener _lifecycle = AppLifecycleListener(onResume: _resync);
   bool _finished = false;
 
-  /// Toast de fin d'import listant des items sans contenu suffisant.
+  /// Toast de fin d'import listant des items sans contenu suffisant : 3 lignes
+  /// (8 numéros d'items puis « et N autres »). Pas de
+  /// token de nombre de lignes dans Collega UI : la valeur reste locale à l'écran.
   static const _summaryMaxLines = 3;
-  static const _summaryDuration = Duration(seconds: 6);
 
   /// Reprise lancée et terminée sans rien savoir de l'import (serveur injoignable,
   /// statut inattendu) : on le dit, avec « Réessayer ».
@@ -83,7 +84,7 @@ class _ImportProgressScreenState extends ConsumerState<ImportProgressScreen> {
     if (text != null) {
       // Items à vérifier : le temps de lire leurs numéros, sur plusieurs lignes.
       final long = summary!.insufficientItems.isNotEmpty;
-      showCgToast(context, text, maxLines: long ? _summaryMaxLines : 1, duration: long ? _summaryDuration : null);
+      showCgToast(context, text, maxLines: long ? _summaryMaxLines : 1, duration: long ? CgMotion.toastLong : null);
     }
     context.go('/colleges/${widget.refId}');
   }
