@@ -263,13 +263,13 @@ def _item_row():
 async def test_regenerate_sends_same_settings_and_one_card_schema():
     client = _client(_response(_card("classique", "B", "Q précise ?", "R précise"), input_tokens=500, output_tokens=90))
 
-    result = await client.regenerate_single_card(_card_row(), _item_row(), "Le foie {source}", "trop vague")
+    result = await client.regenerate_single_card(_card_row(), _item_row(), ["Le foie {source}"], "trop vague")
 
     assert result.card == FlashCardData("classique", "B", "Q précise ?", "R précise")
     assert (result.input_tokens, result.output_tokens, result.model) == (500, 90, "claude-sonnet-5")
     kw = _kwargs(client)
     assert kw["model"] == "claude-sonnet-5"
-    assert kw["max_tokens"] == 2000
+    assert kw["max_tokens"] == 8000
     assert kw["thinking"] == {"type": "adaptive"}
     assert kw["output_config"] == {
         "effort": "medium",
@@ -289,26 +289,39 @@ async def test_regenerate_sends_same_settings_and_one_card_schema():
 
 async def test_regenerate_unusable_response_keeps_usage():
     client = _client(_response("pas du json", input_tokens=400, output_tokens=12))
-    result = await client.regenerate_single_card(_card_row(), _item_row(), "texte", None)
+    result = await client.regenerate_single_card(_card_row(), _item_row(), ["texte"], None)
     assert result.card is None and (result.input_tokens, result.output_tokens) == (400, 12)
 
 
 async def test_regenerate_refusal_keeps_usage():
     client = _client(_response(_card(), stop_reason="refusal", input_tokens=50, output_tokens=5))
-    result = await client.regenerate_single_card(_card_row(), _item_row(), "texte", None)
+    result = await client.regenerate_single_card(_card_row(), _item_row(), ["texte"], None)
     assert result.card is None and (result.input_tokens, result.output_tokens) == (50, 5)
 
 
 async def test_regenerate_api_error_gives_no_card_no_usage():
     client = _client(side_effect=anthropic.APIError("boom", request=MagicMock(), body=None))
-    result = await client.regenerate_single_card(_card_row(), _item_row(), "texte", None)
+    result = await client.regenerate_single_card(_card_row(), _item_row(), ["texte"], None)
     assert result.card is None and (result.input_tokens, result.output_tokens) == (0, 0)
 
 
 async def test_regenerate_blank_source_makes_no_call():
     client = _client()
-    result = await client.regenerate_single_card(_card_row(), _item_row(), "  ", None)
+    result = await client.regenerate_single_card(_card_row(), _item_row(), ["  "], None)
     assert result.card is None and client._client.messages.create.await_count == 0  # type: ignore[attr-defined]
+
+
+async def test_regenerate_cleans_item_pages_repeated_headers():
+    """Revue finale (Minor 3) : la régénération reçoit l'item page par page, la règle
+    des en-têtes répétés de clean_for_prompt s'applique comme à la génération."""
+    client = _client(_response(_card()))
+    pages = [f"COLLÈGE HÉPATO\nContenu de la page {n}" for n in range(1, 4)]
+
+    await client.regenerate_single_card(_card_row(), _item_row(), pages, None)
+
+    content = _kwargs(client)["messages"][0]["content"]
+    assert "COLLÈGE HÉPATO" not in content
+    assert all(f"Contenu de la page {n}" in content for n in range(1, 4))
 
 
 # --- Évaluation du drill (Haiku) ----------------------------------------------

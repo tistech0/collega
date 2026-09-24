@@ -46,8 +46,10 @@ async def test_regenerate_uses_stored_source_text_and_drops_origin(pg_client, pg
     resp = await pg_client.post(f"/v1/flash-cards/{card.id}/regenerate", json={"user_note": "trop vague"})
 
     assert resp.status_code == 200 and resp.json()["data"]["recto"] == "Q précise ?"
-    _card, _item, source_text, note = regen.await_args.args
-    assert (source_text, note) == ("Le foie {texte source}\n233", "trop vague")
+    # Pages de l'item (séparateur « \f » d'item_texts) : clean_for_prompt y applique la
+    # règle des en-têtes répétés, comme à la génération.
+    _card, _item, source_pages, note = regen.await_args.args
+    assert (source_pages, note) == (["Le foie {texte source}\n233"], "trop vague")
     async with pg_factory() as s:
         saved = await s.get(FlashCard, card.id)
         assert (saved.recto, saved.user_feedback, saved.generation_id) == ("Q précise ?", None, None)

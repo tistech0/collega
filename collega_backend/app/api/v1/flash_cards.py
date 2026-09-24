@@ -79,15 +79,16 @@ async def regenerate_card(
     if item is None:
         raise unprocessable("ITEM_NOT_FOUND", "Item source introuvable")
 
-    source_text = await store.get_item_text(db, item.text_hash) if item.text_hash else None
-    if not source_text:
+    # Pages de l'item : clean_for_prompt y retire les en-têtes répétés (comme à la génération).
+    source_pages = await store.get_item_pages(db, item.text_hash) if item.text_hash else None
+    if not source_pages or not any(source_pages):
         raise conflict(
             "SOURCE_UNAVAILABLE",
             "Le texte source de cet item n'est pas disponible : réimporte le PDF pour pouvoir régénérer.",
         )
 
     claude = ClaudeClient()
-    regen = await claude.regenerate_single_card(card, item, source_text, body.user_note)
+    regen = await claude.regenerate_single_card(card, item, source_pages, body.user_note)
     # Appel facturé compté même si la réponse est inutilisable ; APIError : usage à 0, rien.
     if regen.input_tokens or regen.output_tokens:
         await record_usage(

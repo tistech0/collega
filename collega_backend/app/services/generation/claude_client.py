@@ -37,7 +37,8 @@ GENERATION_VERSION = f"{GENERATION_MODEL}:{PROMPT_VERSION}"
 EVALUATION_MODEL = "claude-haiku-4-5-20251001"
 
 GENERATION_MAX_TOKENS = 16000
-REGENERATION_MAX_TOKENS = 2000
+# Pensée adaptative + fiche JSON : 2000 tronquait la réponse (revue finale).
+REGENERATION_MAX_TOKENS = 8000
 EVALUATION_MAX_TOKENS = 512
 Effort = Literal["low", "medium", "high", "xhigh", "max"]
 DEFAULT_EFFORT: Effort = "medium"
@@ -333,15 +334,18 @@ class ClaudeClient:
         self,
         card: Any,
         item: Any,
-        source_text: str,
+        source_pages: list[str],
         user_note: str | None,
     ) -> RegenResult:
         """Régénère une seule fiche avec la remarque de l'utilisatrice en contexte.
 
+        `source_pages` : les pages de l'item (`store.get_item_pages`), pour que
+        `clean_for_prompt` retire les en-têtes répétés comme à la génération.
+
         Réponse inexploitable ou erreur d'API : `card=None` (usage conservé si
         l'appel a abouti)."""
         empty = RegenResult(card=None, input_tokens=0, output_tokens=0, model=GENERATION_MODEL)
-        text = clean_for_prompt([source_text])
+        text = clean_for_prompt(source_pages)
         if not text.strip():
             logger.warning("Item %s sans texte source — impossible de régénérer la fiche %s", item.id, card.id)
             return empty
