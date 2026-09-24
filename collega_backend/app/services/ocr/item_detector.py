@@ -96,6 +96,9 @@ _COMPLETE_REFERENTIAL = 300
 _MAX_SECTION_CONTENT_PAGES = 30
 _FRONT_MATTER_MAX_SHARE = 0.10
 _MIN_ITEM_COVERAGE = 0.5
+_CONCENTRATION_MIN_PAGES = 100
+_MAX_ITEM_SHARE = 0.4
+_MIN_IGNORED_NUMBERS = 3
 
 # ── R7 ────────────────────────────────────────────────────────────────────────
 _SECTION_PATTERNS = [
@@ -647,6 +650,21 @@ def _titles_from_toc(page_texts: list[str]) -> dict[int, str]:
 # ── Détecteur ─────────────────────────────────────────────────────────────────
 
 
+@dataclass
+class _AssignStats:
+    covered: int  # pages de contenu rattachées à un item
+    largest: int  # pages de contenu du plus gros item
+    opened: set[int]
+
+
+def _assign_stats(parsed: list[_Page], assign: list[int | str | None]) -> _AssignStats:
+    per_item: dict[int, int] = {}
+    for p, a in zip(parsed, assign, strict=True):
+        if not p.blank and isinstance(a, int):
+            per_item[a] = per_item.get(a, 0) + 1
+    return _AssignStats(sum(per_item.values()), max(per_item.values(), default=0), set(per_item))
+
+
 def _safety_warnings(
     parsed: list[_Page], assign: list[int | str | None], sure: dict[int, str], report: SegmentationReport
 ) -> None:
@@ -723,8 +741,9 @@ class ItemDetector:
         norm_titles = {n: _norm(t)[:40] for n, t in r6_titles.items() if len(_norm(t)) >= _R6_TITLE_MIN}
 
         report = SegmentationReport()
-        assign = self._assign(parsed, known, norm_titles, report)
-        assign = self._check_coverage(parsed, assign, report)
+        ignored: set[int] = set()
+        assign = self._assign(parsed, known, norm_titles, report, ignored)
+        assign = self._check_suspect(parsed, assign, report, ignored)
         sure = _sure_numbers(parsed)
         if _complete(known_titles):
             sure = {n: src for n, src in sure.items() if n in known_titles}  # type: ignore[operator]
@@ -736,9 +755,14 @@ class ItemDetector:
 
     @staticmethod
     def _assign(
-        parsed: list[_Page], known: set[int], norm_titles: dict[int, str], report: SegmentationReport
+        parsed: list[_Page],
+        known: set[int],
+        norm_titles: dict[int, str],
+        report: SegmentationReport,
+        ignored: set[int],
     ) -> list[int | str | None]:
-        """Machine à états : numéro d'item, libellé de section, ou None (page blanche)."""
+        """Machine à états : numéro d'item, libellé de section, ou None (page blanche).
+        `ignored` reçoit les numéros d'en-têtes ignorés (critère de découpage suspect)."""
         assign: list[int | str | None] = [None] * len(parsed)
         warnings = report.warnings
         current: int | None = None
@@ -757,6 +781,7 @@ class ItemDetector:
                 n = _resolve(p, current, known)
                 if n is None and p.header:
                     warnings.append(f"p{i} : en-tête {'/'.join(map(str, p.header))} ignoré (item courant {current})")
+                    ignored.add(p.header[0])
                 elif n is not None and n != current:
                     confirmed = any(
                         _resolve(q, None, known) == n for q in parsed[i + 1 : i + 1 + _CONFIRM_PAGES] if q.header
@@ -765,6 +790,7 @@ class ItemDetector:
                         target = n
                     else:
                         warnings.append(f"p{i} : en-tête {n} ignoré (item courant {current})")
+                        ignored.add(n)
                 if target is None:  # R6
                     start = _norm(" ".join(p.lines[:3]))
                     for number, title in norm_titles.items():
@@ -805,24 +831,45 @@ class ItemDetector:
         return assign
 
     @classmethod
-    def _check_coverage(
-        cls, parsed: list[_Page], assign: list[int | str | None], report: SegmentationReport
+    def _check_suspect(
+        cls,
+        parsed: list[_Page],
+        assign: list[int | str | None],
+        report: SegmentationReport,
+        ignored: set[int],
     ) -> list[int | str | None]:
-        """Découpage suspect (aucun item, ou items < 50 % des pages de contenu) : repli."""
+        """Découpage suspect → repli sur les en-têtes « Item N » propres. Suspect si :
+        aucun item, items < 50 % des pages de contenu, un item > 40 % des pages de contenu
+        d'un livre d'au moins 100 pages, ou en-têtes ignorés sur ≥ 3 numéros jamais ouverts."""
         content = sum(1 for p in parsed if not p.blank)
-        covered = sum(1 for p, a in zip(parsed, assign, strict=True) if not p.blank and isinstance(a, int))
-        if content and covered >= _MIN_ITEM_COVERAGE * content:
+        stats = _assign_stats(parsed, assign)
+        reasons = []
+        low_coverage = not content or stats.covered < _MIN_ITEM_COVERAGE * content
+        if low_coverage:
+            reasons.append(f"{stats.covered}/{content} pages de contenu dans un item")
+        if len(parsed) >= _CONCENTRATION_MIN_PAGES and stats.largest > _MAX_ITEM_SHARE * content:
+            reasons.append(f"un item a {stats.largest}/{content} pages de contenu")
+        never_opened = sorted(ignored - stats.opened)
+        if len(never_opened) >= _MIN_IGNORED_NUMBERS:
+            reasons.append(f"en-têtes ignorés de {len(never_opened)} numéros jamais ouverts")
+        if not reasons:
             return assign
+        reason = " ; ".join(reasons)
         fallback = cls._assign_fallback(parsed)
-        fb_covered = sum(1 for p, a in zip(parsed, fallback, strict=True) if not p.blank and isinstance(a, int))
-        if fb_covered > covered:
+        fb = _assign_stats(parsed, fallback)
+        better = (
+            fb.covered > stats.covered
+            if low_coverage
+            else len(fb.opened) > len(stats.opened) and fb.covered >= _MIN_ITEM_COVERAGE * content
+        )
+        if better:
             # Les warnings du 1er passage décrivent un découpage abandonné.
             report.warnings[:] = [
-                f"découpage suspect ({covered}/{content} pages de contenu dans un item) : repli sur les "
-                f"en-têtes « Item N » ({fb_covered}/{content})"
+                f"découpage suspect ({reason}) : repli sur les en-têtes « Item N » "
+                f"({len(fb.opened)} items, {fb.covered}/{content} pages de contenu)"
             ]
             return fallback
-        report.warnings.append(f"découpage suspect ({covered}/{content} pages de contenu dans un item)")
+        report.warnings.append(f"découpage suspect ({reason})")
         return assign
 
     @staticmethod

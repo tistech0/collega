@@ -584,3 +584,31 @@ class TestSafetyNets:
     def test_zero_items_is_suspect(self):
         result = seg([page("Un livre sans aucun numéro d'item")] * 3)
         assert result.items == [] and warned(result, "découpage suspect")
+
+
+class TestSuspectConcentration:
+    def test_lone_headers_after_one_strong_opening_fall_back(self):
+        """Un seul item ouvert fortement, puis des « Item N » isolés (≥ 3 numéros ignorés) : repli."""
+        pages = [page("Item 42", "OBJECTIFS: N° 42. Titre"), *content(3)]
+        for n in (43, 44, 45):
+            pages += [page(f"Item {n}", "Titre du chapitre"), *content(3)]
+        result = seg(pages)
+        assert spans(result) == [(42, 0, 3), (43, 4, 7), (44, 8, 11), (45, 12, 15)]
+        assert warned(result, "découpage suspect", "repli")
+
+    def test_one_item_holding_most_of_a_long_book_falls_back(self):
+        pages = [page("Item 42", "OBJECTIFS: N° 42. Titre"), *content(39)]
+        pages += [page("Item 43", "Titre"), *content(34), page("Item 44", "Titre"), *content(34)]
+        result = seg(pages)
+        assert spans(result) == [(42, 0, 39), (43, 40, 74), (44, 75, 109)]
+        assert warned(result, "découpage suspect", "repli")
+
+    def test_short_book_with_one_item_is_not_suspect(self):
+        pages = [page("Item 42", "OBJECTIFS: N° 42. Titre"), *content(20)]
+        result = seg(pages)
+        assert spans(result) == [(42, 0, 20)] and not warned(result, "découpage suspect")
+
+    def test_two_ignored_headers_are_not_suspect(self):
+        pages = [page("Item 42", "OBJECTIFS: N° 42. Titre"), *content(2), page("Item 43"), *content(2), page("Item 44")]
+        result = seg(pages)
+        assert spans(result) == [(42, 0, 6)] and not warned(result, "découpage suspect")
