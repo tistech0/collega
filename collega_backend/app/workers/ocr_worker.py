@@ -320,9 +320,9 @@ def with_pages(items: list[DetectedItem], texts: list[str]) -> list[tuple[Detect
 
 
 def _items_message(count: int, report: SegmentationReport) -> str:
-    """« 21 items, 3 avertissements de découpage » (événements du job)."""
+    """« 21 items, 3 avertissements de découpage » / « 1 item, … » (événements du job)."""
     warnings = len(report.warnings)
-    return f"{count} items, {warnings} avertissement{'s' if warnings > 1 else ''} de découpage"
+    return f"{count} item{'s' if count > 1 else ''}, {warnings} avertissement{'s' if warnings > 1 else ''} de découpage"
 
 
 async def _resolve_title(db: AsyncSession, college_id: uuid.UUID, detected: DetectedItem) -> str | None:

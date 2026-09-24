@@ -377,6 +377,13 @@ async def test_event_messages_carry_segmentation_warning_count(pg_factory, seed)
     ]
 
 
+def test_items_message_pluralises_items():
+    """Revue finale (Minor 6) : « 1 item », « 2 items »."""
+    one_warning = SegmentationReport(warnings=["w"])
+    assert ocr_worker._items_message(1, SegmentationReport()) == "1 item, 0 avertissement de découpage"
+    assert ocr_worker._items_message(2, one_warning) == "2 items, 1 avertissement de découpage"
+
+
 async def test_no_item_fails_the_job_without_generation(pg_factory, seed):
     """Découpage sans aucun item (même après le repli) : échec propre, rien en file, aucun coût."""
     college, job = await seed()
