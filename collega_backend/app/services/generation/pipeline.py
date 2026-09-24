@@ -19,6 +19,7 @@ import json
 import logging
 import uuid
 from collections.abc import Awaitable, Callable, Sequence
+from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy import update as sa_update
@@ -59,7 +60,7 @@ async def report_generation_progress(
         await session.commit()
 
 
-async def _report(progress: ProgressReporter | None, college_id: uuid.UUID, **kw) -> None:
+async def _report(progress: ProgressReporter | None, college_id: uuid.UUID, **kw: Any) -> None:
     """L'avancement n'est qu'un affichage : son échec n'arrête jamais la génération."""
     if progress is None:
         return
@@ -76,7 +77,7 @@ async def _job_status(db: AsyncSession, job_id: uuid.UUID) -> str | None:
 async def generate_job_items(
     session_factory: async_sessionmaker[AsyncSession],
     job_id: uuid.UUID,
-    claude,
+    claude: Any,
     progress: ProgressReporter | None = None,
 ) -> int | None:
     """Renvoie le nombre d'appels Claude de cette exécution, ou None si l'import a

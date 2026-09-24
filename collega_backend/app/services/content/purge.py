@@ -56,7 +56,8 @@ async def purge_unreferenced_content(db: AsyncSession) -> dict[str, int]:
     await hold_content_lock_exclusive(db)
     counts = {}
     for table, statement in _PURGE_STATEMENTS.items():  # ordre : générations → textes → pages
-        counts[table] = (await db.execute(text(statement))).rowcount or 0
+        result = await db.execute(text(statement))
+        counts[table] = getattr(result, "rowcount", 0) or 0
     if any(counts.values()):
         logger.info("Contenu non référencé purgé : %s", counts)
     return counts

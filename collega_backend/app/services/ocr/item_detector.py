@@ -22,7 +22,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Literal, cast
 
 from app.services.ocr.item_titles import clean_title, is_valid_title
 
@@ -216,7 +216,7 @@ class ItemDetector:
 
             # Rang depuis les tables pdfplumber (méthode principale),
             # puis fallback texte OCR brut (pytesseract)
-            rang = self._rang_from_tables(tables) or self._rang_from_text(text)
+            page_rang = self._rang_from_tables(tables) or self._rang_from_text(text)
 
             if headers and headers[-1].item_number == item_number:
                 # Courant seulement si répété sur la page suivante (« Item 359 bis »
@@ -224,13 +224,13 @@ class ItemDetector:
                 if page_num == headers[-1].last_page + 1:
                     headers[-1].running = True
                 headers[-1].last_page = page_num
-                if rang is not None:
-                    headers[-1].rangs.append(rang)
+                if page_rang is not None:
+                    headers[-1].rangs.append(page_rang)
                 continue
 
             # Si aucun signal de rang, n'accepter comme header que si "Item N"
             # est en tout début de page (heading, pas une référence inline).
-            if rang is None and match.start() > _MAX_HEADER_POSITION:
+            if page_rang is None and match.start() > _MAX_HEADER_POSITION:
                 logger.debug(
                     "Skipping 'Item %d' at position %d on page %d (likely cross-reference)",
                     item_number,
@@ -243,7 +243,7 @@ class ItemDetector:
                 _Header(
                     page=page_num,
                     item_number=item_number,
-                    rangs=[rang] if rang is not None else [],
+                    rangs=[page_rang] if page_rang is not None else [],
                     last_page=page_num,
                 )
             )
@@ -269,7 +269,7 @@ class ItemDetector:
             end_page = headers[i + 1].page - 1 if i + 1 < len(headers) else total_pages - 1
 
             if header.rangs:
-                rang: RangType = min(header.rangs, key=lambda r: _RANG_PRIORITY.get(r, 99))
+                rang: RangType = min(header.rangs, key=lambda r: _RANG_PRIORITY.get(r or "", 99))
             else:
                 logger.warning(
                     "Rang not found for item %d on page %d — defaulting to 'A'",
@@ -311,7 +311,7 @@ class ItemDetector:
         collecte toutes les valeurs A/B/C dans cette colonne, et retourne
         le rang de plus haute priorité (A > B > C).
         """
-        rangs_found: set[str] = set()
+        rangs_found: set[RangType] = set()
 
         for table in tables:
             if not table:
@@ -331,13 +331,13 @@ class ItemDetector:
                 if rang_col < len(row):
                     cell_val = (row[rang_col] or "").strip().upper()
                     if cell_val in _RANG_VALID:
-                        rangs_found.add(cell_val)
+                        rangs_found.add(cast(RangType, cell_val))
 
         if not rangs_found:
             return None
 
         # Retourner le rang de priorité la plus haute (A > B > C)
-        return min(rangs_found, key=lambda r: _RANG_PRIORITY.get(r, 99))  # type: ignore[return-value]
+        return min(rangs_found, key=lambda r: _RANG_PRIORITY.get(r or "", 99))
 
     @staticmethod
     def _rang_from_text(text: str) -> RangType | None:
@@ -347,7 +347,7 @@ class ItemDetector:
         """
         lines = text.splitlines()
         in_rang_table = False
-        rangs_found: set[str] = set()
+        rangs_found: set[RangType] = set()
 
         for line in lines:
             stripped = line.strip()
@@ -369,9 +369,9 @@ class ItemDetector:
             # Ligne de rang : commence par A, B ou C suivi d'un espace
             rang_match = re.match(r"^([ABC])\s", stripped)
             if rang_match:
-                rangs_found.add(rang_match.group(1).upper())
+                rangs_found.add(cast(RangType, rang_match.group(1).upper()))
 
         if not rangs_found:
             return None
 
-        return min(rangs_found, key=lambda r: _RANG_PRIORITY.get(r, 99))  # type: ignore[return-value]
+        return min(rangs_found, key=lambda r: _RANG_PRIORITY.get(r or "", 99))

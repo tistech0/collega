@@ -103,14 +103,16 @@ async def publish_job(db: AsyncSession, job_id: uuid.UUID, *, claude_calls: int)
         else {}
     )
 
-    card_counts = dict(
+    card_counts: dict[uuid.UUID, int] = dict(
         (
             await db.execute(
                 select(FlashCard.item_id, func.count(FlashCard.id))
                 .where(FlashCard.college_id == college.id)
                 .group_by(FlashCard.item_id)
             )
-        ).all()
+        )
+        .tuples()
+        .all()
     )
     removed_numbers = [n for n in live if n not in drafts]
     if was_ready and len(live) >= MIN_ITEMS_FOR_GUARD and len(removed_numbers) > len(live) * MAX_REMOVED_SHARE:

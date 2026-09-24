@@ -29,7 +29,7 @@ class Base(DeclarativeBase):
 ALEMBIC_UNMANAGED_INDEXES = frozenset({"idx_flash_cards_fts"})
 
 
-def alembic_include_object(obj, name, type_, reflected, compare_to) -> bool:
+def alembic_include_object(obj: object, name: str | None, type_: str, reflected: bool, compare_to: object) -> bool:
     return not (type_ == "index" and name in ALEMBIC_UNMANAGED_INDEXES)
 
 

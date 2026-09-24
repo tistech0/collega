@@ -4,10 +4,14 @@ import json
 import logging
 import re
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import anthropic
 
 from app.core.config import settings
+
+if TYPE_CHECKING:
+    from app.schemas.college import FlashCardData as FlashCardDataSchema
 
 logger = logging.getLogger(__name__)
 
@@ -129,7 +133,7 @@ class ClaudeClient:
         output_tokens = response.usage.output_tokens
 
         try:
-            raw = response.content[0].text.strip()
+            raw = response.content[0].text.strip()  # type: ignore[union-attr]
             # Strip markdown code fence if Claude wraps JSON in ```json ... ```
             if raw.startswith("```"):
                 raw = re.sub(r"^```[a-z]*\n?", "", raw)
@@ -157,13 +161,13 @@ class ClaudeClient:
 
     async def regenerate_single_card(
         self,
-        card,
-        item,
+        card: Any,
+        item: Any,
         source_text: str,
         user_note: str | None,
-    ) -> FlashCardData | None:
+    ) -> FlashCardDataSchema | None:
         """Régénère une seule fiche avec le feedback utilisateur en contexte."""
-        from app.schemas.college import FlashCardData as FlashCardDataSchema
+        from app.schemas.college import FlashCardData as FlashCardDataSchema  # noqa: F811 (import d'exécution)
 
         if not source_text.strip():
             logger.warning("Item %s sans texte source — impossible de régénérer la fiche %s", item.id, card.id)
@@ -185,7 +189,7 @@ class ClaudeClient:
                 max_tokens=500,
                 messages=[{"role": "user", "content": prompt}],
             )
-            raw = response.content[0].text.strip()
+            raw = response.content[0].text.strip()  # type: ignore[union-attr]
             if raw.startswith("```"):
                 raw = re.sub(r"^```[a-z]*\n?", "", raw)
                 raw = re.sub(r"\n?```$", "", raw)
