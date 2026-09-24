@@ -7,10 +7,10 @@ import json
 import logging
 import os
 import uuid
-from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from pathlib import Path
 
+from arq.connections import ArqRedis
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, select
@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import async_session_factory, get_db
 from app.core.time_utils import next_month_reset as _next_month_reset
-from app.deps import get_current_user, get_current_user_short_session, require_subscription
+from app.deps import get_arq, get_current_user, get_current_user_short_session, require_subscription
 from app.models.college import College
 from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
@@ -275,7 +275,7 @@ async def _assert_import_allowed(db: AsyncSession, user: User, ref_id: int, limi
 
 
 async def _create_job_and_enqueue(
-    db: AsyncSession, user: User, college: College, job_id: uuid.UUID, pdf_file_path: Path
+    db: AsyncSession, arq: ArqRedis, user: User, college: College, job_id: uuid.UUID, pdf_file_path: Path
 ) -> ImportCollegeResponseData:
     """Crée le GenerationJob et enqueue l'OCR. Supprime le PDF sur toute erreur."""
     # IntegrityError = race OCR détectée par l'index UNIQUE partial sur (college_id) WHERE status active.
@@ -297,15 +297,9 @@ async def _create_job_and_enqueue(
         pdf_file_path.unlink(missing_ok=True)
         raise
 
-    # Enqueuer le job ARQ
-    pool = None
+    # Enqueuer le job ARQ (pool unique de l'application)
     try:
-        from arq import create_pool  # type: ignore[import]
-
-        from app.core.redis import redis_settings as _redis_settings
-
-        pool = await create_pool(_redis_settings)
-        arq_job = await pool.enqueue_job(
+        arq_job = await arq.enqueue_job(
             "process_college_ocr",
             str(college.id),
             str(job_id),
@@ -324,9 +318,6 @@ async def _create_job_and_enqueue(
             status_code=503,
             detail={"code": "QUEUE_UNAVAILABLE", "message": "Impossible d'enqueuer le job OCR — réessayez"},
         ) from exc
-    finally:
-        if pool is not None:
-            await pool.close()
 
     return ImportCollegeResponseData(
         college_id=str(college.id),
@@ -336,7 +327,7 @@ async def _create_job_and_enqueue(
 
 
 async def _start_import_from_file(
-    db: AsyncSession, user: User, ref_id: int, pdf_file_path: Path
+    db: AsyncSession, user: User, ref_id: int, pdf_file_path: Path, arq: ArqRedis
 ) -> ImportCollegeResponseData:
     """Chemin d'import à partir d'un PDF déjà écrit sur le volume partagé (upload par morceaux
     assemblé) : get/create College, garde job actif, quotas atomiques, renommage en
@@ -354,7 +345,7 @@ async def _start_import_from_file(
     final_path = pdf_file_path.with_name(f"{college.id}_{job_id}.pdf")
     os.replace(pdf_file_path, final_path)
     logger.info("PDF ready for college %s (ref_id=%s) at %s", college.id, ref_id, final_path)
-    return await _create_job_and_enqueue(db, user, college, job_id, final_path)
+    return await _create_job_and_enqueue(db, arq, user, college, job_id, final_path)
 
 
 @router.post(
@@ -367,6 +358,7 @@ async def import_college_pdf(
     pdf: UploadFile,
     current_user: User = Depends(require_subscription),
     db: AsyncSession = Depends(get_db),
+    arq: ArqRedis = Depends(get_arq),
 ) -> ImportCollegeResponseWrapped:
     """Soumet un PDF pour traitement OCR — crée le College si nécessaire (mono-requête, ≤ 100 MB
     derrière Cloudflare ; au-delà, voir /import/init)."""
@@ -423,24 +415,16 @@ async def import_college_pdf(
 
     logger.info("PDF saved for college %s (ref_id=%s) at %s", college.id, ref_id, pdf_file_path)
 
-    data = await _create_job_and_enqueue(db, current_user, college, job_id, pdf_file_path)
+    data = await _create_job_and_enqueue(db, arq, current_user, college, job_id, pdf_file_path)
     return ImportCollegeResponseWrapped(data=data)
 
 
 # ── Story 7.11 — upload par morceaux (Cloudflare : 100 MB max par requête) ──────
 
 
-async def get_upload_store() -> AsyncIterator[ChunkedUploadStore]:
-    """Store d'upload : Redis via le pool ARQ (redis.asyncio) + volume pdf_storage."""
-    from arq import create_pool  # type: ignore[import]
-
-    from app.core.redis import redis_settings as _redis_settings
-
-    pool = await create_pool(_redis_settings)
-    try:
-        yield ChunkedUploadStore(pool, Path(settings.pdf_storage_path))
-    finally:
-        await pool.close()
+async def get_upload_store(arq: ArqRedis = Depends(get_arq)) -> ChunkedUploadStore:
+    """Store d'upload : Redis via le pool ARQ unique (redis.asyncio) + volume pdf_storage."""
+    return ChunkedUploadStore(arq, Path(settings.pdf_storage_path))
 
 
 def _upload_not_found() -> HTTPException:
@@ -532,6 +516,7 @@ async def complete_chunked_import(
     current_user: User = Depends(require_subscription),
     db: AsyncSession = Depends(get_db),
     store: ChunkedUploadStore = Depends(get_upload_store),
+    arq: ArqRedis = Depends(get_arq),
 ) -> ImportCollegeResponseWrapped:
     """Assemble les morceaux puis enchaîne sur le pipeline d'import existant."""
     state = await store.get(str(upload_id))
@@ -562,7 +547,7 @@ async def complete_chunked_import(
     try:
         store.assemble(claimed, assembled)
         await assert_pdf_readable(assembled)
-        data = await _start_import_from_file(db, current_user, claimed.ref_id, assembled)
+        data = await _start_import_from_file(db, current_user, claimed.ref_id, assembled, arq)
     except HTTPException as exc:
         assembled.unlink(missing_ok=True)
         if exc.status_code == 503:

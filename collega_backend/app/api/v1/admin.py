@@ -10,6 +10,7 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
+from arq.connections import ArqRedis
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile
 from sqlalchemy import func, select
 from sqlalchemy import update as sa_update
@@ -19,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import async_session_factory, get_db
 from app.core.security import hash_password
-from app.deps import get_admin_user
+from app.deps import get_admin_user, get_arq, get_arq_optional
 from app.models.college import College
 from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
@@ -119,6 +120,7 @@ async def process_college(
     pdf: UploadFile,
     _: bool = Depends(get_admin_user),
     db: AsyncSession = Depends(get_db),
+    arq: ArqRedis = Depends(get_arq),
 ) -> ProcessCollegeResponseWrapped:
     """Soumet un PDF pour traitement OCR.
 
@@ -203,14 +205,8 @@ async def process_college(
         ) from None
 
     # Enqueuer le job ARQ — si l'enqueue échoue, on rollback et retourne 503
-    pool = None
     try:
-        from arq import create_pool  # type: ignore[import]
-
-        from app.core.redis import redis_settings as _redis_settings
-
-        pool = await create_pool(_redis_settings)
-        arq_job = await pool.enqueue_job(
+        arq_job = await arq.enqueue_job(
             "process_college_ocr",
             str(college_id),
             str(job_id),
@@ -230,9 +226,6 @@ async def process_college(
             status_code=503,
             detail={"code": "QUEUE_UNAVAILABLE", "message": "Failed to enqueue OCR job — please retry"},
         ) from exc
-    finally:
-        if pool is not None:
-            await pool.close()
 
     return ProcessCollegeResponseWrapped(data=ProcessCollegeResponse(job_id=str(job.id), status=job.status))
 
@@ -713,6 +706,7 @@ async def stop_job(
     job_id: uuid.UUID,
     _: bool = Depends(get_admin_user),
     db: AsyncSession = Depends(get_db),
+    arq: ArqRedis | None = Depends(get_arq_optional),
 ) -> StopJobResponseWrapped:
     """Annule un job ARQ actif et force son statut DB à 'failed'.
 
@@ -740,7 +734,8 @@ async def stop_job(
     # le worker tourne encore. Le statut DB est forcé indépendamment du résultat.
     aborted = False
     if job.arq_job_id:
-        aborted = await abort_arq_job(job.arq_job_id)
+        # Redis injoignable (arq None) : abort impossible, le statut DB est forcé quand même.
+        aborted = await abort_arq_job(arq, job.arq_job_id)
 
     # Échec centralisé (chantier 1) : brouillon vidé, PDF de l'import supprimé,
     # contenu en service du collège intact, utilisatrice notifiée.

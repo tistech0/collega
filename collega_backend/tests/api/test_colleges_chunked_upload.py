@@ -12,6 +12,7 @@ from httpx import AsyncClient
 from app.api.v1 import colleges as colleges_module
 from app.deps import require_subscription
 from app.services.upload.chunked_upload import PART_SIZE, ChunkedUploadStore
+from tests.fakes.fake_arq import arq_pool
 from tests.fakes.fake_redis import FakeRedis
 
 
@@ -202,7 +203,7 @@ class TestComplete:
         await _upload_all(store, st)
         captured = {}
 
-        async def fake_start(db, u, ref_id, pdf_file_path):
+        async def fake_start(db, u, ref_id, pdf_file_path, arq):
             captured["ref_id"] = ref_id
             captured["bytes"] = pdf_file_path.read_bytes()
             from app.schemas.college import ImportCollegeResponseData
@@ -279,7 +280,7 @@ class TestComplete:
         st = await store.create(user.id, 34, 10)
         await _upload_all(store, st)
 
-        async def failing_start(db, u, ref_id, pdf_file_path):
+        async def failing_start(db, u, ref_id, pdf_file_path, arq):
             pdf_file_path.unlink(missing_ok=True)
             from fastapi import HTTPException
 
@@ -296,7 +297,6 @@ class TestComplete:
         self, client, mock_db, app_with_store, store, monkeypatch, tmp_path
     ):
         """Chemin complet sans fake : assemblage → _start_import_from_file → {college.id}_{job_id}.pdf enqueué."""
-        from unittest.mock import patch
 
         user = _make_user()
         app_with_store.dependency_overrides[require_subscription] = lambda: user
@@ -316,7 +316,7 @@ class TestComplete:
         )
         mock_pool = AsyncMock()
         mock_pool.enqueue_job = AsyncMock(return_value=MagicMock(job_id="arq-1"))
-        with patch("arq.create_pool", AsyncMock(return_value=mock_pool)):
+        with arq_pool(mock_pool):
             resp = await client.post(f"/v1/colleges/import/{st.upload_id}/complete")
 
         assert resp.status_code == 202, resp.text

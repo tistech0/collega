@@ -11,6 +11,7 @@ import pytest
 from httpx import AsyncClient
 
 from app.deps import get_current_user, require_subscription
+from tests.fakes.fake_arq import arq_pool
 
 
 def _make_user(user_id=None, is_subscribed=True, is_beta=False):
@@ -168,7 +169,7 @@ class TestImportCollegePdf:
         with (
             patch("app.api.v1.colleges.Path.mkdir"),
             patch("builtins.open", MagicMock()),
-            patch("arq.create_pool", AsyncMock(return_value=mock_pool)),
+            arq_pool(mock_pool),
         ):
             resp = await client.post(
                 "/v1/colleges/15/import",

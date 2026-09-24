@@ -49,7 +49,7 @@ async def test_409_when_job_not_active(pg_client, pg_factory, monkeypatch, statu
     abort.assert_not_awaited()
 
 
-async def test_stop_reimport_keeps_content_and_clears_draft(pg_client, pg_factory, monkeypatch):
+async def test_stop_reimport_keeps_content_and_clears_draft(pg_client, pg_factory, monkeypatch, fake_arq):
     abort = AsyncMock(return_value=True)
     monkeypatch.setattr("app.api.v1.admin.abort_arq_job", abort)
     college, job = await _seed(pg_factory)
@@ -63,7 +63,7 @@ async def test_stop_reimport_keeps_content_and_clears_draft(pg_client, pg_factor
         "error_message": "Annulé par l'admin",
         "aborted": True,
     }
-    abort.assert_awaited_once_with("arq-1")
+    abort.assert_awaited_once_with(fake_arq, "arq-1")
     async with pg_factory() as s:
         assert (await s.get(College, college.id)).status == "generation_complete"
         assert (await s.execute(select(func.count()).select_from(FlashCard))).scalar_one() == 1

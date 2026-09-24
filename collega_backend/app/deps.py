@@ -1,6 +1,8 @@
+import asyncio
 import secrets
 import uuid
 
+from arq.connections import ArqRedis
 from fastapi import Depends, Header, HTTPException, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,11 +15,49 @@ _http_basic = HTTPBasic()
 
 __all__ = [
     "get_db",
+    "get_arq",
+    "get_arq_optional",
     "get_admin_user",
     "get_current_user",
     "get_current_user_short_session",
     "require_subscription",
 ]
+
+
+# Une seule reconnexion paresseuse à la fois : sans verrou, des requêtes concurrentes
+# ouvriraient chacune un pool, dont tous sauf un fuiraient.
+_arq_reconnect_lock = asyncio.Lock()
+
+
+async def get_arq_optional(request: Request) -> ArqRedis | None:
+    """Pool ARQ de l'application (créé dans le lifespan), ou None si Redis reste injoignable.
+
+    Si le pool manque (Redis injoignable au démarrage), une reconnexion est tentée.
+    """
+    state = request.app.state
+    pool = getattr(state, "arq", None)
+    if pool is not None:
+        return pool
+    connect = getattr(state, "arq_connect", None)
+    if connect is None:
+        return None
+    async with _arq_reconnect_lock:
+        pool = getattr(state, "arq", None)
+        if pool is None:
+            pool = await connect()
+            state.arq = pool
+    return pool
+
+
+async def get_arq(request: Request) -> ArqRedis:
+    """Pool ARQ de l'application ; 503 QUEUE_UNAVAILABLE si Redis reste injoignable."""
+    pool = await get_arq_optional(request)
+    if pool is None:
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "QUEUE_UNAVAILABLE", "message": "File d'attente indisponible — réessayez"},
+        )
+    return pool
 
 
 async def get_admin_user(

@@ -25,6 +25,7 @@ from httpx import AsyncClient
 from sqlalchemy.exc import IntegrityError
 
 from app.deps import get_current_user, require_subscription
+from tests.fakes.fake_arq import arq_pool
 
 
 def _make_user(user_id=None, monthly_reloads=0, monthly_reloads_reset_at=None):
@@ -170,7 +171,7 @@ class TestReimportQuotaChecks:
         with (
             patch("app.api.v1.colleges.Path.mkdir"),
             patch("builtins.open", _MM()),
-            patch("arq.create_pool", _AM(return_value=mock_pool)),
+            arq_pool(mock_pool),
         ):
             resp = await client.post(
                 "/v1/colleges/15/import",
@@ -211,7 +212,7 @@ class TestReimportQuotaChecks:
         with (
             patch("app.api.v1.colleges.Path.mkdir"),
             patch("builtins.open", _MM()),
-            patch("arq.create_pool", _AM(return_value=mock_pool)),
+            arq_pool(mock_pool),
         ):
             resp = await client.post(
                 "/v1/colleges/15/import",
@@ -261,7 +262,7 @@ class TestReimportQuotaChecks:
         with (
             patch("app.api.v1.colleges.Path.mkdir"),
             patch("builtins.open", _MM()),
-            patch("arq.create_pool", _AM(return_value=mock_pool)),
+            arq_pool(mock_pool),
         ):
             resp = await client.post(
                 "/v1/colleges/15/import",
@@ -311,7 +312,7 @@ class TestUniqueProcessingIntegrity:
         with (
             patch("app.api.v1.colleges.Path.mkdir"),
             patch("builtins.open", _MM()),
-            patch("arq.create_pool", _AM(return_value=mock_pool)),
+            arq_pool(mock_pool),
         ):
             resp = await client.post(
                 "/v1/colleges/15/import",
