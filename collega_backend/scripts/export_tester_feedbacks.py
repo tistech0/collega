@@ -7,8 +7,9 @@ est joint au contenu de sa fiche (recto, verso, rang). Écrit
 le nombre de lignes. Si la table n'existe plus (migration 019 déjà passée) :
 message et code 0.
 
-Sur le NAS, AVANT la migration 019 :
-  docker exec collega-api-1 python scripts/export_tester_feedbacks.py --out /tmp/collega_pdfs
+Sur le NAS, AVANT la migration 019 — l'image de prod ne contient pas ce script,
+donc on le pipe par l'entrée standard (cf. docs/deployment.md) :
+  docker exec -i collega-api-1 python - --out /tmp/collega_pdfs < scripts/export_tester_feedbacks.py
 puis rapatrier le fichier.
 """
 
