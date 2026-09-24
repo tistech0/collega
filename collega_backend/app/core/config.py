@@ -1,6 +1,6 @@
 import logging
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
 
     # Items générés en parallèle par import (chantier 4) : appels Claude simultanés.
     # 429 répétés au contrôle de fumée → 2.
-    generation_concurrency: int = 4
+    generation_concurrency: int = Field(4, ge=1)
 
     # Taux de conversion USD→EUR pour le calcul de coût des tokens Claude
     # (Story 7.8). Valeur par défaut ici (PAS dans le .env prod NAS, cf. mémoire

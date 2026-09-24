@@ -532,3 +532,64 @@ async def test_insufficient_item_is_listed_and_never_repaid(pg_factory, notifica
     result = await _run(pg_factory, college, job2, claude)
     assert claude.calls == []
     assert (result["insufficient_items"], result["claude_calls"], result["unchanged"]) == ([305], 0, 2)
+
+
+async def test_modified_item_turned_insufficient_survives_purge_and_is_not_repaid(pg_factory, notifications):
+    from app.services.content.purge import purge_unreferenced_content
+
+    _, college, job = await _ready_job(pg_factory, {304: "ancien texte"})
+    await _run(pg_factory, college, job, FakeClaude())
+    # Le texte de l'item change et devient insuffisant : l'ancien contenu est gardé, la
+    # nouvelle génération (0 fiche) n'est référencée par rien après la bascule.
+    job2 = await _drafts_again(pg_factory, college, {304: "texte tronqué"})
+    result = await _run(pg_factory, college, job2, FakeClaude(insufficient_for={304}))
+    assert (result["insufficient_items"], result["cards"]) == ([304], 1)
+    async with pg_factory() as db:
+        await purge_unreferenced_content(db)
+        await db.commit()
+    job3 = await _drafts_again(pg_factory, college, {304: "texte tronqué"})
+    claude = FakeClaude(insufficient_for={304})
+    result = await _run(pg_factory, college, job3, claude)
+    assert claude.calls == [] and result["insufficient_items"] == [304]
+
+
+async def test_cancellation_right_after_the_call_still_persists_it(pg_factory, notifications, sequential):
+    texts = {301: "a", 302: "b", 303: "c"}
+    _, college, job = await _ready_job(pg_factory, texts)
+
+    class CancelledAfterCall(FakeClaude):
+        async def generate_cards(self, item_number, title, pages, *, effort="medium"):
+            r = await super().generate_cards(item_number, title, pages)
+            if item_number == 302:
+                asyncio.current_task().cancel()  # annulation livrée dès l'await suivant
+            return r
+
+    with pytest.raises(asyncio.CancelledError):
+        await _run(pg_factory, college, job, CancelledAfterCall())
+    # L'appel payé de 302 est enregistré (usage + génération) malgré l'annulation.
+    assert len(await _usage(pg_factory)) == 2
+    async with pg_factory() as s:
+        assert (await s.execute(select(func.count()).select_from(ItemGeneration))).scalar_one() == 2
+        assert (await s.get(GenerationJob, job.id)).status == "ocr_complete"
+    claude = FakeClaude()
+    result = await _run(pg_factory, college, job, claude)  # relance ARQ du même job
+    assert claude.calls == [303] and result["added"] == 3
+
+
+async def test_every_task_error_is_logged(pg_factory, notifications, monkeypatch, caplog):
+    monkeypatch.setattr(settings, "generation_concurrency", 2)
+    _, college, job = await _ready_job(pg_factory, {301: "a", 302: "b"})
+    both_in_flight = asyncio.Event()
+
+    class BothFail(FakeClaude):
+        async def generate_cards(self, item_number, title, pages, *, effort="medium"):
+            self.calls.append(item_number)
+            if len(self.calls) == 2:
+                both_in_flight.set()
+            await asyncio.wait_for(both_in_flight.wait(), 5)
+            raise RuntimeError(f"panne {item_number}")
+
+    with pytest.raises(RuntimeError) as raised:
+        await _run(pg_factory, college, job, BothFail())
+    other = ({"panne 301", "panne 302"} - {str(raised.value)}).pop()
+    assert other in caplog.text

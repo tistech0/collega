@@ -6,6 +6,11 @@
 - PDF : on garde celui de chaque import actif et celui du dernier import réussi
   de chaque collège (politique : « conservés tant que le collège est dans ton
   compte ») ; le reste est orphelin.
+- Exception : les générations « texte insuffisant » (0 fiche, minuscules) et leurs
+  textes d'items ne sont jamais purgées — un item modifié devenu insuffisant garde
+  son ancien contenu, sa nouvelle génération n'est référencée par rien, et la purger
+  ferait repayer Claude à chaque réimport (chantier 4). Le vidage (wipe_content) les
+  supprime.
 """
 
 from __future__ import annotations
@@ -27,7 +32,8 @@ logger = logging.getLogger(__name__)
 _PURGE_STATEMENTS = {
     "item_generations": """
         DELETE FROM item_generations g
-        WHERE NOT EXISTS (SELECT 1 FROM flash_cards f WHERE f.generation_id = g.id)
+        WHERE NOT g.insufficient_text
+          AND NOT EXISTS (SELECT 1 FROM flash_cards f WHERE f.generation_id = g.id)
           AND NOT EXISTS (SELECT 1 FROM job_items j WHERE j.generation_id = g.id)
           AND NOT EXISTS (SELECT 1 FROM items i WHERE i.text_hash = g.text_hash)
           AND NOT EXISTS (SELECT 1 FROM job_items j2 WHERE j2.text_hash = g.text_hash)

@@ -14,8 +14,11 @@ Aucune session n'est ouverte pendant un appel Claude.
 
 Chantier 4 : items générés en parallèle (`settings.generation_concurrency` appels
 simultanés), chacun dans sa tâche avec ses sessions courtes et son commit ; seul
-l'orchestrateur tient l'avancement (items faits, fiches, aperçu). Stop : les appels
-en vol sont annulés, les items validés restent acquis et l'import reste reprenable.
+l'orchestrateur tient l'avancement (items faits, fiches, aperçu). Stop : constaté par
+chaque tâche avant son appel ; les appels en vol sont alors annulés — un appel déjà
+revenu est tout de même enregistré (payé, réutilisable) —, les items validés restent
+acquis et la bascule n'a pas lieu (publish_job ignore un job qui n'est plus
+`ocr_complete`).
 Erreur d'une tâche (API indisponible après les réessais du SDK) : les autres sont
 annulées et l'erreur remonte (le worker passe l'import en échec, `fail_job`).
 Les pages de l'item sont relues dans `item_texts` (séparateur de page stable,
@@ -46,7 +49,7 @@ from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
 from app.models.item import Item
 from app.services.content import store
-from app.services.generation.claude_client import GENERATION_MODEL, GENERATION_VERSION
+from app.services.generation.claude_client import GENERATION_MODEL, GENERATION_VERSION, CardGenResult
 from app.services.generation.usage import record_usage
 from app.services.jobs.job_events import record_job_event
 
@@ -142,7 +145,7 @@ async def generate_job_items(
     claude_calls = 0
     await _report(progress, college_id, items_done=items_done, items_total=total, cards=cards, preview=latest)
 
-    semaphore = asyncio.Semaphore(max(1, settings.generation_concurrency))
+    semaphore = asyncio.Semaphore(settings.generation_concurrency)
     event_numbers = itertools.count(items_done + 1)
 
     async def generate_one(item_number: int, title: str | None, text_hash: str) -> _ItemOutcome | None:
@@ -168,6 +171,8 @@ async def generate_job_items(
             # échoue par l'appelant (fail_job) ou reste reprenable (CancelledError).
             failed = [t for t in done if t.cancelled() or t.exception() is not None]
             if failed:
+                for other in failed[1:]:
+                    _log_task_error(other)
                 failed[0].result()
             results = [t.result() for t in done]
             outcomes = [o for o in results if o is not None]
@@ -187,8 +192,17 @@ async def generate_job_items(
             task.cancel()
         if pending:
             await asyncio.gather(*pending, return_exceptions=True)
+            for task in pending:
+                _log_task_error(task)
 
     return claude_calls
+
+
+def _log_task_error(task: asyncio.Task[Any]) -> None:
+    """Journalise l'erreur d'une tâche d'item qui n'est pas celle qui remonte (jamais
+    « Task exception was never retrieved ») ; une annulation n'est pas une erreur."""
+    if task.done() and not task.cancelled() and (exc := task.exception()) is not None:
+        logger.warning("Génération : autre erreur (%s) : %r", task.get_name(), exc)
 
 
 @dataclass
@@ -211,7 +225,7 @@ async def _generate_item(
     event_numbers: Iterator[int],
 ) -> _ItemOutcome | None:
     """Génère (ou réutilise) la génération d'un item et la valide aussitôt (commit
-    par item). None : import arrêté (Stop, job ou collège supprimé)."""
+    par item). None : import arrêté (Stop constaté avant l'appel, job supprimé)."""
     async with session_factory() as db:
         if await _job_status(db, job_id) != "ocr_complete":
             logger.info("Génération du job %s arrêtée avant l'item %d", job_id, item_number)
@@ -222,19 +236,62 @@ async def _generate_item(
     result = None
     if gen is None:
         result = await claude.generate_cards(item_number, title or "", pages or [""])
+
+    # L'appel est payé : son enregistrement (usage, génération, brouillon) va au bout
+    # même si la tâche est annulée entre-temps (Stop, erreur d'un autre item, arrêt
+    # du worker) — sinon un réimport le repaierait. L'annulation est rendue ensuite.
+    persist = asyncio.ensure_future(
+        _persist_item(
+            session_factory,
+            result,
+            gen,
+            job_id=job_id,
+            user_id=user_id,
+            college_id=college_id,
+            item_number=item_number,
+            text_hash=text_hash,
+            total=total,
+            event_numbers=event_numbers,
+        )
+    )
+    try:
+        return await asyncio.shield(persist)
+    except asyncio.CancelledError:
+        await persist
+        raise
+
+
+async def _persist_item(
+    session_factory: async_sessionmaker[AsyncSession],
+    result: CardGenResult | None,
+    gen: ItemGeneration | None,
+    *,
+    job_id: uuid.UUID,
+    user_id: uuid.UUID,
+    college_id: uuid.UUID,
+    item_number: int,
+    text_hash: str,
+    total: int,
+    event_numbers: Iterator[int],
+) -> _ItemOutcome | None:
+    """Enregistre l'usage de l'appel, la génération et le brouillon, commit par item.
+
+    Pas de contrôle du Stop ici : un résultat payé est toujours enregistré (il sera
+    réutilisé sans repayer) ; un job arrêté n'est de toute façon jamais basculé
+    (publish_job relit son statut sous verrou). None : job supprimé."""
+    if result is not None and (result.input_tokens or result.output_tokens):
         # Seul un appel réellement facturé compte (texte vide : aucun appel fait). Il est
         # enregistré tout de suite : compté même si l'import est ensuite arrêté ou échoue.
-        if result.input_tokens or result.output_tokens:
-            await record_usage(
-                session_factory,
-                kind="generation",
-                model=result.model,
-                input_tokens=result.input_tokens,
-                output_tokens=result.output_tokens,
-                user_id=user_id,
-                college_id=college_id,
-                job_id=job_id,
-            )
+        await record_usage(
+            session_factory,
+            kind="generation",
+            model=result.model,
+            input_tokens=result.input_tokens,
+            output_tokens=result.output_tokens,
+            user_id=user_id,
+            college_id=college_id,
+            job_id=job_id,
+        )
 
     async with session_factory() as db:
         job = await db.get(GenerationJob, job_id)
@@ -242,8 +299,8 @@ async def _generate_item(
             return None
         if result is not None:
             if result.cards or result.insufficient_text:
-                # Texte insuffisant : génération à 0 fiche gardée comme les autres — un
-                # réimport du même texte ne repaie pas l'item.
+                # Texte insuffisant : génération à 0 fiche gardée comme les autres (et
+                # épargnée par la purge) — un réimport du même texte ne repaie pas l'item.
                 gen = await store.put_generation(
                     db,
                     text_hash,
