@@ -4,9 +4,11 @@ Revision ID: 012
 Revises: 011
 Create Date: 2026-05-20
 """
+
 import logging
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision = "012"
@@ -66,9 +68,7 @@ def upgrade() -> None:
     result = conn.execute(cleanup_sql)
     deleted = getattr(result, "rowcount", None)
     if deleted:
-        logger.warning(
-            "Pre-index cleanup: deleted %d duplicate active GenerationJob rows", deleted
-        )
+        logger.warning("Pre-index cleanup: deleted %d duplicate active GenerationJob rows", deleted)
 
     op.create_index(
         "idx_one_active_job_per_college",

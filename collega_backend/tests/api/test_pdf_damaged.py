@@ -1,4 +1,5 @@
 """422 PDF_DAMAGED : un PDF qui ne s'ouvre pas est refusé à la réception (chantier 1)."""
+
 from pathlib import Path
 
 import pytest
@@ -8,9 +9,8 @@ from app.core.config import settings
 from app.models.college import College
 from app.models.generation_job import GenerationJob
 from app.services.ocr.pdf_check import assert_pdf_readable
-from tests.api_pg import login_as, pg_client  # noqa: F401
+from tests.api_pg import login_as
 from tests.factories import make_college, make_user
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
 
 SAMPLE_PDF = Path(__file__).parents[1] / "fixtures" / "sample_ecni.pdf"
 # Magic bytes valides mais structure illisible (comme ANAPATH 4e.pdf : index de fin

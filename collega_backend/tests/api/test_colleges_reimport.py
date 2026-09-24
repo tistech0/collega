@@ -11,11 +11,12 @@ UPDATE atomique avec RETURNING. Le mock `db.execute.side_effect` chaîne :
 Pour les tests non-reimport (status != 'generation_complete'), seuls les
 deux premiers SELECT sont exécutés.
 """
+
 from __future__ import annotations
 
 import types
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from unittest.mock import AsyncMock, MagicMock
 
@@ -66,7 +67,9 @@ def _readable_pdf(monkeypatch):
     from app.api.v1 import colleges as colleges_module
 
     monkeypatch.setattr(colleges_module, "assert_pdf_readable", AsyncMock(return_value=1))
-_FUTURE = datetime.now(timezone.utc) + timedelta(days=15)
+
+
+_FUTURE = datetime.now(UTC) + timedelta(days=15)
 
 
 class TestReimportQuotaChecks:
@@ -81,8 +84,8 @@ class TestReimportQuotaChecks:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob (aucun job actif)
-                _result(None),     # UPDATE College RETURNING — saturé → 409 COLLEGE_RELOAD_LIMIT
+                _result(None),  # SELECT GenerationJob (aucun job actif)
+                _result(None),  # UPDATE College RETURNING — saturé → 409 COLLEGE_RELOAD_LIMIT
             ]
         )
 
@@ -98,9 +101,7 @@ class TestReimportQuotaChecks:
         assert detail["reload_count"] == 2
         assert detail["reload_count_max"] == 2
 
-    async def test_reimport_bloque_monthly_limit_rollback_college(
-        self, client: AsyncClient, mock_db
-    ):
+    async def test_reimport_bloque_monthly_limit_rollback_college(self, client: AsyncClient, mock_db):
         """409 MONTHLY_RELOAD_LIMIT — College a été UPDATE OK mais User RETURNING None.
 
         On vérifie aussi que `db.rollback()` est bien appelé pour annuler
@@ -115,9 +116,9 @@ class TestReimportQuotaChecks:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob
-                _result(1),        # UPDATE College RETURNING 1 (OK)
-                _result(None),     # UPDATE User RETURNING None → saturé → 409
+                _result(None),  # SELECT GenerationJob
+                _result(1),  # UPDATE College RETURNING 1 (OK)
+                _result(None),  # UPDATE User RETURNING None → saturé → 409
             ]
         )
         mock_db.rollback = AsyncMock()
@@ -139,9 +140,12 @@ class TestReimportQuotaChecks:
 
     async def test_monthly_reset_at_none_effective_zero(self, client: AsyncClient, mock_db):
         """Si monthly_reloads_reset_at is None → reset lazy → user peut faire un reimport."""
-        from app.main import app
         import uuid as _uuid
-        from unittest.mock import patch, MagicMock as _MM, AsyncMock as _AM
+        from unittest.mock import AsyncMock as _AM
+        from unittest.mock import MagicMock as _MM
+        from unittest.mock import patch
+
+        from app.main import app
 
         user = _make_user(monthly_reloads=3, monthly_reloads_reset_at=None)
         college = _make_college(ref_id=15, user_id=user.id, status="generation_complete", reload_count=0)
@@ -151,9 +155,9 @@ class TestReimportQuotaChecks:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob
-                _result(1),        # UPDATE College RETURNING 1 (premier reload, le reset_lazy a remis monthly=0)
-                _result(1),        # UPDATE User RETURNING 1 (incrément OK après reset lazy)
+                _result(None),  # SELECT GenerationJob
+                _result(1),  # UPDATE College RETURNING 1 (premier reload, le reset_lazy a remis monthly=0)
+                _result(1),  # UPDATE User RETURNING 1 (incrément OK après reset lazy)
             ]
         )
 
@@ -181,8 +185,11 @@ class TestReimportQuotaChecks:
 
     async def test_premier_import_non_bloque(self, client: AsyncClient, mock_db):
         """Premier import (status != generation_complete) → aucun UPDATE atomique nécessaire."""
+        from unittest.mock import AsyncMock as _AM
+        from unittest.mock import MagicMock as _MM
+        from unittest.mock import patch
+
         from app.main import app
-        from unittest.mock import patch, MagicMock as _MM, AsyncMock as _AM
 
         user = _make_user()
         college = _make_college(ref_id=15, user_id=user.id, status="pending", reload_count=99)
@@ -191,7 +198,7 @@ class TestReimportQuotaChecks:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob
+                _result(None),  # SELECT GenerationJob
             ]
         )
 
@@ -219,9 +226,12 @@ class TestReimportQuotaChecks:
 
     async def test_import_dans_les_limites_retourne_202(self, client: AsyncClient, mock_db):
         """Reimport OK — UPDATE atomique réussit pour College et User."""
-        from app.main import app
         import uuid as _uuid
-        from unittest.mock import patch, MagicMock as _MM, AsyncMock as _AM
+        from unittest.mock import AsyncMock as _AM
+        from unittest.mock import MagicMock as _MM
+        from unittest.mock import patch
+
+        from app.main import app
 
         user = _make_user(monthly_reloads=2, monthly_reloads_reset_at=_FUTURE)
         college = _make_college(ref_id=15, user_id=user.id, status="generation_complete", reload_count=1)
@@ -231,9 +241,9 @@ class TestReimportQuotaChecks:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob
-                _result(2),        # UPDATE College RETURNING 2
-                _result(3),        # UPDATE User RETURNING 3
+                _result(None),  # SELECT GenerationJob
+                _result(2),  # UPDATE College RETURNING 2
+                _result(3),  # UPDATE User RETURNING 3
             ]
         )
 
@@ -245,6 +255,7 @@ class TestReimportQuotaChecks:
 
         async def mock_refresh(obj):
             pass
+
         mock_db.refresh = mock_refresh
 
         with (
@@ -269,12 +280,13 @@ class TestUniqueProcessingIntegrity:
     se manifeste via IntegrityError au commit du nouveau job. Le router doit
     renvoyer 409 JOB_IN_PROGRESS (et non 500)."""
 
-    async def test_integrity_error_commit_returns_409_job_in_progress(
-        self, client: AsyncClient, mock_db
-    ):
-        from app.main import app
+    async def test_integrity_error_commit_returns_409_job_in_progress(self, client: AsyncClient, mock_db):
         import uuid as _uuid
-        from unittest.mock import patch, MagicMock as _MM, AsyncMock as _AM
+        from unittest.mock import AsyncMock as _AM
+        from unittest.mock import MagicMock as _MM
+        from unittest.mock import patch
+
+        from app.main import app
 
         user = _make_user()
         # status != generation_complete → pas de quota check, le code va directement
@@ -286,7 +298,7 @@ class TestUniqueProcessingIntegrity:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob (pre-check vide, le doublon n'est pas encore créé)
+                _result(None),  # SELECT GenerationJob (pre-check vide, le doublon n'est pas encore créé)
             ]
         )
         mock_db.commit = AsyncMock(side_effect=IntegrityError("INSERT", {}, Exception("UNIQUE")))

@@ -1,4 +1,5 @@
 """Cron de purge des uploads par morceaux orphelins (Story 7.11)."""
+
 from __future__ import annotations
 
 import os

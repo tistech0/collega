@@ -1,4 +1,5 @@
 """Client API branché sur le Postgres de test (chantier 1)."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator

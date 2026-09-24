@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, Integer, String
@@ -17,9 +17,7 @@ if TYPE_CHECKING:
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
     is_beta: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
@@ -37,12 +35,10 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
 
-    colleges: Mapped[list["College"]] = relationship(
-        "College", back_populates="user", cascade="all, delete-orphan"
-    )
+    colleges: Mapped[list["College"]] = relationship("College", back_populates="user", cascade="all, delete-orphan")
     generation_jobs: Mapped[list["GenerationJob"]] = relationship(
         "GenerationJob", back_populates="user", cascade="all, delete-orphan"
     )

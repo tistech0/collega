@@ -1,4 +1,5 @@
 """Story 8.0 — rapprochement titres extraits du PDF ↔ items en base (fonction pure)."""
+
 import uuid
 
 from scripts.backfill_item_titles import plan_updates
@@ -19,9 +20,7 @@ def test_missing_extraction_is_skipped():
 def test_parse_overrides():
     from scripts.backfill_item_titles import parse_overrides
 
-    assert parse_overrides(['338=Œdème de Quincke et anaphylaxie']) == {
-        338: "Œdème de Quincke et anaphylaxie"
-    }
+    assert parse_overrides(["338=Œdème de Quincke et anaphylaxie"]) == {338: "Œdème de Quincke et anaphylaxie"}
 
 
 def test_parse_overrides_rejects_malformed():

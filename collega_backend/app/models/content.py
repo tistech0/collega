@@ -6,6 +6,7 @@
   vidé à la bascule ou à l'échec.
 - `college_pages` : pages en service d'un collège.
 """
+
 import uuid
 from datetime import datetime
 
@@ -24,9 +25,7 @@ class OcrPage(Base):
     tables_json: Mapped[str] = mapped_column(Text, nullable=False)
     confidence: Mapped[float] = mapped_column(Float, nullable=False)
     method: Mapped[str] = mapped_column(String(20), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
 
 class ItemText(Base):
@@ -34,16 +33,12 @@ class ItemText(Base):
 
     hash: Mapped[str] = mapped_column(String(64), primary_key=True)
     text: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
 
 class ItemGeneration(Base):
     __tablename__ = "item_generations"
-    __table_args__ = (
-        UniqueConstraint("text_hash", "generation_version", name="uq_item_generations_hash_version"),
-    )
+    __table_args__ = (UniqueConstraint("text_hash", "generation_version", name="uq_item_generations_hash_version"),)
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     text_hash: Mapped[str] = mapped_column(String(64), ForeignKey("item_texts.hash"), nullable=False)
@@ -52,9 +47,7 @@ class ItemGeneration(Base):
     model: Mapped[str] = mapped_column(String(100), nullable=False)
     input_tokens: Mapped[int] = mapped_column(Integer, nullable=False)
     output_tokens: Mapped[int] = mapped_column(Integer, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
 
 class JobPage(Base):

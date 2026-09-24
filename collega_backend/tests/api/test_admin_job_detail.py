@@ -1,12 +1,12 @@
 """Tests GET /v1/admin/jobs/{job_id} (détail + timeline + OCR) — Story 7.7 AC #1/#2."""
+
 from __future__ import annotations
 
 import types
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 ADMIN_AUTH = ("admin", "testpass")
@@ -25,8 +25,8 @@ def make_job(job_id=None, college_id=None, status="processing"):
         error_message=None,
         input_tokens=1_000_000,
         output_tokens=1_000_000,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
 
 
@@ -74,7 +74,7 @@ class TestJobDetail:
         # db.get : 1) job, 2) college
         mock_db.get = AsyncMock(side_effect=[job, college])
 
-        t0 = datetime.now(timezone.utc)
+        t0 = datetime.now(UTC)
         events = [
             make_event("ocr_started", t0, total=10),
             make_event("ocr_progress", t0 + timedelta(seconds=5), page=5, total=10),

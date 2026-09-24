@@ -1,12 +1,12 @@
 """Tests POST /v1/auth/register, /login, /refresh, GET /me, PATCH /profile."""
+
 from __future__ import annotations
 
 import types
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 from httpx import AsyncClient
 
 from app.core.security import create_access_token, create_refresh_token, hash_password
@@ -66,9 +66,7 @@ class TestRegister:
 class TestLogin:
     async def test_login_success(self, client: AsyncClient, mock_db):
         user = make_user()
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=user))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=user)))
 
         resp = await client.post(
             "/v1/auth/login",
@@ -81,9 +79,7 @@ class TestLogin:
 
     async def test_login_wrong_password(self, client: AsyncClient, mock_db):
         user = make_user()
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=user))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=user)))
 
         resp = await client.post(
             "/v1/auth/login",
@@ -93,9 +89,7 @@ class TestLogin:
         assert resp.json()["detail"]["code"] == "INVALID_CREDENTIALS"
 
     async def test_login_unknown_email(self, client: AsyncClient, mock_db):
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
 
         resp = await client.post(
             "/v1/auth/login",
@@ -147,9 +141,7 @@ class TestGetCurrentUser:
 
     async def test_beta_user_flag_in_token_response(self, client: AsyncClient, mock_db):
         user = make_user(is_beta=True)
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=user))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=user)))
         mock_db.add = MagicMock()
         mock_db.commit = AsyncMock()
         mock_db.refresh = AsyncMock(side_effect=lambda u: setattr(u, "id", user.id))
@@ -160,9 +152,7 @@ class TestGetCurrentUser:
         )
         # L'utilisateur beta est déjà en base (409) ou on teste login
         # Ici on teste via login
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=user))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=user)))
         resp = await client.post(
             "/v1/auth/login",
             json={"email": user.email, "password": "password123"},
@@ -179,7 +169,7 @@ class TestGetMe:
             faculty="Paris 6",
             monthly_reloads=2,
             with_password=False,
-            monthly_reloads_reset_at=datetime.now(timezone.utc) + timedelta(days=5),
+            monthly_reloads_reset_at=datetime.now(UTC) + timedelta(days=5),
         )
         app.dependency_overrides[get_current_user] = lambda: user
         try:
@@ -199,7 +189,7 @@ class TestGetMe:
 
     async def test_get_me_quota_du_mois_en_cours_et_rappel(self, client: AsyncClient, mock_db):
         """Profil (story 8.14) : réimports du mois en cours + date de renouvellement + rappel."""
-        reset = datetime.now(timezone.utc) + timedelta(days=5)
+        reset = datetime.now(UTC) + timedelta(days=5)
         user = make_user(with_password=False, monthly_reloads=2, monthly_reloads_reset_at=reset, reminder_hour_utc=6)
         app.dependency_overrides[get_current_user] = lambda: user
         try:
@@ -219,7 +209,7 @@ class TestGetMe:
         user = make_user(
             with_password=False,
             monthly_reloads=3,
-            monthly_reloads_reset_at=datetime.now(timezone.utc) - timedelta(days=2),
+            monthly_reloads_reset_at=datetime.now(UTC) - timedelta(days=2),
         )
         app.dependency_overrides[get_current_user] = lambda: user
         try:
@@ -231,7 +221,7 @@ class TestGetMe:
 
         data = resp.json()["data"]
         assert data["monthly_reloads"] == 0
-        assert datetime.fromisoformat(data["monthly_reloads_reset_at"]) > datetime.now(timezone.utc)
+        assert datetime.fromisoformat(data["monthly_reloads_reset_at"]) > datetime.now(UTC)
         assert data["reminder_hour_utc"] is None
 
     async def test_get_me_null_profile_fields(self, client: AsyncClient, mock_db):

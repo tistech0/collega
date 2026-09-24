@@ -1,4 +1,5 @@
 """Tests POST /v1/colleges/{ref_id}/import, GET /v1/colleges/{college_id}/status."""
+
 from __future__ import annotations
 
 import types
@@ -143,16 +144,19 @@ class TestImportCollegePdf:
 
         # add() capture le college créé pour lui donner un id fixe
         added_objects: list = []
+
         def mock_add(obj):
             added_objects.append(obj)
             if hasattr(obj, "college_ref_id") and not getattr(obj, "id", None):
                 obj.id = uuid.uuid4()
                 obj.user_id = user.id
+
         mock_db.add = mock_add
 
         async def mock_refresh(obj):
             if hasattr(obj, "arq_job_id") and not getattr(obj, "id", None):
                 obj.id = uuid.uuid4()
+
         mock_db.refresh = mock_refresh
 
         mock_arq_job = MagicMock()
@@ -233,9 +237,7 @@ class TestGetCollegeStatus:
         app.dependency_overrides[get_current_user] = lambda: user
 
         mock_db.get = AsyncMock(return_value=college)
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=job))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=job)))
 
         resp = await client.get(f"/v1/colleges/{college.id}/status")
         app.dependency_overrides.pop(get_current_user, None)

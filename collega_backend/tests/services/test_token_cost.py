@@ -1,4 +1,5 @@
 """Tests de compute_cost_eur — fonction pure de coût € des tokens (Story 7.8 AC4)."""
+
 from __future__ import annotations
 
 from app.core.config import settings

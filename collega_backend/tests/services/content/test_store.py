@@ -4,7 +4,6 @@ from sqlalchemy import func, select
 from app.models.content import ItemGeneration, OcrPage
 from app.services.content import store
 from app.services.content.fingerprint import item_hash
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
 
 pytestmark = pytest.mark.pg
 

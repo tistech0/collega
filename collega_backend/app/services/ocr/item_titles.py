@@ -4,6 +4,7 @@ Les items de l'ECN sont universels : un titre bien extrait d'un collège sert à
 les autres. Les titres valides alimentent la table `item_titles` ; un item sans titre
 exploitable est complété par correspondance de numéro.
 """
+
 from __future__ import annotations
 
 import re
@@ -28,14 +29,56 @@ _AUTHOR = re.compile(r"\b(?:Pr|Dr)\.?\s+[A-ZÀ-ÖØ-Þ]")
 _META = re.compile(r"objectif|\brang\s+[ABC]\b|^rang\b|\brubrique\b", re.IGNORECASE)
 # Intertitres de section du corps d'un chapitre : jamais un intitulé d'item à eux seuls
 _SECTION_HEADINGS = frozenset(
-    "introduction épidémiologie epidemiologie généralités generalites physiopathologie "
-    "diagnostic définition definition définitions traitement traitements clinique sommaire "
-    "étiologies etiologies conclusion prévention prevention pronostic".split()
+    [
+        "introduction",
+        "épidémiologie",
+        "epidemiologie",
+        "généralités",
+        "generalites",
+        "physiopathologie",
+        "diagnostic",
+        "définition",
+        "definition",
+        "définitions",
+        "traitement",
+        "traitements",
+        "clinique",
+        "sommaire",
+        "étiologies",
+        "etiologies",
+        "conclusion",
+        "prévention",
+        "prevention",
+        "pronostic",
+    ]
 )
 _MIN_LONGEST_WORD = 4
 # Mots qu'une troncature à 200 caractères ne doit pas laisser pendre en fin de titre
 _DANGLING_WORDS = frozenset(
-    "et ou de du des la le les à au aux en d' l' dont par pour sur avec dans un une".split()
+    [
+        "et",
+        "ou",
+        "de",
+        "du",
+        "des",
+        "la",
+        "le",
+        "les",
+        "à",
+        "au",
+        "aux",
+        "en",
+        "d'",
+        "l'",
+        "dont",
+        "par",
+        "pour",
+        "sur",
+        "avec",
+        "dans",
+        "un",
+        "une",
+    ]
 )
 
 
@@ -110,9 +153,7 @@ async def record_title(db: AsyncSession, item_number: int, raw_title: str) -> bo
     async with db.begin_nested():
         try:
             async with db.begin_nested():
-                db.add(
-                    ItemTitle(item_number=item_number, label=label, source="extracted", occurrences=1)
-                )
+                db.add(ItemTitle(item_number=item_number, label=label, source="extracted", occurrences=1))
         except IntegrityError:
             await db.execute(
                 update(ItemTitle)
@@ -135,11 +176,7 @@ async def ensure_title(db: AsyncSession, item_number: int, raw_title: str) -> bo
         return False
     async with db.begin_nested():
         known = (
-            await db.execute(
-                select(ItemTitle.id).where(
-                    ItemTitle.item_number == item_number, ItemTitle.label == label
-                )
-            )
+            await db.execute(select(ItemTitle.id).where(ItemTitle.item_number == item_number, ItemTitle.label == label))
         ).first()
         if known is None:
             db.add(ItemTitle(item_number=item_number, label=label, source="extracted", occurrences=1))
@@ -173,9 +210,7 @@ async def record_official_title(db: AsyncSession, item_number: int, raw_title: s
         raise ValueError(f"Titre invalide pour l'item {item_number} : {raw_title!r}")
 
     existing = (
-        await db.execute(
-            select(ItemTitle).where(ItemTitle.item_number == item_number, ItemTitle.label == label)
-        )
+        await db.execute(select(ItemTitle).where(ItemTitle.item_number == item_number, ItemTitle.label == label))
     ).scalar_one_or_none()
     if existing is None:
         db.add(ItemTitle(item_number=item_number, label=label, source="official", occurrences=1))

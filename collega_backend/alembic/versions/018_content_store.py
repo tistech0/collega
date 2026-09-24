@@ -13,9 +13,11 @@ Revision ID: 018
 Revises: 017
 Create Date: 2026-09-24
 """
+
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 revision = "018"
 down_revision = "017"
@@ -57,15 +59,23 @@ def upgrade() -> None:
     )
     op.create_table(
         "job_pages",
-        sa.Column("job_id", postgresql.UUID(as_uuid=True),
-                  sa.ForeignKey("generation_jobs.id", ondelete="CASCADE"), primary_key=True),
+        sa.Column(
+            "job_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("generation_jobs.id", ondelete="CASCADE"),
+            primary_key=True,
+        ),
         sa.Column("page_number", sa.Integer(), primary_key=True),
         sa.Column("page_hash", sa.String(64), sa.ForeignKey("ocr_pages.hash"), nullable=False),
     )
     op.create_table(
         "job_items",
-        sa.Column("job_id", postgresql.UUID(as_uuid=True),
-                  sa.ForeignKey("generation_jobs.id", ondelete="CASCADE"), primary_key=True),
+        sa.Column(
+            "job_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("generation_jobs.id", ondelete="CASCADE"),
+            primary_key=True,
+        ),
         sa.Column("item_number", sa.Integer(), primary_key=True),
         sa.Column("rang", sa.String(1), nullable=False),
         sa.Column("chapter_title", sa.String(500), nullable=True),
@@ -74,13 +84,16 @@ def upgrade() -> None:
         sa.Column("ocr_confidence_score", sa.Float(), nullable=False),
         sa.Column("low_confidence", sa.Boolean(), nullable=False),
         sa.Column("text_hash", sa.String(64), sa.ForeignKey("item_texts.hash"), nullable=False),
-        sa.Column("generation_id", postgresql.UUID(as_uuid=True),
-                  sa.ForeignKey("item_generations.id"), nullable=True),
+        sa.Column("generation_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("item_generations.id"), nullable=True),
     )
     op.create_table(
         "college_pages",
-        sa.Column("college_id", postgresql.UUID(as_uuid=True),
-                  sa.ForeignKey("colleges.id", ondelete="CASCADE"), primary_key=True),
+        sa.Column(
+            "college_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("colleges.id", ondelete="CASCADE"),
+            primary_key=True,
+        ),
         sa.Column("page_number", sa.Integer(), primary_key=True),
         sa.Column("page_hash", sa.String(64), sa.ForeignKey("ocr_pages.hash"), nullable=False),
     )
@@ -88,8 +101,12 @@ def upgrade() -> None:
     op.drop_column("items", "ocr_text")
     op.add_column(
         "flash_cards",
-        sa.Column("generation_id", postgresql.UUID(as_uuid=True),
-                  sa.ForeignKey("item_generations.id", ondelete="SET NULL"), nullable=True),
+        sa.Column(
+            "generation_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("item_generations.id", ondelete="SET NULL"),
+            nullable=True,
+        ),
     )
     op.add_column("generation_jobs", sa.Column("summary_json", sa.Text(), nullable=True))
     op.drop_column("generation_jobs", "page_texts_json")
@@ -101,7 +118,10 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.alter_column("generation_jobs", "card_count", existing_type=sa.Integer(), nullable=True)
     op.create_index(
-        "ix_generation_jobs_unique_active", "generation_jobs", ["college_id"], unique=True,
+        "ix_generation_jobs_unique_active",
+        "generation_jobs",
+        ["college_id"],
+        unique=True,
         postgresql_where=sa.text("status IN ('pending', 'processing')"),
     )
     op.add_column("generation_jobs", sa.Column("page_texts_json", sa.Text(), nullable=True))

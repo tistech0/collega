@@ -107,5 +107,7 @@ app.include_router(admin_router, prefix="/v1/admin")
 app.include_router(billing_router, prefix="/v1/webhooks")
 app.include_router(tester_router, prefix="/v1/tester")
 # StaticFiles doit être monté EN DERNIER pour ne pas masquer les routes API
-app.mount("/admin", StaticFiles(directory=str(Path(__file__).parent / "static" / "admin"), html=True), name="admin-static")
+app.mount(
+    "/admin", StaticFiles(directory=str(Path(__file__).parent / "static" / "admin"), html=True), name="admin-static"
+)
 app.mount("/tester", StaticFiles(directory=str(Path(__file__).parent / "static"), html=True), name="tester-static")

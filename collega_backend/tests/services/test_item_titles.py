@@ -1,4 +1,5 @@
 """Tests du filtre de titres d'items (story 8.0) — fonctions pures."""
+
 import pytest
 
 from app.services.ocr.item_titles import clean_title, is_valid_title
@@ -89,7 +90,6 @@ from sqlalchemy import select  # noqa: E402
 from app.models.item import Item  # noqa: E402
 from app.models.item_title import ItemTitle  # noqa: E402
 from app.services.ocr.item_titles import lookup_title, record_title  # noqa: E402
-from tests.sqlite_db import sqlite_session  # noqa: E402,F401
 
 
 def _item(number: int, title: str | None) -> Item:
@@ -125,9 +125,7 @@ class TestReferential:
         await record_title(sqlite_session, 309, "Tumeurs du poumon")
         await record_title(sqlite_session, 309, "Tumeurs du poumon, primitives et secondaires")
         await record_title(sqlite_session, 309, "Tumeurs du poumon, primitives et secondaires")
-        assert await lookup_title(sqlite_session, 309) == (
-            "Tumeurs du poumon, primitives et secondaires"
-        )
+        assert await lookup_title(sqlite_session, 309) == ("Tumeurs du poumon, primitives et secondaires")
 
     async def test_lookup_tie_oldest_wins(self, sqlite_session):
         await record_title(sqlite_session, 309, "Tumeurs du poumon")
@@ -141,9 +139,7 @@ class TestReferential:
             ItemTitle(item_number=309, label="Tumeurs du poumon, primitives et secondaires", source="official")
         )
         await sqlite_session.flush()
-        assert await lookup_title(sqlite_session, 309) == (
-            "Tumeurs du poumon, primitives et secondaires"
-        )
+        assert await lookup_title(sqlite_session, 309) == ("Tumeurs du poumon, primitives et secondaires")
 
     async def test_lookup_unknown_returns_none(self, sqlite_session):
         assert await lookup_title(sqlite_session, 1) is None
@@ -228,8 +224,15 @@ class TestOfficialTitle:
 class TestReviewFindingsTitles:
     @pytest.mark.parametrize(
         "title",
-        ["Rang Rubrique Intitulé Descriptif", "Introduction", "Épidémiologie", "Généralités",
-         "Physiopathologie", "Diagnostic", "Sommaire"],
+        [
+            "Rang Rubrique Intitulé Descriptif",
+            "Introduction",
+            "Épidémiologie",
+            "Généralités",
+            "Physiopathologie",
+            "Diagnostic",
+            "Sommaire",
+        ],
     )
     def test_rejects_table_header_and_section_headings(self, title):
         assert not is_valid_title(title)

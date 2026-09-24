@@ -3,8 +3,10 @@
 Isole l'interaction Redis/ARQ derrière une fonction unique pour la rendre
 mockable dans les tests de l'endpoint Stop (jamais de vrai Redis en test).
 """
+
 from __future__ import annotations
 
+import contextlib
 import logging
 
 logger = logging.getLogger(__name__)
@@ -34,7 +36,5 @@ async def abort_arq_job(arq_job_id: str, *, timeout: float = 5.0) -> bool:
         return False
     finally:
         if pool is not None:
-            try:
+            with contextlib.suppress(Exception):  # cleanup non bloquant
                 await pool.close()
-            except Exception:  # noqa: BLE001 — cleanup non bloquant
-                pass

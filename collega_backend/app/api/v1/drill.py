@@ -1,4 +1,5 @@
 """Évaluation sémantique des fiches définition via Claude — FR29."""
+
 from __future__ import annotations
 
 import json
@@ -21,7 +22,7 @@ class SemanticEvalRequest(BaseModel):
 
 
 class SemanticEvalResult(BaseModel):
-    result: str    # 'correct' | 'partial' | 'incorrect'
+    result: str  # 'correct' | 'partial' | 'incorrect'
     feedback: str
 
 
@@ -55,4 +56,4 @@ async def evaluate_semantic(
         result_json = await claude.ask_json(prompt)
         return {"data": SemanticEvalResult(**result_json).model_dump()}
     except (ValueError, json.JSONDecodeError, ValidationError):
-        raise HTTPException(502, detail={"code": "CLAUDE_EVAL_FAILED"})
+        raise HTTPException(502, detail={"code": "CLAUDE_EVAL_FAILED"}) from None

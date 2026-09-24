@@ -1,4 +1,5 @@
 """Bascule d'un import (chantier 1) sur Postgres réel."""
+
 import json
 import uuid
 
@@ -6,15 +7,11 @@ import pytest
 from sqlalchemy import func, select
 
 from app.core.config import settings
-from app.models.college import College
 from app.models.content import CollegePage, JobItem, JobPage
 from app.models.flash_card import FlashCard
-from app.models.generation_job import GenerationJob
 from app.models.item import Item
-from app.models.user import User
 from app.services.generation.publish import publish_job, stale_pdfs
 from tests.factories import cards, make_card, make_college, make_draft, make_item, make_job, make_job_page, make_user
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
 
 pytestmark = pytest.mark.pg
 
@@ -201,8 +198,14 @@ async def test_summary_persisted_on_job(pg_session):
     await pg_session.commit()
     await pg_session.refresh(job)
     assert json.loads(job.summary_json) == {
-        "changed": 0, "added": 1, "removed": 0, "unchanged": 0, "cards": 1,
-        "claude_calls": 1, "quota_refunded": False, "reimport": True,
+        "changed": 0,
+        "added": 1,
+        "removed": 0,
+        "unchanged": 0,
+        "cards": 1,
+        "claude_calls": 1,
+        "quota_refunded": False,
+        "reimport": True,
     }
     assert job.hash_shared is False
 

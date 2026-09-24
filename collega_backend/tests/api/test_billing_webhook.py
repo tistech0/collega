@@ -1,11 +1,11 @@
 """Tests POST /v1/webhooks/revenuecat — webhook billing RevenueCat."""
+
 from __future__ import annotations
 
 import types
 import uuid
 from unittest.mock import AsyncMock, patch
 
-import pytest
 from httpx import AsyncClient
 
 VALID_SECRET = "test-rc-secret"

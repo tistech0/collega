@@ -7,11 +7,12 @@
   de chaque collège (politique : « conservés tant que le collège est dans ton
   compte ») ; le reste est orphelin.
 """
+
 from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy import select, text
@@ -76,8 +77,9 @@ async def active_pdf_names(db: AsyncSession) -> set[str]:
     """PDF à conserver : imports actifs + dernier import réussi de chaque collège."""
     rows = (
         await db.execute(
-            select(GenerationJob.college_id, GenerationJob.id, GenerationJob.status, GenerationJob.created_at)
-            .order_by(GenerationJob.created_at)
+            select(GenerationJob.college_id, GenerationJob.id, GenerationJob.status, GenerationJob.created_at).order_by(
+                GenerationJob.created_at
+            )
         )
     ).all()
     keep: set[str] = set()
@@ -94,12 +96,12 @@ async def active_pdf_names(db: AsyncSession) -> set[str]:
 def purge_orphan_pdfs(keep: set[str], now: datetime | None = None) -> int:
     """Supprime les PDF hors de `keep` (dont les assemblages `incoming_*`) modifiés
     depuis plus de 24 h."""
-    now = now or datetime.now(timezone.utc)
+    now = now or datetime.now(UTC)
     removed = 0
     for pdf in Path(settings.pdf_storage_path).glob("*.pdf"):
         if pdf.name in keep:
             continue
-        if now - datetime.fromtimestamp(pdf.stat().st_mtime, timezone.utc) <= PDF_GRACE:
+        if now - datetime.fromtimestamp(pdf.stat().st_mtime, UTC) <= PDF_GRACE:
             continue
         try:
             pdf.unlink(missing_ok=True)

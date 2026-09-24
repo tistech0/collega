@@ -1,14 +1,15 @@
 """`alembic check` : les modèles déclarent exactement le schéma produit par les migrations."""
+
 import asyncio
 
 import pytest
-from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
 
 import app.models  # noqa: F401
+from alembic import command
 from app.core.database import Base, alembic_include_object
-from tests.pg import alembic_config, pg_engine  # noqa: F401
+from tests.pg import alembic_config
 
 pytestmark = pytest.mark.pg
 

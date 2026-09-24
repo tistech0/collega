@@ -1,4 +1,5 @@
 """Worker ARQ : génération des fiches d'un import puis bascule (chantier 1)."""
+
 from __future__ import annotations
 
 import logging

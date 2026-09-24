@@ -6,6 +6,7 @@ dernière page faite. Les items détectés sont écrits dans le brouillon de l'i
 (`job_items`) — le contenu en service (`items`, `flash_cards`) n'est touché qu'à
 la bascule, après la génération. Un réimport laisse donc le collège consultable.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -62,9 +63,7 @@ def file_sha256(path: str) -> str:
 
 
 async def _job_status(db: AsyncSession, job_id: uuid.UUID) -> str | None:
-    return (
-        await db.execute(select(GenerationJob.status).where(GenerationJob.id == job_id))
-    ).scalar_one_or_none()
+    return (await db.execute(select(GenerationJob.status).where(GenerationJob.id == job_id))).scalar_one_or_none()
 
 
 async def run_ocr(
@@ -81,6 +80,43 @@ async def run_ocr(
     detector = detector or _item_detector
     base = {"college_id": str(college_id), "job_id": str(job_id)}
 
+    early, total_pages, done_pages = await _begin_ocr(session_factory, college_id, job_id, pdf_path, processor, ctx)
+    if early is not None:
+        return {**base, **early}
+
+    progress_step = max(1, total_pages // 20)
+    logger.info("OCR college %s — %d pages (%d déjà faites)", college_id, total_pages, len(done_pages))
+
+    for page_num in range(total_pages):
+        if page_num in done_pages:
+            continue
+        stopped = await _ocr_page(
+            session_factory,
+            college_id,
+            job_id,
+            pdf_path,
+            processor,
+            page_num,
+            total_pages,
+            len(done_pages),
+            progress_step,
+        )
+        if stopped is not None:
+            return {**base, **stopped}
+        done_pages.add(page_num)
+
+    return {**base, **await _finish_ocr(session_factory, college_id, job_id, pdf_path, detector, ctx, total_pages)}
+
+
+async def _begin_ocr(
+    session_factory: async_sessionmaker[AsyncSession],
+    college_id: uuid.UUID,
+    job_id: uuid.UUID,
+    pdf_path: str,
+    processor,
+    ctx: dict | None,
+) -> tuple[dict | None, int, set[int]]:
+    """Valide l'état du job et prépare le collège. Renvoie (résultat anticipé, nb de pages, pages déjà faites)."""
     async with session_factory() as db:
         college = await db.get(College, college_id)
         job = await db.get(GenerationJob, job_id)
@@ -88,16 +124,16 @@ async def run_ocr(
             # Reprise après une interruption survenue juste après la fin de l'OCR :
             # la génération n'a peut-être jamais été mise en file.
             await _enqueue_generation(db, job, pdf_path, ctx)
-            return {**base, "resumed": "generation_enqueued"}
+            return {"resumed": "generation_enqueued"}, 0, set()
         if college is None or job is None or job.status not in ("pending", "processing"):
             logger.info("OCR job %s ignoré (état %s)", job_id, job.status if job else "absent")
-            return {**base, "error": "invalid_job_state"}
+            return {"error": "invalid_job_state"}, 0, set()
         first_import = college.status != CollegeStatus.generation_complete
 
         total_pages = await asyncio.to_thread(processor.count_pages, pdf_path)
         if total_pages == 0:
             await fail_job(session_factory, job_id, "PDF vide ou illisible (0 page)")
-            return {**base, "error": "empty_pdf"}
+            return {"error": "empty_pdf"}, 0, set()
 
         done = (
             await db.execute(select(func.count()).select_from(JobPage).where(JobPage.job_id == job_id))
@@ -119,46 +155,63 @@ async def run_ocr(
         job.status = "processing"
         await record_job_event(db, job.id, "ocr_started", total=total_pages)
         await db.commit()
-        done_pages = set(
-            (await db.execute(select(JobPage.page_number).where(JobPage.job_id == job_id))).scalars()
-        )
+        done_pages = set((await db.execute(select(JobPage.page_number).where(JobPage.job_id == job_id))).scalars())
+    return None, total_pages, done_pages
 
-    progress_step = max(1, total_pages // 20)
-    logger.info("OCR college %s — %d pages (%d déjà faites)", college_id, total_pages, len(done_pages))
 
-    for page_num in range(total_pages):
-        if page_num in done_pages:
-            continue
-        async with session_factory() as db:
-            status = await _job_status(db, job_id)
-        if status != "processing":
-            logger.info("OCR job %s arrêté (statut %s) avant la page %d", job_id, status, page_num + 1)
-            return {**base, "error": "cancelled"}
+async def _ocr_page(
+    session_factory: async_sessionmaker[AsyncSession],
+    college_id: uuid.UUID,
+    job_id: uuid.UUID,
+    pdf_path: str,
+    processor,
+    page_num: int,
+    total_pages: int,
+    done_count: int,
+    progress_step: int,
+) -> dict | None:
+    """OCR d'une page et enregistrement. Renvoie un résultat d'arrêt, ou None pour continuer."""
+    async with session_factory() as db:
+        status = await _job_status(db, job_id)
+    if status != "processing":
+        logger.info("OCR job %s arrêté (statut %s) avant la page %d", job_id, status, page_num + 1)
+        return {"error": "cancelled"}
 
-        result = await asyncio.to_thread(processor.process_page, pdf_path, page_num)
-
-        async with session_factory() as db:
-            try:
-                page_hash = await store.put_page(db, result.text, result.tables, result.confidence_score, result.method)
-                db.add(JobPage(job_id=job_id, page_number=page_num, page_hash=page_hash))
-                college = await db.get(College, college_id)
-                if college is None:
-                    return {**base, "error": "cancelled"}
-                college.ocr_page_progress = len(done_pages) + 1
-                if (page_num + 1) % progress_step == 0 or page_num + 1 == total_pages:
-                    await record_job_event(db, job_id, "ocr_progress", page=page_num + 1, total=total_pages)
-                await db.commit()
-            except IntegrityError:
-                # Collège ou compte supprimé pendant la page (FK) : arrêt propre, rien à relancer.
-                await db.rollback()
-                if await _job_status(db, job_id) is None:
-                    return {**base, "error": "cancelled"}
-                raise
-        done_pages.add(page_num)
+    result = await asyncio.to_thread(processor.process_page, pdf_path, page_num)
 
     async with session_factory() as db:
+        try:
+            page_hash = await store.put_page(db, result.text, result.tables, result.confidence_score, result.method)
+            db.add(JobPage(job_id=job_id, page_number=page_num, page_hash=page_hash))
+            college = await db.get(College, college_id)
+            if college is None:
+                return {"error": "cancelled"}
+            college.ocr_page_progress = done_count + 1
+            if (page_num + 1) % progress_step == 0 or page_num + 1 == total_pages:
+                await record_job_event(db, job_id, "ocr_progress", page=page_num + 1, total=total_pages)
+            await db.commit()
+        except IntegrityError:
+            # Collège ou compte supprimé pendant la page (FK) : arrêt propre, rien à relancer.
+            await db.rollback()
+            if await _job_status(db, job_id) is None:
+                return {"error": "cancelled"}
+            raise
+    return None
+
+
+async def _finish_ocr(
+    session_factory: async_sessionmaker[AsyncSession],
+    college_id: uuid.UUID,
+    job_id: uuid.UUID,
+    pdf_path: str,
+    detector,
+    ctx: dict | None,
+    total_pages: int,
+) -> dict:
+    """Détecte les items, les enregistre et met la génération en file."""
+    async with session_factory() as db:
         if await _job_status(db, job_id) != "processing":
-            return {**base, "error": "cancelled"}
+            return {"error": "cancelled"}
         items = await _detect_items(db, job_id, detector)
         await record_job_event(db, job_id, "items_detected", message=f"{len(items)} items")
         for detected, pages in items:
@@ -179,7 +232,7 @@ async def run_ocr(
         job = await db.get(GenerationJob, job_id)
         college = await db.get(College, college_id)
         if job is None or college is None:
-            return {**base, "error": "cancelled"}
+            return {"error": "cancelled"}
         job.status = "ocr_complete"
         if college.status != CollegeStatus.generation_complete:
             college.status = CollegeStatus.ocr_complete
@@ -189,7 +242,7 @@ async def run_ocr(
 
         await _enqueue_generation(db, job, pdf_path, ctx)
 
-    return {**base, "item_count": len(items), "total_pages": total_pages}
+    return {"item_count": len(items), "total_pages": total_pages}
 
 
 def generation_arq_id(job_id: uuid.UUID) -> str:
@@ -219,8 +272,10 @@ async def _detect_items(db: AsyncSession, job_id: uuid.UUID, detector) -> list[t
     """Détection sur toutes les pages de l'import, relues depuis le stockage.
     Renvoie chaque item avec le texte de ses pages (base de son empreinte)."""
     rows = (
-        await db.execute(select(JobPage).where(JobPage.job_id == job_id).order_by(JobPage.page_number))
-    ).scalars().all()
+        (await db.execute(select(JobPage).where(JobPage.job_id == job_id).order_by(JobPage.page_number)))
+        .scalars()
+        .all()
+    )
     pages = await store.load_pages(db, [r.page_hash for r in rows])
     texts = [pages[r.page_hash].text for r in rows]
     scores = [pages[r.page_hash].confidence for r in rows]

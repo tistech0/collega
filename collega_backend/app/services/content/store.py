@@ -3,6 +3,7 @@
 Écritures en INSERT … ON CONFLICT DO NOTHING : deux imports concurrents (même
 PDF chez deux utilisatrices) peuvent écrire la même empreinte sans erreur.
 """
+
 import json
 import uuid
 from typing import Any
@@ -35,8 +36,9 @@ async def put_page(db: AsyncSession, text: str, tables: list, confidence: float,
     await hold_content_lock_shared(db)
     await db.execute(
         insert(OcrPage)
-        .values(hash=h, text=text, tables_json=json.dumps(tables, ensure_ascii=False),
-                confidence=confidence, method=method)
+        .values(
+            hash=h, text=text, tables_json=json.dumps(tables, ensure_ascii=False), confidence=confidence, method=method
+        )
         .on_conflict_do_nothing(index_elements=["hash"])
     )
     return h
@@ -88,9 +90,15 @@ async def put_generation(
     await hold_content_lock_shared(db)
     await db.execute(
         insert(ItemGeneration)
-        .values(id=uuid.uuid4(), text_hash=text_hash, generation_version=version,
-                cards_json=json.dumps(cards, ensure_ascii=False), model=model,
-                input_tokens=input_tokens, output_tokens=output_tokens)
+        .values(
+            id=uuid.uuid4(),
+            text_hash=text_hash,
+            generation_version=version,
+            cards_json=json.dumps(cards, ensure_ascii=False),
+            model=model,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+        )
         .on_conflict_do_nothing(constraint="uq_item_generations_hash_version")
     )
     gen = await find_generation(db, text_hash, version)

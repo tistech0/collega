@@ -2,6 +2,7 @@
 
 Toutes les routes sont protégées par HTTP Basic Auth (credentials distincts de l'admin).
 """
+
 from __future__ import annotations
 
 import logging
@@ -21,10 +22,10 @@ from app.models.tester_feedback import TesterFeedback
 from app.schemas.tester import (
     CollegeItemsData,
     CollegeItemsResponse,
+    CollegesListResponse,
     CollegeSummaryData,
     CollegeSummaryResponse,
     CollegeTesterData,
-    CollegesListResponse,
     FeedbackData,
     FeedbackRequest,
     FeedbackResponseData,
@@ -45,31 +46,23 @@ async def list_colleges(
 ) -> CollegesListResponse:
     """Liste les collèges ayant au moins un job generation_complete."""
     college_ids_result = await db.execute(
-        select(GenerationJob.college_id)
-        .where(GenerationJob.status == "generation_complete")
-        .distinct()
+        select(GenerationJob.college_id).where(GenerationJob.status == "generation_complete").distinct()
     )
     college_ids = college_ids_result.scalars().all()
 
     if not college_ids:
         return CollegesListResponse(data=[], total=0)
 
-    colleges_result = await db.execute(
-        select(College).where(College.id.in_(college_ids))
-    )
+    colleges_result = await db.execute(select(College).where(College.id.in_(college_ids)))
     colleges = colleges_result.scalars().all()
 
     data = []
     for college in colleges:
         card_count = (
-            await db.execute(
-                select(func.count(FlashCard.id)).where(FlashCard.college_id == college.id)
-            )
+            await db.execute(select(func.count(FlashCard.id)).where(FlashCard.college_id == college.id))
         ).scalar_one()
         feedback_count = (
-            await db.execute(
-                select(func.count(TesterFeedback.id)).where(TesterFeedback.college_id == college.id)
-            )
+            await db.execute(select(func.count(TesterFeedback.id)).where(TesterFeedback.college_id == college.id))
         ).scalar_one()
         data.append(
             CollegeTesterData(
@@ -97,9 +90,7 @@ async def get_college_items(
             detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
         )
 
-    items_result = await db.execute(
-        select(Item).where(Item.college_id == college_id).order_by(Item.item_number)
-    )
+    items_result = await db.execute(select(Item).where(Item.college_id == college_id).order_by(Item.item_number))
     items = items_result.scalars().all()
 
     items_data = []
@@ -108,8 +99,7 @@ async def get_college_items(
             select(FlashCard, TesterFeedback)
             .outerjoin(
                 TesterFeedback,
-                (TesterFeedback.flash_card_id == FlashCard.id)
-                & (TesterFeedback.tester_id == tester_id),
+                (TesterFeedback.flash_card_id == FlashCard.id) & (TesterFeedback.tester_id == tester_id),
             )
             .where(FlashCard.item_id == item.id)
             .order_by(FlashCard.rang, FlashCard.created_at)
@@ -148,9 +138,7 @@ async def get_college_items(
             )
         )
 
-    return CollegeItemsResponse(
-        data=CollegeItemsData(college_id=str(college_id), items=items_data)
-    )
+    return CollegeItemsResponse(data=CollegeItemsData(college_id=str(college_id), items=items_data))
 
 
 @router.post("/flash-cards/{card_id}/feedback", response_model=FeedbackResponseWrapped)
@@ -214,28 +202,28 @@ async def get_college_summary(
             detail={"code": "COLLEGE_NOT_FOUND", "message": f"College {college_id} not found"},
         )
 
-    items_result = await db.execute(
-        select(Item).where(Item.college_id == college_id).order_by(Item.item_number)
-    )
+    items_result = await db.execute(select(Item).where(Item.college_id == college_id).order_by(Item.item_number))
     items = items_result.scalars().all()
 
     items_data = []
     for item in items:
-        card_ids = (
-            await db.execute(select(FlashCard.id).where(FlashCard.item_id == item.id))
-        ).scalars().all()
+        card_ids = (await db.execute(select(FlashCard.id).where(FlashCard.item_id == item.id))).scalars().all()
         total = len(card_ids)
 
         pertinent = 0
         not_pertinent = 0
         if card_ids:
             feedbacks = (
-                await db.execute(
-                    select(TesterFeedback)
-                    .where(TesterFeedback.flash_card_id.in_(card_ids))
-                    .where(TesterFeedback.tester_id == tester_id)
+                (
+                    await db.execute(
+                        select(TesterFeedback)
+                        .where(TesterFeedback.flash_card_id.in_(card_ids))
+                        .where(TesterFeedback.tester_id == tester_id)
+                    )
                 )
-            ).scalars().all()
+                .scalars()
+                .all()
+            )
             pertinent = sum(1 for f in feedbacks if f.is_pertinent)
             not_pertinent = sum(1 for f in feedbacks if not f.is_pertinent)
 
@@ -251,6 +239,4 @@ async def get_college_summary(
             )
         )
 
-    return CollegeSummaryResponse(
-        data=CollegeSummaryData(college_id=str(college_id), items=items_data)
-    )
+    return CollegeSummaryResponse(data=CollegeSummaryData(college_id=str(college_id), items=items_data))

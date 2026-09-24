@@ -1,4 +1,5 @@
 """Fabriques de données pour les tests sur Postgres réel (chantier 1)."""
+
 from __future__ import annotations
 
 import uuid
@@ -33,9 +34,7 @@ async def make_user(db: AsyncSession, *, apns_token: str | None = "tok", monthly
 async def make_college(
     db: AsyncSession, user: User, *, status: str = CollegeStatus.pending, ref_id: int = 34, reload_count: int = 0
 ) -> College:
-    college = College(
-        id=uuid.uuid4(), user_id=user.id, college_ref_id=ref_id, status=status, reload_count=reload_count
-    )
+    college = College(id=uuid.uuid4(), user_id=user.id, college_ref_id=ref_id, status=status, reload_count=reload_count)
     db.add(college)
     await db.flush()
     return college
@@ -53,9 +52,16 @@ async def make_item(
 ) -> Item:
     text_hash = await store.put_item_text(db, [text]) if text is not None else None
     item = Item(
-        id=uuid.uuid4(), college_id=college.id, item_number=number, rang=rang,
-        chapter_title=f"Item {number}", text_hash=text_hash, ocr_confidence_score=0.9,
-        low_confidence=False, start_page=0, end_page=1,
+        id=uuid.uuid4(),
+        college_id=college.id,
+        item_number=number,
+        rang=rang,
+        chapter_title=f"Item {number}",
+        text_hash=text_hash,
+        ocr_confidence_score=0.9,
+        low_confidence=False,
+        start_page=0,
+        end_page=1,
     )
     db.add(item)
     await db.flush()
@@ -65,8 +71,15 @@ async def make_item(
 async def make_card(db: AsyncSession, item: Item, *, recto: str = "Q ?", verso: str = "R", **kw) -> FlashCard:
     college = await db.get(College, item.college_id)
     card = FlashCard(
-        id=uuid.uuid4(), item_id=item.id, college_id=item.college_id, user_id=college.user_id,
-        card_type=kw.pop("card_type", "classique"), rang=item.rang, recto=recto, verso=verso, **kw,
+        id=uuid.uuid4(),
+        item_id=item.id,
+        college_id=item.college_id,
+        user_id=college.user_id,
+        card_type=kw.pop("card_type", "classique"),
+        rang=item.rang,
+        recto=recto,
+        verso=verso,
+        **kw,
     )
     db.add(card)
     await db.flush()
@@ -74,8 +87,14 @@ async def make_card(db: AsyncSession, item: Item, *, recto: str = "Q ?", verso: 
 
 
 async def make_draft(
-    db: AsyncSession, job: GenerationJob, number: int, text: str, cards: list[dict] | None = None,
-    *, version: str = "claude-sonnet-4-6:p1", rang: str = "A",
+    db: AsyncSession,
+    job: GenerationJob,
+    number: int,
+    text: str,
+    cards: list[dict] | None = None,
+    *,
+    version: str = "claude-sonnet-4-6:p1",
+    rang: str = "A",
 ) -> JobItem:
     """Item détecté par l'import `job` ; `cards` non None → génération d'origine déjà faite."""
     text_hash = await store.put_item_text(db, [text])
@@ -84,8 +103,15 @@ async def make_draft(
         gen = await store.put_generation(db, text_hash, version, cards, "claude-sonnet-4-6", 10, 5)
         generation_id = gen.id
     draft = JobItem(
-        job_id=job.id, item_number=number, rang=rang, chapter_title=f"Item {number}", start_page=0,
-        end_page=1, ocr_confidence_score=0.9, low_confidence=False, text_hash=text_hash,
+        job_id=job.id,
+        item_number=number,
+        rang=rang,
+        chapter_title=f"Item {number}",
+        start_page=0,
+        end_page=1,
+        ocr_confidence_score=0.9,
+        low_confidence=False,
+        text_hash=text_hash,
         generation_id=generation_id,
     )
     db.add(draft)

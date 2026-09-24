@@ -1,25 +1,24 @@
 import asyncio
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
+from app.core.limiter import limiter
 from app.core.security import (
     JWTError,
     create_access_token,
     create_refresh_token,
     decode_token,
-    hash_password,
     verify_password,
 )
-from app.core.limiter import limiter
+from app.core.time_utils import next_month_reset
 from app.deps import get_current_user, get_db
 from app.models.user import User
-from app.core.config import settings
-from app.core.time_utils import next_month_reset
 from app.schemas.auth import LoginRequest, ProfileUpdateRequest, RefreshRequest, RegisterRequest, TokenResponse
 
 logger = logging.getLogger(__name__)
@@ -68,7 +67,7 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
         raise HTTPException(
             status_code=401,
             detail={"code": "TOKEN_EXPIRED", "message": "Refresh token invalide ou expiré"},
-        )
+        ) from None
 
     user_id = payload.get("sub")
     if not user_id:
@@ -82,7 +81,7 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
         raise HTTPException(
             status_code=401,
             detail={"code": "TOKEN_EXPIRED", "message": "Refresh token invalide ou expiré"},
-        )
+        ) from None
     user = await db.get(User, user_uuid)
     if not user:
         raise HTTPException(
@@ -103,7 +102,7 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
 async def get_me(current_user: User = Depends(get_current_user)):
     # Quota du mois en cours : le compteur stocké n'est remis à zéro qu'au
     # prochain réimport ; passé la date, il n'est plus le bon (Profil, story 8.14).
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     reset_at = current_user.monthly_reloads_reset_at
     if reset_at is None or now >= reset_at:
         monthly_reloads, reset_at = 0, next_month_reset(now)

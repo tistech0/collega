@@ -7,6 +7,7 @@ changement de tarif Anthropic ou de taux €/$ n'invalide pas l'historique.
 Tout le flux de génération de fiches passe par `claude-sonnet-4-6`
 (`generate_cards_for_item`), un seul jeu de tarifs suffit donc ici.
 """
+
 from __future__ import annotations
 
 from app.core.config import settings

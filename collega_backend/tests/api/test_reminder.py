@@ -1,10 +1,10 @@
 """Tests endpoints rappel quotidien — AC3, AC4 (Story 4.5)."""
+
 from __future__ import annotations
 
 import types
 import uuid
 
-import pytest
 from httpx import AsyncClient
 
 from app.deps import get_current_user

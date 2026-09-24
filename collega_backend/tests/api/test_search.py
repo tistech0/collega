@@ -1,11 +1,11 @@
 """Tests GET /v1/search — FR36-37 (Story 5.1) + Story 7.2 (rate limit par user_id)."""
+
 from __future__ import annotations
 
 import types
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 from httpx import AsyncClient
 
 from app.deps import get_current_user, require_subscription
@@ -206,6 +206,5 @@ class TestSearchRateLimitKey:
                         if kw.arg == "key_func" and isinstance(kw.value, ast.Name):
                             wirings.append(kw.value.id)
         assert "_user_id_key" in wirings, (
-            "Décorateur @limiter.limit du endpoint search() doit avoir "
-            "key_func=_user_id_key (Story 7.2 AC #3)"
+            "Décorateur @limiter.limit du endpoint search() doit avoir key_func=_user_id_key (Story 7.2 AC #3)"
         )

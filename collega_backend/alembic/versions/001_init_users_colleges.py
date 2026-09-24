@@ -7,9 +7,11 @@ Create Date: 2026-04-27
 Story 1.1 — crée uniquement les tables users et colleges.
 Les tables items, flash_cards, generation_jobs sont créées dans les Stories 1.2 et 1.3.
 """
-from alembic import op
+
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
+
+from alembic import op
 
 revision = "001"
 down_revision = None

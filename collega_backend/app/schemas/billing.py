@@ -1,4 +1,5 @@
 """Schemas Pydantic pour le webhook RevenueCat (FR46)."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel

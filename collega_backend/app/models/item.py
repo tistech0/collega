@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -20,9 +20,7 @@ class Item(Base):
         UniqueConstraint("college_id", "item_number", name="uq_items_college_item_number"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     college_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("colleges.id", ondelete="CASCADE"),
@@ -34,18 +32,14 @@ class Item(Base):
     chapter_title: Mapped[str | None] = mapped_column(String(500), nullable=True)
     # Empreinte du texte de l'item (item_texts) : décide « inchangé → fiches gardées » au réimport.
     text_hash: Mapped[str | None] = mapped_column(String(64), ForeignKey("item_texts.hash"), nullable=True)
-    ocr_confidence_score: Mapped[float] = mapped_column(
-        Float, nullable=False, default=0.0
-    )
-    low_confidence: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False
-    )
+    ocr_confidence_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    low_confidence: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     start_page: Mapped[int | None] = mapped_column(Integer, nullable=True)
     end_page: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
 
     college: Mapped["College"] = relationship("College", back_populates="items")

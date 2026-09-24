@@ -5,6 +5,7 @@ Chaque test part d'un schéma neuf migré par Alembic (`upgrade head`), donc les
 index et contraintes réels (index unique partiel, FK, cascades) sont en place.
 Sans serveur, les tests « pg » échouent (jamais ignorés en silence).
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -12,14 +13,13 @@ import os
 from collections.abc import AsyncIterator
 
 import pytest
-from alembic import command
 from alembic.config import Config
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
-TEST_PG_URL = os.environ.get(
-    "TEST_PG_URL", "postgresql+asyncpg://postgres:postgres@127.0.0.1:55432/collega_test"
-)
+from alembic import command
+
+TEST_PG_URL = os.environ.get("TEST_PG_URL", "postgresql+asyncpg://postgres:postgres@127.0.0.1:55432/collega_test")
 _BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -37,10 +37,7 @@ async def _reset_schema() -> None:
             await conn.execute(text("DROP SCHEMA public CASCADE"))
             await conn.execute(text("CREATE SCHEMA public"))
     except OSError as exc:  # connexion refusée
-        pytest.fail(
-            f"Postgres de test injoignable ({exc}). Lancer : "
-            "docker compose -f docker-compose.test.yml up -d"
-        )
+        pytest.fail(f"Postgres de test injoignable ({exc}). Lancer : docker compose -f docker-compose.test.yml up -d")
     finally:
         await engine.dispose()
 

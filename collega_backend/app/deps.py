@@ -97,7 +97,7 @@ async def get_current_user(
         raise HTTPException(
             status_code=401,
             detail={"code": "TOKEN_EXPIRED", "message": "Token invalide ou expiré"},
-        )
+        ) from None
     user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(
@@ -110,7 +110,7 @@ async def get_current_user(
         raise HTTPException(
             status_code=401,
             detail={"code": "UNAUTHORIZED", "message": "Token invalide"},
-        )
+        ) from None
     user = await db.get(User, user_uuid)
     if not user:
         raise HTTPException(

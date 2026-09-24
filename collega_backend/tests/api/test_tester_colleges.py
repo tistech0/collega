@@ -1,11 +1,11 @@
 """Tests GET /v1/tester/colleges — liste des collèges disponibles pour le testeur."""
+
 from __future__ import annotations
 
 import types
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 TESTER_AUTH = ("tester", "testpass")
@@ -47,12 +47,14 @@ class TestListColleges:
         # 2. SELECT College.where(in) → [college]
         # 3. SELECT count(FlashCard) → 10
         # 4. SELECT count(TesterFeedback) → 3
-        mock_db.execute = AsyncMock(side_effect=[
-            MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[college_id])))),
-            MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[college])))),
-            MagicMock(scalar_one=MagicMock(return_value=10)),
-            MagicMock(scalar_one=MagicMock(return_value=3)),
-        ])
+        mock_db.execute = AsyncMock(
+            side_effect=[
+                MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[college_id])))),
+                MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[college])))),
+                MagicMock(scalar_one=MagicMock(return_value=10)),
+                MagicMock(scalar_one=MagicMock(return_value=3)),
+            ]
+        )
 
         resp = await client.get("/v1/tester/colleges", auth=TESTER_AUTH)
         assert resp.status_code == 200

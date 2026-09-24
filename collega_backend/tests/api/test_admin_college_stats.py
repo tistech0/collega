@@ -1,11 +1,11 @@
 """Tests GET /v1/admin/colleges/{id}/stats — statistiques fiches + pertinence (Story 1.4/1.5)."""
+
 from __future__ import annotations
 
 import types
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 ADMIN_AUTH = ("admin", "testpass")
@@ -58,9 +58,7 @@ class TestGetCollegeStats:
     async def test_404_for_unknown_college(self, client: AsyncClient, mock_db):
         mock_db.get = AsyncMock(return_value=None)
         college_id = str(uuid.uuid4())
-        resp = await client.get(
-            f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH
-        )
+        resp = await client.get(f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH)
         assert resp.status_code == 404
         assert resp.json()["detail"]["code"] == "COLLEGE_NOT_FOUND"
 
@@ -71,9 +69,7 @@ class TestGetCollegeStats:
         mock_db.get = AsyncMock(return_value=college)
         mock_db.execute = AsyncMock(side_effect=stats_side_effects())
 
-        resp = await client.get(
-            f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH
-        )
+        resp = await client.get(f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH)
         assert resp.status_code == 200
         body = resp.json()["data"]
         assert body["card_count_by_rang"] == {"A": 0, "B": 0, "C": 0}
@@ -96,9 +92,7 @@ class TestGetCollegeStats:
             )
         )
 
-        resp = await client.get(
-            f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH
-        )
+        resp = await client.get(f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH)
         assert resp.status_code == 200
         body = resp.json()["data"]
         assert body["card_count_by_rang"] == {"A": 3, "B": 2, "C": 0}
@@ -114,9 +108,7 @@ class TestGetCollegeStats:
         mock_db.get = AsyncMock(return_value=college)
         mock_db.execute = AsyncMock(side_effect=stats_side_effects(job=job))
 
-        resp = await client.get(
-            f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH
-        )
+        resp = await client.get(f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH)
         assert resp.json()["data"]["hash_shared"] is True
 
     async def test_stats_with_pertinence(self, client: AsyncClient, mock_db):
@@ -132,9 +124,7 @@ class TestGetCollegeStats:
         ]
         mock_db.execute = AsyncMock(side_effect=stats_side_effects(fb_rows=fb_rows))
 
-        resp = await client.get(
-            f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH
-        )
+        resp = await client.get(f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH)
         assert resp.status_code == 200
         ps = resp.json()["data"]["pertinence_stats"]
         assert ps is not None
@@ -151,9 +141,7 @@ class TestGetCollegeStats:
         mock_db.get = AsyncMock(return_value=college)
         mock_db.execute = AsyncMock(side_effect=stats_side_effects(fb_rows=[]))
 
-        resp = await client.get(
-            f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH
-        )
+        resp = await client.get(f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH)
         assert resp.json()["data"]["pertinence_stats"] is None
 
     async def test_response_has_data_wrapper(self, client: AsyncClient, mock_db):
@@ -161,7 +149,5 @@ class TestGetCollegeStats:
         college = make_college(college_id)
         mock_db.get = AsyncMock(return_value=college)
         mock_db.execute = AsyncMock(side_effect=stats_side_effects())
-        resp = await client.get(
-            f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH
-        )
+        resp = await client.get(f"/v1/admin/colleges/{college_id}/stats", auth=ADMIN_AUTH)
         assert "data" in resp.json()

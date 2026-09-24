@@ -1,4 +1,5 @@
 """Fake minimal de redis.asyncio pour les tests du store d'upload (bytes comme le vrai client)."""
+
 from __future__ import annotations
 
 

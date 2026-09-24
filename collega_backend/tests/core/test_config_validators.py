@@ -47,9 +47,7 @@ class TestValidatorsProductionMode:
         with pytest.raises(ValidationError, match="SECRET_KEY"):
             _make_settings(
                 environment="production",
-                **_base_settings_kwargs(
-                    secret_key="change-me-in-production-use-at-least-32-chars"
-                ),
+                **_base_settings_kwargs(secret_key="change-me-in-production-use-at-least-32-chars"),
             )
 
     def test_empty_claude_key_raises(self):
@@ -65,9 +63,7 @@ class TestValidatorsProductionMode:
 
     def test_default_admin_password_raises(self):
         with pytest.raises(ValidationError, match="ADMIN_PASSWORD"):
-            _make_settings(
-                environment="production", **_base_settings_kwargs(admin_password="change-me")
-            )
+            _make_settings(environment="production", **_base_settings_kwargs(admin_password="change-me"))
 
     def test_default_tester_password_raises(self):
         with pytest.raises(ValidationError, match="TESTER_PASSWORD"):

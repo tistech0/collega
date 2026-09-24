@@ -3,6 +3,7 @@
 Cloudflare limite chaque requête à 100 MB : l'app envoie des morceaux de PART_SIZE
 que `complete` assemble avant de rejoindre le pipeline d'import existant.
 """
+
 from __future__ import annotations
 
 import os
@@ -10,7 +11,7 @@ import shutil
 import uuid
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Protocol
 
@@ -100,7 +101,7 @@ class ChunkedUploadStore:
             size_bytes=size_bytes,
             part_size=PART_SIZE,
             parts_total=-(-size_bytes // PART_SIZE),
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         await self._write_state(state)
         return state
@@ -196,5 +197,5 @@ class ChunkedUploadStore:
     def stale_dirs(self, max_age: timedelta) -> list[Path]:
         if not self._base.exists():
             return []
-        cutoff = datetime.now(timezone.utc).timestamp() - max_age.total_seconds()
+        cutoff = datetime.now(UTC).timestamp() - max_age.total_seconds()
         return sorted(p for p in self._base.iterdir() if p.is_dir() and p.stat().st_mtime < cutoff)

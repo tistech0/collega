@@ -1,14 +1,14 @@
 """Worker ARQ cron — reset défensif des quotas mensuels (Story 7.2 — AC #2) et
 purge des uploads par morceaux orphelins (Story 7.11). La purge du texte OCR à
 24 h (NFR9) est supprimée au chantier 1 : le texte est conservé avec le collège."""
+
 from __future__ import annotations
 
 import logging
 import shutil
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from sqlalchemy import select
 from sqlalchemy import update as sql_update
 
 from app.core.config import settings
@@ -31,7 +31,7 @@ async def reset_monthly_reloads(ctx: dict) -> None:
     23:59:xx le 31 mars met `reset_at=Apr 1 00:00`, et le cron à `Apr 1 00:05`
     ne doit pas re-resetter ce user (sinon il gagne une fenêtre de quota gratuite).
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     grace_period = timedelta(hours=1)
     async with async_session_factory() as db:
         result = await db.execute(

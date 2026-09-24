@@ -10,6 +10,7 @@
   s'il change, l'item est régénéré. Elle ne sert qu'au calcul de l'empreinte,
   jamais au texte stocké ni envoyé à Claude.
 """
+
 import hashlib
 import re
 

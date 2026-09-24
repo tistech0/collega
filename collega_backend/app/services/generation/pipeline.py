@@ -12,6 +12,7 @@ Pour chaque item du brouillon (`job_items`) :
   item déjà généré.
 Aucune session n'est ouverte pendant un appel Claude.
 """
+
 from __future__ import annotations
 
 import json
@@ -26,8 +27,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from app.models.college import College
 from app.models.content import ItemGeneration, JobItem
 from app.models.flash_card import FlashCard
-from app.models.item import Item
 from app.models.generation_job import GenerationJob
+from app.models.item import Item
 from app.services.content import store
 from app.services.generation.claude_client import GENERATION_MODEL, GENERATION_VERSION
 from app.services.jobs.job_events import record_job_event
@@ -69,9 +70,7 @@ async def _report(progress: ProgressReporter | None, college_id: uuid.UUID, **kw
 
 
 async def _job_status(db: AsyncSession, job_id: uuid.UUID) -> str | None:
-    return (
-        await db.execute(select(GenerationJob.status).where(GenerationJob.id == job_id))
-    ).scalar_one_or_none()
+    return (await db.execute(select(GenerationJob.status).where(GenerationJob.id == job_id))).scalar_one_or_none()
 
 
 async def generate_job_items(
@@ -88,12 +87,15 @@ async def generate_job_items(
             return None
         college_id = job.college_id
         drafts = (
-            await db.execute(select(JobItem).where(JobItem.job_id == job_id).order_by(JobItem.item_number))
-        ).scalars().all()
+            (await db.execute(select(JobItem).where(JobItem.job_id == job_id).order_by(JobItem.item_number)))
+            .scalars()
+            .all()
+        )
         done_gen_ids = [d.generation_id for d in drafts if d.generation_id is not None]
         done_gens = (
             (await db.execute(select(ItemGeneration).where(ItemGeneration.id.in_(done_gen_ids)))).scalars().all()
-            if done_gen_ids else []
+            if done_gen_ids
+            else []
         )
         # Items en service : (empreinte, nombre de fiches), par numéro.
         live = {

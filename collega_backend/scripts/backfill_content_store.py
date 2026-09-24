@@ -18,6 +18,7 @@ Dans le conteneur worker (volume PDF monté) :
   docker exec collega-worker-1 python -m scripts.backfill_content_store
   docker exec collega-worker-1 python -m scripts.backfill_content_store --college <uuid>
 """
+
 from __future__ import annotations
 
 import argparse
@@ -87,8 +88,12 @@ async def backfill_college(
         item.text_hash = await store.put_item_text(db, pages)
         matched.append(detected.item_number)
     await db.flush()
-    return {"pages": total, "matched": sorted(matched), "unmatched": sorted(unmatched),
-            "without_hash": sorted(n for n, i in live.items() if i.text_hash is None)}
+    return {
+        "pages": total,
+        "matched": sorted(matched),
+        "unmatched": sorted(unmatched),
+        "without_hash": sorted(n for n, i in live.items() if i.text_hash is None),
+    }
 
 
 async def run(dry_run: bool, college_id: uuid.UUID | None) -> None:

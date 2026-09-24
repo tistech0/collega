@@ -1,13 +1,14 @@
 """Routes collèges utilisateur — FR7 (liste), FR8-FR9 (import PDF + SSE)."""
+
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator
 import json
 import logging
 import os
 import uuid
-from datetime import datetime, timezone
+from collections.abc import AsyncIterator
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile
@@ -28,14 +29,14 @@ from app.models.item import Item
 from app.models.user import User
 from app.schemas.college import (
     CardsListResponseWrapped,
+    CollegesListResponseWrapped,
     CollegeStatusData,
     CollegeStatusResponseWrapped,
-    CollegesListResponseWrapped,
     FlashCardData,
     ImportCollegeResponseData,
     ImportCollegeResponseWrapped,
-    ItemSummaryData,
     ItemsListResponseWrapped,
+    ItemSummaryData,
     ReloadLimitsData,
     ReloadLimitsResponseWrapped,
     UploadInitData,
@@ -73,9 +74,7 @@ async def list_user_colleges(
     db: AsyncSession = Depends(get_db),
 ) -> CollegesListResponseWrapped:
     """Retourne tous les collèges importés par l'utilisateur authentifié."""
-    result = await db.execute(
-        select(College).where(College.user_id == current_user.id)
-    )
+    result = await db.execute(select(College).where(College.user_id == current_user.id))
     colleges = result.scalars().all()
 
     if not colleges:
@@ -114,9 +113,7 @@ async def get_college_reload_limits(
 ) -> ReloadLimitsResponseWrapped:
     """Retourne les quotas de reimport pour ce collège (lecture seule)."""
     result = await db.execute(
-        select(College)
-        .where(College.user_id == current_user.id)
-        .where(College.college_ref_id == ref_id)
+        select(College).where(College.user_id == current_user.id).where(College.college_ref_id == ref_id)
     )
     college = result.scalar_one_or_none()
     if college is None:
@@ -125,11 +122,8 @@ async def get_college_reload_limits(
             detail={"code": "COLLEGE_NOT_FOUND", "message": "Collège non trouvé"},
         )
 
-    now = datetime.now(timezone.utc)
-    is_month_reset = (
-        current_user.monthly_reloads_reset_at is None
-        or now >= current_user.monthly_reloads_reset_at
-    )
+    now = datetime.now(UTC)
+    is_month_reset = current_user.monthly_reloads_reset_at is None or now >= current_user.monthly_reloads_reset_at
     effective_monthly = 0 if is_month_reset else current_user.monthly_reloads
     monthly_reset_at = _next_month_reset(now) if is_month_reset else current_user.monthly_reloads_reset_at
 
@@ -160,11 +154,7 @@ def _invalid_ref_id(ref_id: int) -> None:
 
 
 async def _select_college(db: AsyncSession, user: User, ref_id: int) -> College | None:
-    result = await db.execute(
-        select(College)
-        .where(College.user_id == user.id)
-        .where(College.college_ref_id == ref_id)
-    )
+    result = await db.execute(select(College).where(College.user_id == user.id).where(College.college_ref_id == ref_id))
     return result.scalar_one_or_none()
 
 
@@ -177,7 +167,7 @@ async def _get_or_create_college(db: AsyncSession, user: User, ref_id: int) -> C
             await db.flush()
         except IntegrityError:
             await db.rollback()
-            raise _job_in_progress()
+            raise _job_in_progress() from None
     return college
 
 
@@ -224,7 +214,7 @@ async def _apply_reimport_quota(db: AsyncSession, user: User, college: College) 
     if college.status != "generation_complete":
         return
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     is_month_reset = user.monthly_reloads_reset_at is None or now >= user.monthly_reloads_reset_at
 
     # 1. Reset mensuel lazy (filet de sécurité — cron quotidien est la source défensive)
@@ -270,7 +260,7 @@ async def _assert_import_allowed(db: AsyncSession, user: User, ref_id: int) -> C
     await _assert_no_active_job(db, college)
 
     if college.status == "generation_complete":
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         month_reset_due = user.monthly_reloads_reset_at is None or now >= user.monthly_reloads_reset_at
         if college.reload_count >= settings.reload_count_max:
             raise _college_reload_limit(college)
@@ -297,7 +287,7 @@ async def _create_job_and_enqueue(
     except IntegrityError:
         await db.rollback()
         pdf_file_path.unlink(missing_ok=True)
-        raise _job_in_progress()
+        raise _job_in_progress() from None
     except Exception:
         pdf_file_path.unlink(missing_ok=True)
         raise
@@ -306,6 +296,7 @@ async def _create_job_and_enqueue(
     pool = None
     try:
         from arq import create_pool  # type: ignore[import]
+
         from app.core.redis import redis_settings as _redis_settings
 
         pool = await create_pool(_redis_settings)
@@ -327,7 +318,7 @@ async def _create_job_and_enqueue(
         raise HTTPException(
             status_code=503,
             detail={"code": "QUEUE_UNAVAILABLE", "message": "Impossible d'enqueuer le job OCR — réessayez"},
-        )
+        ) from exc
     finally:
         if pool is not None:
             await pool.close()
@@ -437,6 +428,7 @@ async def import_college_pdf(
 async def get_upload_store() -> AsyncIterator[ChunkedUploadStore]:
     """Store d'upload : Redis via le pool ARQ (redis.asyncio) + volume pdf_storage."""
     from arq import create_pool  # type: ignore[import]
+
     from app.core.redis import redis_settings as _redis_settings
 
     pool = await create_pool(_redis_settings)
@@ -521,7 +513,7 @@ async def put_chunked_import_part(
         raise HTTPException(
             status_code=422,
             detail={"code": "INVALID_PART", "message": f"Morceau invalide : {exc}"},
-        )
+        ) from exc
     return Response(status_code=204)
 
 
@@ -790,9 +782,7 @@ async def list_college_items(
             detail={"code": "GENERATION_NOT_COMPLETE", "message": "Generation not yet complete"},
         )
 
-    items_result = await db.execute(
-        select(Item).where(Item.college_id == college_id).order_by(Item.item_number)
-    )
+    items_result = await db.execute(select(Item).where(Item.college_id == college_id).order_by(Item.item_number))
     items = items_result.scalars().all()
     if not items:
         return ItemsListResponseWrapped(data=[], total=0)
@@ -899,9 +889,7 @@ async def list_item_cards(
         )
 
     cards_result = await db.execute(
-        select(FlashCard)
-        .where(FlashCard.item_id == item_id)
-        .order_by(FlashCard.rang, FlashCard.card_type)
+        select(FlashCard).where(FlashCard.item_id == item_id).order_by(FlashCard.rang, FlashCard.card_type)
     )
     cards = cards_result.scalars().all()
     data = [

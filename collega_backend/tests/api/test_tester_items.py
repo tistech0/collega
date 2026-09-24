@@ -1,12 +1,12 @@
 """Tests GET /v1/tester/colleges/{id}/items — items et fiches du collège."""
+
 from __future__ import annotations
 
 import types
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 TESTER_AUTH = ("tester", "testpass")
@@ -37,7 +37,7 @@ def make_card(card_id=None, item_id=None, college_id=None, rang="A"):
         verso="Réponse.",
         low_confidence=False,
         ocr_confidence_score=0.85,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
 
 
@@ -47,7 +47,7 @@ def make_feedback(card_id=None, is_pertinent=True):
         flash_card_id=card_id or uuid.uuid4(),
         is_pertinent=is_pertinent,
         tester_id="tester",
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
 
 
@@ -58,9 +58,7 @@ class TestGetCollegeItems:
 
     async def test_404_for_unknown_college(self, client: AsyncClient, mock_db):
         mock_db.get = AsyncMock(return_value=None)
-        resp = await client.get(
-            f"/v1/tester/colleges/{uuid.uuid4()}/items", auth=TESTER_AUTH
-        )
+        resp = await client.get(f"/v1/tester/colleges/{uuid.uuid4()}/items", auth=TESTER_AUTH)
         assert resp.status_code == 404
         assert resp.json()["detail"]["code"] == "COLLEGE_NOT_FOUND"
 
@@ -74,14 +72,14 @@ class TestGetCollegeItems:
         # execute calls :
         # 1. SELECT Item where college_id → [item]
         # 2. SELECT FlashCard, TesterFeedback LEFT JOIN where item_id → [(card, None)]
-        mock_db.execute = AsyncMock(side_effect=[
-            MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[item])))),
-            MagicMock(all=MagicMock(return_value=[(card, None)])),
-        ])
-
-        resp = await client.get(
-            f"/v1/tester/colleges/{college_id}/items", auth=TESTER_AUTH
+        mock_db.execute = AsyncMock(
+            side_effect=[
+                MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[item])))),
+                MagicMock(all=MagicMock(return_value=[(card, None)])),
+            ]
         )
+
+        resp = await client.get(f"/v1/tester/colleges/{college_id}/items", auth=TESTER_AUTH)
         assert resp.status_code == 200
         body = resp.json()["data"]
         assert body["college_id"] == str(college_id)
@@ -101,14 +99,14 @@ class TestGetCollegeItems:
         feedback = make_feedback(card_id=card_id, is_pertinent=True)
         mock_db.get = AsyncMock(return_value=college)
 
-        mock_db.execute = AsyncMock(side_effect=[
-            MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[item])))),
-            MagicMock(all=MagicMock(return_value=[(card, feedback)])),
-        ])
-
-        resp = await client.get(
-            f"/v1/tester/colleges/{college_id}/items", auth=TESTER_AUTH
+        mock_db.execute = AsyncMock(
+            side_effect=[
+                MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[item])))),
+                MagicMock(all=MagicMock(return_value=[(card, feedback)])),
+            ]
         )
+
+        resp = await client.get(f"/v1/tester/colleges/{college_id}/items", auth=TESTER_AUTH)
         assert resp.status_code == 200
         fb = resp.json()["data"]["items"][0]["flash_cards"][0]["feedback"]
         assert fb is not None
@@ -124,14 +122,14 @@ class TestGetCollegeItems:
         card.ocr_confidence_score = 0.55
         mock_db.get = AsyncMock(return_value=college)
 
-        mock_db.execute = AsyncMock(side_effect=[
-            MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[item])))),
-            MagicMock(all=MagicMock(return_value=[(card, None)])),
-        ])
-
-        resp = await client.get(
-            f"/v1/tester/colleges/{college_id}/items", auth=TESTER_AUTH
+        mock_db.execute = AsyncMock(
+            side_effect=[
+                MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[item])))),
+                MagicMock(all=MagicMock(return_value=[(card, None)])),
+            ]
         )
+
+        resp = await client.get(f"/v1/tester/colleges/{college_id}/items", auth=TESTER_AUTH)
         card_data = resp.json()["data"]["items"][0]["flash_cards"][0]
         assert card_data["low_confidence"] is True
         assert card_data["ocr_confidence_score"] == 0.55
@@ -145,8 +143,6 @@ class TestGetCollegeItems:
             return_value=MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[]))))
         )
 
-        resp = await client.get(
-            f"/v1/tester/colleges/{college_id}/items", auth=TESTER_AUTH
-        )
+        resp = await client.get(f"/v1/tester/colleges/{college_id}/items", auth=TESTER_AUTH)
         assert resp.status_code == 200
         assert resp.json()["data"]["items"] == []

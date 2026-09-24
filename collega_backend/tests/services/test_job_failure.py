@@ -8,7 +8,6 @@ from app.models.generation_job import GenerationJob
 from app.models.generation_job_event import GenerationJobEvent
 from app.services.jobs.job_failure import fail_job
 from tests.factories import Seed, make_college, make_draft, make_job, make_job_page, make_user, write_pdf
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
 
 pytestmark = pytest.mark.pg
 

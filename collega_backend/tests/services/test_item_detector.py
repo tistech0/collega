@@ -7,6 +7,7 @@ Les tests couvrent :
   - Filtrage des références inline ("voir item N" dans le corps du texte)
   - Priorité des rangs : A > B > C
 """
+
 import pytest
 
 from app.services.ocr.item_detector import ItemDetector
@@ -143,12 +144,7 @@ class TestRangFromText:
 
     def test_stops_at_section_header(self, detector):
         """Arrêt du parsing quand on atteint une section de contenu (I. INTRODUCTION)."""
-        text = (
-            "Item 1\nRang Rubrique Intitulé\n"
-            "B Définition ...\n"
-            "I. INTRODUCTION\n"
-            "A Faux rang après section\n"
-        )
+        text = "Item 1\nRang Rubrique Intitulé\nB Définition ...\nI. INTRODUCTION\nA Faux rang après section\n"
         rang = detector._rang_from_text(text)
         # Seulement "B" avant la section, pas "A" après
         assert rang == "B"
@@ -271,9 +267,7 @@ CNEC_290_P1 = (
 )
 CNEC_290_P2 = "Item 290\n• Les recommandations sont de ne pas dépasser dix verres par semaine.\n"
 CNEC_291_P1 = (
-    "Item 291\n"
-    "OBJECTIFS : N° 291. Cancer : cancérogenèse, oncogénétique\n"
-    "➔ Décrire l'histoire naturelle du cancer.\n"
+    "Item 291\nOBJECTIFS : N° 291. Cancer : cancérogenèse, oncogénétique\n➔ Décrire l'histoire naturelle du cancer.\n"
 )
 CNEC_TOC = (
     "SOMMAIRE\n"
@@ -309,9 +303,7 @@ class TestTitleExtraction:
             "Rang Rubrique Intitulé\n"
         )
         items = detector.detect_items([page], page_tables=[[TABLE_SIMPLE_A]])
-        assert items[0].chapter_title == (
-            "Infections broncho-pulmonaires communautaires de l’adulte"
-        )
+        assert items[0].chapter_title == ("Infections broncho-pulmonaires communautaires de l’adulte")
 
     def test_single_word_title(self, detector):
         page = "Item 360\nPneumothorax\nRang Rubrique Intitulé\n"
@@ -465,6 +457,10 @@ class TestReviewFindings:
 
     def test_non_adjacent_repeat_keeps_header_title(self, detector):
         """CEP : « Item 359 bis » 14 pages plus loin n'est pas un en-tête courant."""
-        pages = ["Item 359\nDétresse respiratoire de l’adulte\nRang Rubrique\n", "suite", "Item 359 bis\nDétresse de l'enfant\n"]
+        pages = [
+            "Item 359\nDétresse respiratoire de l’adulte\nRang Rubrique\n",
+            "suite",
+            "Item 359 bis\nDétresse de l'enfant\n",
+        ]
         items = detector.detect_items(pages, page_tables=[[TABLE_SIMPLE_A], [], []])
         assert items[0].chapter_title == "Détresse respiratoire de l’adulte"

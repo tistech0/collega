@@ -3,6 +3,7 @@
 Sans elle, le logger racine reste à WARNING : tous les `logger.info` sont perdus
 et les avertissements sortent sans horodatage.
 """
+
 import logging
 import sys
 

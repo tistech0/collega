@@ -1,4 +1,5 @@
 """Tests pour la dépendance require_subscription (AC #5 — FR42)."""
+
 from __future__ import annotations
 
 import types

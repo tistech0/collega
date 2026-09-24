@@ -1,25 +1,23 @@
 """Génération par item, réutilisation et worker de génération (chantier 1), Postgres réel."""
+
 import asyncio
-import uuid
 
 import pytest
 from sqlalchemy import func, select
 
 from app.core.config import settings
 from app.models.college import College
-from app.models.content import ItemGeneration, JobItem
+from app.models.content import ItemGeneration
 from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
 from app.models.item import Item
 from app.models.user import User
 from app.services.generation import pipeline
 from app.services.generation.claude_client import CardGenResult, FlashCardData
-from app.services.generation.pipeline import generate_job_items
-from app.workers import generation_worker, ocr_worker
+from app.workers import generation_worker
 from app.workers.generation_worker import run_generation
 from app.workers.ocr_worker import run_ocr
-from tests.factories import cards, make_card, make_college, make_draft, make_item, make_job, make_user, write_pdf
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
+from tests.factories import make_card, make_college, make_draft, make_item, make_job, make_user, write_pdf
 from tests.workers.test_ocr_pipeline import PAGES, FakeDetector, FakeProcessor
 
 pytestmark = pytest.mark.pg
@@ -39,7 +37,8 @@ class FakeClaude:
             return CardGenResult(cards=[], input_tokens=50, output_tokens=5)
         return CardGenResult(
             cards=[FlashCardData("classique", f"Q{item_number} ?", f"R{item_number}")],
-            input_tokens=100, output_tokens=10,
+            input_tokens=100,
+            output_tokens=10,
         )
 
 
@@ -287,8 +286,13 @@ async def test_backfilled_college_reimport_calls_claude_zero_times(pg_factory, n
         await db.commit()
     write_pdf(storage, college, old_job)
     async with pg_factory() as db:
-        await backfill_college(db, await db.get(College, college.id), processor=FakeProcessor(PAGES),
-                               detector=FakeDetector(), pdf_dir=storage)
+        await backfill_college(
+            db,
+            await db.get(College, college.id),
+            processor=FakeProcessor(PAGES),
+            detector=FakeDetector(),
+            pdf_dir=storage,
+        )
         await db.commit()
         job = await make_job(db, await db.get(College, college.id))
         await db.commit()

@@ -7,9 +7,11 @@ Create Date: 2026-04-27
 Story 1.2 — crée les tables items et generation_jobs, ajoute total_pages sur
 colleges, et installe le trigger updated_at (reporté depuis Story 1.1).
 """
-from alembic import op
+
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
+
+from alembic import op
 
 revision = "002"
 down_revision = "001"

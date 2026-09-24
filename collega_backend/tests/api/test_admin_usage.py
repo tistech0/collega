@@ -1,10 +1,10 @@
 """Tests GET /v1/admin/usage — agrégat tokens + coût € global/par user (Story 7.8 AC4)."""
+
 from __future__ import annotations
 
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 from app.services.generation.token_cost import compute_cost_eur
@@ -32,10 +32,12 @@ class TestGetUsage:
             (u1, "a@example.com", 300_000, 100_000),
             (u2, "b@example.com", 200_000, 100_000),
         ]
-        mock_db.execute = AsyncMock(side_effect=[
-            _global_result(500_000, 200_000),
-            _by_user_result(by_user_rows),
-        ])
+        mock_db.execute = AsyncMock(
+            side_effect=[
+                _global_result(500_000, 200_000),
+                _by_user_result(by_user_rows),
+            ]
+        )
 
         resp = await client.get("/v1/admin/usage", auth=ADMIN_AUTH)
         assert resp.status_code == 200
@@ -55,10 +57,12 @@ class TestGetUsage:
 
     async def test_null_jobs_counted_as_zero(self, client: AsyncClient, mock_db):
         """Aucun usage mesuré (coalesce → 0) → totaux et coût à 0."""
-        mock_db.execute = AsyncMock(side_effect=[
-            _global_result(0, 0),
-            _by_user_result([]),
-        ])
+        mock_db.execute = AsyncMock(
+            side_effect=[
+                _global_result(0, 0),
+                _by_user_result([]),
+            ]
+        )
 
         resp = await client.get("/v1/admin/usage", auth=ADMIN_AUTH)
         assert resp.status_code == 200

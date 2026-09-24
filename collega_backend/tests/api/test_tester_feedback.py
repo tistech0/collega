@@ -1,12 +1,12 @@
 """Tests POST /v1/tester/flash-cards/{id}/feedback — enregistrement et UPSERT du feedback."""
+
 from __future__ import annotations
 
 import types
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 TESTER_AUTH = ("tester", "testpass")
@@ -33,7 +33,7 @@ def make_feedback(card_id=None, college_id=None, is_pertinent=True):
         college_id=college_id or uuid.uuid4(),
         tester_id="tester",
         is_pertinent=is_pertinent,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
 
 
@@ -63,9 +63,8 @@ class TestSubmitFeedback:
 
         mock_db.get = AsyncMock(return_value=card)
         # SELECT existing feedback → None
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
+
         # db.refresh side_effect : simule le rechargement du feedback
         async def fake_refresh(obj):
             obj.id = feedback.id
@@ -95,9 +94,7 @@ class TestSubmitFeedback:
 
         mock_db.get = AsyncMock(return_value=card)
         # SELECT existing feedback → retourne un feedback existant
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=existing))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=existing)))
         mock_db.refresh = AsyncMock()
 
         resp = await client.post(
@@ -118,9 +115,7 @@ class TestSubmitFeedback:
         feedback = make_feedback(card_id=card_id, is_pertinent=False)
 
         mock_db.get = AsyncMock(return_value=card)
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
 
         async def fake_refresh(obj):
             obj.id = feedback.id
@@ -142,9 +137,7 @@ class TestSubmitFeedback:
         feedback = make_feedback(card_id=card_id)
 
         mock_db.get = AsyncMock(return_value=card)
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
 
         async def fake_refresh(obj):
             obj.id = feedback.id

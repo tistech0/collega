@@ -5,6 +5,7 @@ qui pointe au milieu des données) passe ce contrôle puis échoue à l'OCR avec
 « 0 page ». On l'ouvre à la réception, avant toute consommation de quota ou
 création d'import.
 """
+
 import asyncio
 import logging
 from pathlib import Path
@@ -28,7 +29,7 @@ async def assert_pdf_readable(path: Path) -> int:
         pages = await asyncio.to_thread(OcrProcessor().count_pages, path)
     except Exception as exc:  # noqa: BLE001 — toute erreur d'ouverture = PDF endommagé
         logger.info("PDF endommagé refusé (%s) : %r", path.name, exc)
-        raise pdf_damaged()
+        raise pdf_damaged() from exc
     if pages <= 0:
         raise pdf_damaged()
     return pages

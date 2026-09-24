@@ -1,4 +1,5 @@
 """POST /v1/admin/jobs/{id}/stop (story 7.7, chantier 1) sur Postgres réel."""
+
 import uuid
 from unittest.mock import AsyncMock
 
@@ -9,9 +10,8 @@ from app.models.college import College
 from app.models.content import JobItem
 from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
-from tests.api_pg import ADMIN_AUTH, pg_client  # noqa: F401
+from tests.api_pg import ADMIN_AUTH
 from tests.factories import make_card, make_college, make_draft, make_item, make_job, make_user
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
 
 pytestmark = pytest.mark.pg
 
@@ -58,7 +58,10 @@ async def test_stop_reimport_keeps_content_and_clears_draft(pg_client, pg_factor
 
     assert resp.status_code == 200
     assert resp.json()["data"] == {
-        "job_id": str(job.id), "status": "failed", "error_message": "Annulé par l'admin", "aborted": True,
+        "job_id": str(job.id),
+        "status": "failed",
+        "error_message": "Annulé par l'admin",
+        "aborted": True,
     }
     abort.assert_awaited_once_with("arq-1")
     async with pg_factory() as s:

@@ -1,11 +1,11 @@
 """Tests GET /v1/admin/colleges/{id}/cards — inspection fiches générées (Story 7.8 AC2)."""
+
 from __future__ import annotations
 
 import types
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 ADMIN_AUTH = ("admin", "testpass")

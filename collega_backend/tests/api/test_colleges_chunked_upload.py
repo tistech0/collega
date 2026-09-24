@@ -1,4 +1,5 @@
 """Tests upload par morceaux — init / status / parts / complete (Story 7.11)."""
+
 from __future__ import annotations
 
 import types
@@ -155,10 +156,9 @@ def _pdf_part(size: int) -> bytes:
 async def _upload_all(store, st, first: bytes | None = None):
     for n in range(st.parts_total):
         size = st.expected_part_size(n)
+        data = b"y" * size
         if n == 0:
             data = first if first is not None else _pdf_part(size)
-        else:
-            data = b"y" * size
 
         async def gen(d=data):
             yield d
@@ -211,7 +211,11 @@ class TestComplete:
 
         monkeypatch.setattr(colleges_module, "_start_import_from_file", fake_start)
         resp = await client.post(f"/v1/colleges/import/{st.upload_id}/complete")
-        assert resp.status_code == 202 and resp.json()["data"] == {"college_id": "c", "job_id": "j", "status": "pending"}
+        assert resp.status_code == 202 and resp.json()["data"] == {
+            "college_id": "c",
+            "job_id": "j",
+            "status": "pending",
+        }
         assert captured["ref_id"] == 34 and captured["bytes"].startswith(b"%PDF-") and len(captured["bytes"]) == 10
         assert await store.get(st.upload_id) is None
         assert not store.part_path(st.upload_id, 0).parent.exists()
@@ -288,7 +292,9 @@ class TestComplete:
         assert again is not None and again.is_complete  # morceaux + clé restaurés
         assert store.part_path(st.upload_id, 0).exists()
 
-    async def test_complete_reel_renomme_et_enqueue(self, client, mock_db, app_with_store, store, monkeypatch, tmp_path):
+    async def test_complete_reel_renomme_et_enqueue(
+        self, client, mock_db, app_with_store, store, monkeypatch, tmp_path
+    ):
         """Chemin complet sans fake : assemblage → _start_import_from_file → {college.id}_{job_id}.pdf enqueué."""
         from unittest.mock import patch
 
@@ -299,7 +305,9 @@ class TestComplete:
         await _upload_all(store, st)
 
         college_id = uuid.uuid4()
-        college = types.SimpleNamespace(id=college_id, user_id=user.id, college_ref_id=34, status="processing", reload_count=0)
+        college = types.SimpleNamespace(
+            id=college_id, user_id=user.id, college_ref_id=34, status="processing", reload_count=0
+        )
         mock_db.execute = AsyncMock(
             side_effect=[
                 MagicMock(scalar_one_or_none=MagicMock(return_value=college)),  # SELECT College

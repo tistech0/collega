@@ -1,4 +1,5 @@
 """Seed de développement — insère un collège fictif avec fiches pour tester sans Claude."""
+
 import asyncio
 import uuid
 
@@ -91,8 +92,8 @@ async def seed() -> None:
         existing = result.scalar_one_or_none()
         if existing:
             print(f"✅ Seed déjà présent (college_ref_id={COLLEGE_REF_ID})")
-            print(f"   Interface testeur → http://localhost/tester")
-            print(f"   Interface admin   → http://localhost/v1/admin/")
+            print("   Interface testeur → http://localhost/tester")
+            print("   Interface admin   → http://localhost/v1/admin/")
             return
 
         total_cards = sum(len(item["cards"]) for item in ITEMS)
@@ -173,13 +174,13 @@ async def seed() -> None:
 
         await db.commit()
 
-        print(f"✅ Seed terminé !")
-        print(f"   College : Item 45 — Douleur thoracique aiguë")
+        print("✅ Seed terminé !")
+        print("   College : Item 45 — Douleur thoracique aiguë")
         print(f"   Items   : {len(ITEMS)} (rang A / B / C)")
         print(f"   Fiches  : {total_cards} flash cards")
         print()
-        print(f"   Interface testeur → http://localhost/tester  (tester / tester-dev-password)")
-        print(f"   Interface admin   → http://localhost/v1/admin/ (admin / admin-dev-password)")
+        print("   Interface testeur → http://localhost/tester  (tester / tester-dev-password)")
+        print("   Interface admin   → http://localhost/v1/admin/ (admin / admin-dev-password)")
 
 
 if __name__ == "__main__":

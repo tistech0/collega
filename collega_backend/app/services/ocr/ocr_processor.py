@@ -1,4 +1,5 @@
 """OCR processor: pdfplumber (texte natif) avec fallback pytesseract (pages image)."""
+
 from __future__ import annotations
 
 import logging
@@ -52,9 +53,7 @@ class OcrProcessor:
                 method="empty",
             )
 
-    def _extract_with_pdfplumber(
-        self, pdf_path: str | Path, page_num: int
-    ) -> OcrPageResult | None:
+    def _extract_with_pdfplumber(self, pdf_path: str | Path, page_num: int) -> OcrPageResult | None:
         import pdfplumber  # type: ignore[import]
 
         with pdfplumber.open(str(pdf_path)) as pdf:
@@ -67,11 +66,7 @@ class OcrProcessor:
 
         # Normaliser les cellules None → ""
         tables: PageTables = [
-            [
-                [cell if cell is not None else "" for cell in row]
-                for row in table
-            ]
-            for table in raw_tables
+            [[cell if cell is not None else "" for cell in row] for row in table] for table in raw_tables
         ]
 
         score = self._pdfplumber_confidence(text, words)
@@ -83,9 +78,7 @@ class OcrProcessor:
             tables=tables,
         )
 
-    def _extract_with_pytesseract(
-        self, pdf_path: str | Path, page_num: int
-    ) -> OcrPageResult:
+    def _extract_with_pytesseract(self, pdf_path: str | Path, page_num: int) -> OcrPageResult:
         import pytesseract  # type: ignore[import]
         from pdf2image import convert_from_path  # type: ignore[import]
 
@@ -96,9 +89,7 @@ class OcrProcessor:
             dpi=300,
         )
         if not images:
-            return OcrPageResult(
-                page_num=page_num, text="", confidence_score=0.0, method="empty"
-            )
+            return OcrPageResult(page_num=page_num, text="", confidence_score=0.0, method="empty")
 
         image = images[0]
         try:
@@ -112,15 +103,9 @@ class OcrProcessor:
             image.close()
 
         word_confidences = [
-            c / 100.0
-            for c, w in zip(data["conf"], data["text"])
-            if int(c) > 0 and w.strip()
+            c / 100.0 for c, w in zip(data["conf"], data["text"], strict=False) if int(c) > 0 and w.strip()
         ]
-        score = (
-            sum(word_confidences) / len(word_confidences)
-            if word_confidences
-            else 0.0
-        )
+        score = sum(word_confidences) / len(word_confidences) if word_confidences else 0.0
         # pytesseract ne fournit pas de tables structurées — tables reste vide
         return OcrPageResult(
             page_num=page_num,

@@ -1,8 +1,9 @@
 """Crons de maintenance des imports (chantier 1)."""
+
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from arq.constants import in_progress_key_prefix
 from sqlalchemy import func, select
@@ -24,7 +25,7 @@ async def fail_stale_jobs(ctx: dict, *, session_factory=None, now: datetime | No
     traite (timeout ARQ, file perdue, relances épuisées) → échec. Sans cela, le
     collège resterait « import en cours » (409) jusqu'à un Stop manuel."""
     session_factory = session_factory or async_session_factory
-    now = now or datetime.now(timezone.utc)
+    now = now or datetime.now(UTC)
     last_event = (
         select(func.max(GenerationJobEvent.created_at))
         .where(GenerationJobEvent.generation_job_id == GenerationJob.id)
@@ -34,8 +35,9 @@ async def fail_stale_jobs(ctx: dict, *, session_factory=None, now: datetime | No
     async with session_factory() as db:
         rows = (
             await db.execute(
-                select(GenerationJob.id, GenerationJob.arq_job_id, GenerationJob.updated_at, last_event)
-                .where(GenerationJob.status.in_(ACTIVE_JOB_STATUSES))
+                select(GenerationJob.id, GenerationJob.arq_job_id, GenerationJob.updated_at, last_event).where(
+                    GenerationJob.status.in_(ACTIVE_JOB_STATUSES)
+                )
             )
         ).all()
     redis = ctx.get("redis")

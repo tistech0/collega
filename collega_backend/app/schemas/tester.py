@@ -1,4 +1,5 @@
 """Schemas Pydantic pour les routes testeur — interface web Phase 0 (Story 1.5)."""
+
 from __future__ import annotations
 
 from datetime import datetime

@@ -1,5 +1,6 @@
 """Santé du service : sondée chaque minute par le script de supervision du NAS
 (collega-health) et par les healthchecks Docker. 503 si Postgres ou Redis ne répond pas."""
+
 import asyncio
 import logging
 

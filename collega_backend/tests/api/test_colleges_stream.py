@@ -5,6 +5,7 @@ commentaire `: keep-alive` part si rien n'a été émis depuis l'intervalle.
 Chantier 1 : le flux suit le statut du dernier import (le collège reste prêt
 pendant un réimport) et ne retient aucune connexion à la base.
 """
+
 from __future__ import annotations
 
 import json
@@ -15,21 +16,27 @@ import pytest
 from httpx import AsyncClient
 
 from app.api.v1 import colleges as colleges_module
-from app.models.college import College
 from app.deps import get_current_user_short_session
-from tests.api_pg import login_as, pg_client  # noqa: F401
+from app.models.college import College
+from tests.api_pg import login_as
 from tests.factories import make_college, make_item, make_job, make_user
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
 
 
 def _events(body: str) -> list[dict]:
-    return [json.loads(f[len("data: "):]) for f in body.split("\n\n") if f.startswith("data:")]
+    return [json.loads(f[len("data: ") :]) for f in body.split("\n\n") if f.startswith("data:")]
 
 
 def _college(user_id, status="processing", progress=3):
     return types.SimpleNamespace(
-        id=uuid.uuid4(), user_id=user_id, college_ref_id=4, status=status, ocr_page_progress=progress,
-        total_pages=10, generation_items_done=0, generation_items_total=None, generation_cards=0,
+        id=uuid.uuid4(),
+        user_id=user_id,
+        college_ref_id=4,
+        status=status,
+        ocr_page_progress=progress,
+        total_pages=10,
+        generation_items_done=0,
+        generation_items_total=None,
+        generation_cards=0,
         generation_preview=None,
     )
 
@@ -44,8 +51,6 @@ def stream_with_states(client: AsyncClient, mock_db, monkeypatch):
     user = types.SimpleNamespace(id=uuid.uuid4())
 
     def _run(college, states):
-        from unittest.mock import AsyncMock
-
         from app.main import app
 
         app.dependency_overrides[get_current_user_short_session] = lambda: user
@@ -98,7 +103,10 @@ async def test_generation_progress_emitted_only_on_change(stream_with_states, mo
     for done, total, cards, preview in steps:
         c = _college(None, status="ocr_complete", progress=10)
         c.generation_items_done, c.generation_items_total, c.generation_cards, c.generation_preview = (
-            done, total, cards, preview,
+            done,
+            total,
+            cards,
+            preview,
         )
         states.append((c, _job("ocr_complete")))
     states.append((states[-1][0], _job("generation_complete")))
@@ -116,8 +124,16 @@ async def test_reimport_progress_follows_job_while_college_stays_ready(stream_wi
     monkeypatch.setattr(colleges_module, "_SSE_HEARTBEAT_INTERVAL", 1000)
     c = _college(None, status="generation_complete", progress=10)
     c.generation_items_total = 2
-    summary = {"changed": 1, "added": 0, "removed": 0, "unchanged": 1, "cards": 9, "claude_calls": 1,
-               "quota_refunded": False, "reimport": True}
+    summary = {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1,
+        "cards": 9,
+        "claude_calls": 1,
+        "quota_refunded": False,
+        "reimport": True,
+    }
     states = [(c, _job("ocr_complete")), (c, _job("generation_complete", summary_json=json.dumps(summary)))]
     events = _events((await stream_with_states(c, states)).text)
     kinds = [e["event"] for e in events]
@@ -215,7 +231,6 @@ async def test_status_exposes_summary_and_failed_reimport(pg_client, pg_factory)
         await db.commit()
     status = (await pg_client.get(f"/v1/colleges/{college.id}/status")).json()["data"]
     assert (status["status"], status["reimport"], status["job_id"]) == ("failed", True, str(failed.id))
-
 
 
 @pytest.mark.pg

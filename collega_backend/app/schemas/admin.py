@@ -1,10 +1,11 @@
 """Schemas Pydantic pour les routes admin — pipeline OCR Phase 0 + Story 1.4."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, EmailStr, Field
 
-
 # ── College creation ─────────────────────────────────────────────────────────
+
 
 class CreateCollegeRequest(BaseModel):
     user_id: str
@@ -22,6 +23,7 @@ class CreateCollegeResponseWrapped(BaseModel):
 
 
 # ── Story 1.2 — existant ──────────────────────────────────────────────────────
+
 
 class ProcessCollegeResponse(BaseModel):
     job_id: str
@@ -45,6 +47,7 @@ class CollegeStatusResponseWrapped(BaseModel):
 
 # ── Story 1.4 — Queue dashboard ───────────────────────────────────────────────
 
+
 class QueueJobData(BaseModel):
     job_id: str
     college_id: str
@@ -63,6 +66,7 @@ class QueueResponse(BaseModel):
 
 # ── Story 1.4 — Stats collège ─────────────────────────────────────────────────
 
+
 class ItemOcrData(BaseModel):
     item_number: int
     ocr_confidence_score: float
@@ -70,6 +74,7 @@ class ItemOcrData(BaseModel):
 
 
 # ── Story 1.5 — Pertinence stats (feedback testeur) ───────────────────────────
+
 
 class PertinenceByRang(BaseModel):
     pertinent: int
@@ -85,6 +90,7 @@ class PertinenceStats(BaseModel):
 
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class CollegeStatsData(BaseModel):
     card_count_by_rang: dict[str, int]
     avg_ocr_confidence: float | None
@@ -98,6 +104,7 @@ class CollegeStatsResponseWrapped(BaseModel):
 
 
 # ── Story 1.4 — Gestion beta ──────────────────────────────────────────────────
+
 
 class UserBetaData(BaseModel):
     user_id: str
@@ -123,6 +130,7 @@ class BetaUpdateResponseWrapped(BaseModel):
 
 # ── Story 1.4 — Configuration anti-spam ──────────────────────────────────────
 
+
 class ConfigData(BaseModel):
     reload_count_max: int
     monthly_reloads_max: int
@@ -139,6 +147,7 @@ class ConfigResponseWrapped(BaseModel):
 
 # ── Story 7.6 — Création utilisateur admin (hard-blocker onboarding) ──────────
 
+
 class CreateUserRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)
@@ -151,11 +160,13 @@ class CreateUserResponseWrapped(BaseModel):
 
 # ── Story 7.6 — Reset quota mensuel ──────────────────────────────────────────
 
+
 class ResetQuotaResponseWrapped(BaseModel):
     data: UserBetaData
 
 
 # ── Story 7.6 — Détail utilisateur (collèges + jobs + quota) ──────────────────
+
 
 class UserCollegeSummary(BaseModel):
     college_id: str
@@ -193,6 +204,7 @@ class UserDetailResponseWrapped(BaseModel):
 
 # ── Story 7.6 — Overview KPI (point d'entrée console) ─────────────────────────
 
+
 class OverviewData(BaseModel):
     users_total: int
     jobs_by_status: dict[str, int]
@@ -204,6 +216,7 @@ class OverviewResponseWrapped(BaseModel):
 
 
 # ── Story 7.7 — Suivi & contrôle imports (timeline / détail / stop) ───────────
+
 
 class JobEventData(BaseModel):
     event_type: str
@@ -256,6 +269,7 @@ class StopJobResponseWrapped(BaseModel):
 
 # ── Story 7.8 — Qualité : inspection fiches générées ──────────────────────────
 
+
 class AdminFlashCardData(BaseModel):
     card_id: str
     item_number: int | None
@@ -273,6 +287,7 @@ class AdminCardsResponseWrapped(BaseModel):
 
 
 # ── Story 7.8 — Qualité : feedback testeuse joint au contenu fiche ────────────
+
 
 class AdminFeedbackData(BaseModel):
     feedback_id: str
@@ -292,6 +307,7 @@ class AdminFeedbackResponseWrapped(BaseModel):
 
 
 # ── Story 7.8 — Coût : agrégat usage tokens + € (global / par user) ───────────
+
 
 class UsageByUserData(BaseModel):
     user_id: str

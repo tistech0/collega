@@ -1,9 +1,9 @@
 """Tests GET /v1/admin/overview (KPI accueil console) — Story 7.6 AC #4."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 ADMIN_AUTH = ("admin", "testpass")
@@ -31,7 +31,11 @@ class TestOverview:
         assert data["users_total"] == 5
         # Les 5 clés sont toujours présentes, 0 par défaut
         assert set(data["jobs_by_status"].keys()) == {
-            "pending", "processing", "ocr_complete", "generation_complete", "failed",
+            "pending",
+            "processing",
+            "ocr_complete",
+            "generation_complete",
+            "failed",
         }
         assert data["jobs_by_status"]["failed"] == 2
         assert data["jobs_by_status"]["generation_complete"] == 7

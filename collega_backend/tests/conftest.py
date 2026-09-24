@@ -3,7 +3,11 @@
 Utilise SQLite (aiosqlite) en tests pour éviter asyncpg et PostgreSQL.
 Les dépendances DB et ARQ sont mockées via override FastAPI.
 """
+
 import os
+
+# Fixtures partagées : Postgres (pg_engine, pg_factory, pg_session, pg_client) et SQLite (sqlite_session).
+pytest_plugins = ["tests.pg", "tests.api_pg", "tests.sqlite_db"]
 
 # Doit être défini AVANT l'import du module settings (module-level Settings())
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./test.db")
@@ -20,11 +24,10 @@ os.environ.setdefault("TESTER_PASSWORD", "testpass")
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from httpx import ASGITransport, AsyncClient
-
 
 # Override de create_async_engine pour SQLite (sans pool_size / max_overflow)
 import sqlalchemy.ext.asyncio as _sa_async
+from httpx import ASGITransport, AsyncClient
 
 _orig_create = _sa_async.create_async_engine
 

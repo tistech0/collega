@@ -1,4 +1,5 @@
 """Calcul et classification du score de confiance OCR."""
+
 from __future__ import annotations
 
 from app.services.ocr.ocr_processor import OcrPageResult

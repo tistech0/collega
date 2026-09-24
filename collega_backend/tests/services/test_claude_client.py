@@ -1,4 +1,5 @@
 """Tests du service ClaudeClient — génération de flashcards via API Anthropic."""
+
 from __future__ import annotations
 
 import types

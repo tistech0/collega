@@ -53,9 +53,7 @@ class NotificationService(ABC):
     ) -> None: ...
 
     @abstractmethod
-    async def send_import_failed(
-        self, apns_token: str | None, college_ref_id: int, reimport: bool
-    ) -> None: ...
+    async def send_import_failed(self, apns_token: str | None, college_ref_id: int, reimport: bool) -> None: ...
 
     @abstractmethod
     async def send_daily_reminder(self, apns_token: str | None) -> None: ...
@@ -74,9 +72,7 @@ class NullNotificationService(NotificationService):
             college_ref_id,
         )
 
-    async def send_import_failed(
-        self, apns_token: str | None, college_ref_id: int, reimport: bool
-    ) -> None:
+    async def send_import_failed(self, apns_token: str | None, college_ref_id: int, reimport: bool) -> None:
         logger.debug("NullNotificationService: échec d'import collège %s (APNs non configuré)", college_ref_id)
 
     async def send_daily_reminder(self, apns_token: str | None) -> None:
@@ -125,9 +121,7 @@ class APNsNotificationService(NotificationService):
         title, body = completion_message(summary)
         await self._send_alert(apns_token, title, body, extra={"college_ref_id": college_ref_id}, badge=True)
 
-    async def send_import_failed(
-        self, apns_token: str | None, college_ref_id: int, reimport: bool
-    ) -> None:
+    async def send_import_failed(self, apns_token: str | None, college_ref_id: int, reimport: bool) -> None:
         title, body = failure_message(reimport, college_label(college_ref_id))
         await self._send_alert(apns_token, title, body, extra={"college_ref_id": college_ref_id})
 
@@ -146,8 +140,7 @@ class APNsNotificationService(NotificationService):
         close_attr = getattr(self._apns, "close", None)
         if close_attr is None or not callable(close_attr):
             logger.info(
-                "APNs client (%s) n'expose pas close() public — "
-                "release HTTP/2 délégué au GC",
+                "APNs client (%s) n'expose pas close() public — release HTTP/2 délégué au GC",
                 type(self._apns).__name__,
             )
             return
@@ -177,7 +170,7 @@ _service_instance: NotificationService | None = None
 
 
 def get_notification_service(
-    request: "Request | None" = None,
+    request: Request | None = None,
     ctx: dict[str, Any] | None = None,
 ) -> NotificationService:
     """Récupère le singleton notification service.

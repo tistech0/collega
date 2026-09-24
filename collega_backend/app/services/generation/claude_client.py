@@ -77,6 +77,7 @@ class CardGenResult:
     *survive* à un échec de parsing JSON : l'appel API a déjà facturé les tokens
     même si la réponse est mal formée (Story 7.8 AC1).
     """
+
     cards: list[FlashCardData]
     input_tokens: int
     output_tokens: int
@@ -160,14 +161,12 @@ class ClaudeClient:
         item,
         source_text: str,
         user_note: str | None,
-    ) -> "FlashCardData | None":
+    ) -> FlashCardData | None:
         """Régénère une seule fiche avec le feedback utilisateur en contexte."""
         from app.schemas.college import FlashCardData as FlashCardDataSchema
 
         if not source_text.strip():
-            logger.warning(
-                "Item %s sans texte source — impossible de régénérer la fiche %s", item.id, card.id
-            )
+            logger.warning("Item %s sans texte source — impossible de régénérer la fiche %s", item.id, card.id)
             return None
 
         prompt = REGENERATION_PROMPT.format(

@@ -3,6 +3,7 @@
 L'app synchronise ainsi toutes les fiches en local (session du jour mixte, hors-ligne)
 au lieu d'attendre l'ouverture de chaque item.
 """
+
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
@@ -73,8 +74,17 @@ class TestListCollegeCards:
         assert body["total"] == 3
         assert {c["item_id"] for c in body["data"]} == {str(item_1.id), str(item_2.id)}
         first = body["data"][0]
-        assert set(first) >= {"id", "item_id", "college_id", "card_type", "rang", "recto", "verso",
-                              "ocr_confidence_score", "low_confidence"}
+        assert set(first) >= {
+            "id",
+            "item_id",
+            "college_id",
+            "card_type",
+            "rang",
+            "recto",
+            "verso",
+            "ocr_confidence_score",
+            "low_confidence",
+        }
 
     async def test_requete_filtre_sur_le_college(self, client: AsyncClient, mock_db):
         """La requête ne lit que les fiches de ce collège (pas celles des autres users)."""

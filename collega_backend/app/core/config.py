@@ -10,11 +10,13 @@ _KNOWN_ENVIRONMENTS = frozenset({"development", "production"})
 # Listes fermées de placeholders connus (issus de `.env.example`). On préfère
 # une égalité explicite à une recherche par substring, qui rejetait à tort des
 # secrets légitimes contenant `change-me*` ou `in-production`.
-_PLACEHOLDER_SECRET_KEYS = frozenset({
-    "change-me",
-    "change-me-in-production",
-    "change-me-in-production-use-at-least-32-chars",
-})
+_PLACEHOLDER_SECRET_KEYS = frozenset(
+    {
+        "change-me",
+        "change-me-in-production",
+        "change-me-in-production-use-at-least-32-chars",
+    }
+)
 _PLACEHOLDER_PASSWORDS = frozenset({"change-me", "change-me-in-production"})
 _PLACEHOLDER_WEBHOOK_SECRETS = frozenset({"change-me", "change-me-in-production"})
 
@@ -73,13 +75,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _require_distinct_tester_credentials(self) -> "Settings":
-        if (
-            self.tester_username == self.admin_username
-            and self.tester_password == self.admin_password
-        ):
-            raise ValueError(
-                "tester_username/tester_password must differ from admin credentials"
-            )
+        if self.tester_username == self.admin_username and self.tester_password == self.admin_password:
+            raise ValueError("tester_username/tester_password must differ from admin credentials")
         return self
 
     @model_validator(mode="after")
@@ -93,8 +90,7 @@ class Settings(BaseSettings):
         # une typo (`prod`, `prd`, `PROD`) — fail-open silencieux interdit.
         if env_normalized not in _KNOWN_ENVIRONMENTS:
             logger.warning(
-                "Unknown ENVIRONMENT=%r — treated as development. "
-                "Expected one of: %s.",
+                "Unknown ENVIRONMENT=%r — treated as development. Expected one of: %s.",
                 self.environment,
                 ", ".join(sorted(_KNOWN_ENVIRONMENTS)),
             )
@@ -122,9 +118,7 @@ class Settings(BaseSettings):
         elif not claude_api_key.startswith("sk-ant-"):
             issues.append("CLAUDE_API_KEY (invalid format — expected sk-ant-…)")
         elif len(claude_api_key) < _CLAUDE_API_KEY_MIN_LEN:
-            issues.append(
-                f"CLAUDE_API_KEY (too short — must be ≥ {_CLAUDE_API_KEY_MIN_LEN} chars)"
-            )
+            issues.append(f"CLAUDE_API_KEY (too short — must be ≥ {_CLAUDE_API_KEY_MIN_LEN} chars)")
 
         # ADMIN_PASSWORD / TESTER_PASSWORD : non vide + pas de placeholder.
         if not admin_password or admin_password in _PLACEHOLDER_PASSWORDS:

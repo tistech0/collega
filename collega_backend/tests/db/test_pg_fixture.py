@@ -1,8 +1,6 @@
 import pytest
 from sqlalchemy import text
 
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
-
 pytestmark = pytest.mark.pg
 
 

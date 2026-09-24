@@ -1,10 +1,9 @@
 """Tests record_job_event — écriture défensive de la timeline (Story 7.7 AC #1)."""
+
 from __future__ import annotations
 
 import uuid
 from unittest.mock import MagicMock
-
-import pytest
 
 from app.models.generation_job_event import GenerationJobEvent
 from app.services.jobs.job_events import record_job_event

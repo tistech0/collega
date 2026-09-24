@@ -1,7 +1,7 @@
 """Worker OCR (chantier 1) sur Postgres réel : pages par empreinte, reprise,
 brouillon d'items, arrêt, échecs. OCR et détection simulés (contrôlés par les tests)."""
+
 import asyncio
-import uuid
 
 import pytest
 from sqlalchemy import func, select
@@ -17,7 +17,6 @@ from app.services.ocr.ocr_processor import OcrPageResult
 from app.workers import ocr_worker
 from app.workers.ocr_worker import dedupe_items, run_ocr
 from tests.factories import make_college, make_item, make_job, make_user, write_pdf
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
 
 pytestmark = pytest.mark.pg
 
@@ -68,8 +67,13 @@ class FakeDetector:
                 current["end"] = i
         return [
             DetectedItem(
-                item_number=c["n"], rang="A", chapter_title=c["title"], ocr_text="\n".join(c["texts"]),
-                start_page=c["start"], end_page=c["end"], ocr_confidence_score=0.9,
+                item_number=c["n"],
+                rang="A",
+                chapter_title=c["title"],
+                ocr_text="\n".join(c["texts"]),
+                start_page=c["start"],
+                end_page=c["end"],
+                ocr_confidence_score=0.9,
             )
             for c in items
         ]
@@ -161,10 +165,12 @@ async def test_stop_between_pages(pg_factory, seed, pg_engine):
 
     def stop_at_page_1(n):
         if n == 1:
+
             async def _stop():
                 async with pg_factory() as s:
                     (await s.get(GenerationJob, job.id)).status = "failed"
                     await s.commit()
+
             asyncio.run_coroutine_threadsafe(_stop(), loop).result()
 
     loop = asyncio.get_running_loop()
@@ -179,10 +185,12 @@ async def test_deleted_job_stops_ocr(pg_factory, seed):
 
     def delete_job(n):
         if n == 0:
+
             async def _delete():
                 async with pg_factory() as s:
                     await s.delete(await s.get(GenerationJob, job.id))
                     await s.commit()
+
             asyncio.run_coroutine_threadsafe(_delete(), loop).result()
 
     loop = asyncio.get_running_loop()
@@ -193,7 +201,9 @@ async def test_deleted_job_stops_ocr(pg_factory, seed):
 
 async def test_empty_pdf_fails_first_import(pg_factory, seed):
     college, job = await seed()
-    result = await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor([]), detector=FakeDetector())
+    result = await run_ocr(
+        pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor([]), detector=FakeDetector()
+    )
     assert result["error"] == "empty_pdf"
     async with pg_factory() as s:
         assert (await s.get(GenerationJob, job.id)).status == "failed"
@@ -251,8 +261,15 @@ async def test_generation_enqueued_and_stop_target_repointed(pg_factory, seed):
     college, job = await seed()
 
     redis = FakeRedis()
-    await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor(PAGES),
-                  detector=FakeDetector(), ctx={"redis": redis})
+    await run_ocr(
+        pg_factory,
+        college.id,
+        job.id,
+        "x.pdf",
+        processor=FakeProcessor(PAGES),
+        detector=FakeDetector(),
+        ctx={"redis": redis},
+    )
     assert redis.calls == [("generate_college_cards", (str(college.id), str(job.id), "x.pdf"), f"gen:{job.id}")]
     async with pg_factory() as s:
         assert (await s.get(GenerationJob, job.id)).arq_job_id == f"gen:{job.id}"
@@ -266,8 +283,9 @@ async def test_resumed_after_ocr_complete_reenqueues_generation(pg_factory, seed
         (await s.get(GenerationJob, job.id)).status = "ocr_complete"
         await s.commit()
     redis, proc = FakeRedis(), FakeProcessor(PAGES)
-    result = await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=proc, detector=FakeDetector(),
-                           ctx={"redis": redis})
+    result = await run_ocr(
+        pg_factory, college.id, job.id, "x.pdf", processor=proc, detector=FakeDetector(), ctx={"redis": redis}
+    )
     assert result["resumed"] == "generation_enqueued" and proc.calls == []
     assert [c[2] for c in redis.calls] == [f"gen:{job.id}"]
 
@@ -281,8 +299,9 @@ async def test_title_cascade_uses_and_feeds_referential(pg_factory, seed):
     assert labels == {304: "Tumeurs du foie", 305: "Cancer du pancréas"}
     # Import sans titre extrait : complété par le référentiel.
     college2, job2 = await seed()
-    await run_ocr(pg_factory, college2.id, job2.id, "x.pdf", processor=FakeProcessor(PAGES),
-                  detector=FakeDetector(titles=False))
+    await run_ocr(
+        pg_factory, college2.id, job2.id, "x.pdf", processor=FakeProcessor(PAGES), detector=FakeDetector(titles=False)
+    )
     async with pg_factory() as s:
         drafts = (await s.execute(select(JobItem).where(JobItem.job_id == job2.id))).scalars().all()
         assert {d.item_number: d.chapter_title for d in drafts} == labels
@@ -290,9 +309,19 @@ async def test_title_cascade_uses_and_feeds_referential(pg_factory, seed):
 
 def test_dedupe_keeps_longest_then_best_rang():
     def det(n, text, rang="B"):
-        return DetectedItem(item_number=n, rang=rang, chapter_title="t", ocr_text=text,
-                            start_page=0, end_page=0, ocr_confidence_score=0.9)
+        return DetectedItem(
+            item_number=n,
+            rang=rang,
+            chapter_title="t",
+            ocr_text=text,
+            start_page=0,
+            end_page=0,
+            ocr_confidence_score=0.9,
+        )
 
-    out = {d.item_number: d for d in dedupe_items([det(1, "court"), det(1, "plus long"), det(2, "x", "C"), det(2, "y", "A")])}
+    out = {
+        d.item_number: d
+        for d in dedupe_items([det(1, "court"), det(1, "plus long"), det(2, "x", "C"), det(2, "y", "A")])
+    }
     assert out[1].ocr_text == "plus long"
     assert (out[2].rang, out[2].ocr_text) == ("A", "x")

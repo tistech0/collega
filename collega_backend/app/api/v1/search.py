@@ -1,4 +1,5 @@
 """FR36–37 — Recherche full-text sur fiches utilisateur via GIN index PostgreSQL."""
+
 from __future__ import annotations
 
 import logging

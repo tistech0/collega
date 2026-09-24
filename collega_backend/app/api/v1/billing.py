@@ -1,4 +1,5 @@
 """Webhook RevenueCat — mise à jour statut abonnement (FR46)."""
+
 from __future__ import annotations
 
 import logging
@@ -27,9 +28,7 @@ async def revenuecat_webhook(
 ) -> dict:
     """Traite les events RevenueCat et met à jour user.is_subscribed."""
     auth_token = authorization.removeprefix("Bearer ") if authorization else None
-    if not auth_token or not secrets.compare_digest(
-        auth_token.encode(), settings.revenuecat_webhook_secret.encode()
-    ):
+    if not auth_token or not secrets.compare_digest(auth_token.encode(), settings.revenuecat_webhook_secret.encode()):
         raise HTTPException(
             status_code=401,
             detail={"code": "INVALID_SIGNATURE", "message": "Invalid or missing Authorization"},
@@ -47,7 +46,7 @@ async def revenuecat_webhook(
         raise HTTPException(
             status_code=422,
             detail={"code": "INVALID_USER_ID", "message": "app_user_id is not a valid UUID"},
-        )
+        ) from None
 
     from app.models.user import User
 

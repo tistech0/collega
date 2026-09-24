@@ -1,12 +1,12 @@
 """Tests GET /v1/admin/colleges/{id}/feedback — feedback testeuse joint fiche (Story 7.8 AC3)."""
+
 from __future__ import annotations
 
 import types
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 ADMIN_AUTH = ("admin", "testpass")
@@ -22,7 +22,7 @@ def make_feedback(is_pertinent=True, tester_id="testeuse"):
         flash_card_id=uuid.uuid4(),
         tester_id=tester_id,
         is_pertinent=is_pertinent,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
 
 

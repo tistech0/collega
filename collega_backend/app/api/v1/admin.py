@@ -2,11 +2,12 @@
 
 Toutes les routes sont protégées par HTTP Basic Auth.
 """
+
 from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile
@@ -26,11 +27,6 @@ from app.models.generation_job_event import GenerationJobEvent
 from app.models.item import Item
 from app.models.tester_feedback import TesterFeedback
 from app.models.user import User
-from app.services.generation.token_cost import compute_cost_eur
-from app.services.jobs.arq_control import abort_arq_job
-from app.services.jobs.job_events import record_job_event
-from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
-from app.services.jobs.job_failure import fail_job
 from app.schemas.admin import (
     AdminCardsResponseWrapped,
     AdminFeedbackData,
@@ -75,6 +71,10 @@ from app.schemas.admin import (
     UserJobSummary,
     UsersListResponseWrapped,
 )
+from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
+from app.services.generation.token_cost import compute_cost_eur
+from app.services.jobs.arq_control import abort_arq_job
+from app.services.jobs.job_failure import fail_job
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["admin"])
@@ -151,7 +151,10 @@ async def process_college(
     if not is_pdf:
         raise HTTPException(
             status_code=422,
-            detail={"code": "INVALID_FILE_TYPE", "message": "File must be a PDF (.pdf extension or application/pdf content-type)"},
+            detail={
+                "code": "INVALID_FILE_TYPE",
+                "message": "File must be a PDF (.pdf extension or application/pdf content-type)",
+            },
         )
 
     # Lire le premier chunk et vérifier la signature binaire PDF
@@ -159,7 +162,10 @@ async def process_college(
     if not first_chunk.startswith(_PDF_MAGIC):
         raise HTTPException(
             status_code=422,
-            detail={"code": "INVALID_FILE_TYPE", "message": "File does not appear to be a valid PDF (missing %PDF- signature)"},
+            detail={
+                "code": "INVALID_FILE_TYPE",
+                "message": "File does not appear to be a valid PDF (missing %PDF- signature)",
+            },
         )
 
     # Sauvegarder le PDF en chunks pour éviter de tout charger en mémoire
@@ -194,12 +200,13 @@ async def process_college(
         raise HTTPException(
             status_code=409,
             detail={"code": "JOB_IN_PROGRESS", "message": "An active job already exists for this college"},
-        )
+        ) from None
 
     # Enqueuer le job ARQ — si l'enqueue échoue, on rollback et retourne 503
     pool = None
     try:
         from arq import create_pool  # type: ignore[import]
+
         from app.core.redis import redis_settings as _redis_settings
 
         pool = await create_pool(_redis_settings)
@@ -222,14 +229,12 @@ async def process_college(
         raise HTTPException(
             status_code=503,
             detail={"code": "QUEUE_UNAVAILABLE", "message": "Failed to enqueue OCR job — please retry"},
-        )
+        ) from exc
     finally:
         if pool is not None:
             await pool.close()
 
-    return ProcessCollegeResponseWrapped(
-        data=ProcessCollegeResponse(job_id=str(job.id), status=job.status)
-    )
+    return ProcessCollegeResponseWrapped(data=ProcessCollegeResponse(job_id=str(job.id), status=job.status))
 
 
 @router.get(
@@ -270,6 +275,7 @@ async def get_college_status(
 
 # ── Story 1.4 — Queue dashboard ───────────────────────────────────────────────
 
+
 @router.get("/queue", response_model=QueueResponse)
 async def get_queue(
     _: bool = Depends(get_admin_user),
@@ -284,27 +290,30 @@ async def get_queue(
     )
     rows = result.all()
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     jobs = []
     for job, college in rows:
         created = job.created_at
         if created.tzinfo is None:
-            created = created.replace(tzinfo=timezone.utc)
+            created = created.replace(tzinfo=UTC)
         elapsed = (now - created).total_seconds()
-        jobs.append(QueueJobData(
-            job_id=str(job.id),
-            college_id=str(job.college_id),
-            status=job.status,
-            college_ocr_page_progress=college.ocr_page_progress,
-            college_total_pages=college.total_pages,
-            card_count=job.card_count,
-            elapsed_seconds=round(max(0.0, elapsed), 1),
-            error_message=job.error_message,
-        ))
+        jobs.append(
+            QueueJobData(
+                job_id=str(job.id),
+                college_id=str(job.college_id),
+                status=job.status,
+                college_ocr_page_progress=college.ocr_page_progress,
+                college_total_pages=college.total_pages,
+                card_count=job.card_count,
+                elapsed_seconds=round(max(0.0, elapsed), 1),
+                error_message=job.error_message,
+            )
+        )
     return QueueResponse(data=jobs, total=len(jobs))
 
 
 # ── Story 1.4 — Stats collège ─────────────────────────────────────────────────
+
 
 @router.get("/colleges/{college_id}/stats", response_model=CollegeStatsResponseWrapped)
 async def get_college_stats(
@@ -327,7 +336,11 @@ async def get_college_stats(
         .group_by(FlashCard.rang)
     )
     card_rang_counts = {row[0]: row[1] for row in card_counts_result.all()}
-    card_count_by_rang = {"A": card_rang_counts.get("A", 0), "B": card_rang_counts.get("B", 0), "C": card_rang_counts.get("C", 0)}
+    card_count_by_rang = {
+        "A": card_rang_counts.get("A", 0),
+        "B": card_rang_counts.get("B", 0),
+        "C": card_rang_counts.get("C", 0),
+    }
 
     # OCR confidence par item
     items_result = await db.execute(
@@ -336,10 +349,7 @@ async def get_college_stats(
         .order_by(Item.item_number)
     )
     items_rows = items_result.all()
-    items_ocr = [
-        ItemOcrData(item_number=r[0], ocr_confidence_score=r[1], low_confidence=r[2])
-        for r in items_rows
-    ]
+    items_ocr = [ItemOcrData(item_number=r[0], ocr_confidence_score=r[1], low_confidence=r[2]) for r in items_rows]
     avg_confidence = sum(r[1] for r in items_rows) / len(items_rows) if items_rows else None
 
     # hash_shared depuis le dernier job generation_complete
@@ -397,6 +407,7 @@ async def get_college_stats(
 
 # ── Story 1.4 — Gestion utilisateurs beta ────────────────────────────────────
 
+
 @router.get("/users", response_model=UsersListResponseWrapped)
 async def list_users(
     _: bool = Depends(get_admin_user),
@@ -449,6 +460,7 @@ async def update_user_beta(
 
 # ── Story 7.6 — Création utilisateur admin (hard-blocker onboarding) ──────────
 
+
 @router.post("/users", response_model=CreateUserResponseWrapped, status_code=201)
 async def create_user(
     body: CreateUserRequest,
@@ -477,7 +489,7 @@ async def create_user(
         raise HTTPException(
             status_code=409,
             detail={"code": "EMAIL_ALREADY_EXISTS", "message": "Un compte avec cet email existe déjà."},
-        )
+        ) from None
     # Invariants d'un compte neuf : jamais abonné (RevenueCat le posera plus tard),
     # quota vierge. Pas de relecture nécessaire.
     return CreateUserResponseWrapped(
@@ -514,11 +526,7 @@ async def reset_user_quota(
     # concurrent qui incrémente monthly_reloads entre le read et le commit.
     # La réponse est construite à partir des valeurs connues post-reset
     # (monthly_reloads=0), sans relire l'objet.
-    await db.execute(
-        sa_update(User)
-        .where(User.id == user_id)
-        .values(monthly_reloads=0, monthly_reloads_reset_at=None)
-    )
+    await db.execute(sa_update(User).where(User.id == user_id).values(monthly_reloads=0, monthly_reloads_reset_at=None))
     await db.commit()
     return ResetQuotaResponseWrapped(
         data=UserBetaData(
@@ -552,9 +560,7 @@ async def get_user_detail(
     colleges = colleges_result.scalars().all()
 
     jobs_result = await db.execute(
-        select(GenerationJob)
-        .where(GenerationJob.user_id == user_id)
-        .order_by(GenerationJob.created_at.desc())
+        select(GenerationJob).where(GenerationJob.user_id == user_id).order_by(GenerationJob.created_at.desc())
     )
     jobs = jobs_result.scalars().all()
 
@@ -609,9 +615,7 @@ async def get_overview(
     users_total = await db.execute(select(func.count()).select_from(User))
     users_count = users_total.scalar_one()
 
-    jobs_result = await db.execute(
-        select(GenerationJob.status, func.count()).group_by(GenerationJob.status)
-    )
+    jobs_result = await db.execute(select(GenerationJob.status, func.count()).group_by(GenerationJob.status))
     counts = {status: count for status, count in jobs_result.all()}
     jobs_by_status = {status: counts.get(status, 0) for status in _JOB_STATUSES}
 
@@ -663,10 +667,7 @@ async def get_job_detail(
         .where(Item.college_id == job.college_id)
         .order_by(Item.item_number)
     )
-    items = [
-        ItemOcrData(item_number=r[0], ocr_confidence_score=r[1], low_confidence=r[2])
-        for r in items_result.all()
-    ]
+    items = [ItemOcrData(item_number=r[0], ocr_confidence_score=r[1], low_confidence=r[2]) for r in items_result.all()]
 
     return JobDetailResponseWrapped(
         data=JobDetailData(
@@ -804,6 +805,7 @@ async def delete_college(
 
 
 # ── Story 7.8 — Qualité & Coût (inspection fiches / feedback / usage tokens) ──
+
 
 @router.get("/colleges/{college_id}/cards", response_model=AdminCardsResponseWrapped)
 async def get_college_cards(
@@ -943,6 +945,7 @@ async def get_usage(
 
 
 # ── Story 1.4 — Configuration anti-spam ──────────────────────────────────────
+
 
 @router.get("/config", response_model=ConfigResponseWrapped)
 async def get_config(

@@ -16,6 +16,7 @@ Stratégie de détection du rang (par ordre de priorité) :
      (fallback pour pages scannées via pytesseract).
   3. Défaut "A" avec warning si aucun signal trouvé.
 """
+
 from __future__ import annotations
 
 import logging
@@ -32,9 +33,7 @@ logger = logging.getLogger(__name__)
 # Tolère la ponctuation OCR en tête (". Item 313", CNEC) mais pas les puces (« • Item 230 »
 # est une référence dans le corps). Pas « tem 313 » : ces en-têtes tronqués le sont souvent
 # aussi à droite (« tem 30 » pour 306) et créeraient de faux items.
-_ITEM_HEADER_PATTERN = re.compile(
-    r"^[.,'’ \t]{0,3}item\s*n?°?\s*(\d{1,3})\b", re.IGNORECASE | re.MULTILINE
-)
+_ITEM_HEADER_PATTERN = re.compile(r"^[.,'’ \t]{0,3}item\s*n?°?\s*(\d{1,3})\b", re.IGNORECASE | re.MULTILINE)
 # Compte des numéros d'un sommaire : motif strict (« Item N » en tout début de ligne), pour
 # qu'une liste « - Item 12 / - Item 45 » d'items liés ne fasse pas passer une page pour un sommaire.
 _TOC_ITEM_PATTERN = re.compile(r"^item\s*n?°?\s*(\d{1,3})\b", re.IGNORECASE | re.MULTILINE)
@@ -42,9 +41,7 @@ _TOC_ITEM_PATTERN = re.compile(r"^item\s*n?°?\s*(\d{1,3})\b", re.IGNORECASE | r
 _TOC_CHAPTER_PREFIX = re.compile(r"^[^:\d]{1,15}?\d+\s*:\s*")
 _TOC_LEADERS = re.compile(r"[.·…\s]{3,}[\s\-\d]*$")
 # « OBJECTIFS: N° 304. Tumeurs du foie… » (variantes OCR : « OBJECTIFS : », « N"o300. »)
-_OBJECTIFS_PATTERN = re.compile(
-    r"OBJECTIFS?\s*:?\s*N\s*[°º\"'o]{0,3}\s*(\d{1,3})\s*[.\-–:][ \t]*(.*)"
-)
+_OBJECTIFS_PATTERN = re.compile(r"OBJECTIFS?\s*:?\s*N\s*[°º\"'o]{0,3}\s*(\d{1,3})\s*[.\-–:][ \t]*(.*)")
 # Au-delà de ce nombre de numéros d'item distincts en début de ligne, la page est un sommaire.
 _TOC_MIN_ITEM_NUMBERS = 3
 _MAX_TITLE_LINES = 3
@@ -215,9 +212,7 @@ class ItemDetector:
                 continue
 
             item_number = int(match.group(1))
-            tables: PageTables = (
-                page_tables[page_num] if page_num < len(page_tables) else []
-            )
+            tables: PageTables = page_tables[page_num] if page_num < len(page_tables) else []
 
             # Rang depuis les tables pdfplumber (méthode principale),
             # puis fallback texte OCR brut (pytesseract)
@@ -271,9 +266,7 @@ class ItemDetector:
         for i, header in enumerate(headers):
             start_page = header.page
             item_number = header.item_number
-            end_page = (
-                headers[i + 1].page - 1 if i + 1 < len(headers) else total_pages - 1
-            )
+            end_page = headers[i + 1].page - 1 if i + 1 < len(headers) else total_pages - 1
 
             if header.rangs:
                 rang: RangType = min(header.rangs, key=lambda r: _RANG_PRIORITY.get(r, 99))
@@ -293,11 +286,7 @@ class ItemDetector:
             )
             item_page_scores = page_scores[start_page : end_page + 1]
 
-            avg_score = (
-                sum(item_page_scores) / len(item_page_scores)
-                if item_page_scores
-                else 0.0
-            )
+            avg_score = sum(item_page_scores) / len(item_page_scores) if item_page_scores else 0.0
 
             items.append(
                 DetectedItem(

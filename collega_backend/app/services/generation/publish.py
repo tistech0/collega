@@ -13,6 +13,7 @@ Une seule transaction, collège verrouillé. Items rapprochés par numéro :
 Rejouable : un import qui n'est plus `ocr_complete` (déjà basculé, stoppé) n'est
 pas republié. Ne commit pas (l'appelant commit), ne touche à aucun fichier.
 """
+
 from __future__ import annotations
 
 import json
@@ -66,9 +67,7 @@ class ImportSummary:
 def stale_pdfs(college_id: uuid.UUID, keep_job_id: uuid.UUID) -> list[Path]:
     """PDF du collège autres que celui de l'import qui vient d'être publié."""
     keep = f"{college_id}_{keep_job_id}.pdf"
-    return sorted(
-        p for p in Path(settings.pdf_storage_path).glob(f"{college_id}_*.pdf") if p.name != keep
-    )
+    return sorted(p for p in Path(settings.pdf_storage_path).glob(f"{college_id}_*.pdf") if p.name != keep)
 
 
 def _copy_metadata(item: Item, draft: JobItem) -> None:
@@ -95,19 +94,14 @@ async def publish_job(db: AsyncSession, job_id: uuid.UUID, *, claude_calls: int)
         return None
 
     was_ready = college.status == CollegeStatus.generation_complete
-    drafts = {
-        d.item_number: d
-        for d in (await db.execute(select(JobItem).where(JobItem.job_id == job_id))).scalars()
-    }
-    live = {
-        i.item_number: i
-        for i in (await db.execute(select(Item).where(Item.college_id == college.id))).scalars()
-    }
+    drafts = {d.item_number: d for d in (await db.execute(select(JobItem).where(JobItem.job_id == job_id))).scalars()}
+    live = {i.item_number: i for i in (await db.execute(select(Item).where(Item.college_id == college.id))).scalars()}
     gen_ids = {d.generation_id for d in drafts.values() if d.generation_id is not None}
-    generations = {
-        g.id: g
-        for g in (await db.execute(select(ItemGeneration).where(ItemGeneration.id.in_(gen_ids)))).scalars()
-    } if gen_ids else {}
+    generations = (
+        {g.id: g for g in (await db.execute(select(ItemGeneration).where(ItemGeneration.id.in_(gen_ids)))).scalars()}
+        if gen_ids
+        else {}
+    )
 
     card_counts = dict(
         (
@@ -191,11 +185,15 @@ async def publish_job(db: AsyncSession, job_id: uuid.UUID, *, claude_calls: int)
         # Réimport sans aucun appel Claude (même contenu, tout réutilisé) : le quota
         # consommé au router est rendu. UPDATE conditionnels `> 0` : jamais négatif.
         await db.execute(
-            sa_update(College).where(College.id == college.id).where(College.reload_count > 0)
+            sa_update(College)
+            .where(College.id == college.id)
+            .where(College.reload_count > 0)
             .values(reload_count=College.reload_count - 1)
         )
         await db.execute(
-            sa_update(User).where(User.id == job.user_id).where(User.monthly_reloads > 0)
+            sa_update(User)
+            .where(User.id == job.user_id)
+            .where(User.monthly_reloads > 0)
             .values(monthly_reloads=User.monthly_reloads - 1)
         )
         summary.quota_refunded = True
@@ -210,7 +208,9 @@ async def publish_job(db: AsyncSession, job_id: uuid.UUID, *, claude_calls: int)
     college.status = CollegeStatus.generation_complete
     college.generation_items_total = None
     await record_job_event(
-        db, job_id, "generation_complete",
+        db,
+        job_id,
+        "generation_complete",
         message=(
             f"{summary.changed} modifiés, {summary.added} nouveaux, {summary.removed} supprimés, "
             f"{summary.unchanged} inchangés — {summary.cards} fiches"

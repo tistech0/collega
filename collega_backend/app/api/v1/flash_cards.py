@@ -1,4 +1,5 @@
 """Endpoints de feedback, suppression et régénération de fiches — FR19, FR20, FR21."""
+
 from __future__ import annotations
 
 import logging
