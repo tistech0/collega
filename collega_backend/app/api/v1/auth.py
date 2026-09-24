@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import logging
 import secrets
 import time
@@ -53,6 +54,15 @@ def _remaining_lifetime_s(payload: dict) -> int:
     return max(1, int(exp - time.time()))
 
 
+def _refresh_jti(token: str, payload: dict) -> str:
+    """`jti` du refresh ; jeton émis avant le chantier 2 (sans `jti`) : dérivé de son
+    empreinte, pour qu'il suive la même rotation / grâce / révocation que les autres."""
+    jti = payload.get("jti")
+    if isinstance(jti, str) and jti:
+        return jti
+    return hashlib.sha256(token.encode()).hexdigest()[:32]
+
+
 def _token_pair(user: User) -> TokenResponse:
     return TokenResponse(
         access_token=create_access_token(str(user.id), user.token_version),
@@ -89,7 +99,7 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
 @limiter.limit("30/minute")
 async def refresh(request: Request, body: RefreshRequest, db: AsyncSession = Depends(get_db)):
     """Rotation (chantier 2 § 2) : chaque renouvellement révoque le refresh présenté et
-    émet un nouveau couple. Un refresh révoqué depuis plus de 60 s qui revient = vol
+    émet un nouveau couple. Un refresh révoqué depuis plus de `GRACE_S` s qui revient = vol
     présumé → `token_version` incrémentée (toutes les sessions coupées)."""
     try:
         payload = decode_token(body.refresh_token)
@@ -111,21 +121,19 @@ async def refresh(request: Request, body: RefreshRequest, db: AsyncSession = Dep
     if not token_version_ok(payload, user.token_version):
         raise unauthorized("TOKEN_REVOKED", "Session révoquée — reconnectez-vous")
 
-    jti = payload.get("jti")
-    # Jeton émis avant le chantier 2 (sans `jti`) : pas de révocation possible, il est
-    # simplement remplacé par un couple rotatif.
-    if isinstance(jti, str) and jti:
-        # Révocation atomique « premier arrivé » : l'état renvoyé est celui d'avant l'appel.
-        state = await token_store.revoke_refresh(jti, _remaining_lifetime_s(payload))
-        if state == "reused":
-            # UPDATE atomique : deux réutilisations concurrentes incrémentent bien deux fois.
-            await db.execute(sa_update(User).where(User.id == user.id).values(token_version=User.token_version + 1))
-            await db.commit()
-            logger.warning("Réutilisation d'un refresh token révoqué : sessions coupées (user=%s)", user.id)
-            raise unauthorized("TOKEN_REUSED", "Session révoquée — reconnectez-vous")
-        # "active" : révoqué par cette requête ; "grace" : révoqué il y a moins de 60 s par
-        # une requête parallèle → accepté sans toucher à l'état existant.
+    # Révocation atomique « premier arrivé » : l'état renvoyé est celui d'avant l'appel.
+    jti = _refresh_jti(body.refresh_token, payload)
+    state = await token_store.revoke_refresh(jti, _remaining_lifetime_s(payload))
+    if state == "reused":
+        # UPDATE atomique : deux réutilisations concurrentes incrémentent bien deux fois.
+        await db.execute(sa_update(User).where(User.id == user.id).values(token_version=User.token_version + 1))
+        await db.commit()
+        logger.warning("Réutilisation d'un refresh token révoqué : sessions coupées (user=%s)", user.id)
+        raise unauthorized("TOKEN_REUSED", "Session révoquée — reconnectez-vous")
+    # "active" : révoqué par cette requête ; "grace" : révoqué il y a moins de
+    # `GRACE_S` secondes par une requête parallèle → accepté sans toucher à l'état existant.
 
+    logger.debug("refresh : jeton renouvelé (user %s)", user.id)
     return {"data": _token_pair(user).model_dump()}
 
 
@@ -142,15 +150,9 @@ async def logout(
             payload = decode_token(body.refresh_token)
         except JWTError:
             payload = None
-        jti = payload.get("jti") if payload else None
-        if (
-            payload is not None
-            and payload.get("type") == "refresh"
-            and payload.get("sub") == str(current_user.id)
-            and isinstance(jti, str)
-            and jti
-        ):
+        if payload is not None and payload.get("type") == "refresh" and payload.get("sub") == str(current_user.id):
             # Sans grâce : un refresh déconnecté est refusé immédiatement (TOKEN_REUSED).
+            jti = _refresh_jti(body.refresh_token, payload)
             await token_store.revoke_refresh(jti, _remaining_lifetime_s(payload), grace=False)
     current_user.apns_token = None
     await db.commit()

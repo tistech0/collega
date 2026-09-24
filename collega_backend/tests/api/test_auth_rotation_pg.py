@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -116,6 +117,44 @@ class TestRotation:
         payload = decode_token(new_refresh)
         assert payload["tv"] == 0 and len(payload["jti"]) == 32
 
+    async def test_jeton_ancien_utilisable_une_fois_puis_reutilisation(self, pg_client, pg_factory, token_redis):
+        """I2 : un refresh sans `jti` reçoit un `jti` dérivé (sha256) → rotation normale."""
+        user = await _make_user(pg_factory)
+        legacy = _legacy_refresh(user.id)
+
+        assert (await _refresh(pg_client, legacy)).status_code == 200
+        # Hors grâce : la réutilisation est détectée comme pour un jeton récent.
+        await token_redis.delete(f"refresh:grace:{_legacy_jti(legacy)}")
+        resp = await _refresh(pg_client, legacy)
+        assert resp.status_code == 401
+        assert resp.json()["detail"]["code"] == "TOKEN_REUSED"
+        assert (await _reload(pg_factory, user.id)).token_version == 1
+
+    async def test_rotation_journalise_en_debug_sans_jeton(self, pg_client, pg_factory, token_redis, caplog):
+        user = await _make_user(pg_factory)
+        refresh = (await _login(pg_client, user.email)).json()["data"]["refresh_token"]
+        with caplog.at_level(logging.DEBUG, logger="app.api.v1.auth"):
+            resp = await _refresh(pg_client, refresh)
+        assert resp.status_code == 200
+        messages = [r.getMessage() for r in caplog.records if r.name == "app.api.v1.auth"]
+        assert f"refresh : jeton renouvelé (user {user.id})" in messages
+        jti = decode_token(refresh)["jti"]
+        new_refresh = resp.json()["data"]["refresh_token"]
+        assert all(refresh not in m and new_refresh not in m and jti not in m for m in messages)
+
+
+def _legacy_refresh(user_id) -> str:
+    """Refresh émis avant le chantier 2 : ni `tv` ni `jti`."""
+    return jwt.encode(
+        {"sub": str(user_id), "type": "refresh", "exp": datetime.now(UTC) + timedelta(days=1)},
+        settings.secret_key,
+        algorithm="HS256",
+    )
+
+
+def _legacy_jti(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()[:32]
+
 
 class TestLogout:
     async def test_logout_revoque_le_refresh_et_efface_apns(self, pg_client, pg_factory, token_redis):
@@ -141,6 +180,18 @@ class TestLogout:
 
         # Refresh immédiat (la grâce n'est PAS supprimée par le test) → réutilisation.
         resp = await _refresh(pg_client, refresh)
+        assert resp.status_code == 401
+        assert resp.json()["detail"]["code"] == "TOKEN_REUSED"
+
+    async def test_logout_revoque_un_refresh_ancien_sans_jti(self, pg_client, pg_factory, token_redis):
+        user = await _make_user(pg_factory)
+        access = (await _login(pg_client, user.email)).json()["data"]["access_token"]
+        legacy = _legacy_refresh(user.id)
+
+        resp = await pg_client.post("/v1/auth/logout", headers=_bearer(access), json={"refresh_token": legacy})
+        assert resp.status_code == 204
+        assert await token_redis.get(f"revoked:jti:{_legacy_jti(legacy)}") == b"1"
+        resp = await _refresh(pg_client, legacy)
         assert resp.status_code == 401
         assert resp.json()["detail"]["code"] == "TOKEN_REUSED"
 
