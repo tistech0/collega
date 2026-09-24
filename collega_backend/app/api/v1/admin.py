@@ -25,7 +25,6 @@ from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
 from app.models.generation_job_event import GenerationJobEvent
 from app.models.item import Item
-from app.models.tester_feedback import TesterFeedback
 from app.models.user import User
 from app.schemas.admin import (
     AdminCardsResponseWrapped,
@@ -363,11 +362,13 @@ async def get_college_stats(
     last_job = last_job_result.scalar_one_or_none()
     hash_shared = last_job.hash_shared if last_job else False
 
-    # Pertinence stats depuis tester_feedbacks (Story 1.5)
+    # Pertinence depuis les avis de l'utilisatrice sur ses fiches (pouces du drill,
+    # chantier 5 R3) : pertinent = positive, non pertinent = negative.
     fb_result = await db.execute(
-        select(TesterFeedback, FlashCard.rang)
-        .join(FlashCard, TesterFeedback.flash_card_id == FlashCard.id)
-        .where(TesterFeedback.college_id == college_id)
+        select(FlashCard.rang, FlashCard.user_feedback, func.count(FlashCard.id))
+        .where(FlashCard.college_id == college_id)
+        .where(FlashCard.user_feedback.is_not(None))
+        .group_by(FlashCard.rang, FlashCard.user_feedback)
     )
     fb_rows = fb_result.all()
 
@@ -378,13 +379,11 @@ async def get_college_stats(
             "B": {"pertinent": 0, "not_pertinent": 0},
             "C": {"pertinent": 0, "not_pertinent": 0},
         }
-        for fb, rang in fb_rows:
+        for rang, feedback, count in fb_rows:
             if rang not in pertinence_by_rang:
                 pertinence_by_rang[rang] = {"pertinent": 0, "not_pertinent": 0}
-            if fb.is_pertinent:
-                pertinence_by_rang[rang]["pertinent"] += 1
-            else:
-                pertinence_by_rang[rang]["not_pertinent"] += 1
+            key = "pertinent" if feedback == "positive" else "not_pertinent"
+            pertinence_by_rang[rang][key] += count
         total_p = sum(v["pertinent"] for v in pertinence_by_rang.values())
         total_np = sum(v["not_pertinent"] for v in pertinence_by_rang.values())
         pertinence_stats = PertinenceStats(
@@ -761,8 +760,8 @@ async def delete_college(
     """Supprime un import (college) et toute sa descendance + PDF disque.
 
     La suppression est au niveau College car FlashCard/Item n'ont aucune FK vers
-    le GenerationJob — seul `DELETE College` emporte items/jobs/events/flashcards/
-    feedbacks via la cascade ORM `all, delete-orphan` + FK `ondelete=CASCADE`.
+    le GenerationJob — seul `DELETE College` emporte items/jobs/events/flashcards
+    via la cascade ORM `all, delete-orphan` + FK `ondelete=CASCADE`.
     """
     college = await db.get(College, college_id)
     if college is None:
@@ -853,10 +852,10 @@ async def get_college_feedback(
     _: bool = Depends(get_admin_user),
     db: AsyncSession = Depends(get_db),
 ) -> AdminFeedbackResponseWrapped:
-    """Feedbacks testeuse d'un collège joints au contenu de la fiche concernée.
+    """Avis de l'utilisatrice (pouces du drill, `flash_cards.user_feedback`) sur les
+    fiches d'un collège, avec leur contenu, triés par numéro d'item.
 
-    `is_pertinent=false` = signal qualité n°1. Même pattern de jointure que
-    `get_college_stats` (TesterFeedback n'a pas de relationship ORM directe).
+    `is_pertinent=false` (avis négatif) = signal qualité n°1.
     """
     college = await db.get(College, college_id)
     if college is None:
@@ -866,30 +865,27 @@ async def get_college_feedback(
         )
 
     result = await db.execute(
-        select(
-            TesterFeedback,
-            FlashCard.recto,
-            FlashCard.verso,
-            FlashCard.card_type,
-            FlashCard.rang,
-        )
-        .join(FlashCard, TesterFeedback.flash_card_id == FlashCard.id)
-        .where(TesterFeedback.college_id == college_id)
-        .order_by(TesterFeedback.created_at.desc())
+        select(FlashCard, Item.item_number, User.email)
+        .join(Item, FlashCard.item_id == Item.id)
+        .join(College, FlashCard.college_id == College.id)
+        .join(User, College.user_id == User.id)
+        .where(FlashCard.college_id == college_id)
+        .where(FlashCard.user_feedback.is_not(None))
+        .order_by(Item.item_number, FlashCard.created_at, FlashCard.id)
     )
     feedbacks = [
         AdminFeedbackData(
-            feedback_id=str(fb.id),
-            flash_card_id=str(fb.flash_card_id),
-            tester_id=fb.tester_id,
-            is_pertinent=fb.is_pertinent,
-            created_at=fb.created_at.isoformat() if fb.created_at else None,
-            recto=recto,
-            verso=verso,
-            card_type=card_type,
-            rang=rang,
+            flash_card_id=str(card.id),
+            item_number=item_number,
+            user_email=user_email,
+            feedback=card.user_feedback,
+            is_pertinent=card.user_feedback == "positive",
+            recto=card.recto,
+            verso=card.verso,
+            card_type=card.card_type,
+            rang=card.rang,
         )
-        for fb, recto, verso, card_type, rang in result.all()
+        for card, item_number, user_email in result.all()
     ]
     return AdminFeedbackResponseWrapped(data=feedbacks, total=len(feedbacks))
 

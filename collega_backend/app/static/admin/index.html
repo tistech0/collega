@@ -153,7 +153,7 @@
     <div class="create-form" id="create-form">
       <h3 class="subsection-title" style="margin-top:0">Nouveau compte</h3>
       <label for="new-email">Email</label>
-      <input type="email" id="new-email" autocomplete="off" placeholder="testeuse@example.com">
+      <input type="email" id="new-email" autocomplete="off" placeholder="utilisatrice@example.com">
       <label for="new-password">Mot de passe (≥ 8 caractères)</label>
       <input type="password" id="new-password" autocomplete="new-password">
       <div class="checkbox-row">
@@ -262,10 +262,10 @@
         <tbody id="quality-cards-body"></tbody>
       </table>
 
-      <h3 class="subsection-title">Feedback testeuse (<span id="quality-fb-count">0</span>)</h3>
-      <div id="quality-fb-empty" class="empty-state" style="display:none; padding:24px">Aucun feedback.</div>
+      <h3 class="subsection-title">Avis de l'utilisatrice (<span id="quality-fb-count">0</span>)</h3>
+      <div id="quality-fb-empty" class="empty-state" style="display:none; padding:24px">Aucun avis.</div>
       <table id="quality-fb-table" style="display:none">
-        <thead><tr><th>Pertinence</th><th>Type</th><th>Rang</th><th>Recto / Verso</th><th>Testeur</th><th>Date</th></tr></thead>
+        <thead><tr><th>Pertinence</th><th>Item</th><th>Type</th><th>Rang</th><th>Recto / Verso</th><th>Utilisatrice</th></tr></thead>
         <tbody id="quality-fb-body"></tbody>
       </table>
     </div>
@@ -957,11 +957,11 @@
         : `<span class="badge badge-red">⚠ Non pertinent</span>`;
       tr.innerHTML = `
         <td>${badge}</td>
+        <td>${f.item_number}</td>
         <td>${escapeHtml(f.card_type)}</td>
         <td>${escapeHtml(f.rang)}</td>
         <td><div class="qa-recto">${escapeHtml(f.recto)}</div><div class="qa-verso">${escapeHtml(f.verso)}</div></td>
-        <td>${escapeHtml(f.tester_id)}</td>
-        <td>${fmtDate(f.created_at)}</td>`;
+        <td>${escapeHtml(f.user_email)}</td>`;
       body.appendChild(tr);
     });
     table.style.display = "";

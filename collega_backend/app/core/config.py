@@ -50,10 +50,6 @@ class Settings(BaseSettings):
     admin_username: str = "admin"
     admin_password: str = "change-me"
 
-    # Interface testeur Phase 0 — HTTP Basic Auth (credentials distincts de l'admin)
-    tester_username: str = "tester"
-    tester_password: str = "change-me"
-
     # Webhook RevenueCat — secret partagé (FR46)
     revenuecat_webhook_secret: str = ""
 
@@ -71,12 +67,6 @@ class Settings(BaseSettings):
     def _require_webhook_secret(self) -> "Settings":
         if not self.revenuecat_webhook_secret:
             raise ValueError("revenuecat_webhook_secret must be set (non-empty)")
-        return self
-
-    @model_validator(mode="after")
-    def _require_distinct_tester_credentials(self) -> "Settings":
-        if self.tester_username == self.admin_username and self.tester_password == self.admin_password:
-            raise ValueError("tester_username/tester_password must differ from admin credentials")
         return self
 
     @model_validator(mode="after")
@@ -102,7 +92,6 @@ class Settings(BaseSettings):
         secret_key = self.secret_key.strip()
         claude_api_key = self.claude_api_key.strip()
         admin_password = self.admin_password.strip()
-        tester_password = self.tester_password.strip()
         webhook_secret = self.revenuecat_webhook_secret.strip()
 
         # SECRET_KEY : taille mini ET pas de placeholder (deux contrôles
@@ -120,12 +109,9 @@ class Settings(BaseSettings):
         elif len(claude_api_key) < _CLAUDE_API_KEY_MIN_LEN:
             issues.append(f"CLAUDE_API_KEY (too short — must be ≥ {_CLAUDE_API_KEY_MIN_LEN} chars)")
 
-        # ADMIN_PASSWORD / TESTER_PASSWORD : non vide + pas de placeholder.
+        # ADMIN_PASSWORD : non vide + pas de placeholder.
         if not admin_password or admin_password in _PLACEHOLDER_PASSWORDS:
             issues.append("ADMIN_PASSWORD (default placeholder value)")
-
-        if not tester_password or tester_password in _PLACEHOLDER_PASSWORDS:
-            issues.append("TESTER_PASSWORD (default placeholder value)")
 
         # REVENUECAT_WEBHOOK_SECRET : pas de placeholder (le non-vide est déjà
         # vérifié par _require_webhook_secret au-dessus).

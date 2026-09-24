@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, EmailStr, Field
 
 # ── College creation ─────────────────────────────────────────────────────────
@@ -73,7 +75,7 @@ class ItemOcrData(BaseModel):
     low_confidence: bool
 
 
-# ── Story 1.5 — Pertinence stats (feedback testeur) ───────────────────────────
+# ── Story 1.5 — Pertinence stats (avis flash_cards.user_feedback) ─────────────
 
 
 class PertinenceByRang(BaseModel):
@@ -286,15 +288,15 @@ class AdminCardsResponseWrapped(BaseModel):
     total: int
 
 
-# ── Story 7.8 — Qualité : feedback testeuse joint au contenu fiche ────────────
+# ── Story 7.8 — Qualité : avis de l'utilisatrice joint au contenu fiche ───────
 
 
 class AdminFeedbackData(BaseModel):
-    feedback_id: str
     flash_card_id: str
-    tester_id: str
+    item_number: int
+    user_email: str
+    feedback: Literal["positive", "negative"]
     is_pertinent: bool
-    created_at: str | None
     recto: str
     verso: str
     card_type: str

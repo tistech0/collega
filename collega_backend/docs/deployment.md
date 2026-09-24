@@ -24,6 +24,11 @@ Le script :
 - **Image non root** (uid 1000 `collega`) : le dossier bind des PDF `/mnt/user/appdata/collega/pdfs` appartient à `1000:1000` (`chown -R 1000:1000`, fait au déploiement du chantier 3). À refaire si le dossier est recréé.
 - **Redis protégé** : `REDIS_PASSWORD` dans le `.env` du NAS ; le compose passe `--requirepass`, surcharge `REDIS_URL` pour migrate/api/worker et pose `REDISCLI_AUTH` dans le conteneur redis (donc `docker exec collega-redis-1 redis-cli …` fonctionne sans mot de passe en argument).
 - `IMAGE_TAG` est obligatoire (le compose refuse de démarrer sans).
+- **Migration 019 (chantier 5)** : elle supprime la table `tester_feedbacks` (testeur web retiré). L'exporter **avant** le déploiement qui l'embarque (le conteneur `collega-migrate-1` l'applique au `up -d`). L'image en service ne contient pas encore le script : il est passé sur l'entrée standard, puis le CSV est rapatrié dans `_bmad-output/implementation-artifacts/exports/` :
+  ```sh
+  ssh nas 'docker exec -i collega-api-1 python - --out /tmp/collega_pdfs' < collega_backend/scripts/export_tester_feedbacks.py
+  ```
+  (Avec une image qui contient le script : `docker exec collega-api-1 python scripts/export_tester_feedbacks.py --out /tmp/collega_pdfs`.) Le fichier `tester_feedbacks_<AAAAMMJJ>.csv` atterrit dans le dossier des PDF du NAS. Les variables `TESTER_*` du `.env` du NAS sont désormais ignorées et restent en place.
 - Vérifier une config de prod sans afficher de secret : `docker exec -e ENVIRONMENT=production collega-api-1 python -c "from app.core.config import Settings; Settings()"`.
 
 ## Production secrets — validators stricts (Story 7.3)
@@ -36,7 +41,6 @@ suivantes est violée (cf. `app/core/config.py::_validate_production_secrets`) :
   `_PLACEHOLDER_SECRET_KEYS`).
 - `CLAUDE_API_KEY` est vide **OU** ne commence pas par `sk-ant-`.
 - `ADMIN_PASSWORD` vaut `change-me` ou `change-me-in-production`.
-- `TESTER_PASSWORD` vaut `change-me` ou `change-me-in-production`.
 - `REVENUECAT_WEBHOOK_SECRET` vaut `change-me-in-production`
   (le non-vide est aussi vérifié par `_require_webhook_secret`).
 
@@ -53,7 +57,7 @@ Le fichier `.env` prod se trouve sur
 écrasé** (mémoire `project_nas_env.md`). Vérification non-destructive :
 
 ```bash
-ssh nas 'grep -oE "^(ENVIRONMENT|SECRET_KEY|ADMIN_PASSWORD|TESTER_PASSWORD|CLAUDE_API_KEY|REVENUECAT_WEBHOOK_SECRET|REDIS_PASSWORD|IMAGE_TAG)=" /mnt/user/appdata/compose-stacks/collega/.env'
+ssh nas 'grep -oE "^(ENVIRONMENT|SECRET_KEY|ADMIN_PASSWORD|CLAUDE_API_KEY|REVENUECAT_WEBHOOK_SECRET|REDIS_PASSWORD|IMAGE_TAG)=" /mnt/user/appdata/compose-stacks/collega/.env'
 ```
 
 (`-o` : n'affiche que les noms des variables présentes, jamais les valeurs.)

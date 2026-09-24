@@ -32,7 +32,7 @@ docker exec collega-restore-test psql -U postgres -d collega -Atc \
 docker run --rm --network collega-restore-net \
   -e DATABASE_URL=postgresql+asyncpg://postgres@db:5432/collega -e REDIS_URL=redis://localhost:6379/0 \
   -e SECRET_KEY=restore-test-only-0123456789abcdefghijkl -e CLAUDE_API_KEY=x -e ADMIN_USERNAME=a \
-  -e ADMIN_PASSWORD=b -e REVENUECAT_WEBHOOK_SECRET=c -e TESTER_USERNAME=t -e TESTER_PASSWORD=u \
+  -e ADMIN_PASSWORD=b -e REVENUECAT_WEBHOOK_SECRET=c \
   tistech0/collega-backend:latest alembic upgrade head
 docker rm -f collega-restore-test && docker network rm collega-restore-net
 ```

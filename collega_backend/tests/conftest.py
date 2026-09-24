@@ -18,8 +18,6 @@ os.environ.setdefault("CLAUDE_API_KEY", "test-key")
 os.environ.setdefault("ADMIN_USERNAME", "admin")
 os.environ.setdefault("ADMIN_PASSWORD", "testpass")
 os.environ.setdefault("REVENUECAT_WEBHOOK_SECRET", "test-rc-secret")
-os.environ.setdefault("TESTER_USERNAME", "tester")
-os.environ.setdefault("TESTER_PASSWORD", "testpass")
 
 from unittest.mock import AsyncMock, MagicMock
 

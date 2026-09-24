@@ -17,7 +17,6 @@ from app.api.v1.flash_cards import router as flash_cards_router
 from app.api.v1.health import router as health_router
 from app.api.v1.notifications import router as notifications_router
 from app.api.v1.search import router as search_router
-from app.api.v1.tester import router as tester_router
 from app.core.config import settings
 from app.core.database import engine
 from app.core.limiter import limiter
@@ -105,9 +104,7 @@ app.include_router(notifications_router, prefix="/v1")
 app.include_router(search_router, prefix="/v1")
 app.include_router(admin_router, prefix="/v1/admin")
 app.include_router(billing_router, prefix="/v1/webhooks")
-app.include_router(tester_router, prefix="/v1/tester")
 # StaticFiles doit être monté EN DERNIER pour ne pas masquer les routes API
 app.mount(
     "/admin", StaticFiles(directory=str(Path(__file__).parent / "static" / "admin"), html=True), name="admin-static"
 )
-app.mount("/tester", StaticFiles(directory=str(Path(__file__).parent / "static"), html=True), name="tester-static")

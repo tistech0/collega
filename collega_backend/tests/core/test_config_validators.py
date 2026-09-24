@@ -21,7 +21,6 @@ def _base_settings_kwargs(**overrides):
         secret_key="a" * 32,
         claude_api_key="sk-ant-test1234567890",
         admin_password="strongpw",
-        tester_password="testerpw",
         revenuecat_webhook_secret="real-secret",
     )
     base.update(overrides)
@@ -65,12 +64,12 @@ class TestValidatorsProductionMode:
         with pytest.raises(ValidationError, match="ADMIN_PASSWORD"):
             _make_settings(environment="production", **_base_settings_kwargs(admin_password="change-me"))
 
-    def test_default_tester_password_raises(self):
-        with pytest.raises(ValidationError, match="TESTER_PASSWORD"):
-            _make_settings(
-                environment="production",
-                **_base_settings_kwargs(tester_password="change-me-in-production"),
-            )
+    def test_leftover_tester_variables_are_ignored(self, monkeypatch):
+        # Chantier 5 (R1) : les TESTER_* restent dans le .env du NAS, jamais réécrit.
+        monkeypatch.setenv("TESTER_USERNAME", "tester")
+        monkeypatch.setenv("TESTER_PASSWORD", "change-me")
+        s = _make_settings(environment="production", **_base_settings_kwargs())
+        assert not hasattr(s, "tester_password")
 
     def test_default_webhook_secret_raises(self):
         with pytest.raises(ValidationError, match="REVENUECAT_WEBHOOK_SECRET"):
