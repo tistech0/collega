@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:collega_app/core/network/api_client.dart';
 import 'package:collega_app/features/auth/data/auth_repository.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 
@@ -367,6 +368,87 @@ void main() {
       await repo.logout();
 
       expect(storage.deletedKeys, containsAll(['access_token', 'refresh_token']));
+    });
+  });
+
+  group('AuthRepository.logout — rotation défensive avant logout (fix round 1)', () {
+    test(
+      'rotation R1→R2 pré-logout : /logout reçoit R2 (jamais figé sur R1), '
+      'jamais via le dio intercepté 401→refresh→retry',
+      () async {
+        final storage = _FakeSecureStorage(initial: {
+          'access_token': 'stale-access',
+          'refresh_token': 'R1',
+          'user_id': 'u',
+          'user_email': 'a@b.fr',
+        });
+
+        // ApiClient.rawDio (= _refreshDio) : 1) le refresh défensif (R1→R2),
+        // 2) le POST /v1/auth/logout lui-même.
+        final rawAdapter = _ScriptedAdapter([
+          {
+            'data': {'access_token': 'new-access', 'refresh_token': 'R2'},
+          },
+          204,
+        ]);
+        // ApiClient.dio (intercepté 401→refresh→retry) : ne doit JAMAIS être
+        // sollicité par logout() — script vide, tout appel ici fait échouer
+        // le test (StateError).
+        final interceptedAdapter = _ScriptedAdapter([]);
+
+        final apiClient = ApiClient(
+          storage,
+          dio: _plainDio(interceptedAdapter),
+          refreshDio: _plainDio(rawAdapter),
+        );
+
+        final repo = AuthRepository(
+          dio: apiClient.dio,
+          storage: storage,
+          logoutDio: apiClient.rawDio,
+          ensureFreshAccessToken: apiClient.ensureFreshAccessToken,
+        );
+
+        await repo.logout();
+
+        expect(interceptedAdapter.callCount, 0);
+        expect(rawAdapter.callCount, 2);
+        expect(rawAdapter.requests[0].path, '/v1/auth/refresh');
+        final logoutSent = rawAdapter.requests[1];
+        expect(logoutSent.path, '/v1/auth/logout');
+        expect(logoutSent.headers['Authorization'], 'Bearer new-access');
+        // Le corps envoyé porte le refresh_token POST-rotation (R2) — jamais
+        // l'ancien R1 lu avant la rotation défensive.
+        expect(logoutSent.data, {'refresh_token': 'R2'});
+        expect(await storage.read(key: 'access_token'), isNull);
+        expect(await storage.read(key: 'refresh_token'), isNull);
+      },
+    );
+
+    test('rafraîchissement défensif en échec → logout suit avec les jetons existants (best-effort)', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 'acc-1', 'refresh_token': 'ref-1'});
+      final rawAdapter = _ScriptedAdapter([DioExceptionType.connectionError, 204]);
+      final interceptedAdapter = _ScriptedAdapter([]);
+
+      final apiClient = ApiClient(
+        storage,
+        dio: _plainDio(interceptedAdapter),
+        refreshDio: _plainDio(rawAdapter),
+      );
+      final repo = AuthRepository(
+        dio: apiClient.dio,
+        storage: storage,
+        logoutDio: apiClient.rawDio,
+        ensureFreshAccessToken: apiClient.ensureFreshAccessToken,
+      );
+
+      await repo.logout();
+
+      expect(rawAdapter.callCount, 2);
+      final logoutSent = rawAdapter.requests[1];
+      expect(logoutSent.headers['Authorization'], 'Bearer acc-1');
+      expect(logoutSent.data, {'refresh_token': 'ref-1'});
+      expect(await storage.read(key: 'access_token'), isNull);
     });
   });
 

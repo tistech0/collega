@@ -29,6 +29,14 @@ class ApiClient {
 
   Dio get dio => _dio;
 
+  /// Dio SANS l'intercepteur 401→refresh→retry de [dio] — même base URL et
+  /// mêmes en-têtes (Cloudflare Access) via [_buildDio]. À utiliser pour tout
+  /// appel qui doit maîtriser lui-même le jeton envoyé (ex. logout après
+  /// rotation défensive) : avec [dio], un 401 en cours d'appel déclencherait
+  /// une rotation interne puis un retry rejouant le corps figé AVANT rotation
+  /// (fix round 1, chantier 2 § 8 task 5).
+  Dio get rawDio => _refreshDio;
+
   static Dio _buildDio() {
     return Dio(
       BaseOptions(
@@ -103,11 +111,15 @@ class ApiClient {
         data: {'refresh_token': refreshToken},
       );
       final data = response.data!['data'] as Map;
-      final newToken = data['access_token'] as String;
-      await _storage.write(key: _kAccessToken, value: newToken);
+      // Les deux jetons sont extraits/validés AVANT toute écriture : un
+      // refresh_token malformé (type inattendu) doit faire échouer TOUT le
+      // refresh — jamais laisser un access_token déjà écrit alors que
+      // l'appel est remonté en échec (refresh partiellement appliqué).
+      final newAccessToken = data['access_token'] as String;
+      final newRefreshToken = data['refresh_token'] as String?;
+      await _storage.write(key: _kAccessToken, value: newAccessToken);
       // Rotation : le refresh_token renvoyé est nouveau à chaque appel (reuse
       // detection côté serveur) — on l'enregistre s'il est présent et non vide.
-      final newRefreshToken = data['refresh_token'] as String?;
       if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
         await _storage.write(key: _kRefreshToken, value: newRefreshToken);
       }
