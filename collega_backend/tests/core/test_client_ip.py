@@ -10,6 +10,7 @@ from app.core.config import Settings, settings
 from app.core.limiter import get_client_ip, user_id_key
 
 NPM = "172.18.0.5"  # réseau Docker de Nginx Proxy Manager (dans 172.16.0.0/12)
+CLOUDFLARED = "172.23.0.3"  # conteneur cloudflared (réseau Docker net-edge)
 
 
 def _request(client_host: str | None, headers: dict[str, str] | None = None) -> Request:
@@ -29,9 +30,19 @@ def _default_trusted(monkeypatch):
 
 
 class TestTrustedProxy:
-    def test_cf_connecting_ip_prioritaire(self):
-        req = _request(NPM, {"CF-Connecting-IP": "203.0.113.7", "X-Forwarded-For": "1.1.1.1, 198.51.100.2"})
+    """Topologie prod : cloudflared (172.23.0.3, réseau Docker) → NPM (172.18.x) → API.
+    NPM ajoute à X-Forwarded-For l'adresse qui s'est connectée à lui ($remote_addr)."""
+
+    def test_cf_connecting_ip_via_cloudflared(self):
+        req = _request(NPM, {"CF-Connecting-IP": "203.0.113.7", "X-Forwarded-For": "1.1.1.1, " + CLOUDFLARED})
         assert get_client_ip(req) == "203.0.113.7"
+
+    def test_cf_connecting_ip_forge_depuis_le_lan_ignore(self):
+        req = _request(NPM, {"CF-Connecting-IP": "203.0.113.7", "X-Forwarded-For": "192.168.1.20"})
+        assert get_client_ip(req) == "192.168.1.20"
+
+    def test_cf_connecting_ip_sans_x_forwarded_for_ignore(self):
+        assert get_client_ip(_request(NPM, {"CF-Connecting-IP": "203.0.113.7"})) == NPM
 
     def test_dernier_element_de_x_forwarded_for(self):
         req = _request(NPM, {"X-Forwarded-For": "6.6.6.6, 198.51.100.2"})
@@ -43,15 +54,32 @@ class TestTrustedProxy:
     def test_x_forwarded_for_elements_vides_ignores(self):
         assert get_client_ip(_request(NPM, {"X-Forwarded-For": "6.6.6.6, 198.51.100.2, "})) == "198.51.100.2"
 
+    def test_dernier_element_non_ip_repli_sur_le_pair(self):
+        assert get_client_ip(_request(NPM, {"X-Forwarded-For": "1.2.3.4, pas-une-ip"})) == NPM
+
     def test_sans_en_tete_adresse_du_proxy(self):
         assert get_client_ip(_request(NPM)) == NPM
 
-    def test_cf_connecting_ip_invalide_ignore(self):
-        req = _request(NPM, {"CF-Connecting-IP": "pas-une-ip", "X-Forwarded-For": "198.51.100.2"})
-        assert get_client_ip(req) == "198.51.100.2"
+    def test_cf_connecting_ip_invalide_repli_sur_le_dernier_saut(self):
+        req = _request(NPM, {"CF-Connecting-IP": "pas-une-ip", "X-Forwarded-For": CLOUDFLARED})
+        assert get_client_ip(req) == CLOUDFLARED
 
-    def test_cf_connecting_ip_ipv6(self):
-        assert get_client_ip(_request(NPM, {"CF-Connecting-IP": "2001:db8::1"})) == "2001:db8::1"
+    def test_cf_connecting_ip_ipv6_regroupee_par_64(self):
+        req = _request(NPM, {"CF-Connecting-IP": "2001:db8:1:2:aaaa::1", "X-Forwarded-For": CLOUDFLARED})
+        assert get_client_ip(req) == "2001:db8:1:2::/64"
+
+
+class TestIPv6:
+    def test_meme_64_meme_cle(self):
+        a = get_client_ip(_request("2001:db8:1:2::1"))
+        b = get_client_ip(_request("2001:db8:1:2:ffff::9"))
+        assert a == b == "2001:db8:1:2::/64"
+
+    def test_64_differents_cles_differentes(self):
+        assert get_client_ip(_request("2001:db8:1:2::1")) != get_client_ip(_request("2001:db8:1:3::1"))
+
+    def test_ipv4_inchangee(self):
+        assert get_client_ip(_request("203.0.113.50")) == "203.0.113.50"
 
 
 class TestUntrustedClient:
@@ -80,7 +108,8 @@ class TestUntrustedClient:
     def test_plusieurs_reseaux(self, monkeypatch):
         monkeypatch.setattr(settings, "trusted_proxy_ips", ["10.0.0.0/8", "192.168.1.10"])
         assert get_client_ip(_request("192.168.1.10", {"X-Forwarded-For": "5.6.7.8"})) == "5.6.7.8"
-        assert get_client_ip(_request("10.1.2.3", {"CF-Connecting-IP": "1.2.3.4"})) == "1.2.3.4"
+        req = _request("10.1.2.3", {"CF-Connecting-IP": "1.2.3.4", "X-Forwarded-For": "10.9.9.9"})
+        assert get_client_ip(req) == "1.2.3.4"
 
 
 class TestUserIdKey:

@@ -54,6 +54,15 @@ async def test_admin_authentifie_jamais_limite(pg_client):
         assert resp.status_code == 200, resp.text
 
 
+async def test_admin_succes_ne_remettent_pas_a_zero_ni_ne_comptent(pg_client):
+    for _ in range(9):
+        assert (await pg_client.get("/v1/admin/config", auth=BAD_ADMIN)).status_code == 401
+    for _ in range(20):
+        assert (await pg_client.get("/v1/admin/config", auth=ADMIN_AUTH)).status_code == 200
+    assert (await pg_client.get("/v1/admin/config", auth=BAD_ADMIN)).status_code == 401  # 10e échec
+    _assert_rate_limited(await pg_client.get("/v1/admin/config", auth=BAD_ADMIN))  # 11e
+
+
 async def test_admin_echecs_comptes_par_ip(pg_client):
     from app.main import app
 
