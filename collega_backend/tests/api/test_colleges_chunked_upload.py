@@ -326,3 +326,71 @@ class TestComplete:
         mock_pool.enqueue_job.assert_awaited_once_with("process_college_ocr", str(college_id), job_id, str(final))
         assert not (tmp_path / f"incoming_{st.upload_id}.pdf").exists()
         assert await store.get(st.upload_id) is None
+
+
+class TestUploadLogs:
+    """Chantier 2 § 6 : l'upload_id (capacité d'accès à l'upload) n'apparaît jamais en clair dans les logs."""
+
+    def test_upload_ref_is_truncated_sha256(self):
+        import hashlib
+
+        from app.services.upload.chunked_upload import upload_ref
+
+        upload_id = "abc123"
+        assert upload_ref(upload_id) == hashlib.sha256(b"abc123").hexdigest()[:8]
+
+    async def test_init_and_complete_never_log_upload_id(
+        self, client, mock_db, app_with_store, store, monkeypatch, tmp_path, caplog
+    ):
+        import logging
+
+        from app.services.upload.chunked_upload import upload_ref
+
+        user = _make_user()
+        app_with_store.dependency_overrides[require_subscription] = lambda: user
+        monkeypatch.setattr(colleges_module.settings, "pdf_storage_path", str(tmp_path))
+        _no_college(mock_db)
+
+        async def fake_start(db, arq, u, ref_id, pdf_file_path, limits):
+            from app.schemas.college import ImportCollegeResponseData
+
+            return ImportCollegeResponseData(college_id="c", job_id="j", status="pending")
+
+        monkeypatch.setattr("app.services.imports.start_import_from_file", fake_start)
+
+        with caplog.at_level(logging.DEBUG):
+            resp = await client.post("/v1/colleges/34/import/init", json={"size_bytes": 10})
+            assert resp.status_code == 201, resp.text
+            upload_id = resp.json()["data"]["upload_id"]
+            st = await store.get(upload_id)
+            await _upload_all(store, st)
+            resp = await client.post(f"/v1/colleges/import/{upload_id}/complete")
+            assert resp.status_code == 202, resp.text
+
+        # httpx (client de test) journalise l'URL appelée : ce n'est pas un log de l'application.
+        app_logs = "\n".join(r.getMessage() for r in caplog.records if not r.name.startswith("httpx"))
+        assert upload_id not in app_logs
+        upload_logs = [r.getMessage() for r in caplog.records if r.name == colleges_module.logger.name]
+        assert len(upload_logs) == 2 and all(upload_ref(upload_id) in m for m in upload_logs)
+
+    async def test_internal_error_log_uses_route_template(self, client, app_with_store, store, monkeypatch, caplog):
+        """Une 500 sur une route d'upload journalise le gabarit de route, pas le chemin avec l'id."""
+        import logging
+
+        from httpx import ASGITransport
+        from httpx import AsyncClient as _Client
+
+        st = await store.create(uuid.uuid4(), 34, 10)
+
+        async def boom(upload_id):
+            raise RuntimeError("boom")
+
+        monkeypatch.setattr(store, "get", boom)
+        transport = ASGITransport(app=app_with_store, raise_app_exceptions=False)
+        async with _Client(transport=transport, base_url="http://test") as c:
+            with caplog.at_level(logging.DEBUG):
+                resp = await c.get(f"/v1/colleges/import/{st.upload_id}")
+        assert resp.status_code == 500
+        app_logs = "\n".join(r.getMessage() for r in caplog.records if not r.name.startswith("httpx"))
+        assert st.upload_id not in app_logs
+        assert "{upload_id}" in app_logs

@@ -47,7 +47,10 @@ suivantes est violée (cf. `app/core/config.py::_validate_production_secrets`) :
 Le message `ValidationError` liste **toutes** les variables fautives d'un coup,
 ex. : `Production secrets invalid — Insecure config values: SECRET_KEY (must be ≥ 32 chars), ADMIN_PASSWORD (default placeholder value). Refuse to start.`
 
-En `ENVIRONMENT=development` (default), les mêmes violations émettent un
+`ENVIRONMENT` est obligatoire (`development`, `production` ou `test`) : absente ou
+hors liste (`prod`, `PRODUCTION`…), le démarrage est refusé.
+
+En `ENVIRONMENT=development` (ou `test`), les mêmes violations émettent un
 `logger.warning("DEV mode: ...")` mais le démarrage continue.
 
 ### Vérifier le `.env` NAS prod

@@ -110,10 +110,9 @@ class TestValidatorsDevelopmentMode:
         assert "SECRET_KEY" in caplog.text
         assert "ADMIN_PASSWORD" in caplog.text
 
-    def test_default_environment_is_development(self):
-        # Pas d'`environment` passé → default Pydantic "development".
-        s = _make_settings(**_base_settings_kwargs(secret_key="short"))
-        assert s.environment == "development"
+    def test_test_environment_accepted(self):
+        s = _make_settings(environment="test", **_base_settings_kwargs())
+        assert s.environment == "test"
 
     def test_valid_dev_settings_no_warning(self, caplog):
         with caplog.at_level(logging.WARNING, logger="app.core.config"):
@@ -122,41 +121,25 @@ class TestValidatorsDevelopmentMode:
         assert "DEV mode" not in caplog.text
 
 
-class TestEnvironmentNormalization:
-    """Story 7.3 review — P1+P7 : `ENVIRONMENT` strip + warn sur valeur inconnue."""
+class TestEnvironmentRequired:
+    """Chantier 2 § 6 : `ENVIRONMENT` obligatoire, valeur dans {development, production, test}."""
 
-    def test_production_with_trailing_whitespace_is_strict(self):
-        # `ENVIRONMENT=" production "` (espaces dans .env) doit être traité
-        # comme prod et bloquer les secrets faibles. Avant le patch : silently
-        # traité comme dev → secrets faibles tolérés en prod réelle.
-        with pytest.raises(ValidationError, match="SECRET_KEY"):
-            _make_settings(
-                environment=" production ",
-                **_base_settings_kwargs(secret_key="short"),
-            )
+    def test_missing_environment_refuses_to_start(self, monkeypatch):
+        # La suite de tests définit ENVIRONMENT=test (conftest) : on l'enlève ici.
+        monkeypatch.delenv("ENVIRONMENT", raising=False)
+        with pytest.raises(ValidationError, match="environment"):
+            _make_settings(**_base_settings_kwargs())
 
-    def test_uppercase_production_is_strict(self):
-        with pytest.raises(ValidationError, match="ADMIN_PASSWORD"):
-            _make_settings(
-                environment="PRODUCTION",
-                **_base_settings_kwargs(admin_password="change-me"),
-            )
+    @pytest.mark.parametrize("value", ["prod", "PRODUCTION", " production ", "staging", ""])
+    def test_unknown_environment_refuses_to_start(self, value):
+        # Une typo (`prod`) ne doit plus être traitée silencieusement comme dev.
+        with pytest.raises(ValidationError, match="environment"):
+            _make_settings(environment=value, **_base_settings_kwargs())
 
-    def test_unknown_environment_logs_warning(self, caplog):
-        # `ENVIRONMENT=prod` (typo) ne doit PAS être traité silencieusement
-        # comme dev — un warning est émis pour signaler le fail-open.
-        with caplog.at_level(logging.WARNING, logger="app.core.config"):
-            _make_settings(environment="prod", **_base_settings_kwargs())
-        assert "Unknown ENVIRONMENT" in caplog.text
-        assert "'prod'" in caplog.text
-
-    def test_known_environments_no_unknown_warning(self, caplog):
-        # `development` et `production` (valides) ne déclenchent pas le warning
-        # "Unknown ENVIRONMENT" — seulement les autres valeurs le font.
-        with caplog.at_level(logging.WARNING, logger="app.core.config"):
-            _make_settings(environment="development", **_base_settings_kwargs())
-            _make_settings(environment="production", **_base_settings_kwargs())
-        assert "Unknown ENVIRONMENT" not in caplog.text
+    def test_environment_from_env_var(self, monkeypatch):
+        monkeypatch.setenv("ENVIRONMENT", "production")
+        s = _make_settings(**_base_settings_kwargs())
+        assert s.environment == "production"
 
 
 class TestStripAndStrictness:

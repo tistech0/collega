@@ -1,13 +1,11 @@
 import ipaddress
 import logging
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
-
-_KNOWN_ENVIRONMENTS = frozenset({"development", "production"})
 
 # Listes fermées de placeholders connus (issus de `.env.example`). On préfère
 # une égalité explicite à une recherche par substring, qui rejetait à tort des
@@ -33,7 +31,9 @@ class Settings(BaseSettings):
         env_file=".env", env_file_encoding="utf-8", extra="ignore", hide_input_in_errors=True
     )
 
-    environment: str = "development"  # "development" | "production"
+    # Obligatoire (chantier 2 § 6) : absente ou hors liste → démarrage refusé. Une typo
+    # (`prod`) n'est plus traitée silencieusement comme `development`.
+    environment: Literal["development", "production", "test"]
 
     database_url: str
     redis_url: str
@@ -99,19 +99,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _validate_production_secrets(self) -> "Settings":
-        # Strip + lower : `ENVIRONMENT=" production "` (espaces dans .env) ne
-        # doit pas être traité silencieusement comme `development`.
-        env_normalized = self.environment.strip().lower()
-        is_prod = env_normalized == "production"
-
-        # Toute valeur autre que `development`/`production` est probablement
-        # une typo (`prod`, `prd`, `PROD`) — fail-open silencieux interdit.
-        if env_normalized not in _KNOWN_ENVIRONMENTS:
-            logger.warning(
-                "Unknown ENVIRONMENT=%r — treated as development. Expected one of: %s.",
-                self.environment,
-                ", ".join(sorted(_KNOWN_ENVIRONMENTS)),
-            )
+        is_prod = self.environment == "production"
 
         issues: list[str] = []
 

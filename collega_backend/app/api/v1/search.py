@@ -27,6 +27,7 @@ async def search(
     current_user: User = Depends(get_current_user),
     _: None = Depends(require_subscription),
 ):
-    logger.info("Search q=%r user=%s", q, current_user.id)
     results = await search_flash_cards(db, current_user.id, q)
+    # Jamais le terme cherché dans les logs (chantier 2 § 6).
+    logger.info("Search user=%s results=%d", current_user.id, len(results))
     return {"data": results}

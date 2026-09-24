@@ -6,6 +6,7 @@ que `complete` assemble avant de rejoindre le pipeline d'import existant.
 
 from __future__ import annotations
 
+import hashlib
 import os
 import shutil
 import uuid
@@ -19,6 +20,11 @@ PART_SIZE = 25 * 1024 * 1024
 UPLOAD_TTL_SECONDS = 24 * 3600
 MAX_UPLOAD_SIZE = 500 * 1024 * 1024
 _WRITE_CHUNK = 1024 * 1024
+
+
+def upload_ref(upload_id: str | uuid.UUID) -> str:
+    """Référence d'upload pour les logs : l'upload_id donne accès à l'upload, jamais en clair."""
+    return hashlib.sha256(str(upload_id).encode()).hexdigest()[:8]
 
 
 class UploadRedis(Protocol):

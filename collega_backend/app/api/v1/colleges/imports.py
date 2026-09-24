@@ -31,6 +31,7 @@ from app.services.upload.chunked_upload import (
     ChunkedUploadStore,
     InvalidPartIndex,
     PartSizeError,
+    upload_ref,
 )
 
 logger = logging.getLogger(__name__)
@@ -105,7 +106,9 @@ async def init_chunked_import(
     if body.size_bytes > MAX_UPLOAD_SIZE:
         raise import_service.file_too_large()
     state = await store.create(current_user.id, ref_id, body.size_bytes)
-    logger.info("Chunked upload %s opened (ref_id=%s, %d parts)", state.upload_id, ref_id, state.parts_total)
+    logger.info(
+        "Chunked upload %s opened (ref_id=%s, %d parts)", upload_ref(state.upload_id), ref_id, state.parts_total
+    )
     return UploadInitResponseWrapped(
         data=UploadInitData(
             upload_id=state.upload_id,
@@ -205,5 +208,5 @@ async def complete_chunked_import(
         raise
 
     store.purge(claimed.upload_id)
-    logger.info("Chunked upload %s completed → college %s job %s", upload_id, data.college_id, data.job_id)
+    logger.info("Chunked upload %s completed → college %s job %s", upload_ref(upload_id), data.college_id, data.job_id)
     return ImportCollegeResponseWrapped(data=data)

@@ -10,6 +10,7 @@ import os
 pytest_plugins = ["tests.pg", "tests.api_pg", "tests.sqlite_db"]
 
 # Doit être défini AVANT l'import du module settings (module-level Settings())
+os.environ.setdefault("ENVIRONMENT", "test")
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./test.db")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
 os.environ.setdefault("RATE_LIMIT_STORAGE_URI", "memory://")

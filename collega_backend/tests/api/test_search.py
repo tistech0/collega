@@ -210,3 +210,29 @@ class TestSearchRateLimitKey:
         assert "_user_id_key" in wirings, (
             "Décorateur @limiter.limit du endpoint search() doit avoir key_func=_user_id_key (Story 7.2 AC #3)"
         )
+
+
+class TestSearchLogs:
+    async def test_search_term_never_logged(self, client: AsyncClient, mock_db, caplog):
+        """Chantier 2 § 6 : le terme cherché n'apparaît dans aucun log (id + nombre de résultats seulement)."""
+        import logging
+
+        from app.main import app
+
+        user = _make_user()
+        app.dependency_overrides[get_current_user] = lambda: user
+        app.dependency_overrides[require_subscription] = lambda: user
+        term = "insuffisance-cardiaque-secrete"
+
+        with (
+            caplog.at_level(logging.DEBUG),
+            patch("app.api.v1.search.search_flash_cards", new=AsyncMock(return_value=[_make_result()])),
+        ):
+            resp = await client.get("/v1/search", params={"q": term}, headers={"Authorization": "Bearer token"})
+
+        assert resp.status_code == 200
+        # httpx (client de test) journalise l'URL appelée : ce n'est pas un log de l'application.
+        app_logs = "\n".join(r.getMessage() for r in caplog.records if not r.name.startswith("httpx"))
+        assert term not in app_logs
+        search_logs = [r.getMessage() for r in caplog.records if r.name == "app.api.v1.search"]
+        assert search_logs and str(user.id) in search_logs[0] and "1" in search_logs[0]
