@@ -74,7 +74,8 @@ final collegeDetailProvider = AsyncNotifierProvider.family<
 class CollegeDetailNotifier
     extends FamilyAsyncNotifier<CollegeDetailState, String> {
   @override
-  Future<CollegeDetailState> build(String collegeId) async {
+  Future<CollegeDetailState> build(String arg) async {
+    final collegeId = arg;
     ref.watch(collegeDataVersionProvider(collegeId));
     final repo = ref.read(collegeDetailRepositoryProvider);
     List<ItemModel> items;
@@ -147,7 +148,8 @@ final itemDetailProvider = AsyncNotifierProvider.family<
 class ItemDetailNotifier
     extends FamilyAsyncNotifier<List<FlashCardModel>, String> {
   @override
-  Future<List<FlashCardModel>> build(String compositeKey) async {
+  Future<List<FlashCardModel>> build(String arg) async {
+    final compositeKey = arg;
     final parts = compositeKey.split(':');
     if (parts.length < 2) throw ArgumentError('Invalid compositeKey: $compositeKey');
     final collegeId = parts[0];
