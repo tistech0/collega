@@ -153,7 +153,7 @@ def _legacy_refresh(user_id) -> str:
 
 
 def _legacy_jti(token: str) -> str:
-    return hashlib.sha256(token.encode()).hexdigest()[:32]
+    return hashlib.sha256(token.rsplit(".", 1)[0].encode()).hexdigest()[:32]
 
 
 class TestLogout:

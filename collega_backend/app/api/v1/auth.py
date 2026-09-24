@@ -56,11 +56,13 @@ def _remaining_lifetime_s(payload: dict) -> int:
 
 def _refresh_jti(token: str, payload: dict) -> str:
     """`jti` du refresh ; jeton émis avant le chantier 2 (sans `jti`) : dérivé de son
-    empreinte, pour qu'il suive la même rotation / grâce / révocation que les autres."""
+    empreinte, pour qu'il suive la même rotation / grâce / révocation que les autres.
+    L'empreinte porte sur la partie signée (en-tête.charge) : un réencodage de la
+    signature ne peut pas donner un autre identifiant au même jeton."""
     jti = payload.get("jti")
     if isinstance(jti, str) and jti:
         return jti
-    return hashlib.sha256(token.encode()).hexdigest()[:32]
+    return hashlib.sha256(token.rsplit(".", 1)[0].encode()).hexdigest()[:32]
 
 
 def _token_pair(user: User) -> TokenResponse:

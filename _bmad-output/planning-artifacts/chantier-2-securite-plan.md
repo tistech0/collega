@@ -47,11 +47,11 @@ def token_version_ok(payload: dict, current_version: int) -> bool      # "tv" ab
 ```python
 # app/core/token_store.py — client redis.asyncio paresseux (settings.redis_url), remplaçable en test
 GRACE_S = 120
-async def revoke_refresh(jti: str, ttl_s: int) -> None        # SET revoked:jti:{jti} 1 EX ttl ; SET refresh:grace:{jti} 1 EX 60 ; erreur Redis → warning
+async def revoke_refresh(jti: str, ttl_s: int) -> None        # SET revoked:jti:{jti} 1 EX ttl ; SET refresh:grace:{jti} 1 EX 120 (rotation seulement, jamais au logout) ; erreur Redis → warning
 async def refresh_state(jti: str) -> Literal["active", "grace", "reused"]  # erreur Redis → warning + "active"
 def set_client_for_tests(client) -> None
 ```
-- `POST /v1/auth/refresh` (algorithme exact de la spec § 2) : décode, `type == "refresh"`, `tv` ok sinon 401 `TOKEN_REVOKED` ; si le jeton porte un `jti` : `reused` → `UPDATE users SET token_version = token_version + 1`, commit, 401 `TOKEN_REUSED`, warning (sans jeton) ; `active` → `revoke_refresh(jti, ttl = exp - now)` ; `grace` → pas de nouvelle révocation ; puis nouveau couple access + refresh. Jeton ancien sans `jti` : nouveau couple (pas de révocation possible).
+- `POST /v1/auth/refresh` (algorithme exact de la spec § 2) : décode, `type == "refresh"`, `tv` ok sinon 401 `TOKEN_REVOKED` ; si le jeton porte un `jti` : `reused` → `UPDATE users SET token_version = token_version + 1`, commit, 401 `TOKEN_REUSED`, warning (sans jeton) ; `active` → `revoke_refresh(jti, ttl = exp - now)` ; `grace` → pas de nouvelle révocation ; puis nouveau couple access + refresh. Jeton ancien sans `jti` : `jti` dérivé de l'empreinte de sa partie signée (revue finale, I2), même rotation / grâce / révocation.
 - `POST /v1/auth/logout` (access token requis, 204, idempotent) : si `refresh_token` fourni, décodé et `sub == user.id` → `revoke_refresh` ; `user.apns_token = None` ; commit.
 - `POST /v1/admin/users/{id}/reset-password` → `{"data": {"temporary_password": "..."}}` ; hache, `token_version += 1`, commit ; 404 `USER_NOT_FOUND`. Console : bouton « Réinitialiser le mot de passe » sur la fiche utilisatrice (confirmation), boîte avec le mot de passe et bouton Copier.
 - Login à temps constant : `_DUMMY_HASH = hash_password(secrets.token_urlsafe(16))` calculé une fois ; e-mail inconnu → `verify_password(body.password, _DUMMY_HASH)` avant le 401.
