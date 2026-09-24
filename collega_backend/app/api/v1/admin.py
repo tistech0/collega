@@ -70,6 +70,7 @@ from app.schemas.admin import (
     UserJobSummary,
     UsersListResponseWrapped,
 )
+from app.services import app_settings
 from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
 from app.services.generation.token_cost import compute_cost_eur
 from app.services.jobs.arq_control import abort_arq_job
@@ -415,6 +416,7 @@ async def list_users(
     """Liste tous les utilisateurs avec leur statut beta et abonnement."""
     result = await db.execute(select(User).order_by(User.created_at.desc()))
     users = result.scalars().all()
+    _, monthly_reloads_max = await app_settings.anti_spam_limits(db)
     user_data = [
         UserBetaData(
             user_id=str(u.id),
@@ -422,7 +424,7 @@ async def list_users(
             is_beta=u.is_beta,
             is_subscribed=u.is_subscribed,
             monthly_reloads=u.monthly_reloads,
-            monthly_reloads_max=settings.monthly_reloads_max,
+            monthly_reloads_max=monthly_reloads_max,
         )
         for u in users
     ]
@@ -445,6 +447,7 @@ async def update_user_beta(
         )
     user.is_beta = body.is_beta
     await db.commit()
+    _, monthly_reloads_max = await app_settings.anti_spam_limits(db)
     return BetaUpdateResponseWrapped(
         data=UserBetaData(
             user_id=str(user.id),
@@ -452,7 +455,7 @@ async def update_user_beta(
             is_beta=user.is_beta,
             is_subscribed=user.is_subscribed,
             monthly_reloads=user.monthly_reloads,
-            monthly_reloads_max=settings.monthly_reloads_max,
+            monthly_reloads_max=monthly_reloads_max,
         )
     )
 
@@ -491,6 +494,7 @@ async def create_user(
         ) from None
     # Invariants d'un compte neuf : jamais abonné (RevenueCat le posera plus tard),
     # quota vierge. Pas de relecture nécessaire.
+    _, monthly_reloads_max = await app_settings.anti_spam_limits(db)
     return CreateUserResponseWrapped(
         data=UserBetaData(
             user_id=str(user.id),
@@ -498,7 +502,7 @@ async def create_user(
             is_beta=user.is_beta,
             is_subscribed=False,
             monthly_reloads=0,
-            monthly_reloads_max=settings.monthly_reloads_max,
+            monthly_reloads_max=monthly_reloads_max,
         )
     )
 
@@ -527,6 +531,7 @@ async def reset_user_quota(
     # (monthly_reloads=0), sans relire l'objet.
     await db.execute(sa_update(User).where(User.id == user_id).values(monthly_reloads=0, monthly_reloads_reset_at=None))
     await db.commit()
+    _, monthly_reloads_max = await app_settings.anti_spam_limits(db)
     return ResetQuotaResponseWrapped(
         data=UserBetaData(
             user_id=str(user.id),
@@ -534,7 +539,7 @@ async def reset_user_quota(
             is_beta=user.is_beta,
             is_subscribed=user.is_subscribed,
             monthly_reloads=0,
-            monthly_reloads_max=settings.monthly_reloads_max,
+            monthly_reloads_max=monthly_reloads_max,
         )
     )
 
@@ -562,6 +567,7 @@ async def get_user_detail(
         select(GenerationJob).where(GenerationJob.user_id == user_id).order_by(GenerationJob.created_at.desc())
     )
     jobs = jobs_result.scalars().all()
+    reload_count_max, monthly_reloads_max = await app_settings.anti_spam_limits(db)
 
     return UserDetailResponseWrapped(
         data=UserDetailData(
@@ -570,7 +576,7 @@ async def get_user_detail(
             is_beta=user.is_beta,
             is_subscribed=user.is_subscribed,
             monthly_reloads=user.monthly_reloads,
-            monthly_reloads_max=settings.monthly_reloads_max,
+            monthly_reloads_max=monthly_reloads_max,
             monthly_reloads_reset_at=(
                 user.monthly_reloads_reset_at.isoformat() if user.monthly_reloads_reset_at else None
             ),
@@ -581,7 +587,7 @@ async def get_user_detail(
                     college_ref_id=c.college_ref_id,
                     status=c.status,
                     reload_count=c.reload_count,
-                    reload_count_max=settings.reload_count_max,
+                    reload_count_max=reload_count_max,
                 )
                 for c in colleges
             ],
@@ -946,13 +952,12 @@ async def get_usage(
 @router.get("/config", response_model=ConfigResponseWrapped)
 async def get_config(
     _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
 ) -> ConfigResponseWrapped:
-    """Retourne la configuration anti-spam actuelle."""
+    """Retourne la configuration anti-spam actuelle (table app_settings, défauts .env)."""
+    reload_count_max, monthly_reloads_max = await app_settings.anti_spam_limits(db)
     return ConfigResponseWrapped(
-        data=ConfigData(
-            reload_count_max=settings.reload_count_max,
-            monthly_reloads_max=settings.monthly_reloads_max,
-        )
+        data=ConfigData(reload_count_max=reload_count_max, monthly_reloads_max=monthly_reloads_max)
     )
 
 
@@ -960,15 +965,16 @@ async def get_config(
 async def update_config(
     body: ConfigUpdateRequest,
     _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
 ) -> ConfigResponseWrapped:
-    """Met à jour la configuration anti-spam en mémoire (sans redémarrage)."""
+    """Met à jour la configuration anti-spam en base : vue par l'API et le worker
+    en 30 s au plus (cache par processus), conservée au redémarrage."""
     if body.reload_count_max is not None:
-        settings.reload_count_max = body.reload_count_max
+        await app_settings.set_setting(db, app_settings.RELOAD_COUNT_MAX, body.reload_count_max)
     if body.monthly_reloads_max is not None:
-        settings.monthly_reloads_max = body.monthly_reloads_max
+        await app_settings.set_setting(db, app_settings.MONTHLY_RELOADS_MAX, body.monthly_reloads_max)
+    await db.commit()
+    reload_count_max, monthly_reloads_max = await app_settings.anti_spam_limits(db)
     return ConfigResponseWrapped(
-        data=ConfigData(
-            reload_count_max=settings.reload_count_max,
-            monthly_reloads_max=settings.monthly_reloads_max,
-        )
+        data=ConfigData(reload_count_max=reload_count_max, monthly_reloads_max=monthly_reloads_max)
     )

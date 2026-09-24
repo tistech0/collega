@@ -1,5 +1,7 @@
-"""suppression de la table tester_feedbacks (chantier 5)
+"""réglages en base (app_settings) et suppression de tester_feedbacks (chantier 5)
 
+- app_settings : réglages anti-spam modifiables à chaud (R4) ; une ligne par clé,
+  valeur JSONB ; sans ligne, les valeurs du .env s'appliquent.
 - tester_feedbacks : le testeur web est supprimé (R1) ; les avis passent par
   flash_cards.user_feedback. La table est exportée en CSV avant la migration
   (scripts/export_tester_feedbacks.py), puis supprimée (R2).
@@ -10,6 +12,7 @@ Create Date: 2026-09-24
 """
 
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 from alembic import op
 
@@ -20,12 +23,20 @@ depends_on = None
 
 
 def upgrade() -> None:
+    op.create_table(
+        "app_settings",
+        sa.Column("key", sa.Text(), nullable=False),
+        sa.Column("value", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")),
+        sa.PrimaryKeyConstraint("key"),
+    )
     op.drop_index("ix_tester_feedbacks_college_id", table_name="tester_feedbacks")
     op.drop_index("ix_tester_feedbacks_flash_card_id", table_name="tester_feedbacks")
     op.drop_table("tester_feedbacks")
 
 
 def downgrade() -> None:
+    op.drop_table("app_settings")
     # Recrée la table telle que définie par la migration 005 (données non restaurées).
     op.create_table(
         "tester_feedbacks",

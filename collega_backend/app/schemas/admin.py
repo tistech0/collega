@@ -139,8 +139,8 @@ class ConfigData(BaseModel):
 
 
 class ConfigUpdateRequest(BaseModel):
-    reload_count_max: int | None = Field(default=None, ge=1)
-    monthly_reloads_max: int | None = Field(default=None, ge=1)
+    reload_count_max: int | None = Field(default=None, ge=0)
+    monthly_reloads_max: int | None = Field(default=None, ge=0)
 
 
 class ConfigResponseWrapped(BaseModel):

@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
 from app.core.limiter import limiter
 from app.core.security import (
     JWTError,
@@ -20,6 +19,7 @@ from app.core.time_utils import next_month_reset
 from app.deps import get_current_user, get_db
 from app.models.user import User
 from app.schemas.auth import LoginRequest, ProfileUpdateRequest, RefreshRequest, RegisterRequest, TokenResponse
+from app.services import app_settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["auth"])
@@ -99,7 +99,7 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/me")
-async def get_me(current_user: User = Depends(get_current_user)):
+async def get_me(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     # Quota du mois en cours : le compteur stocké n'est remis à zéro qu'au
     # prochain réimport ; passé la date, il n'est plus le bon (Profil, story 8.14).
     now = datetime.now(UTC)
@@ -108,6 +108,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
         monthly_reloads, reset_at = 0, next_month_reset(now)
     else:
         monthly_reloads = current_user.monthly_reloads
+    _, monthly_reloads_max = await app_settings.anti_spam_limits(db)
     return {
         "data": {
             "id": str(current_user.id),
@@ -118,7 +119,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
             "year_group": current_user.year_group,
             "faculty": current_user.faculty,
             "monthly_reloads": monthly_reloads,
-            "monthly_reloads_max": settings.monthly_reloads_max,
+            "monthly_reloads_max": monthly_reloads_max,
             "monthly_reloads_reset_at": reset_at.isoformat(),
             "reminder_hour_utc": current_user.reminder_hour_utc,
         }

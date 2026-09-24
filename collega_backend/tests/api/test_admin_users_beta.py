@@ -6,7 +6,11 @@ import types
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
 from httpx import AsyncClient
+
+# Le faux db.get renvoie l'utilisateur pour toute clé : limites anti-spam injectées.
+pytestmark = pytest.mark.usefixtures("default_anti_spam_limits")
 
 ADMIN_AUTH = ("admin", "testpass")
 

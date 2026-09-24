@@ -173,7 +173,7 @@ class TestGetMe:
         )
         app.dependency_overrides[get_current_user] = lambda: user
         try:
-            with patch("app.api.v1.auth.settings") as mock_settings:
+            with patch("app.services.app_settings.settings") as mock_settings:
                 mock_settings.monthly_reloads_max = 3
                 resp = await client.get("/v1/auth/me")
         finally:
@@ -193,7 +193,7 @@ class TestGetMe:
         user = make_user(with_password=False, monthly_reloads=2, monthly_reloads_reset_at=reset, reminder_hour_utc=6)
         app.dependency_overrides[get_current_user] = lambda: user
         try:
-            with patch("app.api.v1.auth.settings") as mock_settings:
+            with patch("app.services.app_settings.settings") as mock_settings:
                 mock_settings.monthly_reloads_max = 3
                 resp = await client.get("/v1/auth/me")
         finally:
@@ -213,7 +213,7 @@ class TestGetMe:
         )
         app.dependency_overrides[get_current_user] = lambda: user
         try:
-            with patch("app.api.v1.auth.settings") as mock_settings:
+            with patch("app.services.app_settings.settings") as mock_settings:
                 mock_settings.monthly_reloads_max = 3
                 resp = await client.get("/v1/auth/me")
         finally:
@@ -228,7 +228,7 @@ class TestGetMe:
         user = make_user(with_password=False)
         app.dependency_overrides[get_current_user] = lambda: user
         try:
-            with patch("app.api.v1.auth.settings") as mock_settings:
+            with patch("app.services.app_settings.settings") as mock_settings:
                 mock_settings.monthly_reloads_max = 3
                 resp = await client.get("/v1/auth/me")
         finally:

@@ -46,6 +46,7 @@ from app.schemas.college import (
     UploadStatusResponseWrapped,
     UserCollegeData,
 )
+from app.services import app_settings
 from app.services.ocr.pdf_check import assert_pdf_readable
 from app.services.upload.chunked_upload import (
     MAX_UPLOAD_SIZE,
@@ -126,13 +127,14 @@ async def get_college_reload_limits(
     is_month_reset = current_user.monthly_reloads_reset_at is None or now >= current_user.monthly_reloads_reset_at
     effective_monthly = 0 if is_month_reset else current_user.monthly_reloads
     monthly_reset_at = _next_month_reset(now) if is_month_reset else current_user.monthly_reloads_reset_at
+    reload_count_max, monthly_reloads_max = await app_settings.anti_spam_limits(db)
 
     return ReloadLimitsResponseWrapped(
         data=ReloadLimitsData(
             college_reload_count=college.reload_count,
-            college_reload_max=settings.reload_count_max,
+            college_reload_max=reload_count_max,
             monthly_reloads=effective_monthly,
-            monthly_max=settings.monthly_reloads_max,
+            monthly_max=monthly_reloads_max,
             monthly_reset_at=monthly_reset_at.isoformat(),
         )
     )
@@ -182,38 +184,40 @@ async def _assert_no_active_job(db: AsyncSession, college: College) -> None:
         raise _job_in_progress()
 
 
-def _college_reload_limit(college: College) -> HTTPException:
+def _college_reload_limit(college: College, reload_count_max: int) -> HTTPException:
     return HTTPException(
         status_code=409,
         detail={
             "code": "COLLEGE_RELOAD_LIMIT",
-            "message": f"Ce collège ne peut plus être retraité (limite : {settings.reload_count_max})",
+            "message": f"Ce collège ne peut plus être retraité (limite : {reload_count_max})",
             "reload_count": college.reload_count,
-            "reload_count_max": settings.reload_count_max,
+            "reload_count_max": reload_count_max,
         },
     )
 
 
-def _monthly_reload_limit(user: User, now: datetime) -> HTTPException:
+def _monthly_reload_limit(user: User, now: datetime, monthly_reloads_max: int) -> HTTPException:
     reset_at = user.monthly_reloads_reset_at or _next_month_reset(now)
     return HTTPException(
         status_code=409,
         detail={
             "code": "MONTHLY_RELOAD_LIMIT",
-            "message": f"Limite mensuelle atteinte ({settings.monthly_reloads_max} reimports/mois)",
+            "message": f"Limite mensuelle atteinte ({monthly_reloads_max} reimports/mois)",
             "monthly_reloads": user.monthly_reloads,
-            "monthly_max": settings.monthly_reloads_max,
+            "monthly_max": monthly_reloads_max,
             "reset_at": reset_at.isoformat(),
         },
     )
 
 
-async def _apply_reimport_quota(db: AsyncSession, user: User, college: College) -> None:
+async def _apply_reimport_quota(db: AsyncSession, user: User, college: College, limits: tuple[int, int]) -> None:
     """Quota checks pour les reimports uniquement (premier import = libre).
-    Atomique : UPDATE conditionnel avec RETURNING — pas de race read-then-check."""
+    Atomique : UPDATE conditionnel avec RETURNING — pas de race read-then-check.
+    `limits` = (reload_count_max, monthly_reloads_max), lus une fois par requête."""
     if college.status != "generation_complete":
         return
 
+    reload_count_max, monthly_reloads_max = limits
     now = datetime.now(UTC)
     is_month_reset = user.monthly_reloads_reset_at is None or now >= user.monthly_reloads_reset_at
 
@@ -227,28 +231,28 @@ async def _apply_reimport_quota(db: AsyncSession, user: User, college: College) 
     college_update = await db.execute(
         sa_update(College)
         .where(College.id == college.id)
-        .where(College.reload_count < settings.reload_count_max)
+        .where(College.reload_count < reload_count_max)
         .values(reload_count=College.reload_count + 1)
         .returning(College.reload_count)
     )
     if college_update.scalar_one_or_none() is None:
-        raise _college_reload_limit(college)
+        raise _college_reload_limit(college, reload_count_max)
 
     # 3. Incrément atomique User.monthly_reloads — rollback college si échec
     user_update = await db.execute(
         sa_update(User)
         .where(User.id == user.id)
-        .where(User.monthly_reloads < settings.monthly_reloads_max)
+        .where(User.monthly_reloads < monthly_reloads_max)
         .values(monthly_reloads=User.monthly_reloads + 1)
         .returning(User.monthly_reloads)
     )
     if user_update.scalar_one_or_none() is None:
         # Annule l'incrément college fait juste avant (transaction non commitée)
         await db.rollback()
-        raise _monthly_reload_limit(user, now)
+        raise _monthly_reload_limit(user, now, monthly_reloads_max)
 
 
-async def _assert_import_allowed(db: AsyncSession, user: User, ref_id: int) -> College | None:
+async def _assert_import_allowed(db: AsyncSession, user: User, ref_id: int, limits: tuple[int, int]) -> College | None:
     """Gardes d'import en lecture seule (aucune écriture) — utilisées par POST /import/init
     (morceaux) avant de recevoir le moindre octet. Renvoie le College existant ou None.
     Lève les mêmes HTTPException que le chemin d'import (422 INVALID_REF_ID, 409 JOB_IN_PROGRESS,
@@ -262,10 +266,11 @@ async def _assert_import_allowed(db: AsyncSession, user: User, ref_id: int) -> C
     if college.status == "generation_complete":
         now = datetime.now(UTC)
         month_reset_due = user.monthly_reloads_reset_at is None or now >= user.monthly_reloads_reset_at
-        if college.reload_count >= settings.reload_count_max:
-            raise _college_reload_limit(college)
-        if not month_reset_due and user.monthly_reloads >= settings.monthly_reloads_max:
-            raise _monthly_reload_limit(user, now)
+        reload_count_max, monthly_reloads_max = limits
+        if college.reload_count >= reload_count_max:
+            raise _college_reload_limit(college, reload_count_max)
+        if not month_reset_due and user.monthly_reloads >= monthly_reloads_max:
+            raise _monthly_reload_limit(user, now, monthly_reloads_max)
     return college
 
 
@@ -340,7 +345,7 @@ async def _start_import_from_file(
     try:
         college = await _get_or_create_college(db, user, ref_id)
         await _assert_no_active_job(db, college)
-        await _apply_reimport_quota(db, user, college)
+        await _apply_reimport_quota(db, user, college, await app_settings.anti_spam_limits(db))
     except HTTPException:
         pdf_file_path.unlink(missing_ok=True)
         raise
@@ -368,7 +373,7 @@ async def import_college_pdf(
     _invalid_ref_id(ref_id)
     college = await _get_or_create_college(db, current_user, ref_id)
     await _assert_no_active_job(db, college)
-    await _apply_reimport_quota(db, current_user, college)
+    await _apply_reimport_quota(db, current_user, college, await app_settings.anti_spam_limits(db))
 
     # Valider le type de fichier
     is_pdf = (pdf.content_type == "application/pdf") or (pdf.filename or "").lower().endswith(".pdf")
@@ -458,7 +463,7 @@ async def init_chunked_import(
     store: ChunkedUploadStore = Depends(get_upload_store),
 ) -> UploadInitResponseWrapped:
     """Ouvre un upload par morceaux. Mêmes gardes que POST /import, quota NON consommé."""
-    await _assert_import_allowed(db, current_user, ref_id)
+    await _assert_import_allowed(db, current_user, ref_id, await app_settings.anti_spam_limits(db))
     if body.size_bytes > MAX_UPLOAD_SIZE:
         raise HTTPException(
             status_code=413,

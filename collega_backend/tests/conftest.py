@@ -72,6 +72,28 @@ def _reset_rate_limits():
 
 
 @pytest.fixture(autouse=True)
+def _reset_app_settings_cache():
+    """Le cache des réglages en base (30 s, par processus) ne fuit pas d'un test à l'autre."""
+    from app.services import app_settings
+
+    app_settings.clear_cache()
+    yield
+
+
+@pytest.fixture
+def default_anti_spam_limits(monkeypatch):
+    """Faux lecteur des limites anti-spam (défauts .env), pour les tests dont le faux
+    `db.get` renvoie le même objet quelle que soit la clé demandée."""
+    from app.core.config import settings
+    from app.services import app_settings
+
+    async def _defaults(db):
+        return settings.reload_count_max, settings.monthly_reloads_max
+
+    monkeypatch.setattr(app_settings, "anti_spam_limits", _defaults)
+
+
+@pytest.fixture(autouse=True)
 def _reset_apns_service_singleton():
     """Reset le module-level `_service_instance` entre chaque test.
 
