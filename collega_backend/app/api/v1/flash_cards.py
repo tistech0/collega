@@ -85,7 +85,10 @@ async def regenerate_card(
         )
 
     claude = ClaudeClient()
-    new_card_data = await claude.regenerate_single_card(card, item, source_text, body.user_note)
+    # L'usage de la régénération (regen.input_tokens/output_tokens) sera enregistré
+    # par la comptabilité claude_usage (chantier 4, tâche 5).
+    regen = await claude.regenerate_single_card(card, item, source_text, body.user_note)
+    new_card_data = regen.card
     if new_card_data is None:
         raise AppError(503, "REGENERATION_FAILED", "Régénération échouée")
 

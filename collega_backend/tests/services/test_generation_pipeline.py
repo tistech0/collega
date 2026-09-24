@@ -1,6 +1,7 @@
 """Génération par item, réutilisation et worker de génération (chantier 1), Postgres réel."""
 
 import asyncio
+import json
 
 import pytest
 from sqlalchemy import func, select
@@ -26,20 +27,29 @@ pytestmark = pytest.mark.pg
 class FakeClaude:
     def __init__(self, *, fail_on_call: int | None = None, empty_for: set[int] = frozenset()):
         self.calls: list[int] = []
+        self.args: list[tuple[int, str, list[str]]] = []
         self.fail_on_call = fail_on_call
         self.empty_for = empty_for
 
-    async def generate_cards(self, item_number, rang, text):
+    async def generate_cards(self, item_number, title, pages, *, effort="medium"):
         self.calls.append(item_number)
+        self.args.append((item_number, title, pages))
         if self.fail_on_call is not None and len(self.calls) == self.fail_on_call:
             raise RuntimeError("Claude indisponible")
         if item_number in self.empty_for:
-            return CardGenResult(cards=[], input_tokens=50, output_tokens=5)
-        return CardGenResult(
-            cards=[FlashCardData("classique", f"Q{item_number} ?", f"R{item_number}")],
-            input_tokens=100,
-            output_tokens=10,
-        )
+            return _result([], 50, 5)
+        return _result([FlashCardData("classique", "B", f"Q{item_number} ?", f"R{item_number}")], 100, 10)
+
+
+def _result(cards, input_tokens, output_tokens):
+    return CardGenResult(
+        cards=cards,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        model="claude-sonnet-5",
+        insufficient_text=False,
+        stop_reason="end_turn" if input_tokens else None,
+    )
 
 
 class Notifications:
@@ -92,6 +102,20 @@ async def test_generates_each_draft_and_publishes(pg_factory, notifications):
         j = await s.get(GenerationJob, job.id)
         assert (j.status, j.input_tokens, j.output_tokens, j.hash_shared) == ("generation_complete", 200, 20, False)
     assert notifications.sent == [("complete", 34, None)]  # premier import : message simple
+
+
+async def test_passes_title_and_text_and_stores_card_rang(pg_factory, notifications):
+    _, college, job = await _ready_job(pg_factory, {304: "texte 304"})
+    claude = FakeClaude()
+    await _run(pg_factory, college, job, claude)
+    # Texte d'item stocké d'un seul tenant : envoyé comme une seule page.
+    assert claude.args == [(304, "Item 304", ["texte 304"])]
+    async with pg_factory() as s:
+        gen = (await s.execute(select(ItemGeneration))).scalar_one()
+        assert json.loads(gen.cards_json) == [
+            {"card_type": "classique", "rang": "B", "recto": "Q304 ?", "verso": "R304"}
+        ]
+        assert (await s.execute(select(FlashCard.recto))).scalars().all() == ["Q304 ?"]
 
 
 async def test_reuses_generation_of_another_user_without_calling_claude(pg_factory, notifications):
@@ -153,10 +177,10 @@ async def test_interruption_then_arq_retry_does_not_repay(pg_factory, notificati
     _, college, job = await _ready_job(pg_factory, {301: "a", 302: "b", 303: "c"})
 
     class Interrupting(FakeClaude):
-        async def generate_cards(self, item_number, rang, text):
+        async def generate_cards(self, item_number, title, pages, *, effort="medium"):
             if item_number == 302:
                 raise asyncio.CancelledError()
-            return await super().generate_cards(item_number, rang, text)
+            return await super().generate_cards(item_number, title, pages)
 
     monkeypatch.setattr(generation_worker, "async_session_factory", pg_factory)
     monkeypatch.setattr(generation_worker, "ClaudeClient", lambda: Interrupting())
@@ -185,8 +209,8 @@ async def test_stop_between_items(pg_factory, notifications):
     _, college, job = await _ready_job(pg_factory, {301: "a", 302: "b"})
 
     class StopAfterFirst(FakeClaude):
-        async def generate_cards(self, item_number, rang, text):
-            r = await super().generate_cards(item_number, rang, text)
+        async def generate_cards(self, item_number, title, pages, *, effort="medium"):
+            r = await super().generate_cards(item_number, title, pages)
             async with pg_factory() as s:
                 (await s.get(GenerationJob, job.id)).status = "failed"
                 await s.commit()
@@ -203,8 +227,8 @@ async def test_deleted_account_stops_generation(pg_factory, notifications):
     user, college, job = await _ready_job(pg_factory, {301: "a", 302: "b"})
 
     class DeleteAfterFirst(FakeClaude):
-        async def generate_cards(self, item_number, rang, text):
-            r = await super().generate_cards(item_number, rang, text)
+        async def generate_cards(self, item_number, title, pages, *, effort="medium"):
+            r = await super().generate_cards(item_number, title, pages)
             async with pg_factory() as s:
                 await s.delete(await s.get(User, user.id))
                 await s.commit()
@@ -311,9 +335,9 @@ async def test_empty_text_item_does_not_count_as_claude_call(pg_factory, notific
     _, college, job = await _ready_job(pg_factory, {304: "texte"}, college_status="generation_complete")
 
     class ZeroTokens(FakeClaude):
-        async def generate_cards(self, item_number, rang, text):
+        async def generate_cards(self, item_number, title, pages, *, effort="medium"):
             self.calls.append(item_number)
-            return CardGenResult(cards=[], input_tokens=0, output_tokens=0)
+            return _result([], 0, 0)
 
     result = await _run(pg_factory, college, job, ZeroTokens())
     assert result["claude_calls"] == 0

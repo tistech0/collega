@@ -116,7 +116,7 @@ async def generate_job_items(
         text_hash, count = live.get(d.item_number, (None, 0))
         return text_hash == d.text_hash and count > 0
 
-    todo = [(d.item_number, d.rang, d.text_hash) for d in drafts if d.generation_id is None and not kept(d)]
+    todo = [(d.item_number, d.chapter_title, d.text_hash) for d in drafts if d.generation_id is None and not kept(d)]
     total = len(drafts)
     items_done = total - len(todo)
     cards = sum(len(store.generation_cards(g)) for g in done_gens) + sum(
@@ -126,7 +126,7 @@ async def generate_job_items(
     claude_calls = 0
     await _report(progress, college_id, items_done=items_done, items_total=total, cards=cards, preview=latest)
 
-    for item_number, rang, text_hash in todo:
+    for item_number, title, text_hash in todo:
         async with session_factory() as db:
             if await _job_status(db, job_id) != "ocr_complete":
                 logger.info("Génération du job %s arrêtée avant l'item %d", job_id, item_number)
@@ -136,7 +136,10 @@ async def generate_job_items(
 
         result = None
         if gen is None:
-            result = await claude.generate_cards(item_number, rang, text or "")
+            # Le texte d'item est stocké d'un seul tenant (pages jointes par « \n », sans
+            # séparateur stable) : il est envoyé comme une seule « page » — la règle des
+            # en-têtes répétés de clean_for_prompt ne s'y applique donc pas (tâche 6).
+            result = await claude.generate_cards(item_number, title or "", [text or ""])
             # Seul un appel réellement facturé compte (texte vide : aucun appel fait).
             if result.input_tokens or result.output_tokens:
                 claude_calls += 1
@@ -154,7 +157,10 @@ async def generate_job_items(
                         db,
                         text_hash,
                         GENERATION_VERSION,
-                        [{"card_type": c.card_type, "recto": c.recto, "verso": c.verso} for c in result.cards],
+                        [
+                            {"card_type": c.card_type, "rang": c.rang, "recto": c.recto, "verso": c.verso}
+                            for c in result.cards
+                        ],
                         GENERATION_MODEL,
                         result.input_tokens,
                         result.output_tokens,

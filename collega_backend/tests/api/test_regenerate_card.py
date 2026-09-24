@@ -7,7 +7,8 @@ import pytest
 from app.api.v1 import flash_cards as flash_cards_module
 from app.deps import require_subscription
 from app.models.flash_card import FlashCard
-from app.schemas.college import FlashCardData
+from app.services.generation.claude_client import FlashCardData as CardData
+from app.services.generation.claude_client import RegenResult
 from tests.api_pg import login_as
 from tests.factories import make_card, make_college, make_item, make_user
 
@@ -31,16 +32,11 @@ async def test_regenerate_uses_stored_source_text_and_drops_origin(pg_client, pg
     login_as(user)
     app.dependency_overrides[require_subscription] = lambda: user
     regen = AsyncMock(
-        return_value=FlashCardData(
-            id=str(card.id),
-            item_id=str(card.item_id),
-            college_id=str(card.college_id),
-            card_type="classique",
-            rang="A",
-            recto="Q précise ?",
-            verso="R",
-            ocr_confidence_score=0.9,
-            low_confidence=False,
+        return_value=RegenResult(
+            card=CardData("classique", "A", "Q précise ?", "R"),
+            input_tokens=500,
+            output_tokens=90,
+            model="claude-sonnet-5",
         )
     )
     monkeypatch.setattr(flash_cards_module.ClaudeClient, "regenerate_single_card", regen)

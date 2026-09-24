@@ -22,6 +22,18 @@ class SemanticEvalRequest(BaseModel):
     user_answer: str
 
 
+# Sortie structurée demandée à Claude (Haiku 4.5) pour l'évaluation.
+EVAL_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "result": {"type": "string", "enum": ["correct", "partial", "incorrect"]},
+        "feedback": {"type": "string"},
+    },
+    "required": ["result", "feedback"],
+    "additionalProperties": False,
+}
+
+
 class SemanticEvalResult(BaseModel):
     result: str  # 'correct' | 'partial' | 'incorrect'
     feedback: str
@@ -54,7 +66,9 @@ async def evaluate_semantic(
         "Le feedback doit être une phrase courte (≤ 30 mots) en français."
     )
     try:
-        result_json = await claude.ask_json(prompt)
+        # L'usage (second élément) sera enregistré par la comptabilité claude_usage
+        # (chantier 4, tâche 5).
+        result_json, _usage = await claude.ask_json(prompt, EVAL_SCHEMA)
         return {"data": SemanticEvalResult(**result_json).model_dump()}
     except (ValueError, json.JSONDecodeError, ValidationError):
         raise AppError(502, "CLAUDE_EVAL_FAILED", "Évaluation de la réponse impossible — réessayez") from None
