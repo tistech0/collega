@@ -53,7 +53,7 @@ def _readable_pdf(monkeypatch):
     testée dans test_pdf_damaged.py."""
     from unittest.mock import AsyncMock
 
-    from app.api.v1 import colleges as colleges_module
+    from app.api.v1.colleges import imports as colleges_module
 
     monkeypatch.setattr(colleges_module, "assert_pdf_readable", AsyncMock(return_value=1))
 

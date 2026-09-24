@@ -15,7 +15,7 @@ import uuid
 import pytest
 from httpx import AsyncClient
 
-from app.api.v1 import colleges as colleges_module
+from app.api.v1.colleges import status as colleges_module
 from app.deps import get_current_user_short_session
 from app.models.college import College
 from tests.api_pg import login_as

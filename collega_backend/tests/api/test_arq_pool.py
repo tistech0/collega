@@ -119,7 +119,7 @@ class TestAbortArqJob:
         """`stop_job` dépend de `get_arq_optional` : Redis injoignable ne bloque pas l'arrêt."""
         import inspect
 
-        from app.api.v1.admin import stop_job
+        from app.api.v1.admin.jobs import stop_job
         from app.deps import get_arq_optional
 
         param = inspect.signature(stop_job).parameters["arq"]

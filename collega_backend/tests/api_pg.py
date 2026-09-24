@@ -15,8 +15,8 @@ async def pg_client(pg_factory, monkeypatch, fake_arq) -> AsyncIterator[AsyncCli
     """Toutes les sessions de l'app (dépendance get_db et sessions courtes des
     routes, workers et services) pointent sur la base de test."""
     import app.core.database as database
-    from app.api.v1 import admin as admin_module
-    from app.api.v1 import colleges as colleges_module
+    from app.api.v1.admin import jobs as admin_jobs_module
+    from app.api.v1.colleges import status as colleges_status_module
     from app.core.database import get_db
     from app.main import app
     from tests.fakes.fake_arq import override_arq
@@ -25,7 +25,7 @@ async def pg_client(pg_factory, monkeypatch, fake_arq) -> AsyncIterator[AsyncCli
         async with pg_factory() as session:
             yield session
 
-    for module in (database, colleges_module, admin_module):
+    for module in (database, colleges_status_module, admin_jobs_module):
         monkeypatch.setattr(module, "async_session_factory", pg_factory)
     app.dependency_overrides[get_db] = override_get_db
     override_arq(fake_arq)

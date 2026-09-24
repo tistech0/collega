@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from httpx import AsyncClient
 
-from app.api.v1 import colleges as colleges_module
+from app.api.v1.colleges import imports as colleges_module
 from app.deps import require_subscription
 from app.services.upload.chunked_upload import PART_SIZE, ChunkedUploadStore
 from tests.fakes.fake_arq import arq_pool
