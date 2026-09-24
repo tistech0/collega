@@ -1,23 +1,36 @@
 """Tests ItemDetector — détection ECNi via tableau Rang/Rubrique/Intitulé.
 
 Les tests couvrent :
-  - Extraction du rang depuis les tables pdfplumber (chemin principal)
-  - Fallback pytesseract : détection rang depuis le texte brut "Rang Rubrique …"
+  - Rang depuis les tables pdfplumber et depuis le texte brut "Rang Rubrique …"
   - Délimitation du contenu item (du header jusqu'au header suivant)
   - Filtrage des références inline ("voir item N" dans le corps du texte)
-  - Priorité des rangs : A > B > C
+  - Titres d'items (story 8.0)
+
+Chantier 4 : les règles du découpage (R0-R10) et le rapport sont testés dans
+tests/services/ocr/test_segmentation_rules.py. Ici, `detect_items` est lu via ses items.
+Une page de moins de 40 caractères utiles est blanche (R0) : les pages de test courtes
+sont complétées par BODY.
 """
 
 import pytest
 
-from app.services.ocr.item_detector import ItemDetector
+from app.services.ocr.item_detector import DetectedItem, ItemDetector
 
 # ── Fixtures détecteur ────────────────────────────────────────────────────────
 
 
+class _ItemsOnly:
+    def detect_items(self, *args, **kwargs) -> list[DetectedItem]:
+        return ItemDetector().detect_items(*args, **kwargs).items
+
+
 @pytest.fixture
 def detector():
-    return ItemDetector()
+    return _ItemsOnly()
+
+
+# Corps de page : au-delà du seuil de page blanche (R0).
+BODY = "Texte de cours assez long pour ne pas passer pour une page blanche.\n"
 
 
 # ── Données de test ───────────────────────────────────────────────────────────
@@ -42,14 +55,14 @@ TABLE_ITEM_110_ONLY_B = [
 ]
 
 # Page d'en-tête Item 200 (table avec seulement Rang C)
-PAGE_ITEM_200 = "Item 200\nTitre item 200.\n"
+PAGE_ITEM_200 = "Item 200\nTitre item 200.\n" + BODY
 TABLE_ITEM_200_ONLY_C = [
     ["Rang", "Rubrique", "Intitulé connaissance"],
     ["C", "Spécialité", "Connaître un traitement avancé"],
 ]
 
 # Page de contenu (pas d'en-tête, pas de table)
-PAGE_CONTENT = "I. INTRODUCTION\n\nContenu du cours ici.\n"
+PAGE_CONTENT = "I. INTRODUCTION\n\nContenu du cours ici.\n" + BODY
 
 # Format pytesseract : tableau rendu en texte brut, sans structure pdfplumber
 PAGE_PYTESSERACT_HEADER = (
@@ -72,20 +85,29 @@ _LONG_BODY = "Ce chapitre traite de l'addiction au tabac en détail. " * 9  # ~4
 PAGE_CROSS_REF = "I. INTRODUCTION\n\n" + _LONG_BODY + "Voir item 42 pour le traitement.\n"
 
 
-# ── Tests unitaires : _rang_from_tables ──────────────────────────────────────
+# ── Rang depuis les tables pdfplumber et le texte OCR ─────────────────────────
+
+
+def rang_of(tables=None, text=""):
+    """Rang d'un item de 2 pages dont la 1re porte `text` et les tables `tables`."""
+    pages = ["Item 75\nTitre\n" + text + BODY, "Item 75\n" + BODY]
+    items = ItemDetector().detect_items(pages, page_tables=[tables or [], []]).items
+    assert [i.item_number for i in items] == [75]
+    return items[0].rang
 
 
 class TestRangFromTables:
-    def test_rang_a_when_a_rows_present(self, detector):
-        assert detector._rang_from_tables([TABLE_ITEM_75]) == "A"
+    def test_rang_a_when_a_rows_present(self):
+        assert rang_of([TABLE_ITEM_75]) == "A"
 
-    def test_rang_b_when_only_b_rows(self, detector):
-        assert detector._rang_from_tables([TABLE_ITEM_110_ONLY_B]) == "B"
+    def test_rang_b_when_only_b_rows(self):
+        assert rang_of([TABLE_ITEM_110_ONLY_B]) == "B"
 
-    def test_rang_c_when_only_c_rows(self, detector):
-        assert detector._rang_from_tables([TABLE_ITEM_200_ONLY_C]) == "C"
+    def test_rang_c_is_not_an_objective_rang(self):
+        """Chantier 4 : seuls A et B sont des rangs d'objectif ; C → rang inconnu, A par défaut."""
+        assert rang_of([TABLE_ITEM_200_ONLY_C]) == "A"
 
-    def test_priority_a_over_b_and_c(self, detector):
+    def test_priority_a_over_b_and_c(self):
         """Table avec A, B, C mélangés → rang A (priorité A > B > C)."""
         table = [
             ["Rang", "Rubrique", "Intitulé"],
@@ -93,61 +115,55 @@ class TestRangFromTables:
             ["C", "Spec", "..."],
             ["A", "Étiologie", "..."],
         ]
-        assert detector._rang_from_tables([table]) == "A"
+        assert rang_of([table]) == "A"
 
-    def test_priority_b_over_c(self, detector):
+    def test_priority_b_over_c(self):
         table = [
             ["Rang", "Rubrique", "Intitulé"],
             ["C", "Spec", "..."],
             ["B", "Def", "..."],
         ]
-        assert detector._rang_from_tables([table]) == "B"
+        assert rang_of([table]) == "B"
 
-    def test_none_when_no_rang_column(self, detector):
+    def test_default_a_when_no_rang_column(self):
         table = [["Colonne1", "Colonne2"], ["val1", "val2"]]
-        assert detector._rang_from_tables([table]) is None
+        assert rang_of([table]) == "A"
 
-    def test_none_when_tables_empty(self, detector):
-        assert detector._rang_from_tables([]) is None
+    def test_default_a_when_tables_empty(self):
+        assert rang_of([]) == "A"
 
-    def test_handles_none_cells_gracefully(self, detector):
+    def test_handles_none_cells_gracefully(self):
         table = [
             ["Rang", "Rubrique", "Intitulé"],
             [None, "Rubrique1", "..."],
             ["A", "Rubrique2", "..."],
         ]
-        assert detector._rang_from_tables([table]) == "A"
+        assert rang_of([table]) == "A"
 
-    def test_rang_column_case_insensitive(self, detector):
+    def test_rang_column_case_insensitive(self):
         table = [
             ["RANG", "Rubrique", "Intitulé"],
             ["B", "Def", "..."],
         ]
-        assert detector._rang_from_tables([table]) == "B"
-
-
-# ── Tests unitaires : _rang_from_text (fallback pytesseract) ─────────────────
+        assert rang_of([table]) == "B"
 
 
 class TestRangFromText:
-    def test_detects_rang_from_pytesseract_text(self, detector):
-        rang = detector._rang_from_text(PAGE_PYTESSERACT_HEADER)
-        assert rang == "A"
+    def test_detects_rang_from_pytesseract_text(self):
+        assert rang_of(text="Rang Rubrique Intitulé\nA Définition x\nB Traitement y\n") == "A"
 
-    def test_priority_a_over_b_in_text(self, detector):
-        text = "Item 1\nRang Rubrique Intitulé\nB Définition ...\nA Étiologie ...\n"
-        assert detector._rang_from_text(text) == "A"
+    def test_priority_a_over_b_in_text(self):
+        assert rang_of(text="Rang Rubrique Intitulé\nB Définition ...\nA Étiologie ...\n") == "A"
 
-    def test_returns_none_without_table_header(self, detector):
-        """Texte sans 'Rang Rubrique' → pas de détection rang par texte."""
-        assert detector._rang_from_text("Item 75\nContenu sans tableau.") is None
+    def test_default_a_without_table(self):
+        """Texte sans tableau d'objectifs → rang inconnu, A par défaut (warning au rapport)."""
+        assert rang_of(text="Contenu sans tableau.\n") == "A"
 
-    def test_stops_at_section_header(self, detector):
+    def test_stops_at_section_header(self):
         """Arrêt du parsing quand on atteint une section de contenu (I. INTRODUCTION)."""
-        text = "Item 1\nRang Rubrique Intitulé\nB Définition ...\nI. INTRODUCTION\nA Faux rang après section\n"
-        rang = detector._rang_from_text(text)
+        text = "Rang Rubrique Intitulé\nB Définition ...\nI. INTRODUCTION\nA Diagnostic faux rang après section\n"
         # Seulement "B" avant la section, pas "A" après
-        assert rang == "B"
+        assert rang_of(text=text) == "B"
 
 
 # ── Tests d'intégration : detect_items ───────────────────────────────────────
@@ -187,9 +203,10 @@ class TestDetectItems:
         items = detector.detect_items([PAGE_ITEM_110], page_tables=[[TABLE_ITEM_110_ONLY_B]])
         assert items[0].rang == "B"
 
-    def test_rang_c_item(self, detector):
+    def test_rang_c_item_defaults_to_a(self, detector):
+        """Chantier 4 : C n'est pas un rang d'objectif → rang inconnu, A par défaut."""
         items = detector.detect_items([PAGE_ITEM_200], page_tables=[[TABLE_ITEM_200_ONLY_C]])
-        assert items[0].rang == "C"
+        assert items[0].rang == "A"
 
     def test_pytesseract_fallback_rang(self, detector):
         """Sans table pdfplumber, le rang est détecté depuis le texte OCR brut."""
@@ -210,21 +227,21 @@ class TestDetectItems:
 
     def test_item_n_degree_pattern(self, detector):
         """Supporte 'Item n°42'."""
-        page = "Item n°42\nTitre\n"
+        page = "Item n°42\nTitre\n" + BODY
         table = [["Rang", "Rubrique", "Intitulé"], ["A", "Def", "..."]]
         items = detector.detect_items([page], page_tables=[[table]])
         assert items[0].item_number == 42
 
     def test_item_uppercase(self, detector):
         """Supporte 'ITEM 15' (insensible à la casse)."""
-        page = "ITEM 15\nHypertension artérielle.\n"
+        page = "ITEM 15\nHypertension artérielle.\n" + BODY
         table = [["Rang", "Rubrique", "Intitulé"], ["B", "Def", "..."]]
         items = detector.detect_items([page], page_tables=[[table]])
         assert items[0].item_number == 15
 
     def test_ocr_text_contains_all_item_pages(self, detector):
         """Le texte OCR de l'item inclut le contenu de toutes ses pages."""
-        pages = [PAGE_ITEM_75, "contenu page 1 spécifique", "contenu page 2 spécifique"]
+        pages = [PAGE_ITEM_75, "contenu page 1 spécifique\n" + BODY, "contenu page 2 spécifique\n" + BODY]
         tables = [[TABLE_ITEM_75], [], []]
         items = detector.detect_items(pages, page_tables=tables)
         assert "contenu page 1 spécifique" in items[0].ocr_text
@@ -249,10 +266,12 @@ class TestDetectItems:
         assert detector.detect_items([]) == []
 
     def test_default_rang_a_with_warning_when_no_signal(self, detector):
-        """Item N en tout début de page mais sans signal rang → rang 'A' par défaut."""
+        """En-tête répété sans signal de rang → rang 'A' par défaut.
+
+        Chantier 4 (R4/R5) : un « Item N » isolé sans signal fort n'ouvre plus d'item ;
+        l'en-tête est ici répété sur 2 pages (numéro sûr)."""
         page = "Item 99\nTitre sans tableau ni rang dans le texte.\n"
-        items = detector.detect_items([page], page_tables=[[]])
-        # Accepté car position < 400 ; rang defaults to "A"
+        items = detector.detect_items([page, page], page_tables=[[], []])
         assert len(items) == 1
         assert items[0].rang == "A"
 
@@ -288,7 +307,7 @@ class TestTitleExtraction:
 
     @pytest.mark.parametrize("sep", [":", "-", "."])
     def test_title_on_same_line_other_separators(self, detector, sep):
-        page = f"Item 311 {sep} Tumeurs du rein\n"
+        page = f"Item 311 {sep} Tumeurs du rein\n" + BODY
         items = detector.detect_items([page], page_tables=[[TABLE_SIMPLE_A]])
         assert items[0].chapter_title == "Tumeurs du rein"
 
@@ -311,7 +330,8 @@ class TestTitleExtraction:
         assert items[0].chapter_title == "Pneumothorax"
 
     def test_body_text_after_header_is_not_a_title(self, detector):
-        items = detector.detect_items([CNEC_290_P2], page_tables=[[]])
+        # Page d'ouverture (tableau de rang) : un en-tête isolé n'ouvre plus d'item (R5).
+        items = detector.detect_items([CNEC_290_P2], page_tables=[[TABLE_SIMPLE_A]])
         assert items[0].chapter_title == ""
 
     def test_objectifs_line_gives_title(self, detector):
@@ -344,7 +364,10 @@ class TestTitleExtraction:
         assert items[0].chapter_title == "Tumeurs du foie, primitives et secondaires"
 
     def test_objectifs_on_later_page_of_the_item(self, detector):
-        pages = ["Item 299\nIntroduction du chapitre\n", "Item 299\nOBJECTIFS: N° 299. Tumeurs intracrâniennes\n-+\n"]
+        pages = [
+            "Item 299\nIntroduction du chapitre\n" + BODY,
+            "Item 299\nOBJECTIFS: N° 299. Tumeurs intracrâniennes\n-+\n",
+        ]
         items = detector.detect_items(pages, page_tables=[[], []])
         assert items[0].chapter_title == "Tumeurs intracrâniennes"
 
@@ -359,7 +382,7 @@ class TestRunningHeadersAndToc:
         assert (items[1].start_page, items[1].end_page) == (2, 2)
 
     def test_merged_span_takes_best_rang(self, detector):
-        pages = ["Item 297\nIntro\n", "Item 297\nsuite\n"]
+        pages = ["Item 297\nIntro\n" + BODY, "Item 297\nsuite\n" + BODY]
         tables = [[TABLE_ITEM_200_ONLY_C], [TABLE_ITEM_110_ONLY_B]]
         items = detector.detect_items(pages, page_tables=tables)
         assert len(items) == 1
@@ -376,8 +399,9 @@ class TestProdCorpusEdgeCases:
     """Cas relevés sur les PDF de prod (CEP 2023, CNEC 4e éd.) — story 8.0."""
 
     def test_header_with_leading_punctuation_is_detected(self, detector):
-        pages = ["Item 312\nOBJECTIFS: N° 312. Tumeurs du sein\n", ". Item 313\nTumeurs du testicule\n"]
-        items = detector.detect_items(pages, page_tables=[[], []])
+        pages = ["Item 312\nOBJECTIFS: N° 312. Tumeurs du sein\n", ". Item 313\nTumeurs du testicule\n" + BODY]
+        # Page d'ouverture de 313 (tableau de rang) : un en-tête isolé n'ouvre plus d'item (R5).
+        items = detector.detect_items(pages, page_tables=[[], [TABLE_SIMPLE_A]])
         assert [i.item_number for i in items] == [312, 313]
         assert items[1].chapter_title == "Tumeurs du testicule"
 
@@ -388,13 +412,13 @@ class TestProdCorpusEdgeCases:
             "Chapitre 18 : Tumeurs du pancréas ...............................\n307\nItem 308\n"
             "C' a ire 13 : Tumeurs de l'estomac ................ 213\nItem 303\n"
         )
-        pages = [toc, "Item 308\n1.2. Facteurs de risque\n", "Item 308\nN - Adénopathies régionales\n"]
+        pages = [toc, "Item 308\n1.2. Facteurs de risque\n" + BODY, "Item 308\nN - Adénopathies régionales\n" + BODY]
         items = detector.detect_items(pages, page_tables=[[], [], []])
         assert [i.item_number for i in items] == [308]
         assert items[0].chapter_title == "Tumeurs du pancréas"
 
     def test_header_title_read_on_first_page_only(self, detector):
-        pages = ["Item 308\n1.2. Facteurs de risque\n", "Item 308\nN - Adénopathies régionales\n"]
+        pages = ["Item 308\n1.2. Facteurs de risque\n" + BODY, "Item 308\nN - Adénopathies régionales\n" + BODY]
         items = detector.detect_items(pages, page_tables=[[], []])
         assert items[0].chapter_title == ""
 
@@ -410,7 +434,11 @@ class TestProdCorpusEdgeCases:
 
     def test_truncated_running_header_is_ignored(self, detector):
         """« tem 30 » (en-tête « Item 306 » tronqué des deux côtés) ne crée pas d'item 30."""
-        pages = ["Item 306\nTumeurs de l'ovaire\n", "tem 30\nClinique\n", "Item 306\n4. Démarche\n"]
+        pages = [
+            "Item 306\nTumeurs de l'ovaire\n" + BODY,
+            "tem 30\nClinique\n" + BODY,
+            "Item 306\n4. Démarche\n" + BODY,
+        ]
         items = detector.detect_items(pages, page_tables=[[], [], []])
         assert [(i.item_number, i.start_page, i.end_page) for i in items] == [(306, 0, 2)]
 
@@ -430,18 +458,20 @@ class TestReviewFindings:
 
     def test_running_header_span_ignores_header_line(self, detector):
         """Format CNEC (en-tête répété) : la ligne sous « Item N » est du corps de texte."""
-        pages = ["Item 290\nIntroduction\n", "Item 290\nÉpidémiologie\n"]
+        # « Introduction » seule en 2e ligne avant le 1er item serait une section liminaire (R7 bis).
+        pages = ["Item 290\nGénéralités\n" + BODY, "Item 290\nÉpidémiologie\n" + BODY]
         items = detector.detect_items(pages, page_tables=[[], []])
         assert items[0].chapter_title == ""
 
     def test_related_items_list_does_not_make_header_a_toc(self, detector):
         page = "Item 75\nAddiction au tabac.\nItems liés :\n- Item 12\n- Item 45\n• Item 46\n"
-        items = detector.detect_items([page, "Item 76\nTitre suivant correct\n"], page_tables=[[TABLE_ITEM_75], []])
+        page_76 = "Item 76\nTitre suivant correct\n" + BODY
+        items = detector.detect_items([page, page_76], page_tables=[[TABLE_ITEM_75], [TABLE_SIMPLE_A]])
         assert [i.item_number for i in items] == [75, 76]
         assert items[0].chapter_title == "Addiction au tabac"
 
     def test_bulleted_reference_is_not_a_header(self, detector):
-        pages = [PAGE_ITEM_75, "• Item 230 évoqué ici\nsuite du texte\n"]
+        pages = [PAGE_ITEM_75, "• Item 230 évoqué ici\nsuite du texte\n" + BODY]
         items = detector.detect_items(pages, page_tables=[[TABLE_ITEM_75], []])
         assert [(i.item_number, i.start_page, i.end_page) for i in items] == [(75, 0, 1)]
 
@@ -451,16 +481,16 @@ class TestReviewFindings:
             "SOMMAIRE\nItem 306\nTumeurs du col utérin ...... 12\n"
             "Item 307\nTumeurs de l'ovaire ...... 30\nItem 308\nTumeurs du pancréas ...... 44\n"
         )
-        pages = [toc, "Item 307\nTumeurs de l'ovaire\n"]
-        items = detector.detect_items(pages, page_tables=[[], []])
+        pages = [toc, "Item 307\nTumeurs de l'ovaire\n" + BODY]
+        items = detector.detect_items(pages, page_tables=[[], [TABLE_SIMPLE_A]])
         assert items[0].chapter_title == "Tumeurs de l'ovaire"
 
     def test_non_adjacent_repeat_keeps_header_title(self, detector):
         """CEP : « Item 359 bis » 14 pages plus loin n'est pas un en-tête courant."""
         pages = [
             "Item 359\nDétresse respiratoire de l’adulte\nRang Rubrique\n",
-            "suite",
-            "Item 359 bis\nDétresse de l'enfant\n",
+            "suite\n" + BODY,
+            "Item 359 bis\nDétresse de l'enfant\n" + BODY,
         ]
         items = detector.detect_items(pages, page_tables=[[TABLE_SIMPLE_A], [], []])
         assert items[0].chapter_title == "Détresse respiratoire de l’adulte"

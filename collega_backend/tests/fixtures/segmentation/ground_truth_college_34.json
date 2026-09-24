@@ -1,0 +1,163 @@
+{
+ "college_ref_id": 34,
+ "page_count": 355,
+ "items": [
+  {
+   "item_number": 75,
+   "title": "Addiction au tabac",
+   "start_page": 3,
+   "end_page": 15
+  },
+  {
+   "item_number": 110,
+   "title": "Troubles du sommeil de l'enfant et de l'adulte",
+   "start_page": 16,
+   "end_page": 27
+  },
+  {
+   "item_number": 154,
+   "title": "Infections broncho-pulmonaires communautaires de l'adulte",
+   "start_page": 28,
+   "end_page": 47
+  },
+  {
+   "item_number": 159,
+   "title": "Tuberculose de l'adulte",
+   "start_page": 48,
+   "end_page": 67
+  },
+  {
+   "item_number": 186,
+   "title": "Hypersensibilités et allergies respiratoires",
+   "start_page": 68,
+   "end_page": 82
+  },
+  {
+   "item_number": 188,
+   "title": "Asthme, rhinite",
+   "start_page": 83,
+   "end_page": 101
+  },
+  {
+   "item_number": 203,
+   "title": "Dyspnée aiguë et chronique",
+   "start_page": 102,
+   "end_page": 111
+  },
+  {
+   "item_number": 204,
+   "title": "Toux chez l'adulte",
+   "start_page": 112,
+   "end_page": 121
+  },
+  {
+   "item_number": 205,
+   "title": "Hémoptysie",
+   "start_page": 122,
+   "end_page": 132
+  },
+  {
+   "item_number": 206,
+   "title": "Épanchement pleural liquidien",
+   "start_page": 133,
+   "end_page": 149
+  },
+  {
+   "item_number": 207,
+   "title": "Opacités et masses intra-thoraciques",
+   "start_page": 150,
+   "end_page": 169
+  },
+  {
+   "item_number": 208,
+   "title": "Insuffisance respiratoire chronique",
+   "start_page": 170,
+   "end_page": 185
+  },
+  {
+   "item_number": 209,
+   "title": "Bronchopneumopathie chronique obstructive",
+   "start_page": 186,
+   "end_page": 208
+  },
+  {
+   "item_number": 210,
+   "title": "Pneumopathies interstitielles diffuses",
+   "start_page": 209,
+   "end_page": 229
+  },
+  {
+   "item_number": 211,
+   "title": "Sarcoïdose",
+   "start_page": 230,
+   "end_page": 244
+  },
+  {
+   "item_number": 226,
+   "title": "Embolie pulmonaire et thrombose veineuse profonde",
+   "start_page": 245,
+   "end_page": 265
+  },
+  {
+   "item_number": 230,
+   "title": "Douleur thoracique aiguë",
+   "start_page": 266,
+   "end_page": 278
+  },
+  {
+   "item_number": 309,
+   "title": "Tumeurs du poumon, primitives et secondaires",
+   "start_page": 279,
+   "end_page": 300
+  },
+  {
+   "item_number": 338,
+   "title": "Œdème de Quincke et anaphylaxie",
+   "start_page": 301,
+   "end_page": 314
+  },
+  {
+   "item_number": 359,
+   "title": "Détresse respiratoire aiguë du nourrisson, de l'enfant et de l'adulte (359 + 359 bis corps étranger)",
+   "start_page": 315,
+   "end_page": 339
+  },
+  {
+   "item_number": 360,
+   "title": "Pneumothorax",
+   "start_page": 340,
+   "end_page": 354
+  }
+ ],
+ "non_item_sections": [
+  {
+   "label": "page de diffusion",
+   "start_page": 0,
+   "end_page": 0
+  },
+  {
+   "label": "page de titre",
+   "start_page": 1,
+   "end_page": 1
+  },
+  {
+   "label": "sommaire",
+   "start_page": 2,
+   "end_page": 2
+  }
+ ],
+ "ambiguous_pages": [
+  {
+   "page": 329,
+   "reason": "« Item 359 bis » (corps étranger des voies aériennes, 329-339) : chapitre distinct du même item 359"
+  },
+  {
+   "page": 66,
+   "reason": "annexes (formulaires ARS) de 159 : rattachées à l'item, texte peu utile"
+  },
+  {
+   "page": 67,
+   "reason": "idem"
+  }
+ ]
+}

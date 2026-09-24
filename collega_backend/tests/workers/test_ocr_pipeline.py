@@ -2,6 +2,7 @@
 brouillon d'items, arrêt, échecs. OCR et détection simulés (contrôlés par les tests)."""
 
 import asyncio
+import json
 
 import pytest
 from sqlalchemy import func, select
@@ -12,10 +13,10 @@ from app.models.content import JobItem, JobPage, OcrPage
 from app.models.generation_job import GenerationJob
 from app.models.item import Item
 from app.models.item_title import ItemTitle
-from app.services.ocr.item_detector import DetectedItem
+from app.services.ocr.item_detector import DetectedItem, PageAssignment, SegmentationReport, SegmentationResult
 from app.services.ocr.ocr_processor import OcrPageResult
 from app.workers import ocr_worker
-from app.workers.ocr_worker import dedupe_items, run_ocr
+from app.workers.ocr_worker import run_ocr, with_pages
 from tests.factories import make_college, make_item, make_job, make_user, write_pdf
 
 pytestmark = pytest.mark.pg
@@ -53,8 +54,10 @@ class FakeDetector:
 
     def __init__(self, titles=True):
         self.titles = titles
+        self.known_titles = None
 
-    def detect_items(self, texts, scores, tables):
+    def detect_items(self, texts, scores, tables, known_titles=None):
+        self.known_titles = known_titles
         items, current = [], None
         for i, text in enumerate(texts):
             first = text.splitlines()[0]
@@ -65,7 +68,7 @@ class FakeDetector:
             if current:
                 current["texts"].append(text)
                 current["end"] = i
-        return [
+        detected = [
             DetectedItem(
                 item_number=c["n"],
                 rang="A",
@@ -74,9 +77,16 @@ class FakeDetector:
                 start_page=c["start"],
                 end_page=c["end"],
                 ocr_confidence_score=0.9,
+                pages=list(range(c["start"], c["end"] + 1)),
             )
             for c in items
         ]
+        report = SegmentationReport(
+            pages=[PageAssignment(p, "item", item_number=d.item_number) for d in detected for p in d.pages],
+            items=[{"item_number": d.item_number, "pages": f"{d.start_page}-{d.end_page}"} for d in detected],
+            warnings=["p9 : exemple"],
+        )
+        return SegmentationResult(items=detected, report=report)
 
 
 @pytest.fixture
@@ -307,21 +317,34 @@ async def test_title_cascade_uses_and_feeds_referential(pg_factory, seed):
         assert {d.item_number: d.chapter_title for d in drafts} == labels
 
 
-def test_dedupe_keeps_longest_then_best_rang():
-    def det(n, text, rang="B"):
-        return DetectedItem(
-            item_number=n,
-            rang=rang,
-            chapter_title="t",
-            ocr_text=text,
-            start_page=0,
-            end_page=0,
-            ocr_confidence_score=0.9,
-        )
+def test_with_pages_uses_item_pages_not_a_range():
+    """Chantier 4 : dedupe_items a disparu (R8 : un item par numéro, plages concaténées) ;
+    le texte d'un item est celui de ses pages, même non contiguës."""
+    item = DetectedItem(
+        item_number=216,
+        rang="A",
+        chapter_title="t",
+        ocr_text="",
+        start_page=0,
+        end_page=3,
+        ocr_confidence_score=0.9,
+        pages=[0, 1, 3],
+    )
+    assert with_pages([item], ["p0", "p1", "p2", "p3"]) == [(item, ["p0", "p1", "p3"])]
 
-    out = {
-        d.item_number: d
-        for d in dedupe_items([det(1, "court"), det(1, "plus long"), det(2, "x", "C"), det(2, "y", "A")])
-    }
-    assert out[1].ocr_text == "plus long"
-    assert (out[2].rang, out[2].ocr_text) == ("A", "x")
+
+async def test_segmentation_report_is_stored_and_official_titles_passed(pg_factory, seed):
+    college, job = await seed()
+    async with pg_factory() as s:
+        s.add(ItemTitle(item_number=304, label="Tumeurs du foie", source="official", occurrences=1))
+        s.add(ItemTitle(item_number=305, label="Autre libellé extrait", source="extracted", occurrences=1))
+        await s.commit()
+    detector = FakeDetector()
+    await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor(PAGES), detector=detector)
+    assert detector.known_titles == {304: "Tumeurs du foie"}
+    async with pg_factory() as s:
+        stored = (await s.get(GenerationJob, job.id)).segmentation_report
+    data = json.loads(stored)
+    assert [i["item_number"] for i in data["items"]] == [304, 305]
+    assert data["warnings"] == ["p9 : exemple"]
+    assert "texte A" not in stored

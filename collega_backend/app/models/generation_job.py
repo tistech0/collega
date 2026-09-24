@@ -56,6 +56,9 @@ class GenerationJob(Base):
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Résumé de la bascule (chantier 1) : {changed, added, removed, unchanged, cards, claude_calls, quota_refunded}
     summary_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Rapport de découpage (chantier 4, JSON) : pages → item | section | blanche, warnings.
+    # Numéros et libellés seulement, jamais de texte de page. NULL = import antérieur.
+    segmentation_report: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

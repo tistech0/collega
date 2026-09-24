@@ -53,7 +53,7 @@ def extract_titles(pdf_path: Path) -> dict[int, str]:
 
     with pdfplumber.open(pdf_path) as pdf:
         texts = [page.extract_text() or "" for page in pdf.pages]
-    detected = ItemDetector().detect_items(texts)
+    detected = ItemDetector().detect_items(texts).items
     return {d.item_number: d.chapter_title for d in detected if d.chapter_title}
 
 

@@ -1,0 +1,185 @@
+{
+ "college_ref_id": 12,
+ "page_count": 439,
+ "items": [
+  {
+   "item_number": 212,
+   "title": "Hémogramme chez l'adulte et l'enfant : indications et interprétation",
+   "start_page": 53,
+   "end_page": 68
+  },
+  {
+   "item_number": 213,
+   "title": "Anémie chez l'adulte et l'enfant",
+   "start_page": 69,
+   "end_page": 103
+  },
+  {
+   "item_number": 315,
+   "title": "Leucémies aiguës",
+   "start_page": 104,
+   "end_page": 117
+  },
+  {
+   "item_number": 316,
+   "title": "Syndromes myélodysplasiques",
+   "start_page": 118,
+   "end_page": 131
+  },
+  {
+   "item_number": 317,
+   "title": "Syndromes myéloprolifératifs",
+   "start_page": 132,
+   "end_page": 156
+  },
+  {
+   "item_number": 296,
+   "title": "Agranulocytose médicamenteuse : conduite à tenir",
+   "start_page": 157,
+   "end_page": 167
+  },
+  {
+   "item_number": 318,
+   "title": "Leucémie lymphoïde chronique",
+   "start_page": 168,
+   "end_page": 176
+  },
+  {
+   "item_number": 320,
+   "title": "Myélome multiple",
+   "start_page": 177,
+   "end_page": 192
+  },
+  {
+   "item_number": 220,
+   "title": "Adénopathie superficielle de l'adulte et de l'enfant",
+   "start_page": 193,
+   "end_page": 203
+  },
+  {
+   "item_number": 319,
+   "title": "Lymphomes malins",
+   "start_page": 204,
+   "end_page": 223
+  },
+  {
+   "item_number": 217,
+   "title": "Syndrome mononucléosique",
+   "start_page": 224,
+   "end_page": 233
+  },
+  {
+   "item_number": 275,
+   "title": "Splénomégalie",
+   "start_page": 234,
+   "end_page": 246
+  },
+  {
+   "item_number": 218,
+   "title": "Éosinophilie",
+   "start_page": 247,
+   "end_page": 257
+  },
+  {
+   "item_number": 214,
+   "title": "Thrombopénie chez l'adulte et l'enfant",
+   "start_page": 258,
+   "end_page": 275
+  },
+  {
+   "item_number": 215,
+   "title": "Purpuras chez l'adulte et l'enfant",
+   "start_page": 276,
+   "end_page": 283
+  },
+  {
+   "item_number": 202,
+   "title": "Biothérapies et thérapies ciblées",
+   "start_page": 284,
+   "end_page": 299
+  },
+  {
+   "item_number": 216,
+   "title": "Syndrome hémorragique d'origine hématologique (ch. 18 Hémostase : physiologie et exploration + ch. 19)",
+   "start_page": 300,
+   "end_page": 334
+  },
+  {
+   "item_number": 226,
+   "title": "Thrombose veineuse profonde et embolie pulmonaire",
+   "start_page": 335,
+   "end_page": 344
+  },
+  {
+   "item_number": 330,
+   "title": "Prescription et surveillance d'un traitement antithrombotique (ch. 21 + ch. 22 Accidents des anticoagulants)",
+   "start_page": 345,
+   "end_page": 372
+  },
+  {
+   "item_number": 329,
+   "title": "Connaître les caractéristiques des produits sanguins labiles (PSL) et leur spécificité",
+   "start_page": 373,
+   "end_page": 411
+  }
+ ],
+ "non_item_sections": [
+  {
+   "label": "couverture, titre, copyright",
+   "start_page": 0,
+   "end_page": 2
+  },
+  {
+   "label": "table des matières",
+   "start_page": 3,
+   "end_page": 11
+  },
+  {
+   "label": "collaborateurs, note de l'éditeur, compléments en ligne",
+   "start_page": 12,
+   "end_page": 17
+  },
+  {
+   "label": "abréviations",
+   "start_page": 18,
+   "end_page": 24
+  },
+  {
+   "label": "chapitre 1 « Hématopoïèse » (connaissances transverses, sans item)",
+   "start_page": 25,
+   "end_page": 52
+  },
+  {
+   "label": "dossiers progressifs (énoncés)",
+   "start_page": 412,
+   "end_page": 433
+  },
+  {
+   "label": "dossiers progressifs (réponses)",
+   "start_page": 434,
+   "end_page": 438
+  }
+ ],
+ "ambiguous_pages": [
+  {
+   "page": 132,
+   "reason": "début du ch. 6 (317) sans ligne « CHAPITRE » ni « Item 317 » : titre « Syndromes myéloprolifératifs » seul"
+  },
+  {
+   "page": 316,
+   "reason": "ch. 19 = même item 216 que ch. 18 (deux chapitres, un item)"
+  },
+  {
+   "page": 361,
+   "reason": "ch. 22 = même item 330 que ch. 21"
+  },
+  {
+   "page": 25,
+   "reason": "chapitre 1 « Hématopoïèse » : contenu de cours sans numéro d'item (hors item par choix ; pourrait nourrir 212/213)"
+  },
+  {
+   "page": 434,
+   "reason": "page mixte : fin des énoncés et début des réponses des dossiers progressifs"
+  }
+ ]
+}

@@ -23,19 +23,20 @@ from app.core.database import async_session_factory
 from app.models.college import College, CollegeStatus
 from app.models.content import JobItem, JobPage
 from app.models.generation_job import GenerationJob
+from app.models.item_title import ItemTitle
 from app.services.content import store
 from app.services.jobs.job_events import record_job_event
 from app.services.jobs.job_failure import fail_job
 from app.services.ocr.confidence_scorer import ConfidenceScorer
-from app.services.ocr.item_detector import DetectedItem, ItemDetector
+from app.services.ocr.item_detector import DetectedItem, ItemDetector, SegmentationReport
 from app.services.ocr.item_titles import lookup_title, record_title
 from app.services.ocr.ocr_processor import OcrProcessor
 
 logger = logging.getLogger(__name__)
 
 _ocr_processor = OcrProcessor()
-_RANG_PRIORITY: dict[str, int] = {"A": 0, "B": 1, "C": 2}  # A > B > C
 _confidence_scorer = ConfidenceScorer()
+_LOGGED_WARNINGS = 20  # le rapport complet est dans generation_jobs.segmentation_report
 _item_detector = ItemDetector()
 
 
@@ -212,7 +213,11 @@ async def _finish_ocr(
     async with session_factory() as db:
         if await _job_status(db, job_id) != "processing":
             return {"error": "cancelled"}
-        items = await _detect_items(db, job_id, detector)
+        items, report = await _detect_items(db, job_id, detector)
+        # Rapport de découpage (chantier 4) : numéros, sections, warnings — jamais de texte de page.
+        logger.info("Découpage du job %s : %s", job_id, report.summary())
+        if report.warnings:
+            logger.warning("Découpage du job %s : %s", job_id, " ; ".join(report.warnings[:_LOGGED_WARNINGS]))
         await record_job_event(db, job_id, "items_detected", message=f"{len(items)} items")
         for detected, pages in items:
             text_hash = await store.put_item_text(db, pages)
@@ -234,6 +239,7 @@ async def _finish_ocr(
         if job is None or college is None:
             return {"error": "cancelled"}
         job.status = "ocr_complete"
+        job.segmentation_report = report.to_json()
         if college.status != CollegeStatus.generation_complete:
             college.status = CollegeStatus.ocr_complete
         await record_job_event(db, job_id, "ocr_complete", message=f"{len(items)} items")
@@ -268,9 +274,11 @@ async def _enqueue_generation(db: AsyncSession, job: GenerationJob, pdf_path: st
         logger.error("Failed to enqueue generation for job %s: %s", job.id, exc)
 
 
-async def _detect_items(db: AsyncSession, job_id: uuid.UUID, detector) -> list[tuple[DetectedItem, list[str]]]:
-    """Détection sur toutes les pages de l'import, relues depuis le stockage.
-    Renvoie chaque item avec le texte de ses pages (base de son empreinte)."""
+async def _detect_items(
+    db: AsyncSession, job_id: uuid.UUID, detector
+) -> tuple[list[tuple[DetectedItem, list[str]]], SegmentationReport]:
+    """Découpage de toutes les pages de l'import, relues depuis le stockage.
+    Renvoie chaque item avec le texte de ses pages (base de son empreinte), et le rapport."""
     rows = (
         (await db.execute(select(JobPage).where(JobPage.job_id == job_id).order_by(JobPage.page_number)))
         .scalars()
@@ -280,35 +288,22 @@ async def _detect_items(db: AsyncSession, job_id: uuid.UUID, detector) -> list[t
     texts = [pages[r.page_hash].text for r in rows]
     scores = [pages[r.page_hash].confidence for r in rows]
     tables = [json.loads(pages[r.page_hash].tables_json) for r in rows]
-    return with_pages(dedupe_items(detector.detect_items(texts, scores, tables)), texts)
+    result = detector.detect_items(texts, scores, tables, known_titles=await official_titles(db))
+    return with_pages(result.items, texts), result.report
+
+
+async def official_titles(db: AsyncSession) -> dict[int, str] | None:
+    """Référentiel officiel des titres (`item_titles`, source `official`) ; None s'il est vide
+    (le découpage n'en dépend pas, il restreint seulement les numéros sûrs)."""
+    rows = (
+        await db.execute(select(ItemTitle.item_number, ItemTitle.label).where(ItemTitle.source == "official"))
+    ).all()
+    return {number: label for number, label in rows} or None
 
 
 def with_pages(items: list[DetectedItem], texts: list[str]) -> list[tuple[DetectedItem, list[str]]]:
-    """Le texte d'un item est la concaténation de ses pages start..end (ItemDetector)."""
-    return [(d, texts[d.start_page : d.end_page + 1]) for d in items]
-
-
-def dedupe_items(detected_items: list[DetectedItem]) -> list[DetectedItem]:
-    """Un item par numéro (edge case : même numéro sur deux sections du PDF) :
-    l'occurrence au contenu le plus long ; à contenu égal, le meilleur rang (A > B > C)."""
-    deduped: dict[int, DetectedItem] = {}
-    for det in detected_items:
-        prev = deduped.get(det.item_number)
-        if prev is None or len(det.ocr_text) > len(prev.ocr_text):
-            deduped[det.item_number] = det
-        elif _RANG_PRIORITY.get(det.rang, 99) < _RANG_PRIORITY.get(prev.rang, 99):
-            deduped[det.item_number] = DetectedItem(
-                item_number=prev.item_number,
-                rang=det.rang,
-                chapter_title=prev.chapter_title,
-                ocr_text=prev.ocr_text,
-                start_page=prev.start_page,
-                end_page=prev.end_page,
-                ocr_confidence_score=prev.ocr_confidence_score,
-            )
-    if len(deduped) < len(detected_items):
-        logger.info("Dedup: %d → %d items", len(detected_items), len(deduped))
-    return list(deduped.values())
+    """Le texte d'un item est la concaténation de ses pages (`DetectedItem.pages`)."""
+    return [(d, [texts[p] for p in d.pages]) for d in items]
 
 
 async def _resolve_title(db: AsyncSession, college_id: uuid.UUID, detected: DetectedItem) -> str | None:

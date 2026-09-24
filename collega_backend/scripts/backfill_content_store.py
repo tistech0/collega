@@ -38,7 +38,7 @@ from app.models.item import Item
 from app.services.content import store
 from app.services.ocr.item_detector import ItemDetector
 from app.services.ocr.ocr_processor import OcrProcessor
-from app.workers.ocr_worker import dedupe_items, with_pages
+from app.workers.ocr_worker import with_pages
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ async def backfill_college(
 
     live = {i.item_number: i for i in (await db.execute(select(Item).where(Item.college_id == college.id))).scalars()}
     matched, unmatched = [], []
-    for detected, pages in with_pages(dedupe_items(detector.detect_items(texts, scores, tables)), texts):
+    for detected, pages in with_pages(detector.detect_items(texts, scores, tables).items, texts):
         item = live.get(detected.item_number)
         if item is None:
             unmatched.append(detected.item_number)
