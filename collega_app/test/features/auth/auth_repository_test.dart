@@ -188,6 +188,20 @@ void main() {
           LoginError.invalidEmail);
     });
 
+    // Chantier 5 § 4 : corps uniformes {"detail": {"code", "message", ...}} pour 422 et 429.
+    test('422 VALIDATION_ERROR (corps uniforme) → email invalide', () async {
+      const body = '{"detail":{"code":"VALIDATION_ERROR","message":"Requête invalide",'
+          '"errors":[{"loc":["body","email"],"msg":"value is not a valid email address","type":"value_error"}]}}';
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 422, body: body, contentType: 'application/json')),
+          LoginError.invalidEmail);
+    });
+
+    test('429 RATE_LIMITED (corps uniforme) → trop d’essais', () async {
+      const body = '{"detail":{"code":"RATE_LIMITED","message":"Trop de requêtes, réessayez plus tard"}}';
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 429, body: body, contentType: 'application/json')),
+          LoginError.tooManyAttempts);
+    });
+
     test('500 → autre', () async {
       expect(await errorFor(_ScriptedRawAdapter(statusCode: 500, body: '{}', contentType: 'application/json')),
           LoginError.other);

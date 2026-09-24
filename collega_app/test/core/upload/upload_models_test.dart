@@ -66,5 +66,14 @@ void main() {
       final e = _err(500, null);
       expect(mapImportDioError(e), same(e));
     });
+    // Chantier 5 § 4 : 422 / 429 / 500 ont désormais un `detail` objet ; ils restent non typés.
+    test('422 VALIDATION_ERROR, 429 RATE_LIMITED, 500 INTERNAL_ERROR → renvoie la DioException', () {
+      for (final (status, code) in [(422, 'VALIDATION_ERROR'), (429, 'RATE_LIMITED'), (500, 'INTERNAL_ERROR')]) {
+        final e = _err(status, {
+          'detail': {'code': code, 'message': 'x', if (status == 422) 'errors': []},
+        });
+        expect(mapImportDioError(e), same(e));
+      }
+    });
   });
 }
