@@ -26,6 +26,12 @@ _PAGE_NUMBER_LINE = re.compile(r"^(page\s*)?\d+(\s*(/|sur)\s*\d+)?$", re.IGNOREC
 # caractères non-espace.
 _MAX_FRAGMENT_NON_SPACE_CHARS = 2
 
+# Rang isolé sur sa ligne (pdfplumber sépare parfois « 3. Dépistage… » / « A » /
+# « 3.1 … » dans un tableau d'objectifs) : jamais retiré par la règle des fragments,
+# même s'il tient en 1-2 caractères non-espace. Casse significative (rang normalisé
+# ailleurs, ici c'est le symbole lu dans le PDF).
+_RANG_MARKERS = frozenset({"A", "B", "C", "A*", "B*"})
+
 # En-tête/pied répété : ligne normalisée présente sur au moins cette part des pages
 # d'un item d'au moins ce nombre de pages (spec § 5).
 _MIN_PAGES_FOR_HEADER_RULE = 3
@@ -40,6 +46,8 @@ def _normalize_line(line: str) -> str:
 
 
 def _is_fragment(line: str) -> bool:
+    if line in _RANG_MARKERS:
+        return False
     return len(re.sub(r"\s", "", line)) <= _MAX_FRAGMENT_NON_SPACE_CHARS
 
 
