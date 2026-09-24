@@ -1,6 +1,6 @@
 # Politique de Confidentialité
 
-**Version : 2026-09-25**
+**Version : 2026-09-24**
 
 La présente politique décrit comment **Collega** (« l'Application ») collecte, traite et
 protège tes données personnelles conformément au Règlement Général sur la Protection des Données
