@@ -22,6 +22,8 @@ from pathlib import Path
 # base ni Redis). Sans effet si les variables sont déjà définies (conteneur : .env de
 # prod). La clé Claude n'a PAS de valeur factice : sans elle, les scripts s'arrêtent.
 for _key, _value in {
+    # Obligatoire depuis le chantier 2 (hors liste → configuration refusée).
+    "ENVIRONMENT": "development",
     "DATABASE_URL": "postgresql+asyncpg://hors-ligne@localhost/hors-ligne",
     "REDIS_URL": "redis://localhost:6379/0",
     "SECRET_KEY": "mesure-generation-hors-ligne-sans-secret",

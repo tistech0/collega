@@ -1,6 +1,12 @@
 """Chantier 4 — scripts/segmentation_report.py sur une fixture synthétique."""
 
 import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
 
 from app.services.ocr.item_detector import ItemDetector
 from scripts.segmentation_report import compare, main, render
@@ -49,3 +55,35 @@ def test_main_on_fixture(tmp_path, capsys):
     truth.write_text(json.dumps(TRUTH))
     assert main([str(fixture), "--verite", str(truth)]) == 0
     assert "Vérité terrain : 2/2 items exacts" in capsys.readouterr().out
+
+
+BACKEND = Path(__file__).resolve().parents[2]
+_CONFIG_VARS = (
+    "ENVIRONMENT",
+    "DATABASE_URL",
+    "REDIS_URL",
+    "SECRET_KEY",
+    "CLAUDE_API_KEY",
+    "REVENUECAT_WEBHOOK_SECRET",
+)
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["-m", "scripts.segmentation_report", "{fixture}"],
+        # Module partagé des scripts de mesure : ses réglages factices doivent suffire à l'import.
+        ["-c", "import scripts.generation_fixtures"],
+    ],
+)
+def test_script_runs_in_a_bare_environment(tmp_path, args):
+    """Revue finale (Minor 2) : hors conteneur, aucune variable de configuration n'est
+    définie (ENVIRONMENT est obligatoire depuis le chantier 2) — les réglages factices du
+    script doivent suffire. Répertoire courant vide : aucun .env relu."""
+    fixture = tmp_path / "college.json"
+    fixture.write_text(json.dumps({"pages": [{"text": t, "confidence": 0.9, "tables": []} for t in PAGES]}))
+    env = {k: v for k, v in os.environ.items() if k not in _CONFIG_VARS}
+    env["PYTHONPATH"] = str(BACKEND)
+    argv = [sys.executable, *(a.format(fixture=fixture) for a in args)]
+    proc = subprocess.run(argv, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=120)
+    assert proc.returncode == 0, proc.stderr[-2000:]

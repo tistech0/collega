@@ -23,6 +23,8 @@ from pathlib import Path
 # Réglages factices : le script n'ouvre ni base ni Redis, mais `app.services.ocr` importe les
 # modèles, donc la configuration. Sans effet si les variables sont déjà définies.
 for _key, _value in {
+    # Obligatoire depuis le chantier 2 (hors liste → configuration refusée).
+    "ENVIRONMENT": "development",
     "DATABASE_URL": "postgresql+asyncpg://hors-ligne@localhost/hors-ligne",
     "REDIS_URL": "redis://localhost:6379/0",
     "SECRET_KEY": "segmentation-report-hors-ligne-sans-secret",
