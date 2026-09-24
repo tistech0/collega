@@ -3,11 +3,11 @@
 FROM python:3.11-slim AS builder
 
 ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
-RUN pip install "poetry==2.5.1" poetry-plugin-export
+RUN pip install "poetry==2.5.1" "poetry-plugin-export==1.9.0"
 
 WORKDIR /build
 COPY pyproject.toml poetry.lock ./
-RUN poetry export --only main --without-hashes -f requirements.txt -o requirements.txt \
+RUN poetry export --only main -f requirements.txt -o requirements.txt \
     && python -m venv /opt/venv \
     && /opt/venv/bin/pip install -r requirements.txt \
     && find /opt/venv -name '__pycache__' -type d -prune -exec rm -rf {} +

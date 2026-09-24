@@ -38,6 +38,17 @@ class TestValidatorsProductionMode:
         s = _make_settings(environment="production", **_base_settings_kwargs())
         assert s.environment == "production"
 
+    def test_refused_config_never_prints_secret_values(self):
+        # Les logs du conteneur (affichés par deploy.sh en cas d'échec) ne doivent
+        # contenir aucune valeur de variable : pydantic les recopie par défaut.
+        with pytest.raises(ValidationError) as exc:
+            _make_settings(
+                environment="production",
+                **_base_settings_kwargs(secret_key="short", revenuecat_webhook_secret="RC-SECRET-VALUE"),
+            )
+        assert "RC-SECRET-VALUE" not in str(exc.value)
+        assert "sk-ant-test1234567890" not in str(exc.value)
+
     def test_short_secret_key_raises(self):
         with pytest.raises(ValidationError, match="SECRET_KEY"):
             _make_settings(environment="production", **_base_settings_kwargs(secret_key="short"))

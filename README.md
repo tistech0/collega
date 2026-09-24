@@ -24,7 +24,7 @@ docker compose -f docker-compose.test.yml up -d   # Postgres + Redis de test
 .venv/bin/python -m pytest -q
 
 # App
-cd collega_app
+cd ../collega_app
 flutter pub get
 flutter test test/core                            # tests lancés par dossier
 tool/run_device.sh --release -d <id>              # build sur l'iPhone (service token Cloudflare dans .env.local)

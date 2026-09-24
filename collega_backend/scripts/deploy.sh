@@ -14,8 +14,9 @@
 #    ligne ; sauvegarde avant), `docker compose pull` + `up -d` ;
 # 5. attend api et worker `healthy` (3 min max), affiche les logs de migration et /health.
 #
-# Retour arrière : ./scripts/deploy.sh <sha précédent> (affiché en cas d'échec), plus
-# restauration du dump si une migration a changé le schéma (docs/restore.md).
+# Retour arrière (affiché en cas d'échec) : si une migration a changé le schéma, arrêter
+# api/worker et restaurer d'abord le dump (docs/restore.md), PUIS ./scripts/deploy.sh <sha
+# précédent> — l'image existante est réutilisée, jamais reconstruite.
 set -euo pipefail
 
 REPO=tistech0/collega
@@ -55,7 +56,7 @@ git fetch -q origin
 
 # ── 2. CI verte ─────────────────────────────────────────────────────────────────
 ci=$(gh run list --repo "$REPO" --commit "$FULL_SHA" --workflow ci.yml --json status,conclusion \
-       -q '.[0] | "\(.status)/\(.conclusion)"' 2>/dev/null) || ci="inaccessible"
+       -q '.[0] // empty | "\(.status)/\(.conclusion)"' 2>/dev/null) || ci="inaccessible"
 [[ -z "$ci" ]] && ci="absente"
 if [[ "$ci" != "completed/success" ]]; then
   msg="CI de $SHA : $ci (attendu completed/success)."
@@ -73,8 +74,16 @@ cleanup() { git worktree remove --force "$WT" >/dev/null 2>&1 || rm -rf "$WT"; }
 trap cleanup EXIT
 git worktree add -q --detach "$WT" "$FULL_SHA"
 
-info "Construction de $IMAGE:$SHA (linux/amd64)"
-docker build -q --platform linux/amd64 -t "$IMAGE:$SHA" "$WT/collega_backend" >/dev/null
+# Image déjà publiée (retour arrière, redéploiement) : on redéploie CETTE image, jamais une reconstruction.
+if docker manifest inspect "$IMAGE:$SHA" >/dev/null 2>&1; then
+  info "$IMAGE:$SHA existe déjà sur Docker Hub : réutilisée telle quelle"
+  docker pull -q --platform linux/amd64 "$IMAGE:$SHA" >/dev/null
+  PUSH=0
+else
+  info "Construction de $IMAGE:$SHA (linux/amd64)"
+  docker build -q --platform linux/amd64 -t "$IMAGE:$SHA" "$WT/collega_backend" >/dev/null
+  PUSH=1
+fi
 
 info "Contrôle de l'image"
 expected=$(git show "$FULL_SHA:collega_backend/app/main.py" | shasum -a 256 | cut -d' ' -f1)
@@ -86,14 +95,18 @@ docker run --rm --platform linux/amd64 \
   --entrypoint python "$IMAGE:$SHA" -c "import app.main, app.workers.settings" >/dev/null 2>&1 \
   || die "l'application ne s'importe pas dans l'image $SHA."
 
-info "Envoi de $IMAGE:$SHA"
-docker push -q "$IMAGE:$SHA" >/dev/null
+if [[ $PUSH -eq 1 ]]; then
+  info "Envoi de $IMAGE:$SHA"
+  docker push -q "$IMAGE:$SHA" >/dev/null
+fi
 
 # ── 4. NAS ──────────────────────────────────────────────────────────────────────
 info "Compose du commit envoyé sur le NAS"
 git show "$FULL_SHA:collega_backend/docker-compose.prod.yml" | ssh "$NAS" "cat > $STACK_DIR/docker-compose.yml.new"
 
-PREV=$(ssh "$NAS" "sed -n 's/^IMAGE_TAG=//p' $STACK_DIR/.env | tail -1")
+# Dernière image déployée AVEC SUCCÈS (fichier écrit en fin de déploiement réussi ;
+# repli sur IMAGE_TAG du .env pour le premier passage).
+PREV=$(ssh "$NAS" "cat $STACK_DIR/.last_deployed 2>/dev/null || sed -n 's/^IMAGE_TAG=//p' $STACK_DIR/.env | tail -1")
 
 # Le script distant reçoit ses paramètres en arguments ; il n'affiche aucun secret.
 set +e
@@ -103,17 +116,27 @@ SHA=$1; STACK_DIR=$2; BACKUP_DIR=$3; WAIT_IDLE_MAX_S=$4; WAIT_HEALTHY_MAX_S=$5
 cd "$STACK_DIR"
 stamp=$(date +%Y%m%d-%H%M%S)
 
+# Chaque compteur doit être lu avec certitude : une erreur (conteneur absent, NOAUTH,
+# psql en échec) n'est JAMAIS prise pour « rien en cours ».
 busy() {
-  local inprog queued active
-  inprog=$(docker exec collega-redis-1 redis-cli --scan --pattern 'arq:in-progress:*' 2>/dev/null | wc -l)
-  queued=$(docker exec collega-redis-1 redis-cli zcard arq:queue 2>/dev/null | tr -dc '0-9')
+  local scan inprog queued active
+  scan=$(docker exec collega-redis-1 redis-cli --scan --pattern 'arq:in-progress:*') || return 1
+  if grep -qiE 'NOAUTH|ERR|WRONGPASS' <<<"$scan"; then return 1; fi
+  inprog=$(grep -c . <<<"$scan" || true)
+  queued=$(docker exec collega-redis-1 redis-cli zcard arq:queue) || return 1
+  [[ "$queued" =~ ^[0-9]+$ ]] || return 1
   active=$(docker exec collega-db-1 psql -U postgres -d collega -tAc \
-    "SELECT count(*) FROM generation_jobs WHERE status IN ('pending','processing','ocr_complete')" 2>/dev/null | tr -dc '0-9')
-  echo "${inprog:-0} ${queued:-0} ${active:-0}"
+    "SELECT count(*) FROM generation_jobs WHERE status IN ('pending','processing','ocr_complete')") || return 1
+  [[ "$active" =~ ^[0-9]+$ ]] || return 1
+  echo "$inprog $queued $active"
 }
 waited=0
 while :; do
-  read -r inprog queued active < <(busy)
+  if ! state=$(busy); then
+    echo "❌ Impossible de vérifier qu'aucun import ne tourne (Redis ou Postgres illisible) : abandon, rien n'a été modifié." >&2
+    exit 3
+  fi
+  read -r inprog queued active <<<"$state"
   [[ "$inprog" == 0 && "$queued" == 0 && "$active" == 0 ]] && break
   if (( waited >= WAIT_IDLE_MAX_S )); then
     echo "❌ Import toujours en cours après $((WAIT_IDLE_MAX_S / 60)) min (arq en cours=$inprog, file=$queued, jobs actifs=$active) : abandon, rien n'a été modifié." >&2
@@ -125,14 +148,18 @@ done
 
 dump="$BACKUP_DIR/collega_pre_${SHA}_${stamp}.sql.gz"
 echo "▶ Dump $dump"
-docker exec collega-db-1 pg_dumpall -U postgres | gzip > "$dump"
-[[ $(stat -c %s "$dump") -gt 1024 ]] || { echo "❌ Dump vide : abandon." >&2; exit 4; }
+# --clean : le dump supprime et recrée la base au rejeu (même format que les dumps de nuit, docs/restore.md).
+docker exec collega-db-1 pg_dumpall --clean -U postgres | gzip > "$dump" \
+  || { echo "❌ Dump en échec : abandon, rien n'a été modifié." >&2; exit 3; }
+[[ $(stat -c %s "$dump") -gt 1024 ]] || { echo "❌ Dump vide : abandon, rien n'a été modifié." >&2; exit 3; }
 
 echo "▶ Compose et IMAGE_TAG=$SHA"
 # Validation AVANT toute modification (variables manquantes comme REDIS_PASSWORD comprises).
 IMAGE_TAG=$SHA docker compose -f docker-compose.yml.new config -q \
-  || { echo "❌ Compose du commit invalide avec ce .env : rien n'a été modifié." >&2; exit 4; }
+  || { echo "❌ Compose du commit invalide avec ce .env : rien n'a été modifié." >&2; exit 3; }
 cp .env ".env.bak-$stamp"
+# Les sauvegardes du .env contiennent des secrets : on n'en garde que les 5 dernières.
+find . -maxdepth 1 -name '.env.bak-*' -printf '%T@ %p\n' | sort -rn | tail -n +6 | cut -d' ' -f2- | xargs -r rm -f
 if ! cmp -s docker-compose.yml docker-compose.yml.new; then
   cp docker-compose.yml "docker-compose.yml.bak-$stamp"
 fi
@@ -170,6 +197,7 @@ echo "--- migrate (exit $(docker inspect -f '{{.State.ExitCode}}' collega-migrat
 docker logs --tail 10 collega-migrate-1 2>&1
 echo "--- /health ---"
 docker exec collega-api-1 python -c "import urllib.request; print(urllib.request.urlopen('http://localhost:8000/health', timeout=5).read().decode())"
+echo "$SHA" > .last_deployed
 echo "DUMP=$dump"
 REMOTE
 rc=$?
@@ -178,13 +206,17 @@ set -e
 if [[ $rc -ne 0 ]]; then
   echo >&2
   echo "❌ Déploiement de $SHA en échec (code $rc)." >&2
-  if [[ $rc -ne 3 ]]; then
+  if [[ $rc -eq 3 ]]; then
+    echo "   Rien n'a été modifié sur le NAS." >&2
+  else
+    echo "   Retour arrière, dans cet ordre :" >&2
+    echo "   1. si une migration a tourné (logs de collega-migrate-1) : ssh nas 'cd $STACK_DIR && docker compose stop api worker'," >&2
+    echo "      puis restaurer le dump $BACKUP_DIR/collega_pre_${SHA}_*.sql.gz (docs/restore.md, « Restaurer la prod ») ;" >&2
     if [[ -n "$PREV" ]]; then
-      echo "   Retour arrière : ./collega_backend/scripts/deploy.sh --force $PREV" >&2
+      echo "   2. ./collega_backend/scripts/deploy.sh --force $PREV (image existante, pas de reconstruction)." >&2
     else
-      echo "   Retour arrière : restaurer $STACK_DIR/docker-compose.yml.bak-* et .env.bak-* du NAS, puis docker compose up -d." >&2
+      echo "   2. restaurer $STACK_DIR/docker-compose.yml.bak-* et .env.bak-* du NAS, puis docker compose up -d." >&2
     fi
-    echo "   Si la migration a changé le schéma : restaurer le dump collega_pre_${SHA}_* de $BACKUP_DIR (docs/restore.md)." >&2
   fi
   exit "$rc"
 fi

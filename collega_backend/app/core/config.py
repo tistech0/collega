@@ -26,7 +26,10 @@ _CLAUDE_API_KEY_MIN_LEN = 20
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    # hide_input_in_errors : une config refusée ne recopie jamais les valeurs (secrets) dans l'erreur.
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore", hide_input_in_errors=True
+    )
 
     environment: str = "development"  # "development" | "production"
 

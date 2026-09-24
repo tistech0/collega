@@ -53,6 +53,9 @@ jobs:
         run: poetry run ruff format --check .
       - name: mypy (app/core, app/services)
         run: poetry run mypy app/core app/services
+      - name: mypy (reste de app, informatif)
+        continue-on-error: true
+        run: poetry run mypy app
       - name: pytest
         run: poetry run pytest -q --cov=app --cov-report=term:skip-covered
       - name: alembic check (modèles = migrations)
@@ -106,8 +109,9 @@ jobs:
           FLUTTER_TEST_ARGS: --exclude-tags golden
         run: |
           set +e
+          shopt -s nullglob
           failed=()
-          targets=(test/core test/features/*.dart)
+          targets=(test/core test/*.dart test/features/*.dart)
           for d in test/features/*/; do targets+=("${d%/}"); done
           for t in "${targets[@]}"; do
             echo "::group::flutter test $t"
