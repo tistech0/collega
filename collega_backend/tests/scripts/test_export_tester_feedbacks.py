@@ -16,11 +16,14 @@ pytestmark = pytest.mark.pg
 
 
 async def test_exports_rows_joined_to_card(pg_engine, pg_factory, tmp_path):
-    # Schéma d'avant la 019 : la table existe encore.
-    await asyncio.to_thread(command.downgrade, alembic_config(), "018")
+    # Lignes créées au schéma courant (les modèles ORM le suivent), puis retour au
+    # schéma d'avant la 019 : la table tester_feedbacks existe encore.
     async with pg_factory() as db:
         college = await make_college(db, await make_user(db))
         card = await make_card(db, await make_item(db, college, 7), recto="Recto ?", verso="Verso")
+        await db.commit()
+    await asyncio.to_thread(command.downgrade, alembic_config(), "018")
+    async with pg_factory() as db:
         await db.execute(
             text(
                 "INSERT INTO tester_feedbacks (flash_card_id, college_id, tester_id, is_pertinent)"

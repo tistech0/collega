@@ -11,6 +11,7 @@ import pytest
 from httpx import AsyncClient
 
 from app.deps import get_current_user, require_subscription
+from tests.fakes.fake_arq import arq_pool
 
 
 def _make_user(user_id=None, is_subscribed=True, is_beta=False):
@@ -52,7 +53,7 @@ def _readable_pdf(monkeypatch):
     testée dans test_pdf_damaged.py."""
     from unittest.mock import AsyncMock
 
-    from app.api.v1 import colleges as colleges_module
+    from app.api.v1.colleges import imports as colleges_module
 
     monkeypatch.setattr(colleges_module, "assert_pdf_readable", AsyncMock(return_value=1))
 
@@ -163,12 +164,11 @@ class TestImportCollegePdf:
         mock_arq_job.job_id = "arq-job-123"
         mock_pool = AsyncMock()
         mock_pool.enqueue_job = AsyncMock(return_value=mock_arq_job)
-        mock_pool.close = AsyncMock()
 
         with (
-            patch("app.api.v1.colleges.Path.mkdir"),
+            patch("app.services.imports.Path.mkdir"),
             patch("builtins.open", MagicMock()),
-            patch("arq.create_pool", AsyncMock(return_value=mock_pool)),
+            arq_pool(mock_pool),
         ):
             resp = await client.post(
                 "/v1/colleges/15/import",

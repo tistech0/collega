@@ -10,6 +10,7 @@ engine = create_async_engine(
     pool_pre_ping=True,
     pool_size=5,
     max_overflow=10,
+    hide_parameters=True,  # les paramètres de requête (contenu de fiches, etc.) n'apparaissent jamais dans les logs
 )
 
 async_session_factory = async_sessionmaker(

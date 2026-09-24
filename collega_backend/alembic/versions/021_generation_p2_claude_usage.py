@@ -4,7 +4,7 @@
   section | blanche, warnings), écrit en fin d'OCR et affiché dans le détail de job admin.
 
 Revision ID: 021
-Revises: 019
+Revises: 020
 Create Date: 2026-09-24
 """
 
@@ -13,8 +13,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision = "021"
-# 020 existera sur main au moment de la fusion : down_revision sera alors corrigé.
-down_revision = "019"
+down_revision = "020"
 branch_labels = None
 depends_on = None
 

@@ -12,6 +12,15 @@ from unittest.mock import AsyncMock
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def _no_redis(monkeypatch):
+    """Le lifespan ouvre aussi le pool ARQ : faux pool, jamais de vrai Redis en test."""
+    import app.main as main_module
+    from tests.fakes.fake_arq import make_fake_arq
+
+    monkeypatch.setattr(main_module, "create_pool", AsyncMock(return_value=make_fake_arq()))
+
+
 @pytest.fixture
 def reset_app_state():
     """Garantit que `app.state.notification_service` est remis à zéro entre tests."""

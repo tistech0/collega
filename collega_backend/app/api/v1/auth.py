@@ -3,23 +3,27 @@ import logging
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.errors import forbidden, unauthorized
 from app.core.limiter import limiter
 from app.core.security import (
     JWTError,
     create_access_token,
     create_refresh_token,
     decode_token,
+    token_version_ok,
     verify_password,
 )
 from app.core.time_utils import next_month_reset
 from app.deps import get_current_user, get_db
+from app.models.college import College
 from app.models.user import User
 from app.schemas.auth import LoginRequest, ProfileUpdateRequest, RefreshRequest, RegisterRequest, TokenResponse
 from app.services import app_settings
+from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["auth"])
@@ -27,10 +31,7 @@ router = APIRouter(tags=["auth"])
 
 @router.post("/register", status_code=200)
 async def register(body: RegisterRequest):
-    raise HTTPException(
-        status_code=403,
-        detail={"code": "REGISTRATION_DISABLED", "message": "Les inscriptions sont fermées."},
-    )
+    raise forbidden("REGISTRATION_DISABLED", "Les inscriptions sont fermées.")
 
 
 @router.post("/login")
@@ -43,14 +44,11 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
     user = result.scalar_one_or_none()
 
     if user is None or not verify_password(body.password, user.hashed_password):
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "INVALID_CREDENTIALS", "message": "Identifiants incorrects"},
-        )
+        raise unauthorized("INVALID_CREDENTIALS", "Identifiants incorrects")
 
     token_response = TokenResponse(
-        access_token=create_access_token(str(user.id)),
-        refresh_token=create_refresh_token(str(user.id)),
+        access_token=create_access_token(str(user.id), user.token_version),
+        refresh_token=create_refresh_token(str(user.id), user.token_version),
         is_beta=user.is_beta,
         is_subscribed=user.is_subscribed,
     )
@@ -64,33 +62,23 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
         if payload.get("type") != "refresh":
             raise JWTError("Not a refresh token")
     except JWTError:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "TOKEN_EXPIRED", "message": "Refresh token invalide ou expiré"},
-        ) from None
+        raise unauthorized("TOKEN_EXPIRED", "Refresh token invalide ou expiré") from None
 
     user_id = payload.get("sub")
     if not user_id:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "TOKEN_EXPIRED", "message": "Refresh token invalide ou expiré"},
-        )
+        raise unauthorized("TOKEN_EXPIRED", "Refresh token invalide ou expiré")
     try:
         user_uuid = uuid.UUID(user_id)
     except ValueError:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "TOKEN_EXPIRED", "message": "Refresh token invalide ou expiré"},
-        ) from None
+        raise unauthorized("TOKEN_EXPIRED", "Refresh token invalide ou expiré") from None
     user = await db.get(User, user_uuid)
     if not user:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "USER_NOT_FOUND", "message": "Utilisateur introuvable"},
-        )
+        raise unauthorized("USER_NOT_FOUND", "Utilisateur introuvable")
+    if not token_version_ok(payload, user.token_version):
+        raise unauthorized("TOKEN_REVOKED", "Session révoquée — reconnectez-vous")
 
     token_response = TokenResponse(
-        access_token=create_access_token(str(user.id)),
+        access_token=create_access_token(str(user.id), user.token_version),
         refresh_token=body.refresh_token,
         is_beta=user.is_beta,
         is_subscribed=user.is_subscribed,
@@ -156,9 +144,6 @@ async def delete_account(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    from app.models.college import College
-    from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
-
     college_ids = list((await db.execute(select(College.id).where(College.user_id == current_user.id))).scalars())
     await db.delete(current_user)
     await db.commit()

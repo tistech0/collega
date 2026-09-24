@@ -15,6 +15,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from httpx import AsyncClient
 
 from app.models.college import CollegeStatus
+from tests.fakes.fake_arq import override_arq
 
 
 def make_college(college_id: uuid.UUID | None = None):
@@ -166,8 +167,7 @@ class TestProcessCollege:
         assert resp.status_code == 409
         assert resp.json()["detail"]["code"] == "JOB_IN_PROGRESS"
 
-    @patch("arq.create_pool")
-    async def test_creates_job_and_returns_pending(self, mock_create_pool, client: AsyncClient, mock_db, tmp_path):
+    async def test_creates_job_and_returns_pending(self, client: AsyncClient, mock_db, tmp_path):
         """AC#1 — POST /process crée un GenerationJob avec statut 'pending'."""
         college_id = uuid.uuid4()
         college = make_college(college_id)
@@ -189,10 +189,9 @@ class TestProcessCollege:
         mock_arq_job = MagicMock()
         mock_arq_job.job_id = "arq-test-id"
         mock_pool.enqueue_job = AsyncMock(return_value=mock_arq_job)
-        mock_pool.close = AsyncMock()
-        mock_create_pool.return_value = mock_pool
+        override_arq(mock_pool)
 
-        with patch("app.api.v1.admin.settings") as mock_settings:
+        with patch("app.services.imports.settings") as mock_settings:
             mock_settings.pdf_storage_path = str(tmp_path)
             mock_settings.admin_username = "admin"
             mock_settings.admin_password = "testpass"

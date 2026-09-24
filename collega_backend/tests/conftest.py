@@ -41,6 +41,7 @@ _sa_async.create_async_engine = _patched_create_engine  # type: ignore[assignmen
 
 from app.core.database import get_db
 from app.main import app
+from tests.fakes.fake_arq import make_fake_arq, override_arq
 
 # Restaurer après import
 _sa_async.create_async_engine = _orig_create  # type: ignore[assignment]
@@ -109,11 +110,18 @@ def _reset_apns_service_singleton():
 
 
 @pytest.fixture
-async def client(mock_db):
+def fake_arq():
+    """Faux pool ARQ unique (chantier 5 § 3), injecté via `app.dependency_overrides[get_arq]`."""
+    return make_fake_arq()
+
+
+@pytest.fixture
+async def client(mock_db, fake_arq):
     async def override_get_db():
         yield mock_db
 
     app.dependency_overrides[get_db] = override_get_db
+    override_arq(fake_arq)
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
     app.dependency_overrides.clear()
