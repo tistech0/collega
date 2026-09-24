@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: collega_backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: collega_test
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["56379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_PG_URL: postgresql+asyncpg://postgres:postgres@127.0.0.1:55432/collega_test
+      TEST_REDIS_URL: redis://127.0.0.1:56379/0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Poetry
+        run: pipx install poetry==2.5.1
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: poetry-${{ runner.os }}-${{ hashFiles('collega_backend/poetry.lock') }}
+      - name: Dépendances
+        run: |
+          poetry config virtualenvs.in-project true
+          poetry install --no-root --no-interaction
+      - name: ruff check
+        run: poetry run ruff check .
+      - name: ruff format
+        run: poetry run ruff format --check .
+      - name: mypy (app/core, app/services)
+        run: poetry run mypy app/core app/services
+      - name: pytest
+        run: poetry run pytest -q --cov=app --cov-report=term:skip-covered
+      - name: alembic check (modèles = migrations)
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@127.0.0.1:55432/collega_check
+          REDIS_URL: redis://127.0.0.1:56379/0
+          SECRET_KEY: ci-secret-key-ci-secret-key-ci-secret
+          CLAUDE_API_KEY: ci
+          ADMIN_PASSWORD: ci
+          REVENUECAT_WEBHOOK_SECRET: ci
+          ENVIRONMENT: test
+        run: |
+          poetry run python -c "import asyncio, asyncpg
+          async def main():
+              c = await asyncpg.connect('postgresql://postgres:postgres@127.0.0.1:55432/postgres')
+              await c.execute('CREATE DATABASE collega_check')
+              await c.close()
+          asyncio.run(main())"
+          poetry run alembic upgrade head
+          poetry run alembic check
+      - name: pip-audit (informatif)
+        continue-on-error: true
+        run: |
+          poetry run pip freeze --exclude-editable > /tmp/requirements.txt
+          pipx run pip-audit -r /tmp/requirements.txt --no-deps --disable-pip --progress-spinner off
+
+  app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: collega_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.27.1"
+          channel: stable
+          cache: true
+      - name: Dépendances
+        run: flutter pub get
+      - name: flutter analyze
+        run: flutter analyze
+      - name: flutter test (par dossier)
+        # Convention du projet : un `flutter test` par dossier (isolation des tests).
+        run: |
+          set +e
+          failed=()
+          targets=(test/core test/features/*.dart test/widget_test.dart)
+          for d in test/features/*/; do targets+=("${d%/}"); done
+          for t in "${targets[@]}"; do
+            echo "::group::flutter test $t"
+            flutter test $FLUTTER_TEST_ARGS "$t" || failed+=("$t")
+            echo "::endgroup::"
+          done
+          if (( ${#failed[@]} )); then
+            echo "::error::Échecs : ${failed[*]}"
+            exit 1
+          fi

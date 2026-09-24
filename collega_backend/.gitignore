@@ -20,3 +20,6 @@ htmlcov/
 # IDE
 .idea/
 .vscode/
+
+# Base SQLite des tests (créée par pytest)
+test.db
