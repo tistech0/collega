@@ -1,0 +1,4 @@
+# Tests dont le résultat dépend du rendu des pixels (goldens, contraste mesuré sur
+# l'image) : exécutés en local sur macOS, exclus de la CI Linux (écarts de rendu de 2 à 4 %).
+tags:
+  golden:

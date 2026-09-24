@@ -432,7 +432,7 @@ void main() {
       for (final width in cgGoldenWidths) {
         for (final scale in cgGoldenScales) {
           final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-          testWidgets('golden item_detail_${name}_$tag', (tester) async {
+          testWidgets('golden item_detail_${name}_$tag', tags: const ['golden'], (tester) async {
             _phone(tester, width: width, height: 1300);
             _repo.cards = [_card('k1', feedback: 'positive'), _card('k2'), _card('k3', ocr: 0.4, feedback: 'negative')];
             await _pumpApp(tester, textScale: scale);

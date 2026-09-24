@@ -9,5 +9,6 @@
 ## CI (`.github/workflows/ci.yml`)
 
 - Job `backend` : services Postgres 16 (55432) et Redis 7 (56379), `ruff check`, `ruff format --check`, `mypy app/core app/services`, `pytest --cov=app`, `alembic upgrade head` + `alembic check` sur une base dédiée, `pip-audit` (informatif).
-- Job `app` : Flutter 3.27.1, `flutter analyze`, puis `flutter test` lancé **dossier par dossier** (`test/core`, chaque `test/features/<dossier>`, fichiers racine) ; la liste des dossiers est découverte automatiquement.
+- Job `app` : Flutter 3.27.1, `flutter analyze` (app + widgetbook), puis `flutter test --exclude-tags golden` lancé **dossier par dossier** (`test/core`, chaque `test/features/<dossier>`, fichiers racine) ; la liste des dossiers est découverte automatiquement.
+- **Goldens hors CI** (décision du 2026-09-24, premier passage sous Linux) : 314 goldens échouent sous Linux (2 à 4 % de pixels différents, rendu du texte) ainsi que 2 tests de contraste qui mesurent l'image. Ces tests portent le tag `golden` (`collega_app/dart_test.yaml`) et restent exécutés **en local sur macOS** avant chaque commit qui touche l'UI : `flutter test test/features/<dossier>` (sans exclusion).
 - Rejouer la CI en local (même image ubuntu) : `act push -j backend -P ubuntu-latest=catthehacker/ubuntu:act-latest --container-architecture linux/amd64`.

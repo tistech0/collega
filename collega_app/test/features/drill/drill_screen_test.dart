@@ -390,7 +390,7 @@ void main() {
     });
   });
 
-  testWidgets('accessibilité : cibles étiquetées, 44 pt, contraste du texte (8.15)', (tester) async {
+  testWidgets('accessibilité : cibles étiquetées, 44 pt, contraste du texte (8.15)', tags: const ['golden'], (tester) async {
     final handle = tester.ensureSemantics();
     _phone(tester);
     await tester.pumpWidget(_app(_Repo([_card(0), _card(1)])));
@@ -411,7 +411,7 @@ void main() {
     expect(find.text('Quitter ?'), findsOneWidget);
   });
 
-  testWidgets('accessibilité au verso : réponse et verdicts (8.15)', (tester) async {
+  testWidgets('accessibilité au verso : réponse et verdicts (8.15)', tags: const ['golden'], (tester) async {
     _phone(tester);
     final handle = tester.ensureSemantics();
     await tester.pumpWidget(_app(_Repo([_card(0), _card(1)])));
@@ -440,7 +440,7 @@ void main() {
       for (final width in cgGoldenWidths) {
         for (final scale in cgGoldenScales) {
           final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-          testWidgets('golden drill_${name}_$tag', (tester) async {
+          testWidgets('golden drill_${name}_$tag', tags: const ['golden'], (tester) async {
             _phone(tester, width: width, height: 852);
             tester.platformDispatcher.textScaleFactorTestValue = scale;
             addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

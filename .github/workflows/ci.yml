@@ -100,10 +100,14 @@ jobs:
         run: flutter analyze
       - name: flutter test (par dossier)
         # Convention du projet : un `flutter test` par dossier (isolation des tests).
+        # Tag golden (goldens, contraste mesuré sur l'image) : rendu Linux ≠ macOS,
+        # ces tests restent locaux (voir collega_backend/docs/testing.md).
+        env:
+          FLUTTER_TEST_ARGS: --exclude-tags golden
         run: |
           set +e
           failed=()
-          targets=(test/core test/features/*.dart test/widget_test.dart)
+          targets=(test/core test/features/*.dart)
           for d in test/features/*/; do targets+=("${d%/}"); done
           for t in "${targets[@]}"; do
             echo "::group::flutter test $t"

@@ -248,7 +248,7 @@ void main() {
   });
 
   group('accessibilité', () {
-    testWidgets('accessibilité : cibles étiquetées, 44 pt, contraste du texte (8.15)', (tester) async {
+    testWidgets('accessibilité : cibles étiquetées, 44 pt, contraste du texte (8.15)', tags: const ['golden'], (tester) async {
       final handle = tester.ensureSemantics();
       _phone(tester);
       await tester.pumpWidget(_app(() => _value(_ready(planning: _config()))));
@@ -282,7 +282,7 @@ void main() {
       for (final width in cgGoldenWidths) {
         for (final scale in cgGoldenScales) {
           final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-          testWidgets('golden progress_${name}_$tag', (tester) async {
+          testWidgets('golden progress_${name}_$tag', tags: const ['golden'], (tester) async {
             _phone(tester, width: width, height: 1500);
             await tester.pumpWidget(_app(() => _value(state), textScale: scale));
             await tester.pumpAndSettle();

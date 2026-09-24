@@ -354,7 +354,7 @@ void main() {
       for (final width in cgGoldenWidths) {
         for (final scale in cgGoldenScales) {
           final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-          testWidgets('golden search_${name}_$tag', (tester) async {
+          testWidgets('golden search_${name}_$tag', tags: const ['golden'], (tester) async {
             _phone(tester, width: width, height: 900);
             _recents.saved = ['alcool', 'amoxicilline'];
             await tester.pumpWidget(_app(textScale: scale));

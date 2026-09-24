@@ -232,7 +232,7 @@ void main() {
     for (final width in cgGoldenWidths) {
       for (final scale in cgGoldenScales) {
         final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-        testWidgets('golden import_generating_$tag', (tester) async {
+        testWidgets('golden import_generating_$tag', tags: const ['golden'], (tester) async {
           _phone(tester, width: width, height: 900);
           _Import.initial = _generating;
           await tester.pumpWidget(_app(textScale: scale));

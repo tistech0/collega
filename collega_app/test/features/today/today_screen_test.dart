@@ -370,7 +370,7 @@ void main() {
     ('faite', _ready(completed: true, verdicts: {'maitrise': 18, 'bien': 4, 'a_revoir': 2})),
     ('vide', const TodayNoCollege()),
   ]) {
-    testWidgets('accessibilité ($name) : cibles étiquetées, 44 pt, contraste du texte (8.15)', (tester) async {
+    testWidgets('accessibilité ($name) : cibles étiquetées, 44 pt, contraste du texte (8.15)', tags: const ['golden'], (tester) async {
       final handle = tester.ensureSemantics();
       _phone(tester, height: 1100);
       await tester.pumpWidget(_app(() => _Fixed(state)));
@@ -399,7 +399,7 @@ void main() {
       for (final width in cgGoldenWidths) {
         for (final scale in cgGoldenScales) {
           final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-          testWidgets('golden today_${name}_$tag', (tester) async {
+          testWidgets('golden today_${name}_$tag', tags: const ['golden'], (tester) async {
             _phone(tester, width: width, height: 1100);
             await tester.pumpWidget(_app(() => _Fixed(state), textScale: scale));
             await tester.pumpAndSettle();

@@ -311,7 +311,7 @@ void main() {
       for (final width in cgGoldenWidths) {
         for (final scale in cgGoldenScales) {
           final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-          testWidgets('golden drill_end_${name}_$tag', (tester) async {
+          testWidgets('golden drill_end_${name}_$tag', tags: const ['golden'], (tester) async {
             await pump(tester, params, state, width: width, scale: scale);
             await expectLater(find.byType(DrillEndScreen), matchesGoldenFile('goldens/drill_end_${name}_$tag.png'));
           });

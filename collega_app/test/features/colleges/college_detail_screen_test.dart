@@ -534,7 +534,7 @@ void main() {
       for (final width in cgGoldenWidths) {
         for (final scale in cgGoldenScales) {
           final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-          testWidgets('golden college_detail_${name}_$tag', (tester) async {
+          testWidgets('golden college_detail_${name}_$tag', tags: const ['golden'], (tester) async {
             _phone(tester, width: width, height: 1300);
             await tester.pumpWidget(_app(textScale: scale));
             await tester.pumpAndSettle();
