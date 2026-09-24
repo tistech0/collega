@@ -104,23 +104,45 @@ class AuthRepository {
     }
   }
 
+  /// Déconnexion best-effort : l'appel serveur révoque la session côté back
+  /// (rotation du refresh token — chantier 2 § 8) mais n'empêche JAMAIS la
+  /// déconnexion locale. Le storage est effacé en dernière étape, y compris
+  /// si l'appel échoue, timeout, ou lève (401 access token déjà expiré...).
   Future<void> logout() async {
-    await Future.wait([
-      _storage.delete(key: _kAccessToken),
-      _storage.delete(key: _kRefreshToken),
-      _storage.delete(key: _kUserId),
-      _storage.delete(key: _kUserEmail),
-      _storage.delete(key: _kIsBeta),
-      _storage.delete(key: _kIsSubscribed),
-      _storage.delete(key: _kFirstName),
-      _storage.delete(key: _kYearGroup),
-      _storage.delete(key: _kFaculty),
-      _storage.delete(key: _kMonthlyReloads),
-      _storage.delete(key: _kMonthlyMax),
-      _storage.delete(key: _kMonthlyResetAt),
-      _storage.delete(key: _kReminderHourUtc),
-      _storage.delete(key: _kReminderLocalHour),
-    ]);
+    try {
+      final accessToken = await _storage.read(key: _kAccessToken);
+      if (accessToken != null) {
+        final refreshToken = await _storage.read(key: _kRefreshToken);
+        await _dio.post<dynamic>(
+          '/v1/auth/logout',
+          data: refreshToken != null ? {'refresh_token': refreshToken} : null,
+          options: Options(
+            headers: {'Authorization': 'Bearer $accessToken'},
+            sendTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      AppLogger.warning('logout: appel serveur ignoré (${e.runtimeType})', tag: 'AuthRepository');
+    } finally {
+      await Future.wait([
+        _storage.delete(key: _kAccessToken),
+        _storage.delete(key: _kRefreshToken),
+        _storage.delete(key: _kUserId),
+        _storage.delete(key: _kUserEmail),
+        _storage.delete(key: _kIsBeta),
+        _storage.delete(key: _kIsSubscribed),
+        _storage.delete(key: _kFirstName),
+        _storage.delete(key: _kYearGroup),
+        _storage.delete(key: _kFaculty),
+        _storage.delete(key: _kMonthlyReloads),
+        _storage.delete(key: _kMonthlyMax),
+        _storage.delete(key: _kMonthlyResetAt),
+        _storage.delete(key: _kReminderHourUtc),
+        _storage.delete(key: _kReminderLocalHour),
+      ]);
+    }
   }
 
   /// Rappel quotidien mémorisé (l'interrupteur du Profil au prochain démarrage),

@@ -70,12 +70,17 @@ class _ScriptedAdapter implements HttpClientAdapter {
   final List<Object> script;
   int callCount = 0;
 
+  /// Requêtes reçues (path, headers, body) — pour vérifier ce que le repo
+  /// envoie réellement (Story task 5 — appel `/v1/auth/logout`).
+  final List<RequestOptions> requests = [];
+
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
     Stream<List<int>>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    requests.add(options);
     final idx = callCount;
     callCount += 1;
     if (idx >= script.length) {
@@ -117,6 +122,11 @@ class _ScriptedAdapter implements HttpClientAdapter {
   @override
   void close({bool force = false}) {}
 }
+
+/// Dio « nu » (validateStatus par défaut : 4xx/5xx lèvent) — comme le groupe
+/// `login — erreur typée`, pour tester les statuts d'erreur de `logout()`.
+Dio _plainDio(HttpClientAdapter adapter) =>
+    Dio(BaseOptions(baseUrl: 'http://test'))..httpClientAdapter = adapter;
 
 Dio _makeScriptedDio(HttpClientAdapter adapter) {
   final dio = Dio(BaseOptions(
@@ -290,6 +300,73 @@ void main() {
       final storage = _FakeSecureStorage();
       await AuthRepository(dio: Dio(), storage: storage).logout();
       expect(storage.deletedKeys, containsAll(['reminder_hour_utc', 'reminder_local_hour', 'monthly_reset_at']));
+    });
+  });
+
+  group('AuthRepository.logout — appel serveur best-effort (chantier 2 sécurité, task 5)', () {
+    test('pas d’access_token → aucun appel réseau, storage vidé quand même', () async {
+      final storage = _FakeSecureStorage();
+      final adapter = _ScriptedAdapter([204]);
+      final repo = AuthRepository(dio: _plainDio(adapter), storage: storage);
+
+      await repo.logout();
+
+      expect(adapter.callCount, 0);
+      expect(storage.deletedKeys, containsAll(['access_token', 'refresh_token', 'user_id']));
+    });
+
+    test('API OK (204) → POST /v1/auth/logout avec le refresh_token stocké, puis storage vidé', () async {
+      final storage = _FakeSecureStorage(initial: {
+        'access_token': 'acc-1',
+        'refresh_token': 'ref-1',
+        'user_id': 'u',
+        'user_email': 'a@b.fr',
+      });
+      final adapter = _ScriptedAdapter([204]);
+      final repo = AuthRepository(dio: _plainDio(adapter), storage: storage);
+
+      await repo.logout();
+
+      expect(adapter.callCount, 1);
+      final sent = adapter.requests.single;
+      expect(sent.path, '/v1/auth/logout');
+      expect(sent.headers['Authorization'], 'Bearer acc-1');
+      expect(sent.data, {'refresh_token': 'ref-1'});
+      expect(
+        storage.deletedKeys,
+        containsAll(['access_token', 'refresh_token', 'user_id', 'user_email']),
+      );
+    });
+
+    test('API en erreur (500) → appel tenté, storage vidé quand même', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 'acc-1', 'refresh_token': 'ref-1'});
+      final adapter = _ScriptedAdapter([500]);
+      final repo = AuthRepository(dio: _plainDio(adapter), storage: storage);
+
+      await repo.logout();
+
+      expect(adapter.callCount, 1);
+      expect(storage.deletedKeys, containsAll(['access_token', 'refresh_token']));
+    });
+
+    test('401 (access token déjà expiré côté serveur) → ignoré, storage vidé quand même', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 'acc-1', 'refresh_token': 'ref-1'});
+      final adapter = _ScriptedAdapter([401]);
+      final repo = AuthRepository(dio: _plainDio(adapter), storage: storage);
+
+      await repo.logout();
+
+      expect(storage.deletedKeys, containsAll(['access_token', 'refresh_token']));
+    });
+
+    test('timeout réseau → storage vidé quand même', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 'acc-1', 'refresh_token': 'ref-1'});
+      final adapter = _ScriptedAdapter([DioExceptionType.sendTimeout]);
+      final repo = AuthRepository(dio: _plainDio(adapter), storage: storage);
+
+      await repo.logout();
+
+      expect(storage.deletedKeys, containsAll(['access_token', 'refresh_token']));
     });
   });
 

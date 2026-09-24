@@ -12,9 +12,11 @@ const _kIsBeta = 'is_beta';
 const _kIsSubscribed = 'is_subscribed';
 
 class ApiClient {
-  ApiClient(this._storage, {this.onForceLogout})
-      : _dio = _buildDio(),
-        _refreshDio = _buildDio() {
+  /// [dio] / [refreshDio] : injectables pour les tests (adapter scripté) ;
+  /// en production, toujours construits via [_buildDio].
+  ApiClient(this._storage, {this.onForceLogout, Dio? dio, Dio? refreshDio})
+      : _dio = dio ?? _buildDio(),
+        _refreshDio = refreshDio ?? _buildDio() {
     _setupInterceptors();
   }
 
@@ -100,8 +102,15 @@ class ApiClient {
         '/v1/auth/refresh',
         data: {'refresh_token': refreshToken},
       );
-      final newToken = (response.data!['data'] as Map)['access_token'] as String;
+      final data = response.data!['data'] as Map;
+      final newToken = data['access_token'] as String;
       await _storage.write(key: _kAccessToken, value: newToken);
+      // Rotation : le refresh_token renvoyé est nouveau à chaque appel (reuse
+      // detection côté serveur) — on l'enregistre s'il est présent et non vide.
+      final newRefreshToken = data['refresh_token'] as String?;
+      if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
+        await _storage.write(key: _kRefreshToken, value: newRefreshToken);
+      }
       return true;
     } catch (_) {
       return false;
