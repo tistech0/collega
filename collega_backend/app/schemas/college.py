@@ -113,7 +113,7 @@ class FlashCardFeedbackRequest(BaseModel):
 
 
 class FlashCardRegenerateRequest(BaseModel):
-    user_note: str | None = None
+    user_note: str | None = Field(default=None, max_length=2000)
 
 
 class FlashCardResponseWrapped(BaseModel):

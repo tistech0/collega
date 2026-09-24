@@ -1,7 +1,9 @@
+import ipaddress
 import logging
+from typing import Annotated
 
-from pydantic import model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator, model_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +39,10 @@ class Settings(BaseSettings):
     redis_url: str
     # Tests : "memory://" (compteurs par processus, plus de Redis local requis).
     rate_limit_storage_uri: str = ""
+    # Proxys dont on croit les en-têtes CF-Connecting-IP / X-Forwarded-For (chantier 2 § 4).
+    # Défaut : réseau Docker de Nginx Proxy Manager. Variable TRUSTED_PROXY_IPS : réseaux
+    # (CIDR) ou adresses séparés par des virgules ; vide = aucun proxy de confiance.
+    trusted_proxy_ips: Annotated[list[str], NoDecode] = ["172.16.0.0/12"]
     secret_key: str
     claude_api_key: str = ""
 
@@ -65,6 +71,25 @@ class Settings(BaseSettings):
     apns_team_id: str = ""
     apns_bundle_id: str = "com.lesurmatthis.collega"
     apns_use_sandbox: bool = True
+
+    @field_validator("trusted_proxy_ips", mode="before")
+    @classmethod
+    def _split_trusted_proxy_ips(cls, value: object) -> object:
+        if isinstance(value, str):
+            return [part.strip() for part in value.split(",") if part.strip()]
+        return value
+
+    @field_validator("trusted_proxy_ips")
+    @classmethod
+    def _check_trusted_proxy_ips(cls, value: list[str]) -> list[str]:
+        # Un réseau mal saisi refuse le démarrage (sinon l'IP client retomberait
+        # silencieusement sur celle du proxy : toutes les utilisatrices partageraient un compteur).
+        for network in value:
+            try:
+                ipaddress.ip_network(network, strict=False)
+            except ValueError:
+                raise ValueError(f"TRUSTED_PROXY_IPS: réseau invalide {network!r}") from None
+        return value
 
     @model_validator(mode="after")
     def _require_webhook_secret(self) -> "Settings":

@@ -86,7 +86,8 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
 
 
 @router.post("/refresh")
-async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("30/minute")
+async def refresh(request: Request, body: RefreshRequest, db: AsyncSession = Depends(get_db)):
     """Rotation (chantier 2 § 2) : chaque renouvellement révoque le refresh présenté et
     émet un nouveau couple. Un refresh révoqué depuis plus de 60 s qui revient = vol
     présumé → `token_version` incrémentée (toutes les sessions coupées)."""

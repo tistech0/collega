@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.errors import AppError, conflict, not_found, unprocessable
-from app.core.limiter import limiter
+from app.core.limiter import limiter, user_id_key
 from app.deps import require_subscription
 from app.models.flash_card import FlashCard
 from app.models.item import Item
@@ -63,7 +63,7 @@ async def delete_card(
 
 
 @router.post("/flash-cards/{card_id}/regenerate", response_model=FlashCardResponseWrapped)
-@limiter.limit("10/hour")
+@limiter.limit("10/hour", key_func=user_id_key)
 async def regenerate_card(
     request: Request,
     card_id: uuid.UUID,

@@ -166,7 +166,9 @@ class TestSearchRateLimitKey:
         request = MagicMock()
         # Pas de user_id → state.user_id absent (getattr renverra None)
         del request.state.user_id
-        request.headers = {"X-Forwarded-For": "1.2.3.4"}
+        # Client direct (hors proxy de confiance) : X-Forwarded-For ignoré (chantier 2 § 4).
+        request.client.host = "1.2.3.4"
+        request.headers = {"X-Forwarded-For": "6.6.6.6"}
         # fallback IP via get_client_ip → préfixe "ip:" (P8) pour debug Redis
         assert _user_id_key(request) == "ip:1.2.3.4"
 
