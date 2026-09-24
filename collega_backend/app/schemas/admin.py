@@ -167,6 +167,17 @@ class ResetQuotaResponseWrapped(BaseModel):
     data: UserBetaData
 
 
+# ── Chantier 2 — Réinitialisation du mot de passe (admin) ────────────────────
+
+
+class ResetPasswordData(BaseModel):
+    temporary_password: str
+
+
+class ResetPasswordResponseWrapped(BaseModel):
+    data: ResetPasswordData
+
+
 # ── Story 7.6 — Détail utilisateur (collèges + jobs + quota) ──────────────────
 
 

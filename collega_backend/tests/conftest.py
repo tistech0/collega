@@ -125,3 +125,47 @@ async def client(mock_db, fake_arq):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
     app.dependency_overrides.clear()
+
+
+# ── Magasin de révocation des jetons (chantier 2) ─────────────────────────────
+
+TEST_REDIS_URL = os.environ.get("TEST_REDIS_URL", "redis://127.0.0.1:56379/0")
+# Port fermé : sans Redis réel, le magasin « laisse passer » (warning), comme en prod.
+_CLOSED_REDIS_URL = "redis://127.0.0.1:1/0"
+
+
+@pytest.fixture(autouse=True)
+async def _token_store_offline():
+    """Par défaut, le magasin de révocation pointe sur un port fermé : les tests
+    unitaires n'écrivent jamais dans un Redis de dev et vérifient le fail-open."""
+    from redis.asyncio import Redis
+
+    from app.core import token_store
+
+    client = Redis.from_url(_CLOSED_REDIS_URL, socket_connect_timeout=0.2, socket_timeout=0.2)
+    token_store.set_client_for_tests(client)
+    yield
+    token_store.set_client_for_tests(None)
+    await client.aclose()
+
+
+@pytest.fixture
+async def token_redis(_token_store_offline):
+    """Redis réel (TEST_REDIS_URL) branché sur le magasin ; clés de révocation effacées après."""
+    from redis.asyncio import Redis
+
+    from app.core import token_store
+
+    client = Redis.from_url(TEST_REDIS_URL, socket_connect_timeout=2)
+    try:
+        await client.ping()
+    except Exception as exc:  # noqa: BLE001
+        pytest.fail(f"Redis de test injoignable ({exc}). Lancer : docker compose -f docker-compose.test.yml up -d")
+    token_store.set_client_for_tests(client)
+    yield client
+    for pattern in ("revoked:jti:*", "refresh:grace:*"):
+        keys = [k async for k in client.scan_iter(match=pattern)]
+        if keys:
+            await client.delete(*keys)
+    token_store.set_client_for_tests(None)
+    await client.aclose()
