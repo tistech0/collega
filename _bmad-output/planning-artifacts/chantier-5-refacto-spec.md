@@ -1,6 +1,6 @@
 # Chantier 5 — Refactorisation et nettoyage admin/testeur : spécification
 
-Date : 2026-09-24 · Statut : validée avec l'utilisateur · Branche à créer : `feat/chantier-5-refacto`
+Date : 2026-09-24 · Statut : validée avec l'utilisateur · Branche : `feat/refonte-back-infra` (commune aux chantiers 2 à 5)
 Contexte : `audit-back-infra-2026-09-23.md` (« Architecture du code », « Admin »). Aucun changement de comportement visible pour l'app, sauf le format d'erreur unifié (compatible, § 4).
 
 ## 1. Décisions

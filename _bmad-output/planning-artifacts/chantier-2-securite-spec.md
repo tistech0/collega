@@ -1,6 +1,6 @@
 # Chantier 2 — Sécurité : spécification
 
-Date : 2026-09-24 · Statut : validée avec l'utilisateur · Branche à créer : `feat/chantier-2-securite`
+Date : 2026-09-24 · Statut : validée avec l'utilisateur · Branche : `feat/refonte-back-infra` (commune aux chantiers 2 à 5)
 Contexte : `audit-back-infra-2026-09-23.md` (constat 5 et « Sécurité (hors tableau) ») ; absorbe la story 7.10 (`_bmad-output/implementation-artifacts/7-10-hardening-securite-pre-prod.md`) ; la story 7.9 (session admin par cookie) est **abandonnée** au profit de Cloudflare Access.
 
 ## 1. Décisions (validées)

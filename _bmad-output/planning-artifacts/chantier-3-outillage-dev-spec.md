@@ -1,6 +1,6 @@
 # Chantier 3 — Outillage de développement : spécification
 
-Date : 2026-09-24 · Statut : validée avec l'utilisateur · Branche à créer : `feat/chantier-3-outillage`
+Date : 2026-09-24 · Statut : validée avec l'utilisateur · Branche : `feat/refonte-back-infra` (commune aux chantiers 2 à 5)
 Contexte : `audit-back-infra-2026-09-23.md` (« Développement », « Exploitation »). Déjà fait au chantier 1 : tests indépendants du Redis local (limiteur en mémoire), Postgres de test (`docker-compose.test.yml`), `alembic/__init__.py` retiré, `test.db` retiré. Déjà fait au chantier 0 : compose de prod versionné = NAS, healthchecks, logs, supervision.
 
 ## 1. Décisions

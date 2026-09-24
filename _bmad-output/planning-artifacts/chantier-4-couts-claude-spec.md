@@ -1,6 +1,6 @@
 # Chantier 4 — Génération des fiches (qualité et coûts Claude) : spécification
 
-Date : 2026-09-24 · Statut : validée avec l'utilisateur · Branche à créer : `feat/chantier-4-generation`
+Date : 2026-09-24 · Statut : validée avec l'utilisateur · Branche : `feat/refonte-back-infra` (commune aux chantiers 2 à 5)
 Contexte : `audit-back-infra-2026-09-23.md` (« Coûts Claude ») et **revue qualité des 504 fiches de prod du 2026-09-24** (§ 1 bis). S'appuie sur le chantier 1 (contenu par empreinte, `item_generations` UNIQUE(text_hash, generation_version), commits par item dans `pipeline.py`). Les `max_length` des saisies (`user_answer`, `user_note`) sont au chantier 2.
 
 ## 1. Décisions
@@ -9,7 +9,7 @@ Contexte : `audit-back-infra-2026-09-23.md` (« Coûts Claude ») et **revue qua
 |---|---|
 | C1 | **Pas de Batch API** : génération interactive (SSE). |
 | C2 | **Claude Sonnet 5** (`claude-sonnet-5`, 2 $ / 10 $ par MTok) pour la génération et la régénération, sans évaluation à l'aveugle ; contrôle de fumée (§ 9). Évaluation sémantique du drill : Haiku 4.5 inchangé. |
-| C3 | **Nouveau prompt `p2`** (§ 3) : nombre de fiches **proportionnel au contenu (0 à 40)**, couverture de chaque objectif de rang A d'abord, rang par fiche. |
+| C3 | **Nouveau prompt `p2`** (§ 3) : nombre de fiches **proportionnel au contenu (0 à 40)**, couverture de chaque objectif de rang A d'abord, puis B ; **aucune fiche de rang C** (non évalué aux EDN) ; rang par fiche. |
 | C4 | **Nouveau type de fiche `cas_clinique`** (mini cas clinique → conduite/diagnostic), ~20 % max, seulement si le texte fournit les éléments. |
 | C5 | **Correction du découpage des items** (§ 4) : c'est la première cause de mauvaises fiches. |
 | C6 | **Base de contenu vidée au déploiement** (§ 8) : l'utilisateur est seul utilisateur et réimporte ses collèges de zéro. Son compte est conservé. Autorisation donnée le 2026-09-24. |
@@ -70,7 +70,8 @@ Méthode :
    texte peuvent aussi être marquées A ou B.
 2. Couvre d'abord CHAQUE objectif de rang A par au moins une fiche
    (souvent 2 ou 3 pour un objectif riche), puis les points clés, puis le
-   rang B s'il reste des notions utiles.
+   rang B s'il reste des notions utiles. Les notions de rang C ne sont pas
+   évaluées aux EDN : ne fais aucune fiche dessus.
 3. Le nombre de fiches dépend du contenu : autant que de notions à
    connaître, de 0 à 40. Un item court en aura peu, un item dense beaucoup.
 4. Si le texte ne contient pas de vrai contenu d'enseignement (seulement
@@ -128,7 +129,7 @@ Objectif : chaque item reçoit **toutes ses pages et seulement les siennes**. Ex
 - **Texte pivoté** : les caractères non droits (`upright == False` dans pdfplumber) sont extraits dans le bon ordre (ou la zone repasse par Tesseract avec détection d'orientation) : plus de mots à l'envers dans les tableaux.
 - **Rang des objectifs** : les pictogrammes A/B mal lus (« O / 0 / G / Q / © / □ ») ne sont plus pris pour un rang ; le rang d'item reste « A si au moins un objectif A ». Le rang par fiche (§ 2) devient la source affichée dans l'app.
 - Fixtures de test : les textes de pages des 3 collèges exportés de la prod **avant le vidage** (§ 8), stockés hors git (`collega_backend/tests/fixtures/private/`, ajouté au `.gitignore` : contenu sous droits) ; les tests qui en dépendent sont ignorés proprement s'ils sont absents (CI). Tests unitaires synthétiques (committés) pour chaque règle ci-dessus.
-- Script `scripts/segmentation_report.py <pdf|fixture>` : tableau item → pages, caractères, nb d'objectifs A détectés ; résultat avant/après dans la PR pour les 3 collèges. PDFs disponibles à la racine du dépôt : `PNEUMO 8e college.pdf`, `CANCERO 4e college (1).pdf` (`ANAPATH 4e.pdf` est abîmé) ; le PDF d'**hématologie** n'est pas dans le dépôt : utiliser les fixtures exportées, et demander le PDF à l'utilisateur pour le contrôle du texte pivoté.
+- Script `scripts/segmentation_report.py <pdf|fixture>` : tableau item → pages, caractères, nb d'objectifs A détectés ; résultat avant/après dans la PR pour les 3 collèges. PDFs disponibles à la racine du dépôt (git-ignorés) : `PNEUMO 8e college.pdf`, `CANCERO 4e college (1).pdf`, `HEMATO 5e college.pdf` (ajouté par l'utilisateur le 2026-09-24) ; `ANAPATH 4e.pdf` est abîmé.
 
 ## 5. Allègement du texte envoyé
 
@@ -170,7 +171,7 @@ Objectif : chaque item reçoit **toutes ses pages et seulement les siennes**. Ex
   - remet à zéro les compteurs de réimport/quota des utilisatrices ;
   - **conserve** les comptes, les abonnements et `claude_usage` (`college_id`/`job_id` passent à NULL).
   - Le script affiche les comptes avant/après et refuse de tourner sans `--confirm`.
-- L'utilisateur réimporte ensuite ses collèges depuis l'app ; la session surveille les logs (découpage, `insufficient_text`, coût par collège) et rapporte le nombre de fiches par item.
+- Le déploiement du chantier 4 (avec le vidage) se fait **au retour de l'utilisateur**, en même temps que celui du chantier 2 (voir la passation). L'utilisateur réimporte ensuite ses collèges depuis l'app ; la session surveille les logs (découpage, `insufficient_text`, coût par collège) et rapporte le nombre de fiches par item.
 
 ## 9. Contrôle de fumée (avant déploiement)
 
