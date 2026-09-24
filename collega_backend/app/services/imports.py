@@ -151,9 +151,13 @@ async def apply_reimport_quota(db: AsyncSession, user: User, college: College, l
         .returning(User.monthly_reloads)
     )
     if user_update.scalar_one_or_none() is None:
+        # L'erreur DOIT être construite avant le rollback : `db.rollback()` expire les
+        # objets ORM de la session (dont `user`), et lire ses attributs après coup
+        # déclencherait un lazy-load synchrone → MissingGreenlet (I2).
+        error = _monthly_reload_limit(user, now, monthly_reloads_max)
         # Annule l'incrément college fait juste avant (transaction non commitée)
         await db.rollback()
-        raise _monthly_reload_limit(user, now, monthly_reloads_max)
+        raise error
 
 
 async def assert_import_allowed(db: AsyncSession, user: User, ref_id: int, limits: tuple[int, int]) -> College | None:

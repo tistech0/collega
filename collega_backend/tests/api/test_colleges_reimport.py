@@ -24,7 +24,12 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.exc import IntegrityError
 
+from app.core.config import settings
+from app.core.security import create_access_token
 from app.deps import get_current_user, require_subscription
+from app.models.college import College
+from app.models.user import User
+from tests.factories import make_college, make_user
 from tests.fakes.fake_arq import arq_pool
 
 
@@ -271,6 +276,45 @@ class TestReimportQuotaChecks:
         data = resp.json()["data"]
         assert "college_id" in data
         assert "job_id" in data
+
+
+@pytest.mark.pg
+async def test_reimport_bloque_monthly_limit_409_pg(pg_client: AsyncClient, pg_factory):
+    """I2 (régression) : à la limite mensuelle, `POST /import` doit renvoyer 409
+    MONTHLY_RELOAD_LIMIT — pas 500 (MissingGreenlet).
+
+    Contrairement aux tests mockés ci-dessus, l'utilisateur est authentifié par un
+    vrai Bearer token (pas d'override de `require_subscription`/`get_current_user`) :
+    `current_user` est donc chargé par `get_current_user` dans la MÊME session que
+    celle utilisée par `apply_reimport_quota`, comme en production. C'est cette
+    session partagée qui reproduit le bug : `await db.rollback()` expire l'ORM
+    `user`, et un accès à ses attributs après coup (pour construire l'erreur)
+    déclenche un lazy-load synchrone → MissingGreenlet si l'erreur est construite
+    après le rollback."""
+    async with pg_factory() as db:
+        user = await make_user(db, monthly_reloads=settings.monthly_reloads_max)
+        user.monthly_reloads_reset_at = datetime.now(UTC) + timedelta(days=15)
+        college = await make_college(db, user, status="generation_complete", reload_count=0)
+        await db.commit()
+
+    token = create_access_token(str(user.id))
+    resp = await pg_client.post(
+        f"/v1/colleges/{college.college_ref_id}/import",
+        files={"pdf": ("t.pdf", BytesIO(_PDF_BYTES), "application/pdf")},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert resp.status_code == 409
+    detail = resp.json()["detail"]
+    assert detail["code"] == "MONTHLY_RELOAD_LIMIT"
+    assert detail["monthly_reloads"] == settings.monthly_reloads_max
+    assert detail["monthly_max"] == settings.monthly_reloads_max
+    assert "reset_at" in detail
+
+    # Quota inchangé : l'incrément College fait avant l'échec User a bien été annulé.
+    async with pg_factory() as s:
+        assert (await s.get(College, college.id)).reload_count == 0
+        assert (await s.get(User, user.id)).monthly_reloads == settings.monthly_reloads_max
 
 
 class TestUniqueProcessingIntegrity:
