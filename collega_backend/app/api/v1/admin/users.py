@@ -144,7 +144,7 @@ async def reset_user_quota(
 
     `monthly_reloads = 0` + `monthly_reloads_reset_at = None` : la fenêtre sera
     ré-initialisée proprement au prochain réimport via la logique lazy de
-    `colleges.py` (cohérent avec le hardening quota Story 7.2).
+    `app/services/imports.py` (cohérent avec le hardening quota Story 7.2).
     """
     user = await db.get(User, user_id)
     if user is None:

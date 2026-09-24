@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.errors import not_found, unauthorized, unprocessable
+from app.models.user import User
 from app.schemas.billing import RevenueCatWebhookPayload
 
 logger = logging.getLogger(__name__)
@@ -42,8 +43,6 @@ async def revenuecat_webhook(
         user_id = uuid.UUID(payload.event.app_user_id)
     except ValueError:
         raise unprocessable("INVALID_USER_ID", "app_user_id is not a valid UUID") from None
-
-    from app.models.user import User
 
     user = await db.get(User, user_id)
     if user is None:

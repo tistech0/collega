@@ -18,9 +18,11 @@ from app.core.security import (
 )
 from app.core.time_utils import next_month_reset
 from app.deps import get_current_user, get_db
+from app.models.college import College
 from app.models.user import User
 from app.schemas.auth import LoginRequest, ProfileUpdateRequest, RefreshRequest, RegisterRequest, TokenResponse
 from app.services import app_settings
+from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["auth"])
@@ -139,9 +141,6 @@ async def delete_account(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    from app.models.college import College
-    from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
-
     college_ids = list((await db.execute(select(College.id).where(College.user_id == current_user.id))).scalars())
     await db.delete(current_user)
     await db.commit()

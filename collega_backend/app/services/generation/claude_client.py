@@ -4,14 +4,12 @@ import json
 import logging
 import re
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import anthropic
 
 from app.core.config import settings
-
-if TYPE_CHECKING:
-    from app.schemas.college import FlashCardData as FlashCardDataSchema
+from app.schemas.college import FlashCardData as FlashCardDataSchema
 
 logger = logging.getLogger(__name__)
 
@@ -167,8 +165,6 @@ class ClaudeClient:
         user_note: str | None,
     ) -> FlashCardDataSchema | None:
         """Régénère une seule fiche avec le feedback utilisateur en contexte."""
-        from app.schemas.college import FlashCardData as FlashCardDataSchema  # noqa: F811 (import d'exécution)
-
         if not source_text.strip():
             logger.warning("Item %s sans texte source — impossible de régénérer la fiche %s", item.id, card.id)
             return None

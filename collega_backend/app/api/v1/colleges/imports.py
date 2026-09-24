@@ -23,7 +23,8 @@ from app.schemas.college import (
     UploadStatusData,
     UploadStatusResponseWrapped,
 )
-from app.services import app_settings, imports
+from app.services import app_settings
+from app.services import imports as import_service
 from app.services.ocr.pdf_check import assert_pdf_readable
 from app.services.upload.chunked_upload import (
     MAX_UPLOAD_SIZE,
@@ -50,14 +51,14 @@ async def import_college_pdf(
 ) -> ImportCollegeResponseWrapped:
     """Soumet un PDF pour traitement OCR — crée le College si nécessaire (mono-requête, ≤ 100 MB
     derrière Cloudflare ; au-delà, voir /import/init)."""
-    imports.validate_ref_id(ref_id)
-    college = await imports.get_or_create_college(db, current_user, ref_id)
-    await imports.assert_no_active_job(db, college)
-    await imports.apply_reimport_quota(db, current_user, college, await app_settings.anti_spam_limits(db))
+    import_service.validate_ref_id(ref_id)
+    college = await import_service.get_or_create_college(db, current_user, ref_id)
+    await import_service.assert_no_active_job(db, college)
+    await import_service.apply_reimport_quota(db, current_user, college, await app_settings.anti_spam_limits(db))
 
     job_id = uuid.uuid4()
-    pdf_file_path = imports.pdf_path_for(college.id, job_id)
-    await imports.save_upload(pdf, pdf_file_path, max_size=imports.MAX_PDF_SIZE)
+    pdf_file_path = import_service.pdf_path_for(college.id, job_id)
+    await import_service.save_upload(pdf, pdf_file_path, max_size=import_service.MAX_PDF_SIZE)
 
     try:
         await assert_pdf_readable(pdf_file_path)
@@ -69,10 +70,10 @@ async def import_college_pdf(
 
     logger.info("PDF saved for college %s (ref_id=%s) at %s", college.id, ref_id, pdf_file_path)
 
-    await imports.create_job_and_enqueue(
+    await import_service.create_job_and_enqueue(
         db, arq, college=college, user_id=current_user.id, job_id=job_id, pdf_path=pdf_file_path
     )
-    return ImportCollegeResponseWrapped(data=imports.import_response(college, job_id))
+    return ImportCollegeResponseWrapped(data=import_service.import_response(college, job_id))
 
 
 # ── Story 7.11 — upload par morceaux (Cloudflare : 100 MB max par requête) ──────
@@ -100,9 +101,9 @@ async def init_chunked_import(
     store: ChunkedUploadStore = Depends(get_upload_store),
 ) -> UploadInitResponseWrapped:
     """Ouvre un upload par morceaux. Mêmes gardes que POST /import, quota NON consommé."""
-    await imports.assert_import_allowed(db, current_user, ref_id, await app_settings.anti_spam_limits(db))
+    await import_service.assert_import_allowed(db, current_user, ref_id, await app_settings.anti_spam_limits(db))
     if body.size_bytes > MAX_UPLOAD_SIZE:
-        raise imports.file_too_large()
+        raise import_service.file_too_large()
     state = await store.create(current_user.id, ref_id, body.size_bytes)
     logger.info("Chunked upload %s opened (ref_id=%s, %d parts)", state.upload_id, ref_id, state.parts_total)
     return UploadInitResponseWrapped(
@@ -172,15 +173,15 @@ async def complete_chunked_import(
     if not state.is_complete:
         raise conflict("UPLOAD_INCOMPLETE", "Morceaux manquants", missing=state.missing)
     with open(store.part_path(state.upload_id, 0), "rb") as f:
-        if not f.read(len(imports.PDF_MAGIC)).startswith(imports.PDF_MAGIC):
+        if not f.read(len(import_service.PDF_MAGIC)).startswith(import_service.PDF_MAGIC):
             await store.claim(state.upload_id)
             store.purge(state.upload_id)
-            raise imports.invalid_pdf_signature()
+            raise import_service.invalid_pdf_signature()
 
     # Prise de possession atomique : un complete concurrent qui perd le DEL reçoit 409.
     claimed = await store.claim(state.upload_id)
     if claimed is None:
-        raise imports.job_in_progress()
+        raise import_service.job_in_progress()
 
     storage_path = Path(settings.pdf_storage_path)
     storage_path.mkdir(parents=True, exist_ok=True)
@@ -189,7 +190,7 @@ async def complete_chunked_import(
         store.assemble(claimed, assembled)
         await assert_pdf_readable(assembled)
         limits = await app_settings.anti_spam_limits(db)
-        data = await imports.start_import_from_file(db, arq, current_user, claimed.ref_id, assembled, limits)
+        data = await import_service.start_import_from_file(db, arq, current_user, claimed.ref_id, assembled, limits)
     except AppError as exc:
         assembled.unlink(missing_ok=True)
         if exc.status_code == 503:
