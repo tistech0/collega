@@ -69,10 +69,12 @@ Future<void> syncItemsToDrift(AppDatabase db, String collegeId, List<ItemModel> 
 /// mortes — 404 à l'évaluation). À n'appeler qu'après un chargement RÉUSSI de la
 /// liste des collèges : [keep] = leurs ids ; une liste vide purge tout.
 ///
-/// Supprimés : fiches, items, sessions de planning, imports suivis ; les sessions
-/// du jour non terminées qui citent une fiche supprimée (recalculées à la
-/// prochaine lecture). Gardés : les sessions terminées (semaine « faite ») et le
-/// journal des révisions (historique réel de la Progression, jamais renvoyé au serveur).
+/// Supprimés : fiches, items, imports suivis ; les sessions du jour non terminées
+/// qui citent une fiche supprimée (recalculées à la prochaine lecture). Gardés :
+/// les sessions terminées (semaine « faite »), le journal des révisions (historique
+/// réel de la Progression, jamais renvoyé au serveur) et `planningSessions`, qui ne
+/// contient que les jours décalés (`addPostponed`, collegeId vide) — pas une donnée
+/// de collège.
 Future<void> pruneStaleColleges(AppDatabase db, Set<String> keep) async {
   final ids = keep.toList();
   await db.transaction(() async {
@@ -83,7 +85,6 @@ Future<void> pruneStaleColleges(AppDatabase db, Set<String> keep) async {
         .get();
     await (db.delete(db.flashCards)..where((t) => t.collegeId.isNotIn(ids))).go();
     await (db.delete(db.items)..where((t) => t.collegeId.isNotIn(ids))).go();
-    await (db.delete(db.planningSessions)..where((t) => t.collegeId.isNotIn(ids))).go();
     await (db.delete(db.collegeImports)..where((t) => t.id.isNotIn(ids))).go();
 
     if (deadCards.isEmpty) return;
@@ -91,10 +92,21 @@ Future<void> pruneStaleColleges(AppDatabase db, Set<String> keep) async {
     final open = await (db.select(db.dailySessions)..where((t) => t.completedAtMs.isNull())).get();
     final stale = [
       for (final s in open)
-        if ((jsonDecode(s.queueJson) as List).any(dead.contains)) s.day,
+        if (_queueIds(s.queueJson).any(dead.contains)) s.day,
     ];
     if (stale.isNotEmpty) {
       await (db.delete(db.dailySessions)..where((t) => t.day.isIn(stale))).go();
     }
   });
+}
+
+/// Ids d'une file de session du jour ; file illisible → aucun id (jamais d'exception
+/// dans la transaction de purge).
+Iterable<Object?> _queueIds(String queueJson) {
+  try {
+    final decoded = jsonDecode(queueJson);
+    return decoded is List ? decoded : const [];
+  } on FormatException {
+    return const [];
+  }
 }

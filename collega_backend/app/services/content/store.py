@@ -76,7 +76,7 @@ async def get_item_pages(db: AsyncSession, text_hash: str) -> list[str] | None:
 
 async def get_item_text(db: AsyncSession, text_hash: str) -> str | None:
     """Le texte de l'item d'un seul tenant, pages jointes par des retours à la ligne
-    (affichage, régénération d'une fiche)."""
+    (affichage). La régénération d'une fiche lit les pages (`get_item_pages`)."""
     row = await db.get(ItemText, text_hash)
     return row.text.replace(PAGE_SEPARATOR, "\n") if row else None
 
