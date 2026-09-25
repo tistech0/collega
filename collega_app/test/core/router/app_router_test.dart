@@ -13,6 +13,7 @@ import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/data/colleges_repository.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/auth/presentation/auth_login_screen.dart';
+import 'package:collega_app/features/auth/presentation/paywall_screen.dart';
 import 'package:collega_app/features/auth/presentation/welcome_screen.dart';
 import 'package:collega_app/features/demo/presentation/demo_screen.dart';
 import 'package:collega_app/core/ui/components/cg_tab_bar.dart';
@@ -236,6 +237,25 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.byType(WelcomeScreen), findsNothing);
+      expect(find.byType(TodayScreen), findsOneWidget);
+    });
+  });
+  group('beta TestFlight — accès bêta sans abonnement', () {
+    testWidgets('bêta non abonnée : Aujourd’hui, jamais le paywall (même en demandant /paywall)', (tester) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      const beta = AuthUser(id: 'b1', email: 'beta@example.com', isBeta: true, isSubscribed: false);
+      await tester.pumpWidget(_buildApp(const AuthState(user: beta), db));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(TodayScreen), findsOneWidget);
+      expect(find.byType(PaywallScreen), findsNothing);
+
+      final router = ProviderScope.containerOf(tester.element(find.byType(TodayScreen))).read(routerProvider);
+      router.go('/paywall');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(PaywallScreen), findsNothing);
       expect(find.byType(TodayScreen), findsOneWidget);
     });
   });

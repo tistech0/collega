@@ -11,6 +11,7 @@ import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/auth/paywall_providers.dart';
 import 'package:collega_app/features/auth/data/auth_repository.dart';
+import 'package:collega_app/features/auth/data/revenuecat_service.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 
 class _FakeAuthRepository extends AuthRepository {
@@ -93,10 +94,13 @@ class _CountingPaywall extends PaywallNotifier {
 ProviderContainer _makeContainer(
   _FakeAuthRepository repo, {
   AppDatabase? database,
+  bool revenueCatEnabled = true,
 }) {
   return ProviderContainer(
     overrides: [
       authRepositoryProvider.overrideWithValue(repo),
+      // Activé par défaut ici : le mock channel trace les appels natifs.
+      revenueCatServiceProvider.overrideWithValue(RevenueCatService(enabled: revenueCatEnabled)),
       if (database != null) databaseProvider.overrideWithValue(database),
       secureStorageProvider.overrideWithValue(const FlutterSecureStorage()),
     ],
@@ -344,6 +348,30 @@ void main() {
       ]);
       final state = container.read(authProvider).valueOrNull;
       expect(state, equals(const AuthState()));
+    });
+
+    test('RevenueCat désactivé (beta sans clé iOS) → wipe complet sans appel natif', () async {
+      final callOrder = <String>[];
+      _activeSequence = callOrder;
+      final repo = _FakeAuthRepository(
+        loadResult: const AuthState(user: _testUser),
+        onDeleteAccount: () async {
+          callOrder.add('repo.deleteAccount');
+          return const AuthState();
+        },
+        onLogout: () async => callOrder.add('repo.logout'),
+      );
+      final db = _SpyAppDatabase(() async => callOrder.add('db.deleteEverything'));
+      addTearDown(db.close);
+      final container = _makeContainer(repo, database: db, revenueCatEnabled: false);
+      addTearDown(container.dispose);
+
+      await container.read(authProvider.future);
+      final error = await container.read(authProvider.notifier).deleteAccount();
+
+      expect(error, isNull);
+      expect(callOrder, ['repo.deleteAccount', 'db.deleteEverything', 'repo.logout']);
+      expect(container.read(authProvider).valueOrNull, equals(const AuthState()));
     });
 
     test('serveur KO → aucun wipe, errorMessage propagé, session intacte', () async {

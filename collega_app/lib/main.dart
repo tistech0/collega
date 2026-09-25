@@ -10,7 +10,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Story 7.11 : réactive le suivi des uploads de morceaux lancés en arrière-plan.
   await FileDownloader().start(autoCleanDatabase: true);
-  await Purchases.configure(PurchasesConfiguration(revenueCatApiKey));
+  if (kRevenueCatEnabled) {
+    await Purchases.configure(PurchasesConfiguration(revenueCatApiKey));
+  }
   runApp(
     const ProviderScope(
       child: App(),

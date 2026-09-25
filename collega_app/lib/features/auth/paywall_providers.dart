@@ -54,16 +54,15 @@ class PaywallNotifier extends AsyncNotifier<PaywallState> {
     state = AsyncData(currentState!.copyWith(isLoading: true, clearError: true));
     try {
       // Identification RevenueCat avant achat — idempotent, non-bloquant si échec
+      final revenueCat = ref.read(revenueCatServiceProvider);
       final userId = ref.read(authProvider).valueOrNull?.user?.id;
       if (userId != null) {
         try {
-          await Purchases.logIn(userId);
+          await revenueCat.logIn(userId);
         } catch (_) {}
       }
 
-      await ref
-          .read(revenueCatServiceProvider)
-          .purchaseMonthlySubscription(currentState.package!);
+      await revenueCat.purchaseMonthlySubscription(currentState.package!);
       await ref.read(authProvider.notifier).refreshSubscription();
 
       // Réinitialise le loading ; si is_subscribed=true le router redirige automatiquement
