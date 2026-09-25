@@ -183,7 +183,7 @@ void main() {
       final visited = <String>[];
       await tester.pumpWidget(_app(() => _Fixed(const []), visited: visited));
       await tester.pumpAndSettle();
-      expect(find.text('SFH · envoi 42 %, reprend tout seul'), findsOneWidget);
+      expect(find.text('SFH · envoi du PDF : 42 %'), findsOneWidget);
       expect(find.text('Catalogue · 38 collèges'), findsOneWidget);
       expect(find.text('Importer'), findsNWidgets(38));
       await tester.tap(find.text('Hématologie'));

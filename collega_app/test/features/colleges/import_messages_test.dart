@@ -20,7 +20,14 @@ void main() {
   test('messages du spec', () {
     expect(importErrorMessage('monthly_reload_limit:2026-10-01T00:00:00+00:00'),
         'Plus de réimport ce mois-ci : le compteur repart le 1er octobre.');
-    expect(importErrorMessage('upload_failed'), 'L’envoi s’est interrompu. Il reprendra tout seul.');
+    expect(importErrorMessage('upload_failed'),
+        'L’envoi s’est interrompu. Il repartira de là où il s’est arrêté à ta prochaine ouverture de Collega.');
+  });
+
+  test('un autre envoi en cours : le collège est nommé', () {
+    expect(uploadInProgressMessage('Cancérologie'),
+        'Le PDF de Cancérologie est en cours d’envoi. Attends qu’il soit terminé pour en importer un autre.');
+    expect(uploadInProgressMessage(null), importErrorMessage('upload_in_progress'));
   });
 
   test('réimport : « Tes fiches restent » en tête', () {

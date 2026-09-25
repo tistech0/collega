@@ -222,7 +222,8 @@ void main() {
       await tester.pumpAndSettle();
       _notifier(tester).emit(const ImportError(message: 'upload_failed'));
       await tester.pumpAndSettle();
-      expect(find.text('L’envoi s’est interrompu. Il reprendra tout seul.'), findsOneWidget);
+      expect(find.text('L’envoi s’est interrompu. Il repartira de là où il s’est arrêté à ta prochaine ouverture de Collega.'),
+          findsOneWidget);
     });
 
     testWidgets('l’écran d’import en cours n’est ouvert qu’une fois (erreur puis reprise dessous)', (tester) async {
@@ -246,7 +247,8 @@ void main() {
       _pdf = _file(1000);
       await tester.pumpWidget(_app());
       await tester.pumpAndSettle();
-      expect(find.text('Un autre PDF est en cours d’envoi. Attends qu’il se termine.'), findsOneWidget);
+      expect(find.text('Le PDF de Neurologie est en cours d’envoi. Attends qu’il soit terminé pour en importer un autre.'),
+          findsOneWidget);
       expect(find.textContaining('Envoi 30 %'), findsNothing);
       await tester.tap(find.text('Choisir le PDF'));
       await tester.pumpAndSettle();
