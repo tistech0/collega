@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:collega_app/core/network/api_client.dart';
 import 'package:collega_app/features/auth/data/auth_repository.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 
@@ -70,12 +71,17 @@ class _ScriptedAdapter implements HttpClientAdapter {
   final List<Object> script;
   int callCount = 0;
 
+  /// Requêtes reçues (path, headers, body) — pour vérifier ce que le repo
+  /// envoie réellement (Story task 5 — appel `/v1/auth/logout`).
+  final List<RequestOptions> requests = [];
+
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
     Stream<List<int>>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    requests.add(options);
     final idx = callCount;
     callCount += 1;
     if (idx >= script.length) {
@@ -117,6 +123,11 @@ class _ScriptedAdapter implements HttpClientAdapter {
   @override
   void close({bool force = false}) {}
 }
+
+/// Dio « nu » (validateStatus par défaut : 4xx/5xx lèvent) — comme le groupe
+/// `login — erreur typée`, pour tester les statuts d'erreur de `logout()`.
+Dio _plainDio(HttpClientAdapter adapter) =>
+    Dio(BaseOptions(baseUrl: 'http://test'))..httpClientAdapter = adapter;
 
 Dio _makeScriptedDio(HttpClientAdapter adapter) {
   final dio = Dio(BaseOptions(
@@ -186,6 +197,20 @@ void main() {
     test('422 (email mal formé) → email invalide', () async {
       expect(await errorFor(_ScriptedRawAdapter(statusCode: 422, body: '{}', contentType: 'application/json')),
           LoginError.invalidEmail);
+    });
+
+    // Chantier 5 § 4 : corps uniformes {"detail": {"code", "message", ...}} pour 422 et 429.
+    test('422 VALIDATION_ERROR (corps uniforme) → email invalide', () async {
+      const body = '{"detail":{"code":"VALIDATION_ERROR","message":"Requête invalide",'
+          '"errors":[{"loc":["body","email"],"msg":"value is not a valid email address","type":"value_error"}]}}';
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 422, body: body, contentType: 'application/json')),
+          LoginError.invalidEmail);
+    });
+
+    test('429 RATE_LIMITED (corps uniforme) → trop d’essais', () async {
+      const body = '{"detail":{"code":"RATE_LIMITED","message":"Trop de requêtes, réessayez plus tard"}}';
+      expect(await errorFor(_ScriptedRawAdapter(statusCode: 429, body: body, contentType: 'application/json')),
+          LoginError.tooManyAttempts);
     });
 
     test('500 → autre', () async {
@@ -276,6 +301,185 @@ void main() {
       final storage = _FakeSecureStorage();
       await AuthRepository(dio: Dio(), storage: storage).logout();
       expect(storage.deletedKeys, containsAll(['reminder_hour_utc', 'reminder_local_hour', 'monthly_reset_at']));
+    });
+  });
+
+  group('AuthRepository.logout — appel serveur best-effort (chantier 2 sécurité, task 5)', () {
+    test('pas d’access_token → aucun appel réseau, storage vidé quand même', () async {
+      final storage = _FakeSecureStorage();
+      final adapter = _ScriptedAdapter([204]);
+      final repo = AuthRepository(dio: _plainDio(adapter), storage: storage);
+
+      await repo.logout();
+
+      expect(adapter.callCount, 0);
+      expect(storage.deletedKeys, containsAll(['access_token', 'refresh_token', 'user_id']));
+    });
+
+    test('API OK (204) → POST /v1/auth/logout avec le refresh_token stocké, puis storage vidé', () async {
+      final storage = _FakeSecureStorage(initial: {
+        'access_token': 'acc-1',
+        'refresh_token': 'ref-1',
+        'user_id': 'u',
+        'user_email': 'a@b.fr',
+      });
+      final adapter = _ScriptedAdapter([204]);
+      final repo = AuthRepository(dio: _plainDio(adapter), storage: storage);
+
+      await repo.logout();
+
+      expect(adapter.callCount, 1);
+      final sent = adapter.requests.single;
+      expect(sent.path, '/v1/auth/logout');
+      expect(sent.headers['Authorization'], 'Bearer acc-1');
+      expect(sent.data, {'refresh_token': 'ref-1'});
+      expect(
+        storage.deletedKeys,
+        containsAll(['access_token', 'refresh_token', 'user_id', 'user_email']),
+      );
+    });
+
+    test('API en erreur (500) → appel tenté, storage vidé quand même', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 'acc-1', 'refresh_token': 'ref-1'});
+      final adapter = _ScriptedAdapter([500]);
+      final repo = AuthRepository(dio: _plainDio(adapter), storage: storage);
+
+      await repo.logout();
+
+      expect(adapter.callCount, 1);
+      expect(storage.deletedKeys, containsAll(['access_token', 'refresh_token']));
+    });
+
+    test('401 (access token déjà expiré côté serveur) → ignoré, storage vidé quand même', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 'acc-1', 'refresh_token': 'ref-1'});
+      final adapter = _ScriptedAdapter([401]);
+      final repo = AuthRepository(dio: _plainDio(adapter), storage: storage);
+
+      await repo.logout();
+
+      expect(storage.deletedKeys, containsAll(['access_token', 'refresh_token']));
+    });
+
+    test('timeout réseau → storage vidé quand même', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 'acc-1', 'refresh_token': 'ref-1'});
+      final adapter = _ScriptedAdapter([DioExceptionType.sendTimeout]);
+      final repo = AuthRepository(dio: _plainDio(adapter), storage: storage);
+
+      await repo.logout();
+
+      expect(storage.deletedKeys, containsAll(['access_token', 'refresh_token']));
+    });
+  });
+
+  group('AuthRepository.logout — rotation défensive avant logout (fix round 1)', () {
+    test(
+      'rotation R1→R2 pré-logout : /logout reçoit R2 (jamais figé sur R1), '
+      'jamais via le dio intercepté 401→refresh→retry',
+      () async {
+        final storage = _FakeSecureStorage(initial: {
+          'access_token': 'stale-access',
+          'refresh_token': 'R1',
+          'user_id': 'u',
+          'user_email': 'a@b.fr',
+        });
+
+        // ApiClient.rawDio (= _refreshDio) : 1) le refresh défensif (R1→R2),
+        // 2) le POST /v1/auth/logout lui-même.
+        final rawAdapter = _ScriptedAdapter([
+          {
+            'data': {'access_token': 'new-access', 'refresh_token': 'R2'},
+          },
+          204,
+        ]);
+        // ApiClient.dio (intercepté 401→refresh→retry) : ne doit JAMAIS être
+        // sollicité par logout() — script vide, tout appel ici fait échouer
+        // le test (StateError).
+        final interceptedAdapter = _ScriptedAdapter([]);
+
+        final apiClient = ApiClient(
+          storage,
+          dio: _plainDio(interceptedAdapter),
+          refreshDio: _plainDio(rawAdapter),
+        );
+
+        final repo = AuthRepository(
+          dio: apiClient.dio,
+          storage: storage,
+          logoutDio: apiClient.rawDio,
+          ensureFreshAccessToken: apiClient.ensureFreshAccessToken,
+        );
+
+        await repo.logout();
+
+        expect(interceptedAdapter.callCount, 0);
+        expect(rawAdapter.callCount, 2);
+        expect(rawAdapter.requests[0].path, '/v1/auth/refresh');
+        final logoutSent = rawAdapter.requests[1];
+        expect(logoutSent.path, '/v1/auth/logout');
+        expect(logoutSent.headers['Authorization'], 'Bearer new-access');
+        // Le corps envoyé porte le refresh_token POST-rotation (R2) — jamais
+        // l'ancien R1 lu avant la rotation défensive.
+        expect(logoutSent.data, {'refresh_token': 'R2'});
+        expect(await storage.read(key: 'access_token'), isNull);
+        expect(await storage.read(key: 'refresh_token'), isNull);
+      },
+    );
+
+    test('rafraîchissement défensif en échec → logout suit avec les jetons existants (best-effort)', () async {
+      final storage = _FakeSecureStorage(initial: {'access_token': 'acc-1', 'refresh_token': 'ref-1'});
+      final rawAdapter = _ScriptedAdapter([DioExceptionType.connectionError, 204]);
+      final interceptedAdapter = _ScriptedAdapter([]);
+
+      final apiClient = ApiClient(
+        storage,
+        dio: _plainDio(interceptedAdapter),
+        refreshDio: _plainDio(rawAdapter),
+      );
+      final repo = AuthRepository(
+        dio: apiClient.dio,
+        storage: storage,
+        logoutDio: apiClient.rawDio,
+        ensureFreshAccessToken: apiClient.ensureFreshAccessToken,
+      );
+
+      await repo.logout();
+
+      expect(rawAdapter.callCount, 2);
+      final logoutSent = rawAdapter.requests[1];
+      expect(logoutSent.headers['Authorization'], 'Bearer acc-1');
+      expect(logoutSent.data, {'refresh_token': 'ref-1'});
+      expect(await storage.read(key: 'access_token'), isNull);
+    });
+  });
+
+  group('AuthRepository.logout — access encore valide (I4)', () {
+    test('access valide > 2 min → pas de rotation, logout avec les jetons stockés', () async {
+      String part(Map<String, Object> m) => base64Url.encode(utf8.encode(jsonEncode(m))).replaceAll('=', '');
+      final exp = DateTime.now().add(const Duration(minutes: 10)).millisecondsSinceEpoch ~/ 1000;
+      final access = '${part({'alg': 'HS256'})}.${part({'sub': 'u', 'exp': exp})}.c2ln';
+      final storage = _FakeSecureStorage(initial: {'access_token': access, 'refresh_token': 'R1'});
+      final rawAdapter = _ScriptedAdapter([204]);
+      final interceptedAdapter = _ScriptedAdapter([]);
+      final apiClient = ApiClient(
+        storage,
+        dio: _plainDio(interceptedAdapter),
+        refreshDio: _plainDio(rawAdapter),
+      );
+      final repo = AuthRepository(
+        dio: apiClient.dio,
+        storage: storage,
+        logoutDio: apiClient.rawDio,
+        ensureFreshAccessToken: apiClient.ensureFreshAccessToken,
+      );
+
+      await repo.logout();
+
+      expect(rawAdapter.callCount, 1);
+      final logoutSent = rawAdapter.requests.single;
+      expect(logoutSent.path, '/v1/auth/logout');
+      expect(logoutSent.headers['Authorization'], 'Bearer $access');
+      expect(logoutSent.data, {'refresh_token': 'R1'});
+      expect(await storage.read(key: 'refresh_token'), isNull);
     });
   });
 

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
@@ -23,9 +23,7 @@ class GenerationJobEvent(Base):
 
     __tablename__ = "generation_job_events"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     generation_job_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("generation_jobs.id", ondelete="CASCADE"),
@@ -39,9 +37,7 @@ class GenerationJobEvent(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
 
-    job: Mapped["GenerationJob"] = relationship(
-        "GenerationJob", back_populates="events"
-    )
+    job: Mapped["GenerationJob"] = relationship("GenerationJob", back_populates="events")

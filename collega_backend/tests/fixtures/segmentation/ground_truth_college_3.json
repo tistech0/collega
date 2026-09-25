@@ -1,0 +1,364 @@
+{
+ "college_ref_id": 3,
+ "page_count": 436,
+ "items": [
+  {
+   "item_number": 290,
+   "title": "Épidémiologie, facteurs de risque, prévention et dépistage des cancers",
+   "start_page": 12,
+   "end_page": 24
+  },
+  {
+   "item_number": 291,
+   "title": "Cancer : cancérogenèse, oncogénétique",
+   "start_page": 26,
+   "end_page": 42
+  },
+  {
+   "item_number": 292,
+   "title": "Diagnostic des cancers : signes d'appel et investigations paracliniques ; caractérisation du stade ; pronostic",
+   "start_page": 44,
+   "end_page": 59
+  },
+  {
+   "item_number": 293,
+   "title": "Le médecin préleveur de cellules et/ou de tissus pour des examens d'Anatomie et Cytologie pathologiques",
+   "start_page": 60,
+   "end_page": 70
+  },
+  {
+   "item_number": 294,
+   "title": "Traitement des cancers : principales modalités, classes thérapeutiques et leurs complications majeures. La décision thérapeutique pluridisciplinaire et l'information du malade",
+   "start_page": 72,
+   "end_page": 98
+  },
+  {
+   "item_number": 295,
+   "title": "Prise en charge et accompagnement d'un malade atteint de cancer à tous les stades de la maladie dont le stade de soins palliatifs",
+   "start_page": 100,
+   "end_page": 109
+  },
+  {
+   "item_number": 297,
+   "title": "Cancer de l'enfant : particularités épidémiologiques, diagnostiques et thérapeutiques",
+   "start_page": 110,
+   "end_page": 119
+  },
+  {
+   "item_number": 298,
+   "title": "Tumeurs de la cavité buccale, naso-sinusiennes et du cavum, et des voies aérodigestives supérieures",
+   "start_page": 120,
+   "end_page": 132
+  },
+  {
+   "item_number": 299,
+   "title": "Tumeurs intracrâniennes",
+   "start_page": 134,
+   "end_page": 150
+  },
+  {
+   "item_number": 300,
+   "title": "Tumeurs du col utérin, tumeurs du corps utérin",
+   "start_page": 152,
+   "end_page": 172
+  },
+  {
+   "item_number": 301,
+   "title": "Tumeurs du côlon et du rectum",
+   "start_page": 174,
+   "end_page": 190
+  },
+  {
+   "item_number": 302,
+   "title": "Tumeurs cutanées, épithéliales et mélaniques",
+   "start_page": 192,
+   "end_page": 210
+  },
+  {
+   "item_number": 303,
+   "title": "Tumeurs de l'estomac",
+   "start_page": 212,
+   "end_page": 227
+  },
+  {
+   "item_number": 304,
+   "title": "Tumeurs du foie, primitives et secondaires",
+   "start_page": 228,
+   "end_page": 246
+  },
+  {
+   "item_number": 305,
+   "title": "Tumeurs de l'œsophage",
+   "start_page": 248,
+   "end_page": 268
+  },
+  {
+   "item_number": 306,
+   "title": "Tumeurs de l'ovaire",
+   "start_page": 270,
+   "end_page": 284
+  },
+  {
+   "item_number": 307,
+   "title": "Tumeurs des os primitives et secondaires",
+   "start_page": 286,
+   "end_page": 304
+  },
+  {
+   "item_number": 308,
+   "title": "Tumeurs du pancréas",
+   "start_page": 306,
+   "end_page": 328
+  },
+  {
+   "item_number": 309,
+   "title": "Tumeurs du poumon, primitives et secondaires",
+   "start_page": 330,
+   "end_page": 355
+  },
+  {
+   "item_number": 310,
+   "title": "Tumeurs de la prostate",
+   "start_page": 356,
+   "end_page": 378
+  },
+  {
+   "item_number": 311,
+   "title": "Tumeurs du rein",
+   "start_page": 380,
+   "end_page": 394
+  },
+  {
+   "item_number": 312,
+   "title": "Tumeurs du sein",
+   "start_page": 396,
+   "end_page": 416
+  },
+  {
+   "item_number": 313,
+   "title": "Tumeurs du testicule",
+   "start_page": 418,
+   "end_page": 424
+  },
+  {
+   "item_number": 314,
+   "title": "Tumeurs vésicales",
+   "start_page": 426,
+   "end_page": 435
+  }
+ ],
+ "non_item_sections": [
+  {
+   "label": "couverture, éditeur",
+   "start_page": 0,
+   "end_page": 1
+  },
+  {
+   "label": "sommaire",
+   "start_page": 2,
+   "end_page": 3
+  },
+  {
+   "label": "préface",
+   "start_page": 4,
+   "end_page": 4
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 5,
+   "end_page": 5
+  },
+  {
+   "label": "introduction",
+   "start_page": 6,
+   "end_page": 6
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 7,
+   "end_page": 7
+  },
+  {
+   "label": "les auteurs",
+   "start_page": 8,
+   "end_page": 10
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 11,
+   "end_page": 11
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 25,
+   "end_page": 25
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 43,
+   "end_page": 43
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 71,
+   "end_page": 71
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 99,
+   "end_page": 99
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 133,
+   "end_page": 133
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 151,
+   "end_page": 151
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 173,
+   "end_page": 173
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 191,
+   "end_page": 191
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 211,
+   "end_page": 211
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 247,
+   "end_page": 247
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 269,
+   "end_page": 269
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 285,
+   "end_page": 285
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 305,
+   "end_page": 305
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 329,
+   "end_page": 329
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 379,
+   "end_page": 379
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 395,
+   "end_page": 395
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 417,
+   "end_page": 417
+  },
+  {
+   "label": "page blanche (filigrane seul / page vide OCR)",
+   "start_page": 425,
+   "end_page": 425
+  }
+ ],
+ "ambiguous_pages": [
+  {
+   "page": 25,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 43,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 71,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 99,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 133,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 151,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 173,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 191,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 211,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 247,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 269,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 285,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 305,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 329,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 379,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 395,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 417,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 425,
+   "reason": "page blanche entre deux chapitres : rattachable indifféremment à l'item précédent (sans contenu)"
+  },
+  {
+   "page": 306,
+   "reason": "début de 308 sans « Item 308 » ni « OBJECTIFS » (titre en caractères doublés « TTUUMMEEUURRSS ») : seuls le pied de page et la continuité l'identifient"
+  },
+  {
+   "page": 307,
+   "reason": "2e page de 308, sans en-tête courant"
+  }
+ ]
+}

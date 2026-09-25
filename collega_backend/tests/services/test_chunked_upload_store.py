@@ -1,4 +1,5 @@
 """Tests ChunkedUploadStore — état Redis + morceaux disque (Story 7.11)."""
+
 from __future__ import annotations
 
 import os

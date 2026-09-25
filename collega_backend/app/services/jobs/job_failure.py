@@ -8,6 +8,7 @@ laisse le collège `generation_complete` et son quota est rendu (l'utilisatrice
 n'a rien obtenu) ; seul un premier import passe le collège à `failed`.
 Verrous dans le même ordre que la bascule (collège puis job) : pas d'interblocage.
 """
+
 from __future__ import annotations
 
 import logging
@@ -73,11 +74,15 @@ async def fail_job(
                 # Réimport sans résultat : le quota consommé au router est rendu
                 # (UPDATE conditionnels : jamais négatif).
                 await db.execute(
-                    sa_update(College).where(College.id == college.id).where(College.reload_count > 0)
+                    sa_update(College)
+                    .where(College.id == college.id)
+                    .where(College.reload_count > 0)
                     .values(reload_count=College.reload_count - 1)
                 )
                 await db.execute(
-                    sa_update(User).where(User.id == job.user_id).where(User.monthly_reloads > 0)
+                    sa_update(User)
+                    .where(User.id == job.user_id)
+                    .where(User.monthly_reloads > 0)
                     .values(monthly_reloads=User.monthly_reloads - 1)
                 )
         await db.commit()

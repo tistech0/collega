@@ -521,7 +521,7 @@ void main() {
     });
   });
 
-  testWidgets('accessibilité : cibles étiquetées, 44 pt, contraste du texte (8.15)', (tester) async {
+  testWidgets('accessibilité : cibles étiquetées, 44 pt, contraste du texte (8.15)', tags: const ['golden'], (tester) async {
     _phone(tester, height: 900);
     final handle = tester.ensureSemantics();
     _Auth.user = _beta.copyWith(reminderHourUtc: 6, monthlyResetAt: DateTime(2026, 10, 1, 12));
@@ -550,7 +550,7 @@ void main() {
     for (final width in cgGoldenWidths) {
       for (final scale in cgGoldenScales) {
         final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-        testWidgets('golden profile_beta_$tag', (tester) async {
+        testWidgets('golden profile_beta_$tag', tags: const ['golden'], (tester) async {
           _phone(tester, width: width, height: 900);
           _Auth.user = _beta.copyWith(monthlyReloads: 1, monthlyResetAt: DateTime(2026, 10, 1, 12));
           await _open(tester, textScale: scale);

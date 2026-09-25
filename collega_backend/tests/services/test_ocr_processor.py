@@ -1,4 +1,5 @@
 """Tests OcrProcessor — pdfplumber et pytesseract sont mockés."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,9 +16,7 @@ def make_pdfplumber_mock(page_text: str, words: list | None = None):
     """Crée un mock pdfplumber.open() context manager."""
     mock_page = MagicMock()
     mock_page.extract_text.return_value = page_text
-    mock_page.extract_words.return_value = words or [
-        {"text": w} for w in page_text.split() if w
-    ]
+    mock_page.extract_words.return_value = words or [{"text": w} for w in page_text.split() if w]
 
     mock_pdf = MagicMock()
     mock_pdf.pages = [mock_page]
@@ -40,9 +39,7 @@ class TestProcessPage:
 
     @patch("app.services.ocr.ocr_processor.OcrProcessor._extract_with_pytesseract")
     @patch("app.services.ocr.ocr_processor.OcrProcessor._extract_with_pdfplumber")
-    def test_fallback_to_pytesseract_when_text_too_short(
-        self, mock_pdfplumber, mock_tesseract, processor
-    ):
+    def test_fallback_to_pytesseract_when_text_too_short(self, mock_pdfplumber, mock_tesseract, processor):
         mock_pdfplumber.return_value = OcrPageResult(
             page_num=0, text="short", confidence_score=0.9, method="pdfplumber"
         )

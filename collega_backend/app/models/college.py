@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -28,9 +28,7 @@ class College(Base):
     __tablename__ = "colleges"
     __table_args__ = (UniqueConstraint("user_id", "college_ref_id", name="uq_colleges_user_ref_id"),)
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
@@ -38,9 +36,7 @@ class College(Base):
         index=True,
     )
     college_ref_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default=CollegeStatus.pending
-    )
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default=CollegeStatus.pending)
     reload_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     ocr_page_progress: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     total_pages: Mapped[int | None] = mapped_column(Integer, nullable=True)
@@ -54,19 +50,17 @@ class College(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     user: Mapped["User"] = relationship("User", back_populates="colleges")
-    items: Mapped[list["Item"]] = relationship(
-        "Item", back_populates="college", cascade="all, delete-orphan"
-    )
+    items: Mapped[list["Item"]] = relationship("Item", back_populates="college", cascade="all, delete-orphan")
     generation_jobs: Mapped[list["GenerationJob"]] = relationship(
         "GenerationJob", back_populates="college", cascade="all, delete-orphan"
     )

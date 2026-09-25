@@ -1,7 +1,8 @@
 """Worker OCR (chantier 1) sur Postgres réel : pages par empreinte, reprise,
 brouillon d'items, arrêt, échecs. OCR et détection simulés (contrôlés par les tests)."""
+
 import asyncio
-import uuid
+import json
 
 import pytest
 from sqlalchemy import func, select
@@ -10,14 +11,14 @@ from app.core.config import settings
 from app.models.college import College
 from app.models.content import JobItem, JobPage, OcrPage
 from app.models.generation_job import GenerationJob
+from app.models.generation_job_event import GenerationJobEvent
 from app.models.item import Item
 from app.models.item_title import ItemTitle
-from app.services.ocr.item_detector import DetectedItem
+from app.services.ocr.item_detector import DetectedItem, PageAssignment, SegmentationReport, SegmentationResult
 from app.services.ocr.ocr_processor import OcrPageResult
 from app.workers import ocr_worker
-from app.workers.ocr_worker import dedupe_items, run_ocr
+from app.workers.ocr_worker import run_ocr, with_pages
 from tests.factories import make_college, make_item, make_job, make_user, write_pdf
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
 
 pytestmark = pytest.mark.pg
 
@@ -54,8 +55,10 @@ class FakeDetector:
 
     def __init__(self, titles=True):
         self.titles = titles
+        self.known_titles = None
 
-    def detect_items(self, texts, scores, tables):
+    def detect_items(self, texts, scores, tables, known_titles=None):
+        self.known_titles = known_titles
         items, current = [], None
         for i, text in enumerate(texts):
             first = text.splitlines()[0]
@@ -66,13 +69,25 @@ class FakeDetector:
             if current:
                 current["texts"].append(text)
                 current["end"] = i
-        return [
+        detected = [
             DetectedItem(
-                item_number=c["n"], rang="A", chapter_title=c["title"], ocr_text="\n".join(c["texts"]),
-                start_page=c["start"], end_page=c["end"], ocr_confidence_score=0.9,
+                item_number=c["n"],
+                rang="A",
+                chapter_title=c["title"],
+                ocr_text="\n".join(c["texts"]),
+                start_page=c["start"],
+                end_page=c["end"],
+                ocr_confidence_score=0.9,
+                pages=list(range(c["start"], c["end"] + 1)),
             )
             for c in items
         ]
+        report = SegmentationReport(
+            pages=[PageAssignment(p, "item", item_number=d.item_number) for d in detected for p in d.pages],
+            items=[{"item_number": d.item_number, "pages": f"{d.start_page}-{d.end_page}"} for d in detected],
+            warnings=["p9 : exemple"],
+        )
+        return SegmentationResult(items=detected, report=report)
 
 
 @pytest.fixture
@@ -161,10 +176,12 @@ async def test_stop_between_pages(pg_factory, seed, pg_engine):
 
     def stop_at_page_1(n):
         if n == 1:
+
             async def _stop():
                 async with pg_factory() as s:
                     (await s.get(GenerationJob, job.id)).status = "failed"
                     await s.commit()
+
             asyncio.run_coroutine_threadsafe(_stop(), loop).result()
 
     loop = asyncio.get_running_loop()
@@ -179,10 +196,12 @@ async def test_deleted_job_stops_ocr(pg_factory, seed):
 
     def delete_job(n):
         if n == 0:
+
             async def _delete():
                 async with pg_factory() as s:
                     await s.delete(await s.get(GenerationJob, job.id))
                     await s.commit()
+
             asyncio.run_coroutine_threadsafe(_delete(), loop).result()
 
     loop = asyncio.get_running_loop()
@@ -193,7 +212,9 @@ async def test_deleted_job_stops_ocr(pg_factory, seed):
 
 async def test_empty_pdf_fails_first_import(pg_factory, seed):
     college, job = await seed()
-    result = await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor([]), detector=FakeDetector())
+    result = await run_ocr(
+        pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor([]), detector=FakeDetector()
+    )
     assert result["error"] == "empty_pdf"
     async with pg_factory() as s:
         assert (await s.get(GenerationJob, job.id)).status == "failed"
@@ -251,8 +272,15 @@ async def test_generation_enqueued_and_stop_target_repointed(pg_factory, seed):
     college, job = await seed()
 
     redis = FakeRedis()
-    await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor(PAGES),
-                  detector=FakeDetector(), ctx={"redis": redis})
+    await run_ocr(
+        pg_factory,
+        college.id,
+        job.id,
+        "x.pdf",
+        processor=FakeProcessor(PAGES),
+        detector=FakeDetector(),
+        ctx={"redis": redis},
+    )
     assert redis.calls == [("generate_college_cards", (str(college.id), str(job.id), "x.pdf"), f"gen:{job.id}")]
     async with pg_factory() as s:
         assert (await s.get(GenerationJob, job.id)).arq_job_id == f"gen:{job.id}"
@@ -266,8 +294,9 @@ async def test_resumed_after_ocr_complete_reenqueues_generation(pg_factory, seed
         (await s.get(GenerationJob, job.id)).status = "ocr_complete"
         await s.commit()
     redis, proc = FakeRedis(), FakeProcessor(PAGES)
-    result = await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=proc, detector=FakeDetector(),
-                           ctx={"redis": redis})
+    result = await run_ocr(
+        pg_factory, college.id, job.id, "x.pdf", processor=proc, detector=FakeDetector(), ctx={"redis": redis}
+    )
     assert result["resumed"] == "generation_enqueued" and proc.calls == []
     assert [c[2] for c in redis.calls] == [f"gen:{job.id}"]
 
@@ -281,18 +310,97 @@ async def test_title_cascade_uses_and_feeds_referential(pg_factory, seed):
     assert labels == {304: "Tumeurs du foie", 305: "Cancer du pancréas"}
     # Import sans titre extrait : complété par le référentiel.
     college2, job2 = await seed()
-    await run_ocr(pg_factory, college2.id, job2.id, "x.pdf", processor=FakeProcessor(PAGES),
-                  detector=FakeDetector(titles=False))
+    await run_ocr(
+        pg_factory, college2.id, job2.id, "x.pdf", processor=FakeProcessor(PAGES), detector=FakeDetector(titles=False)
+    )
     async with pg_factory() as s:
         drafts = (await s.execute(select(JobItem).where(JobItem.job_id == job2.id))).scalars().all()
         assert {d.item_number: d.chapter_title for d in drafts} == labels
 
 
-def test_dedupe_keeps_longest_then_best_rang():
-    def det(n, text, rang="B"):
-        return DetectedItem(item_number=n, rang=rang, chapter_title="t", ocr_text=text,
-                            start_page=0, end_page=0, ocr_confidence_score=0.9)
+def test_with_pages_uses_item_pages_not_a_range():
+    """Chantier 4 : dedupe_items a disparu (R8 : un item par numéro, plages concaténées) ;
+    le texte d'un item est celui de ses pages, même non contiguës."""
+    item = DetectedItem(
+        item_number=216,
+        rang="A",
+        chapter_title="t",
+        ocr_text="",
+        start_page=0,
+        end_page=3,
+        ocr_confidence_score=0.9,
+        pages=[0, 1, 3],
+    )
+    assert with_pages([item], ["p0", "p1", "p2", "p3"]) == [(item, ["p0", "p1", "p3"])]
 
-    out = {d.item_number: d for d in dedupe_items([det(1, "court"), det(1, "plus long"), det(2, "x", "C"), det(2, "y", "A")])}
-    assert out[1].ocr_text == "plus long"
-    assert (out[2].rang, out[2].ocr_text) == ("A", "x")
+
+async def test_segmentation_report_is_stored_and_official_titles_passed(pg_factory, seed):
+    college, job = await seed()
+    async with pg_factory() as s:
+        s.add(ItemTitle(item_number=304, label="Tumeurs du foie", source="official", occurrences=1))
+        s.add(ItemTitle(item_number=305, label="Autre libellé extrait", source="extracted", occurrences=1))
+        await s.commit()
+    detector = FakeDetector()
+    await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor(PAGES), detector=detector)
+    assert detector.known_titles == {304: "Tumeurs du foie"}
+    async with pg_factory() as s:
+        stored = (await s.get(GenerationJob, job.id)).segmentation_report
+    data = json.loads(stored)
+    assert [i["item_number"] for i in data["items"]] == [304, 305]
+    assert data["warnings"] == ["p9 : exemple"]
+    assert "texte A" not in stored
+
+
+def test_with_pages_rejects_item_without_pages():
+    item = DetectedItem(
+        item_number=1, rang="A", chapter_title="", ocr_text="", start_page=0, end_page=0, ocr_confidence_score=0.9
+    )
+    with pytest.raises(ValueError):
+        with_pages([item], ["p0"])
+
+
+async def test_event_messages_carry_segmentation_warning_count(pg_factory, seed):
+    college, job = await seed()
+    await run_ocr(pg_factory, college.id, job.id, "x.pdf", processor=FakeProcessor(PAGES), detector=FakeDetector())
+    async with pg_factory() as s:
+        events = (
+            await s.execute(
+                select(GenerationJobEvent.event_type, GenerationJobEvent.message).where(
+                    GenerationJobEvent.generation_job_id == job.id,
+                    GenerationJobEvent.event_type.in_(["items_detected", "ocr_complete"]),
+                )
+            )
+        ).all()
+    assert sorted(events) == [
+        ("items_detected", "2 items, 1 avertissement de découpage"),
+        ("ocr_complete", "2 items, 1 avertissement de découpage"),
+    ]
+
+
+def test_items_message_pluralises_items():
+    """Revue finale (Minor 6) : « 1 item », « 2 items »."""
+    one_warning = SegmentationReport(warnings=["w"])
+    assert ocr_worker._items_message(1, SegmentationReport()) == "1 item, 0 avertissement de découpage"
+    assert ocr_worker._items_message(2, one_warning) == "2 items, 1 avertissement de découpage"
+
+
+async def test_no_item_fails_the_job_without_generation(pg_factory, seed):
+    """Découpage sans aucun item (même après le repli) : échec propre, rien en file, aucun coût."""
+    college, job = await seed()
+    redis = FakeRedis()
+    result = await run_ocr(
+        pg_factory,
+        college.id,
+        job.id,
+        "x.pdf",
+        processor=FakeProcessor(["Une page de texte sans aucun numéro d'item, assez longue."] * 3),
+        ctx={"redis": redis},
+    )
+    assert result["error"] == "no_items"
+    assert redis.calls == []
+    async with pg_factory() as s:
+        stored = await s.get(GenerationJob, job.id)
+        assert (stored.status, stored.error_message) == ("failed", "Aucun item détecté dans ce PDF")
+        assert "découpage suspect" in json.loads(stored.segmentation_report)["warnings"][-1]
+        assert (await s.get(College, college.id)).status == "failed"
+    assert await _count(pg_factory, JobItem, job_id=job.id) == 0

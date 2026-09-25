@@ -25,6 +25,40 @@ void main() {
     expect(ImportSummary.maybeFromJson(null), isNull);
   });
 
+  test('premier import : aucun compteur de changement ; rien à dire sans item insuffisant', () {
+    const first = ImportSummary(changed: 0, added: 40, removed: 0, unchanged: 0, quotaRefunded: false, reimport: false);
+    expect(importSummaryText(first), isNull);
+  });
+
+  test('premier import avec items sans contenu suffisant : seulement la liste, jamais « N nouveaux »', () {
+    const first = ImportSummary(changed: 0, added: 40, removed: 0, unchanged: 0, quotaRefunded: false,
+        reimport: false, insufficientItems: [215, 230]);
+    expect(importSummaryText(first), 'Pas assez de contenu : items 215, 230');
+  });
+
+  test('réimport avec items insuffisants : changements puis la liste', () {
+    const s = ImportSummary(changed: 1, added: 0, removed: 0, unchanged: 20, quotaRefunded: false,
+        insufficientItems: [215]);
+    expect(importSummaryText(s), '1 item mis à jour, 20 inchangés. Pas assez de contenu : item 215');
+  });
+
+  test('liste longue : 8 items puis « et N autres »', () {
+    expect(insufficientItemsText([for (var i = 1; i <= 9; i++) i]), 'Pas assez de contenu : items 1, 2, 3, 4, 5, 6, 7, 8 et 1 autre');
+    expect(insufficientItemsText([for (var i = 1; i <= 11; i++) i]),
+        'Pas assez de contenu : items 1, 2, 3, 4, 5, 6, 7, 8 et 3 autres');
+    expect(insufficientItemsText(const []), isNull);
+  });
+
+  test('JSON : reimport et insufficient_items lus ; serveur ancien sans « reimport » = réimport', () {
+    final first = ImportSummary.fromJson({'changed': 0, 'added': 40, 'removed': 0, 'unchanged': 0,
+      'quota_refunded': false, 'reimport': false, 'insufficient_items': [215, 216]});
+    expect(first.reimport, isFalse);
+    expect(first.insufficientItems, [215, 216]);
+    final old = ImportSummary.fromJson({'changed': 2, 'added': 0, 'removed': 0, 'unchanged': 5, 'quota_refunded': false});
+    expect(old.reimport, isTrue);
+    expect(old.insufficientItems, isEmpty);
+  });
+
   test('échec d’un réimport confirmé par le serveur : fiches intactes, sans double préfixe', () {
     const expected = 'Le réimport n’a pas abouti. Tes fiches actuelles sont intactes.';
     expect(importErrorMessage('reimport_failed'), expected);

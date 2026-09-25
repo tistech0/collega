@@ -12,6 +12,7 @@ Dans le conteneur worker (volume PDF monté) :
   # Combler un trou que l'extraction ne peut pas lire (source `official`, prioritaire) :
   docker exec collega-worker-1 python -m scripts.backfill_item_titles --set 338="Œdème de Quincke et anaphylaxie"
 """
+
 from __future__ import annotations
 
 import argparse
@@ -33,11 +34,7 @@ ItemRow = tuple[uuid.UUID, int, str | None]
 
 def plan_updates(items: list[ItemRow], extracted: dict[int, str]) -> list[tuple[uuid.UUID, str]]:
     """Items sans titre pour lesquels le PDF fournit un titre : (id, titre)."""
-    return [
-        (item_id, extracted[number])
-        for item_id, number, title in items
-        if not title and number in extracted
-    ]
+    return [(item_id, extracted[number]) for item_id, number, title in items if not title and number in extracted]
 
 
 def parse_overrides(values: list[str]) -> dict[int, str]:
@@ -56,7 +53,7 @@ def extract_titles(pdf_path: Path) -> dict[int, str]:
 
     with pdfplumber.open(pdf_path) as pdf:
         texts = [page.extract_text() or "" for page in pdf.pages]
-    detected = ItemDetector().detect_items(texts)
+    detected = ItemDetector().detect_items(texts).items
     return {d.item_number: d.chapter_title for d in detected if d.chapter_title}
 
 
@@ -100,9 +97,7 @@ async def run(dry_run: bool, overrides: dict[int, str]) -> None:
                     if item is not None and not item.chapter_title:
                         item.chapter_title = title
 
-            missing = sorted(
-                number for _, number, title in rows if not title and number not in extracted
-            )
+            missing = sorted(number for _, number, title in rows if not title and number not in extracted)
             print(
                 f"{label} : {len(rows)} items, {len(extracted)} titres extraits du PDF, "
                 f"{len(updates)} items à compléter, sans titre : {missing or 'aucun'}"

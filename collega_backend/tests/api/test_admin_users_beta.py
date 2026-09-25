@@ -1,4 +1,5 @@
 """Tests GET /v1/admin/users et PATCH /v1/admin/users/{id}/beta."""
+
 from __future__ import annotations
 
 import types
@@ -7,6 +8,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from httpx import AsyncClient
+
+# Le faux db.get renvoie l'utilisateur pour toute clé : limites anti-spam injectées.
+pytestmark = pytest.mark.usefixtures("default_anti_spam_limits")
 
 ADMIN_AUTH = ("admin", "testpass")
 
@@ -55,9 +59,7 @@ class TestGetUsers:
 
     async def test_response_has_data_wrapper(self, client: AsyncClient, mock_db):
         mock_db.execute = AsyncMock(
-            return_value=MagicMock(
-                scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[])))
-            )
+            return_value=MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[]))))
         )
         resp = await client.get("/v1/admin/users", auth=ADMIN_AUTH)
         assert "data" in resp.json()
@@ -67,9 +69,7 @@ class TestGetUsers:
 class TestPatchUserBeta:
     async def test_401_without_credentials(self, client: AsyncClient):
         user_id = str(uuid.uuid4())
-        resp = await client.patch(
-            f"/v1/admin/users/{user_id}/beta", json={"is_beta": True}
-        )
+        resp = await client.patch(f"/v1/admin/users/{user_id}/beta", json={"is_beta": True})
         assert resp.status_code == 401
 
     async def test_404_for_unknown_user(self, client: AsyncClient, mock_db):

@@ -1,11 +1,11 @@
 """Tests GET /v1/search — FR36-37 (Story 5.1) + Story 7.2 (rate limit par user_id)."""
+
 from __future__ import annotations
 
 import types
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 from httpx import AsyncClient
 
 from app.deps import get_current_user, require_subscription
@@ -166,7 +166,9 @@ class TestSearchRateLimitKey:
         request = MagicMock()
         # Pas de user_id → state.user_id absent (getattr renverra None)
         del request.state.user_id
-        request.headers = {"X-Forwarded-For": "1.2.3.4"}
+        # Client direct (hors proxy de confiance) : X-Forwarded-For ignoré (chantier 2 § 4).
+        request.client.host = "1.2.3.4"
+        request.headers = {"X-Forwarded-For": "6.6.6.6"}
         # fallback IP via get_client_ip → préfixe "ip:" (P8) pour debug Redis
         assert _user_id_key(request) == "ip:1.2.3.4"
 
@@ -206,6 +208,31 @@ class TestSearchRateLimitKey:
                         if kw.arg == "key_func" and isinstance(kw.value, ast.Name):
                             wirings.append(kw.value.id)
         assert "_user_id_key" in wirings, (
-            "Décorateur @limiter.limit du endpoint search() doit avoir "
-            "key_func=_user_id_key (Story 7.2 AC #3)"
+            "Décorateur @limiter.limit du endpoint search() doit avoir key_func=_user_id_key (Story 7.2 AC #3)"
         )
+
+
+class TestSearchLogs:
+    async def test_search_term_never_logged(self, client: AsyncClient, mock_db, caplog):
+        """Chantier 2 § 6 : le terme cherché n'apparaît dans aucun log (id + nombre de résultats seulement)."""
+        import logging
+
+        from app.main import app
+
+        user = _make_user()
+        app.dependency_overrides[get_current_user] = lambda: user
+        app.dependency_overrides[require_subscription] = lambda: user
+        term = "insuffisance-cardiaque-secrete"
+
+        with (
+            caplog.at_level(logging.DEBUG),
+            patch("app.api.v1.search.search_flash_cards", new=AsyncMock(return_value=[_make_result()])),
+        ):
+            resp = await client.get("/v1/search", params={"q": term}, headers={"Authorization": "Bearer token"})
+
+        assert resp.status_code == 200
+        # httpx (client de test) journalise l'URL appelée : ce n'est pas un log de l'application.
+        app_logs = "\n".join(r.getMessage() for r in caplog.records if not r.name.startswith("httpx"))
+        assert term not in app_logs
+        search_logs = [r.getMessage() for r in caplog.records if r.name == "app.api.v1.search"]
+        assert search_logs and str(user.id) in search_logs[0] and "1" in search_logs[0]

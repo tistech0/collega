@@ -11,11 +11,12 @@ UPDATE atomique avec RETURNING. Le mock `db.execute.side_effect` chaîne :
 Pour les tests non-reimport (status != 'generation_complete'), seuls les
 deux premiers SELECT sont exécutés.
 """
+
 from __future__ import annotations
 
 import types
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from unittest.mock import AsyncMock, MagicMock
 
@@ -23,7 +24,13 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.exc import IntegrityError
 
+from app.core.config import settings
+from app.core.security import create_access_token
 from app.deps import get_current_user, require_subscription
+from app.models.college import College
+from app.models.user import User
+from tests.factories import make_college, make_user
+from tests.fakes.fake_arq import arq_pool
 
 
 def _make_user(user_id=None, monthly_reloads=0, monthly_reloads_reset_at=None):
@@ -63,10 +70,12 @@ def _readable_pdf(monkeypatch):
     testée dans test_pdf_damaged.py."""
     from unittest.mock import AsyncMock
 
-    from app.api.v1 import colleges as colleges_module
+    from app.api.v1.colleges import imports as colleges_module
 
     monkeypatch.setattr(colleges_module, "assert_pdf_readable", AsyncMock(return_value=1))
-_FUTURE = datetime.now(timezone.utc) + timedelta(days=15)
+
+
+_FUTURE = datetime.now(UTC) + timedelta(days=15)
 
 
 class TestReimportQuotaChecks:
@@ -81,8 +90,8 @@ class TestReimportQuotaChecks:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob (aucun job actif)
-                _result(None),     # UPDATE College RETURNING — saturé → 409 COLLEGE_RELOAD_LIMIT
+                _result(None),  # SELECT GenerationJob (aucun job actif)
+                _result(None),  # UPDATE College RETURNING — saturé → 409 COLLEGE_RELOAD_LIMIT
             ]
         )
 
@@ -98,9 +107,7 @@ class TestReimportQuotaChecks:
         assert detail["reload_count"] == 2
         assert detail["reload_count_max"] == 2
 
-    async def test_reimport_bloque_monthly_limit_rollback_college(
-        self, client: AsyncClient, mock_db
-    ):
+    async def test_reimport_bloque_monthly_limit_rollback_college(self, client: AsyncClient, mock_db):
         """409 MONTHLY_RELOAD_LIMIT — College a été UPDATE OK mais User RETURNING None.
 
         On vérifie aussi que `db.rollback()` est bien appelé pour annuler
@@ -115,9 +122,9 @@ class TestReimportQuotaChecks:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob
-                _result(1),        # UPDATE College RETURNING 1 (OK)
-                _result(None),     # UPDATE User RETURNING None → saturé → 409
+                _result(None),  # SELECT GenerationJob
+                _result(1),  # UPDATE College RETURNING 1 (OK)
+                _result(None),  # UPDATE User RETURNING None → saturé → 409
             ]
         )
         mock_db.rollback = AsyncMock()
@@ -139,9 +146,12 @@ class TestReimportQuotaChecks:
 
     async def test_monthly_reset_at_none_effective_zero(self, client: AsyncClient, mock_db):
         """Si monthly_reloads_reset_at is None → reset lazy → user peut faire un reimport."""
-        from app.main import app
         import uuid as _uuid
-        from unittest.mock import patch, MagicMock as _MM, AsyncMock as _AM
+        from unittest.mock import AsyncMock as _AM
+        from unittest.mock import MagicMock as _MM
+        from unittest.mock import patch
+
+        from app.main import app
 
         user = _make_user(monthly_reloads=3, monthly_reloads_reset_at=None)
         college = _make_college(ref_id=15, user_id=user.id, status="generation_complete", reload_count=0)
@@ -151,9 +161,9 @@ class TestReimportQuotaChecks:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob
-                _result(1),        # UPDATE College RETURNING 1 (premier reload, le reset_lazy a remis monthly=0)
-                _result(1),        # UPDATE User RETURNING 1 (incrément OK après reset lazy)
+                _result(None),  # SELECT GenerationJob
+                _result(1),  # UPDATE College RETURNING 1 (premier reload, le reset_lazy a remis monthly=0)
+                _result(1),  # UPDATE User RETURNING 1 (incrément OK après reset lazy)
             ]
         )
 
@@ -161,12 +171,11 @@ class TestReimportQuotaChecks:
         mock_arq_job.job_id = "arq-test"
         mock_pool = _AM()
         mock_pool.enqueue_job = _AM(return_value=mock_arq_job)
-        mock_pool.close = _AM()
 
         with (
-            patch("app.api.v1.colleges.Path.mkdir"),
+            patch("app.services.imports.Path.mkdir"),
             patch("builtins.open", _MM()),
-            patch("arq.create_pool", _AM(return_value=mock_pool)),
+            arq_pool(mock_pool),
         ):
             resp = await client.post(
                 "/v1/colleges/15/import",
@@ -181,8 +190,11 @@ class TestReimportQuotaChecks:
 
     async def test_premier_import_non_bloque(self, client: AsyncClient, mock_db):
         """Premier import (status != generation_complete) → aucun UPDATE atomique nécessaire."""
+        from unittest.mock import AsyncMock as _AM
+        from unittest.mock import MagicMock as _MM
+        from unittest.mock import patch
+
         from app.main import app
-        from unittest.mock import patch, MagicMock as _MM, AsyncMock as _AM
 
         user = _make_user()
         college = _make_college(ref_id=15, user_id=user.id, status="pending", reload_count=99)
@@ -191,7 +203,7 @@ class TestReimportQuotaChecks:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob
+                _result(None),  # SELECT GenerationJob
             ]
         )
 
@@ -199,12 +211,11 @@ class TestReimportQuotaChecks:
         mock_arq_job.job_id = "arq-test"
         mock_pool = _AM()
         mock_pool.enqueue_job = _AM(return_value=mock_arq_job)
-        mock_pool.close = _AM()
 
         with (
-            patch("app.api.v1.colleges.Path.mkdir"),
+            patch("app.services.imports.Path.mkdir"),
             patch("builtins.open", _MM()),
-            patch("arq.create_pool", _AM(return_value=mock_pool)),
+            arq_pool(mock_pool),
         ):
             resp = await client.post(
                 "/v1/colleges/15/import",
@@ -219,9 +230,12 @@ class TestReimportQuotaChecks:
 
     async def test_import_dans_les_limites_retourne_202(self, client: AsyncClient, mock_db):
         """Reimport OK — UPDATE atomique réussit pour College et User."""
-        from app.main import app
         import uuid as _uuid
-        from unittest.mock import patch, MagicMock as _MM, AsyncMock as _AM
+        from unittest.mock import AsyncMock as _AM
+        from unittest.mock import MagicMock as _MM
+        from unittest.mock import patch
+
+        from app.main import app
 
         user = _make_user(monthly_reloads=2, monthly_reloads_reset_at=_FUTURE)
         college = _make_college(ref_id=15, user_id=user.id, status="generation_complete", reload_count=1)
@@ -231,9 +245,9 @@ class TestReimportQuotaChecks:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob
-                _result(2),        # UPDATE College RETURNING 2
-                _result(3),        # UPDATE User RETURNING 3
+                _result(None),  # SELECT GenerationJob
+                _result(2),  # UPDATE College RETURNING 2
+                _result(3),  # UPDATE User RETURNING 3
             ]
         )
 
@@ -241,16 +255,16 @@ class TestReimportQuotaChecks:
         mock_arq_job.job_id = "arq-ok"
         mock_pool = _AM()
         mock_pool.enqueue_job = _AM(return_value=mock_arq_job)
-        mock_pool.close = _AM()
 
         async def mock_refresh(obj):
             pass
+
         mock_db.refresh = mock_refresh
 
         with (
-            patch("app.api.v1.colleges.Path.mkdir"),
+            patch("app.services.imports.Path.mkdir"),
             patch("builtins.open", _MM()),
-            patch("arq.create_pool", _AM(return_value=mock_pool)),
+            arq_pool(mock_pool),
         ):
             resp = await client.post(
                 "/v1/colleges/15/import",
@@ -264,17 +278,57 @@ class TestReimportQuotaChecks:
         assert "job_id" in data
 
 
+@pytest.mark.pg
+async def test_reimport_bloque_monthly_limit_409_pg(pg_client: AsyncClient, pg_factory):
+    """I2 (régression) : à la limite mensuelle, `POST /import` doit renvoyer 409
+    MONTHLY_RELOAD_LIMIT — pas 500 (MissingGreenlet).
+
+    Contrairement aux tests mockés ci-dessus, l'utilisateur est authentifié par un
+    vrai Bearer token (pas d'override de `require_subscription`/`get_current_user`) :
+    `current_user` est donc chargé par `get_current_user` dans la MÊME session que
+    celle utilisée par `apply_reimport_quota`, comme en production. C'est cette
+    session partagée qui reproduit le bug : `await db.rollback()` expire l'ORM
+    `user`, et un accès à ses attributs après coup (pour construire l'erreur)
+    déclenche un lazy-load synchrone → MissingGreenlet si l'erreur est construite
+    après le rollback."""
+    async with pg_factory() as db:
+        user = await make_user(db, monthly_reloads=settings.monthly_reloads_max)
+        user.monthly_reloads_reset_at = datetime.now(UTC) + timedelta(days=15)
+        college = await make_college(db, user, status="generation_complete", reload_count=0)
+        await db.commit()
+
+    token = create_access_token(str(user.id))
+    resp = await pg_client.post(
+        f"/v1/colleges/{college.college_ref_id}/import",
+        files={"pdf": ("t.pdf", BytesIO(_PDF_BYTES), "application/pdf")},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert resp.status_code == 409
+    detail = resp.json()["detail"]
+    assert detail["code"] == "MONTHLY_RELOAD_LIMIT"
+    assert detail["monthly_reloads"] == settings.monthly_reloads_max
+    assert detail["monthly_max"] == settings.monthly_reloads_max
+    assert "reset_at" in detail
+
+    # Quota inchangé : l'incrément College fait avant l'échec User a bien été annulé.
+    async with pg_factory() as s:
+        assert (await s.get(College, college.id)).reload_count == 0
+        assert (await s.get(User, user.id)).monthly_reloads == settings.monthly_reloads_max
+
+
 class TestUniqueProcessingIntegrity:
     """Story 7.2 AC #4 — la contrainte UNIQUE partial index sur generation_jobs
     se manifeste via IntegrityError au commit du nouveau job. Le router doit
     renvoyer 409 JOB_IN_PROGRESS (et non 500)."""
 
-    async def test_integrity_error_commit_returns_409_job_in_progress(
-        self, client: AsyncClient, mock_db
-    ):
-        from app.main import app
+    async def test_integrity_error_commit_returns_409_job_in_progress(self, client: AsyncClient, mock_db):
         import uuid as _uuid
-        from unittest.mock import patch, MagicMock as _MM, AsyncMock as _AM
+        from unittest.mock import AsyncMock as _AM
+        from unittest.mock import MagicMock as _MM
+        from unittest.mock import patch
+
+        from app.main import app
 
         user = _make_user()
         # status != generation_complete → pas de quota check, le code va directement
@@ -286,7 +340,7 @@ class TestUniqueProcessingIntegrity:
         mock_db.execute = AsyncMock(
             side_effect=[
                 _result(college),  # SELECT College
-                _result(None),     # SELECT GenerationJob (pre-check vide, le doublon n'est pas encore créé)
+                _result(None),  # SELECT GenerationJob (pre-check vide, le doublon n'est pas encore créé)
             ]
         )
         mock_db.commit = AsyncMock(side_effect=IntegrityError("INSERT", {}, Exception("UNIQUE")))
@@ -294,12 +348,11 @@ class TestUniqueProcessingIntegrity:
 
         mock_pool = _AM()
         mock_pool.enqueue_job = _AM(return_value=_MM(job_id="x"))
-        mock_pool.close = _AM()
 
         with (
-            patch("app.api.v1.colleges.Path.mkdir"),
+            patch("app.services.imports.Path.mkdir"),
             patch("builtins.open", _MM()),
-            patch("arq.create_pool", _AM(return_value=mock_pool)),
+            arq_pool(mock_pool),
         ):
             resp = await client.post(
                 "/v1/colleges/15/import",

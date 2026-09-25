@@ -1,66 +1,157 @@
-"""Détection des items ECNi et de leurs rangs dans le texte OCR.
+"""Découpage d'un collège en items ECNi et rang de leurs objectifs (chantier 4, spec § 4).
 
-Structure réelle des PDFs ECNi (collèges CNCEM, COFER, CEP, etc.) :
-  - Chaque item débute par une page d'en-tête :
-        "Item N\nTitre de l'item"
-    suivie d'un tableau structuré :
-        Rang | Rubrique | Intitulé connaissance
-  - Les pages suivantes contiennent le texte de l'item (sections I, II, …)
-    jusqu'à la prochaine page d'en-tête.
-  - Le rang de l'item est déterminé d'après ce tableau selon la priorité A > B > C :
-    rang "A" si au moins un objectif Rang A existe, sinon "B", sinon "C".
+Chaque page est classée (item N | section hors item | blanche) par une machine à états
+sur des signaux par page. Objectif : chaque item reçoit toutes ses pages et seulement
+les siennes ; le rapport de découpage dit où va chaque page (aucune page perdue).
 
-Stratégie de détection du rang (par ordre de priorité) :
-  1. Tableau pdfplumber : colonne "Rang" dans les tables extraites de la page.
-  2. Texte brut OCR : recherche du bloc tableau "Rang | Rubrique" + lignes "A/B/C …"
-     (fallback pour pages scannées via pytesseract).
-  3. Défaut "A" avec warning si aucun signal trouvé.
+Règles (détail et cas réels : analyse du chantier 4, § 4) :
+  R0  normalisation : lignes de filigrane retirées, lignes « TTuummeeuurrss » dédoublées ;
+      page blanche si moins de 40 caractères utiles.
+  R1  en-tête « Item N » dans les 5 premières lignes ; préfixes « • », « w », « - / »,
+      formes abîmées « tem N », « em N » ; chiffres coupés « 21 2 » → candidats [212, 21] ;
+      « 359 bis » → 359.
+  R2  « OBJECTIFS : N° x » ouvre l'item x (signal fort).
+  R3  page d'ouverture (signal fort) : en-tête R1 et 1re ligne « CHAPITRE » (Elsevier),
+      1re ligne « Collège des Enseignants … » (CEP) ou tableau « Rang … Rubrique ».
+  R4  ensemble K des numéros sûrs : sommaire, OBJECTIFS, ouvertures fortes, en-têtes répétés
+      ≥ 2 fois (sauf préfixe tronqué d'un numéro sûr) ; restreint au référentiel officiel
+      s'il est fourni et complet. Un en-tête se résout : joint ∈ K, sinon item courant si un candidat
+      en est le préfixe, sinon autre candidat ∈ K, sinon rien (warning).
+  R5  un en-tête ≠ item courant n'ouvre un item que s'il est dans K, confirmé sur une des
+      4 pages suivantes et pas déjà ouvert.
+  R6  une page dont le début égale le titre connu (référentiel, sommaire, OBJECTIFS) d'un
+      item de K pas encore ouvert ouvre cet item.
+  R7  sections hors item (sommaire, préface… seulement avant le 1er item ; « CHAPITRE » sans
+      item, dossiers progressifs, entraînement, index, corrigés partout) : ferment l'item.
+  R8  un item fermé ne se rouvre pas par un signal faible ; une réouverture par un signal
+      fort concatène les pages (un item par numéro) et est signalée.
+  R9  pages blanches neutres : un item finit à sa dernière page de contenu, une page
+      blanche interne y reste.
+  R10 rapport : chaque page → item | section | blanche, avec ses signaux, et les warnings.
+
+Rang (analyse § 3) : par objectif, dans le tableau « Rang Rubrique » de la page d'ouverture
+et des 2 suivantes. Les pictogrammes des scans sont lus comme des lettres rondes : noirs
+{A, A*, O, 0, G, ©, @} → A, bleus {B, B*, Q, □, s} → B, autre → inconnu. Dans les tableaux
+pdfplumber, la colonne de rang est trouvée par ses valeurs (≥ 60 % de A/B/C).
+Rang d'item : A si au moins un objectif A, sinon B si au moins un B, sinon A (warning).
 """
+
 from __future__ import annotations
 
+import json
 import logging
+import math
 import re
+import unicodedata
 from dataclasses import dataclass, field
 from typing import Literal
 
 from app.services.ocr.item_titles import clean_title, is_valid_title
+from app.services.ocr.text_normalize import WATERMARK_PATTERN, undouble
 
 logger = logging.getLogger(__name__)
 
-# Pattern item : "Item 75", "Item n°110", "ITEM 330"
-# Ancré en début de ligne (re.MULTILINE) pour ne pas matcher "voir item 42" mid-sentence.
-# Tolère la ponctuation OCR en tête (". Item 313", CNEC) mais pas les puces (« • Item 230 »
-# est une référence dans le corps). Pas « tem 313 » : ces en-têtes tronqués le sont souvent
-# aussi à droite (« tem 30 » pour 306) et créeraient de faux items.
-_ITEM_HEADER_PATTERN = re.compile(
-    r"^[.,'’ \t]{0,3}item\s*n?°?\s*(\d{1,3})\b", re.IGNORECASE | re.MULTILINE
+RangType = Literal["A", "B", "C"]
+PageKind = Literal["item", "section", "blank"]
+PageTables = list[list[list[str]]]  # list[table] → table = list[row] → row = list[cell]
+
+# ── R0 ────────────────────────────────────────────────────────────────────────
+# Motif de filigrane partagé avec l'allègement du texte envoyé à Claude (spec § 5).
+_WATERMARK = WATERMARK_PATTERN
+_BLANK_MAX_CHARS = 40
+
+# ── R1 ────────────────────────────────────────────────────────────────────────
+_HEADER_LINES = 5
+_HEADER_PREFIX = r"^(?:[\W_]{0,4}|w\s+|-\s*/\s*)"
+_HEADER_ITEM = re.compile(_HEADER_PREFIX + r"(?:i?t?em)\s*n?°?\s*((?:\d\s?){1,3})(\s*bis)?\b", re.IGNORECASE)
+# Chapitre commun à deux items : « Items 213 et 214 », « Items 213, 214 », « Items 213-214 »
+_HEADER_ITEMS = re.compile(_HEADER_PREFIX + r"items\s*(\d{1,3})\s*(?:et|,|-|–|&)\s*(\d{1,3})\b", re.IGNORECASE)
+# En-tête « propre » du repli (format de l'ancien détecteur) : pas de forme abîmée ni de puce.
+_CLEAN_HEADER = re.compile(r"^[.,'’ \t]{0,3}items?\s*n?°?\s*\d", re.IGNORECASE)
+
+# ── R2 / R3 ───────────────────────────────────────────────────────────────────
+# « OBJECTIFS: N° 304. Tumeurs du foie… » (variantes OCR : « OBJECTIFS : », « N"o300. »)
+# Le mot « OBJECTIFS » en toute casse ; « N » strict (« objectifs nutritionnels » n'en est pas un).
+_OBJECTIFS = re.compile(r"(?i:OBJECTIFS?)\s*:?\s*N\s*[°º\"'o]{0,3}\s*(\d{1,3})\s*[.\-–:]?[ \t]*([^\n]*)")
+_CHAPITRE = re.compile(r"^CHAPITRE\b")
+_CEP_FIRST_LINE = re.compile(r"Coll[èe]ge des Enseignants")
+_RANG_TABLE_LINES = 40
+
+# ── R4 : sommaire ─────────────────────────────────────────────────────────────
+_TOC_ITEM_LINE = re.compile(r"(?im)^\s*(?:\d+\s+)?item\s*_?(\d{1,3})")
+_TOC_LEADER_LINE = re.compile(r"\.{6,}|…")
+_TOC_MIN_LEADERS = 4
+_TOC_MIN_ITEMS = 3
+_CONFIRM_PAGES = 4
+_R6_TITLE_MIN = 10
+_R6_TITLE_PREFIX = 25
+# Le référentiel officiel ne restreint K que s'il est complet (367 items EDN, marge pour
+# les numéros retirés) ; un référentiel partiel sert seulement aux titres (R6).
+_COMPLETE_REFERENTIAL = 300
+
+# ── Filets de sécurité (livres d'un format inconnu) ───────────────────────────
+_MAX_SECTION_CONTENT_PAGES = 30
+_FRONT_MATTER_MAX_SHARE = 0.10
+_MIN_ITEM_COVERAGE = 0.5
+_CONCENTRATION_MIN_PAGES = 100
+_MAX_ITEM_SHARE = 0.4
+_MIN_IGNORED_NUMBERS = 3
+
+# ── R7 ────────────────────────────────────────────────────────────────────────
+_SECTION_PATTERNS = [
+    ("sommaire", re.compile(r"^\s*(sommaire|table des mati[èe]res)\b", re.IGNORECASE)),
+    ("préface", re.compile(r"^\s*pr[ée]face\b", re.IGNORECASE)),
+    ("introduction du livre", re.compile(r"^\s*introduction\s*$", re.IGNORECASE)),
+    ("auteurs", re.compile(r"^\s*(les auteurs|collaborateurs\b)", re.IGNORECASE)),
+    ("note de l'éditeur", re.compile(r"^\s*(note de l.[ée]diteur|compl[ée]ments en ligne)", re.IGNORECASE)),
+    ("abréviations", re.compile(r"^\s*abr[ée]viations\b", re.IGNORECASE)),
+    ("dossiers progressifs", re.compile(r"^\s*(dossiers? (cliniques )?progressifs|entra[îi]nement)\b", re.IGNORECASE)),
+    ("index", re.compile(r"^\s*index\s*$", re.IGNORECASE)),
+    ("corrigés", re.compile(r"^\s*(corrig[ée]s|r[ée]ponses aux (qcm|questions))\b", re.IGNORECASE)),
+]
+# R7 bis : liminaires, reconnues seulement avant le 1er item.
+_FRONT_MATTER = frozenset(
+    {"sommaire", "préface", "introduction du livre", "auteurs", "note de l'éditeur", "abréviations"}
 )
-# Compte des numéros d'un sommaire : motif strict (« Item N » en tout début de ligne), pour
-# qu'une liste « - Item 12 / - Item 45 » d'items liés ne fasse pas passer une page pour un sommaire.
-_TOC_ITEM_PATTERN = re.compile(r"^item\s*n?°?\s*(\d{1,3})\b", re.IGNORECASE | re.MULTILINE)
+_CHAPTER_WITHOUT_ITEM = "chapitre sans item"
+_DOSSIERS = "dossiers progressifs"
+_FRONT_LABEL = "liminaire"
+
+# ── Rang (§ 3) ────────────────────────────────────────────────────────────────
+# En-tête du tableau d'objectifs : « Rubrique » en début de ligne, précédé de « Rang » ou suivi
+# de « Intitulé ». Plus large que `rang\W*rubrique` : l'OCR des scans abîme la 1re colonne
+# (« Rang__ Rubrique », « Ra~g Rubrique », « 1 Rang j Rubrique », « ~ Rubrique Intitulé »).
+_RUBRIQUE = "rubrique"
+_RUBRIQUE_MAX_POSITION = 24
+_RANG_BEFORE_RUBRIQUE = re.compile(r"ng[\W_]")
+_RUBRIQUES = (
+    r"(Définition|Diagnostic|Étiologie|Etiologie|Prise|Examens?|Identifier|Contenu|Épidémio|Epidémio|Prévalence"
+    r"|Élé|Elé|Élts|Elts|Suivi|Physio|Facteurs|Pronostic|Situations?|Terminologie|Ex\b|Surveillance|Évaluation"
+    r"|Evaluation|Dépistage|Prévention|Traitement|Classification|Moyens|Anatomie|Histoire|Examen|Formes"
+    r"|Principes|Complications)"
+)
+_OBJECTIVE_ROW = re.compile(r"^(\S{1,3})\s+" + _RUBRIQUES)
+_GLYPHS_A = frozenset({"A", "A*", "O", "0", "G", "©", "@"})  # pictogramme noir
+_GLYPHS_B = frozenset({"B", "B*", "Q", "□", "s"})  # pictogramme bleu
+# Fin du tableau d'objectifs : 1re section du cours (« I. Introduction », « 1. … »)
+_COURSE_HEADING = re.compile(r"^(?:[IVX]+|\d+)\.\s")
+_RANG_PAGES = 3
+_RANG_VALUES = frozenset({"A", "B", "C"})
+_RANG_COLUMN_MIN_RATIO = 0.6
+
+# ── Titres (inchangés, story 8.0) ─────────────────────────────────────────────
 # Préfixe « Chapitre 18 : » d'une entrée de sommaire (y compris OCR abîmé « C' a ire 13 : »)
 _TOC_CHAPTER_PREFIX = re.compile(r"^[^:\d]{1,15}?\d+\s*:\s*")
 _TOC_LEADERS = re.compile(r"[.·…\s]{3,}[\s\-\d]*$")
-# « OBJECTIFS: N° 304. Tumeurs du foie… » (variantes OCR : « OBJECTIFS : », « N"o300. »)
-_OBJECTIFS_PATTERN = re.compile(
-    r"OBJECTIFS?\s*:?\s*N\s*[°º\"'o]{0,3}\s*(\d{1,3})\s*[.\-–:][ \t]*(.*)"
-)
-# Au-delà de ce nombre de numéros d'item distincts en début de ligne, la page est un sommaire.
-_TOC_MIN_ITEM_NUMBERS = 3
+# Entrée « Item N » d'un sommaire (titres) : motif strict, en tout début de ligne
+_TOC_TITLE_ITEM = re.compile(r"^[.,'’ \t]{0,3}item\s*n?°?\s*(\d{1,3})\b", re.IGNORECASE)
+_TOC_STRICT_ITEM = re.compile(r"^item\s*n?°?\s*(\d{1,3})\b", re.IGNORECASE | re.MULTILINE)
 _MAX_TITLE_LINES = 3
 _TABLE_HEADER_LINE = re.compile(r"\s*(?:rang|rubrique)\b", re.IGNORECASE)
+_MIN_ITEM_PAGES = 2
 
-_RANG_VALID = frozenset({"A", "B", "C"})
-# Priorité : A (0) > B (1) > C (2) — l'élément de plus petit index est retenu
-_RANG_PRIORITY: dict[str, int] = {"A": 0, "B": 1, "C": 2}
 
-RangType = Literal["A", "B", "C"]
-
-# Position maximale (en caractères) d'un "Item N" dans la page pour être considéré
-# comme en-tête d'item (et non une référence inline dans le corps du texte).
-_MAX_HEADER_POSITION = 400
-
-PageTables = list[list[list[str]]]  # list[table] → table = list[row] → row = list[cell]
+# ── Structures publiques ──────────────────────────────────────────────────────
 
 
 @dataclass
@@ -73,22 +164,377 @@ class DetectedItem:
     end_page: int
     ocr_confidence_score: float
     word_confidences: list[float] = field(default_factory=list)
+    # Pages de l'item, triées (une page blanche interne y reste, R9) ; start/end = min/max.
+    pages: list[int] = field(default_factory=list)
+    objectives_a: int = 0
+    objectives_b: int = 0
 
 
 @dataclass
-class _Header:
+class PageAssignment:
+    """Place d'une page dans le découpage (R10). Aucun texte de page : numéros et libellés."""
+
     page: int
-    item_number: int
-    rangs: list[RangType]
-    # Vrai si « Item N » se répète sur les pages suivantes (en-tête courant, format CNEC) :
-    # la ligne sous l'en-tête est alors du corps de texte, pas un titre.
-    running: bool = False
-    last_page: int = -1
+    kind: PageKind
+    item_number: int | None = None
+    label: str | None = None
+    signals: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict:
+        data: dict = {"page": self.page, "kind": self.kind}
+        if self.item_number is not None:
+            data["item_number"] = self.item_number
+        if self.label is not None:
+            data["label"] = self.label
+        data["signals"] = self.signals
+        return data
 
 
-def _is_table_of_contents(text: str) -> bool:
-    numbers = {m.group(1) for m in _TOC_ITEM_PATTERN.finditer(text)}
-    return len(numbers) >= _TOC_MIN_ITEM_NUMBERS
+@dataclass
+class SegmentationReport:
+    pages: list[PageAssignment] = field(default_factory=list)
+    items: list[dict] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+    def sections(self) -> list[dict]:
+        """Sections hors item : une entrée par libellé, pages en plages (« 2-3,40 »)."""
+        by_label: dict[str, list[int]] = {}
+        for p in self.pages:
+            if p.kind == "section" and p.label is not None:
+                by_label.setdefault(p.label, []).append(p.page)
+        return [{"label": label, "pages": page_ranges(pages)} for label, pages in by_label.items()]
+
+    def blank_pages(self) -> list[int]:
+        return [p.page for p in self.pages if p.kind == "blank"]
+
+    def to_dict(self) -> dict:
+        return {
+            "page_count": len(self.pages),
+            "items": self.items,
+            "sections": self.sections(),
+            "blank_pages": page_ranges(self.blank_pages()),
+            "warnings": self.warnings,
+            "pages": [p.to_dict() for p in self.pages],
+        }
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict(), ensure_ascii=False)
+
+    def summary(self) -> str:
+        """Résumé d'une ligne pour les logs (sans texte de page)."""
+        return (
+            f"{len(self.items)} items, {len(self.sections())} sections, "
+            f"{len(self.blank_pages())} pages blanches, {len(self.warnings)} warnings"
+        )
+
+
+@dataclass
+class SegmentationResult:
+    items: list[DetectedItem]
+    report: SegmentationReport
+
+
+def segmentation_overview(raw: str | None) -> dict | None:
+    """Vue du rapport stocké pour le détail de job admin : items → pages, sections, warnings
+    (sans le détail page par page). None si absent (import antérieur) ou illisible."""
+    if not raw:
+        return None
+    try:
+        data = json.loads(raw)
+    except ValueError:
+        logger.warning("Rapport de découpage illisible")
+        return None
+    if not isinstance(data, dict):
+        return None
+    return {key: data.get(key) for key in ("page_count", "items", "sections", "blank_pages", "warnings")}
+
+
+def page_ranges(pages: list[int]) -> str:
+    """[2, 3, 4, 9] → « 2-4,9 »."""
+    runs: list[list[int]] = []
+    for p in sorted(pages):
+        if runs and p == runs[-1][1] + 1:
+            runs[-1][1] = p
+        else:
+            runs.append([p, p])
+    return ",".join(f"{a}-{b}" if a != b else str(a) for a, b in runs)
+
+
+# ── R0 / R1 : fonctions pures ─────────────────────────────────────────────────
+
+
+def page_lines(text: str) -> list[str]:
+    """R0 : lignes utiles d'une page (dédoublées, sans filigrane ni ligne vide)."""
+    lines = [undouble(line).strip() for line in text.splitlines()]
+    return [line for line in lines if line and not _WATERMARK.search(line)]
+
+
+def header_candidates(line: str) -> list[int]:
+    """R1 : numéros candidats d'un en-tête « Item N », par ordre de préférence.
+
+    « Item 21 2 » → [212, 21] (chiffres coupés : joint d'abord, puis 1er groupe) ;
+    aucun en-tête → [].
+    """
+    match = _HEADER_ITEM.match(line)
+    if match is None:
+        return []
+    groups = match.group(1).split()
+    joined = int("".join(groups))
+    return [joined] if len(groups) == 1 else [joined, int(groups[0])]
+
+
+def _norm(s: str) -> str:
+    s = unicodedata.normalize("NFKD", s.lower())
+    s = "".join(c for c in s if not unicodedata.combining(c))
+    return re.sub(r"[^a-z0-9]+", " ", s).strip()
+
+
+# ── Analyse d'une page ────────────────────────────────────────────────────────
+
+
+@dataclass
+class _Page:
+    idx: int
+    lines: list[str]
+    blank: bool
+    header: list[int] = field(default_factory=list)
+    objectifs: int | None = None
+    strong: int | None = None
+    section: str | None = None
+    toc: bool = False
+    signals: list[str] = field(default_factory=list)
+    shared: int | None = None  # 2e numéro d'un chapitre « Items N et M »
+    clean_header: int | None = None  # en-tête « Item N » propre (repli)
+
+
+def _table_has_rang_header(tables: PageTables) -> bool:
+    return any(_is_rang_header(" ".join(str(c) for c in row if c)) for table in tables for row in table if row)
+
+
+def _parse_header(p: _Page) -> None:
+    """R1 : 1er en-tête « Item N » (ou « Items N et M ») des 5 premières lignes."""
+    for line in p.lines[:_HEADER_LINES]:
+        candidates = header_candidates(line)
+        shared = _HEADER_ITEMS.match(line)
+        if shared and not candidates:
+            candidates, p.shared = [int(shared.group(1))], int(shared.group(2))
+        if candidates:
+            p.header = candidates
+            p.signals.append("en-tête:" + "/".join(str(n) for n in candidates))
+            if p.shared is not None:
+                p.signals.append(f"chapitre partagé:{p.shared}")
+            if _CLEAN_HEADER.match(line):
+                p.clean_header = candidates[0]
+            return
+
+
+def _parse_page(idx: int, text: str, tables: PageTables) -> _Page:
+    lines = page_lines(text)
+    p = _Page(idx, lines, blank=len("".join(lines)) < _BLANK_MAX_CHARS)
+    if p.blank:
+        return p
+    _parse_header(p)
+    m = _OBJECTIFS.search(text)
+    if m:
+        p.objectifs = int(m.group(1))
+        p.signals.append(f"objectifs:{p.objectifs}")
+    leaders = sum(1 for line in lines if _TOC_LEADER_LINE.search(line))
+    toc_items = {n for n in _TOC_ITEM_LINE.findall(text)}
+    p.toc = leaders >= _TOC_MIN_LEADERS or len(toc_items) >= _TOC_MIN_ITEMS
+    if p.toc:
+        p.signals.append("sommaire")
+    # R3 : ouverture forte ; R2 prime (numéro lu en toutes lettres dans OBJECTIFS)
+    if p.header and (
+        _CHAPITRE.match(lines[0])
+        or _CEP_FIRST_LINE.search(lines[0])
+        or any(_is_rang_header(line) for line in lines[:_RANG_TABLE_LINES])
+        or _table_has_rang_header(tables)
+    ):
+        p.strong = p.header[0]
+        p.signals.append(f"ouverture:{p.strong}")
+    if p.objectifs is not None:
+        p.strong = p.objectifs
+    # R7 : sections hors item
+    head = " ".join(lines[:8])
+    if _CHAPITRE.match(lines[0]) and not re.search(r"\bItems?\s*\d", head, re.IGNORECASE):
+        title = " ".join(line for line in lines[1:4] if not line.isdigit())
+        p.section = _DOSSIERS if re.search(r"dossiers? progressifs", title, re.IGNORECASE) else _CHAPTER_WITHOUT_ITEM
+    else:
+        for label, rx in _SECTION_PATTERNS:
+            if any(rx.search(line) for line in lines[:2]):
+                p.section = label
+                break
+    if p.toc and not p.section:
+        p.section = "sommaire"
+    if p.section:
+        p.signals.append(f"section:{p.section}")
+    return p
+
+
+def _r6_toc_titles(pages: list[_Page]) -> dict[int, str]:
+    """Titres du sommaire pour R6 (formats Elsevier « 7 Item 296 - Titre … 135 » et CNEC)."""
+    titles: dict[int, str] = {}
+    for p in pages:
+        if not p.toc:
+            continue
+        buf: list[str] = []
+        for line in p.lines:
+            m = re.match(r"^(?:[\d\s]+)?Item\s*(\d{1,3})\s*[-–]\s*(.+?)(?:\s*\.{3,}.*|\s+\d+)?$", line)
+            if m:
+                titles.setdefault(int(m.group(1)), m.group(2))
+                buf = []
+                continue
+            m = re.match(r"^Item\s*(\d{1,3})\b", line)
+            if m and buf:
+                entry = re.sub(r"^.{0,15}?\d+\s*:\s*", "", " ".join(buf))
+                titles.setdefault(int(m.group(1)), re.sub(r"[.…\s\-\d]*$", "", entry))
+                buf = []
+                continue
+            if re.search(r"[a-z]{3}", line):
+                buf.append(re.sub(r"\.{3,}.*$|….*$", "", line))
+                buf = buf[-3:]
+    return titles
+
+
+def _sure_numbers(pages: list[_Page]) -> dict[int, str]:
+    """Numéros sûrs (sommaire, OBJECTIFS, ouverture forte) → source, pour le rapport."""
+    sources: dict[int, str] = {}
+    for p in pages:
+        if p.toc:
+            for n in _TOC_ITEM_LINE.findall("\n".join(p.lines)):
+                sources.setdefault(int(n), "du sommaire")
+        if p.objectifs is not None:
+            sources.setdefault(p.objectifs, "d'OBJECTIFS")
+        if p.strong is not None:
+            sources.setdefault(p.strong, "d'une page d'ouverture")
+    return sources
+
+
+def _known_numbers(pages: list[_Page], known_titles: dict[int, str] | None) -> set[int]:
+    """R4 : numéros sûrs du livre (un chiffre accepté ici ; pas pour les en-têtes répétés)."""
+    k: set[int] = set(_sure_numbers(pages))
+    counts: dict[int, int] = {}
+    for p in pages:
+        if p.header and not p.toc:
+            counts[p.header[0]] = counts.get(p.header[0], 0) + 1
+    # En-têtes répétés, sauf préfixe tronqué d'un numéro sûr (« em 29 » ×2 alors que 298 ∈ K)
+    k |= {
+        n
+        for n, c in counts.items()
+        if c >= 2 and len(str(n)) >= 2 and not any(s != n and str(s).startswith(str(n)) for s in k)
+    }
+    if _complete(known_titles):
+        k = {n for n in k if n in known_titles}  # type: ignore[operator]
+    return k
+
+
+def _complete(known_titles: dict[int, str] | None) -> bool:
+    """Référentiel partiel (quelques titres posés à la main) : il exclurait presque tout de K."""
+    return bool(known_titles) and len(known_titles or {}) >= _COMPLETE_REFERENTIAL
+
+
+def _resolve(p: _Page, current: int | None, known: set[int]) -> int | None:
+    """R4 : numéro désigné par l'en-tête de la page, ou None."""
+    if not p.header:
+        return None
+    if p.header[0] in known:  # « 21 2 » → 212 si 212 est sûr
+        return p.header[0]
+    if current is not None and any(str(current).startswith(str(c)) for c in p.header):
+        return current  # en-tête tronqué (« em 29 » dans 298, « tem 30 » dans 306)
+    for candidate in p.header[1:]:
+        if candidate in known:
+            return candidate
+    return None
+
+
+# ── Rang par objectif ─────────────────────────────────────────────────────────
+
+
+def _is_rang_header(line: str) -> bool:
+    low = line.lower()
+    k = low.find(_RUBRIQUE)
+    if not 0 <= k <= _RUBRIQUE_MAX_POSITION:
+        return False
+    return "intitul" in low or _RANG_BEFORE_RUBRIQUE.search(low[:k]) is not None
+
+
+def _glyph_counts(glyphs: list[str]) -> tuple[int, int]:
+    return sum(g in _GLYPHS_A for g in glyphs), sum(g in _GLYPHS_B for g in glyphs)
+
+
+def _objectives_from_text(lines: list[str], inside: bool) -> tuple[int, int, bool, bool]:
+    """Objectifs A/B lus dans le tableau texte. Renvoie (a, b, tableau vu, tableau fini).
+
+    Une ligne « <pictogramme connu> <Rubrique> … » compte même sans en-tête lu (en-tête
+    perdu à l'OCR, cancéro 307) ; après l'en-tête, le tableau finit à la 1re section du cours.
+    """
+    glyphs: list[str] = []
+    seen = False
+    for line in lines:
+        if _is_rang_header(line):
+            inside = seen = True
+            continue
+        if inside and _COURSE_HEADING.match(line):
+            a, b = _glyph_counts(glyphs)
+            return a, b, seen, True
+        m = _OBJECTIVE_ROW.match(line)
+        if m and (m.group(1) in _GLYPHS_A or m.group(1) in _GLYPHS_B):
+            glyphs.append(m.group(1))
+            seen = True
+    a, b = _glyph_counts(glyphs)
+    return a, b, seen, False
+
+
+def _rang_column(table: list[list[str]]) -> int | None:
+    """Colonne de rang d'un tableau pdfplumber, trouvée par ses valeurs (≥ 60 % de A/B/C).
+
+    L'en-tête « Rang » n'est pas fiable (CEP : cellules fusionnées, valeurs une colonne à gauche).
+    """
+    width = max((len(row) for row in table), default=0)
+    for col in range(width):
+        cells = [str(row[col]).strip() for row in table if col < len(row) and row[col]]
+        cells = [c for c in cells if c and "rang" not in c.lower()]
+        values = [c for c in cells if c.upper() in _RANG_VALUES]
+        if values and len(values) >= _RANG_COLUMN_MIN_RATIO * len(cells):
+            return col
+    return None
+
+
+def _objectives_from_tables(tables: PageTables) -> tuple[int, int, bool]:
+    glyphs: list[str] = []
+    found = False
+    for table in tables:
+        col = _rang_column(table) if table else None
+        if col is None:
+            continue
+        found = True
+        glyphs += [str(row[col]).strip().upper() for row in table if col < len(row) and row[col]]
+    a, b = _glyph_counts(glyphs)
+    return a, b, found
+
+
+def _item_objectives(pages: list[int], parsed: list[_Page], tables: list[PageTables]) -> tuple[int, int, bool]:
+    """Objectifs A/B de l'item : tableau de la page d'ouverture et des 2 suivantes.
+
+    Par page, la source (texte ou tableaux pdfplumber) qui lit le plus d'objectifs l'emporte.
+    Renvoie (a, b, tableau d'objectifs trouvé).
+    """
+    a = b = 0
+    found = finished = False
+    for idx in [p for p in pages if not parsed[p].blank][:_RANG_PAGES]:
+        if finished:
+            break
+        ta, tb, t_seen, finished = _objectives_from_text(parsed[idx].lines, inside=found)
+        pa, pb, p_seen = _objectives_from_tables(tables[idx] if idx < len(tables) else [])
+        found = found or t_seen or p_seen
+        if pa + pb > ta + tb:
+            a, b = a + pa, b + pb
+        else:
+            a, b = a + ta, b + tb
+    return a, b, found
+
+
+# ── Titres (story 8.0) ────────────────────────────────────────────────────────
 
 
 def _join_title_lines(first: str, following: list[str]) -> str:
@@ -107,7 +553,7 @@ def _join_title_lines(first: str, following: list[str]) -> str:
 def _titles_from_objectifs(page_texts: list[str]) -> dict[int, str]:
     titles: dict[int, str] = {}
     for text in page_texts:
-        for match in _OBJECTIFS_PATTERN.finditer(text):
+        for match in _OBJECTIFS.finditer(text):
             number = int(match.group(1))
             if number in titles:
                 continue
@@ -125,14 +571,19 @@ def _titles_from_objectifs(page_texts: list[str]) -> dict[int, str]:
     return titles
 
 
-def _title_from_header(text: str) -> str:
-    """Titre sur la ligne « Item N – Titre » ou sur la/les ligne(s) suivante(s)."""
-    match = _ITEM_HEADER_PATTERN.search(text)
-    if match is None:
+def _title_from_header(text: str, same_line_only: bool = False) -> str:
+    """Titre sur la ligne « Item N – Titre » ou sur la/les ligne(s) suivante(s).
+
+    `same_line_only` : en-tête courant, la ligne suivante est du corps de texte.
+    """
+    lines = [undouble(line) for line in text.splitlines()]
+    non_empty = [i for i, line in enumerate(lines) if line.strip()][:_HEADER_LINES]
+    found = next(((i, m) for i in non_empty if (m := _HEADER_ITEM.match(lines[i].strip()))), None)
+    if found is None:
         return ""
-    lines = text[match.end() :].splitlines()
-    rest = clean_title(lines[0]) if lines else ""
-    following = lines[1:]
+    i, match = found
+    rest = clean_title(lines[i].strip()[match.end() :])
+    following = [] if same_line_only else lines[i + 1 :]
     if not rest:
         while following and not following[0].strip():
             following = following[1:]
@@ -143,15 +594,37 @@ def _title_from_header(text: str) -> str:
     return title if is_valid_title(title) else ""
 
 
+def _item_header_title(number: int, pages: list[int], parsed: list[_Page], page_texts: list[str]) -> str:
+    """Titre lu dans l'en-tête de l'item.
+
+    Page d'ouverture (R3) ou en-tête non répété : ligne d'en-tête ou ligne(s) suivante(s).
+    En-tête courant (CNEC : « Item N » répété sur la page suivante) : la ligne suivante est du
+    corps de texte ; seul un titre sur la ligne même (« Item 315 - Leucémies aiguës », en-tête
+    courant Elsevier) est retenu, cherché sur les premières pages de l'item.
+    """
+    first = pages[0]
+    nxt = parsed[first + 1] if first + 1 < len(parsed) else None
+    opening = any(s.startswith("ouverture:") for s in parsed[first].signals)
+    running = not opening and nxt is not None and not nxt.blank and number in nxt.header
+    if not running:
+        return _title_from_header(page_texts[first])
+    for p in [p for p in pages if not parsed[p].blank][:_RANG_PAGES]:
+        if number in parsed[p].header:
+            title = _title_from_header(page_texts[p], same_line_only=True)
+            if title:
+                return title
+    return ""
+
+
 def _titles_from_toc(page_texts: list[str]) -> dict[int, str]:
     """Sommaire « Chapitre 18 : Tumeurs du pancréas ..... 307 / Item 308 » → {308: titre}."""
     titles: dict[int, str] = {}
     for text in page_texts:
-        if not _is_table_of_contents(text):
+        if len(set(_TOC_STRICT_ITEM.findall(text))) < _TOC_MIN_ITEMS:
             continue
         buffer: list[str] = []
         for line in text.splitlines():
-            match = _ITEM_HEADER_PATTERN.match(line)
+            match = _TOC_TITLE_ITEM.match(line)
             if match is None:
                 # Lignes de titre : ont des minuscules et au moins 3 lettres (écarte
                 # « SOMMAIRE », « ► », les numéros de page seuls, les miettes OCR).
@@ -171,218 +644,314 @@ def _titles_from_toc(page_texts: list[str]) -> dict[int, str]:
     return titles
 
 
-class ItemDetector:
-    """Détecte les items ECNi en exploitant le tableau rang/rubrique/intitulé.
+# ── Détecteur ─────────────────────────────────────────────────────────────────
 
-    Approche en deux passes :
-      1. Identifier les pages d'en-tête d'item (Item N + tableau rang).
-      2. Délimiter le contenu de chaque item (du header jusqu'au header suivant - 1).
-    """
+
+@dataclass
+class _AssignStats:
+    covered: int  # pages de contenu rattachées à un item
+    largest: int  # pages de contenu du plus gros item
+    opened: set[int]
+
+
+def _assign_stats(parsed: list[_Page], assign: list[int | str | None]) -> _AssignStats:
+    per_item: dict[int, int] = {}
+    for p, a in zip(parsed, assign, strict=True):
+        if not p.blank and isinstance(a, int):
+            per_item[a] = per_item.get(a, 0) + 1
+    return _AssignStats(sum(per_item.values()), max(per_item.values(), default=0), set(per_item))
+
+
+def _safety_warnings(
+    parsed: list[_Page], assign: list[int | str | None], sure: dict[int, str], report: SegmentationReport
+) -> None:
+    """Warnings du rapport pour un livre d'un format inattendu (sans texte de page)."""
+    warnings = report.warnings
+    opened = {a for a in assign if isinstance(a, int)}
+    # Numéro sûr jamais ouvert
+    for number in sorted(n for n in sure if n not in opened):
+        warnings.append(f"numéro {number} {sure[number]} sans item")
+    # Chapitre commun à deux items : le 2e numéro n'a pas de pages à lui
+    shared = sorted({(a, p.shared) for p, a in zip(parsed, assign, strict=True) if p.shared and isinstance(a, int)})
+    warnings += [f"item {n} : l'item {m} partage son chapitre (pas de pages propres)" for n, m in shared]
+    # Sections : trop longues, liminaires au-delà du début du livre, contenu hors item
+    front_limit = max(1, math.ceil(len(parsed) * _FRONT_MATTER_MAX_SHARE))
+    first_item = next((i for i, a in enumerate(assign) if isinstance(a, int)), len(assign))
+    runs: list[tuple[str, list[int]]] = []
+    late_front: dict[str, list[int]] = {}
+    outside: dict[str, list[int]] = {}
+    for i, (p, a) in enumerate(zip(parsed, assign, strict=True)):
+        if p.blank or not isinstance(a, str):
+            if isinstance(a, int):
+                runs.append(("", []))
+            continue
+        if not runs or runs[-1][0] != a:
+            runs.append((a, []))
+        runs[-1][1].append(i)
+        if a in _FRONT_MATTER | {_FRONT_LABEL} and i >= front_limit:
+            late_front.setdefault(a, []).append(i)
+        if p.section is None and i > first_item:
+            outside.setdefault(a, []).append(i)
+    for label, pages in runs:
+        if len(pages) > _MAX_SECTION_CONTENT_PAGES:
+            warnings.append(f"section « {label} » : {len(pages)} pages de contenu (p{page_ranges(pages)})")
+    for label, pages in late_front.items():
+        warnings.append(f"section « {label} » au-delà des premiers 10 % du livre (p{page_ranges(pages)})")
+    for label, pages in outside.items():
+        warnings.append(f"p{page_ranges(pages)} : contenu hors item (section « {label} »)")
+    if not opened:
+        warnings.append("découpage suspect : aucun item détecté")
+
+
+class ItemDetector:
+    """Découpe un collège en items (règles R0-R10) et lit le rang de leurs objectifs."""
 
     def detect_items(
         self,
         page_texts: list[str],
         page_scores: list[float] | None = None,
         page_tables: list[PageTables] | None = None,
-    ) -> list[DetectedItem]:
-        """Extrait les items depuis les textes paginés.
+        known_titles: dict[int, str] | None = None,
+    ) -> SegmentationResult:
+        """Découpe les pages (index = numéro de page) en items.
 
         Args:
-            page_texts:   texte extrait par page (index = numéro de page).
+            page_texts:   texte extrait par page.
             page_scores:  score de confiance par page (même longueur que page_texts).
-            page_tables:  tables extraites par page par pdfplumber. Chaque élément est
-                          la liste des tables d'une page (list[table], table = list[row],
-                          row = list[str]). Fourni par OcrProcessor.
+            page_tables:  tables pdfplumber par page (list[table], table = list[row]).
+            known_titles: référentiel officiel des titres (`item_titles`, source `official`) ;
+                          facultatif : fournit des titres à R6 et, s'il est complet
+                          (≥ 300 titres), restreint K (R4).
         """
-        if page_scores is None:
-            page_scores = [0.9] * len(page_texts)
-        if page_tables is None:
-            page_tables = [[] for _ in page_texts]
+        n_pages = len(page_texts)
+        scores = page_scores if page_scores is not None else [0.9] * n_pages
+        tables = page_tables if page_tables is not None else [[] for _ in page_texts]
+        parsed = [_parse_page(i, text, tables[i] if i < len(tables) else []) for i, text in enumerate(page_texts)]
+        known = _known_numbers(parsed, known_titles)
+        r6_titles = dict(known_titles or {})
+        for number, title in _r6_toc_titles(parsed).items():
+            r6_titles.setdefault(number, title)
+        for text in page_texts:
+            for m in _OBJECTIFS.finditer(text):
+                if m.group(2).strip():
+                    r6_titles.setdefault(int(m.group(1)), m.group(2).strip())
+        norm_titles = {n: _norm(t)[:40] for n, t in r6_titles.items() if len(_norm(t)) >= _R6_TITLE_MIN}
 
-        # ── Passe 1 : identifier les pages d'en-tête d'item ─────────────────────
-        # Un en-tête = (page de départ, numéro, signaux de rang collectés sur le span).
-        # Les pages consécutives portant le même « Item N » (en-tête courant, CNEC)
-        # forment un seul item : on les fusionne au lieu d'en faire N items d'une page.
-        headers: list[_Header] = []
+        report = SegmentationReport()
+        ignored: set[int] = set()
+        assign = self._assign(parsed, known, norm_titles, report, ignored)
+        assign = self._check_suspect(parsed, assign, report, ignored)
+        sure = _sure_numbers(parsed)
+        if _complete(known_titles):
+            sure = {n: src for n, src in sure.items() if n in known_titles}  # type: ignore[operator]
+        _safety_warnings(parsed, assign, sure, report)
 
-        for page_num, text in enumerate(page_texts):
-            match = _ITEM_HEADER_PATTERN.search(text)
-            if match is None:
+        items = self._build_items(page_texts, scores, tables, parsed, assign, report)
+        logger.debug("Découpage : %s", report.summary())
+        return SegmentationResult(items=items, report=report)
+
+    @staticmethod
+    def _assign(
+        parsed: list[_Page],
+        known: set[int],
+        norm_titles: dict[int, str],
+        report: SegmentationReport,
+        ignored: set[int],
+    ) -> list[int | str | None]:
+        """Machine à états : numéro d'item, libellé de section, ou None (page blanche).
+        `ignored` reçoit les numéros d'en-têtes ignorés (critère de découpage suspect)."""
+        assign: list[int | str | None] = [None] * len(parsed)
+        warnings = report.warnings
+        current: int | None = None
+        opened: set[int] = set()
+        section: str | None = _FRONT_LABEL
+        for i, p in enumerate(parsed):
+            if p.blank:  # R9
                 continue
-
-            if _is_table_of_contents(text):
-                logger.debug("Skipping page %d: table of contents", page_num)
+            # R7 (R7 bis : les liminaires ne valent qu'avant le 1er item)
+            if p.section and p.strong is None and not (opened and p.section in _FRONT_MATTER):
+                current, section = None, p.section
+                assign[i] = section
                 continue
+            target = p.strong  # R2, R3
+            if target is None:
+                n = _resolve(p, current, known)
+                if n is None and p.header:
+                    warnings.append(f"p{i} : en-tête {'/'.join(map(str, p.header))} ignoré (item courant {current})")
+                    ignored.add(p.header[0])
+                elif n is not None and n != current:
+                    confirmed = any(
+                        _resolve(q, None, known) == n for q in parsed[i + 1 : i + 1 + _CONFIRM_PAGES] if q.header
+                    )
+                    if n in known and confirmed and n not in opened:  # R5
+                        target = n
+                    else:
+                        warnings.append(f"p{i} : en-tête {n} ignoré (item courant {current})")
+                        ignored.add(n)
+                if target is None:  # R6
+                    start = _norm(" ".join(p.lines[:3]))
+                    for number, title in norm_titles.items():
+                        if (
+                            number != current
+                            and number not in opened
+                            and number in known
+                            and start.startswith(title[:_R6_TITLE_PREFIX])
+                        ):
+                            target = number
+                            p.signals.append(f"titre:{number}")
+                            break
+            if target is not None and target != current:
+                if target in opened:  # R8
+                    warnings.append(f"p{i} : réouverture de l'item {target}")
+                current, section = target, None
+                opened.add(target)
+            assign[i] = current if current is not None else section
+        return assign
 
-            item_number = int(match.group(1))
-            tables: PageTables = (
-                page_tables[page_num] if page_num < len(page_tables) else []
-            )
-
-            # Rang depuis les tables pdfplumber (méthode principale),
-            # puis fallback texte OCR brut (pytesseract)
-            rang = self._rang_from_tables(tables) or self._rang_from_text(text)
-
-            if headers and headers[-1].item_number == item_number:
-                # Courant seulement si répété sur la page suivante (« Item 359 bis »
-                # 14 pages plus loin est une sous-section, pas un en-tête courant).
-                if page_num == headers[-1].last_page + 1:
-                    headers[-1].running = True
-                headers[-1].last_page = page_num
-                if rang is not None:
-                    headers[-1].rangs.append(rang)
+    @staticmethod
+    def _assign_fallback(parsed: list[_Page]) -> list[int | str | None]:
+        """Repli (ancien détecteur) : tout en-tête « Item N » propre ou signal fort ouvre ou
+        poursuit l'item N ; les sections ferment toujours l'item courant."""
+        assign: list[int | str | None] = [None] * len(parsed)
+        current: int | None = None
+        section = _FRONT_LABEL
+        for i, p in enumerate(parsed):
+            if p.blank:
                 continue
+            if p.section and p.strong is None and not (current is not None and p.section in _FRONT_MATTER):
+                current, section = None, p.section
+            else:
+                target = p.strong if p.strong is not None else p.clean_header
+                if target is not None:
+                    current = target
+            assign[i] = current if current is not None else section
+        return assign
 
-            # Si aucun signal de rang, n'accepter comme header que si "Item N"
-            # est en tout début de page (heading, pas une référence inline).
-            if rang is None and match.start() > _MAX_HEADER_POSITION:
-                logger.debug(
-                    "Skipping 'Item %d' at position %d on page %d (likely cross-reference)",
-                    item_number,
-                    match.start(),
-                    page_num,
-                )
-                continue
+    @classmethod
+    def _check_suspect(
+        cls,
+        parsed: list[_Page],
+        assign: list[int | str | None],
+        report: SegmentationReport,
+        ignored: set[int],
+    ) -> list[int | str | None]:
+        """Découpage suspect → repli sur les en-têtes « Item N » propres. Suspect si :
+        aucun item, items < 50 % des pages de contenu, un item > 40 % des pages de contenu
+        d'un livre d'au moins 100 pages, ou en-têtes ignorés sur ≥ 3 numéros jamais ouverts."""
+        content = sum(1 for p in parsed if not p.blank)
+        stats = _assign_stats(parsed, assign)
+        reasons = []
+        low_coverage = not content or stats.covered < _MIN_ITEM_COVERAGE * content
+        if low_coverage:
+            reasons.append(f"{stats.covered}/{content} pages de contenu dans un item")
+        if len(parsed) >= _CONCENTRATION_MIN_PAGES and stats.largest > _MAX_ITEM_SHARE * content:
+            reasons.append(f"un item a {stats.largest}/{content} pages de contenu")
+        never_opened = sorted(ignored - stats.opened)
+        if len(never_opened) >= _MIN_IGNORED_NUMBERS:
+            reasons.append(f"en-têtes ignorés de {len(never_opened)} numéros jamais ouverts")
+        if not reasons:
+            return assign
+        reason = " ; ".join(reasons)
+        fallback = cls._assign_fallback(parsed)
+        fb = _assign_stats(parsed, fallback)
+        better = (
+            fb.covered > stats.covered
+            if low_coverage
+            else len(fb.opened) > len(stats.opened) and fb.covered >= _MIN_ITEM_COVERAGE * content
+        )
+        if better:
+            # Les warnings du 1er passage décrivent un découpage abandonné.
+            report.warnings[:] = [
+                f"découpage suspect ({reason}) : repli sur les en-têtes « Item N » "
+                f"({len(fb.opened)} items, {fb.covered}/{content} pages de contenu)"
+            ]
+            return fallback
+        report.warnings.append(f"découpage suspect ({reason})")
+        return assign
 
-            headers.append(
-                _Header(
-                    page=page_num,
-                    item_number=item_number,
-                    rangs=[rang] if rang is not None else [],
-                    last_page=page_num,
-                )
-            )
+    @staticmethod
+    def _build_items(
+        page_texts: list[str],
+        scores: list[float],
+        tables: list[PageTables],
+        parsed: list[_Page],
+        assign: list[int | str | None],
+        report: SegmentationReport,
+    ) -> list[DetectedItem]:
+        # Plages de pages contiguës d'un même numéro (les blanches internes restent, R9),
+        # puis un item par numéro (R8 : une réouverture concatène les plages).
+        pages_by_number: dict[int, list[int]] = {}
+        run: tuple[int, int, int] | None = None  # (numéro, début, fin)
+        runs: list[tuple[int, int, int]] = []
+        for i, a in enumerate(assign):
+            if isinstance(a, int):
+                if run is not None and run[0] == a and all(assign[j] in (a, None) for j in range(run[2] + 1, i)):
+                    run = (a, run[1], i)
+                else:
+                    if run is not None:
+                        runs.append(run)
+                    run = (a, i, i)
+        if run is not None:
+            runs.append(run)
+        for number, start, end in runs:
+            pages_by_number.setdefault(number, []).extend(range(start, end + 1))
 
-        if not headers:
-            logger.warning("No item header pages detected in %d pages", len(page_texts))
-            return []
+        for i, p in enumerate(parsed):
+            a = assign[i]
+            if p.blank:
+                report.pages.append(PageAssignment(i, "blank", signals=p.signals))
+            elif isinstance(a, int):
+                report.pages.append(PageAssignment(i, "item", item_number=a, signals=p.signals))
+            else:
+                report.pages.append(PageAssignment(i, "section", label=str(a), signals=p.signals))
 
-        logger.info("Found %d item header pages", len(headers))
-
-        # Sources de titre, par priorité : « OBJECTIFS: N° N. Titre » (CNEC, le plus
-        # complet) → sommaire → ligne(s) d'en-tête de la première page de l'item.
         objectifs_titles = _titles_from_objectifs(page_texts)
         toc_titles = _titles_from_toc(page_texts)
-
-        # ── Passe 2 : délimiter le contenu de chaque item ───────────────────────
         items: list[DetectedItem] = []
-        total_pages = len(page_texts)
-
-        for i, header in enumerate(headers):
-            start_page = header.page
-            item_number = header.item_number
-            end_page = (
-                headers[i + 1].page - 1 if i + 1 < len(headers) else total_pages - 1
-            )
-
-            if header.rangs:
-                rang: RangType = min(header.rangs, key=lambda r: _RANG_PRIORITY.get(r, 99))
-            else:
-                logger.warning(
-                    "Rang not found for item %d on page %d — defaulting to 'A'",
-                    item_number,
-                    start_page,
-                )
+        for number, pages in pages_by_number.items():
+            pages = sorted(set(pages))
+            first = pages[0]
+            objectives_a, objectives_b, table_found = _item_objectives(pages, parsed, tables)
+            rang: RangType
+            if objectives_a:
                 rang = "A"
-
-            item_page_texts = page_texts[start_page : end_page + 1]
-            chapter_title = (
-                objectifs_titles.get(item_number)
-                or toc_titles.get(item_number)
-                or ("" if header.running else _title_from_header(item_page_texts[0]))
+            elif objectives_b:
+                rang = "B"
+            else:
+                rang = "A"
+                reason = "aucun objectif A/B lu" if table_found else "sans tableau d'objectifs"
+                report.warnings.append(f"item {number} : rang inconnu ({reason}), A par défaut")
+            content = [p for p in pages if not parsed[p].blank]
+            if len(content) < _MIN_ITEM_PAGES:
+                report.warnings.append(f"item {number} : moins de 2 pages")
+            title = (
+                objectifs_titles.get(number)
+                or toc_titles.get(number)
+                or _item_header_title(number, pages, parsed, page_texts)
             )
-            item_page_scores = page_scores[start_page : end_page + 1]
-
-            avg_score = (
-                sum(item_page_scores) / len(item_page_scores)
-                if item_page_scores
-                else 0.0
-            )
-
+            page_scores = [scores[p] for p in pages if p < len(scores)]
             items.append(
                 DetectedItem(
-                    item_number=item_number,
+                    item_number=number,
                     rang=rang,
-                    chapter_title=chapter_title,
-                    ocr_text="\n".join(item_page_texts),
-                    start_page=start_page,
-                    end_page=end_page,
-                    ocr_confidence_score=round(avg_score, 4),
+                    chapter_title=title,
+                    ocr_text="\n".join(page_texts[p] for p in pages),
+                    start_page=first,
+                    end_page=pages[-1],
+                    ocr_confidence_score=round(sum(page_scores) / len(page_scores), 4) if page_scores else 0.0,
+                    pages=pages,
+                    objectives_a=objectives_a,
+                    objectives_b=objectives_b,
                 )
             )
-
-        logger.info("Detected %d items from %d pages", len(items), total_pages)
+            report.items.append(
+                {
+                    "item_number": number,
+                    "pages": page_ranges(pages),
+                    "page_count": len(content),
+                    "rang": rang,
+                    "objectives_a": objectives_a,
+                    "objectives_b": objectives_b,
+                }
+            )
         return items
-
-    @staticmethod
-    def _rang_from_tables(tables: PageTables) -> RangType | None:
-        """Extraire le rang dominant depuis les tableaux pdfplumber.
-
-        Cherche une table ayant une colonne dont l'en-tête contient "Rang",
-        collecte toutes les valeurs A/B/C dans cette colonne, et retourne
-        le rang de plus haute priorité (A > B > C).
-        """
-        rangs_found: set[str] = set()
-
-        for table in tables:
-            if not table:
-                continue
-
-            # Localiser la colonne "Rang" dans la première ligne (en-tête)
-            rang_col: int | None = None
-            for col_idx, cell in enumerate(table[0]):
-                if cell and "rang" in cell.strip().lower():
-                    rang_col = col_idx
-                    break
-            if rang_col is None:
-                continue
-
-            # Collecter les valeurs de la colonne (en sautant l'en-tête)
-            for row in table[1:]:
-                if rang_col < len(row):
-                    cell_val = (row[rang_col] or "").strip().upper()
-                    if cell_val in _RANG_VALID:
-                        rangs_found.add(cell_val)
-
-        if not rangs_found:
-            return None
-
-        # Retourner le rang de priorité la plus haute (A > B > C)
-        return min(rangs_found, key=lambda r: _RANG_PRIORITY.get(r, 99))  # type: ignore[return-value]
-
-    @staticmethod
-    def _rang_from_text(text: str) -> RangType | None:
-        """Fallback pytesseract : détecter le rang dans le texte brut du tableau OCR.
-
-        Cherche le bloc "Rang Rubrique …" puis parse les lignes commençant par A, B ou C.
-        """
-        lines = text.splitlines()
-        in_rang_table = False
-        rangs_found: set[str] = set()
-
-        for line in lines:
-            stripped = line.strip()
-
-            # Détecter l'en-tête du tableau rang (ex: "Rang  Rubrique  Intitulé")
-            if re.search(r"\brang\b", stripped, re.IGNORECASE) and re.search(
-                r"rubrique|intitul", stripped, re.IGNORECASE
-            ):
-                in_rang_table = True
-                continue
-
-            if not in_rang_table:
-                continue
-
-            # Fin du tableau : section de contenu textuel (I. INTRODUCTION, 1. ...)
-            if re.match(r"^[IVX]+\.", stripped) or re.match(r"^\d+\.", stripped):
-                break
-
-            # Ligne de rang : commence par A, B ou C suivi d'un espace
-            rang_match = re.match(r"^([ABC])\s", stripped)
-            if rang_match:
-                rangs_found.add(rang_match.group(1).upper())
-
-        if not rangs_found:
-            return None
-
-        return min(rangs_found, key=lambda r: _RANG_PRIORITY.get(r, 99))  # type: ignore[return-value]

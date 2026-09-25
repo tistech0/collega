@@ -6,6 +6,7 @@ import 'package:collega_app/core/network/network_errors.dart';
 import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/colleges/domain/card_type.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
 import 'package:collega_app/features/colleges/domain/drill_stats.dart';
@@ -167,7 +168,8 @@ class _ItemBodyState extends ConsumerState<_ItemBody> {
     final async = ref.watch(itemDetailProvider(_key));
     final item = ref.watch(itemInfoProvider(widget.itemId)).valueOrNull;
     final title = item == null ? 'Item' : itemDisplayTitle(item.itemNumber, item.chapterTitle);
-    final cards = async.valueOrNull;
+    // Classique, cas clinique, définition ; puis par rang de la fiche.
+    final cards = switch (async.valueOrNull) { final list? => sortCardsForList(list), null => null };
 
     if (cards == null) {
       if (async.hasError && !async.isLoading) {
@@ -237,6 +239,9 @@ class _ItemBodyState extends ConsumerState<_ItemBody> {
           for (final card in shown)
             _CardTile(
               card: card,
+              // Rang de la fiche sur chaque ligne quand la liste en mélange plusieurs
+              // (sinon le badge unique ou le filtre au-dessus de la liste suffit).
+              showRank: rang == null && rangs.length > 1 && const {'A', 'B', 'C'}.contains(card.rang),
               expanded: _expanded.contains(card.id),
               busy: _busy.contains(card.id),
               onToggle: () => setState(() => _expanded.contains(card.id) ? _expanded.remove(card.id) : _expanded.add(card.id)),
@@ -415,6 +420,7 @@ class _NoteBody extends StatelessWidget {
 class _CardTile extends StatelessWidget {
   const _CardTile({
     required this.card,
+    required this.showRank,
     required this.expanded,
     required this.busy,
     required this.onToggle,
@@ -425,6 +431,7 @@ class _CardTile extends StatelessWidget {
   });
 
   final FlashCardModel card;
+  final bool showRank;
   final bool expanded;
   final bool busy;
   final VoidCallback onToggle;
@@ -439,12 +446,15 @@ class _CardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = CgTheme.of(context).colors;
+    final typeLabel = CardType.parse(card.cardType).label;
+    // Rang et type de la fiche, lus avant la question (« Rang B, cas clinique. … »).
+    final tags = [if (showRank) 'Rang ${card.rang}', if (typeLabel != null) typeLabel.toLowerCase()];
     final question = Semantics(
       key: ValueKey('item-card-${card.id}'),
       container: true,
       button: true,
       expanded: expanded,
-      label: card.recto,
+      label: tags.isEmpty ? card.recto : '${tags.join(', ')}. ${card.recto}',
       onTap: onToggle,
       excludeSemantics: true,
       child: GestureDetector(
@@ -455,7 +465,18 @@ class _CardTile extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: CgSpace.s3),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(child: Text(card.recto, style: CgType.head.copyWith(color: c.ink))),
+              Expanded(
+                child: tags.isEmpty
+                    ? Text(card.recto, style: CgType.head.copyWith(color: c.ink))
+                    : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Wrap(spacing: CgSpace.s2, runSpacing: CgSpace.s1, children: [
+                          if (showRank) CgBadge.rank(card.rang, short: true),
+                          CgCardTypeTag(typeLabel),
+                        ]),
+                        const SizedBox(height: CgSpace.s2),
+                        Text(card.recto, style: CgType.head.copyWith(color: c.ink)),
+                      ]),
+              ),
               const SizedBox(width: CgSpace.s3),
               Padding(
                 padding: const EdgeInsets.only(top: CgSpace.s1),

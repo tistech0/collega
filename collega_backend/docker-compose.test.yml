@@ -1,4 +1,4 @@
-# Postgres jetable pour les tests « pg » : docker compose -f docker-compose.test.yml up -d
+# Postgres et Redis jetables pour les tests « pg » : docker compose -f docker-compose.test.yml up -d
 services:
   postgres-test:
     image: postgres:16-alpine
@@ -10,3 +10,8 @@ services:
       - "127.0.0.1:55432:5432"
     tmpfs:
       - /var/lib/postgresql/data
+
+  redis-test:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:56379:6379"

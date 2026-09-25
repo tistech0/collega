@@ -1,3 +1,18 @@
+# Conventions du dépôt pour les agents
+
+- **Backend** (`collega_backend/`, Python 3.11, poetry) : `docker compose -f docker-compose.test.yml up -d` puis `.venv/bin/python -m pytest -q` ; qualité : `.venv/bin/ruff check .`, `.venv/bin/ruff format --check .`, `.venv/bin/mypy app/core app/services` (0 erreur exigé). La CI (`.github/workflows/ci.yml`) lance tout cela plus `alembic check`.
+- **App** (`collega_app/`, Flutter 3.27.1) : `flutter test` **par dossier** (`test/core`, puis chaque `test/features/<dossier>`), jamais toute la suite d'un coup.
+- **Format d'erreur API** : `{"detail": {"code": "CODE", "message": "…"}}` ; succès : `{"data": …}`. L'app lit `detail.code`.
+- **Couches** : `app/api/v1` = HTTP seulement ; logique dans `app/services` ; tâches longues dans `app/workers` (ARQ).
+- **Routes par domaine** : `app/api/v1/<domaine>/` — colleges : `catalog`/`imports`/`status`/`cards` ; admin : `colleges`/`jobs`/`users`/`usage`/`config`.
+- **Erreurs** : toujours `AppError` et les fabriques de `app/core/errors.py` (jamais `HTTPException`).
+- **Pool ARQ** : celui du lifespan via `get_arq` (jamais `create_pool` dans une route).
+- **Import de collège** : logique partagée dans `app/services/imports.py` (utilisatrice et admin).
+- **Anti-spam** : réglages en base (`app_settings`, `anti_spam_limits(db)`), cache 30 s.
+- **Déploiement** : uniquement par `collega_backend/scripts/deploy.sh [<sha>]` (CI verte, dump avant migration, image étiquetée par commit). Jamais de `latest`.
+- **NAS** : ne **jamais écraser** le `.env` de prod (`/mnt/user/appdata/compose-stacks/collega/.env`) : seulement ajouter une variable ou modifier une ligne précise ; ne jamais afficher un secret de prod.
+- Contenu publié (CGU, confidentialité) : éditeur Matthis Lesur, contact@matthislesur.com.
+
 <!-- KAGE_MEMORY_POLICY_V1 -->
 # Kage Memory Harness
 

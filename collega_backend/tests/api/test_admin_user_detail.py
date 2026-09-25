@@ -1,13 +1,17 @@
 """Tests GET /v1/admin/users/{user_id} (détail) — Story 7.6 AC #3."""
+
 from __future__ import annotations
 
 import types
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from httpx import AsyncClient
+
+# Le faux db.get renvoie l'utilisateur pour toute clé : limites anti-spam injectées.
+pytestmark = pytest.mark.usefixtures("default_anti_spam_limits")
 
 ADMIN_AUTH = ("admin", "testpass")
 
@@ -19,8 +23,8 @@ def make_user(user_id=None):
         is_beta=True,
         is_subscribed=False,
         monthly_reloads=2,
-        monthly_reloads_reset_at=datetime.now(timezone.utc),
-        created_at=datetime.now(timezone.utc),
+        monthly_reloads_reset_at=datetime.now(UTC),
+        created_at=datetime.now(UTC),
     )
 
 
@@ -30,7 +34,7 @@ def make_college(college_id=None, ref_id=12):
         college_ref_id=ref_id,
         status="generation_complete",
         reload_count=1,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
 
 
@@ -41,7 +45,7 @@ def make_job(college_id=None, status="generation_complete"):
         status=status,
         card_count=42,
         error_message=None,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
 
 

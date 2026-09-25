@@ -1,14 +1,17 @@
 """Endpoints de feedback, suppression et régénération de fiches — FR19, FR20, FR21."""
+
 from __future__ import annotations
 
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import database
 from app.core.database import get_db
-from app.core.limiter import limiter
+from app.core.errors import AppError, conflict, not_found, unprocessable
+from app.core.limiter import limiter, user_id_key
 from app.deps import require_subscription
 from app.models.flash_card import FlashCard
 from app.models.item import Item
@@ -20,6 +23,7 @@ from app.schemas.college import (
 )
 from app.services.content import store
 from app.services.generation.claude_client import ClaudeClient
+from app.services.generation.usage import record_usage
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["flash-cards"])
@@ -32,10 +36,7 @@ async def _get_card_for_user(
 ) -> FlashCard:
     card = await db.get(FlashCard, card_id)
     if card is None or card.user_id != current_user.id:
-        raise HTTPException(
-            status_code=404,
-            detail={"code": "CARD_NOT_FOUND", "message": "Fiche introuvable"},
-        )
+        raise not_found("CARD_NOT_FOUND", "Fiche introuvable")
     return card
 
 
@@ -64,7 +65,7 @@ async def delete_card(
 
 
 @router.post("/flash-cards/{card_id}/regenerate", response_model=FlashCardResponseWrapped)
-@limiter.limit("10/hour")
+@limiter.limit("10/hour", key_func=user_id_key)
 async def regenerate_card(
     request: Request,
     card_id: uuid.UUID,
@@ -76,28 +77,32 @@ async def regenerate_card(
 
     item = await db.get(Item, card.item_id)
     if item is None:
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "ITEM_NOT_FOUND", "message": "Item source introuvable"},
-        )
+        raise unprocessable("ITEM_NOT_FOUND", "Item source introuvable")
 
-    source_text = await store.get_item_text(db, item.text_hash) if item.text_hash else None
-    if not source_text:
-        raise HTTPException(
-            status_code=409,
-            detail={
-                "code": "SOURCE_UNAVAILABLE",
-                "message": "Le texte source de cet item n'est pas disponible : réimporte le PDF pour pouvoir régénérer.",
-            },
+    # Pages de l'item : clean_for_prompt y retire les en-têtes répétés (comme à la génération).
+    source_pages = await store.get_item_pages(db, item.text_hash) if item.text_hash else None
+    if not source_pages or not any(source_pages):
+        raise conflict(
+            "SOURCE_UNAVAILABLE",
+            "Le texte source de cet item n'est pas disponible : réimporte le PDF pour pouvoir régénérer.",
         )
 
     claude = ClaudeClient()
-    new_card_data = await claude.regenerate_single_card(card, item, source_text, body.user_note)
-    if new_card_data is None:
-        raise HTTPException(
-            status_code=503,
-            detail={"code": "REGENERATION_FAILED", "message": "Régénération échouée"},
+    regen = await claude.regenerate_single_card(card, item, source_pages, body.user_note)
+    # Appel facturé compté même si la réponse est inutilisable ; APIError : usage à 0, rien.
+    if regen.input_tokens or regen.output_tokens:
+        await record_usage(
+            database.async_session_factory,
+            kind="regeneration",
+            model=regen.model,
+            input_tokens=regen.input_tokens,
+            output_tokens=regen.output_tokens,
+            user_id=current_user.id,
+            college_id=card.college_id,
         )
+    new_card_data = regen.card
+    if new_card_data is None:
+        raise AppError(503, "REGENERATION_FAILED", "Régénération échouée")
 
     # P1: card_type n'est PAS modifié — anti-pattern spec ("NE PAS modifier card_type")
     card.recto = new_card_data.recto

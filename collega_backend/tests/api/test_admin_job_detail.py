@@ -1,12 +1,13 @@
 """Tests GET /v1/admin/jobs/{job_id} (détail + timeline + OCR) — Story 7.7 AC #1/#2."""
+
 from __future__ import annotations
 
+import json
 import types
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 ADMIN_AUTH = ("admin", "testpass")
@@ -23,10 +24,9 @@ def make_job(job_id=None, college_id=None, status="processing"):
         hash_shared=False,
         card_count=12,
         error_message=None,
-        input_tokens=1_000_000,
-        output_tokens=1_000_000,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        segmentation_report=None,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
 
 
@@ -74,15 +74,18 @@ class TestJobDetail:
         # db.get : 1) job, 2) college
         mock_db.get = AsyncMock(side_effect=[job, college])
 
-        t0 = datetime.now(timezone.utc)
+        t0 = datetime.now(UTC)
         events = [
             make_event("ocr_started", t0, total=10),
             make_event("ocr_progress", t0 + timedelta(seconds=5), page=5, total=10),
             make_event("ocr_complete", t0 + timedelta(seconds=10), message="8 items"),
         ]
         items_rows = [(1, 0.92, False), (2, 0.4, True)]
-        # db.execute : 1) events (scalars().all()), 2) items (.all())
-        mock_db.execute = AsyncMock(side_effect=[_scalars_result(events), _tuples_result(items_rows)])
+        usage_rows = [("claude-sonnet-4-6", 1_000_000, 1_000_000, 3)]
+        # db.execute : 1) events (scalars().all()), 2) items (.all()), 3) usage (.all())
+        mock_db.execute = AsyncMock(
+            side_effect=[_scalars_result(events), _tuples_result(items_rows), _tuples_result(usage_rows)]
+        )
 
         resp = await client.get(f"/v1/admin/jobs/{job.id}", auth=ADMIN_AUTH)
         assert resp.status_code == 200
@@ -117,16 +120,47 @@ class TestJobDetail:
         assert data["items"][0]["item_number"] == 1
         assert data["items"][1]["low_confidence"] is True
 
-        # Story 7.8 — coût/import (additif). 1M in + 1M out = (3+15) USD × 0.92 = 16.56 €.
+        # Coût lu dans claude_usage. 1M in + 1M out Sonnet 4.6 = (3+15) USD × 0.92 = 16.56 €.
         assert data["input_tokens"] == 1_000_000
         assert data["output_tokens"] == 1_000_000
         assert data["cost_eur"] == 16.56
+        assert data["claude_calls"] == 3
+        assert data["segmentation"] is None
+
+    async def test_exposes_segmentation_report_without_page_detail(self, client: AsyncClient, mock_db):
+        """Chantier 4 : items → pages, sections, warnings (pas le détail page par page)."""
+        job = make_job()
+        job.segmentation_report = json.dumps(
+            {
+                "page_count": 4,
+                "items": [{"item_number": 212, "pages": "1-3", "rang": "A", "objectives_a": 8, "objectives_b": 0}],
+                "sections": [{"label": "sommaire", "pages": "0"}],
+                "blank_pages": "",
+                "warnings": ["p2 : en-tête 21 ignoré (item courant 212)"],
+                "pages": [{"page": 0, "kind": "section", "label": "sommaire", "signals": []}],
+            }
+        )
+        mock_db.get = AsyncMock(side_effect=[job, make_college(job.college_id)])
+        mock_db.execute = AsyncMock(side_effect=[_scalars_result([]), _tuples_result([]), _tuples_result([])])
+
+        resp = await client.get(f"/v1/admin/jobs/{job.id}", auth=ADMIN_AUTH)
+        seg = resp.json()["data"]["segmentation"]
+        assert seg["items"][0] == {
+            "item_number": 212,
+            "pages": "1-3",
+            "rang": "A",
+            "objectives_a": 8,
+            "objectives_b": 0,
+        }
+        assert seg["sections"] == [{"label": "sommaire", "pages": "0"}]
+        assert seg["warnings"] == ["p2 : en-tête 21 ignoré (item courant 212)"]
+        assert "pages" not in seg
 
     async def test_handles_missing_college_gracefully(self, client: AsyncClient, mock_db):
         job = make_job()
         # job présent mais college absent (orphan) → valeurs par défaut, pas de 500
         mock_db.get = AsyncMock(side_effect=[job, None])
-        mock_db.execute = AsyncMock(side_effect=[_scalars_result([]), _tuples_result([])])
+        mock_db.execute = AsyncMock(side_effect=[_scalars_result([]), _tuples_result([]), _tuples_result([])])
 
         resp = await client.get(f"/v1/admin/jobs/{job.id}", auth=ADMIN_AUTH)
         assert resp.status_code == 200

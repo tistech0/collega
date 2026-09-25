@@ -24,7 +24,7 @@ void cgGoldenMatrix(
   for (final width in cgGoldenWidths) {
     for (final scale in cgGoldenScales) {
       final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-      testWidgets('golden $name $tag', (tester) async {
+      testWidgets('golden $name $tag', tags: const ['golden'], (tester) async {
         tester.view.physicalSize = Size(width, height);
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);

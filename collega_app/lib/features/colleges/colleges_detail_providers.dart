@@ -27,16 +27,31 @@ final collegeDrillStatsByItemProvider =
   return (db.select(db.flashCards)
         ..where((t) => t.collegeId.equals(collegeId)))
       .watch()
-      .map((cards) {
-    final levelsByItem = <String, List<String>>{};
-    for (final c in cards) {
-      levelsByItem.putIfAbsent(c.itemId, () => []).add(c.drillLevel);
-    }
-    return levelsByItem.map(
-      (itemId, levels) => MapEntry(itemId, DrillStats.fromDrillLevels(levels)),
-    );
-  });
+      .map(_statsByItem);
 });
+
+/// Même chose, restreint aux fiches d'un rang (filtre du détail collège,
+/// chantier 4 : le rang est celui de la fiche, un item A peut avoir des fiches B).
+final collegeDrillStatsByItemForRangProvider =
+    StreamProvider.family<Map<String, DrillStats>, (String, String)>((ref, arg) {
+  final (collegeId, rang) = arg;
+  final db = ref.watch(databaseProvider);
+  return (db.select(db.flashCards)
+        ..where((t) => t.collegeId.equals(collegeId))
+        ..where((t) => t.rang.equals(rang)))
+      .watch()
+      .map(_statsByItem);
+});
+
+Map<String, DrillStats> _statsByItem(List<FlashCard> cards) {
+  final levelsByItem = <String, List<String>>{};
+  for (final c in cards) {
+    levelsByItem.putIfAbsent(c.itemId, () => []).add(c.drillLevel);
+  }
+  return levelsByItem.map(
+    (itemId, levels) => MapEntry(itemId, DrillStats.fromDrillLevels(levels)),
+  );
+}
 
 /// Récupère toutes les fiches d'un collège (`GET /v1/colleges/{id}/cards`).
 typedef CollegeCardsFetcher = Future<List<FlashCardModel>> Function(String collegeId);
@@ -74,7 +89,8 @@ final collegeDetailProvider = AsyncNotifierProvider.family<
 class CollegeDetailNotifier
     extends FamilyAsyncNotifier<CollegeDetailState, String> {
   @override
-  Future<CollegeDetailState> build(String collegeId) async {
+  Future<CollegeDetailState> build(String arg) async {
+    final collegeId = arg;
     ref.watch(collegeDataVersionProvider(collegeId));
     final repo = ref.read(collegeDetailRepositoryProvider);
     List<ItemModel> items;
@@ -147,7 +163,8 @@ final itemDetailProvider = AsyncNotifierProvider.family<
 class ItemDetailNotifier
     extends FamilyAsyncNotifier<List<FlashCardModel>, String> {
   @override
-  Future<List<FlashCardModel>> build(String compositeKey) async {
+  Future<List<FlashCardModel>> build(String arg) async {
+    final compositeKey = arg;
     final parts = compositeKey.split(':');
     if (parts.length < 2) throw ArgumentError('Invalid compositeKey: $compositeKey');
     final collegeId = parts[0];

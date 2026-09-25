@@ -1,12 +1,12 @@
 """Tests GET /v1/admin/queue — dashboard ARQ."""
+
 from __future__ import annotations
 
 import types
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 ADMIN_AUTH = ("admin", "testpass")
@@ -21,7 +21,7 @@ def make_job(college_id=None, status="generation_complete", card_count=3, error_
         card_count=card_count,
         error_message=error_message,
         hash_shared=False,
-        created_at=datetime(2026, 4, 28, 10, 0, 0, tzinfo=timezone.utc),
+        created_at=datetime(2026, 4, 28, 10, 0, 0, tzinfo=UTC),
     )
 
 
@@ -39,9 +39,7 @@ class TestGetQueue:
         assert resp.status_code == 401
 
     async def test_empty_queue(self, client: AsyncClient, mock_db):
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(all=MagicMock(return_value=[]))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(all=MagicMock(return_value=[])))
         resp = await client.get("/v1/admin/queue", auth=ADMIN_AUTH)
         assert resp.status_code == 200
         body = resp.json()
@@ -53,9 +51,7 @@ class TestGetQueue:
         job = make_job(college_id=cid, status="generation_complete", card_count=5)
         college = make_college(college_id=cid, ocr_page_progress=15, total_pages=30)
 
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(all=MagicMock(return_value=[(job, college)]))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(all=MagicMock(return_value=[(job, college)])))
 
         resp = await client.get("/v1/admin/queue", auth=ADMIN_AUTH)
         assert resp.status_code == 200
@@ -77,18 +73,14 @@ class TestGetQueue:
         job = make_job(college_id=cid, status="failed", error_message="timeout")
         college = make_college(college_id=cid)
 
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(all=MagicMock(return_value=[(job, college)]))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(all=MagicMock(return_value=[(job, college)])))
 
         resp = await client.get("/v1/admin/queue", auth=ADMIN_AUTH)
         assert resp.status_code == 200
         assert resp.json()["data"][0]["error_message"] == "timeout"
 
     async def test_response_has_data_wrapper(self, client: AsyncClient, mock_db):
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(all=MagicMock(return_value=[]))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(all=MagicMock(return_value=[])))
         resp = await client.get("/v1/admin/queue", auth=ADMIN_AUTH)
         body = resp.json()
         assert "data" in body

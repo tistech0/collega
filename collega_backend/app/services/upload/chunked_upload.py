@@ -3,14 +3,16 @@
 Cloudflare limite chaque requête à 100 MB : l'app envoie des morceaux de PART_SIZE
 que `complete` assemble avant de rejoindre le pipeline d'import existant.
 """
+
 from __future__ import annotations
 
+import hashlib
 import os
 import shutil
 import uuid
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Protocol
 
@@ -20,12 +22,17 @@ MAX_UPLOAD_SIZE = 500 * 1024 * 1024
 _WRITE_CHUNK = 1024 * 1024
 
 
+def upload_ref(upload_id: str | uuid.UUID) -> str:
+    """Référence d'upload pour les logs : l'upload_id donne accès à l'upload, jamais en clair."""
+    return hashlib.sha256(str(upload_id).encode()).hexdigest()[:8]
+
+
 class UploadRedis(Protocol):
     """Sous-ensemble de redis.asyncio.Redis (ArqRedis le satisfait)."""
 
     async def hset(self, name: str, mapping: dict) -> int: ...
     async def hgetall(self, name: str) -> dict: ...
-    async def sadd(self, name: str, *values) -> int: ...
+    async def sadd(self, name: str, *values: str | int) -> int: ...
     async def smembers(self, name: str) -> set: ...
     async def expire(self, name: str, seconds: int) -> bool: ...
     async def delete(self, *names: str) -> int: ...
@@ -70,7 +77,7 @@ class UploadState:
         return self.part_size
 
 
-def _s(v) -> str:
+def _s(v: object) -> str:
     return v.decode() if isinstance(v, bytes) else str(v)
 
 
@@ -100,7 +107,7 @@ class ChunkedUploadStore:
             size_bytes=size_bytes,
             part_size=PART_SIZE,
             parts_total=-(-size_bytes // PART_SIZE),
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         await self._write_state(state)
         return state
@@ -196,5 +203,5 @@ class ChunkedUploadStore:
     def stale_dirs(self, max_age: timedelta) -> list[Path]:
         if not self._base.exists():
             return []
-        cutoff = datetime.now(timezone.utc).timestamp() - max_age.total_seconds()
+        cutoff = datetime.now(UTC).timestamp() - max_age.total_seconds()
         return sorted(p for p in self._base.iterdir() if p.is_dir() and p.stat().st_mtime < cutoff)

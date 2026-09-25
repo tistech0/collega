@@ -1,22 +1,56 @@
 # Déploiement — collega_backend
 
+## Déployer : `scripts/deploy.sh` (chantier 3)
+
+Depuis le Mac, OrbStack lancé (`orb start`), commit poussé :
+
+```sh
+./collega_backend/scripts/deploy.sh            # HEAD
+./collega_backend/scripts/deploy.sh <sha>      # un commit précis (retour arrière)
+./collega_backend/scripts/deploy.sh --force …  # passe outre une CI non verte / illisible (avertissement)
+```
+
+Le script :
+1. refuse si `collega_backend/` a des modifications non commitées ou si le commit n'est pas poussé ;
+2. refuse si la CI `ci.yml` n'est pas verte sur ce commit (`gh run list`, il faut un `gh` connecté à un compte qui voit `tistech0/collega`) ;
+3. construit `tistech0/collega-backend:<sha>` (linux/amd64) depuis un worktree du commit, vérifie que `app/main.py` de l'image est celui du commit et que l'app s'importe, pousse l'image (plus de tag `latest`) ;
+4. sur le NAS (`ssh nas`, `/mnt/user/appdata/compose-stacks/collega`) : attend qu'aucun import ne tourne (clés `arq:in-progress:*`, `arq:queue`, jobs actifs en base ; 30 min max puis abandon sans rien modifier), fait un dump `pg_dumpall` dans `/mnt/user/appdata/collega/backups/collega_pre_<sha>_<date>.sql.gz`, valide puis installe le `docker-compose.prod.yml` du commit (ancien sauvegardé en `docker-compose.yml.bak-<date>`), écrit `IMAGE_TAG=<sha>` dans le `.env` (seule ligne modifiée, `.env.bak-<date>` avant), `docker compose pull` + `up -d` ;
+5. attend `healthy` sur api et worker (3 min), affiche les logs de `collega-migrate-1` et `/health`.
+
+**Retour arrière** : `deploy.sh <sha précédent>` (le script l'affiche en cas d'échec). Si une migration a changé le schéma entre les deux, restaurer aussi le dump pré-déploiement ([`restore.md`](restore.md)) : l'ancienne image ne connaît pas le nouveau schéma.
+
+### Particularités de la prod
+
+- **Image non root** (uid 1000 `collega`) : le dossier bind des PDF `/mnt/user/appdata/collega/pdfs` appartient à `1000:1000` (`chown -R 1000:1000`, fait au déploiement du chantier 3). À refaire si le dossier est recréé.
+- **Redis protégé** : `REDIS_PASSWORD` dans le `.env` du NAS ; le compose passe `--requirepass`, surcharge `REDIS_URL` pour migrate/api/worker et pose `REDISCLI_AUTH` dans le conteneur redis (donc `docker exec collega-redis-1 redis-cli …` fonctionne sans mot de passe en argument).
+- `IMAGE_TAG` est obligatoire (le compose refuse de démarrer sans).
+- **Migration 019 (chantier 5)** : elle supprime la table `tester_feedbacks` (testeur web retiré). L'exporter **avant** le déploiement qui l'embarque (le conteneur `collega-migrate-1` l'applique au `up -d`). L'image en service ne contient pas encore le script : il est passé sur l'entrée standard, puis le CSV est rapatrié dans `_bmad-output/implementation-artifacts/exports/` :
+  ```sh
+  ssh nas 'docker exec -i collega-api-1 python - --out /tmp/collega_pdfs' < collega_backend/scripts/export_tester_feedbacks.py
+  ```
+  (Avec une image qui contient le script : `docker exec collega-api-1 python scripts/export_tester_feedbacks.py --out /tmp/collega_pdfs`.) Le fichier `tester_feedbacks_<AAAAMMJJ>.csv` atterrit dans le dossier des PDF du NAS. Les variables `TESTER_*` du `.env` du NAS sont désormais ignorées et restent en place.
+- Vérifier une config de prod sans afficher de secret : `docker exec -e ENVIRONMENT=production collega-api-1 python -c "from app.core.config import Settings; Settings()"`.
+
 ## Production secrets — validators stricts (Story 7.3)
 
 Le backend refuse de démarrer en `ENVIRONMENT=production` si l'une des conditions
 suivantes est violée (cf. `app/core/config.py::_validate_production_secrets`) :
 
-- `SECRET_KEY` fait moins de 32 caractères **OU** commence par `change-me*` **OU**
-  contient `in-production` (placeholders du `.env.example`).
+- `SECRET_KEY` fait moins de 32 caractères **OU** est égale à l'un des placeholders
+  connus (`change-me`, `change-me-in-production`… : égalité stricte, liste dans
+  `_PLACEHOLDER_SECRET_KEYS`).
 - `CLAUDE_API_KEY` est vide **OU** ne commence pas par `sk-ant-`.
 - `ADMIN_PASSWORD` vaut `change-me` ou `change-me-in-production`.
-- `TESTER_PASSWORD` vaut `change-me` ou `change-me-in-production`.
 - `REVENUECAT_WEBHOOK_SECRET` vaut `change-me-in-production`
   (le non-vide est aussi vérifié par `_require_webhook_secret`).
 
 Le message `ValidationError` liste **toutes** les variables fautives d'un coup,
 ex. : `Production secrets invalid — Insecure config values: SECRET_KEY (must be ≥ 32 chars), ADMIN_PASSWORD (default placeholder value). Refuse to start.`
 
-En `ENVIRONMENT=development` (default), les mêmes violations émettent un
+`ENVIRONMENT` est obligatoire (`development`, `production` ou `test`) : absente ou
+hors liste (`prod`, `PRODUCTION`…), le démarrage est refusé.
+
+En `ENVIRONMENT=development` (ou `test`), les mêmes violations émettent un
 `logger.warning("DEV mode: ...")` mais le démarrage continue.
 
 ### Vérifier le `.env` NAS prod
@@ -26,8 +60,10 @@ Le fichier `.env` prod se trouve sur
 écrasé** (mémoire `project_nas_env.md`). Vérification non-destructive :
 
 ```bash
-ssh <user>@<nas> 'grep -E "^(ENVIRONMENT|SECRET_KEY|ADMIN_PASSWORD|TESTER_PASSWORD|CLAUDE_API_KEY|REVENUECAT_WEBHOOK_SECRET)=" /mnt/user/appdata/compose-stacks/collega/.env'
+ssh nas 'grep -oE "^(ENVIRONMENT|SECRET_KEY|ADMIN_PASSWORD|CLAUDE_API_KEY|REVENUECAT_WEBHOOK_SECRET|REDIS_PASSWORD|IMAGE_TAG)=" /mnt/user/appdata/compose-stacks/collega/.env'
 ```
+
+(`-o` : n'affiche que les noms des variables présentes, jamais les valeurs.)
 
 Pour mettre à jour une valeur fautive : éditer **uniquement la ligne concernée**
 via `nano` / `vi` sur le NAS — ne pas régénérer le fichier complet ni copier
@@ -43,21 +79,96 @@ Un commentaire YAML en tête de chaque service rappelle cette contrainte.
 exposer la DB ou Redis sur l'host les rend accessibles depuis le réseau Unraid
 sans authentification supplémentaire.
 
-Le `docker-compose.yml` (dev) expose intentionnellement `5432` et `6379` pour
-les outils dev locaux (TablePlus, RedisInsight). Cette divergence est voulue.
+Le `docker-compose.yml` (dev) expose `5432` et `6379` sur `127.0.0.1` seulement,
+pour les outils dev locaux (TablePlus, RedisInsight).
+
+## Console admin : Cloudflare Access
+
+Depuis le chantier 2 (sécurité), la console admin (`/admin` et `/v1/admin`) est protégée
+**depuis l'extérieur** par Cloudflare Access (code par e-mail à usage unique), en plus du
+Basic Auth applicatif existant. Sur le LAN, seul le Basic Auth s'applique (avec sa limite
+d'essais, 10/min par IP). L'application `collega-admin` est **distincte** de l'application
+Access existante pour le service token de l'app (`collegatest`), qui reste inchangée — l'app
+mobile n'appelle jamais `/v1/admin`.
+
+### Configuration (à faire une fois, dans le dashboard Cloudflare Zero Trust)
+
+1. Ouvrir le dashboard **Cloudflare Zero Trust** → **Access** → **Applications**.
+2. **Add an application** → **Self-hosted**.
+3. Nommer l'application `collega-admin`.
+4. Renseigner les **destinations** (« Public hostname ») :
+   - `collegatest.matthislesur.com/admin`
+   - `collegatest.matthislesur.com/v1/admin`
+5. Créer une policy nommée par ex. « Admin » avec l'action **Allow**, règle **Include** →
+   **Emails** → `contact@matthislesur.com`.
+6. Méthode de connexion (« Login method ») : **One-time PIN** (code envoyé par e-mail).
+7. Enregistrer. Ne pas modifier l'application Access existante qui protège le chemin utilisé
+   par le service token de l'app mobile (`collegatest`) : elle continue de couvrir le reste de
+   `collegatest.matthislesur.com` sans exiger de PIN pour les appels authentifiés par service
+   token.
+
+### Vérification
+
+Depuis l'extérieur du LAN (4G, ou en forçant la résolution DNS pour simuler l'extérieur) :
+
+```sh
+# IP publique actuelle de Cloudflare pour le sous-domaine (résolution DNS externe) :
+dig +short @1.1.1.1 collegatest.matthislesur.com
+
+# /admin doit rediriger (302) vers la page de connexion Access :
+curl -i --resolve collegatest.matthislesur.com:443:<IP Cloudflare> \
+  https://collegatest.matthislesur.com/admin
+
+# /v1/colleges avec le service token de l'app doit rester inchangé (pas de PIN demandé) :
+curl -i --resolve collegatest.matthislesur.com:443:<IP Cloudflare> \
+  -H "CF-Access-Client-Id: <client id>" -H "CF-Access-Client-Secret: <client secret>" \
+  https://collegatest.matthislesur.com/v1/colleges
+```
+
+`/admin` doit répondre `302` vers la page de connexion Cloudflare Access ; `/v1/colleges`
+avec le service token doit répondre comme avant (pas de redirection Access).
+
+### Adresse IP cliente et proxys de confiance
+
+`get_client_ip()` (`app/core/limiter.py`) ne fait confiance à `CF-Connecting-IP` (ou au
+dernier élément de `X-Forwarded-For`) que si la requête arrive d'un **proxy de confiance**
+(`settings.trusted_proxy_ips`, variable d'env `TRUSTED_PROXY_IPS`, défaut : réseau Docker de
+Nginx Proxy Manager `172.16.0.0/12`) — jamais depuis le premier élément de
+`X-Forwarded-For`, falsifiable par le client. Concrètement : `CF-Connecting-IP` n'est retenu
+que si le dernier saut de `X-Forwarded-For` est lui-même un proxy de confiance (requête
+entrée par `cloudflared`) ; sinon (LAN) c'est ce dernier saut qui fait foi.
+
+**Ne jamais démarrer uvicorn avec `--forwarded-allow-ips=*`** : cela reviendrait à faire
+confiance à n'importe quelle IP source pour falsifier son adresse via les en-têtes de
+proxy, ce que `get_client_ip()` empêche précisément en restreignant la confiance à
+`TRUSTED_PROXY_IPS`. Les commandes `uvicorn` du `Dockerfile` et des `docker-compose*.yml`
+n'utilisent pas ce flag ; ne pas l'ajouter.
+
+### Journaux d'accès : chemins masqués
+
+Le journal d'accès d'uvicorn (`uvicorn.access`) passe par un filtre installé par
+`configure_logging()` (`app/core/logging.py`) : la query string est supprimée (termes de
+recherche `q=`) et tout UUID du chemin (collège, upload…) devient `<id>` ; méthode, chemin
+masqué et statut restent journalisés.
+
+**Hors dépôt** : le journal d'accès de Nginx Proxy Manager (proxy host 53) enregistre lui
+aussi l'URI complète, query string comprise. Sa configuration n'est pas versionnée ici :
+à traiter côté NPM (format de log sans `$request_uri`/`$args`, ou désactivation du
+journal d'accès de ce proxy host) et à garder en tête pour la durée de conservation.
 
 ## Service map (prod)
 
 | Service  | Image                                | Ports exposés    | Réseau         |
 |----------|--------------------------------------|------------------|----------------|
-| `api`    | `tistech0/collega-backend:latest`    | `430:8000` (host) | `collega_net` |
-| `worker` | `tistech0/collega-backend:latest`    | aucun            | `collega_net` |
-| `migrate`| `tistech0/collega-backend:latest`    | aucun (one-shot) | `collega_net` |
+| `api`    | `tistech0/collega-backend:${IMAGE_TAG}` | aucun (NPM via `collega_net`) | `collega_net` |
+| `worker` | `tistech0/collega-backend:${IMAGE_TAG}` | aucun            | `collega_net` |
+| `migrate`| `tistech0/collega-backend:${IMAGE_TAG}` | aucun (one-shot) | `collega_net` |
 | `db`     | `postgres:16-alpine`                 | **aucun**        | `collega_net` |
 | `redis`  | `redis:7-alpine`                     | **aucun**        | `collega_net` |
 
-Le reverse proxy (HTTPS, certificats) est géré au niveau Unraid externe et n'est
-pas dans le `docker-compose.prod.yml`.
+Le reverse proxy est Nginx Proxy Manager (proxy host 53) sur le NAS, joint par le
+réseau `collega_net` ; le chemin public passe par le tunnel Cloudflare + Access. Il
+n'est pas dans le `docker-compose.prod.yml`.
 
 ## CGU + Politique de confidentialité (Story 7.4 — FR40)
 
@@ -70,8 +181,7 @@ Les **fichiers sources** (versionnés dans Git) :
 - `collega_app/assets/legal/cgu.md` — Conditions générales d'utilisation
 - `collega_app/assets/legal/privacy.md` — Politique de confidentialité
 
-Aucune route backend, aucune dépendance internet ; aucune configuration Caddy
-externe nécessaire pour ces écrans. La navigation Flutter passe par les routes
+Aucune route backend, aucune dépendance internet pour ces écrans. La navigation Flutter passe par les routes
 `/legal/cgu` et `/legal/privacy` (cf. `app_router.dart`), déclenchées depuis
 `_AppCard` dans l'écran Profil.
 

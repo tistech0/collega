@@ -1,4 +1,5 @@
 """Tests POST /v1/colleges/{ref_id}/import, GET /v1/colleges/{college_id}/status."""
+
 from __future__ import annotations
 
 import types
@@ -10,6 +11,7 @@ import pytest
 from httpx import AsyncClient
 
 from app.deps import get_current_user, require_subscription
+from tests.fakes.fake_arq import arq_pool
 
 
 def _make_user(user_id=None, is_subscribed=True, is_beta=False):
@@ -51,7 +53,7 @@ def _readable_pdf(monkeypatch):
     testée dans test_pdf_damaged.py."""
     from unittest.mock import AsyncMock
 
-    from app.api.v1 import colleges as colleges_module
+    from app.api.v1.colleges import imports as colleges_module
 
     monkeypatch.setattr(colleges_module, "assert_pdf_readable", AsyncMock(return_value=1))
 
@@ -143,28 +145,30 @@ class TestImportCollegePdf:
 
         # add() capture le college créé pour lui donner un id fixe
         added_objects: list = []
+
         def mock_add(obj):
             added_objects.append(obj)
             if hasattr(obj, "college_ref_id") and not getattr(obj, "id", None):
                 obj.id = uuid.uuid4()
                 obj.user_id = user.id
+
         mock_db.add = mock_add
 
         async def mock_refresh(obj):
             if hasattr(obj, "arq_job_id") and not getattr(obj, "id", None):
                 obj.id = uuid.uuid4()
+
         mock_db.refresh = mock_refresh
 
         mock_arq_job = MagicMock()
         mock_arq_job.job_id = "arq-job-123"
         mock_pool = AsyncMock()
         mock_pool.enqueue_job = AsyncMock(return_value=mock_arq_job)
-        mock_pool.close = AsyncMock()
 
         with (
-            patch("app.api.v1.colleges.Path.mkdir"),
+            patch("app.services.imports.Path.mkdir"),
             patch("builtins.open", MagicMock()),
-            patch("arq.create_pool", AsyncMock(return_value=mock_pool)),
+            arq_pool(mock_pool),
         ):
             resp = await client.post(
                 "/v1/colleges/15/import",
@@ -233,9 +237,7 @@ class TestGetCollegeStatus:
         app.dependency_overrides[get_current_user] = lambda: user
 
         mock_db.get = AsyncMock(return_value=college)
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=job))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=job)))
 
         resp = await client.get(f"/v1/colleges/{college.id}/status")
         app.dependency_overrides.pop(get_current_user, None)

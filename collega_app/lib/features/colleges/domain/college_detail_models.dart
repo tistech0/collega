@@ -1,3 +1,5 @@
+import 'package:collega_app/features/colleges/domain/card_type.dart';
+
 class ItemModel {
   const ItemModel({
     required this.id,
@@ -24,6 +26,14 @@ class ItemModel {
   final int cardCountC;
 
   int get totalCards => cardCountA + cardCountB + cardCountC;
+
+  /// Fiches de rang [rang] (A, B ou C) — rang de la fiche, pas celui de l'item.
+  int cardCountFor(String rang) => switch (rang) {
+        'A' => cardCountA,
+        'B' => cardCountB,
+        'C' => cardCountC,
+        _ => 0,
+      };
 
   factory ItemModel.fromJson(Map<String, dynamic> json) => ItemModel(
         id: json['id'] as String,
@@ -135,4 +145,20 @@ class CollegeDetailEmpty extends CollegeDetailState {
 class CollegeDetailError extends CollegeDetailState {
   const CollegeDetailError({required this.message});
   final String message;
+}
+
+const _rangOrder = {'A': 0, 'B': 1, 'C': 2};
+
+/// Fiches d'un item dans l'ordre d'affichage (chantier 4 § 7) : par type
+/// ([CardType.sortOrder] : classique, cas clinique, définition ; inconnu = classique),
+/// puis par rang de la fiche ; à égalité, l'ordre reçu est gardé.
+List<FlashCardModel> sortCardsForList(List<FlashCardModel> cards) {
+  final indexed = [for (var i = 0; i < cards.length; i++) (i, cards[i])];
+  indexed.sort((a, b) {
+    final byType = CardType.parse(a.$2.cardType).sortOrder.compareTo(CardType.parse(b.$2.cardType).sortOrder);
+    if (byType != 0) return byType;
+    final byRang = (_rangOrder[a.$2.rang] ?? 3).compareTo(_rangOrder[b.$2.rang] ?? 3);
+    return byRang != 0 ? byRang : a.$1.compareTo(b.$1);
+  });
+  return [for (final (_, card) in indexed) card];
 }

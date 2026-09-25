@@ -1,8 +1,9 @@
 """Purges du contenu partagé et des PDF (chantier 1), Postgres réel."""
+
 import os
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from sqlalchemy import func, select
@@ -13,9 +14,8 @@ from app.models.content import CollegePage, ItemGeneration, ItemText, OcrPage
 from app.models.user import User
 from app.services.content import store
 from app.services.content.purge import active_pdf_names, purge_orphan_pdfs, purge_unreferenced_content
-from tests.api_pg import login_as, pg_client  # noqa: F401
+from tests.api_pg import login_as
 from tests.factories import cards, make_card, make_college, make_draft, make_item, make_job, make_user, write_pdf
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
 
 pytestmark = pytest.mark.pg
 
@@ -115,7 +115,7 @@ async def test_orphan_pdfs(pg_session, tmp_path, monkeypatch):
     _touch(tmp_path / "incoming_recent.pdf")
     _touch(tmp_path / "incoming_old.pdf", age_hours=25)
 
-    assert purge_orphan_pdfs(keep, datetime.now(timezone.utc)) == 3
+    assert purge_orphan_pdfs(keep, datetime.now(UTC)) == 3
     assert {p.name for p in tmp_path.glob("*.pdf")} == keep | {"incoming_recent.pdf", being_written}
 
 

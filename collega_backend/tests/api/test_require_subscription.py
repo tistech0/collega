@@ -1,4 +1,5 @@
 """Tests pour la dépendance require_subscription (AC #5 — FR42)."""
+
 from __future__ import annotations
 
 import types
@@ -7,6 +8,7 @@ import uuid
 from fastapi import Depends, FastAPI
 from httpx import ASGITransport, AsyncClient
 
+from app.core.errors import install_error_handlers
 from app.deps import get_current_user, require_subscription
 
 
@@ -22,6 +24,7 @@ def _make_user(is_subscribed=False, is_beta=False):
 def _make_test_app(user=None):
     """Mini-app FastAPI avec un endpoint protégé par require_subscription."""
     test_app = FastAPI()
+    install_error_handlers(test_app)
 
     @test_app.get("/protected")
     async def protected(u=Depends(require_subscription)):

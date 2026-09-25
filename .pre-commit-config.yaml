@@ -1,0 +1,11 @@
+# Hook local OPTIONNEL (non imposé) : pipx install pre-commit && pre-commit install
+# Même vérification que la CI (ruff + ruff format) sur le backend uniquement.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.14
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^collega_backend/
+      - id: ruff-format
+        files: ^collega_backend/

@@ -6,12 +6,18 @@
 - PDF : on garde celui de chaque import actif et celui du dernier import réussi
   de chaque collège (politique : « conservés tant que le collège est dans ton
   compte ») ; le reste est orphelin.
+- Exception : les générations « texte insuffisant » (0 fiche, minuscules) et leurs
+  textes d'items ne sont jamais purgées — un item modifié devenu insuffisant garde
+  son ancien contenu, sa nouvelle génération n'est référencée par rien, et la purger
+  ferait repayer Claude à chaque réimport (chantier 4). Le vidage (wipe_content) les
+  supprime.
 """
+
 from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy import select, text
@@ -26,7 +32,8 @@ logger = logging.getLogger(__name__)
 _PURGE_STATEMENTS = {
     "item_generations": """
         DELETE FROM item_generations g
-        WHERE NOT EXISTS (SELECT 1 FROM flash_cards f WHERE f.generation_id = g.id)
+        WHERE NOT g.insufficient_text
+          AND NOT EXISTS (SELECT 1 FROM flash_cards f WHERE f.generation_id = g.id)
           AND NOT EXISTS (SELECT 1 FROM job_items j WHERE j.generation_id = g.id)
           AND NOT EXISTS (SELECT 1 FROM items i WHERE i.text_hash = g.text_hash)
           AND NOT EXISTS (SELECT 1 FROM job_items j2 WHERE j2.text_hash = g.text_hash)
@@ -55,7 +62,8 @@ async def purge_unreferenced_content(db: AsyncSession) -> dict[str, int]:
     await hold_content_lock_exclusive(db)
     counts = {}
     for table, statement in _PURGE_STATEMENTS.items():  # ordre : générations → textes → pages
-        counts[table] = (await db.execute(text(statement))).rowcount or 0
+        result = await db.execute(text(statement))
+        counts[table] = getattr(result, "rowcount", 0) or 0
     if any(counts.values()):
         logger.info("Contenu non référencé purgé : %s", counts)
     return counts
@@ -76,8 +84,9 @@ async def active_pdf_names(db: AsyncSession) -> set[str]:
     """PDF à conserver : imports actifs + dernier import réussi de chaque collège."""
     rows = (
         await db.execute(
-            select(GenerationJob.college_id, GenerationJob.id, GenerationJob.status, GenerationJob.created_at)
-            .order_by(GenerationJob.created_at)
+            select(GenerationJob.college_id, GenerationJob.id, GenerationJob.status, GenerationJob.created_at).order_by(
+                GenerationJob.created_at
+            )
         )
     ).all()
     keep: set[str] = set()
@@ -94,12 +103,12 @@ async def active_pdf_names(db: AsyncSession) -> set[str]:
 def purge_orphan_pdfs(keep: set[str], now: datetime | None = None) -> int:
     """Supprime les PDF hors de `keep` (dont les assemblages `incoming_*`) modifiés
     depuis plus de 24 h."""
-    now = now or datetime.now(timezone.utc)
+    now = now or datetime.now(UTC)
     removed = 0
     for pdf in Path(settings.pdf_storage_path).glob("*.pdf"):
         if pdf.name in keep:
             continue
-        if now - datetime.fromtimestamp(pdf.stat().st_mtime, timezone.utc) <= PDF_GRACE:
+        if now - datetime.fromtimestamp(pdf.stat().st_mtime, UTC) <= PDF_GRACE:
             continue
         try:
             pdf.unlink(missing_ok=True)

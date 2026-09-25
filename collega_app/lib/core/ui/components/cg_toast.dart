@@ -38,7 +38,16 @@ final _live = <OverlayEntry>{};
 /// a une ([aboveTabBar] ; par défaut détecté via [CgTabBarScope]), pendant
 /// [CgMotion.toast] ; un seul à la fois ; annoncée à VoiceOver. Ne capte aucun tap.
 /// Après un `await`, l'appelant vérifie `context.mounted` avant d'appeler.
-void showCgToast(BuildContext context, String message, {bool? aboveTabBar}) {
+///
+/// Une ligne par défaut ; [maxLines] > 1 pour un message qui doit se lire en
+/// entier (liste d'items), avec une [duration] plus longue pour le lire.
+void showCgToast(
+  BuildContext context,
+  String message, {
+  bool? aboveTabBar,
+  int maxLines = 1,
+  Duration? duration,
+}) {
   final overTabBar = aboveTabBar ?? CgTabBarScope.isPresent(context);
   final overlay = Overlay.of(context, rootOverlay: true);
   // L'overlay racine est au-dessus des MediaQuery/thèmes posés par l'écran :
@@ -56,6 +65,8 @@ void showCgToast(BuildContext context, String message, {bool? aboveTabBar}) {
         data: MediaQuery.of(overlayContext).copyWith(disableAnimations: reduced, textScaler: textScaler),
         child: _CgToastOverlay(
           message: message,
+          maxLines: maxLines,
+          duration: duration ?? CgMotion.toast,
           aboveTabBar: overTabBar,
           onDone: () => _dismiss(entry),
           onDetached: () => _live.remove(entry),
@@ -81,12 +92,16 @@ void _dismiss(OverlayEntry? entry) {
 class _CgToastOverlay extends StatefulWidget {
   const _CgToastOverlay({
     required this.message,
+    required this.maxLines,
+    required this.duration,
     required this.aboveTabBar,
     required this.onDone,
     required this.onDetached,
   });
 
   final String message;
+  final int maxLines;
+  final Duration duration;
   final bool aboveTabBar;
   final VoidCallback onDone;
 
@@ -120,7 +135,7 @@ class _CgToastOverlayState extends State<_CgToastOverlay> with SingleTickerProvi
     // qui supprimerait aussi le fondu.
     _controller.duration = CgMotion.reduced(context) ? CgMotion.fast : CgMotion.base;
     _controller.forward();
-    _timer = Timer(CgMotion.toast, _hide);
+    _timer = Timer(widget.duration, _hide);
   }
 
   void _hide() {
@@ -158,7 +173,7 @@ class _CgToastOverlayState extends State<_CgToastOverlay> with SingleTickerProvi
             child: FadeTransition(
               opacity: _curve,
               // VoiceOver l'a déjà entendu via l'annonce : pas de seconde lecture.
-              child: ExcludeSemantics(child: CgToastCapsule(message: widget.message)),
+              child: ExcludeSemantics(child: CgToastCapsule(message: widget.message, maxLines: widget.maxLines)),
             ),
           ),
         ),
@@ -169,9 +184,12 @@ class _CgToastOverlayState extends State<_CgToastOverlay> with SingleTickerProvi
 
 /// La capsule du toast, rendue seule (planche, Widgetbook) ou par [showCgToast].
 class CgToastCapsule extends StatelessWidget {
-  const CgToastCapsule({super.key, required this.message});
+  const CgToastCapsule({super.key, required this.message, this.maxLines = 1});
 
   final String message;
+
+  /// Au-delà d'une ligne, la capsule devient un bloc arrondi (`r-l`) qui passe à la ligne.
+  final int maxLines;
 
   static const _padding = EdgeInsets.symmetric(horizontal: CgSpace.s5, vertical: CgSpace.s3);
 
@@ -179,13 +197,13 @@ class CgToastCapsule extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = CgTheme.of(context).colors;
     return DecoratedBox(
-      decoration: BoxDecoration(color: c.ink, borderRadius: CgRadius.pill),
+      decoration: BoxDecoration(color: c.ink, borderRadius: maxLines > 1 ? CgRadius.lAll : CgRadius.pill),
       child: Padding(
         padding: _padding,
         child: Text(
           message,
-          maxLines: 1,
-          softWrap: false,
+          maxLines: maxLines,
+          softWrap: maxLines > 1,
           overflow: TextOverflow.ellipsis,
           style: CgType.bodyS.copyWith(color: c.ground),
         ),

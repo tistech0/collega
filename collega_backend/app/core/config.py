@@ -1,20 +1,22 @@
+import ipaddress
 import logging
+from typing import Annotated, Literal
 
-from pydantic import model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field, field_validator, model_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
-
-_KNOWN_ENVIRONMENTS = frozenset({"development", "production"})
 
 # Listes fermées de placeholders connus (issus de `.env.example`). On préfère
 # une égalité explicite à une recherche par substring, qui rejetait à tort des
 # secrets légitimes contenant `change-me*` ou `in-production`.
-_PLACEHOLDER_SECRET_KEYS = frozenset({
-    "change-me",
-    "change-me-in-production",
-    "change-me-in-production-use-at-least-32-chars",
-})
+_PLACEHOLDER_SECRET_KEYS = frozenset(
+    {
+        "change-me",
+        "change-me-in-production",
+        "change-me-in-production-use-at-least-32-chars",
+    }
+)
 _PLACEHOLDER_PASSWORDS = frozenset({"change-me", "change-me-in-production"})
 _PLACEHOLDER_WEBHOOK_SECRETS = frozenset({"change-me", "change-me-in-production"})
 
@@ -24,20 +26,35 @@ _CLAUDE_API_KEY_MIN_LEN = 20
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    # hide_input_in_errors : une config refusée ne recopie jamais les valeurs (secrets) dans l'erreur.
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore", hide_input_in_errors=True
+    )
 
-    environment: str = "development"  # "development" | "production"
+    # Obligatoire (chantier 2 § 6) : absente ou hors liste → démarrage refusé. Une typo
+    # (`prod`) n'est plus traitée silencieusement comme `development`.
+    environment: Literal["development", "production", "test"]
 
     database_url: str
     redis_url: str
     # Tests : "memory://" (compteurs par processus, plus de Redis local requis).
     rate_limit_storage_uri: str = ""
+    # Proxys dont on croit les en-têtes CF-Connecting-IP / X-Forwarded-For (chantier 2 § 4).
+    # Défaut : réseau Docker de Nginx Proxy Manager. Variable TRUSTED_PROXY_IPS : réseaux
+    # (CIDR) ou adresses séparés par des virgules ; vide = aucun proxy de confiance.
+    trusted_proxy_ips: Annotated[list[str], NoDecode] = ["172.16.0.0/12"]
     secret_key: str
     claude_api_key: str = ""
 
     # Quotas anti-spam configurables sans redéploiement (FR45)
     reload_count_max: int = 2
     monthly_reloads_max: int = 3
+
+    # Items générés en parallèle par import (chantier 4) : appels Claude simultanés.
+    # 2 par défaut (revue finale) : le parallélisme n'a jamais été mesuré contre les
+    # limites de débit réelles du compte, et plusieurs imports peuvent tourner à la fois
+    # (worker max_jobs 10). À relever par la variable GENERATION_CONCURRENCY si besoin.
+    generation_concurrency: int = Field(2, ge=1)
 
     # Taux de conversion USD→EUR pour le calcul de coût des tokens Claude
     # (Story 7.8). Valeur par défaut ici (PAS dans le .env prod NAS, cf. mémoire
@@ -47,10 +64,6 @@ class Settings(BaseSettings):
     # Interface admin Phase 0 — HTTP Basic Auth
     admin_username: str = "admin"
     admin_password: str = "change-me"
-
-    # Interface testeur Phase 0 — HTTP Basic Auth (credentials distincts de l'admin)
-    tester_username: str = "tester"
-    tester_password: str = "change-me"
 
     # Webhook RevenueCat — secret partagé (FR46)
     revenuecat_webhook_secret: str = ""
@@ -65,6 +78,25 @@ class Settings(BaseSettings):
     apns_bundle_id: str = "com.lesurmatthis.collega"
     apns_use_sandbox: bool = True
 
+    @field_validator("trusted_proxy_ips", mode="before")
+    @classmethod
+    def _split_trusted_proxy_ips(cls, value: object) -> object:
+        if isinstance(value, str):
+            return [part.strip() for part in value.split(",") if part.strip()]
+        return value
+
+    @field_validator("trusted_proxy_ips")
+    @classmethod
+    def _check_trusted_proxy_ips(cls, value: list[str]) -> list[str]:
+        # Un réseau mal saisi refuse le démarrage (sinon l'IP client retomberait
+        # silencieusement sur celle du proxy : toutes les utilisatrices partageraient un compteur).
+        for network in value:
+            try:
+                ipaddress.ip_network(network, strict=False)
+            except ValueError:
+                raise ValueError(f"TRUSTED_PROXY_IPS: réseau invalide {network!r}") from None
+        return value
+
     @model_validator(mode="after")
     def _require_webhook_secret(self) -> "Settings":
         if not self.revenuecat_webhook_secret:
@@ -72,32 +104,8 @@ class Settings(BaseSettings):
         return self
 
     @model_validator(mode="after")
-    def _require_distinct_tester_credentials(self) -> "Settings":
-        if (
-            self.tester_username == self.admin_username
-            and self.tester_password == self.admin_password
-        ):
-            raise ValueError(
-                "tester_username/tester_password must differ from admin credentials"
-            )
-        return self
-
-    @model_validator(mode="after")
     def _validate_production_secrets(self) -> "Settings":
-        # Strip + lower : `ENVIRONMENT=" production "` (espaces dans .env) ne
-        # doit pas être traité silencieusement comme `development`.
-        env_normalized = self.environment.strip().lower()
-        is_prod = env_normalized == "production"
-
-        # Toute valeur autre que `development`/`production` est probablement
-        # une typo (`prod`, `prd`, `PROD`) — fail-open silencieux interdit.
-        if env_normalized not in _KNOWN_ENVIRONMENTS:
-            logger.warning(
-                "Unknown ENVIRONMENT=%r — treated as development. "
-                "Expected one of: %s.",
-                self.environment,
-                ", ".join(sorted(_KNOWN_ENVIRONMENTS)),
-            )
+        is_prod = self.environment == "production"
 
         issues: list[str] = []
 
@@ -106,7 +114,6 @@ class Settings(BaseSettings):
         secret_key = self.secret_key.strip()
         claude_api_key = self.claude_api_key.strip()
         admin_password = self.admin_password.strip()
-        tester_password = self.tester_password.strip()
         webhook_secret = self.revenuecat_webhook_secret.strip()
 
         # SECRET_KEY : taille mini ET pas de placeholder (deux contrôles
@@ -122,16 +129,11 @@ class Settings(BaseSettings):
         elif not claude_api_key.startswith("sk-ant-"):
             issues.append("CLAUDE_API_KEY (invalid format — expected sk-ant-…)")
         elif len(claude_api_key) < _CLAUDE_API_KEY_MIN_LEN:
-            issues.append(
-                f"CLAUDE_API_KEY (too short — must be ≥ {_CLAUDE_API_KEY_MIN_LEN} chars)"
-            )
+            issues.append(f"CLAUDE_API_KEY (too short — must be ≥ {_CLAUDE_API_KEY_MIN_LEN} chars)")
 
-        # ADMIN_PASSWORD / TESTER_PASSWORD : non vide + pas de placeholder.
+        # ADMIN_PASSWORD : non vide + pas de placeholder.
         if not admin_password or admin_password in _PLACEHOLDER_PASSWORDS:
             issues.append("ADMIN_PASSWORD (default placeholder value)")
-
-        if not tester_password or tester_password in _PLACEHOLDER_PASSWORDS:
-            issues.append("TESTER_PASSWORD (default placeholder value)")
 
         # REVENUECAT_WEBHOOK_SECRET : pas de placeholder (le non-vide est déjà
         # vérifié par _require_webhook_secret au-dessus).

@@ -1,4 +1,5 @@
 """Textes des notifications : le produit s'appelle Collega (refonte v2)."""
+
 from __future__ import annotations
 
 import sys

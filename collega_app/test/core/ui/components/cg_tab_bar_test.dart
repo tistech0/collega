@@ -89,7 +89,7 @@ void main() {
       expect(blur.filter, ImageFilter.blur(sigmaX: 24, sigmaY: 24));
     });
 
-    testWidgets('accessibilité : onglets étiquetés, 44 pt, libellés contrastés (8.15)', (tester) async {
+    testWidgets('accessibilité : onglets étiquetés, 44 pt, libellés contrastés (8.15)', tags: const ['golden'], (tester) async {
       final handle = tester.ensureSemantics();
       await _pumpBar(tester, current: 1);
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));

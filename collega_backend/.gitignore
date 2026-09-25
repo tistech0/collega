@@ -20,3 +20,9 @@ htmlcov/
 # IDE
 .idea/
 .vscode/
+
+# Base SQLite des tests (créée par pytest)
+test.db
+
+# Textes de pages réels des collèges (contenu sous droits, chantier 4) — jamais committés
+tests/fixtures/private/

@@ -8,6 +8,7 @@ Exemple :
   .venv/bin/python scripts/chunked_upload.py "../CANCERO 4e college (1).pdf" --ref-id 3 \\
       --email jerome@collega.fr --password '…' --cloudflare-ip 172.67.211.66 --env-file ../collega_app/.env.local
 """
+
 from __future__ import annotations
 
 import argparse
@@ -49,15 +50,25 @@ def main() -> int:
     if a.cloudflare_ip:
         extra += ["--resolve", f"{HOST}:443:{a.cloudflare_ip}"]
     if a.env_file:
-        env = dict(line.strip().split("=", 1) for line in open(a.env_file) if "=" in line)
+        with open(a.env_file) as fh:
+            env = dict(line.strip().split("=", 1) for line in fh if "=" in line)
         extra += [
-            "-H", f"CF-Access-Client-Id: {env['CF_ACCESS_CLIENT_ID']}",
-            "-H", f"CF-Access-Client-Secret: {env['CF_ACCESS_CLIENT_SECRET']}",
+            "-H",
+            f"CF-Access-Client-Id: {env['CF_ACCESS_CLIENT_ID']}",
+            "-H",
+            f"CF-Access-Client-Secret: {env['CF_ACCESS_CLIENT_SECRET']}",
         ]
 
     code, body = curl(
-        ["-X", "POST", f"{base}/v1/auth/login", "-H", "Content-Type: application/json",
-         "-d", json.dumps({"email": a.email, "password": a.password})],
+        [
+            "-X",
+            "POST",
+            f"{base}/v1/auth/login",
+            "-H",
+            "Content-Type: application/json",
+            "-d",
+            json.dumps({"email": a.email, "password": a.password}),
+        ],
         extra,
     )
     if code != 200:
@@ -77,8 +88,16 @@ def main() -> int:
         upload_id = a.resume
     else:
         code, body = curl(
-            ["-X", "POST", f"{base}/v1/colleges/{a.ref_id}/import/init", "-H", "Content-Type: application/json",
-             "-d", json.dumps({"size_bytes": size}), *auth],
+            [
+                "-X",
+                "POST",
+                f"{base}/v1/colleges/{a.ref_id}/import/init",
+                "-H",
+                "Content-Type: application/json",
+                "-d",
+                json.dumps({"size_bytes": size}),
+                *auth,
+            ],
             extra,
         )
         print("init", code, body[:200])
@@ -102,8 +121,15 @@ def main() -> int:
             tmp.write_bytes(data)
             t = time.time()
             code, body = curl(
-                ["-X", "PUT", f"{base}/v1/colleges/import/{upload_id}/parts/{n}",
-                 "-H", "Content-Type: application/octet-stream", "--data-binary", f"@{tmp}"],
+                [
+                    "-X",
+                    "PUT",
+                    f"{base}/v1/colleges/import/{upload_id}/parts/{n}",
+                    "-H",
+                    "Content-Type: application/octet-stream",
+                    "--data-binary",
+                    f"@{tmp}",
+                ],
                 extra,
             )
             tmp.unlink()

@@ -10,6 +10,7 @@ engine = create_async_engine(
     pool_pre_ping=True,
     pool_size=5,
     max_overflow=10,
+    hide_parameters=True,  # les paramètres de requête (contenu de fiches, etc.) n'apparaissent jamais dans les logs
 )
 
 async_session_factory = async_sessionmaker(
@@ -29,7 +30,7 @@ class Base(DeclarativeBase):
 ALEMBIC_UNMANAGED_INDEXES = frozenset({"idx_flash_cards_fts"})
 
 
-def alembic_include_object(obj, name, type_, reflected, compare_to) -> bool:
+def alembic_include_object(obj: object, name: str | None, type_: str, reflected: bool, compare_to: object) -> bool:
     return not (type_ == "index" and name in ALEMBIC_UNMANAGED_INDEXES)
 
 

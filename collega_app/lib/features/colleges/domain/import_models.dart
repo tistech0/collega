@@ -19,6 +19,8 @@ class ImportStartResponse {
 
 /// Ce qu'un réimport a changé (chantier 1) : le serveur ne régénère que les items
 /// dont le contenu a changé, et rend le quota si rien n'a nécessité Claude.
+/// Chantier 4 : aussi les items sans contenu suffisant (0 fiche), listés même au
+/// premier import — seul cas où un premier import porte un résumé.
 class ImportSummary {
   const ImportSummary({
     required this.changed,
@@ -26,6 +28,8 @@ class ImportSummary {
     required this.removed,
     required this.unchanged,
     required this.quotaRefunded,
+    this.reimport = true,
+    this.insufficientItems = const [],
   });
 
   factory ImportSummary.fromJson(Map<String, dynamic> json) => ImportSummary(
@@ -34,6 +38,9 @@ class ImportSummary {
         removed: json['removed'] as int? ?? 0,
         unchanged: json['unchanged'] as int? ?? 0,
         quotaRefunded: json['quota_refunded'] as bool? ?? false,
+        // Serveur antérieur au chantier 4 : un résumé n'existait qu'après un réimport.
+        reimport: json['reimport'] as bool? ?? true,
+        insufficientItems: (json['insufficient_items'] as List?)?.whereType<int>().toList() ?? const [],
       );
 
   static ImportSummary? maybeFromJson(Object? json) =>
@@ -45,12 +52,39 @@ class ImportSummary {
   final int unchanged;
   final bool quotaRefunded;
 
+  /// Faux : premier import (ses compteurs ne décrivent aucun changement).
+  final bool reimport;
+
+  /// Numéros des items où Claude n'a trouvé pas assez de contenu : à vérifier dans le PDF.
+  final List<int> insufficientItems;
+
   bool get nothingChanged => changed == 0 && added == 0 && removed == 0;
 }
 
-/// « 3 items mis à jour, 1 nouveau, 20 inchangés » ; « Aucun changement dans ce PDF :
-/// réimport non décompté ». Mêmes règles que la notification envoyée par le serveur.
-String importSummaryText(ImportSummary s) {
+/// Items listés au plus dans le résumé ; au-delà : « … et N autres ».
+const _maxListedItems = 8;
+
+/// « Pas assez de contenu : items 215, 216 » ; null si aucun item n'est concerné.
+String? insufficientItemsText(List<int> items) {
+  if (items.isEmpty) return null;
+  final shown = items.take(_maxListedItems).join(', ');
+  final rest = items.length - _maxListedItems;
+  final more = rest > 0 ? ' et ${rest == 1 ? '1 autre' : '$rest autres'}' : '';
+  return 'Pas assez de contenu : item${items.length == 1 ? '' : 's'} $shown$more';
+}
+
+/// Toast de fin d'import. Réimport : « 3 items mis à jour, 1 nouveau, 20 inchangés » ;
+/// « Aucun changement dans ce PDF : réimport non décompté » (mêmes règles que la
+/// notification du serveur). Puis, premier import compris, les items sans contenu
+/// suffisant. Null : rien à dire (premier import complet).
+String? importSummaryText(ImportSummary s) {
+  final insufficient = insufficientItemsText(s.insufficientItems);
+  if (!s.reimport) return insufficient;
+  final changes = _changesText(s);
+  return insufficient == null ? changes : '$changes. $insufficient';
+}
+
+String _changesText(ImportSummary s) {
   if (s.nothingChanged) {
     return s.quotaRefunded ? 'Aucun changement dans ce PDF : réimport non décompté' : 'Aucun changement dans ce PDF';
   }
@@ -172,7 +206,8 @@ class ImportStreaming extends CollegeImportState {
 class ImportComplete extends CollegeImportState {
   const ImportComplete({required this.collegeId, this.summary});
   final String collegeId;
-  /// Présent après un réimport : ce qui a changé.
+  /// Présent après un réimport (ce qui a changé) ou quand des items n'avaient pas
+  /// assez de contenu (premier import compris).
   final ImportSummary? summary;
 }
 

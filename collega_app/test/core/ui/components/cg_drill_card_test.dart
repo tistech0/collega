@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:collega_app/core/ui/components/cg_card_type_tag.dart';
 import 'package:collega_app/core/ui/components/cg_drill_card.dart';
 import 'package:collega_app/core/ui/components/cg_verdict_bar.dart';
 import 'package:collega_app/core/ui/gallery/cg_drill_card_gallery.dart';
@@ -49,6 +50,7 @@ Widget _card({
   String answer = _answer,
   int index = 3,
   int total = 24,
+  String? typeLabel,
   Key? key,
 }) =>
     cgTestApp(
@@ -57,6 +59,7 @@ Widget _card({
         question: question,
         answer: answer,
         rank: 'A',
+        typeLabel: typeLabel,
         collegeName: 'Cancérologie',
         index: index,
         total: total,
@@ -98,6 +101,16 @@ void main() {
       ).style;
       expect(style.fontSize, 30);
       expect(style.fontWeight, FontWeight.w600);
+    });
+
+    testWidgets('type de fiche : étiquette sur le recto à côté du rang ; rien pour une classique', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_card());
+      expect(find.byType(CgCardTypeTag), findsNothing);
+      await tester.pumpWidget(_card(typeLabel: 'Cas clinique'));
+      expect(find.text('Cas clinique'), findsOneWidget);
+      expect(tester.widget<CgCardTypeTag>(find.byType(CgCardTypeTag)).onAccent, isTrue);
+      expect(tester.getTopLeft(find.text('Cas clinique')).dx, greaterThan(tester.getTopRight(find.text('Rang A')).dx));
     });
 
     testWidgets('question 26 pt sous 390 de large', (tester) async {
@@ -437,6 +450,14 @@ void main() {
   });
 
   group('Semantics', () {
+    testWidgets('recto d’un cas clinique : le type est lu après le rang', (tester) async {
+      _phone(tester);
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(_card(typeLabel: 'Cas clinique'));
+      expect(find.bySemanticsLabel('Fiche rang A, cas clinique, Cancérologie. Question : $_question'), findsOneWidget);
+      handle.dispose();
+    });
+
     testWidgets('carte, invite, ✕ et trois verdicts', (tester) async {
       _phone(tester);
       final handle = tester.ensureSemantics();

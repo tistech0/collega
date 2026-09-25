@@ -1,10 +1,13 @@
 """Schemas Pydantic pour les routes admin — pipeline OCR Phase 0 + Story 1.4."""
+
 from __future__ import annotations
+
+from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
-
 # ── College creation ─────────────────────────────────────────────────────────
+
 
 class CreateCollegeRequest(BaseModel):
     user_id: str
@@ -22,6 +25,7 @@ class CreateCollegeResponseWrapped(BaseModel):
 
 
 # ── Story 1.2 — existant ──────────────────────────────────────────────────────
+
 
 class ProcessCollegeResponse(BaseModel):
     job_id: str
@@ -45,6 +49,7 @@ class CollegeStatusResponseWrapped(BaseModel):
 
 # ── Story 1.4 — Queue dashboard ───────────────────────────────────────────────
 
+
 class QueueJobData(BaseModel):
     job_id: str
     college_id: str
@@ -63,13 +68,15 @@ class QueueResponse(BaseModel):
 
 # ── Story 1.4 — Stats collège ─────────────────────────────────────────────────
 
+
 class ItemOcrData(BaseModel):
     item_number: int
     ocr_confidence_score: float
     low_confidence: bool
 
 
-# ── Story 1.5 — Pertinence stats (feedback testeur) ───────────────────────────
+# ── Story 1.5 — Pertinence stats (avis flash_cards.user_feedback) ─────────────
+
 
 class PertinenceByRang(BaseModel):
     pertinent: int
@@ -85,6 +92,7 @@ class PertinenceStats(BaseModel):
 
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class CollegeStatsData(BaseModel):
     card_count_by_rang: dict[str, int]
     avg_ocr_confidence: float | None
@@ -98,6 +106,7 @@ class CollegeStatsResponseWrapped(BaseModel):
 
 
 # ── Story 1.4 — Gestion beta ──────────────────────────────────────────────────
+
 
 class UserBetaData(BaseModel):
     user_id: str
@@ -123,14 +132,15 @@ class BetaUpdateResponseWrapped(BaseModel):
 
 # ── Story 1.4 — Configuration anti-spam ──────────────────────────────────────
 
+
 class ConfigData(BaseModel):
     reload_count_max: int
     monthly_reloads_max: int
 
 
 class ConfigUpdateRequest(BaseModel):
-    reload_count_max: int | None = Field(default=None, ge=1)
-    monthly_reloads_max: int | None = Field(default=None, ge=1)
+    reload_count_max: int | None = Field(default=None, ge=0)
+    monthly_reloads_max: int | None = Field(default=None, ge=0)
 
 
 class ConfigResponseWrapped(BaseModel):
@@ -138,6 +148,7 @@ class ConfigResponseWrapped(BaseModel):
 
 
 # ── Story 7.6 — Création utilisateur admin (hard-blocker onboarding) ──────────
+
 
 class CreateUserRequest(BaseModel):
     email: EmailStr
@@ -151,11 +162,24 @@ class CreateUserResponseWrapped(BaseModel):
 
 # ── Story 7.6 — Reset quota mensuel ──────────────────────────────────────────
 
+
 class ResetQuotaResponseWrapped(BaseModel):
     data: UserBetaData
 
 
+# ── Chantier 2 — Réinitialisation du mot de passe (admin) ────────────────────
+
+
+class ResetPasswordData(BaseModel):
+    temporary_password: str
+
+
+class ResetPasswordResponseWrapped(BaseModel):
+    data: ResetPasswordData
+
+
 # ── Story 7.6 — Détail utilisateur (collèges + jobs + quota) ──────────────────
+
 
 class UserCollegeSummary(BaseModel):
     college_id: str
@@ -193,10 +217,13 @@ class UserDetailResponseWrapped(BaseModel):
 
 # ── Story 7.6 — Overview KPI (point d'entrée console) ─────────────────────────
 
+
 class OverviewData(BaseModel):
     users_total: int
     jobs_by_status: dict[str, int]
     jobs_failed: int
+    # Chantier 4 — coût Claude des 30 derniers jours (tous appels, lu dans claude_usage).
+    cost_last_30_days_eur: float = 0.0
 
 
 class OverviewResponseWrapped(BaseModel):
@@ -204,6 +231,7 @@ class OverviewResponseWrapped(BaseModel):
 
 
 # ── Story 7.7 — Suivi & contrôle imports (timeline / détail / stop) ───────────
+
 
 class JobEventData(BaseModel):
     event_type: str
@@ -230,10 +258,13 @@ class JobDetailData(BaseModel):
     college_status: str
     items: list[ItemOcrData]
     timeline: list[JobEventData]
-    # Story 7.8 — coût/import (additif). NULL = job non mesuré (antérieur migration 014).
-    input_tokens: int | None = None
-    output_tokens: int | None = None
+    # Coût du job, lu dans claude_usage (chantier 4) : somme des appels facturés.
+    input_tokens: int = 0
+    output_tokens: int = 0
     cost_eur: float = 0.0
+    claude_calls: int = 0
+    # Chantier 4 — rapport de découpage : items → pages, sections, warnings. NULL = import antérieur.
+    segmentation: dict | None = None
 
 
 class JobDetailResponseWrapped(BaseModel):
@@ -256,6 +287,7 @@ class StopJobResponseWrapped(BaseModel):
 
 # ── Story 7.8 — Qualité : inspection fiches générées ──────────────────────────
 
+
 class AdminFlashCardData(BaseModel):
     card_id: str
     item_number: int | None
@@ -272,14 +304,15 @@ class AdminCardsResponseWrapped(BaseModel):
     total: int
 
 
-# ── Story 7.8 — Qualité : feedback testeuse joint au contenu fiche ────────────
+# ── Story 7.8 — Qualité : avis de l'utilisatrice joint au contenu fiche ───────
+
 
 class AdminFeedbackData(BaseModel):
-    feedback_id: str
     flash_card_id: str
-    tester_id: str
+    item_number: int
+    user_email: str
+    feedback: Literal["positive", "negative"]
     is_pertinent: bool
-    created_at: str | None
     recto: str
     verso: str
     card_type: str
@@ -291,20 +324,26 @@ class AdminFeedbackResponseWrapped(BaseModel):
     total: int
 
 
-# ── Story 7.8 — Coût : agrégat usage tokens + € (global / par user) ───────────
+# ── Coût : agrégat usage tokens + € lu dans claude_usage (story 7.8, chantier 4) ─
 
-class UsageByUserData(BaseModel):
-    user_id: str
-    email: str
+
+class UsageTotalsData(BaseModel):
     input_tokens: int
     output_tokens: int
     cost_eur: float
 
 
-class UsageData(BaseModel):
-    input_tokens: int
-    output_tokens: int
-    cost_eur: float
+class UsageByUserData(UsageTotalsData):
+    # NULL : compte supprimé (ses appels restent dans les totaux).
+    user_id: str | None
+    email: str | None
+    last_30_days: UsageTotalsData
+
+
+class UsageData(UsageTotalsData):
+    last_30_days: UsageTotalsData
+    by_kind: dict[str, UsageTotalsData]
+    by_model: dict[str, UsageTotalsData]
     by_user: list[UsageByUserData]
 
 

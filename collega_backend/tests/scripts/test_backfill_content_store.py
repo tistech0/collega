@@ -1,4 +1,5 @@
 """Remplissage du stockage de contenu des collèges existants (chantier 1), Postgres réel."""
+
 import pytest
 from sqlalchemy import func, select
 
@@ -8,7 +9,6 @@ from app.models.item import Item
 from app.services.content.fingerprint import item_hash
 from scripts.backfill_content_store import backfill_college
 from tests.factories import make_card, make_college, make_item, make_job, make_user, write_pdf
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
 from tests.workers.test_ocr_pipeline import FakeDetector, FakeProcessor
 
 pytestmark = pytest.mark.pg

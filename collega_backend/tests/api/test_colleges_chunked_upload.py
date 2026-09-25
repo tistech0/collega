@@ -1,4 +1,5 @@
 """Tests upload par morceaux — init / status / parts / complete (Story 7.11)."""
+
 from __future__ import annotations
 
 import types
@@ -8,9 +9,10 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from httpx import AsyncClient
 
-from app.api.v1 import colleges as colleges_module
+from app.api.v1.colleges import imports as colleges_module
 from app.deps import require_subscription
 from app.services.upload.chunked_upload import PART_SIZE, ChunkedUploadStore
+from tests.fakes.fake_arq import arq_pool
 from tests.fakes.fake_redis import FakeRedis
 
 
@@ -51,7 +53,7 @@ def app_with_store(store):
 
 
 def _no_college(mock_db):
-    # _assert_import_allowed : SELECT College → None (premier import)
+    # imports.assert_import_allowed : SELECT College → None (premier import)
     mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
 
 
@@ -155,10 +157,9 @@ def _pdf_part(size: int) -> bytes:
 async def _upload_all(store, st, first: bytes | None = None):
     for n in range(st.parts_total):
         size = st.expected_part_size(n)
+        data = b"y" * size
         if n == 0:
             data = first if first is not None else _pdf_part(size)
-        else:
-            data = b"y" * size
 
         async def gen(d=data):
             yield d
@@ -202,16 +203,20 @@ class TestComplete:
         await _upload_all(store, st)
         captured = {}
 
-        async def fake_start(db, u, ref_id, pdf_file_path):
+        async def fake_start(db, arq, u, ref_id, pdf_file_path, limits):
             captured["ref_id"] = ref_id
             captured["bytes"] = pdf_file_path.read_bytes()
             from app.schemas.college import ImportCollegeResponseData
 
             return ImportCollegeResponseData(college_id="c", job_id="j", status="pending")
 
-        monkeypatch.setattr(colleges_module, "_start_import_from_file", fake_start)
+        monkeypatch.setattr("app.services.imports.start_import_from_file", fake_start)
         resp = await client.post(f"/v1/colleges/import/{st.upload_id}/complete")
-        assert resp.status_code == 202 and resp.json()["data"] == {"college_id": "c", "job_id": "j", "status": "pending"}
+        assert resp.status_code == 202 and resp.json()["data"] == {
+            "college_id": "c",
+            "job_id": "j",
+            "status": "pending",
+        }
         assert captured["ref_id"] == 34 and captured["bytes"].startswith(b"%PDF-") and len(captured["bytes"]) == 10
         assert await store.get(st.upload_id) is None
         assert not store.part_path(st.upload_id, 0).parent.exists()
@@ -226,7 +231,7 @@ class TestComplete:
         monkeypatch.setattr(colleges_module.settings, "pdf_storage_path", str(tmp_path))
         monkeypatch.setattr(colleges_module, "assert_pdf_readable", AsyncMock(side_effect=pdf_damaged()))
         start = AsyncMock()
-        monkeypatch.setattr(colleges_module, "_start_import_from_file", start)
+        monkeypatch.setattr("app.services.imports.start_import_from_file", start)
         st = await store.create(user.id, 34, 10)
         await _upload_all(store, st)
 
@@ -275,22 +280,23 @@ class TestComplete:
         st = await store.create(user.id, 34, 10)
         await _upload_all(store, st)
 
-        async def failing_start(db, u, ref_id, pdf_file_path):
+        async def failing_start(db, arq, u, ref_id, pdf_file_path, limits):
             pdf_file_path.unlink(missing_ok=True)
-            from fastapi import HTTPException
+            from app.core.errors import AppError
 
-            raise HTTPException(status_code=503, detail={"code": "QUEUE_UNAVAILABLE", "message": "x"})
+            raise AppError(503, "QUEUE_UNAVAILABLE", "x")
 
-        monkeypatch.setattr(colleges_module, "_start_import_from_file", failing_start)
+        monkeypatch.setattr("app.services.imports.start_import_from_file", failing_start)
         resp = await client.post(f"/v1/colleges/import/{st.upload_id}/complete")
         assert resp.status_code == 503
         again = await store.get(st.upload_id)
         assert again is not None and again.is_complete  # morceaux + clé restaurés
         assert store.part_path(st.upload_id, 0).exists()
 
-    async def test_complete_reel_renomme_et_enqueue(self, client, mock_db, app_with_store, store, monkeypatch, tmp_path):
-        """Chemin complet sans fake : assemblage → _start_import_from_file → {college.id}_{job_id}.pdf enqueué."""
-        from unittest.mock import patch
+    async def test_complete_reel_renomme_et_enqueue(
+        self, client, mock_db, app_with_store, store, monkeypatch, tmp_path
+    ):
+        """Chemin complet sans fake : assemblage → imports.start_import_from_file → {college.id}_{job_id}.pdf enqueué."""
 
         user = _make_user()
         app_with_store.dependency_overrides[require_subscription] = lambda: user
@@ -299,7 +305,9 @@ class TestComplete:
         await _upload_all(store, st)
 
         college_id = uuid.uuid4()
-        college = types.SimpleNamespace(id=college_id, user_id=user.id, college_ref_id=34, status="processing", reload_count=0)
+        college = types.SimpleNamespace(
+            id=college_id, user_id=user.id, college_ref_id=34, status="processing", reload_count=0
+        )
         mock_db.execute = AsyncMock(
             side_effect=[
                 MagicMock(scalar_one_or_none=MagicMock(return_value=college)),  # SELECT College
@@ -308,7 +316,7 @@ class TestComplete:
         )
         mock_pool = AsyncMock()
         mock_pool.enqueue_job = AsyncMock(return_value=MagicMock(job_id="arq-1"))
-        with patch("arq.create_pool", AsyncMock(return_value=mock_pool)):
+        with arq_pool(mock_pool):
             resp = await client.post(f"/v1/colleges/import/{st.upload_id}/complete")
 
         assert resp.status_code == 202, resp.text
@@ -318,3 +326,71 @@ class TestComplete:
         mock_pool.enqueue_job.assert_awaited_once_with("process_college_ocr", str(college_id), job_id, str(final))
         assert not (tmp_path / f"incoming_{st.upload_id}.pdf").exists()
         assert await store.get(st.upload_id) is None
+
+
+class TestUploadLogs:
+    """Chantier 2 § 6 : l'upload_id (capacité d'accès à l'upload) n'apparaît jamais en clair dans les logs."""
+
+    def test_upload_ref_is_truncated_sha256(self):
+        import hashlib
+
+        from app.services.upload.chunked_upload import upload_ref
+
+        upload_id = "abc123"
+        assert upload_ref(upload_id) == hashlib.sha256(b"abc123").hexdigest()[:8]
+
+    async def test_init_and_complete_never_log_upload_id(
+        self, client, mock_db, app_with_store, store, monkeypatch, tmp_path, caplog
+    ):
+        import logging
+
+        from app.services.upload.chunked_upload import upload_ref
+
+        user = _make_user()
+        app_with_store.dependency_overrides[require_subscription] = lambda: user
+        monkeypatch.setattr(colleges_module.settings, "pdf_storage_path", str(tmp_path))
+        _no_college(mock_db)
+
+        async def fake_start(db, arq, u, ref_id, pdf_file_path, limits):
+            from app.schemas.college import ImportCollegeResponseData
+
+            return ImportCollegeResponseData(college_id="c", job_id="j", status="pending")
+
+        monkeypatch.setattr("app.services.imports.start_import_from_file", fake_start)
+
+        with caplog.at_level(logging.DEBUG):
+            resp = await client.post("/v1/colleges/34/import/init", json={"size_bytes": 10})
+            assert resp.status_code == 201, resp.text
+            upload_id = resp.json()["data"]["upload_id"]
+            st = await store.get(upload_id)
+            await _upload_all(store, st)
+            resp = await client.post(f"/v1/colleges/import/{upload_id}/complete")
+            assert resp.status_code == 202, resp.text
+
+        # httpx (client de test) journalise l'URL appelée : ce n'est pas un log de l'application.
+        app_logs = "\n".join(r.getMessage() for r in caplog.records if not r.name.startswith("httpx"))
+        assert upload_id not in app_logs
+        upload_logs = [r.getMessage() for r in caplog.records if r.name == colleges_module.logger.name]
+        assert len(upload_logs) == 2 and all(upload_ref(upload_id) in m for m in upload_logs)
+
+    async def test_internal_error_log_uses_route_template(self, client, app_with_store, store, monkeypatch, caplog):
+        """Une 500 sur une route d'upload journalise le gabarit de route, pas le chemin avec l'id."""
+        import logging
+
+        from httpx import ASGITransport
+        from httpx import AsyncClient as _Client
+
+        st = await store.create(uuid.uuid4(), 34, 10)
+
+        async def boom(upload_id):
+            raise RuntimeError("boom")
+
+        monkeypatch.setattr(store, "get", boom)
+        transport = ASGITransport(app=app_with_store, raise_app_exceptions=False)
+        async with _Client(transport=transport, base_url="http://test") as c:
+            with caplog.at_level(logging.DEBUG):
+                resp = await c.get(f"/v1/colleges/import/{st.upload_id}")
+        assert resp.status_code == 500
+        app_logs = "\n".join(r.getMessage() for r in caplog.records if not r.name.startswith("httpx"))
+        assert st.upload_id not in app_logs
+        assert "{upload_id}" in app_logs

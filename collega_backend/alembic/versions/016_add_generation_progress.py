@@ -8,7 +8,9 @@ Revision ID: 016
 Revises: 015
 Create Date: 2026-09-23
 """
+
 import sqlalchemy as sa
+
 from alembic import op
 
 revision = "016"

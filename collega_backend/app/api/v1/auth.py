@@ -1,37 +1,82 @@
 import asyncio
+import hashlib
 import logging
+import secrets
+import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy import select
+from sqlalchemy import update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import token_store
+from app.core.errors import forbidden, unauthorized
+from app.core.limiter import limiter
 from app.core.security import (
     JWTError,
     create_access_token,
     create_refresh_token,
     decode_token,
     hash_password,
+    token_version_ok,
     verify_password,
 )
-from app.core.limiter import limiter
-from app.deps import get_current_user, get_db
-from app.models.user import User
-from app.core.config import settings
 from app.core.time_utils import next_month_reset
-from app.schemas.auth import LoginRequest, ProfileUpdateRequest, RefreshRequest, RegisterRequest, TokenResponse
+from app.deps import get_current_user, get_db
+from app.models.college import College
+from app.models.user import User
+from app.schemas.auth import (
+    LoginRequest,
+    LogoutRequest,
+    ProfileUpdateRequest,
+    RefreshRequest,
+    RegisterRequest,
+    TokenResponse,
+)
+from app.services import app_settings
+from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["auth"])
 
+# Hash factice calculé une fois : un e-mail inconnu coûte le même bcrypt qu'un mauvais
+# mot de passe (temps de réponse identique, pas d'énumération des comptes).
+_DUMMY_HASH = hash_password(secrets.token_urlsafe(16))
+
+
+def _remaining_lifetime_s(payload: dict) -> int:
+    """Secondes restantes avant `exp` (1 s minimum : la clé Redis doit exister)."""
+    exp = payload.get("exp")
+    if not isinstance(exp, int | float):
+        return 1
+    return max(1, int(exp - time.time()))
+
+
+def _refresh_jti(token: str, payload: dict) -> str:
+    """`jti` du refresh ; jeton émis avant le chantier 2 (sans `jti`) : dérivé de son
+    empreinte, pour qu'il suive la même rotation / grâce / révocation que les autres.
+    L'empreinte porte sur la partie signée (en-tête.charge) : un réencodage de la
+    signature ne peut pas donner un autre identifiant au même jeton."""
+    jti = payload.get("jti")
+    if isinstance(jti, str) and jti:
+        return jti
+    return hashlib.sha256(token.rsplit(".", 1)[0].encode()).hexdigest()[:32]
+
+
+def _token_pair(user: User) -> TokenResponse:
+    return TokenResponse(
+        access_token=create_access_token(str(user.id), user.token_version),
+        refresh_token=create_refresh_token(str(user.id), user.token_version),
+        is_beta=user.is_beta,
+        is_subscribed=user.is_subscribed,
+    )
+
 
 @router.post("/register", status_code=200)
 async def register(body: RegisterRequest):
-    raise HTTPException(
-        status_code=403,
-        detail={"code": "REGISTRATION_DISABLED", "message": "Les inscriptions sont fermées."},
-    )
+    raise forbidden("REGISTRATION_DISABLED", "Les inscriptions sont fermées.")
 
 
 @router.post("/login")
@@ -43,72 +88,90 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
 
-    if user is None or not verify_password(body.password, user.hashed_password):
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "INVALID_CREDENTIALS", "message": "Identifiants incorrects"},
-        )
+    if user is None:
+        verify_password(body.password, _DUMMY_HASH)
+        raise unauthorized("INVALID_CREDENTIALS", "Identifiants incorrects")
+    if not verify_password(body.password, user.hashed_password):
+        raise unauthorized("INVALID_CREDENTIALS", "Identifiants incorrects")
 
-    token_response = TokenResponse(
-        access_token=create_access_token(str(user.id)),
-        refresh_token=create_refresh_token(str(user.id)),
-        is_beta=user.is_beta,
-        is_subscribed=user.is_subscribed,
-    )
-    return {"data": token_response.model_dump()}
+    return {"data": _token_pair(user).model_dump()}
 
 
 @router.post("/refresh")
-async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("30/minute")
+async def refresh(request: Request, body: RefreshRequest, db: AsyncSession = Depends(get_db)):
+    """Rotation (chantier 2 § 2) : chaque renouvellement révoque le refresh présenté et
+    émet un nouveau couple. Un refresh révoqué depuis plus de `GRACE_S` s qui revient = vol
+    présumé → `token_version` incrémentée (toutes les sessions coupées)."""
     try:
         payload = decode_token(body.refresh_token)
         if payload.get("type") != "refresh":
             raise JWTError("Not a refresh token")
     except JWTError:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "TOKEN_EXPIRED", "message": "Refresh token invalide ou expiré"},
-        )
+        raise unauthorized("TOKEN_EXPIRED", "Refresh token invalide ou expiré") from None
 
     user_id = payload.get("sub")
     if not user_id:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "TOKEN_EXPIRED", "message": "Refresh token invalide ou expiré"},
-        )
+        raise unauthorized("TOKEN_EXPIRED", "Refresh token invalide ou expiré")
     try:
         user_uuid = uuid.UUID(user_id)
     except ValueError:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "TOKEN_EXPIRED", "message": "Refresh token invalide ou expiré"},
-        )
+        raise unauthorized("TOKEN_EXPIRED", "Refresh token invalide ou expiré") from None
     user = await db.get(User, user_uuid)
     if not user:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "USER_NOT_FOUND", "message": "Utilisateur introuvable"},
-        )
+        raise unauthorized("USER_NOT_FOUND", "Utilisateur introuvable")
+    if not token_version_ok(payload, user.token_version):
+        raise unauthorized("TOKEN_REVOKED", "Session révoquée — reconnectez-vous")
 
-    token_response = TokenResponse(
-        access_token=create_access_token(str(user.id)),
-        refresh_token=body.refresh_token,
-        is_beta=user.is_beta,
-        is_subscribed=user.is_subscribed,
-    )
-    return {"data": token_response.model_dump()}
+    # Révocation atomique « premier arrivé » : l'état renvoyé est celui d'avant l'appel.
+    jti = _refresh_jti(body.refresh_token, payload)
+    state = await token_store.revoke_refresh(jti, _remaining_lifetime_s(payload))
+    if state == "reused":
+        # UPDATE atomique : deux réutilisations concurrentes incrémentent bien deux fois.
+        await db.execute(sa_update(User).where(User.id == user.id).values(token_version=User.token_version + 1))
+        await db.commit()
+        logger.warning("Réutilisation d'un refresh token révoqué : sessions coupées (user=%s)", user.id)
+        raise unauthorized("TOKEN_REUSED", "Session révoquée — reconnectez-vous")
+    # "active" : révoqué par cette requête ; "grace" : révoqué il y a moins de
+    # `GRACE_S` secondes par une requête parallèle → accepté sans toucher à l'état existant.
+
+    logger.debug("refresh : jeton renouvelé (user %s)", user.id)
+    return {"data": _token_pair(user).model_dump()}
+
+
+@router.post("/logout", status_code=204)
+async def logout(
+    body: LogoutRequest | None = None,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> Response:
+    """Déconnexion serveur (idempotente) : révoque le refresh fourni s'il appartient à
+    l'utilisatrice et efface le jeton APNs (plus de notifications sur cet appareil)."""
+    if body is not None and body.refresh_token:
+        try:
+            payload = decode_token(body.refresh_token)
+        except JWTError:
+            payload = None
+        if payload is not None and payload.get("type") == "refresh" and payload.get("sub") == str(current_user.id):
+            # Sans grâce : un refresh déconnecté est refusé immédiatement (TOKEN_REUSED).
+            jti = _refresh_jti(body.refresh_token, payload)
+            await token_store.revoke_refresh(jti, _remaining_lifetime_s(payload), grace=False)
+    current_user.apns_token = None
+    await db.commit()
+    return Response(status_code=204)
 
 
 @router.get("/me")
-async def get_me(current_user: User = Depends(get_current_user)):
+async def get_me(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     # Quota du mois en cours : le compteur stocké n'est remis à zéro qu'au
     # prochain réimport ; passé la date, il n'est plus le bon (Profil, story 8.14).
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     reset_at = current_user.monthly_reloads_reset_at
     if reset_at is None or now >= reset_at:
         monthly_reloads, reset_at = 0, next_month_reset(now)
     else:
         monthly_reloads = current_user.monthly_reloads
+    _, monthly_reloads_max = await app_settings.anti_spam_limits(db)
     return {
         "data": {
             "id": str(current_user.id),
@@ -119,7 +182,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
             "year_group": current_user.year_group,
             "faculty": current_user.faculty,
             "monthly_reloads": monthly_reloads,
-            "monthly_reloads_max": settings.monthly_reloads_max,
+            "monthly_reloads_max": monthly_reloads_max,
             "monthly_reloads_reset_at": reset_at.isoformat(),
             "reminder_hour_utc": current_user.reminder_hour_utc,
         }
@@ -156,9 +219,6 @@ async def delete_account(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    from app.models.college import College
-    from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
-
     college_ids = list((await db.execute(select(College.id).where(College.user_id == current_user.id))).scalars())
     await db.delete(current_user)
     await db.commit()

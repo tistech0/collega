@@ -39,14 +39,10 @@ class _CollegesScreenState extends ConsumerState<CollegesScreen> with TabReselec
   @override
   void initState() {
     super.initState();
-    // Story 7.11 : reprend un upload par morceaux interrompu (app tuée pendant
-    // l'envoi) au montage et à chaque retour au premier plan.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _resumePendingUpload());
     _lifecycle; // écoute le retour au premier plan
   }
 
   void _onResume() {
-    _resumePendingUpload();
     // Hors connexion : le retour au premier plan retente le réseau (le bandeau
     // ne reste pas affiché une fois la connexion revenue).
     if (mounted && _offline(ref.read(collegesProvider))) _refresh();
@@ -55,11 +51,6 @@ class _CollegesScreenState extends ConsumerState<CollegesScreen> with TabReselec
   bool _offline(AsyncValue<List<CollegeListEntry>> async) =>
       async.hasValue &&
       (ref.read(collegesProvider.notifier).isOffline || (async.hasError && isNetworkUnreachable(async.error!)));
-
-  void _resumePendingUpload() {
-    if (!mounted) return;
-    ref.read(collegeImportProvider.notifier).resumePendingUpload();
-  }
 
   @override
   void dispose() {
@@ -173,10 +164,10 @@ class _UploadingRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = progress;
-    final sent = p == null ? 'envoi en cours' : 'envoi ${(p.clamp(0.0, 1.0) * 100).floor()} %';
+    final sent = p == null ? 'envoi du PDF en cours' : 'envoi du PDF : ${(p.clamp(0.0, 1.0) * 100).floor()} %';
     return CgListRow(
       title: entry.catalog.name,
-      subtitle: '${entry.catalog.editor} · $sent, reprend tout seul',
+      subtitle: '${entry.catalog.editor} · $sent',
       leading: CgRowIcon(entry.catalog.icon),
       trailing: CgRowTrailing.chevron,
       onTap: () => context.push('/colleges/${entry.catalog.refId}/import'),

@@ -1,5 +1,6 @@
 """Cron des imports bloqués (chantier 1), Postgres réel."""
-from datetime import datetime, timedelta, timezone
+
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from sqlalchemy import select, text, update
@@ -8,7 +9,6 @@ from app.models.generation_job import GenerationJob
 from app.models.generation_job_event import GenerationJobEvent
 from app.workers.maintenance_worker import fail_stale_jobs
 from tests.factories import make_college, make_job, make_user
-from tests.pg import pg_engine, pg_factory, pg_session  # noqa: F401
 
 pytestmark = pytest.mark.pg
 
@@ -27,7 +27,7 @@ async def _job(pg_factory, *, minutes_ago: int, status="processing", arq_job_id=
         college = await make_college(db, user, status="generation_complete")
         job = await make_job(db, college, status=status)
         job.arq_job_id = arq_job_id
-        past = datetime.now(timezone.utc) - timedelta(minutes=minutes_ago)
+        past = datetime.now(UTC) - timedelta(minutes=minutes_ago)
         db.add(GenerationJobEvent(generation_job_id=job.id, event_type="ocr_progress", created_at=past))
         await db.commit()
         # Un trigger remet updated_at à NOW() à chaque UPDATE : désactivé le temps de
@@ -49,9 +49,15 @@ async def test_stale_job_is_failed_with_stale_event(pg_factory):
     assert await fail_stale_jobs({"redis": Redis()}, session_factory=pg_factory) == 1
     assert await _status(pg_factory, job_id) == "failed"
     async with pg_factory() as s:
-        events = (await s.execute(
-            select(GenerationJobEvent.event_type).where(GenerationJobEvent.generation_job_id == job_id)
-        )).scalars().all()
+        events = (
+            (
+                await s.execute(
+                    select(GenerationJobEvent.event_type).where(GenerationJobEvent.generation_job_id == job_id)
+                )
+            )
+            .scalars()
+            .all()
+        )
     assert "stale" in events
 
 
@@ -71,4 +77,3 @@ async def test_finished_jobs_are_ignored(pg_factory):
     job_id = await _job(pg_factory, minutes_ago=600, status="generation_complete")
     assert await fail_stale_jobs({"redis": Redis()}, session_factory=pg_factory) == 0
     assert await _status(pg_factory, job_id) == "generation_complete"
-

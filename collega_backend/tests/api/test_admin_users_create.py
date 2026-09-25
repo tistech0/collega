@@ -2,12 +2,12 @@
 
 Inclut un test de non-régression : POST /v1/auth/register reste 403.
 """
+
 from __future__ import annotations
 
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 from sqlalchemy.exc import IntegrityError
 

@@ -1,13 +1,17 @@
 """Tests POST /v1/admin/users/{user_id}/reset-quota — Story 7.6 AC #2."""
+
 from __future__ import annotations
 
 import types
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock
 
 import pytest
 from httpx import AsyncClient
+
+# Le faux db.get renvoie l'utilisateur pour toute clé : limites anti-spam injectées.
+pytestmark = pytest.mark.usefixtures("default_anti_spam_limits")
 
 ADMIN_AUTH = ("admin", "testpass")
 
@@ -19,8 +23,8 @@ def make_user(user_id=None, monthly_reloads=3):
         is_beta=False,
         is_subscribed=False,
         monthly_reloads=monthly_reloads,
-        monthly_reloads_reset_at=datetime.now(timezone.utc),
-        created_at=datetime.now(timezone.utc),
+        monthly_reloads_reset_at=datetime.now(UTC),
+        created_at=datetime.now(UTC),
     )
 
 
@@ -31,9 +35,7 @@ class TestResetQuota:
 
     async def test_404_for_unknown_user(self, client: AsyncClient, mock_db):
         mock_db.get = AsyncMock(return_value=None)
-        resp = await client.post(
-            f"/v1/admin/users/{uuid.uuid4()}/reset-quota", auth=ADMIN_AUTH
-        )
+        resp = await client.post(f"/v1/admin/users/{uuid.uuid4()}/reset-quota", auth=ADMIN_AUTH)
         assert resp.status_code == 404
         assert resp.json()["detail"]["code"] == "USER_NOT_FOUND"
 
@@ -43,9 +45,7 @@ class TestResetQuota:
         mock_db.execute = AsyncMock()
         mock_db.commit = AsyncMock()
 
-        resp = await client.post(
-            f"/v1/admin/users/{user.id}/reset-quota", auth=ADMIN_AUTH
-        )
+        resp = await client.post(f"/v1/admin/users/{user.id}/reset-quota", auth=ADMIN_AUTH)
         assert resp.status_code == 200
         body = resp.json()
         assert body["data"]["monthly_reloads"] == 0

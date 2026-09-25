@@ -22,6 +22,7 @@ import 'package:collega_app/features/planning/presentation/planning_screen.dart'
 import 'package:collega_app/features/search/presentation/search_sheet.dart';
 import 'package:collega_app/features/profile/presentation/profile_screen.dart';
 import 'package:collega_app/features/progress/progress_screen.dart';
+import 'package:collega_app/features/colleges/presentation/pending_upload_resumer.dart';
 import 'package:collega_app/features/shell/app_shell.dart';
 import 'package:collega_app/features/today/presentation/today_screen.dart';
 
@@ -140,7 +141,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/search', redirect: (ctx, s) => '/home'),
       ShellRoute(
         // Le cadre des onglets ne glisse jamais : seuls les écrans poussés dedans le font.
-        pageBuilder: (context, state, child) => _instant(state, AppShell(location: state.uri.path, child: child)),
+        pageBuilder: (context, state, child) => _instant(
+          state,
+          PendingUploadResumer(child: AppShell(location: state.uri.path, child: child)),
+        ),
         routes: [
           GoRoute(path: '/home', pageBuilder: (ctx, s) => _instant(s, const TodayScreen())),
           GoRoute(path: '/progress', pageBuilder: (ctx, s) => _instant(s, const ProgressScreen())),

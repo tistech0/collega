@@ -109,6 +109,21 @@ void main() {
       expect(cards.map((c) => c.id), containsAll(['c1', 'c2']));
     });
 
+    test('getCardsForDrill(rangs: B) — seulement les fiches B, même dans un item de rang A (chantier 4)', () async {
+      final db = _makeDb();
+      addTearDown(db.close);
+      final repo = DrillRepository(dio: Dio(), db: db);
+
+      // Item i1 (rang A côté item) : fiches A et B ; item i2 : fiche B.
+      await _insertCard(db, id: 'a1', itemId: 'i1');
+      await _insertCard(db, id: 'b1', itemId: 'i1', rang: 'B');
+      await _insertCard(db, id: 'b2', itemId: 'i2', rang: 'B');
+      await _insertCard(db, id: 'a2', itemId: 'i2');
+
+      final cards = await repo.getCardsForDrill(collegeId: 'c1', rangs: ['B']);
+      expect(cards.map((c) => c.id), unorderedEquals(['b1', 'b2']));
+    });
+
     test('updateCardDrillLevel(bien) → drillLevel=bien, nextReviewAt≈now+1j',
         () async {
       final db = _makeDb();
@@ -173,14 +188,14 @@ void main() {
   });
 
   group('DrillRepository.evaluateSemantic (Story 7.2 AC #6)', () {
-    Map<String, dynamic> _ok() => {
+    Map<String, dynamic> okBody() => {
           'data': {'result': 'correct', 'feedback': 'Bonne réponse'},
         };
 
     test('succès au 1er essai → 1 appel HTTP', () async {
       final db = _makeDb();
       addTearDown(db.close);
-      final adapter = _ScriptedAdapter([_ok()]);
+      final adapter = _ScriptedAdapter([okBody()]);
       final repo = DrillRepository(dio: _makeScriptedDio(adapter), db: db);
 
       final feedback = await repo.evaluateSemantic('card-1', 'ma réponse');
@@ -195,7 +210,7 @@ void main() {
       addTearDown(db.close);
       final adapter = _ScriptedAdapter([
         DioExceptionType.receiveTimeout,
-        _ok(),
+        okBody(),
       ]);
       final repo = DrillRepository(dio: _makeScriptedDio(adapter), db: db);
 
@@ -226,7 +241,7 @@ void main() {
       addTearDown(db.close);
       final adapter = _ScriptedAdapter([
         DioExceptionType.connectionTimeout,
-        _ok(),
+        okBody(),
       ]);
       final repo = DrillRepository(dio: _makeScriptedDio(adapter), db: db);
 
@@ -238,7 +253,7 @@ void main() {
       final db = _makeDb();
       addTearDown(db.close);
       // Dio considère un 500 comme erreur car validateStatus < 500 = ok
-      final adapter = _ScriptedAdapter([500, _ok()]);
+      final adapter = _ScriptedAdapter([500, okBody()]);
       final repo = DrillRepository(dio: _makeScriptedDio(adapter), db: db);
 
       await repo.evaluateSemantic('card-1', 'ma réponse');

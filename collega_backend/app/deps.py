@@ -1,34 +1,83 @@
+import asyncio
 import secrets
 import uuid
 
-from fastapi import Depends, Header, HTTPException, Request
+from arq.connections import ArqRedis
+from fastapi import Depends, Header, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.security import JWTError, decode_token
+from app.core.errors import AppError, forbidden, unauthorized
+from app.core.limiter import admin_auth_retry_after, get_client_ip, record_admin_auth_failure
+from app.core.security import JWTError, decode_token, token_version_ok
 
 _http_basic = HTTPBasic()
-_http_basic_tester = HTTPBasic(auto_error=False)
 
 __all__ = [
     "get_db",
+    "get_arq",
+    "get_arq_optional",
     "get_admin_user",
-    "get_tester_user",
     "get_current_user",
     "get_current_user_short_session",
     "require_subscription",
 ]
 
 
+# Une seule reconnexion paresseuse à la fois : sans verrou, des requêtes concurrentes
+# ouvriraient chacune un pool, dont tous sauf un fuiraient.
+_arq_reconnect_lock = asyncio.Lock()
+
+
+async def get_arq_optional(request: Request) -> ArqRedis | None:
+    """Pool ARQ de l'application (créé dans le lifespan), ou None si Redis reste injoignable.
+
+    Si le pool manque (Redis injoignable au démarrage), une reconnexion est tentée.
+    """
+    state = request.app.state
+    pool = getattr(state, "arq", None)
+    if pool is not None:
+        return pool
+    connect = getattr(state, "arq_connect", None)
+    if connect is None:
+        return None
+    async with _arq_reconnect_lock:
+        pool = getattr(state, "arq", None)
+        if pool is None:
+            pool = await connect()
+            state.arq = pool
+    return pool
+
+
+async def get_arq(request: Request) -> ArqRedis:
+    """Pool ARQ de l'application ; 503 QUEUE_UNAVAILABLE si Redis reste injoignable."""
+    pool = await get_arq_optional(request)
+    if pool is None:
+        raise AppError(503, "QUEUE_UNAVAILABLE", "File d'attente indisponible — réessayez")
+    return pool
+
+
 async def get_admin_user(
+    request: Request,
     credentials: HTTPBasicCredentials = Depends(_http_basic),
 ) -> bool:
     """Protège toutes les routes /v1/admin/ par HTTP Basic Auth.
 
-    Utilise secrets.compare_digest pour éviter les timing attacks.
+    Utilise secrets.compare_digest pour éviter les timing attacks. Seuls les **échecs**
+    comptent pour la limite (10/min par IP, chantier 2 § 4) : la console enchaîne plusieurs
+    requêtes par écran. Budget épuisé → 429 avant même de comparer les identifiants.
     """
+    ip = get_client_ip(request)
+    retry_after = admin_auth_retry_after(ip)
+    if retry_after is not None:
+        raise AppError(
+            429,
+            "RATE_LIMITED",
+            "Trop de requêtes, réessayez plus tard",
+            headers={"Retry-After": str(retry_after)},
+        )
     correct_username = secrets.compare_digest(
         credentials.username.encode("utf-8"),
         settings.admin_username.encode("utf-8"),
@@ -38,37 +87,14 @@ async def get_admin_user(
         settings.admin_password.encode("utf-8"),
     )
     if not (correct_username and correct_password):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid credentials",
+        record_admin_auth_failure(ip)
+        raise AppError(
+            401,
+            "INVALID_ADMIN_CREDENTIALS",
+            "Identifiants administrateur invalides",
             headers={"WWW-Authenticate": "Basic"},
         )
     return True
-
-
-async def get_tester_user(
-    credentials: HTTPBasicCredentials | None = Depends(_http_basic_tester),
-) -> str:
-    """Protège toutes les routes /v1/tester/ par HTTP Basic Auth.
-
-    Retourne le tester_id (username) pour l'utiliser comme identifiant de feedback.
-    Credentials distincts des credentials admin.
-    Pas de WWW-Authenticate dans la 401 — sinon le navigateur affiche sa propre
-    fenêtre native en boucle au lieu de laisser le formulaire HTML gérer l'erreur.
-    """
-    if credentials is None:
-        raise HTTPException(status_code=401, detail="Authentication required")
-    correct_username = secrets.compare_digest(
-        credentials.username.encode("utf-8"),
-        settings.tester_username.encode("utf-8"),
-    )
-    correct_password = secrets.compare_digest(
-        credentials.password.encode("utf-8"),
-        settings.tester_password.encode("utf-8"),
-    )
-    if not (correct_username and correct_password):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    return credentials.username
 
 
 async def get_current_user(
@@ -84,39 +110,26 @@ async def get_current_user(
     from app.models.user import User
 
     if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "UNAUTHORIZED", "message": "Token requis"},
-        )
+        raise unauthorized("UNAUTHORIZED", "Token requis")
     token = authorization.removeprefix("Bearer ")
     try:
         payload = decode_token(token)
         if payload.get("type") != "access":
             raise JWTError("Not an access token")
     except JWTError:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "TOKEN_EXPIRED", "message": "Token invalide ou expiré"},
-        )
+        raise unauthorized("TOKEN_EXPIRED", "Token invalide ou expiré") from None
     user_id = payload.get("sub")
     if not user_id:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "UNAUTHORIZED", "message": "Token invalide"},
-        )
+        raise unauthorized("UNAUTHORIZED", "Token invalide")
     try:
         user_uuid = uuid.UUID(user_id)
     except ValueError:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "UNAUTHORIZED", "message": "Token invalide"},
-        )
+        raise unauthorized("UNAUTHORIZED", "Token invalide") from None
     user = await db.get(User, user_uuid)
     if not user:
-        raise HTTPException(
-            status_code=401,
-            detail={"code": "USER_NOT_FOUND", "message": "Utilisateur introuvable"},
-        )
+        raise unauthorized("USER_NOT_FOUND", "Utilisateur introuvable")
+    if not token_version_ok(payload, user.token_version):
+        raise unauthorized("TOKEN_REVOKED", "Session révoquée — reconnectez-vous")
     request.state.user_id = str(user.id)
     return user
 
@@ -140,8 +153,5 @@ async def get_current_user_short_session(
 async def require_subscription(user=Depends(get_current_user)):
     """Guard FR42 : vérifie is_subscribed OR is_beta avant tout appel Claude."""
     if not (user.is_subscribed or user.is_beta):
-        raise HTTPException(
-            status_code=403,
-            detail={"code": "SUBSCRIPTION_REQUIRED", "message": "Abonnement actif requis"},
-        )
+        raise forbidden("SUBSCRIPTION_REQUIRED", "Abonnement actif requis")
     return user

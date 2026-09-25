@@ -144,6 +144,7 @@ class _CollegeImportScreenState extends ConsumerState<CollegeImportScreen> {
     final uploading = importState is ImportUploading && (uploadingRef == null || uploadingRef == widget.refId);
     final otherUpload = importState is ImportUploading && !uploading;
     final progress = importState is ImportUploading ? importState.progress : null;
+    final uploadingName = uploadingRef == null ? null : collegeCatalogEntry(uploadingRef)?.name;
 
     final quota = !isReimport
         ? 'Premier import de ce collège'
@@ -158,7 +159,7 @@ class _CollegeImportScreenState extends ConsumerState<CollegeImportScreen> {
             : limitsValue.isMonthlyLimitReached
                 ? importErrorMessage('monthly_reload_limit:${limitsValue.monthlyResetAt}', reimport: true)
                 : null;
-    final shownError = _error ?? blockedMessage ?? (otherUpload ? importErrorMessage('upload_in_progress') : null);
+    final shownError = _error ?? blockedMessage ?? (otherUpload ? uploadInProgressMessage(uploadingName) : null);
 
     return ColoredBox(
       color: c.ground,

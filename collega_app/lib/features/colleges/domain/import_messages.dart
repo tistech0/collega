@@ -11,7 +11,8 @@ String importErrorMessage(String code, {bool reimport = false}) {
     'queue_unavailable' => 'Le service d’import est momentanément indisponible. Réessaie dans quelques minutes.',
     'college_reload_limit' => 'Ce collège a déjà été réimporté le nombre maximum de fois.',
     'upload_in_progress' => 'Un autre PDF est en cours d’envoi. Attends qu’il se termine.',
-    'upload_failed' => 'L’envoi s’est interrompu. Il reprendra tout seul.',
+    'upload_failed' =>
+      'L’envoi s’est interrompu. Il repartira de là où il s’est arrêté à ta prochaine ouverture de Collega.',
     'upload_expired' => 'L’envoi a expiré. Choisis à nouveau le PDF.',
     'upload_source_missing' => 'Le fichier n’est plus sur l’iPhone. Choisis à nouveau le PDF.',
     'session_expired' => 'Ta session a expiré. Reconnecte-toi puis relance l’import.',
@@ -21,6 +22,11 @@ String importErrorMessage(String code, {bool reimport = false}) {
   };
   return reimport ? 'Tes fiches restent. $message' : message;
 }
+
+/// Un autre PDF est en cours d'envoi : le collège est nommé quand on le connaît.
+String uploadInProgressMessage(String? collegeName) => collegeName == null
+    ? importErrorMessage('upload_in_progress')
+    : 'Le PDF de $collegeName est en cours d’envoi. Attends qu’il soit terminé pour en importer un autre.';
 
 String _monthly(String iso) {
   final date = DateTime.tryParse(iso)?.toLocal();

@@ -11,9 +11,10 @@ Corrections issues de la revue de code de Story 1.2 :
 - Contrainte UNIQUE (college_id, item_number) sur items
 - Colonne page_texts_json sur generation_jobs (reprise OCR correcte)
 """
-from alembic import op
+
 import sqlalchemy as sa
 
+from alembic import op
 
 revision = "003"
 down_revision = "002"
@@ -67,7 +68,5 @@ def downgrade() -> None:
     op.drop_constraint("uq_items_college_item_number", "items", type_="unique")
     op.execute("DROP INDEX IF EXISTS ix_generation_jobs_unique_active;")
     op.execute("DROP TRIGGER IF EXISTS update_generation_jobs_updated_at ON generation_jobs;")
-    op.execute(
-        "ALTER TABLE generation_jobs DROP CONSTRAINT IF EXISTS ck_generation_jobs_status;"
-    )
+    op.execute("ALTER TABLE generation_jobs DROP CONSTRAINT IF EXISTS ck_generation_jobs_status;")
     op.drop_column("generation_jobs", "page_texts_json")

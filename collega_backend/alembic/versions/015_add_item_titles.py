@@ -9,13 +9,14 @@ Revision ID: 015
 Revises: 014
 Create Date: 2026-09-22
 """
+
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.engine import Connection
 
+from alembic import op
 from app.services.ocr.item_titles import clean_title, is_valid_title
 
 revision = "015"
@@ -42,7 +43,7 @@ _item_titles = sa.table(
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def seed_and_backfill(conn: Connection) -> None:
@@ -56,37 +57,39 @@ def seed_and_backfill(conn: Connection) -> None:
     for item_id, number, raw in rows:
         label = clean_title(raw)
         if not is_valid_title(label):
-            conn.execute(
-                _items.update().where(_items.c.id == item_id).values(chapter_title=None)
-            )
+            conn.execute(_items.update().where(_items.c.id == item_id).values(chapter_title=None))
             continue
         if label != raw:
-            conn.execute(
-                _items.update().where(_items.c.id == item_id).values(chapter_title=label)
-            )
+            conn.execute(_items.update().where(_items.c.id == item_id).values(chapter_title=label))
         counts[(number, label)] += 1
 
     # Occurrences = nombre d'items portant ce libellé ; un couple déjà présent n'est pas
     # recompté (sinon un second passage compterait les items qu'il vient de compléter).
     for (number, label), count in counts.items():
         existing = conn.execute(
-            sa.select(_item_titles.c.id).where(
-                _item_titles.c.item_number == number, _item_titles.c.label == label
-            )
+            sa.select(_item_titles.c.id).where(_item_titles.c.item_number == number, _item_titles.c.label == label)
         ).first()
         if existing is None:
             conn.execute(
                 _item_titles.insert().values(
-                    item_number=number, label=label, source="extracted",
-                    occurrences=count, created_at=_now(), updated_at=_now(),
+                    item_number=number,
+                    label=label,
+                    source="extracted",
+                    occurrences=count,
+                    created_at=_now(),
+                    updated_at=_now(),
                 )
             )
 
-    untitled = conn.execute(
-        sa.select(_items.c.item_number)
-        .where(sa.or_(_items.c.chapter_title.is_(None), _items.c.chapter_title == ""))
-        .distinct()
-    ).scalars().all()
+    untitled = (
+        conn.execute(
+            sa.select(_items.c.item_number)
+            .where(sa.or_(_items.c.chapter_title.is_(None), _items.c.chapter_title == ""))
+            .distinct()
+        )
+        .scalars()
+        .all()
+    )
     for number in untitled:
         best = conn.execute(
             sa.select(_item_titles.c.label)

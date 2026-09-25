@@ -32,8 +32,8 @@ docker exec collega-restore-test psql -U postgres -d collega -Atc \
 docker run --rm --network collega-restore-net \
   -e DATABASE_URL=postgresql+asyncpg://postgres@db:5432/collega -e REDIS_URL=redis://localhost:6379/0 \
   -e SECRET_KEY=restore-test-only-0123456789abcdefghijkl -e CLAUDE_API_KEY=x -e ADMIN_USERNAME=a \
-  -e ADMIN_PASSWORD=b -e REVENUECAT_WEBHOOK_SECRET=c -e TESTER_USERNAME=t -e TESTER_PASSWORD=u \
-  tistech0/collega-backend:latest alembic upgrade head
+  -e ADMIN_PASSWORD=b -e REVENUECAT_WEBHOOK_SECRET=c \
+  tistech0/collega-backend:$(sed -n 's/^IMAGE_TAG=//p' /mnt/user/appdata/compose-stacks/collega/.env) alembic upgrade head
 docker rm -f collega-restore-test && docker network rm collega-restore-net
 ```
 
@@ -52,6 +52,7 @@ Résultat du 2026-09-23 : 4 utilisateurs, 2 collèges, 44 items, 341 fiches rest
 3. **Base** : `docker compose up -d db`, puis
    `zcat /mnt/user/nas-backup/dumps/collega-db-1.sql.gz | docker exec -i collega-db-1 psql -U postgres -q -o /dev/null`
    (le dump supprime et recrée la base `collega` ; 2 erreurs attendues, voir plus haut). Si le disque est perdu, reprendre le dump depuis kopia `/dumps` ou R2.
+   **Après un déploiement raté** (migration à annuler) : même commande avec le dump pris par `deploy.sh` juste avant, `/mnt/user/appdata/collega/backups/collega_pre_<sha>_<date>.sql.gz` (lui aussi `pg_dumpall --clean` depuis le 2026-09-24), puis `deploy.sh --force <sha précédent>` au lieu de l'étape 5.
 4. **PDF** : `docker exec kopia kopia restore <id-instantané>/collega/pdfs /source/collega/pdfs` (les PDF ne servent qu'aux imports en cours et à l'admin ; les fiches sont en base).
 5. **Relancer** : `docker compose up -d` (le service `migrate` rattrape le schéma), attendre `healthy` sur api et worker, vérifier `/health`.
 6. **Après coup** : les imports qui étaient en cours restent en `processing`/`ocr_complete` → les arrêter depuis la console admin (Stop), l'utilisatrice relance.

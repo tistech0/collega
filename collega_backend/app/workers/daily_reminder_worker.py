@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 async def send_daily_reminders(ctx: dict) -> None:
     """Envoyé à :00 de chaque heure — notifie les users avec reminder_hour_utc == heure courante UTC."""
-    current_hour = datetime.now(timezone.utc).hour
+    current_hour = datetime.now(UTC).hour
     async with async_session_factory() as db:
         result = await db.execute(
             select(User).where(

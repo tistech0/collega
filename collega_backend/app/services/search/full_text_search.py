@@ -1,4 +1,5 @@
 """Service de recherche full-text via PostgreSQL GIN index."""
+
 from __future__ import annotations
 
 import logging

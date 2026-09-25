@@ -1,9 +1,8 @@
 """Tests du singleton APNs côté worker ARQ (Story 7.4 AC #6)."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock
-
-import pytest
 
 from app.workers.settings import _worker_shutdown, _worker_startup
 

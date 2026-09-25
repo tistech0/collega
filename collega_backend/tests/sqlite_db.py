@@ -1,4 +1,5 @@
 """Session SQLite en mémoire avec le schéma complet — pour tester du SQL réel (story 8.0)."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator

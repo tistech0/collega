@@ -1,4 +1,5 @@
 """Extrait de recherche = la phrase entière avec le terme surligné (story 8.10)."""
+
 from __future__ import annotations
 
 import types
@@ -50,7 +51,9 @@ def test_puces_et_retours_a_la_ligne_separent_les_phrases():
 
 def test_abreviations_et_point_virgule_ne_coupent_pas_la_phrase():
     text = "Voir cf. item 232 ; dosage du BNP p. ex. en urgence. Autre."
-    assert build_excerpt(text, "<mark>BNP</mark>") == "Voir cf. item 232 ; dosage du <mark>BNP</mark> p. ex. en urgence."
+    assert (
+        build_excerpt(text, "<mark>BNP</mark>") == "Voir cf. item 232 ; dosage du <mark>BNP</mark> p. ex. en urgence."
+    )
 
 
 def test_sans_surlignage_le_headline_est_rendu_tel_quel():
@@ -63,10 +66,16 @@ def test_terme_absent_du_texte_repli_sur_le_headline():
 
 async def test_service_remplace_l_extrait_et_retire_le_texte_brut():
     row = {
-        "item_id": str(uuid.uuid4()), "item_number": 232, "rang": "A", "chapter_title": "IC",
-        "college_id": str(uuid.uuid4()), "college_ref_id": 1,
-        "excerpt": "le <mark>BNP</mark> s'élève", "rank": 0.8,
-        "recto": "Quel marqueur ?", "verso": "Dosage : le BNP s'élève. Fin.",
+        "item_id": str(uuid.uuid4()),
+        "item_number": 232,
+        "rang": "A",
+        "chapter_title": "IC",
+        "college_id": str(uuid.uuid4()),
+        "college_ref_id": 1,
+        "excerpt": "le <mark>BNP</mark> s'élève",
+        "rank": 0.8,
+        "recto": "Quel marqueur ?",
+        "verso": "Dosage : le BNP s'élève. Fin.",
     }
     result = MagicMock()
     result.mappings.return_value.all.return_value = [row]
@@ -79,10 +88,16 @@ async def test_service_remplace_l_extrait_et_retire_le_texte_brut():
 
 async def test_service_prefere_la_reponse_a_la_question():
     row = {
-        "item_id": str(uuid.uuid4()), "item_number": 232, "rang": "A", "chapter_title": "IC",
-        "college_id": str(uuid.uuid4()), "college_ref_id": 1,
-        "excerpt": "<mark>BNP</mark>", "rank": 0.8,
-        "recto": "Quel dosage du BNP ?", "verso": "Le BNP est élevé dans l'IC.",
+        "item_id": str(uuid.uuid4()),
+        "item_number": 232,
+        "rang": "A",
+        "chapter_title": "IC",
+        "college_id": str(uuid.uuid4()),
+        "college_ref_id": 1,
+        "excerpt": "<mark>BNP</mark>",
+        "rank": 0.8,
+        "recto": "Quel dosage du BNP ?",
+        "verso": "Le BNP est élevé dans l'IC.",
     }
     result = MagicMock()
     result.mappings.return_value.all.return_value = [row]

@@ -1,11 +1,11 @@
 """Tests endpoints feedback, suppression et régénération de fiches — FR19, FR20, FR21, FR23."""
+
 from __future__ import annotations
 
 import types
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
-import pytest
 from httpx import AsyncClient
 
 from app.deps import get_current_user, require_subscription

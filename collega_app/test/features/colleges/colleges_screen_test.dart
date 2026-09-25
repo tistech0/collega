@@ -183,7 +183,7 @@ void main() {
       final visited = <String>[];
       await tester.pumpWidget(_app(() => _Fixed(const []), visited: visited));
       await tester.pumpAndSettle();
-      expect(find.text('SFH · envoi 42 %, reprend tout seul'), findsOneWidget);
+      expect(find.text('SFH · envoi du PDF : 42 %'), findsOneWidget);
       expect(find.text('Catalogue · 38 collèges'), findsOneWidget);
       expect(find.text('Importer'), findsNWidgets(38));
       await tester.tap(find.text('Hématologie'));
@@ -340,7 +340,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('accessibilité : cibles étiquetées, 44 pt, contraste du texte (8.15)', (tester) async {
+    testWidgets('accessibilité : cibles étiquetées, 44 pt, contraste du texte (8.15)', tags: const ['golden'], (tester) async {
       final handle = tester.ensureSemantics();
       _phone(tester);
       await tester.pumpWidget(_app(() => _Fixed([_cancero, _neuroEnCours])));
@@ -374,7 +374,7 @@ void main() {
       for (final width in cgGoldenWidths) {
         for (final scale in cgGoldenScales) {
           final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-          testWidgets('golden library_${name}_$tag', (tester) async {
+          testWidgets('golden library_${name}_$tag', tags: const ['golden'], (tester) async {
             _phone(tester, width: width, height: 1100);
             await tester.pumpWidget(_app(notifier, textScale: scale));
             await tester.pumpAndSettle();

@@ -15,10 +15,17 @@ import 'package:collega_app/features/search/search_providers.dart';
 import 'package:collega_app/features/today/today_providers.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
-  (ref) => AuthRepository(
-    dio: ref.read(apiClientProvider).dio,
-    storage: ref.read(secureStorageProvider),
-  ),
+  (ref) {
+    final apiClient = ref.read(apiClientProvider);
+    return AuthRepository(
+      dio: apiClient.dio,
+      storage: ref.read(secureStorageProvider),
+      // Fix round 1 (chantier 2 § 8 task 5) : le logout poste sur un Dio SANS
+      // l'intercepteur 401→refresh→retry, après une rotation défensive.
+      logoutDio: apiClient.rawDio,
+      ensureFreshAccessToken: apiClient.ensureFreshAccessToken,
+    );
+  },
 );
 
 /// Timeout appliqué aux étapes locales du wipe (RC, Drift) — au-delà, on

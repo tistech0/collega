@@ -1,4 +1,5 @@
 """Tests du ConfidenceScorer — logique pure Python, aucune dépendance externe."""
+
 import pytest
 
 from app.services.ocr.confidence_scorer import LOW_CONFIDENCE_THRESHOLD, ConfidenceScorer

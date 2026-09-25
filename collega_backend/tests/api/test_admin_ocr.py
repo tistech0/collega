@@ -4,6 +4,7 @@ Le DB est mocké via override FastAPI (voir conftest.py).
 ARQ est mocké pour éviter Redis.
 Les modèles SQLAlchemy sont simulés avec SimpleNamespace.
 """
+
 from __future__ import annotations
 
 import io
@@ -11,10 +12,10 @@ import types
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 from httpx import AsyncClient
 
 from app.models.college import CollegeStatus
+from tests.fakes.fake_arq import override_arq
 
 
 def make_college(college_id: uuid.UUID | None = None):
@@ -61,9 +62,7 @@ class TestBasicAuth:
         college_id = uuid.uuid4()
         college = make_college(college_id)
         mock_db.get = AsyncMock(return_value=college)
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
 
         resp = await client.get(
             f"/v1/admin/colleges/{college_id}/status",
@@ -94,9 +93,7 @@ class TestGetCollegeStatus:
         college.total_pages = 380
 
         mock_db.get = AsyncMock(return_value=college)
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
 
         resp = await client.get(
             f"/v1/admin/colleges/{college_id}/status",
@@ -116,9 +113,7 @@ class TestGetCollegeStatus:
         job = make_job(college_id)
 
         mock_db.get = AsyncMock(return_value=college)
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=job))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=job)))
 
         resp = await client.get(
             f"/v1/admin/colleges/{college_id}/status",
@@ -132,9 +127,7 @@ class TestGetCollegeStatus:
         college = make_college(college_id)
 
         mock_db.get = AsyncMock(return_value=college)
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
 
         resp = await client.get(
             f"/v1/admin/colleges/{college_id}/status",
@@ -164,9 +157,7 @@ class TestProcessCollege:
         existing_job = make_job(college_id, status="processing")
 
         mock_db.get = AsyncMock(return_value=college)
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=existing_job))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=existing_job)))
 
         resp = await client.post(
             f"/v1/admin/colleges/{college_id}/process",
@@ -176,18 +167,13 @@ class TestProcessCollege:
         assert resp.status_code == 409
         assert resp.json()["detail"]["code"] == "JOB_IN_PROGRESS"
 
-    @patch("arq.create_pool")
-    async def test_creates_job_and_returns_pending(
-        self, mock_create_pool, client: AsyncClient, mock_db, tmp_path
-    ):
+    async def test_creates_job_and_returns_pending(self, client: AsyncClient, mock_db, tmp_path):
         """AC#1 — POST /process crée un GenerationJob avec statut 'pending'."""
         college_id = uuid.uuid4()
         college = make_college(college_id)
 
         mock_db.get = AsyncMock(return_value=college)
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
         mock_db.add = MagicMock()
         mock_db.commit = AsyncMock()
 
@@ -203,10 +189,9 @@ class TestProcessCollege:
         mock_arq_job = MagicMock()
         mock_arq_job.job_id = "arq-test-id"
         mock_pool.enqueue_job = AsyncMock(return_value=mock_arq_job)
-        mock_pool.close = AsyncMock()
-        mock_create_pool.return_value = mock_pool
+        override_arq(mock_pool)
 
-        with patch("app.api.v1.admin.settings") as mock_settings:
+        with patch("app.services.imports.settings") as mock_settings:
             mock_settings.pdf_storage_path = str(tmp_path)
             mock_settings.admin_username = "admin"
             mock_settings.admin_password = "testpass"

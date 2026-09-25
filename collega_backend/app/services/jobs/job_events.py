@@ -6,6 +6,7 @@ transitions de statut). Le helper est enveloppé dans un try/except large et
 **n'élève jamais** — un échec d'écriture d'event ne doit jamais casser l'OCR ou
 la génération (exigence AC1).
 """
+
 from __future__ import annotations
 
 import logging

@@ -1,4 +1,5 @@
 """Story 8.0 — logique de données de la migration 015 (référentiel item_titles), sur SQLite."""
+
 import importlib.util
 import uuid
 from pathlib import Path
@@ -32,8 +33,13 @@ def _insert_item(conn, number, title):
     item_id = uuid.uuid4()
     conn.execute(
         Item.__table__.insert().values(
-            id=item_id, college_id=uuid.uuid4(), item_number=number, rang="A",
-            chapter_title=title, ocr_confidence_score=0.9, low_confidence=False,
+            id=item_id,
+            college_id=uuid.uuid4(),
+            item_number=number,
+            rang="A",
+            chapter_title=title,
+            ocr_confidence_score=0.9,
+            low_confidence=False,
             created_at=migration._now(),
         )
     )
@@ -41,10 +47,7 @@ def _insert_item(conn, number, title):
 
 
 def _titles(conn):
-    return {
-        r.id: r.chapter_title
-        for r in conn.execute(select(Item.__table__.c.id, Item.__table__.c.chapter_title))
-    }
+    return {r.id: r.chapter_title for r in conn.execute(select(Item.__table__.c.id, Item.__table__.c.chapter_title))}
 
 
 def test_garbage_titles_are_cleared(conn):

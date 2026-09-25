@@ -27,11 +27,12 @@ import 'package:collega_app/features/search/presentation/search_sheet.dart';
 
 import '../../support/cg_golden.dart';
 
-FlashCardModel _card(String id, {String rang = 'A', String? feedback, double ocr = 0.95}) => FlashCardModel(
+FlashCardModel _card(String id, {String rang = 'A', String type = 'classique', String? feedback, double ocr = 0.95}) =>
+    FlashCardModel(
       id: id,
       itemId: 'i232',
       collegeId: 'c3',
-      cardType: 'classique',
+      cardType: type,
       rang: rang,
       recto: 'Question $id : quel marqueur doser ?',
       verso: 'Réponse $id : le BNP, élevé dans l’insuffisance cardiaque.',
@@ -233,6 +234,39 @@ void main() {
   });
 
   group('fiches', () {
+    testWidgets('tri : classique, cas clinique, définition ; étiquette de type, rien pour la classique', (tester) async {
+      _phone(tester);
+      _repo.cards = [
+        _card('k1', type: 'definition'),
+        _card('k2', type: 'cas_clinique'),
+        _card('k3'),
+        _card('k4', type: 'cas_clinique'),
+      ];
+      await _pumpApp(tester);
+      double top(String id) => tester.getTopLeft(find.text('Question $id : quel marqueur doser ?')).dy;
+      expect(top('k3'), lessThan(top('k2')));
+      expect(top('k2'), lessThan(top('k4')), reason: 'à type égal, l’ordre reçu');
+      expect(top('k4'), lessThan(top('k1')));
+      expect(find.text('Cas clinique'), findsNWidgets(2));
+      expect(find.text('Définition'), findsOneWidget);
+    });
+
+    testWidgets('rang de chaque fiche affiché quand l’item en mélange plusieurs, lu par VoiceOver', (tester) async {
+      _phone(tester);
+      final handle = tester.ensureSemantics();
+      _repo.cards = [_card('k1'), _card('k2', rang: 'B', type: 'cas_clinique')];
+      await _pumpApp(tester);
+      expect(find.byWidgetPredicate((w) => w is CgBadge), findsNWidgets(2), reason: 'un badge de rang par fiche');
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('B'), findsOneWidget);
+      expect(
+        tester.getSemantics(find.byKey(const ValueKey('item-card-k2'))),
+        matchesSemantics(isButton: true, hasTapAction: true, hasExpandedState: true, isExpanded: false,
+            label: 'Rang B, cas clinique. Question k2 : quel marqueur doser ?'),
+      );
+      handle.dispose();
+    });
+
     testWidgets('filtre sur un rang qui disparaît (fiche supprimée) : retour à « Toutes »', (tester) async {
       _phone(tester);
       _repo.cards = [_card('k1'), _card('k2'), _card('k3', rang: 'C')];
@@ -432,7 +466,7 @@ void main() {
       for (final width in cgGoldenWidths) {
         for (final scale in cgGoldenScales) {
           final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
-          testWidgets('golden item_detail_${name}_$tag', (tester) async {
+          testWidgets('golden item_detail_${name}_$tag', tags: const ['golden'], (tester) async {
             _phone(tester, width: width, height: 1300);
             _repo.cards = [_card('k1', feedback: 'positive'), _card('k2'), _card('k3', ocr: 0.4, feedback: 'negative')];
             await _pumpApp(tester, textScale: scale);

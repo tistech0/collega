@@ -21,12 +21,25 @@ const _kReminderHourUtc = 'reminder_hour_utc';
 const _kReminderLocalHour = 'reminder_local_hour';
 
 class AuthRepository {
-  AuthRepository({required Dio dio, required FlutterSecureStorage storage})
-      : _dio = dio,
-        _storage = storage;
+  /// [logoutDio] : Dio utilisé pour `POST /v1/auth/logout` — SANS l'intercepteur
+  /// 401→refresh→retry de [dio] (passer `ApiClient.rawDio`). Par défaut, [dio]
+  /// (comportement historique dans les tests qui ne fournissent pas ce param).
+  /// [ensureFreshAccessToken] : rafraîchissement défensif best-effort avant le
+  /// logout (passer `ApiClient.ensureFreshAccessToken`) — voir [logout].
+  AuthRepository({
+    required Dio dio,
+    required FlutterSecureStorage storage,
+    Dio? logoutDio,
+    Future<bool> Function()? ensureFreshAccessToken,
+  })  : _dio = dio,
+        _storage = storage,
+        _logoutDio = logoutDio ?? dio,
+        _ensureFreshAccessToken = ensureFreshAccessToken;
 
   final Dio _dio;
   final FlutterSecureStorage _storage;
+  final Dio _logoutDio;
+  final Future<bool> Function()? _ensureFreshAccessToken;
 
   Future<AuthState> register(String email, String password) async {
     try {
@@ -104,23 +117,62 @@ class AuthRepository {
     }
   }
 
+  /// Déconnexion best-effort : l'appel serveur révoque la session côté back
+  /// (rotation du refresh token — chantier 2 § 8) mais n'empêche JAMAIS la
+  /// déconnexion locale. Le storage est effacé en dernière étape, y compris
+  /// si l'appel échoue, timeout, ou lève (401 access token déjà expiré...).
+  ///
+  /// Fix round 1 : POSTer sur [_dio] (intercepté 401→refresh→retry) est
+  /// dangereux ici — un 401 en cours d'appel ferait tourner le refresh token
+  /// EN INTERNE puis rejouerait la requête avec le corps déjà sérialisé
+  /// AVANT rotation (`{refresh_token: R1}`), alors que le refresh token
+  /// courant est désormais R2 : R2 ne serait jamais révoqué côté serveur.
+  /// On fait donc une rotation défensive AVANT de lire les jetons (seulement
+  /// si l'access expire dans < 2 min ; verrou partagé d'`ApiClient`,
+  /// best-effort), puis on poste sur [_logoutDio] qui
+  /// n'a PAS cet intercepteur : le jeton lu est bien celui envoyé, sans retry
+  /// différé.
   Future<void> logout() async {
-    await Future.wait([
-      _storage.delete(key: _kAccessToken),
-      _storage.delete(key: _kRefreshToken),
-      _storage.delete(key: _kUserId),
-      _storage.delete(key: _kUserEmail),
-      _storage.delete(key: _kIsBeta),
-      _storage.delete(key: _kIsSubscribed),
-      _storage.delete(key: _kFirstName),
-      _storage.delete(key: _kYearGroup),
-      _storage.delete(key: _kFaculty),
-      _storage.delete(key: _kMonthlyReloads),
-      _storage.delete(key: _kMonthlyMax),
-      _storage.delete(key: _kMonthlyResetAt),
-      _storage.delete(key: _kReminderHourUtc),
-      _storage.delete(key: _kReminderLocalHour),
-    ]);
+    try {
+      await _ensureFreshAccessToken?.call();
+    } catch (_) {
+      // Best-effort : le logout suit avec les jetons actuellement stockés.
+    }
+
+    try {
+      final accessToken = await _storage.read(key: _kAccessToken);
+      if (accessToken != null) {
+        final refreshToken = await _storage.read(key: _kRefreshToken);
+        await _logoutDio.post<dynamic>(
+          '/v1/auth/logout',
+          data: refreshToken != null ? {'refresh_token': refreshToken} : null,
+          options: Options(
+            headers: {'Authorization': 'Bearer $accessToken'},
+            sendTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      AppLogger.warning('logout: appel serveur ignoré (${e.runtimeType})', tag: 'AuthRepository');
+    } finally {
+      await Future.wait([
+        _storage.delete(key: _kAccessToken),
+        _storage.delete(key: _kRefreshToken),
+        _storage.delete(key: _kUserId),
+        _storage.delete(key: _kUserEmail),
+        _storage.delete(key: _kIsBeta),
+        _storage.delete(key: _kIsSubscribed),
+        _storage.delete(key: _kFirstName),
+        _storage.delete(key: _kYearGroup),
+        _storage.delete(key: _kFaculty),
+        _storage.delete(key: _kMonthlyReloads),
+        _storage.delete(key: _kMonthlyMax),
+        _storage.delete(key: _kMonthlyResetAt),
+        _storage.delete(key: _kReminderHourUtc),
+        _storage.delete(key: _kReminderLocalHour),
+      ]);
+    }
   }
 
   /// Rappel quotidien mémorisé (l'interrupteur du Profil au prochain démarrage),

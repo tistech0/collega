@@ -1,11 +1,11 @@
 """Tests GET /v1/colleges, GET /v1/colleges/{id}/items, GET /v1/colleges/{id}/items/{id}/cards."""
+
 from __future__ import annotations
 
 import types
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 from app.deps import get_current_user
@@ -73,9 +73,7 @@ class TestListUserColleges:
 
         # SELECT College.where(user_id) → []
         mock_db.execute = AsyncMock(
-            return_value=MagicMock(
-                scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[])))
-            )
+            return_value=MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[]))))
         )
 
         resp = await client.get("/v1/colleges")
@@ -99,9 +97,7 @@ class TestListUserColleges:
         # 2. SELECT college_id, rang, count GROUP BY college_id, rang → [(college.id, "A", 5), ...]
         mock_db.execute = AsyncMock(
             side_effect=[
-                MagicMock(
-                    scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[college])))
-                ),
+                MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[college])))),
                 MagicMock(all=MagicMock(return_value=[(college.id, "A", 5), (college.id, "B", 3)])),
             ]
         )
@@ -127,9 +123,7 @@ class TestListUserColleges:
         app.dependency_overrides[get_current_user] = lambda: user
 
         mock_db.execute = AsyncMock(
-            return_value=MagicMock(
-                scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[])))
-            )
+            return_value=MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[]))))
         )
 
         resp = await client.get("/v1/colleges")

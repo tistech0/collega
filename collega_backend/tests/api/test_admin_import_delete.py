@@ -1,4 +1,5 @@
 """Tests DELETE /v1/admin/colleges/{college_id} — Story 7.7 AC #4."""
+
 from __future__ import annotations
 
 import types
@@ -6,7 +7,6 @@ import uuid
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from httpx import AsyncClient
 
 ADMIN_AUTH = ("admin", "testpass")
@@ -63,9 +63,7 @@ class TestDeleteImport:
         mock_db.delete = AsyncMock()
         # Le garde-fou interroge GenerationJob actif → renvoyer un job (≠ None)
         active_job = types.SimpleNamespace(id=uuid.uuid4(), status="processing")
-        mock_db.execute = AsyncMock(
-            return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=active_job))
-        )
+        mock_db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=active_job)))
 
         resp = await client.delete(f"/v1/admin/colleges/{college.id}", auth=ADMIN_AUTH)
         assert resp.status_code == 409

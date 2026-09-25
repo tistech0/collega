@@ -1,10 +1,9 @@
 """Tests cron `reset_monthly_reloads` — Story 7.2 AC #2."""
+
 from __future__ import annotations
 
 import logging
 from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
 
 
 class TestResetMonthlyReloads:
@@ -40,12 +39,14 @@ class TestResetMonthlyReloads:
         mock_db.execute = AsyncMock(return_value=mock_result)
         mock_db.commit = AsyncMock()
 
-        with patch(
-            "app.workers.cleanup_worker.async_session_factory",
-            return_value=mock_db,
+        with (
+            patch(
+                "app.workers.cleanup_worker.async_session_factory",
+                return_value=mock_db,
+            ),
+            caplog.at_level(logging.INFO, logger="app.workers.cleanup_worker"),
         ):
-            with caplog.at_level(logging.INFO, logger="app.workers.cleanup_worker"):
-                await reset_monthly_reloads({})
+            await reset_monthly_reloads({})
 
         assert "7" in caplog.text
 
