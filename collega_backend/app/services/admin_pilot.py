@@ -199,7 +199,11 @@ async def _failed_count(db: AsyncSession, start: datetime, end: datetime) -> int
 async def pilot(db: AsyncSession, now: datetime) -> PilotData:
     today = now.date()
     testers = await tester_rows(db, now, today)
-    rows = await _activity_rows(db, today - timedelta(days=13))
+    # Les KPI (actives, fiches) ne portent que sur les comptes beta — les comptes
+    # de test/admin ont aussi des ActivityDay mais ne doivent ni gonfler « fiches
+    # révisées » ni permettre à « actives » de dépasser `testers_total` (beta seul).
+    beta_ids = {uuid.UUID(t.user_id) for t in testers if t.is_beta}
+    rows = [r for r in await _activity_rows(db, today - timedelta(days=13)) if r.user_id in beta_ids]
     week, prev_week = today - timedelta(days=6), today - timedelta(days=13)
 
     def period(start: date, end: date) -> list[ActivityDay]:

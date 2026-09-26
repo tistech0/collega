@@ -59,9 +59,13 @@ async def test_pilot_chiffres_et_testeuses(pg_client: AsyncClient, pg_factory):
         active.is_beta, active.first_name, active.last_seen_at = True, "Camille", now
         never = await make_user(db)
         never.is_beta = True
+        # Compte non beta (admin/test) actif dans la fenêtre : ne doit pas gonfler
+        # active_7d/cards_7d, qui ne portent que sur les comptes beta.
+        non_beta = await make_user(db)
         db.add_all(
             [
                 ActivityDay(user_id=active.id, day=today, cards_reviewed=30, session_completed=True, streak=6),
+                ActivityDay(user_id=non_beta.id, day=today, cards_reviewed=99, session_completed=True, streak=1),
                 ActivityDay(
                     user_id=active.id,
                     day=today - timedelta(days=3),
@@ -82,6 +86,7 @@ async def test_pilot_chiffres_et_testeuses(pg_client: AsyncClient, pg_factory):
 
     data = (await pg_client.get("/v1/admin/pilot", auth=ADMIN_AUTH)).json()["data"]
     assert data["testers_total"] == 2
+    # Le compte non beta n'est pas compté malgré son activité dans la fenêtre.
     assert data["active_7d"] == {"value": 1, "previous": 1}
     assert data["cards_7d"] == {"value": 40, "previous": 7}
     rows = {r["email"]: r for r in data["testers"]}
@@ -89,6 +94,7 @@ async def test_pilot_chiffres_et_testeuses(pg_client: AsyncClient, pg_factory):
     assert rows[active.email]["streak"] == 6
     assert rows[active.email]["cards_7d"] == 40
     assert rows[never.email]["status"] == "never_seen"
+    assert non_beta.email not in rows
     assert (await pg_client.get("/v1/admin/badges", auth=ADMIN_AUTH)).json()["data"]["testers"] == 1
 
 
