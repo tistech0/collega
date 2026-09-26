@@ -43,6 +43,7 @@ h1 { font-size: 28px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
 .row.link { cursor: pointer; } .row.link:hover { background: linear-gradient(90deg, transparent, var(--ground) 8%, var(--ground) 92%, transparent); }
 .row .left { display: flex; align-items: center; gap: var(--s2); min-width: 0; }
 .row .left .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .left .muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .muted { color: var(--ink3); }
 .empty { color: var(--ink3); padding: var(--s4) 0; text-align: center; }
 
