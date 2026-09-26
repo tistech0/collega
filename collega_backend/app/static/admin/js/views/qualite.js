@@ -45,16 +45,19 @@ export async function render(root, { id } = {}) {
 
   function draw() {
     const shown = cards.filter((c) => filter === 'all' || (filter === 'negative' && c.user_feedback === 'negative') || (filter === 'low' && c.low_confidence));
-    grid.replaceChildren(...(shown.length ? shown.map(card) : [empty('Aucune fiche dans ce filtre.')]));
+    // Auteur de l'avis (spec § 3.2 écran 6) : seule la propriétaire du collège
+    // note ses fiches, donc l'auteur = l'e-mail du compte du collège affiché.
+    grid.replaceChildren(...(shown.length ? shown.map((c) => card(c, current.user_email)) : [empty('Aucune fiche dans ce filtre.')]));
   }
   draw();
 }
 
-function card(c) {
+function card(c, authorEmail) {
   const fb = c.user_feedback === 'negative' ? icon('thumbDown', 16, 'fb-neg') : c.user_feedback === 'positive' ? icon('thumbUp', 16, 'fb-pos') : null;
   return h('article', { class: `fc${c.user_feedback === 'negative' ? ' neg' : ''}` },
     h('div', { class: 'top' }, h('span', { class: `rank ${c.rang}` }, c.rang), h('span', { class: 'item' }, `Item ${c.item_number ?? '?'}`), h('span', { class: 'fb' }, fb)),
     h('div', { class: 'recto' }, c.recto),
     h('div', { class: 'verso' }, c.verso),
-    h('div', { class: 'foot' }, tag(c.card_type.replace('_', ' ')), c.low_confidence ? tag(`OCR ${c.ocr_confidence_score.toFixed(2)}`, 'warn') : null));
+    h('div', { class: 'foot' }, tag(c.card_type.replace('_', ' ')), c.low_confidence ? tag(`OCR ${c.ocr_confidence_score.toFixed(2)}`, 'warn') : null,
+      c.user_feedback ? h('span', { class: 'muted' }, `avis de ${authorEmail ?? 'compte supprimé'}`) : null));
 }

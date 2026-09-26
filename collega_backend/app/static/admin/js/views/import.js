@@ -3,25 +3,42 @@ import { go } from '../router.js';
 import { JOB_STATUS_LABEL, banner, block, empty, fmtDateTime, fmtEuro, fmtInt, h, icon, row, tag, toast } from '../ui.js';
 
 const RUNNING = new Set(['pending', 'processing', 'ocr_complete']);
+// Événements qui marquent l'échec/l'arrêt d'un import (même liste que l'ancienne
+// console : tl-failed pour failed/stale, tl-cancelled pour cancelled), avec le
+// point rouge de la timeline.
+const FAILURE_EVENTS = new Set(['failed', 'stale', 'cancelled']);
 
 export async function render(root, { id }) {
   const content = h('div');
   root.append(h('a', { class: 'crumb', href: '#/imports' }, icon('chevronLeft', 14), 'Imports'), content);
+
+  // Déclaré avant tout await : cf. imports.js (même piège de navigation pendant
+  // le premier chargement).
+  let stopped = false;
+  let timer = null;
 
   async function load() {
     let d;
     let college;
     try {
       ({ data: d } = await api(`/jobs/${id}`));
+      if (stopped) return;
       college = (await api('/colleges')).data.find((c) => c.college_id === d.college_id);
+      if (stopped) return;
     } catch (err) {
-      content.replaceChildren(banner(err, load));
+      if (!stopped) content.replaceChildren(banner(err, load));
       return;
     }
     const actions = h('div', { class: 'actions' },
       RUNNING.has(d.status) ? h('button', { class: 'btn', onclick: async () => {
         if (!confirm('Arrêter cet import ?')) return;
-        try { await api(`/jobs/${id}/stop`, { method: 'POST' }); toast('Import arrêté'); load(); } catch (err) { toast(err.message); }
+        try {
+          const { data: stop } = await api(`/jobs/${id}/stop`, { method: 'POST' });
+          toast(stop.aborted
+            ? 'Import arrêté'
+            : "Import marqué en échec, mais l'arrêt du worker n'a pas pu être confirmé.");
+          load();
+        } catch (err) { toast(err.message); }
       } }, 'Arrêter') : null,
       h('button', { class: 'btn danger', onclick: async () => {
         if (!confirm('Supprimer ce collège, ses fiches et ses fichiers ? Action définitive.')) return;
@@ -43,7 +60,7 @@ export async function render(root, { id }) {
       h('div', { class: 'grid cols' },
         block('Déroulé', `${d.timeline.length} événements`, d.timeline.length
           ? h('ul', { class: 'timeline' }, ...dedupTimeline(d.timeline).map((e) => h('li', {}, h('span', { class: 'muted' }, fmtDateTime(e.created_at)),
-            h('span', {}, h('b', {}, e.event_type), e.page != null ? ` · page ${e.page}/${e.total ?? '?'}` : '', e.message ? h('div', { class: 'muted' }, e.message) : null))))
+            h('span', {}, h('b', { class: FAILURE_EVENTS.has(e.event_type) ? 'fb-neg' : '' }, e.event_type), e.page != null ? ` · page ${e.page}/${e.total ?? '?'}` : '', e.message ? h('div', { class: 'muted' }, e.message) : null))))
           : empty('Aucun événement.')),
         block('Confiance OCR par item', null, d.items.length ? d.items.map((it) => row(h('span', {}, `Item ${it.item_number}`),
           tag(`${Math.round(it.ocr_confidence_score * 100)} %`, it.low_confidence ? 'warn' : 'ok'))) : empty('Aucun item.')),
@@ -56,12 +73,11 @@ export async function render(root, { id }) {
           row(h('span', {}, 'Mis à jour le'), fmtDateTime(d.updated_at)))),
       segmentation(d),
     ].filter(Boolean));
-    if (RUNNING.has(d.status)) timer = setTimeout(load, 5000);
+    if (!stopped && RUNNING.has(d.status)) timer = setTimeout(load, 5000);
   }
 
-  let timer = null;
   await load();
-  return () => clearTimeout(timer);
+  return () => { stopped = true; clearTimeout(timer); };
 }
 
 // Chantier 1 : un « generation_progress » par item — n'afficher que le dernier

@@ -24,6 +24,9 @@ route('/reglages', () => import('./views/reglages.js'));
 const app = document.getElementById('app');
 let shell = null;
 let cleanup = null;
+// Compteur de rendus : une navigation pendant le chargement (await) d'un écran
+// rend son cleanup obsolète avant même qu'il soit stocké — cf. gotcha task 9 fix round 1.
+let renderToken = 0;
 
 function buildShell() {
   const links = NAV.map((n) => {
@@ -56,6 +59,7 @@ async function refreshBadges() {
 async function render() {
   if (!hasCredentials()) return showLogin();
   if (!shell) { shell = buildShell(); app.replaceChildren(shell.root); }
+  const token = ++renderToken;
   cleanup?.();
   cleanup = null;
   const path = currentPath();
@@ -64,7 +68,14 @@ async function render() {
   shell.content.replaceChildren();
   window.scrollTo(0, 0);
   const view = await found.loader();
-  cleanup = (await view.render(shell.content, found.params)) ?? null;
+  const viewCleanup = (await view.render(shell.content, found.params)) ?? null;
+  if (token !== renderToken) {
+    // Une navigation plus récente a démarré pendant ce chargement : ne pas
+    // écraser son cleanup avec le nôtre (obsolète) — juste l'arrêter.
+    viewCleanup?.();
+    return;
+  }
+  cleanup = viewCleanup;
   refreshBadges();
 }
 
@@ -77,12 +88,13 @@ async function showLogin() {
 
 function logout() {
   clearCredentials();
+  renderToken += 1; // invalide un render() en cours (son cleanup ne doit pas s'appliquer après la déconnexion)
   cleanup?.();
   cleanup = null;
   showLogin();
 }
 
 window.addEventListener('hashchange', render);
-window.addEventListener('admin:logout', () => { cleanup?.(); cleanup = null; showLogin(); });
+window.addEventListener('admin:logout', () => { renderToken += 1; cleanup?.(); cleanup = null; showLogin(); });
 window.addEventListener('admin:badges', refreshBadges);
 render();
