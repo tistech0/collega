@@ -13,7 +13,7 @@
 # /boot/config/plugins/user.scripts/scripts/collega-health/script).
 # Secrets : /boot/config/secrets/collega_cf_access (CF_ACCESS_CLIENT_ID / _SECRET).
 
-HOST=collegatest.matthislesur.com
+HOST=collega.matthislesur.com
 LAN_IP=192.168.1.10
 STATE_DIR=/tmp/collega-health
 SECRETS=/boot/config/secrets/collega_cf_access

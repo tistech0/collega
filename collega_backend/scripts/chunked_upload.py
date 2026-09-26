@@ -19,7 +19,7 @@ import tempfile
 import time
 from pathlib import Path
 
-HOST = "collegatest.matthislesur.com"
+HOST = "collega.matthislesur.com"
 BASE = f"https://{HOST}"
 
 
