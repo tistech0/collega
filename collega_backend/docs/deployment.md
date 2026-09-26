@@ -137,6 +137,41 @@ curl -i --resolve collega.matthislesur.com:443:<IP Cloudflare> \
 `/admin` doit répondre `302` vers la page de connexion Cloudflare Access ; `/v1/colleges`
 avec le service token doit répondre comme avant (pas de redirection Access).
 
+### Console de pilotage — organisation du front
+
+Le front admin (`app/static/admin/`) est découpé en modules ES chargés par le routeur
+(`js/main.js`, routes en hash) sans étape de build : un écran = un fichier sous
+`app/static/admin/js/views/` (`pilotage.js`, `testeuses.js`, `testeuse.js`, `imports.js`,
+`import.js`, `qualite.js`, `couts.js`, `reglages.js`, plus `login.js`). Les briques
+communes (`h`, `icon`, `banner`, `block`, `row`, `tag`, `toast`, formatteurs…) vivent dans
+`js/ui.js` ; le client HTTP (Basic Auth stockée en mémoire) dans `js/api.js`.
+
+Deux fichiers sont **générés**, pas écrits à la main, depuis l'app Flutter (source de
+vérité) :
+
+- `app/core/college_catalog.py` (noms des collèges par `college_ref_id`) ;
+- `app/static/admin/js/icons.js` (icônes, tracé `currentColor`).
+
+Régénération : `.venv/bin/python -m scripts.gen_admin_assets` (`--check` renvoie un
+code non nul et n'écrit rien si les fichiers générés sont différents de ce que produirait
+une régénération — utilisé en CI). Un test de fraîcheur
+(`tests/scripts/test_gen_admin_assets.py::test_fichiers_generes_a_jour`) échoue si le code
+Flutter a changé sans régénération committée.
+
+Réglages exposés dans l'écran **Réglages** (`GET`/`PATCH /v1/admin/config`,
+`ConfigData`/`ConfigUpdateRequest` dans `app/schemas/admin.py`, clés `app_settings` dans
+`app/services/admin_pilot.py`) :
+
+- `inactivity_days` (1 à 60, défaut 5) : au-delà de ce nombre de jours sans
+  `last_seen_at`, une testeuse passe « inactive » (pastille Pilotage/Testeuses/fiche
+  testeuse) ;
+- `testflight_url` (vide, ou une URL `https://…`) : insérée dans le message d'invitation
+  généré par l'écran Testeuses ; laissée vide, l'invitation renvoie vers l'App Store.
+
+L'alerte Telegram sur un import passé en échec (`scripts.import_alerts`, appelée par la
+sonde `collega-health.sh`) est documentée dans [§ Supervision (NAS)](#supervision-nas)
+ci-dessous — pas dupliquée ici.
+
 ### Adresse IP cliente et proxys de confiance
 
 `get_client_ip()` (`app/core/limiter.py`) ne fait confiance à `CF-Connecting-IP` (ou au
