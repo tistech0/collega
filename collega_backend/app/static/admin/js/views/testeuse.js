@@ -1,6 +1,6 @@
 import { api } from '../api.js';
 import { go } from '../router.js';
-import { JOB_STATUS_LABEL, STATUS_LABEL, banner, bars, block, displayName, empty, fmtAgo, fmtDate, fmtInt, h, icon, initials, kpi, panel, row, tag, toast } from '../ui.js';
+import { JOB_STATUS_LABEL, STATUS_LABEL, banner, bars, block, copyText, displayName, empty, fmtAgo, fmtDate, fmtInt, h, icon, initials, kpi, panel, row, tag, toast } from '../ui.js';
 import { invitation } from './testeuses.js';
 
 export async function render(root, { id }) {
@@ -87,7 +87,7 @@ async function resetPassword(d, testflightUrl) {
     panel('Nouveau mot de passe', h('div', {},
       h('p', {}, 'Affiché une seule fois. Copie le message et envoie-le.'),
       h('pre', { class: 'invite' }, text),
-      h('button', { class: 'btn primary', onclick: async () => { await navigator.clipboard.writeText(text); toast('Message copié'); } }, 'Copier le message')));
+      h('button', { class: 'btn primary', onclick: () => copyText(text) }, 'Copier le message')));
   } catch (err) {
     toast(err.message);
   }

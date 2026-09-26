@@ -1,6 +1,6 @@
 import { api } from '../api.js';
 import { go } from '../router.js';
-import { STATUS_LABEL, banner, displayName, empty, fmtAgo, fmtDate, h, icon, panel, tag, toast } from '../ui.js';
+import { STATUS_LABEL, banner, copyText, displayName, empty, fmtAgo, fmtDate, h, icon, panel, tag } from '../ui.js';
 
 const FILTERS = [['all', 'Toutes'], ['active', 'Actives'], ['inactive', 'Inactives'], ['never_seen', 'Jamais connectées']];
 
@@ -80,7 +80,7 @@ function openCreate(testflightUrl) {
         h('p', {}, 'Compte créé. Le mot de passe n\'est affiché qu\'une fois : copie le message maintenant.'),
         h('pre', { class: 'invite' }, text),
         h('div', { class: 'toolbar' },
-          h('button', { class: 'btn primary', type: 'button', onclick: async () => { await navigator.clipboard.writeText(text); toast('Message copié'); } }, 'Copier le message d\'invitation'),
+          h('button', { class: 'btn primary', type: 'button', onclick: () => copyText(text) }, 'Copier le message d\'invitation'),
           h('button', { class: 'btn', type: 'button', onclick: () => { p.close(); go(`/testeuses/${data.user_id}`); } }, 'Voir la fiche')));
       window.dispatchEvent(new Event('admin:badges'));
     } catch (err) {

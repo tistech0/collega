@@ -87,6 +87,18 @@ export function toast(text) {
   setTimeout(() => node.remove(), 2600);
 }
 
+// Copie presse-papiers avec retour utilisateur dans les deux cas : `navigator.clipboard`
+// peut rejeter (contexte non sûr, permission refusée…) ; jamais de rejet non géré ni de
+// silence sur un mot de passe provisoire affiché une seule fois.
+export async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('Message copié');
+  } catch {
+    toast('Copie impossible : sélectionne le message et copie-le à la main.');
+  }
+}
+
 export function panel(title, content) {
   const scrim = h('div', { class: 'scrim' });
   const node = h('aside', { class: 'panel', role: 'dialog', 'aria-label': title });
