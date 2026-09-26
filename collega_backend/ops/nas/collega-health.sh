@@ -80,4 +80,10 @@ done
 # Niveau alert aussi pour le retour : l'agent Telegram du NAS ne pousse tout de suite
 # que les `alert` et met `normal`/`warning` en file pour le récap de 08:00.
 [ -n "$up" ] && notify "Collega : API rétablie" "$up" "alert"
+
+# Imports passés en échec depuis la minute précédente (point de reprise en base).
+# Une panne de la commande ne doit jamais gêner la sonde de santé ci-dessus.
+alerts=$(docker exec collega-api-1 python -m scripts.import_alerts 2>/dev/null) || alerts=""
+[ -n "$alerts" ] && notify "Collega : import en échec" "$alerts" "alert"
+
 exit 0

@@ -179,6 +179,28 @@ Le reverse proxy est Nginx Proxy Manager (proxy host 53) sur le NAS, joint par l
 réseau `collega_net` ; le chemin public passe par le tunnel Cloudflare + Access. Il
 n'est pas dans le `docker-compose.prod.yml`.
 
+## Supervision (NAS)
+
+Le User Script Unraid `collega-health` (source versionnée : `ops/nas/collega-health.sh`,
+copiée sur le NAS par l'utilisateur — jamais par un agent) tourne chaque minute et
+sonde `GET /health` par les chemins LAN et public ; une panne déclenche une alerte
+Telegram (niveau `alert`) et un retour un message de rétablissement.
+
+Depuis le chantier console de pilotage, la même sonde lance aussi, juste avant de
+sortir, `docker exec collega-api-1 python -m scripts.import_alerts` : cette commande
+imprime une ligne par import de collège passé en `failed` depuis le dernier passage
+(« collège — e-mail : message »). Si la sortie n'est pas vide, `collega-health.sh`
+envoie « Collega : import en échec » en niveau `alert`. Une panne de la commande
+(image pas à jour, base injoignable…) n'interrompt jamais la sonde de santé : sa
+sortie d'erreur est ignorée et l'absence d'alerte n'est pas elle-même une alerte.
+
+Le point de reprise (dernier `updated_at` de job déjà signalé) est stocké dans
+`app_settings`, clé `import_alerts_since` (ISO 8601) ; au tout premier passage il est
+juste initialisé à « maintenant », sans rafale sur l'historique. Pour rejouer les
+alertes depuis un moment donné : supprimer la ligne `import_alerts_since` de
+`app_settings` (ou la réécrire à la date voulue) — le passage suivant repart de
+« maintenant » (ou de la date fixée).
+
 ## CGU + Politique de confidentialité (Story 7.4 — FR40)
 
 **Option retenue : B — bundle Flutter.** Les textes légaux sont embarqués dans
