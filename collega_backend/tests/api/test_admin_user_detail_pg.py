@@ -32,7 +32,12 @@ async def test_detail_sans_activite(pg_client: AsyncClient, pg_factory):
     assert len(data["daily"]) == 30
     assert all(d["cards_reviewed"] == 0 for d in data["daily"])
     assert data["colleges"] == [] and data["feedback"] == [] and data["jobs"] == []
-    # Reprend les cas de l'ancien test par faux db : quotas, colonnes de base.
+    # Reprend les cas de l'ancien test par faux db : identité, quotas, colonnes de base.
+    assert data["user_id"] == str(user.id)
+    assert data["email"] == user.email
+    assert data["is_beta"] is False
+    assert data["is_subscribed"] is True
+    assert data["monthly_reloads"] == 0
     assert data["monthly_reloads_max"] == 3
     assert data["monthly_reloads_reset_at"] is None
     assert data["created_at"] is not None
@@ -41,8 +46,8 @@ async def test_detail_sans_activite(pg_client: AsyncClient, pg_factory):
 async def test_detail_complet(pg_client: AsyncClient, pg_factory):
     today = datetime.now(UTC).date()
     async with pg_factory() as db:
-        user = await make_user(db)
-        user.first_name, user.last_seen_at = "Camille", datetime.now(UTC)
+        user = await make_user(db, monthly_reloads=2)
+        user.first_name, user.last_seen_at, user.is_beta = "Camille", datetime.now(UTC), True
         college = await make_college(db, user, ref_id=4, status="generation_complete")
         await make_job(db, college, status="generation_complete")
         item = await make_item(db, college, 1)
@@ -61,10 +66,16 @@ async def test_detail_complet(pg_client: AsyncClient, pg_factory):
         await db.commit()
 
     data = (await pg_client.get(f"/v1/admin/users/{user.id}", auth=ADMIN_AUTH)).json()["data"]
+    assert data["user_id"] == str(user.id)
+    assert data["email"] == user.email
+    assert data["is_beta"] is True
+    assert data["is_subscribed"] is True
+    assert data["monthly_reloads"] == 2
     assert data["first_name"] == "Camille" and data["status"] == "active"
     assert data["streak"] == 6 and data["cards_30d"] == 35 and data["sessions_30d"] == 1
     assert data["daily"][-1] == {"day": today.isoformat(), "cards_reviewed": 25, "session_completed": True}
     assert data["daily"][0]["day"] == (today - timedelta(days=29)).isoformat()
+    assert data["colleges"][0]["college_ref_id"] == 4
     assert data["colleges"][0]["college_name"] == "Cardiologie"
     assert data["colleges"][0]["card_count"] == 1
     assert data["colleges"][0]["reload_count_max"] == 2
