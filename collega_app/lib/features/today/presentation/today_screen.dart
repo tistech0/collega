@@ -76,10 +76,28 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
     super.dispose();
   }
 
+  /// Vrai pendant une construction : la session du jour vient d'être terminée
+  /// dans le drill (animation « Session faite », partie D).
+  bool _celebrate = false;
+
   Future<void> _start(TodayReady state) async {
+    final wasCompleted = state.session.isCompleted;
     await launchDrill(context, ref, DrillSessionParams.daily(state.session.day));
     // Au retour : progression, semaine et collèges ont pu changer.
-    if (mounted) ref.invalidate(todayProvider);
+    if (!mounted) return;
+    ref.invalidate(todayProvider);
+    final next = await ref.read(todayProvider.future);
+    if (mounted && !wasCompleted && next is TodayReady && next.session.isCompleted) {
+      setState(() => _celebrate = true);
+    }
+  }
+
+  /// La célébration ne vaut que pour la construction qui la montre : les
+  /// `DoneCheck` créés à ce moment s'animent, les suivants non.
+  bool _consumeCelebrate() {
+    final celebrate = _celebrate;
+    _celebrate = false;
+    return celebrate;
   }
 
   @override
@@ -126,7 +144,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
             message: '$collegeName : les fiches arrivent. Tu peux fermer Collega, on te prévient.',
             illustration: CgIllustration.done,
           ))],
-        TodayReady() => _readyChildren(context, state),
+        TodayReady() => _readyChildren(context, state, celebrate: _consumeCelebrate()),
       };
     }
 

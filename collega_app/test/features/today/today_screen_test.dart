@@ -73,6 +73,15 @@ class _Prefs extends RevisionPrefsNotifier {
   Future<RevisionPrefs> build() async => const RevisionPrefs();
 }
 
+class _Sequence extends TodayNotifier {
+  _Sequence(this.states);
+
+  /// Partagée entre instances : le premier état est retiré à chaque construction, le dernier reste.
+  final List<TodayState> states;
+  @override
+  Future<TodayState> build() async => states.length > 1 ? states.removeAt(0) : states.first;
+}
+
 class _Fixed extends TodayNotifier {
   _Fixed(this.value);
   final TodayState value;
@@ -106,7 +115,7 @@ Widget _app(TodayNotifier Function() notifier, {List<String>? visited, double te
     GoRoute(path: '/', builder: (_, __) => TodayScreen(now: () => _date)),
     GoRoute(path: '/colleges', builder: (_, __) { visited?.add('/colleges'); return const SizedBox(); }),
     GoRoute(path: '/home/colleges/:ref', builder: (_, s) { visited?.add('/home/colleges/${s.pathParameters['ref']}'); return const SizedBox(); }),
-    GoRoute(path: '/drill', builder: (_, s) { visited?.add('/drill'); return const SizedBox(); }),
+    GoRoute(path: '/drill', builder: (_, s) { visited?.add('/drill'); return const SizedBox(key: Key('drill')); }),
   ]);
   return ProviderScope(
     overrides: [
@@ -431,6 +440,50 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byKey(const ValueKey('today-streak')), findsNothing);
       }
+    });
+  });
+
+  group('célébration au retour du drill (partie D)', () {
+    bool animating(WidgetTester tester) =>
+        tester.widgetList<DoneCheck>(find.byType(DoneCheck)).any((w) => w.animate);
+
+    Future<void> finishDrill(WidgetTester tester) async {
+      await tester.tap(find.text('Commencer'));
+      await tester.pumpAndSettle();
+      GoRouter.of(tester.element(find.byKey(const Key('drill')))).pop();
+      await tester.pump();
+      await tester.pump();
+    }
+
+    testWidgets('session terminée pendant le drill : grand rond et rond du jour animés, une seule fois', (tester) async {
+      _phone(tester, height: 1400);
+      final states = <TodayState>[_ready(), _ready(completed: true)];
+      await tester.pumpWidget(_app(() => _Sequence(states)));
+      await tester.pumpAndSettle();
+      await finishDrill(tester);
+      expect(find.text('Session faite'), findsOneWidget);
+      expect(tester.widgetList<DoneCheck>(find.byType(DoneCheck)).where((w) => w.animate), hasLength(2));
+
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true))));
+      await tester.pumpAndSettle();
+      expect(animating(tester), isFalse);
+    });
+
+    testWidgets('drill quitté avant la fin : pas d’animation', (tester) async {
+      _phone(tester, height: 1400);
+      final states = <TodayState>[_ready(), _ready(position: 12)];
+      await tester.pumpWidget(_app(() => _Sequence(states)));
+      await tester.pumpAndSettle();
+      await finishDrill(tester);
+      expect(find.byType(DoneCheck), findsNothing);
+    });
+
+    testWidgets('Accueil ouvert sur une session déjà faite : pas d’animation', (tester) async {
+      _phone(tester, height: 1400);
+      await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true))));
+      await tester.pumpAndSettle();
+      expect(animating(tester), isFalse);
     });
   });
 
