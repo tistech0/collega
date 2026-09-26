@@ -64,6 +64,8 @@ async def list_college_items(
             card_count_a=counts.get(item.id, {}).get("A", 0),
             card_count_b=counts.get(item.id, {}).get("B", 0),
             card_count_c=counts.get(item.id, {}).get("C", 0),
+            start_page=item.start_page,
+            end_page=item.end_page,
         )
         for item in items
     ]

@@ -23,6 +23,7 @@ from app.schemas.college import (
     UserCollegeData,
 )
 from app.services import app_settings
+from app.services import imports as import_service
 
 router = APIRouter()
 
@@ -48,6 +49,7 @@ async def list_user_colleges(
     counts_by_college: dict[uuid.UUID, dict[str, int]] = {}
     for college_id, rang, count in count_result.all():
         counts_by_college.setdefault(college_id, {})[rang] = count
+    pdfs = await import_service.current_pdfs(db, college_ids)
 
     data = [
         UserCollegeData(
@@ -57,6 +59,8 @@ async def list_user_colleges(
             card_count_a=counts_by_college.get(college.id, {}).get("A", 0),
             card_count_b=counts_by_college.get(college.id, {}).get("B", 0),
             card_count_c=counts_by_college.get(college.id, {}).get("C", 0),
+            pdf_version=str(pdfs[college.id].job_id) if college.id in pdfs else None,
+            pdf_size=pdfs[college.id].size if college.id in pdfs else None,
         )
         for college in colleges
     ]

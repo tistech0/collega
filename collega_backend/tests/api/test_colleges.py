@@ -30,7 +30,7 @@ def _make_college(college_ref_id: int, college_id=None, user_id=None, status="ge
     )
 
 
-def _make_item(college_id, item_id=None, item_number=232, rang="A"):
+def _make_item(college_id, item_id=None, item_number=232, rang="A", start_page=None, end_page=None):
     return types.SimpleNamespace(
         id=item_id or uuid.uuid4(),
         college_id=college_id,
@@ -39,6 +39,8 @@ def _make_item(college_id, item_id=None, item_number=232, rang="A"):
         chapter_title="Insuffisance Cardiaque",
         ocr_confidence_score=0.9,
         low_confidence=False,
+        start_page=start_page,
+        end_page=end_page,
     )
 
 
@@ -95,10 +97,12 @@ class TestListUserColleges:
         # Appels execute dans l'ordre :
         # 1. SELECT College.where(user_id) → [college]
         # 2. SELECT college_id, rang, count GROUP BY college_id, rang → [(college.id, "A", 5), ...]
+        # 3. current_pdfs : dernier job publié de chaque collège
         mock_db.execute = AsyncMock(
             side_effect=[
                 MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[college])))),
                 MagicMock(all=MagicMock(return_value=[(college.id, "A", 5), (college.id, "B", 3)])),
+                MagicMock(all=MagicMock(return_value=[])),  # current_pdfs : aucun PDF
             ]
         )
 
@@ -133,6 +137,41 @@ class TestListUserColleges:
         body = resp.json()
         assert "data" in body
         assert "total" in body
+
+    async def test_expose_version_et_taille_du_pdf(self, client: AsyncClient, mock_db, monkeypatch):
+        from pathlib import Path
+
+        from app.api.v1.colleges import catalog as catalog_module
+        from app.main import app
+        from app.services.imports import CurrentPdf
+
+        user = _make_user()
+        with_pdf = _make_college(college_ref_id=15, user_id=user.id)
+        without_pdf = _make_college(college_ref_id=16, user_id=user.id)
+        job_id = uuid.uuid4()
+        app.dependency_overrides[get_current_user] = lambda: user
+        mock_db.execute = AsyncMock(
+            side_effect=[
+                MagicMock(
+                    scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[with_pdf, without_pdf])))
+                ),
+                MagicMock(all=MagicMock(return_value=[])),
+            ]
+        )
+
+        async def fake_current_pdfs(db, ids):
+            return {with_pdf.id: CurrentPdf(job_id=job_id, path=Path("/x.pdf"), size=398_458_880)}
+
+        monkeypatch.setattr(catalog_module.import_service, "current_pdfs", fake_current_pdfs)
+        try:
+            resp = await client.get("/v1/colleges")
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        by_ref = {e["college_ref_id"]: e for e in resp.json()["data"]}
+        assert by_ref[15]["pdf_version"] == str(job_id)
+        assert by_ref[15]["pdf_size"] == 398_458_880
+        assert by_ref[16]["pdf_version"] is None and by_ref[16]["pdf_size"] is None
 
 
 class TestListCollegeItems:
