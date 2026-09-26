@@ -3727,6 +3727,149 @@ class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
   }
 }
 
+class $QuietDaysTable extends QuietDays
+    with TableInfo<$QuietDaysTable, QuietDayRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuietDaysTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dayMeta = const VerificationMeta('day');
+  @override
+  late final GeneratedColumn<int> day = GeneratedColumn<int>(
+      'day', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [day];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quiet_days';
+  @override
+  VerificationContext validateIntegrity(Insertable<QuietDayRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('day')) {
+      context.handle(
+          _dayMeta, day.isAcceptableOrUnknown(data['day']!, _dayMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {day};
+  @override
+  QuietDayRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuietDayRow(
+      day: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}day'])!,
+    );
+  }
+
+  @override
+  $QuietDaysTable createAlias(String alias) {
+    return $QuietDaysTable(attachedDatabase, alias);
+  }
+}
+
+class QuietDayRow extends DataClass implements Insertable<QuietDayRow> {
+  /// Jour local (`epochDayOf`).
+  final int day;
+  const QuietDayRow({required this.day});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['day'] = Variable<int>(day);
+    return map;
+  }
+
+  QuietDaysCompanion toCompanion(bool nullToAbsent) {
+    return QuietDaysCompanion(
+      day: Value(day),
+    );
+  }
+
+  factory QuietDayRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuietDayRow(
+      day: serializer.fromJson<int>(json['day']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'day': serializer.toJson<int>(day),
+    };
+  }
+
+  QuietDayRow copyWith({int? day}) => QuietDayRow(
+        day: day ?? this.day,
+      );
+  QuietDayRow copyWithCompanion(QuietDaysCompanion data) {
+    return QuietDayRow(
+      day: data.day.present ? data.day.value : this.day,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuietDayRow(')
+          ..write('day: $day')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => day.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is QuietDayRow && other.day == this.day);
+}
+
+class QuietDaysCompanion extends UpdateCompanion<QuietDayRow> {
+  final Value<int> day;
+  const QuietDaysCompanion({
+    this.day = const Value.absent(),
+  });
+  QuietDaysCompanion.insert({
+    this.day = const Value.absent(),
+  });
+  static Insertable<QuietDayRow> custom({
+    Expression<int>? day,
+  }) {
+    return RawValuesInsertable({
+      if (day != null) 'day': day,
+    });
+  }
+
+  QuietDaysCompanion copyWith({Value<int>? day}) {
+    return QuietDaysCompanion(
+      day: day ?? this.day,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (day.present) {
+      map['day'] = Variable<int>(day.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuietDaysCompanion(')
+          ..write('day: $day')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3741,6 +3884,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DailySessionsTable dailySessions = $DailySessionsTable(this);
   late final $ReviewLogTable reviewLog = $ReviewLogTable(this);
   late final $UserCollegesTable userColleges = $UserCollegesTable(this);
+  late final $QuietDaysTable quietDays = $QuietDaysTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3754,7 +3898,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         pendingUploads,
         dailySessions,
         reviewLog,
-        userColleges
+        userColleges,
+        quietDays
       ];
 }
 
@@ -5633,6 +5778,105 @@ typedef $$UserCollegesTableProcessedTableManager = ProcessedTableManager<
     ),
     UserCollegeRow,
     PrefetchHooks Function()>;
+typedef $$QuietDaysTableCreateCompanionBuilder = QuietDaysCompanion Function({
+  Value<int> day,
+});
+typedef $$QuietDaysTableUpdateCompanionBuilder = QuietDaysCompanion Function({
+  Value<int> day,
+});
+
+class $$QuietDaysTableFilterComposer
+    extends Composer<_$AppDatabase, $QuietDaysTable> {
+  $$QuietDaysTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get day => $composableBuilder(
+      column: $table.day, builder: (column) => ColumnFilters(column));
+}
+
+class $$QuietDaysTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuietDaysTable> {
+  $$QuietDaysTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get day => $composableBuilder(
+      column: $table.day, builder: (column) => ColumnOrderings(column));
+}
+
+class $$QuietDaysTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuietDaysTable> {
+  $$QuietDaysTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => column);
+}
+
+class $$QuietDaysTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $QuietDaysTable,
+    QuietDayRow,
+    $$QuietDaysTableFilterComposer,
+    $$QuietDaysTableOrderingComposer,
+    $$QuietDaysTableAnnotationComposer,
+    $$QuietDaysTableCreateCompanionBuilder,
+    $$QuietDaysTableUpdateCompanionBuilder,
+    (QuietDayRow, BaseReferences<_$AppDatabase, $QuietDaysTable, QuietDayRow>),
+    QuietDayRow,
+    PrefetchHooks Function()> {
+  $$QuietDaysTableTableManager(_$AppDatabase db, $QuietDaysTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuietDaysTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuietDaysTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuietDaysTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> day = const Value.absent(),
+          }) =>
+              QuietDaysCompanion(
+            day: day,
+          ),
+          createCompanionCallback: ({
+            Value<int> day = const Value.absent(),
+          }) =>
+              QuietDaysCompanion.insert(
+            day: day,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$QuietDaysTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $QuietDaysTable,
+    QuietDayRow,
+    $$QuietDaysTableFilterComposer,
+    $$QuietDaysTableOrderingComposer,
+    $$QuietDaysTableAnnotationComposer,
+    $$QuietDaysTableCreateCompanionBuilder,
+    $$QuietDaysTableUpdateCompanionBuilder,
+    (QuietDayRow, BaseReferences<_$AppDatabase, $QuietDaysTable, QuietDayRow>),
+    QuietDayRow,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5655,4 +5899,6 @@ class $AppDatabaseManager {
       $$ReviewLogTableTableManager(_db, _db.reviewLog);
   $$UserCollegesTableTableManager get userColleges =>
       $$UserCollegesTableTableManager(_db, _db.userColleges);
+  $$QuietDaysTableTableManager get quietDays =>
+      $$QuietDaysTableTableManager(_db, _db.quietDays);
 }

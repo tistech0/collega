@@ -13,6 +13,7 @@ import 'tables/items_table.dart';
 import 'tables/pending_uploads_table.dart';
 import 'tables/planning_configs_table.dart';
 import 'tables/planning_sessions_table.dart';
+import 'tables/quiet_days_table.dart';
 import 'tables/review_log_table.dart';
 import 'tables/user_colleges_table.dart';
 
@@ -20,7 +21,7 @@ part 'app_database.g.dart';
 
 @DriftDatabase(tables: [
   CollegeImports, Items, FlashCards, PlanningConfigs, PlanningSessions, PendingUploads,
-  DailySessions, ReviewLog, UserColleges,
+  DailySessions, ReviewLog, UserColleges, QuietDays,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -28,7 +29,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -72,6 +73,10 @@ class AppDatabase extends _$AppDatabase {
             // Progression) ; les lignes existantes venaient de la session du jour.
             await m.addColumn(reviewLog, reviewLog.daily);
           }
+          if (from < 9) {
+            // Partie D : jours « rien à réviser » (série de l'Accueil).
+            await m.createTable(quietDays);
+          }
         },
       );
 
@@ -86,6 +91,7 @@ class AppDatabase extends _$AppDatabase {
       await delete(dailySessions).go();
       await delete(reviewLog).go();
       await delete(userColleges).go();
+      await delete(quietDays).go();
     });
   }
 
