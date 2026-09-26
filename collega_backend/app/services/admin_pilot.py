@@ -11,10 +11,12 @@ from datetime import UTC, date, datetime, time, timedelta
 
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.core.college_catalog import college_name
 from app.core.errors import not_found
 from app.models.activity_day import ActivityDay
+from app.models.app_setting import AppSetting
 from app.models.claude_usage import ClaudeUsage
 from app.models.college import College
 from app.models.flash_card import FlashCard
@@ -62,6 +64,18 @@ def tester_status(last_seen_at: datetime | None, now: datetime, inactivity_days:
     return "inactive" if now - last_seen_at > timedelta(days=inactivity_days) else "active"
 
 
+STREAK_STALE_AFTER = timedelta(days=1)
+
+
+def _current_streak(entry: tuple[date, int] | None, today: date) -> int:
+    """La série n'est affichée que si elle porte sur hier ou aujourd'hui — une série
+    vieille de plusieurs semaines (testeuse repartie) ne doit jamais s'afficher comme
+    en cours."""
+    if entry is None or entry[0] < today - STREAK_STALE_AFTER:
+        return 0
+    return entry[1]
+
+
 async def pilot_settings(db: AsyncSession) -> tuple[int, str]:
     inactivity = await app_settings.get_setting(db, INACTIVITY_DAYS, DEFAULT_INACTIVITY_DAYS)
     url = await app_settings.get_setting(db, TESTFLIGHT_URL, "")
@@ -69,7 +83,12 @@ async def pilot_settings(db: AsyncSession) -> tuple[int, str]:
 
 
 async def _quality_since(db: AsyncSession, now: datetime) -> datetime:
-    raw = await app_settings.get_setting(db, QUALITY_SEEN_AT, None)
+    # Lu SANS le cache 30 s de app_settings (contrairement aux autres réglages) :
+    # avec plusieurs workers uvicorn, un `mark_quality_seen` sur l'un d'eux ne doit
+    # pas laisser la pastille Qualité réapparaître jusqu'à 30 s sur les autres tant
+    # que leur cache local n'a pas expiré.
+    row = await db.get(AppSetting, QUALITY_SEEN_AT)
+    raw = row.value if row is not None else None
     return datetime.fromisoformat(raw) if raw else now - QUALITY_DEFAULT_WINDOW
 
 
@@ -105,7 +124,7 @@ async def tester_rows(db: AsyncSession, now: datetime, today: date) -> list[Test
             created_at=u.created_at.isoformat(),
             last_seen_at=u.last_seen_at.isoformat() if u.last_seen_at else None,
             status=tester_status(u.last_seen_at, now, inactivity_days),
-            streak=last_streak.get(u.id, (today, 0))[1],
+            streak=_current_streak(last_streak.get(u.id), today),
             cards_7d=cards_7d.get(u.id, 0),
             college_count=college_counts.get(u.id, 0),
         )
@@ -119,6 +138,15 @@ async def _jobs_to_watch(db: AsyncSession, now: datetime) -> tuple[list[WatchJob
         .group_by(GenerationJobEvent.generation_job_id)
         .subquery()
     )
+    # Un job en échec dont le collège a été relancé (job plus récent pour le même
+    # college_id) ne doit plus apparaître : la relance efface le signal d'échec
+    # (spec § 2.3). Le KPI failed_imports_7d, lui, continue de compter l'échec passé.
+    newer_job = aliased(GenerationJob)
+    not_relaunched = ~(
+        select(newer_job.id)
+        .where(newer_job.college_id == GenerationJob.college_id, newer_job.created_at > GenerationJob.created_at)
+        .exists()
+    )
     result = await db.execute(
         select(GenerationJob, College, User.email, last_event.c.at)
         .join(College, College.id == GenerationJob.college_id)
@@ -126,7 +154,11 @@ async def _jobs_to_watch(db: AsyncSession, now: datetime) -> tuple[list[WatchJob
         .outerjoin(last_event, last_event.c.generation_job_id == GenerationJob.id)
         .where(
             (GenerationJob.status.in_(ACTIVE_JOB_STATUSES))
-            | and_(GenerationJob.status == "failed", GenerationJob.updated_at >= now - FAILED_WINDOW)
+            | and_(
+                GenerationJob.status == "failed",
+                GenerationJob.updated_at >= now - FAILED_WINDOW,
+                not_relaunched,
+            )
         )
         .order_by(GenerationJob.updated_at.desc())
     )
@@ -362,7 +394,7 @@ async def user_detail(db: AsyncSession, user_id: uuid.UUID, now: datetime) -> Us
         created_at=user.created_at.isoformat() if user.created_at else None,
         last_seen_at=user.last_seen_at.isoformat() if user.last_seen_at else None,
         status=tester_status(user.last_seen_at, now, inactivity_days),
-        streak=all_days[-1].streak if all_days else 0,
+        streak=_current_streak((all_days[-1].day, all_days[-1].streak), today) if all_days else 0,
         cards_30d=sum(d.cards_reviewed for d in by_day.values()),
         sessions_30d=sum(1 for d in by_day.values() if d.session_completed),
         daily=daily,

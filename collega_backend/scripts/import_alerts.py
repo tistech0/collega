@@ -55,10 +55,16 @@ async def collect(db: AsyncSession, now: datetime) -> list[str]:
 
 
 async def _run() -> list[str]:
-    from app.core.database import async_session_factory
+    from app.core.database import async_session_factory, engine
 
-    async with async_session_factory() as db:
-        return await collect(db, datetime.now(UTC))
+    try:
+        async with async_session_factory() as db:
+            return await collect(db, datetime.now(UTC))
+    finally:
+        # Lancé une fois par minute par collega-health.sh dans un process Python
+        # jetable : sans dispose(), le pool de connexions asyncpg de cet engine
+        # fuit à chaque appel plutôt que d'être fermé avec le process.
+        await engine.dispose()
 
 
 def main() -> int:

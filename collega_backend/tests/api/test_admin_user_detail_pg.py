@@ -43,6 +43,23 @@ async def test_detail_sans_activite(pg_client: AsyncClient, pg_factory):
     assert data["created_at"] is not None
 
 
+async def test_serie_perimee_streak_zero(pg_client: AsyncClient, pg_factory):
+    """Finding 4 : la fiche testeuse ne doit jamais reprendre une série vieille de
+    plusieurs semaines comme série en cours."""
+    today = datetime.now(UTC).date()
+    async with pg_factory() as db:
+        user = await make_user(db)
+        db.add(
+            ActivityDay(
+                user_id=user.id, day=today - timedelta(days=45), cards_reviewed=9, session_completed=True, streak=12
+            )
+        )
+        await db.commit()
+
+    data = (await pg_client.get(f"/v1/admin/users/{user.id}", auth=ADMIN_AUTH)).json()["data"]
+    assert data["streak"] == 0
+
+
 async def test_detail_complet(pg_client: AsyncClient, pg_factory):
     today = datetime.now(UTC).date()
     async with pg_factory() as db:

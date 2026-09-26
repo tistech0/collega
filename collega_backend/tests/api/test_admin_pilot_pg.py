@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -12,6 +13,7 @@ from app.models.activity_day import ActivityDay
 from app.models.claude_usage import ClaudeUsage
 from app.models.generation_job import GenerationJob
 from app.models.generation_job_event import GenerationJobEvent
+from app.services import admin_pilot, app_settings
 from app.services.admin_pilot import tester_status
 from tests.api_pg import ADMIN_AUTH
 from tests.factories import make_card, make_college, make_item, make_job, make_user
@@ -98,6 +100,26 @@ async def test_pilot_chiffres_et_testeuses(pg_client: AsyncClient, pg_factory):
     assert (await pg_client.get("/v1/admin/badges", auth=ADMIN_AUTH)).json()["data"]["testers"] == 1
 
 
+async def test_serie_perimee_masquee(pg_client: AsyncClient, pg_factory):
+    """Finding 4 : une série vieille de plusieurs semaines (testeuse repartie) ne
+    doit jamais s'afficher comme en cours — seule une activité d'hier/aujourd'hui
+    la garde affichée."""
+    today = datetime.now(UTC).date()
+    async with pg_factory() as db:
+        stale = await make_user(db)
+        stale.is_beta = True
+        db.add(
+            ActivityDay(
+                user_id=stale.id, day=today - timedelta(days=20), cards_reviewed=5, session_completed=True, streak=8
+            )
+        )
+        await db.commit()
+
+    data = (await pg_client.get("/v1/admin/pilot", auth=ADMIN_AUTH)).json()["data"]
+    rows = {r["email"]: r for r in data["testers"]}
+    assert rows[stale.email]["streak"] == 0
+
+
 async def test_imports_en_echec_et_bloques(pg_client: AsyncClient, pg_factory):
     now = datetime.now(UTC)
     async with pg_factory() as db:
@@ -133,6 +155,35 @@ async def test_imports_en_echec_et_bloques(pg_client: AsyncClient, pg_factory):
     assert [r["job_id"] for r in data["running_jobs"]] == [str(running.id)]
     assert data["failed_imports_7d"]["value"] == 1
     assert (await pg_client.get("/v1/admin/badges", auth=ADMIN_AUTH)).json()["data"]["imports"] == 2
+
+
+async def test_echec_puis_relance_disparait_du_watch(pg_client: AsyncClient, pg_factory):
+    """Spec § 2.3 : un job en échec dont le collège a été relancé (job plus récent
+    pour le même college_id) ne doit plus apparaître dans watch_jobs ni gonfler la
+    pastille imports — mais l'échec passé reste compté dans failed_imports_7d."""
+    now = datetime.now(UTC)
+    async with pg_factory() as db:
+        user = await make_user(db)
+        college = await make_college(db, user, ref_id=8)
+        failed = await make_job(db, college, status="failed")
+        failed.error_message = "OCR illisible"
+        await db.flush()
+        newer = await make_job(db, college, status="processing")
+        await db.execute(
+            update(GenerationJob).where(GenerationJob.id == failed.id).values(created_at=now - timedelta(hours=2))
+        )
+        await db.execute(
+            update(GenerationJob).where(GenerationJob.id == newer.id).values(created_at=now - timedelta(hours=1))
+        )
+        await db.commit()
+
+    data = (await pg_client.get("/v1/admin/pilot", auth=ADMIN_AUTH)).json()["data"]
+    kinds = {(w["college_name"], w["kind"]) for w in data["watch_jobs"]}
+    assert (_name(8), "failed") not in kinds
+    assert [r["job_id"] for r in data["running_jobs"]] == [str(newer.id)]
+    # L'échec a bien eu lieu : le KPI hebdomadaire continue de le compter.
+    assert data["failed_imports_7d"]["value"] == 1
+    assert (await pg_client.get("/v1/admin/badges", auth=ADMIN_AUTH)).json()["data"]["imports"] == 0
 
 
 def _name(ref_id: int) -> str:
@@ -181,6 +232,24 @@ async def test_cout_30_jours(pg_client: AsyncClient, pg_factory):
         await db.commit()
     cost = (await pg_client.get("/v1/admin/pilot", auth=ADMIN_AUTH)).json()["data"]["cost_30d_eur"]
     assert cost["value"] > 0 and cost["value"] == cost["previous"]
+
+
+async def test_pastille_qualite_lue_sans_cache(pg_factory):
+    """Finding 6 : quality_seen_at doit être lu SANS le cache 30 s d'app_settings —
+    avec plusieurs workers uvicorn, un mark_quality_seen sur l'un ne doit pas
+    laisser la pastille Qualité réapparaître jusqu'à 30 s sur les autres."""
+    now = datetime.now(UTC)
+    async with pg_factory() as db:
+        await admin_pilot.mark_quality_seen(db, now)
+
+    # Cache local périmé simulant un autre worker qui aurait lu quality_seen_at
+    # AVANT le marquage (donc absent) : sans le fix, _quality_since renverrait
+    # cette valeur de cache au lieu de relire la base.
+    app_settings._cache[admin_pilot.QUALITY_SEEN_AT] = (time.monotonic() + app_settings.CACHE_TTL_S, None)
+
+    async with pg_factory() as db:
+        since = await admin_pilot._quality_since(db, now)
+    assert since == now
 
 
 async def test_reglages_pilotage(pg_client: AsyncClient):
