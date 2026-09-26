@@ -194,4 +194,32 @@ void main() {
     expect(epochDayOf(DateTime(1970, 1, 2, 23, 59)), 1);
     expect(epochDayOf(DateTime(2026, 9, 22, 0, 1)), epochDayOf(DateTime(2026, 9, 22, 23, 59)));
   });
+  group('jours « rien à réviser » (série de l’Accueil)', () {
+    test('session du jour vide : le jour est noté calme', () async {
+      final repo = DailySessionRepository(db, clock: () => now);
+      await repo.getOrBuild(day: today, budget: 24);
+      expect(await repo.quietDays(from: today, to: today), {today});
+    });
+
+    test('Personnaliser sans aucune fiche : ce n’est pas un jour calme', () async {
+      await syncCollegeCards(db, 'c1', [_server('a')]);
+      final repo = DailySessionRepository(db, clock: () => now);
+      await repo.rebuild(day: today, budget: 24, rangs: {'C'});
+      expect(await repo.quietDays(from: today, to: today), isEmpty);
+    });
+
+    test('session avec des fiches : pas de jour calme', () async {
+      await syncCollegeCards(db, 'c1', [_server('a')]);
+      final repo = DailySessionRepository(db, clock: () => now);
+      await repo.getOrBuild(day: today, budget: 24);
+      expect(await repo.quietDays(from: today, to: today), isEmpty);
+    });
+
+    test('resetDay (outil de test) oublie aussi le jour calme', () async {
+      final repo = DailySessionRepository(db, clock: () => now);
+      await repo.getOrBuild(day: today, budget: 24);
+      await repo.resetDay(today);
+      expect(await repo.quietDays(from: today, to: today), isEmpty);
+    });
+  });
 }

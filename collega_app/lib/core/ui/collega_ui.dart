@@ -11,6 +11,7 @@ export 'theme/cg_theme.dart';
 export 'components/cg_badge.dart';
 export 'components/cg_button.dart';
 export 'components/cg_card_type_tag.dart';
+export 'components/cg_card_feedback.dart';
 export 'components/cg_drill_card.dart';
 export 'components/cg_field.dart';
 export 'components/cg_header.dart';

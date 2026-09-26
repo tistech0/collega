@@ -135,3 +135,43 @@ class TestUserFeedbackRenvoye:
     async def test_cards_d_un_item(self, client: AsyncClient, mock_db):
         resp = await self._get(client, mock_db, lambda c, i: f"/v1/colleges/{c.id}/items/{i.id}/cards")
         assert resp.json()["data"][0]["user_feedback"] == "positive"
+
+
+class TestListCollegeItemsPages:
+    async def test_items_exposent_leurs_pages(self, client: AsyncClient, mock_db):
+        from app.main import app
+
+        user = _make_user()
+        college = _make_college(college_ref_id=3, user_id=user.id)
+        item = _make_item(college.id, item_number=340, start_page=111, end_page=117)
+        app.dependency_overrides[get_current_user] = lambda: user
+        mock_db.get = AsyncMock(return_value=college)
+        mock_db.execute = AsyncMock(
+            side_effect=[_scalars([item]), MagicMock(all=MagicMock(return_value=[(item.id, "A", 4)]))]
+        )
+        try:
+            resp = await client.get(f"/v1/colleges/{college.id}/items")
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        assert resp.status_code == 200
+        entry = resp.json()["data"][0]
+        assert entry["start_page"] == 111
+        assert entry["end_page"] == 117
+
+    async def test_item_sans_pages_renvoie_null(self, client: AsyncClient, mock_db):
+        from app.main import app
+
+        user = _make_user()
+        college = _make_college(college_ref_id=3, user_id=user.id)
+        item = _make_item(college.id)
+        app.dependency_overrides[get_current_user] = lambda: user
+        mock_db.get = AsyncMock(return_value=college)
+        mock_db.execute = AsyncMock(side_effect=[_scalars([item]), MagicMock(all=MagicMock(return_value=[]))])
+        try:
+            resp = await client.get(f"/v1/colleges/{college.id}/items")
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        entry = resp.json()["data"][0]
+        assert entry["start_page"] is None and entry["end_page"] is None

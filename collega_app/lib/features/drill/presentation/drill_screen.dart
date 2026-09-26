@@ -1,12 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart' show TextInputAction;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:collega_app/core/ui/collega_ui.dart';
+import 'package:collega_app/core/utils/logger.dart';
+import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/colleges/data/college_detail_repository.dart';
 import 'package:collega_app/features/colleges/domain/card_type.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
+import 'package:collega_app/features/colleges/presentation/card_report.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/domain/drill_state.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
@@ -131,6 +137,69 @@ class _DrillActiveState extends ConsumerState<_DrillActive> {
     _card.currentState?.flip();
   }
 
+  // ─── Avis sur la fiche (spec « avis pendant le drill ») ─────────────────────
+
+  /// La vue item n'est pas autoDispose : elle relira le serveur à sa prochaine ouverture.
+  static void _refreshItem(ProviderContainer container, FlashCardModel card) =>
+      container.invalidate(itemDetailProvider('${card.collegeId}:${card.itemId}'));
+
+  Future<void> _useful(FlashCardModel card) async {
+    CgHaptics.selection();
+    final container = ProviderScope.containerOf(context, listen: false);
+    try {
+      await container.read(collegeDetailRepositoryProvider).submitFeedback(card.id, 'positive');
+    } catch (_) {
+      if (mounted) showCgToast(context, 'Ton retour n’a pas pu s’enregistrer. Réessaie.');
+      return;
+    }
+    _refreshItem(container, card);
+    if (mounted) _notifier.setCardFeedback(card.id, 'positive');
+  }
+
+  /// Pouce bas = signaler : enregistré tout de suite ; régénérer part en
+  /// arrière-plan, le drill reste sur la fiche.
+  Future<void> _report(FlashCardModel card) async {
+    CgHaptics.selection();
+    final container = ProviderScope.containerOf(context, listen: false);
+    final repo = container.read(collegeDetailRepositoryProvider);
+    final sent = repo.submitFeedback(card.id, 'negative').then((_) => true, onError: (Object _) => false);
+    final result = await showCardReportSheet(
+      context,
+      message: 'Dis ce qui ne va pas : une nouvelle version sera préparée pendant que tu continues ton drill.',
+      regenerateLabel: 'Régénérer et continuer',
+      laterLabel: 'Continuer sans régénérer',
+    );
+    final ok = await sent;
+    if (ok) _refreshItem(container, card);
+    if (!mounted) return;
+    if (ok) _notifier.setCardFeedback(card.id, 'negative');
+    if (!ok) showCgToast(context, 'Le signalement n’a pas pu s’enregistrer. Réessaie.');
+    if (result.choice == CardReportChoice.regenerate) {
+      unawaited(_regenerate(container, repo, card, result.note));
+      if (ok) showCgToast(context, 'Nouvelle version en préparation');
+    } else if (ok) {
+      showCgToast(context, 'Fiche signalée');
+    }
+  }
+
+  /// Survit à la sortie du drill : ni `ref` ni `context` après l'attente, sauf
+  /// si l'écran est encore monté. La nouvelle fiche est déjà écrite dans Drift
+  /// par le dépôt (sessions suivantes) ; la session en cours garde l'ancienne.
+  Future<void> _regenerate(
+    ProviderContainer container,
+    CollegeDetailRepository repo,
+    FlashCardModel card,
+    String? note,
+  ) async {
+    try {
+      await repo.regenerateCard(card.id, userNote: note);
+      _refreshItem(container, card);
+    } catch (e) {
+      AppLogger.error('régénération depuis le drill', tag: 'Drill', error: e);
+      if (mounted) showCgToast(context, 'La régénération a échoué. Réessaie plus tard depuis la fiche de l’item.');
+    }
+  }
+
   void _onTimerExpired() {
     // D'abord l'état (timerExpired), ensuite l'ouverture (qui passe isFlipped à vrai).
     _notifier.handleTimerExpiry();
@@ -225,6 +294,11 @@ class _DrillActiveState extends ConsumerState<_DrillActive> {
               )
             : null,
         answerHeader: feedback == null ? null : _SemanticFeedback(feedback: feedback),
+        answerActions: CgCardFeedback(
+          feedback: card.userFeedback,
+          onUseful: () => _useful(card),
+          onReport: () => _report(card),
+        ),
       ),
     );
   }

@@ -244,7 +244,7 @@ class _SearchField extends StatelessWidget {
   static const _height = 40.0;
   static const _iconSize = 18.0;
   static const _iconMaxScale = 1.3;
-  static const _placeholder = 'Un item, un signe, une dose…';
+  static const _placeholder = 'Un collège, un item, un signe…';
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +253,7 @@ class _SearchField extends StatelessWidget {
       key: const Key('library-search'),
       container: true,
       button: true,
-      label: 'Rechercher un item, un signe, une dose',
+      label: 'Rechercher un collège, un item, un signe',
       excludeSemantics: true,
       onTap: onTap,
       child: GestureDetector(

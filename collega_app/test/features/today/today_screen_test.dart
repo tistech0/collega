@@ -15,6 +15,7 @@ import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
 
 import 'package:collega_app/features/search/presentation/search_sheet.dart';
+import 'package:collega_app/features/today/presentation/done_check.dart';
 
 import '../../support/cg_golden.dart';
 
@@ -34,6 +35,7 @@ TodayReady _ready({
   Map<String, int> verdicts = const {},
   int? planningDay = 1,
   bool postponedToday = false,
+  int streak = 0,
 }) =>
     TodayReady(
       date: _date,
@@ -63,11 +65,21 @@ TodayReady _ready({
       planningDay: planningDay,
       planningDays: planningDay == null ? null : 30,
       postponedToday: postponedToday,
+      streak: streak,
     );
 
 class _Prefs extends RevisionPrefsNotifier {
   @override
   Future<RevisionPrefs> build() async => const RevisionPrefs();
+}
+
+class _Sequence extends TodayNotifier {
+  _Sequence(this.states);
+
+  /// Partagée entre instances : le premier état est retiré à chaque construction, le dernier reste.
+  final List<TodayState> states;
+  @override
+  Future<TodayState> build() async => states.length > 1 ? states.removeAt(0) : states.first;
 }
 
 class _Fixed extends TodayNotifier {
@@ -103,7 +115,7 @@ Widget _app(TodayNotifier Function() notifier, {List<String>? visited, double te
     GoRoute(path: '/', builder: (_, __) => TodayScreen(now: () => _date)),
     GoRoute(path: '/colleges', builder: (_, __) { visited?.add('/colleges'); return const SizedBox(); }),
     GoRoute(path: '/home/colleges/:ref', builder: (_, s) { visited?.add('/home/colleges/${s.pathParameters['ref']}'); return const SizedBox(); }),
-    GoRoute(path: '/drill', builder: (_, s) { visited?.add('/drill'); return const SizedBox(); }),
+    GoRoute(path: '/drill', builder: (_, s) { visited?.add('/drill'); return const SizedBox(key: Key('drill')); }),
   ]);
   return ProviderScope(
     overrides: [
@@ -389,11 +401,97 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  group('session faite et série (partie D)', () {
+    testWidgets('faite : grand rond coché + « 24 fiches »', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true, verdicts: {'maitrise': 18, 'bien': 4, 'a_revoir': 2}))));
+      await tester.pumpAndSettle();
+      expect(find.byWidgetPredicate((w) => w is DoneCheck && w.size == 56), findsOneWidget);
+      expect(find.text('24 fiches'), findsOneWidget);
+      expect(find.text('Session faite'), findsOneWidget);
+    });
+
+    testWidgets('semaine : un rond coché par jour fait', (tester) async {
+      _phone(tester, height: 1400);
+      await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true))));
+      await tester.pumpAndSettle();
+      // Le grand rond + le rond du lundi.
+      expect(find.byType(DoneCheck), findsNWidgets(2));
+    });
+
+    testWidgets('badge « 5 jours d’affilée », session faite ou à faire', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true, streak: 5))));
+      await tester.pumpAndSettle();
+      expect(find.text('5 jours d’affilée'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox()); // nouvel arbre : nouveau ProviderScope
+      await tester.pumpWidget(_app(() => _Fixed(_ready(streak: 5))));
+      await tester.pumpAndSettle();
+      expect(find.text('5 jours d’affilée'), findsOneWidget);
+      expect(find.text('Commencer'), findsOneWidget);
+    });
+
+    testWidgets('série de 0 ou 1 : pas de badge', (tester) async {
+      _phone(tester);
+      for (final streak in [0, 1]) {
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true, streak: streak))));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('today-streak')), findsNothing);
+      }
+    });
+  });
+
+  group('célébration au retour du drill (partie D)', () {
+    bool animating(WidgetTester tester) =>
+        tester.widgetList<DoneCheck>(find.byType(DoneCheck)).any((w) => w.animate);
+
+    Future<void> finishDrill(WidgetTester tester) async {
+      await tester.tap(find.text('Commencer'));
+      await tester.pumpAndSettle();
+      GoRouter.of(tester.element(find.byKey(const Key('drill')))).pop();
+      await tester.pump();
+      await tester.pump();
+    }
+
+    testWidgets('session terminée pendant le drill : grand rond et rond du jour animés, une seule fois', (tester) async {
+      _phone(tester, height: 1400);
+      final states = <TodayState>[_ready(), _ready(completed: true)];
+      await tester.pumpWidget(_app(() => _Sequence(states)));
+      await tester.pumpAndSettle();
+      await finishDrill(tester);
+      expect(find.text('Session faite'), findsOneWidget);
+      expect(tester.widgetList<DoneCheck>(find.byType(DoneCheck)).where((w) => w.animate), hasLength(2));
+
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true))));
+      await tester.pumpAndSettle();
+      expect(animating(tester), isFalse);
+    });
+
+    testWidgets('drill quitté avant la fin : pas d’animation', (tester) async {
+      _phone(tester, height: 1400);
+      final states = <TodayState>[_ready(), _ready(position: 12)];
+      await tester.pumpWidget(_app(() => _Sequence(states)));
+      await tester.pumpAndSettle();
+      await finishDrill(tester);
+      expect(find.byType(DoneCheck), findsNothing);
+    });
+
+    testWidgets('Accueil ouvert sur une session déjà faite : pas d’animation', (tester) async {
+      _phone(tester, height: 1400);
+      await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true))));
+      await tester.pumpAndSettle();
+      expect(animating(tester), isFalse);
+    });
+  });
+
   group('goldens', () {
     for (final (name, state) in <(String, TodayState)>[
       ('ready', _ready()),
       ('started', _ready(position: 12)),
-      ('done', _ready(completed: true, verdicts: {'maitrise': 18, 'bien': 4, 'a_revoir': 2})),
+      ('done', _ready(completed: true, verdicts: {'maitrise': 18, 'bien': 4, 'a_revoir': 2}, streak: 5)),
       ('empty', const TodayNoCollege()),
     ]) {
       for (final width in cgGoldenWidths) {

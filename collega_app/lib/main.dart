@@ -5,9 +5,11 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'package:collega_app/app.dart';
 import 'package:collega_app/env.dart';
+import 'package:collega_app/features/pdf/presentation/pdf_document_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  configurePdfium();
   // Story 7.11 : réactive le suivi des uploads de morceaux lancés en arrière-plan.
   await FileDownloader().start(autoCleanDatabase: true);
   if (kRevenueCatEnabled) {

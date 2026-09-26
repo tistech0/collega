@@ -441,6 +441,18 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("low_confidence" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _startPageMeta =
+      const VerificationMeta('startPage');
+  @override
+  late final GeneratedColumn<int> startPage = GeneratedColumn<int>(
+      'start_page', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _endPageMeta =
+      const VerificationMeta('endPage');
+  @override
+  late final GeneratedColumn<int> endPage = GeneratedColumn<int>(
+      'end_page', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -449,7 +461,9 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
         rang,
         chapterTitle,
         ocrConfidenceScore,
-        lowConfidence
+        lowConfidence,
+        startPage,
+        endPage
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -504,6 +518,14 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
           lowConfidence.isAcceptableOrUnknown(
               data['low_confidence']!, _lowConfidenceMeta));
     }
+    if (data.containsKey('start_page')) {
+      context.handle(_startPageMeta,
+          startPage.isAcceptableOrUnknown(data['start_page']!, _startPageMeta));
+    }
+    if (data.containsKey('end_page')) {
+      context.handle(_endPageMeta,
+          endPage.isAcceptableOrUnknown(data['end_page']!, _endPageMeta));
+    }
     return context;
   }
 
@@ -527,6 +549,10 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
           DriftSqlType.double, data['${effectivePrefix}ocr_confidence_score'])!,
       lowConfidence: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}low_confidence'])!,
+      startPage: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}start_page']),
+      endPage: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}end_page']),
     );
   }
 
@@ -544,6 +570,10 @@ class Item extends DataClass implements Insertable<Item> {
   final String? chapterTitle;
   final double ocrConfidenceScore;
   final bool lowConfidence;
+
+  /// Pages de l'item dans le PDF, base 0 (partie B) ; null pour un import ancien.
+  final int? startPage;
+  final int? endPage;
   const Item(
       {required this.id,
       required this.collegeId,
@@ -551,7 +581,9 @@ class Item extends DataClass implements Insertable<Item> {
       required this.rang,
       this.chapterTitle,
       required this.ocrConfidenceScore,
-      required this.lowConfidence});
+      required this.lowConfidence,
+      this.startPage,
+      this.endPage});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -564,6 +596,12 @@ class Item extends DataClass implements Insertable<Item> {
     }
     map['ocr_confidence_score'] = Variable<double>(ocrConfidenceScore);
     map['low_confidence'] = Variable<bool>(lowConfidence);
+    if (!nullToAbsent || startPage != null) {
+      map['start_page'] = Variable<int>(startPage);
+    }
+    if (!nullToAbsent || endPage != null) {
+      map['end_page'] = Variable<int>(endPage);
+    }
     return map;
   }
 
@@ -578,6 +616,12 @@ class Item extends DataClass implements Insertable<Item> {
           : Value(chapterTitle),
       ocrConfidenceScore: Value(ocrConfidenceScore),
       lowConfidence: Value(lowConfidence),
+      startPage: startPage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startPage),
+      endPage: endPage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endPage),
     );
   }
 
@@ -593,6 +637,8 @@ class Item extends DataClass implements Insertable<Item> {
       ocrConfidenceScore:
           serializer.fromJson<double>(json['ocrConfidenceScore']),
       lowConfidence: serializer.fromJson<bool>(json['lowConfidence']),
+      startPage: serializer.fromJson<int?>(json['startPage']),
+      endPage: serializer.fromJson<int?>(json['endPage']),
     );
   }
   @override
@@ -606,6 +652,8 @@ class Item extends DataClass implements Insertable<Item> {
       'chapterTitle': serializer.toJson<String?>(chapterTitle),
       'ocrConfidenceScore': serializer.toJson<double>(ocrConfidenceScore),
       'lowConfidence': serializer.toJson<bool>(lowConfidence),
+      'startPage': serializer.toJson<int?>(startPage),
+      'endPage': serializer.toJson<int?>(endPage),
     };
   }
 
@@ -616,7 +664,9 @@ class Item extends DataClass implements Insertable<Item> {
           String? rang,
           Value<String?> chapterTitle = const Value.absent(),
           double? ocrConfidenceScore,
-          bool? lowConfidence}) =>
+          bool? lowConfidence,
+          Value<int?> startPage = const Value.absent(),
+          Value<int?> endPage = const Value.absent()}) =>
       Item(
         id: id ?? this.id,
         collegeId: collegeId ?? this.collegeId,
@@ -626,6 +676,8 @@ class Item extends DataClass implements Insertable<Item> {
             chapterTitle.present ? chapterTitle.value : this.chapterTitle,
         ocrConfidenceScore: ocrConfidenceScore ?? this.ocrConfidenceScore,
         lowConfidence: lowConfidence ?? this.lowConfidence,
+        startPage: startPage.present ? startPage.value : this.startPage,
+        endPage: endPage.present ? endPage.value : this.endPage,
       );
   Item copyWithCompanion(ItemsCompanion data) {
     return Item(
@@ -643,6 +695,8 @@ class Item extends DataClass implements Insertable<Item> {
       lowConfidence: data.lowConfidence.present
           ? data.lowConfidence.value
           : this.lowConfidence,
+      startPage: data.startPage.present ? data.startPage.value : this.startPage,
+      endPage: data.endPage.present ? data.endPage.value : this.endPage,
     );
   }
 
@@ -655,14 +709,16 @@ class Item extends DataClass implements Insertable<Item> {
           ..write('rang: $rang, ')
           ..write('chapterTitle: $chapterTitle, ')
           ..write('ocrConfidenceScore: $ocrConfidenceScore, ')
-          ..write('lowConfidence: $lowConfidence')
+          ..write('lowConfidence: $lowConfidence, ')
+          ..write('startPage: $startPage, ')
+          ..write('endPage: $endPage')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, collegeId, itemNumber, rang, chapterTitle,
-      ocrConfidenceScore, lowConfidence);
+      ocrConfidenceScore, lowConfidence, startPage, endPage);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -673,7 +729,9 @@ class Item extends DataClass implements Insertable<Item> {
           other.rang == this.rang &&
           other.chapterTitle == this.chapterTitle &&
           other.ocrConfidenceScore == this.ocrConfidenceScore &&
-          other.lowConfidence == this.lowConfidence);
+          other.lowConfidence == this.lowConfidence &&
+          other.startPage == this.startPage &&
+          other.endPage == this.endPage);
 }
 
 class ItemsCompanion extends UpdateCompanion<Item> {
@@ -684,6 +742,8 @@ class ItemsCompanion extends UpdateCompanion<Item> {
   final Value<String?> chapterTitle;
   final Value<double> ocrConfidenceScore;
   final Value<bool> lowConfidence;
+  final Value<int?> startPage;
+  final Value<int?> endPage;
   final Value<int> rowid;
   const ItemsCompanion({
     this.id = const Value.absent(),
@@ -693,6 +753,8 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     this.chapterTitle = const Value.absent(),
     this.ocrConfidenceScore = const Value.absent(),
     this.lowConfidence = const Value.absent(),
+    this.startPage = const Value.absent(),
+    this.endPage = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ItemsCompanion.insert({
@@ -703,6 +765,8 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     this.chapterTitle = const Value.absent(),
     this.ocrConfidenceScore = const Value.absent(),
     this.lowConfidence = const Value.absent(),
+    this.startPage = const Value.absent(),
+    this.endPage = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         collegeId = Value(collegeId),
@@ -716,6 +780,8 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     Expression<String>? chapterTitle,
     Expression<double>? ocrConfidenceScore,
     Expression<bool>? lowConfidence,
+    Expression<int>? startPage,
+    Expression<int>? endPage,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -727,6 +793,8 @@ class ItemsCompanion extends UpdateCompanion<Item> {
       if (ocrConfidenceScore != null)
         'ocr_confidence_score': ocrConfidenceScore,
       if (lowConfidence != null) 'low_confidence': lowConfidence,
+      if (startPage != null) 'start_page': startPage,
+      if (endPage != null) 'end_page': endPage,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -739,6 +807,8 @@ class ItemsCompanion extends UpdateCompanion<Item> {
       Value<String?>? chapterTitle,
       Value<double>? ocrConfidenceScore,
       Value<bool>? lowConfidence,
+      Value<int?>? startPage,
+      Value<int?>? endPage,
       Value<int>? rowid}) {
     return ItemsCompanion(
       id: id ?? this.id,
@@ -748,6 +818,8 @@ class ItemsCompanion extends UpdateCompanion<Item> {
       chapterTitle: chapterTitle ?? this.chapterTitle,
       ocrConfidenceScore: ocrConfidenceScore ?? this.ocrConfidenceScore,
       lowConfidence: lowConfidence ?? this.lowConfidence,
+      startPage: startPage ?? this.startPage,
+      endPage: endPage ?? this.endPage,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -776,6 +848,12 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     if (lowConfidence.present) {
       map['low_confidence'] = Variable<bool>(lowConfidence.value);
     }
+    if (startPage.present) {
+      map['start_page'] = Variable<int>(startPage.value);
+    }
+    if (endPage.present) {
+      map['end_page'] = Variable<int>(endPage.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -792,6 +870,8 @@ class ItemsCompanion extends UpdateCompanion<Item> {
           ..write('chapterTitle: $chapterTitle, ')
           ..write('ocrConfidenceScore: $ocrConfidenceScore, ')
           ..write('lowConfidence: $lowConfidence, ')
+          ..write('startPage: $startPage, ')
+          ..write('endPage: $endPage, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3425,9 +3505,29 @@ class $UserCollegesTable extends UserColleges
   late final GeneratedColumn<int> cardCountC = GeneratedColumn<int>(
       'card_count_c', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _pdfVersionMeta =
+      const VerificationMeta('pdfVersion');
   @override
-  List<GeneratedColumn> get $columns =>
-      [refId, collegeId, status, cardCountA, cardCountB, cardCountC];
+  late final GeneratedColumn<String> pdfVersion = GeneratedColumn<String>(
+      'pdf_version', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _pdfSizeMeta =
+      const VerificationMeta('pdfSize');
+  @override
+  late final GeneratedColumn<int> pdfSize = GeneratedColumn<int>(
+      'pdf_size', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        refId,
+        collegeId,
+        status,
+        cardCountA,
+        cardCountB,
+        cardCountC,
+        pdfVersion,
+        pdfSize
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3478,6 +3578,16 @@ class $UserCollegesTable extends UserColleges
     } else if (isInserting) {
       context.missing(_cardCountCMeta);
     }
+    if (data.containsKey('pdf_version')) {
+      context.handle(
+          _pdfVersionMeta,
+          pdfVersion.isAcceptableOrUnknown(
+              data['pdf_version']!, _pdfVersionMeta));
+    }
+    if (data.containsKey('pdf_size')) {
+      context.handle(_pdfSizeMeta,
+          pdfSize.isAcceptableOrUnknown(data['pdf_size']!, _pdfSizeMeta));
+    }
     return context;
   }
 
@@ -3499,6 +3609,10 @@ class $UserCollegesTable extends UserColleges
           .read(DriftSqlType.int, data['${effectivePrefix}card_count_b'])!,
       cardCountC: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}card_count_c'])!,
+      pdfVersion: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}pdf_version']),
+      pdfSize: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}pdf_size']),
     );
   }
 
@@ -3515,13 +3629,19 @@ class UserCollegeRow extends DataClass implements Insertable<UserCollegeRow> {
   final int cardCountA;
   final int cardCountB;
   final int cardCountC;
+
+  /// PDF en service côté serveur (id du dernier job publié) et sa taille (partie B).
+  final String? pdfVersion;
+  final int? pdfSize;
   const UserCollegeRow(
       {required this.refId,
       required this.collegeId,
       required this.status,
       required this.cardCountA,
       required this.cardCountB,
-      required this.cardCountC});
+      required this.cardCountC,
+      this.pdfVersion,
+      this.pdfSize});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -3531,6 +3651,12 @@ class UserCollegeRow extends DataClass implements Insertable<UserCollegeRow> {
     map['card_count_a'] = Variable<int>(cardCountA);
     map['card_count_b'] = Variable<int>(cardCountB);
     map['card_count_c'] = Variable<int>(cardCountC);
+    if (!nullToAbsent || pdfVersion != null) {
+      map['pdf_version'] = Variable<String>(pdfVersion);
+    }
+    if (!nullToAbsent || pdfSize != null) {
+      map['pdf_size'] = Variable<int>(pdfSize);
+    }
     return map;
   }
 
@@ -3542,6 +3668,12 @@ class UserCollegeRow extends DataClass implements Insertable<UserCollegeRow> {
       cardCountA: Value(cardCountA),
       cardCountB: Value(cardCountB),
       cardCountC: Value(cardCountC),
+      pdfVersion: pdfVersion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pdfVersion),
+      pdfSize: pdfSize == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pdfSize),
     );
   }
 
@@ -3555,6 +3687,8 @@ class UserCollegeRow extends DataClass implements Insertable<UserCollegeRow> {
       cardCountA: serializer.fromJson<int>(json['cardCountA']),
       cardCountB: serializer.fromJson<int>(json['cardCountB']),
       cardCountC: serializer.fromJson<int>(json['cardCountC']),
+      pdfVersion: serializer.fromJson<String?>(json['pdfVersion']),
+      pdfSize: serializer.fromJson<int?>(json['pdfSize']),
     );
   }
   @override
@@ -3567,6 +3701,8 @@ class UserCollegeRow extends DataClass implements Insertable<UserCollegeRow> {
       'cardCountA': serializer.toJson<int>(cardCountA),
       'cardCountB': serializer.toJson<int>(cardCountB),
       'cardCountC': serializer.toJson<int>(cardCountC),
+      'pdfVersion': serializer.toJson<String?>(pdfVersion),
+      'pdfSize': serializer.toJson<int?>(pdfSize),
     };
   }
 
@@ -3576,7 +3712,9 @@ class UserCollegeRow extends DataClass implements Insertable<UserCollegeRow> {
           String? status,
           int? cardCountA,
           int? cardCountB,
-          int? cardCountC}) =>
+          int? cardCountC,
+          Value<String?> pdfVersion = const Value.absent(),
+          Value<int?> pdfSize = const Value.absent()}) =>
       UserCollegeRow(
         refId: refId ?? this.refId,
         collegeId: collegeId ?? this.collegeId,
@@ -3584,6 +3722,8 @@ class UserCollegeRow extends DataClass implements Insertable<UserCollegeRow> {
         cardCountA: cardCountA ?? this.cardCountA,
         cardCountB: cardCountB ?? this.cardCountB,
         cardCountC: cardCountC ?? this.cardCountC,
+        pdfVersion: pdfVersion.present ? pdfVersion.value : this.pdfVersion,
+        pdfSize: pdfSize.present ? pdfSize.value : this.pdfSize,
       );
   UserCollegeRow copyWithCompanion(UserCollegesCompanion data) {
     return UserCollegeRow(
@@ -3596,6 +3736,9 @@ class UserCollegeRow extends DataClass implements Insertable<UserCollegeRow> {
           data.cardCountB.present ? data.cardCountB.value : this.cardCountB,
       cardCountC:
           data.cardCountC.present ? data.cardCountC.value : this.cardCountC,
+      pdfVersion:
+          data.pdfVersion.present ? data.pdfVersion.value : this.pdfVersion,
+      pdfSize: data.pdfSize.present ? data.pdfSize.value : this.pdfSize,
     );
   }
 
@@ -3607,14 +3750,16 @@ class UserCollegeRow extends DataClass implements Insertable<UserCollegeRow> {
           ..write('status: $status, ')
           ..write('cardCountA: $cardCountA, ')
           ..write('cardCountB: $cardCountB, ')
-          ..write('cardCountC: $cardCountC')
+          ..write('cardCountC: $cardCountC, ')
+          ..write('pdfVersion: $pdfVersion, ')
+          ..write('pdfSize: $pdfSize')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(refId, collegeId, status, cardCountA, cardCountB, cardCountC);
+  int get hashCode => Object.hash(refId, collegeId, status, cardCountA,
+      cardCountB, cardCountC, pdfVersion, pdfSize);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3624,7 +3769,9 @@ class UserCollegeRow extends DataClass implements Insertable<UserCollegeRow> {
           other.status == this.status &&
           other.cardCountA == this.cardCountA &&
           other.cardCountB == this.cardCountB &&
-          other.cardCountC == this.cardCountC);
+          other.cardCountC == this.cardCountC &&
+          other.pdfVersion == this.pdfVersion &&
+          other.pdfSize == this.pdfSize);
 }
 
 class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
@@ -3634,6 +3781,8 @@ class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
   final Value<int> cardCountA;
   final Value<int> cardCountB;
   final Value<int> cardCountC;
+  final Value<String?> pdfVersion;
+  final Value<int?> pdfSize;
   const UserCollegesCompanion({
     this.refId = const Value.absent(),
     this.collegeId = const Value.absent(),
@@ -3641,6 +3790,8 @@ class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
     this.cardCountA = const Value.absent(),
     this.cardCountB = const Value.absent(),
     this.cardCountC = const Value.absent(),
+    this.pdfVersion = const Value.absent(),
+    this.pdfSize = const Value.absent(),
   });
   UserCollegesCompanion.insert({
     this.refId = const Value.absent(),
@@ -3649,6 +3800,8 @@ class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
     required int cardCountA,
     required int cardCountB,
     required int cardCountC,
+    this.pdfVersion = const Value.absent(),
+    this.pdfSize = const Value.absent(),
   })  : collegeId = Value(collegeId),
         status = Value(status),
         cardCountA = Value(cardCountA),
@@ -3661,6 +3814,8 @@ class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
     Expression<int>? cardCountA,
     Expression<int>? cardCountB,
     Expression<int>? cardCountC,
+    Expression<String>? pdfVersion,
+    Expression<int>? pdfSize,
   }) {
     return RawValuesInsertable({
       if (refId != null) 'ref_id': refId,
@@ -3669,6 +3824,8 @@ class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
       if (cardCountA != null) 'card_count_a': cardCountA,
       if (cardCountB != null) 'card_count_b': cardCountB,
       if (cardCountC != null) 'card_count_c': cardCountC,
+      if (pdfVersion != null) 'pdf_version': pdfVersion,
+      if (pdfSize != null) 'pdf_size': pdfSize,
     });
   }
 
@@ -3678,7 +3835,9 @@ class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
       Value<String>? status,
       Value<int>? cardCountA,
       Value<int>? cardCountB,
-      Value<int>? cardCountC}) {
+      Value<int>? cardCountC,
+      Value<String?>? pdfVersion,
+      Value<int?>? pdfSize}) {
     return UserCollegesCompanion(
       refId: refId ?? this.refId,
       collegeId: collegeId ?? this.collegeId,
@@ -3686,6 +3845,8 @@ class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
       cardCountA: cardCountA ?? this.cardCountA,
       cardCountB: cardCountB ?? this.cardCountB,
       cardCountC: cardCountC ?? this.cardCountC,
+      pdfVersion: pdfVersion ?? this.pdfVersion,
+      pdfSize: pdfSize ?? this.pdfSize,
     );
   }
 
@@ -3710,6 +3871,12 @@ class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
     if (cardCountC.present) {
       map['card_count_c'] = Variable<int>(cardCountC.value);
     }
+    if (pdfVersion.present) {
+      map['pdf_version'] = Variable<String>(pdfVersion.value);
+    }
+    if (pdfSize.present) {
+      map['pdf_size'] = Variable<int>(pdfSize.value);
+    }
     return map;
   }
 
@@ -3721,7 +3888,152 @@ class UserCollegesCompanion extends UpdateCompanion<UserCollegeRow> {
           ..write('status: $status, ')
           ..write('cardCountA: $cardCountA, ')
           ..write('cardCountB: $cardCountB, ')
-          ..write('cardCountC: $cardCountC')
+          ..write('cardCountC: $cardCountC, ')
+          ..write('pdfVersion: $pdfVersion, ')
+          ..write('pdfSize: $pdfSize')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $QuietDaysTable extends QuietDays
+    with TableInfo<$QuietDaysTable, QuietDayRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuietDaysTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dayMeta = const VerificationMeta('day');
+  @override
+  late final GeneratedColumn<int> day = GeneratedColumn<int>(
+      'day', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [day];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quiet_days';
+  @override
+  VerificationContext validateIntegrity(Insertable<QuietDayRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('day')) {
+      context.handle(
+          _dayMeta, day.isAcceptableOrUnknown(data['day']!, _dayMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {day};
+  @override
+  QuietDayRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuietDayRow(
+      day: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}day'])!,
+    );
+  }
+
+  @override
+  $QuietDaysTable createAlias(String alias) {
+    return $QuietDaysTable(attachedDatabase, alias);
+  }
+}
+
+class QuietDayRow extends DataClass implements Insertable<QuietDayRow> {
+  /// Jour local (`epochDayOf`).
+  final int day;
+  const QuietDayRow({required this.day});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['day'] = Variable<int>(day);
+    return map;
+  }
+
+  QuietDaysCompanion toCompanion(bool nullToAbsent) {
+    return QuietDaysCompanion(
+      day: Value(day),
+    );
+  }
+
+  factory QuietDayRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuietDayRow(
+      day: serializer.fromJson<int>(json['day']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'day': serializer.toJson<int>(day),
+    };
+  }
+
+  QuietDayRow copyWith({int? day}) => QuietDayRow(
+        day: day ?? this.day,
+      );
+  QuietDayRow copyWithCompanion(QuietDaysCompanion data) {
+    return QuietDayRow(
+      day: data.day.present ? data.day.value : this.day,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuietDayRow(')
+          ..write('day: $day')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => day.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is QuietDayRow && other.day == this.day);
+}
+
+class QuietDaysCompanion extends UpdateCompanion<QuietDayRow> {
+  final Value<int> day;
+  const QuietDaysCompanion({
+    this.day = const Value.absent(),
+  });
+  QuietDaysCompanion.insert({
+    this.day = const Value.absent(),
+  });
+  static Insertable<QuietDayRow> custom({
+    Expression<int>? day,
+  }) {
+    return RawValuesInsertable({
+      if (day != null) 'day': day,
+    });
+  }
+
+  QuietDaysCompanion copyWith({Value<int>? day}) {
+    return QuietDaysCompanion(
+      day: day ?? this.day,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (day.present) {
+      map['day'] = Variable<int>(day.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuietDaysCompanion(')
+          ..write('day: $day')
           ..write(')'))
         .toString();
   }
@@ -3741,6 +4053,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DailySessionsTable dailySessions = $DailySessionsTable(this);
   late final $ReviewLogTable reviewLog = $ReviewLogTable(this);
   late final $UserCollegesTable userColleges = $UserCollegesTable(this);
+  late final $QuietDaysTable quietDays = $QuietDaysTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3754,7 +4067,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         pendingUploads,
         dailySessions,
         reviewLog,
-        userColleges
+        userColleges,
+        quietDays
       ];
 }
 
@@ -3970,6 +4284,8 @@ typedef $$ItemsTableCreateCompanionBuilder = ItemsCompanion Function({
   Value<String?> chapterTitle,
   Value<double> ocrConfidenceScore,
   Value<bool> lowConfidence,
+  Value<int?> startPage,
+  Value<int?> endPage,
   Value<int> rowid,
 });
 typedef $$ItemsTableUpdateCompanionBuilder = ItemsCompanion Function({
@@ -3980,6 +4296,8 @@ typedef $$ItemsTableUpdateCompanionBuilder = ItemsCompanion Function({
   Value<String?> chapterTitle,
   Value<double> ocrConfidenceScore,
   Value<bool> lowConfidence,
+  Value<int?> startPage,
+  Value<int?> endPage,
   Value<int> rowid,
 });
 
@@ -4012,6 +4330,12 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
 
   ColumnFilters<bool> get lowConfidence => $composableBuilder(
       column: $table.lowConfidence, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get startPage => $composableBuilder(
+      column: $table.startPage, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get endPage => $composableBuilder(
+      column: $table.endPage, builder: (column) => ColumnFilters(column));
 }
 
 class $$ItemsTableOrderingComposer
@@ -4046,6 +4370,12 @@ class $$ItemsTableOrderingComposer
   ColumnOrderings<bool> get lowConfidence => $composableBuilder(
       column: $table.lowConfidence,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get startPage => $composableBuilder(
+      column: $table.startPage, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get endPage => $composableBuilder(
+      column: $table.endPage, builder: (column) => ColumnOrderings(column));
 }
 
 class $$ItemsTableAnnotationComposer
@@ -4077,6 +4407,12 @@ class $$ItemsTableAnnotationComposer
 
   GeneratedColumn<bool> get lowConfidence => $composableBuilder(
       column: $table.lowConfidence, builder: (column) => column);
+
+  GeneratedColumn<int> get startPage =>
+      $composableBuilder(column: $table.startPage, builder: (column) => column);
+
+  GeneratedColumn<int> get endPage =>
+      $composableBuilder(column: $table.endPage, builder: (column) => column);
 }
 
 class $$ItemsTableTableManager extends RootTableManager<
@@ -4109,6 +4445,8 @@ class $$ItemsTableTableManager extends RootTableManager<
             Value<String?> chapterTitle = const Value.absent(),
             Value<double> ocrConfidenceScore = const Value.absent(),
             Value<bool> lowConfidence = const Value.absent(),
+            Value<int?> startPage = const Value.absent(),
+            Value<int?> endPage = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ItemsCompanion(
@@ -4119,6 +4457,8 @@ class $$ItemsTableTableManager extends RootTableManager<
             chapterTitle: chapterTitle,
             ocrConfidenceScore: ocrConfidenceScore,
             lowConfidence: lowConfidence,
+            startPage: startPage,
+            endPage: endPage,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -4129,6 +4469,8 @@ class $$ItemsTableTableManager extends RootTableManager<
             Value<String?> chapterTitle = const Value.absent(),
             Value<double> ocrConfidenceScore = const Value.absent(),
             Value<bool> lowConfidence = const Value.absent(),
+            Value<int?> startPage = const Value.absent(),
+            Value<int?> endPage = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ItemsCompanion.insert(
@@ -4139,6 +4481,8 @@ class $$ItemsTableTableManager extends RootTableManager<
             chapterTitle: chapterTitle,
             ocrConfidenceScore: ocrConfidenceScore,
             lowConfidence: lowConfidence,
+            startPage: startPage,
+            endPage: endPage,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
@@ -5459,6 +5803,8 @@ typedef $$UserCollegesTableCreateCompanionBuilder = UserCollegesCompanion
   required int cardCountA,
   required int cardCountB,
   required int cardCountC,
+  Value<String?> pdfVersion,
+  Value<int?> pdfSize,
 });
 typedef $$UserCollegesTableUpdateCompanionBuilder = UserCollegesCompanion
     Function({
@@ -5468,6 +5814,8 @@ typedef $$UserCollegesTableUpdateCompanionBuilder = UserCollegesCompanion
   Value<int> cardCountA,
   Value<int> cardCountB,
   Value<int> cardCountC,
+  Value<String?> pdfVersion,
+  Value<int?> pdfSize,
 });
 
 class $$UserCollegesTableFilterComposer
@@ -5496,6 +5844,12 @@ class $$UserCollegesTableFilterComposer
 
   ColumnFilters<int> get cardCountC => $composableBuilder(
       column: $table.cardCountC, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pdfVersion => $composableBuilder(
+      column: $table.pdfVersion, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get pdfSize => $composableBuilder(
+      column: $table.pdfSize, builder: (column) => ColumnFilters(column));
 }
 
 class $$UserCollegesTableOrderingComposer
@@ -5524,6 +5878,12 @@ class $$UserCollegesTableOrderingComposer
 
   ColumnOrderings<int> get cardCountC => $composableBuilder(
       column: $table.cardCountC, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pdfVersion => $composableBuilder(
+      column: $table.pdfVersion, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get pdfSize => $composableBuilder(
+      column: $table.pdfSize, builder: (column) => ColumnOrderings(column));
 }
 
 class $$UserCollegesTableAnnotationComposer
@@ -5552,6 +5912,12 @@ class $$UserCollegesTableAnnotationComposer
 
   GeneratedColumn<int> get cardCountC => $composableBuilder(
       column: $table.cardCountC, builder: (column) => column);
+
+  GeneratedColumn<String> get pdfVersion => $composableBuilder(
+      column: $table.pdfVersion, builder: (column) => column);
+
+  GeneratedColumn<int> get pdfSize =>
+      $composableBuilder(column: $table.pdfSize, builder: (column) => column);
 }
 
 class $$UserCollegesTableTableManager extends RootTableManager<
@@ -5586,6 +5952,8 @@ class $$UserCollegesTableTableManager extends RootTableManager<
             Value<int> cardCountA = const Value.absent(),
             Value<int> cardCountB = const Value.absent(),
             Value<int> cardCountC = const Value.absent(),
+            Value<String?> pdfVersion = const Value.absent(),
+            Value<int?> pdfSize = const Value.absent(),
           }) =>
               UserCollegesCompanion(
             refId: refId,
@@ -5594,6 +5962,8 @@ class $$UserCollegesTableTableManager extends RootTableManager<
             cardCountA: cardCountA,
             cardCountB: cardCountB,
             cardCountC: cardCountC,
+            pdfVersion: pdfVersion,
+            pdfSize: pdfSize,
           ),
           createCompanionCallback: ({
             Value<int> refId = const Value.absent(),
@@ -5602,6 +5972,8 @@ class $$UserCollegesTableTableManager extends RootTableManager<
             required int cardCountA,
             required int cardCountB,
             required int cardCountC,
+            Value<String?> pdfVersion = const Value.absent(),
+            Value<int?> pdfSize = const Value.absent(),
           }) =>
               UserCollegesCompanion.insert(
             refId: refId,
@@ -5610,6 +5982,8 @@ class $$UserCollegesTableTableManager extends RootTableManager<
             cardCountA: cardCountA,
             cardCountB: cardCountB,
             cardCountC: cardCountC,
+            pdfVersion: pdfVersion,
+            pdfSize: pdfSize,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -5633,6 +6007,105 @@ typedef $$UserCollegesTableProcessedTableManager = ProcessedTableManager<
     ),
     UserCollegeRow,
     PrefetchHooks Function()>;
+typedef $$QuietDaysTableCreateCompanionBuilder = QuietDaysCompanion Function({
+  Value<int> day,
+});
+typedef $$QuietDaysTableUpdateCompanionBuilder = QuietDaysCompanion Function({
+  Value<int> day,
+});
+
+class $$QuietDaysTableFilterComposer
+    extends Composer<_$AppDatabase, $QuietDaysTable> {
+  $$QuietDaysTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get day => $composableBuilder(
+      column: $table.day, builder: (column) => ColumnFilters(column));
+}
+
+class $$QuietDaysTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuietDaysTable> {
+  $$QuietDaysTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get day => $composableBuilder(
+      column: $table.day, builder: (column) => ColumnOrderings(column));
+}
+
+class $$QuietDaysTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuietDaysTable> {
+  $$QuietDaysTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get day =>
+      $composableBuilder(column: $table.day, builder: (column) => column);
+}
+
+class $$QuietDaysTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $QuietDaysTable,
+    QuietDayRow,
+    $$QuietDaysTableFilterComposer,
+    $$QuietDaysTableOrderingComposer,
+    $$QuietDaysTableAnnotationComposer,
+    $$QuietDaysTableCreateCompanionBuilder,
+    $$QuietDaysTableUpdateCompanionBuilder,
+    (QuietDayRow, BaseReferences<_$AppDatabase, $QuietDaysTable, QuietDayRow>),
+    QuietDayRow,
+    PrefetchHooks Function()> {
+  $$QuietDaysTableTableManager(_$AppDatabase db, $QuietDaysTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuietDaysTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuietDaysTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuietDaysTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> day = const Value.absent(),
+          }) =>
+              QuietDaysCompanion(
+            day: day,
+          ),
+          createCompanionCallback: ({
+            Value<int> day = const Value.absent(),
+          }) =>
+              QuietDaysCompanion.insert(
+            day: day,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$QuietDaysTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $QuietDaysTable,
+    QuietDayRow,
+    $$QuietDaysTableFilterComposer,
+    $$QuietDaysTableOrderingComposer,
+    $$QuietDaysTableAnnotationComposer,
+    $$QuietDaysTableCreateCompanionBuilder,
+    $$QuietDaysTableUpdateCompanionBuilder,
+    (QuietDayRow, BaseReferences<_$AppDatabase, $QuietDaysTable, QuietDayRow>),
+    QuietDayRow,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5655,4 +6128,6 @@ class $AppDatabaseManager {
       $$ReviewLogTableTableManager(_db, _db.reviewLog);
   $$UserCollegesTableTableManager get userColleges =>
       $$UserCollegesTableTableManager(_db, _db.userColleges);
+  $$QuietDaysTableTableManager get quietDays =>
+      $$QuietDaysTableTableManager(_db, _db.quietDays);
 }

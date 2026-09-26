@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -252,5 +253,53 @@ void main() {
     await repo.addPostponed('cfg', today);
     c.invalidate(planningProvider);
     expect((await c.read(todayProvider.future) as TodayReady).postponedToday, isTrue);
+  });
+  group('série (partie D)', () {
+    Future<TodayReady> read(ProviderContainer c) async => await c.read(todayProvider.future) as TodayReady;
+
+    Future<void> completeDay(int day) async {
+      await db.into(db.dailySessions).insert(DailySessionsCompanion.insert(
+            day: Value(day),
+            queueJson: '[]',
+            completedAtMs: Value(now.millisecondsSinceEpoch),
+          ));
+    }
+
+    test('hier et avant-hier faits, aujourd’hui pas encore : 2', () async {
+      final c = container(statuses: [_status(3, 'c3', a: 1)], server: {'c3': [_card('a', 'c3')]});
+      await completeDay(today - 1);
+      await completeDay(today - 2);
+      expect((await read(c)).streak, 2);
+    });
+
+    test('un jour calme ne casse pas la série', () async {
+      final c = container(statuses: [_status(3, 'c3', a: 1)], server: {'c3': [_card('a', 'c3')]});
+      await completeDay(today - 1);
+      await db.into(db.quietDays).insert(QuietDaysCompanion.insert(day: Value(today - 2)));
+      await completeDay(today - 3);
+      expect((await read(c)).streak, 2);
+    });
+
+    test('un jour décalé du planning ne casse pas la série', () async {
+      final c = container(statuses: [_status(3, 'c3', a: 1)], server: {'c3': [_card('a', 'c3')]});
+      final repo = c.read(planningRepositoryProvider);
+      await repo.replace(PlanningConfig(
+            id: 'cfg',
+            collegeIds: const ['c3'],
+            startDate: DateTime(now.year, now.month, now.day).subtract(const Duration(days: 5)),
+            endDate: DateTime(now.year, now.month, now.day).add(const Duration(days: 20)),
+            dailyMinutes: 20,
+            createdAt: now,
+          ));
+      await completeDay(today - 1);
+      await repo.addPostponed('cfg', today - 2);
+      await completeDay(today - 3);
+      expect((await read(c)).streak, 2);
+    });
+
+    test('aucune session faite : 0', () async {
+      final c = container(statuses: [_status(3, 'c3', a: 1)], server: {'c3': [_card('a', 'c3')]});
+      expect((await read(c)).streak, 0);
+    });
   });
 }

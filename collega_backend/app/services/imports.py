@@ -10,6 +10,8 @@ from __future__ import annotations
 import logging
 import os
 import uuid
+from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -190,6 +192,44 @@ def pdf_path_for(college_id: uuid.UUID, job_id: uuid.UUID) -> Path:
     storage_path = Path(settings.pdf_storage_path)
     storage_path.mkdir(parents=True, exist_ok=True)
     return storage_path / f"{college_id}_{job_id}.pdf"
+
+
+@dataclass(frozen=True)
+class CurrentPdf:
+    """PDF en service d'un collège (partie B) : celui du dernier import publié."""
+
+    job_id: uuid.UUID
+    path: Path
+    size: int
+
+
+async def current_pdfs(db: AsyncSession, college_ids: Sequence[uuid.UUID]) -> dict[uuid.UUID, CurrentPdf]:
+    """Dernier job `generation_complete` de chaque collège dont le fichier existe encore.
+
+    Pendant un réimport, le nouveau PDF est déjà sur le disque mais son job n'est pas publié :
+    c'est l'ancien qui reste en service (ses numéros de page sont ceux des items en base)."""
+    if not college_ids:
+        return {}
+    rows = (
+        await db.execute(
+            select(GenerationJob.college_id, GenerationJob.id)
+            .where(
+                GenerationJob.college_id.in_(list(college_ids)),
+                GenerationJob.status == "generation_complete",
+            )
+            .order_by(GenerationJob.college_id, GenerationJob.created_at.desc())
+            .distinct(GenerationJob.college_id)
+        )
+    ).all()
+    found: dict[uuid.UUID, CurrentPdf] = {}
+    for college_id, job_id in rows:
+        path = pdf_path_for(college_id, job_id)
+        try:
+            size = path.stat().st_size
+        except OSError:
+            continue
+        found[college_id] = CurrentPdf(job_id=job_id, path=path, size=size)
+    return found
 
 
 async def save_upload(upload: UploadFile, dest: Path, *, max_size: int | None) -> None:

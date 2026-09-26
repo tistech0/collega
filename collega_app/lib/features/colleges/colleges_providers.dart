@@ -5,11 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
 import 'package:collega_app/core/network/network_errors.dart';
+import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/colleges/data/college_cards_sync.dart';
 import 'package:collega_app/features/colleges/data/colleges_repository.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
 import 'package:collega_app/features/colleges/domain/drill_stats.dart';
+import 'package:collega_app/features/pdf/pdf_providers.dart';
 
 final collegesRepositoryProvider = Provider<CollegesRepository>(
   (ref) => CollegesRepository(dio: ref.read(apiClientProvider).dio),
@@ -56,12 +58,30 @@ extension on CollegesNotifier {
                   cardCountA: s.cardCountA,
                   cardCountB: s.cardCountB,
                   cardCountC: s.cardCountC,
+                  pdfVersion: Value(s.pdfVersion),
+                  pdfSize: Value(s.pdfSize),
                 ),
             ]));
         // Liste fraîche du serveur : le contenu local des collèges disparus
         // (vidage, suppression) part. Jamais sur un échec (cache hors-ligne).
         await pruneStaleColleges(db, {for (final s in fresh) s.collegeId});
       });
+      // Partie B : les PDF des collèges disparus quittent aussi le téléphone.
+      try {
+        final store = await ref.read(localPdfStoreProvider.future);
+        await store.deleteExcept({for (final s in fresh) s.collegeId});
+        // Import terminé : seule la version servie reste (un réimport échoué ne
+        // garde pas sa copie). « Prêt » sans version = ancien backend : on garde.
+        await store.keepOnlyServed({
+          for (final s in fresh)
+            if (s.status == 'generation_complete' && s.pdfVersion != null)
+              s.collegeId: s.pdfVersion
+            else if (s.status == 'failed')
+              s.collegeId: s.pdfVersion,
+        });
+      } catch (e) {
+        AppLogger.warning('purge des PDF locaux impossible : $e', tag: 'CollegesNotifier');
+      }
       return (fresh, false);
     } on DioException catch (e) {
       final cached = await db.select(db.userColleges).get();
@@ -75,6 +95,8 @@ extension on CollegesNotifier {
             cardCountA: r.cardCountA,
             cardCountB: r.cardCountB,
             cardCountC: r.cardCountC,
+            pdfVersion: r.pdfVersion,
+            pdfSize: r.pdfSize,
           ),
       ], isNetworkUnreachable(e));
     }

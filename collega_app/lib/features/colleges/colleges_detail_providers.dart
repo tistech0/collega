@@ -152,6 +152,8 @@ final itemInfoProvider = FutureProvider.autoDispose.family<ItemModel?, String>((
     cardCountA: 0,
     cardCountB: 0,
     cardCountC: 0,
+    startPage: row.startPage,
+    endPage: row.endPage,
   );
 });
 

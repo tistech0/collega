@@ -117,7 +117,7 @@ class _Visit {
 
 late _Repo _repo;
 
-Widget _app({_Visit? visit, bool fromSearch = false, double textScale = 1}) {
+Widget _app({_Visit? visit, bool fromSearch = false, double textScale = 1, int? startPage, int? endPage}) {
   var pushed = false;
   final router = GoRouter(initialLocation: '/start', routes: [
     GoRoute(path: '/start', builder: (_, __) => Builder(builder: (context) {
@@ -142,12 +142,17 @@ Widget _app({_Visit? visit, bool fromSearch = false, double textScale = 1}) {
       visit?.drillExtra = s.extra;
       return const SizedBox();
     }),
+    GoRoute(path: '/colleges/:ref/pdf', builder: (_, s) {
+      visit?.paths.add(s.uri.toString());
+      return const SizedBox();
+    }),
   ]);
   final db = AppDatabase.forTesting(NativeDatabase.memory());
   addTearDown(db.close);
   // Titre de l'item : lu dans Drift (pas de rechargement réseau du collège).
   db.into(db.items).insert(ItemsCompanion.insert(
-        id: _item.id, collegeId: 'c3', itemNumber: _item.itemNumber, rang: 'A', chapterTitle: Value(_item.chapterTitle)));
+        id: _item.id, collegeId: 'c3', itemNumber: _item.itemNumber, rang: 'A', chapterTitle: Value(_item.chapterTitle),
+        startPage: Value(startPage), endPage: Value(endPage)));
   return ProviderScope(
     overrides: [
       databaseProvider.overrideWithValue(db),
@@ -179,8 +184,10 @@ void _phone(WidgetTester tester, {double width = 393, double height = 1200}) {
   addTearDown(tester.view.reset);
 }
 
-Future<void> _pumpApp(WidgetTester tester, {_Visit? visit, bool fromSearch = false, double textScale = 1}) async {
-  await tester.pumpWidget(_app(visit: visit, fromSearch: fromSearch, textScale: textScale));
+Future<void> _pumpApp(WidgetTester tester,
+    {_Visit? visit, bool fromSearch = false, double textScale = 1, int? startPage, int? endPage}) async {
+  await tester.pumpWidget(
+      _app(visit: visit, fromSearch: fromSearch, textScale: textScale, startPage: startPage, endPage: endPage));
   await tester.pumpAndSettle();
 }
 
@@ -458,6 +465,41 @@ void main() {
       final src = File('lib/features/colleges/presentation/item_detail_screen.dart').readAsStringSync();
       expect(src, isNot(contains('material.dart')));
       expect(src, isNot(contains('shadcn_ui')));
+    });
+  });
+
+  group('PDF de l’item (partie B)', () {
+    testWidgets('lien « Lire dans le PDF · p. 112–118 » → lecteur à la page de l’item', (tester) async {
+      _phone(tester);
+      final visit = _Visit();
+      await _pumpApp(tester, visit: visit, startPage: 111, endPage: 117);
+      expect(find.text('Lire dans le PDF · p. 112–118'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('item-pdf-link')));
+      await tester.pumpAndSettle();
+      expect(visit.paths.last, '/colleges/3/pdf?page=112&item=i232');
+    });
+
+    testWidgets('item sans page connue : pas de lien, feuille OCR sans bouton PDF', (tester) async {
+      _phone(tester);
+      await _pumpApp(tester);
+      expect(find.byKey(const Key('item-pdf-link')), findsNothing);
+      await _expand(tester, 'k3');
+      await tester.tap(find.text('À vérifier'));
+      await tester.pumpAndSettle();
+      expect(find.text('Source à vérifier'), findsOneWidget);
+      expect(find.text('Vérifier dans le PDF'), findsNothing);
+    });
+
+    testWidgets('feuille « Source à vérifier » : « Vérifier dans le PDF » ouvre la page de l’item', (tester) async {
+      _phone(tester);
+      final visit = _Visit();
+      await _pumpApp(tester, visit: visit, startPage: 111, endPage: 117);
+      await _expand(tester, 'k3');
+      await tester.tap(find.text('À vérifier'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Vérifier dans le PDF'));
+      await tester.pumpAndSettle();
+      expect(visit.paths.last, '/colleges/3/pdf?page=112&item=i232');
     });
   });
 

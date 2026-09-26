@@ -10,6 +10,7 @@ import 'package:collega_app/features/auth/paywall_providers.dart';
 import 'package:collega_app/features/auth/data/local_data_owner.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/pdf/pdf_providers.dart';
 import 'package:collega_app/features/search/search_providers.dart';
 import 'package:collega_app/features/today/today_providers.dart';
 
@@ -101,8 +102,11 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   /// quoi que ce soit. Borné dans le temps : la connexion n'est jamais bloquée.
   Future<void> _claimLocalData(String userId) async {
     try {
-      await LocalDataOwner(storage: ref.read(secureStorageProvider), db: ref.read(databaseProvider))
-          .claim(userId)
+      await LocalDataOwner(
+        storage: ref.read(secureStorageProvider),
+        db: ref.read(databaseProvider),
+        clearPdfs: () async => (await ref.read(localPdfStoreProvider.future)).clear(),
+      ).claim(userId)
           .timeout(_kLocalWipeStepTimeout);
     } catch (e) {
       AppLogger.error('LocalDataOwner.claim failed', tag: 'AuthNotifier', error: e);

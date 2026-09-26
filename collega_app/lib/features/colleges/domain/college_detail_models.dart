@@ -12,6 +12,8 @@ class ItemModel {
     required this.cardCountA,
     required this.cardCountB,
     required this.cardCountC,
+    this.startPage,
+    this.endPage,
   });
 
   final String id;
@@ -24,6 +26,10 @@ class ItemModel {
   final int cardCountA;
   final int cardCountB;
   final int cardCountC;
+
+  /// Pages de l'item dans le PDF, base 0 ; null pour un import ancien (partie B).
+  final int? startPage;
+  final int? endPage;
 
   int get totalCards => cardCountA + cardCountB + cardCountC;
 
@@ -46,6 +52,8 @@ class ItemModel {
         cardCountA: json['card_count_a'] as int? ?? 0,
         cardCountB: json['card_count_b'] as int? ?? 0,
         cardCountC: json['card_count_c'] as int? ?? 0,
+        startPage: json['start_page'] as int?,
+        endPage: json['end_page'] as int?,
       );
 }
 

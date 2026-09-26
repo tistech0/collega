@@ -50,6 +50,9 @@ dependencies:
 
   # File picker (import PDF)
   file_picker: ^8.1.6
+  # Lecteur PDF (partie B) — 1.0.103 : dernière version compatible Flutter 3.27 / Dart 3.6
+  # (les 1.1.x+ exigent Flutter >= 3.29).
+  pdfrx: 1.0.103
 
   # Push notifications (APNs iOS)
   flutter_apns_only: ^1.0.0

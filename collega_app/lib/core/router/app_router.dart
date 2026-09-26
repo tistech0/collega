@@ -18,6 +18,7 @@ import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/drill/presentation/drill_screen.dart';
 import 'package:collega_app/features/legal/presentation/legal_screen.dart';
+import 'package:collega_app/features/pdf/presentation/pdf_reader_screen.dart';
 import 'package:collega_app/features/planning/presentation/planning_screen.dart';
 import 'package:collega_app/features/search/presentation/search_sheet.dart';
 import 'package:collega_app/features/profile/presentation/profile_screen.dart';
@@ -122,6 +123,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/colleges/:ref_id/import',
         builder: (ctx, s) => CollegeImportScreen(
           refId: int.parse(s.pathParameters['ref_id']!),
+        ),
+      ),
+      // Lecteur PDF (partie B) : plein écran ; page en base 1.
+      GoRoute(
+        path: '/colleges/:ref_id/pdf',
+        builder: (ctx, s) => PdfReaderScreen(
+          refId: int.parse(s.pathParameters['ref_id']!),
+          page: int.tryParse(s.uri.queryParameters['page'] ?? ''),
+          itemId: s.uri.queryParameters['item'],
         ),
       ),
       GoRoute(

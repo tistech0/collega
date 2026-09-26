@@ -55,4 +55,14 @@ void main() {
     await owner.claim('u2');
     expect(await storage.read(key: SecureSearchRecentsStore.storageKey), isNull);
   });
+
+  test('autre compte : les PDF du précédent quittent le téléphone', () async {
+    var cleared = 0;
+    final owner = LocalDataOwner(storage: storage, db: db, clearPdfs: () async => cleared++);
+    await owner.claim('u1');
+    await owner.claim('u1');
+    expect(cleared, 0);
+    await owner.claim('u2');
+    expect(cleared, 1);
+  });
 }

@@ -73,6 +73,35 @@ ProviderContainer _makeContainer(List<FlashCardModel> cards) {
 
 void main() {
   group('DrillSessionNotifier', () {
+    test('setCardFeedback : avis noté sur la fiche, gardé quand elle revient dans la file', () async {
+      final container = _makeContainer(_makeCards(2));
+      addTearDown(container.dispose);
+      final notifier = container.read(drillSessionProvider(_params).notifier);
+      await container.read(drillSessionProvider(_params).future);
+
+      notifier.setCardFeedback('card-0', 'negative');
+      var s = container.read(drillSessionProvider(_params)).requireValue;
+      expect(s.currentCard!.userFeedback, 'negative');
+      expect(s.cards[1].userFeedback, isNull);
+
+      // 1er « à revoir » : la fiche est réinsérée plus loin, même index dans `cards`.
+      notifier.flip();
+      await notifier.evaluate(DrillEvaluationResult.aRevoir);
+      notifier.advanceToNext();
+      s = container.read(drillSessionProvider(_params)).requireValue;
+      final again = s.queue.skip(s.currentQueuePos).map((i) => s.cards[i]).firstWhere((c) => c.id == 'card-0');
+      expect(again.userFeedback, 'negative');
+    });
+
+    test('setCardFeedback : fiche inconnue → rien ne change', () async {
+      final container = _makeContainer(_makeCards(1));
+      addTearDown(container.dispose);
+      await container.read(drillSessionProvider(_params).future);
+      final before = container.read(drillSessionProvider(_params)).requireValue;
+      container.read(drillSessionProvider(_params).notifier).setCardFeedback('absente', 'positive');
+      expect(container.read(drillSessionProvider(_params)).requireValue.cards, before.cards);
+    });
+
     test('chargement initial — queue ordonnée 0..n-1', () async {
       final cards = _makeCards(3);
       final container = _makeContainer(cards);

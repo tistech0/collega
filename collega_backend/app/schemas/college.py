@@ -10,6 +10,9 @@ class UserCollegeData(BaseModel):
     card_count_a: int = 0
     card_count_b: int = 0
     card_count_c: int = 0
+    # Partie B : PDF en service (id du dernier job publié) et sa taille ; null si aucun.
+    pdf_version: str | None = None
+    pdf_size: int | None = None
 
 
 class CollegesListResponseWrapped(BaseModel):
@@ -83,6 +86,9 @@ class ItemSummaryData(BaseModel):
     card_count_a: int
     card_count_b: int
     card_count_c: int
+    # Partie B : pages de l'item dans le PDF, base 0 (index de page de l'import).
+    start_page: int | None = None
+    end_page: int | None = None
 
 
 class ItemsListResponseWrapped(BaseModel):

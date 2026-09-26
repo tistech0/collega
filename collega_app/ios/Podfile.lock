@@ -43,6 +43,9 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - pdfrx (0.0.3):
+    - Flutter
+    - FlutterMacOS
   - purchases_flutter (10.0.1):
     - Flutter
     - PurchasesHybridCommon (= 18.1.0)
@@ -88,6 +91,7 @@ DEPENDENCIES:
   - flutter_apns_only (from `.symlinks/plugins/flutter_apns_only/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - pdfrx (from `.symlinks/plugins/pdfrx/darwin`)
   - purchases_flutter (from `.symlinks/plugins/purchases_flutter/ios`)
   - SDWebImage
   - sqlite3
@@ -117,6 +121,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  pdfrx:
+    :path: ".symlinks/plugins/pdfrx/darwin"
   purchases_flutter:
     :path: ".symlinks/plugins/purchases_flutter/ios"
   sqlite3_flutter_libs:
@@ -133,6 +139,7 @@ SPEC CHECKSUMS:
   flutter_apns_only: bd278c53433cb01cd66152843f7247fe10b9a9ea
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  pdfrx: f02453e8acfc97f5cd0e29aa33f658ea6c12e71d
   purchases_flutter: 50a5d9fa83ee5605a8fc653792d667404ca90bce
   PurchasesHybridCommon: 32902b8fad349cf549f096183926ee33af00e36a
   RevenueCat: c535d3739d51163f6d9d5dbd01c7b5d93b718ff5

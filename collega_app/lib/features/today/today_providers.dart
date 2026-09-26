@@ -12,6 +12,7 @@ import 'package:collega_app/features/colleges/domain/drill_stats.dart';
 import 'package:collega_app/features/planning/planning_providers.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
 import 'package:collega_app/features/today/data/daily_session_repository.dart';
+import 'package:collega_app/features/today/domain/streak.dart';
 import 'package:collega_app/features/today/domain/daily_session_builder.dart';
 
 export 'package:collega_app/features/colleges/colleges_detail_providers.dart'
@@ -77,6 +78,7 @@ class TodayReady extends TodayState {
     this.planningDay,
     this.planningDays,
     this.postponedToday = false,
+    this.streak = 0,
   }) : _tomorrowBudget = tomorrowBudget;
 
   final DateTime date;
@@ -112,6 +114,9 @@ class TodayReady extends TodayState {
   /// « Décaler aujourd'hui » (story 8.9) : pas de session attendue aujourd'hui,
   /// réviser reste possible.
   final bool postponedToday;
+
+  /// Jours d'affilée avec la session du jour faite (sur ce téléphone), badge dès 2.
+  final int streak;
 
   int get minutes => estimatedMinutes(cardCount);
 }
@@ -203,6 +208,12 @@ class TodayNotifier extends AsyncNotifier<TodayState> {
     final monday = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - DateTime.monday));
     final mondayDay = epochDayOf(monday);
     final done = await repo.completedDays(from: mondayDay, to: mondayDay + 6);
+    // Série : tout l'historique local (une ligne par jour, peu de données).
+    final streak = streakLength(
+      today: day,
+      completed: await repo.completedDays(from: 0, to: day),
+      excused: {...await repo.quietDays(from: 0, to: day), ...planningState.postponedDays},
+    );
 
     int? planningDay;
     int? planningDays;
@@ -239,6 +250,7 @@ class TodayNotifier extends AsyncNotifier<TodayState> {
       planningDay: planningDay,
       planningDays: planningDays,
       postponedToday: planning != null && planningState.postponedDays.contains(day),
+      streak: streak,
     );
   }
 
