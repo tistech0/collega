@@ -13,6 +13,8 @@ import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/search/presentation/search_sheet.dart';
 import 'package:collega_app/features/shell/tab_reselect.dart';
 import 'package:collega_app/features/today/domain/daily_session_builder.dart';
+import 'package:collega_app/features/today/domain/streak.dart';
+import 'package:collega_app/features/today/presentation/done_check.dart';
 import 'package:collega_app/features/today/presentation/today_customize_sheet.dart';
 import 'package:collega_app/features/today/today_providers.dart';
 
@@ -150,15 +152,16 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
         child: state,
       );
 
-  List<Widget> _readyChildren(BuildContext context, TodayReady s) => [
+  List<Widget> _readyChildren(BuildContext context, TodayReady s, {bool celebrate = false}) => [
         const SizedBox(height: _TodayScreenLayout.heroGap),
         _Hero(
           state: s,
+          celebrate: celebrate,
           onStart: () => _start(s),
           onCustomize: () => showTodayCustomizeSheet(context, s),
         ),
         const CgSectionTitle('Cette semaine'),
-        _Week(days: s.week),
+        _Week(days: s.week, celebrate: celebrate),
         if (s.colleges.isNotEmpty) ...[
           const CgSectionTitle('Mes collèges'),
           CgListGroup(children: [
@@ -226,9 +229,10 @@ class _SearchAction extends StatelessWidget {
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
 class _Hero extends StatelessWidget {
-  const _Hero({required this.state, required this.onStart, required this.onCustomize});
+  const _Hero({required this.state, this.celebrate = false, required this.onStart, required this.onCustomize});
 
   final TodayReady state;
+  final bool celebrate;
   final VoidCallback onStart;
   final VoidCallback onCustomize;
 
@@ -243,7 +247,7 @@ class _Hero extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = CgTheme.of(context).colors;
     final session = state.session;
-    if (session.isCompleted) return _Done(state: state);
+    if (session.isCompleted) return _Done(state: state, celebrate: celebrate);
     if (state.cardCount == 0) {
       return _Message(
         title: 'Tout est à jour',
@@ -307,6 +311,11 @@ class _Hero extends StatelessWidget {
             style: CgType.bodyS.copyWith(color: c.ink2),
           ),
         ),
+      if (state.streak >= kStreakMinShown)
+        Padding(
+          padding: const EdgeInsets.only(top: CgSpace.s2),
+          child: Align(alignment: Alignment.centerLeft, child: _StreakBadge(days: state.streak)),
+        ),
       const SizedBox(height: _mixGap),
       for (final m in shown) _MixRow(label: m.collegeName, value: '${m.count} · ${_rangsLabel(m.rangs)}'),
       if (hidden > 0)
@@ -352,9 +361,12 @@ class _MixRow extends StatelessWidget {
 }
 
 class _Done extends StatelessWidget {
-  const _Done({required this.state});
+  const _Done({required this.state, this.celebrate = false});
 
   final TodayReady state;
+  final bool celebrate;
+
+  static const _checkSize = 56.0;
 
   @override
   Widget build(BuildContext context) {
@@ -362,9 +374,24 @@ class _Done extends StatelessWidget {
     final mastered = state.verdicts['maitrise'] ?? 0;
     final good = state.verdicts['bien'] ?? 0;
     final review = state.verdicts['a_revoir'] ?? 0;
+    final cards = state.session.uniqueCount;
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Semantics(header: true, child: Text('Session faite', style: CgType.title.copyWith(color: c.ink))),
-      const SizedBox(height: CgSpace.s2),
+      Row(children: [
+        DoneCheck(size: _checkSize, animate: celebrate),
+        const SizedBox(width: CgSpace.s3),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Semantics(header: true, child: Text('Session faite', style: CgType.title.copyWith(color: c.ink))),
+            Text('$cards ${cards > 1 ? 'fiches' : 'fiche'}', style: CgType.bodyS.copyWith(color: c.ink2)),
+          ]),
+        ),
+      ]),
+      if (state.streak >= kStreakMinShown)
+        Padding(
+          padding: const EdgeInsets.only(top: CgSpace.s3),
+          child: Align(alignment: Alignment.centerLeft, child: _StreakBadge(days: state.streak)),
+        ),
+      const SizedBox(height: CgSpace.s3),
       Text(
         '$mastered maîtrisées · $good bien · $review à revoir',
         style: CgType.bodyS.copyWith(color: c.ink2),
@@ -374,6 +401,24 @@ class _Done extends StatelessWidget {
       const SizedBox(height: CgSpace.s4),
       Text('Prochaine session demain', style: CgType.bodyS.copyWith(color: c.ink2)),
     ]);
+  }
+}
+
+/// « 5 jours d’affilée » (partie D) : pastille `accentSoft`, dès 2 jours.
+class _StreakBadge extends StatelessWidget {
+  const _StreakBadge({required this.days});
+
+  final int days;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = CgTheme.of(context).colors;
+    return Container(
+      key: const ValueKey('today-streak'),
+      padding: const EdgeInsets.symmetric(horizontal: CgSpace.s3, vertical: CgSpace.s1),
+      decoration: BoxDecoration(color: c.accentSoft, borderRadius: CgRadius.pill),
+      child: Text('$days jours d’affilée', style: CgType.meta.copyWith(color: c.accent, fontWeight: FontWeight.w600)),
+    );
   }
 }
 
@@ -397,9 +442,10 @@ class _Message extends StatelessWidget {
 // ─── Semaine ──────────────────────────────────────────────────────────────────
 
 class _Week extends StatelessWidget {
-  const _Week({required this.days});
+  const _Week({required this.days, this.celebrate = false});
 
   final List<TodayWeekDay> days;
+  final bool celebrate;
 
   static const _dotMaxSize = 40.0;
   static const _dotBorder = 1.5;
@@ -428,16 +474,23 @@ class _Week extends StatelessWidget {
                     constraints: const BoxConstraints(maxWidth: _dotMaxSize),
                     child: AspectRatio(
                       aspectRatio: 1,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: d.done ? c.accent : c.surface,
-                          border: Border.all(
-                            color: d.done || d.isToday ? c.accent : c.line,
-                            width: d.isToday ? _todayBorder : _dotBorder,
-                          ),
-                        ),
-                      ),
+                      child: d.done
+                          ? LayoutBuilder(
+                              builder: (context, box) => DoneCheck(
+                                size: box.maxWidth,
+                                animate: celebrate && d.isToday,
+                              ),
+                            )
+                          : DecoratedBox(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: c.surface,
+                                border: Border.all(
+                                  color: d.isToday ? c.accent : c.line,
+                                  width: d.isToday ? _todayBorder : _dotBorder,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: CgSpace.s1),

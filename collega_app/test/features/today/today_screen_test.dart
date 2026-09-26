@@ -15,6 +15,7 @@ import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
 
 import 'package:collega_app/features/search/presentation/search_sheet.dart';
+import 'package:collega_app/features/today/presentation/done_check.dart';
 
 import '../../support/cg_golden.dart';
 
@@ -34,6 +35,7 @@ TodayReady _ready({
   Map<String, int> verdicts = const {},
   int? planningDay = 1,
   bool postponedToday = false,
+  int streak = 0,
 }) =>
     TodayReady(
       date: _date,
@@ -63,6 +65,7 @@ TodayReady _ready({
       planningDay: planningDay,
       planningDays: planningDay == null ? null : 30,
       postponedToday: postponedToday,
+      streak: streak,
     );
 
 class _Prefs extends RevisionPrefsNotifier {
@@ -387,6 +390,48 @@ void main() {
     await tester.pumpWidget(_app(() => _Fixed(_ready()), textScale: 1.6));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  group('session faite et série (partie D)', () {
+    testWidgets('faite : grand rond coché + « 24 fiches »', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true, verdicts: {'maitrise': 18, 'bien': 4, 'a_revoir': 2}))));
+      await tester.pumpAndSettle();
+      expect(find.byWidgetPredicate((w) => w is DoneCheck && w.size == 56), findsOneWidget);
+      expect(find.text('24 fiches'), findsOneWidget);
+      expect(find.text('Session faite'), findsOneWidget);
+    });
+
+    testWidgets('semaine : un rond coché par jour fait', (tester) async {
+      _phone(tester, height: 1400);
+      await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true))));
+      await tester.pumpAndSettle();
+      // Le grand rond + le rond du lundi.
+      expect(find.byType(DoneCheck), findsNWidgets(2));
+    });
+
+    testWidgets('badge « 5 jours d’affilée », session faite ou à faire', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true, streak: 5))));
+      await tester.pumpAndSettle();
+      expect(find.text('5 jours d’affilée'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox()); // nouvel arbre : nouveau ProviderScope
+      await tester.pumpWidget(_app(() => _Fixed(_ready(streak: 5))));
+      await tester.pumpAndSettle();
+      expect(find.text('5 jours d’affilée'), findsOneWidget);
+      expect(find.text('Commencer'), findsOneWidget);
+    });
+
+    testWidgets('série de 0 ou 1 : pas de badge', (tester) async {
+      _phone(tester);
+      for (final streak in [0, 1]) {
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpWidget(_app(() => _Fixed(_ready(completed: true, streak: streak))));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('today-streak')), findsNothing);
+      }
+    });
   });
 
   group('goldens', () {
