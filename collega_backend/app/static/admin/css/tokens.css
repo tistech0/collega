@@ -1,0 +1,16 @@
+@font-face { font-family: "Instrument Sans"; src: url('../fonts/InstrumentSans-Regular.ttf') format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Instrument Sans"; src: url('../fonts/InstrumentSans-Medium.ttf') format("truetype"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Instrument Sans"; src: url('../fonts/InstrumentSans-SemiBold.ttf') format("truetype"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Instrument Sans"; src: url('../fonts/InstrumentSans-Bold.ttf') format("truetype"); font-weight: 700; font-display: swap; }
+
+:root {
+  --ground: #ECEAE3; --surface: #F7F6F2; --soft: #E2E0D8;
+  --ink: #17201F; --ink2: #454D4C; --ink3: #60645E; --line: #D9D6CC;
+  --accent: #0E5E63; --accent-soft: #D5E6E4; --accent-ink: #F2F5F3;
+  --rank-a: #0E5E63; --rank-b: #4C696D; --rank-b-soft: #DDE3E3; --rank-c: #64635B;
+  --good: #6FA8A2; --review: #D9822B; --review-ink: #9A5A16; --review-soft: #F3E3CF;
+  --danger: #B8352B; --danger-soft: #F2D9D6; --scrim: rgba(23, 32, 31, .4);
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px;
+  --r-s: 10px; --r-m: 20px; --r-l: 20px; --r-badge: 6px; --r-pill: 999px;
+  --font: "Instrument Sans", system-ui, -apple-system, sans-serif;
+}
