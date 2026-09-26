@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart' show Value;
@@ -11,6 +12,8 @@ import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/data/colleges_repository.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/college_models.dart';
+import 'package:collega_app/features/pdf/data/local_pdf_store.dart';
+import 'package:collega_app/features/pdf/pdf_providers.dart';
 import 'package:collega_app/features/planning/data/planning_repository.dart';
 
 class _FakeCollegesRepository extends CollegesRepository {
@@ -278,5 +281,47 @@ void main() {
         expect(await db.select(db.dailySessions).get(), hasLength(3));
       });
     }
+  });
+
+  group('PDF locaux (partie B)', () {
+    late Directory tmp;
+    late LocalPdfStore store;
+
+    setUp(() async {
+      tmp = Directory.systemTemp.createTempSync('pdfsync');
+      store = LocalPdfStore(Directory('${tmp.path}/pdfs'));
+      for (final id in ['c1', 'cGone']) {
+        await store.keepCopy(collegeId: id, version: 'j1', source: File('${tmp.path}/$id.src')..writeAsStringSync('%PDF'));
+      }
+    });
+    tearDown(() => tmp.deleteSync(recursive: true));
+
+    ProviderContainer container(_FakeCollegesRepository repo) {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final c = ProviderContainer(overrides: [
+        collegesRepositoryProvider.overrideWithValue(repo),
+        databaseProvider.overrideWithValue(db),
+        localPdfStoreProvider.overrideWith((ref) async => store),
+      ]);
+      addTearDown(c.dispose);
+      return c;
+    }
+
+    const c1 = UserCollegeStatus(
+      refId: 3, collegeId: 'c1', status: 'generation_complete', cardCountA: 1, cardCountB: 0, cardCountC: 0,
+    );
+
+    test('liste fraîche : le PDF d’un collège disparu quitte le téléphone', () async {
+      await container(_FakeCollegesRepository(result: [c1])).read(collegesProvider.future);
+      expect(store.fileFor('c1', 'j1').existsSync(), isTrue);
+      expect(store.fileFor('cGone', 'j1').existsSync(), isFalse);
+    });
+
+    test('échec réseau : aucun PDF supprimé', () async {
+      final c = container(_FakeCollegesRepository(offline: true));
+      await expectLater(c.read(collegesProvider.future), throwsA(isA<DioException>()));
+      expect(store.fileFor('cGone', 'j1').existsSync(), isTrue);
+    });
   });
 }

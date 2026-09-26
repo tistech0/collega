@@ -20,6 +20,7 @@ import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/data/college_cards_sync.dart';
 import 'package:collega_app/features/colleges/data/college_import_repository.dart';
 import 'package:collega_app/features/colleges/domain/import_models.dart';
+import 'package:collega_app/features/pdf/pdf_providers.dart';
 
 export 'package:collega_app/features/colleges/data/college_import_repository.dart'
     show SubscriptionRequiredException, JobInProgressException, QueueUnavailableException,
@@ -110,7 +111,7 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
         final repo = ref.read(collegeImportRepositoryProvider);
         response = await repo.importPdf(refId, file);
       }
-      await _afterUploadAccepted(refId, response);
+      await _afterUploadAccepted(refId, response, file);
     } on FileTooLargeException {
       state = const AsyncValue.data(ImportError(message: 'file_too_large'));
     } on UploadExpiredException {
@@ -134,7 +135,14 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
   }
 
   /// Upload accepté (202) : mémorise l'import en local, passe en streaming et ouvre le SSE.
-  Future<void> _afterUploadAccepted(int refId, ImportStartResponse response) async {
+  Future<void> _afterUploadAccepted(int refId, ImportStartResponse response, File source) async {
+    // Partie B : garder le PDF sur le téléphone (lecteur hors ligne). Jamais bloquant.
+    try {
+      final store = await ref.read(localPdfStoreProvider.future);
+      await store.keepCopy(collegeId: response.collegeId, version: response.jobId, source: source);
+    } catch (e) {
+      AppLogger.warning('copie locale du PDF impossible : $e', tag: 'CollegeImportNotifier');
+    }
     final db = ref.read(databaseProvider);
     await db.into(db.collegeImports).insertOnConflictUpdate(
           CollegeImportsCompanion.insert(
@@ -173,11 +181,14 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
     if (_resumeInFlight || state.valueOrNull is ImportUploading) return;
     final ChunkedUploadService chunked;
     final int refId;
+    final String sourcePath;
     try {
       chunked = await ref.read(chunkedUploadServiceProvider.future);
       if (_disposed || !await chunked.hasPending()) return;
       final db = ref.read(databaseProvider);
-      refId = (await db.select(db.pendingUploads).get()).first.refId;
+      final row = (await db.select(db.pendingUploads).get()).first;
+      refId = row.refId;
+      sourcePath = row.filePath;
     } catch (e) {
       // Pas de reprise possible (DB / cache indisponible) : on ne touche pas à l'état.
       AppLogger.warning('resumePendingUpload: check failed: $e', tag: 'CollegeImportNotifier');
@@ -187,7 +198,7 @@ class CollegeImportNotifier extends AsyncNotifier<CollegeImportState> {
     state = AsyncValue.data(ImportUploading(refId: refId, progress: 0));
     try {
       final response = await chunked.resume(onProgress: _onUploadProgress);
-      if (response != null) await _afterUploadAccepted(refId, response);
+      if (response != null) await _afterUploadAccepted(refId, response, File(sourcePath));
     } on UploadExpiredException {
       state = const AsyncValue.data(ImportError(message: 'upload_expired'));
     } on UploadSourceMissing {
