@@ -172,6 +172,10 @@ class DailySessionRepository {
     if (plan.isEmpty) {
       // Rien à réviser : ne rien figer, la prochaine synchro pourra la remplir.
       await (db.delete(db.dailySessions)..where((t) => t.day.equals(day))).go();
+      // Jour calme (série de l'Accueil) : pas un choix de « Personnaliser ».
+      if (!custom) {
+        await db.into(db.quietDays).insertOnConflictUpdate(QuietDaysCompanion.insert(day: Value(day)));
+      }
       return DailySession(
         day: day,
         cardIds: const [],
@@ -272,6 +276,7 @@ class DailySessionRepository {
   Future<void> resetDay(int day) => db.transaction(() async {
         await (db.delete(db.dailySessions)..where((t) => t.day.equals(day))).go();
         await (db.delete(db.reviewLog)..where((t) => t.day.equals(day) & t.daily.equals(true))).go();
+        await (db.delete(db.quietDays)..where((t) => t.day.equals(day))).go();
       });
 
   /// Jours (inclus) dont la session du jour a été terminée.
@@ -279,6 +284,12 @@ class DailySessionRepository {
     final rows = await (db.select(db.dailySessions)
           ..where((t) => t.day.isBetweenValues(from, to) & t.completedAtMs.isNotNull()))
         .get();
+    return rows.map((r) => r.day).toSet();
+  }
+
+  /// Jours « rien à réviser » entre [from] et [to] inclus (série de l'Accueil).
+  Future<Set<int>> quietDays({required int from, required int to}) async {
+    final rows = await (db.select(db.quietDays)..where((t) => t.day.isBetweenValues(from, to))).get();
     return rows.map((r) => r.day).toSet();
   }
 }
