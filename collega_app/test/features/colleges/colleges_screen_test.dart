@@ -238,7 +238,7 @@ void main() {
       final visited = <String>[];
       await tester.pumpWidget(_app(() => _Fixed(const []), visited: visited));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Un item, un signe, une dose…'));
+      await tester.tap(find.text('Un collège, un item, un signe…'));
       await tester.pumpAndSettle();
       expect(find.byType(SearchPanel), findsOneWidget, reason: 'sheet de recherche (8.10)');
     });
@@ -335,7 +335,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester.getSemantics(find.byKey(const Key('library-search'))),
-        matchesSemantics(label: 'Rechercher un item, un signe, une dose', isButton: true, hasTapAction: true),
+        matchesSemantics(label: 'Rechercher un collège, un item, un signe', isButton: true, hasTapAction: true),
       );
       handle.dispose();
     });
