@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:collega_app/core/ui/components/cg_card_feedback.dart';
 import 'package:collega_app/core/ui/components/cg_card_type_tag.dart';
 import 'package:collega_app/core/ui/components/cg_drill_card.dart';
 import 'package:collega_app/core/ui/components/cg_verdict_bar.dart';
@@ -51,6 +52,7 @@ Widget _card({
   int index = 3,
   int total = 24,
   String? typeLabel,
+  Widget? answerActions,
   Key? key,
 }) =>
     cgTestApp(
@@ -68,6 +70,7 @@ Widget _card({
         canFlip: canFlip,
         onFlip: onFlip,
         initiallyFlipped: flipped,
+        answerActions: answerActions,
       ),
       disableAnimations: reduced,
       textScale: textScale,
@@ -716,5 +719,44 @@ void main() {
       () => const CgDrillCardGallery(state: CgDrillCardGalleryState.drag),
       disableAnimations: false,
     );
+  });
+
+  group('verso — actions de la réponse', () {
+    Widget actions(List<String> calls) => CgCardFeedback(
+          feedback: null,
+          onUseful: () => calls.add('useful'),
+          onReport: () => calls.add('report'),
+        );
+
+    testWidgets('recto : actions ni visibles pour VoiceOver ni touchables', (tester) async {
+      _phone(tester);
+      final calls = <String>[];
+      await tester.pumpWidget(_card(answerActions: actions(calls)));
+      expect(find.bySemanticsLabel('Fiche utile'), findsNothing);
+      await tester.tap(find.byKey(CgCardFeedback.usefulKey), warnIfMissed: false);
+      expect(calls, isEmpty);
+    });
+
+    testWidgets('verso : toucher une action l’appelle et ne juge jamais la fiche', (tester) async {
+      _phone(tester);
+      final calls = <String>[];
+      final verdicts = <CgVerdict>[];
+      await tester.pumpWidget(_card(flipped: true, verdicts: verdicts, answerActions: actions(calls)));
+      expect(find.bySemanticsLabel('Fiche utile'), findsOneWidget);
+      await tester.tap(find.byKey(CgCardFeedback.reportKey));
+      await tester.pumpAndSettle();
+      expect(calls, ['report']);
+      expect(verdicts, isEmpty);
+      expect(_state(tester).dragOffset, Offset.zero);
+    });
+
+    testWidgets('verso : actions au-dessus de la réponse, alignées à droite', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_card(flipped: true, answerActions: actions([])));
+      final icons = tester.getRect(find.byType(CgCardFeedback));
+      final answer = tester.getRect(find.byKey(CgDrillCard.answerKey));
+      expect(icons.bottom, lessThanOrEqualTo(answer.top));
+      expect(icons.right, closeTo(answer.right, 1));
+    });
   });
 }

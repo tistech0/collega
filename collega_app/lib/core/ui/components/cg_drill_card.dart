@@ -56,6 +56,7 @@ class CgDrillCard extends StatefulWidget {
     this.contextLabel = 'Session du jour',
     this.showFlipHint = true,
     this.answerHeader,
+    this.answerActions,
     this.frontInput,
     this.canFlip = true,
     this.onFlip,
@@ -92,6 +93,10 @@ class CgDrillCard extends StatefulWidget {
 
   /// Au-dessus de la réponse, dans la feuille (feedback du mode définition).
   final Widget? answerHeader;
+
+  /// En haut à droite de la feuille de réponse (avis sur la fiche) : de simples
+  /// touchers, qui ne jugent jamais la fiche.
+  final Widget? answerActions;
 
   /// Mode définition : champ intégré au recto, sous la question.
   final Widget? frontInput;
@@ -863,6 +868,10 @@ class CgDrillCardState extends State<CgDrillCard> with TickerProviderStateMixin 
                   child: DefaultTextStyle(
                     style: CgType.body.copyWith(color: c.ink),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                      if (widget.answerActions != null) ...[
+                        Align(alignment: Alignment.centerRight, child: widget.answerActions!),
+                        const SizedBox(height: CgSpace.s1),
+                      ],
                       if (widget.answerHeader != null) ...[
                         widget.answerHeader!,
                         const SizedBox(height: CgSpace.s3),
