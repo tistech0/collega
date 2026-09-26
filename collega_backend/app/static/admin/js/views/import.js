@@ -18,6 +18,10 @@ export async function render(root, { id }) {
   let timer = null;
 
   async function load() {
+    // Rafraîchi toutes les 5 s tant que l'import tourne : le <details> Découpage
+    // est reconstruit à chaque fois (fermé par défaut), donc son état ouvert/fermé
+    // doit être lu avant de jeter l'ancien DOM puis réappliqué au nouveau.
+    const segmentationOpen = content.querySelector('details.seg')?.open ?? false;
     let d;
     let college;
     try {
@@ -71,7 +75,7 @@ export async function render(root, { id }) {
           row(h('span', {}, 'Appels Claude'), fmtInt(d.claude_calls)),
           row(h('span', {}, 'Tokens'), `${fmtInt(d.input_tokens)} entrée / ${fmtInt(d.output_tokens)} sortie`),
           row(h('span', {}, 'Mis à jour le'), fmtDateTime(d.updated_at)))),
-      segmentation(d),
+      segmentation(d, segmentationOpen),
     ].filter(Boolean));
     if (!stopped && RUNNING.has(d.status)) timer = setTimeout(load, 5000);
   }
@@ -90,7 +94,7 @@ function dedupTimeline(events) {
 // Rapport de découpage (JobDetailData.segmentation = segmentation_overview(...)) :
 // items → pages, sections hors item, pages blanches, avertissements. Même contenu
 // que l'ancienne console (renderSegmentation), replié dans un <details>.
-function segmentation(d) {
+function segmentation(d, open = false) {
   const seg = d.segmentation;
   if (!seg) return null;
   const items = seg.items || [];
@@ -102,7 +106,7 @@ function segmentation(d) {
     ...sections.map((sct) => h('tr', {}, h('td', { class: 'muted' }, String(sct.label)), cell(sct.pages), cell('—'), cell('—'))),
     seg.blank_pages ? h('tr', {}, h('td', { class: 'muted' }, 'pages blanches'), cell(seg.blank_pages), cell('—'), cell('—')) : null,
   ];
-  return h('details', { class: 'block' },
+  return h('details', { class: 'block seg', open },
     h('summary', {}, h('b', {}, `Découpage : ${items.length} items, ${sections.length} sections, ${warnings.length} avertissements`)),
     h('table', { class: 'table' }, h('thead', {}, h('tr', {}, ...['Item / section', 'Pages', 'Rang', 'Objectifs A / B'].map((c) => h('th', {}, c)))), h('tbody', {}, ...rows)),
     warnings.length ? h('ul', { class: 'muted' }, ...warnings.map((w) => h('li', {}, String(w)))) : null);

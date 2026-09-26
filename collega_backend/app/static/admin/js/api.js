@@ -3,7 +3,7 @@ const KEY = 'collega-admin-auth';
 let memory = null;
 
 const MESSAGES = {
-  NETWORK: 'Serveur injoignable.',
+  NETWORK: 'Serveur injoignable. Si la session Cloudflare a expiré, recharge la page.',
   RATE_LIMITED: 'Trop de tentatives, réessaie dans une minute.',
   USER_NOT_FOUND: 'Compte introuvable.',
   EMAIL_ALREADY_EXISTS: 'Un compte existe déjà avec cet e-mail.',

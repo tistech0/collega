@@ -1,6 +1,6 @@
 import { api, clearCredentials, hasCredentials } from './api.js';
 import { currentPath, resolve, route } from './router.js';
-import { h, icon } from './ui.js';
+import { banner, h, icon } from './ui.js';
 
 const NAV = [
   { path: '/pilotage', label: 'Pilotage', icon: 'progress' },
@@ -67,8 +67,17 @@ async function render() {
   const found = resolve(path) ?? resolve('/pilotage');
   shell.content.replaceChildren();
   window.scrollTo(0, 0);
-  const view = await found.loader();
-  const viewCleanup = (await view.render(shell.content, found.params)) ?? null;
+  let viewCleanup = null;
+  try {
+    const view = await found.loader();
+    viewCleanup = (await view.render(shell.content, found.params)) ?? null;
+  } catch (err) {
+    // Import dynamique ou render() en échec : page blanche évitée, un bandeau
+    // avec « réessayer » remplace l'écran (respecte renderToken comme le succès).
+    if (token !== renderToken) return;
+    shell.content.replaceChildren(banner(err, () => render()));
+    return;
+  }
   if (token !== renderToken) {
     // Une navigation plus récente a démarré pendant ce chargement : ne pas
     // écraser son cleanup avec le nôtre (obsolète) — juste l'arrêter.

@@ -144,7 +144,8 @@ Le front admin (`app/static/admin/`) est découpé en modules ES chargés par le
 `app/static/admin/js/views/` (`pilotage.js`, `testeuses.js`, `testeuse.js`, `imports.js`,
 `import.js`, `qualite.js`, `couts.js`, `reglages.js`, plus `login.js`). Les briques
 communes (`h`, `icon`, `banner`, `block`, `row`, `tag`, `toast`, formatteurs…) vivent dans
-`js/ui.js` ; le client HTTP (Basic Auth stockée en mémoire) dans `js/api.js`.
+`js/ui.js` ; le client HTTP (Basic Auth gardée en mémoire du module, doublée dans
+`sessionStorage` pour survivre à un rechargement de page) dans `js/api.js`.
 
 Deux fichiers sont **générés**, pas écrits à la main, depuis l'app Flutter (source de
 vérité) :

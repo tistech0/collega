@@ -8,18 +8,22 @@ export async function render(root, { id } = {}) {
   let colleges;
   try {
     ({ data: colleges } = await api('/colleges'));
-    await api('/badges/quality-seen', { method: 'POST' });
-    window.dispatchEvent(new Event('admin:badges'));
   } catch (err) {
     root.append(banner(err, () => { root.replaceChildren(); render(root, { id }); }));
     return;
   }
+  // Best-effort : marquer la qualité comme vue ne doit jamais bloquer l'écran
+  // (la pastille resterait simplement affichée un peu plus longtemps).
+  try {
+    await api('/badges/quality-seen', { method: 'POST' });
+    window.dispatchEvent(new Event('admin:badges'));
+  } catch { /* pastille : non bloquant */ }
   root.append(h('div', { class: 'page-head' }, h('div', {}, h('h1', {}, 'Qualité des fiches'))));
   if (!colleges.length) { root.append(empty('Aucun collège importé pour l\'instant.')); return; }
 
   const current = colleges.find((c) => c.college_id === id) ?? colleges.find((c) => c.negative_count > 0) ?? colleges[0];
   const select = h('select', { class: 'input', style: 'width:auto;max-width:100%', onchange: (e) => go(`/qualite/${e.target.value}`) },
-    ...colleges.map((c) => h('option', { value: c.college_id, selected: c.college_id === current.college_id }, `${c.college_name} — ${c.user_email ?? 'compte supprimé'}${c.negative_count ? ` (${c.negative_count} négatifs)` : ''}`)));
+    ...colleges.map((c) => h('option', { value: c.college_id, selected: c.college_id === current.college_id }, `${c.college_name} — ${c.user_email ?? 'compte supprimé'}${c.negative_count ? ` (${c.negative_count} négatif${c.negative_count > 1 ? 's' : ''})` : ''}`)));
   let filter = current.negative_count ? 'negative' : 'all';
   const stats = h('div', { class: 'stats' });
   const grid = h('div', { class: 'cards' });

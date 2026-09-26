@@ -35,10 +35,17 @@ function testersBlock(testers) {
   return block('Testeuses', h('a', { href: '#/testeuses', class: 'muted' }, 'Tout voir'), rows.length ? rows : empty('Aucune testeuse pour l\'instant.'));
 }
 
+function truncate(text, max = 80) {
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
 function watchBlock(data) {
   const rows = [
     ...data.watch_jobs.map((j) => row(
-      [icon('warning', 16, j.kind === 'failed' ? 'fb-neg' : ''), h('span', { class: 't' }, `Import ${j.college_name}`), h('span', { class: 'muted' }, j.user_email ? `· ${j.user_email}` : '')],
+      [icon('warning', 16, j.kind === 'failed' ? 'fb-neg' : ''),
+        h('div', {},
+          h('div', {}, h('span', { class: 't' }, `Import ${j.college_name}`), h('span', { class: 'muted' }, j.user_email ? ` · ${j.user_email}` : '')),
+          j.message ? h('div', { class: 'muted' }, truncate(j.message)) : null)],
       tag(j.kind === 'failed' ? 'échec' : 'bloqué', j.kind === 'failed' ? 'err' : 'warn'),
       () => go(`/imports/${j.job_id}`))),
     ...data.watch_feedback.map((f) => row(
