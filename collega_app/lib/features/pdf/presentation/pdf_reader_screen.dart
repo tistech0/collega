@@ -70,7 +70,7 @@ class _PdfReaderScreenState extends ConsumerState<PdfReaderScreen> {
             download: download,
             onDownload: () {
               final version = status.pdfVersion;
-              if (version != null) ref.read(pdfDownloadProvider(status.collegeId).notifier).start(version);
+              if (version != null) ref.read(pdfDownloadProvider(status.collegeId).notifier).start(version, expectedSize: status.pdfSize);
             },
           ),
       };

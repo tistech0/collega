@@ -92,4 +92,35 @@ void main() {
     expect(await store.status('c1', 'j1'), LocalPdfStatus.upToDate);
     expect(store.fileFor('c1', 'j2').existsSync(), isTrue);
   });
+
+  test('revue finale 3 : purgeLeftovers supprime les .part et .tmp, garde copies et pages', () async {
+    await store.keepCopy(collegeId: 'c1', version: 'j1', source: await source('a.pdf'));
+    await store.saveLastPage('c1', 3);
+    File('${store.root.path}/c1_j2.pdf.part').writeAsStringSync('x');
+    File('${store.root.path}/c1_j3.pdf.tmp').writeAsStringSync('x');
+    await store.purgeLeftovers();
+    final names = store.root.listSync().map((e) => e.path.split('/').last).toSet();
+    expect(names, {'c1_j1.pdf', 'c1.page'});
+  });
+
+  test('revue finale 4 : réimport jamais publié (échoué) → sa copie part, la version servie reste', () async {
+    await store.keepCopy(collegeId: 'c1', version: 'j1', source: await source('a.pdf'));
+    await store.keepCopy(collegeId: 'c1', version: 'j2', source: await source('b.pdf'));
+    await store.keepOnlyServed({'c1': 'j1'});
+    expect(store.fileFor('c1', 'j1').existsSync(), isTrue);
+    expect(store.fileFor('c1', 'j2').existsSync(), isFalse);
+  });
+
+  test('revue finale 4 : premier import échoué (aucune version servie) → plus rien', () async {
+    await store.keepCopy(collegeId: 'c1', version: 'j1', source: await source('a.pdf'));
+    await store.keepOnlyServed({'c1': null});
+    expect(await store.status('c1', null), LocalPdfStatus.absent);
+  });
+
+  test('revue finale 4 : collège absent de la carte → copies intactes (import en cours)', () async {
+    await store.keepCopy(collegeId: 'c1', version: 'j1', source: await source('a.pdf'));
+    await store.keepCopy(collegeId: 'c1', version: 'j2', source: await source('b.pdf'));
+    await store.keepOnlyServed({});
+    expect(store.fileFor('c1', 'j2').existsSync(), isTrue);
+  });
 }

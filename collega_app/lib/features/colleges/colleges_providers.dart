@@ -70,6 +70,15 @@ extension on CollegesNotifier {
       try {
         final store = await ref.read(localPdfStoreProvider.future);
         await store.deleteExcept({for (final s in fresh) s.collegeId});
+        // Import terminé : seule la version servie reste (un réimport échoué ne
+        // garde pas sa copie). « Prêt » sans version = ancien backend : on garde.
+        await store.keepOnlyServed({
+          for (final s in fresh)
+            if (s.status == 'generation_complete' && s.pdfVersion != null)
+              s.collegeId: s.pdfVersion
+            else if (s.status == 'failed')
+              s.collegeId: s.pdfVersion,
+        });
       } catch (e) {
         AppLogger.warning('purge des PDF locaux impossible : $e', tag: 'CollegesNotifier');
       }

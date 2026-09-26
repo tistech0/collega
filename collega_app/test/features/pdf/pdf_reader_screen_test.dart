@@ -55,6 +55,9 @@ class _MemStore extends LocalPdfStore {
       (_versions[collegeId] ??= []).add(version);
 
   @override
+  Future<bool> verifyDownload(File f, {int? expectedSize}) async => true;
+
+  @override
   Future<int?> lastPage(String collegeId) async => _pages[collegeId];
 
   @override

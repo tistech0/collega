@@ -86,6 +86,42 @@ class LocalPdfStore {
     await f.setLastModified(at);
   }
 
+  /// Téléchargement vraiment complet : en-tête `%PDF-` et, si le serveur l'a
+  /// annoncée, la taille exacte. Sinon le fichier est supprimé (jamais pris
+  /// pour une copie valide : page de connexion Cloudflare, proxy…).
+  Future<bool> verifyDownload(File f, {int? expectedSize}) async {
+    if (!await f.exists()) return false;
+    var ok = expectedSize == null || await f.length() == expectedSize;
+    if (ok) {
+      final head = await f.openRead(0, 5).fold<List<int>>([], (a, b) => a..addAll(b));
+      ok = String.fromCharCodes(head) == '%PDF-';
+    }
+    if (!ok) await _delete(f);
+    return ok;
+  }
+
+  /// Collèges dont l'import est terminé (publié ou échoué) → version servie par
+  /// le serveur (null : aucune). Toute autre copie de ces collèges part : un
+  /// réimport jamais publié ne garde pas 400 Mo pour rien. Les collèges absents
+  /// de [served] (import en cours) ne sont pas touchés.
+  Future<void> keepOnlyServed(Map<String, String?> served) async {
+    for (final MapEntry(key: collegeId, value: version) in served.entries) {
+      final keep = version == null ? null : fileFor(collegeId, version).path;
+      for (final f in await _copies(collegeId)) {
+        if (f.path != keep) await _delete(f);
+      }
+    }
+  }
+
+  /// Restes d'une copie ou d'un téléchargement interrompus (app tuée…) : à
+  /// l'ouverture du store, aucun téléchargement de cette session n'est en cours.
+  Future<void> purgeLeftovers() async {
+    if (!await root.exists()) return;
+    await for (final e in root.list()) {
+      if (e is File && (e.path.endsWith('.part') || e.path.endsWith('.tmp'))) await _delete(e);
+    }
+  }
+
   Future<void> deleteExcept(Set<String> collegeIds) async {
     if (!await root.exists()) return;
     await for (final e in root.list()) {

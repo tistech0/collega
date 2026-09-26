@@ -14,7 +14,13 @@ import 'package:collega_app/features/pdf/data/pdf_downloader.dart';
 /// iOS, contrairement aux caches), exclues de la sauvegarde iCloud.
 final localPdfStoreProvider = FutureProvider<LocalPdfStore>((ref) async {
   final support = await getApplicationSupportDirectory();
-  return LocalPdfStore(Directory(p.join(support.path, 'pdfs')), excluder: const ChannelBackupExcluder());
+  final store = LocalPdfStore(Directory(p.join(support.path, 'pdfs')), excluder: const ChannelBackupExcluder());
+  try {
+    await store.purgeLeftovers();
+  } catch (e) {
+    AppLogger.warning('nettoyage des PDF partiels impossible : $e', tag: 'LocalPdfStore');
+  }
+  return store;
 });
 
 final pdfDownloaderProvider = Provider<PdfDownloader>((ref) => BackgroundPdfDownloader(
@@ -51,7 +57,7 @@ class PdfDownloadNotifier extends FamilyNotifier<PdfDownloadState, String> {
   @override
   PdfDownloadState build(String arg) => const PdfDownloadIdle();
 
-  Future<void> start(String version) async {
+  Future<void> start(String version, {int? expectedSize}) async {
     if (state is PdfDownloading) return;
     state = const PdfDownloading(0);
     try {
@@ -62,7 +68,14 @@ class PdfDownloadNotifier extends FamilyNotifier<PdfDownloadState, String> {
             into: store.root,
             onProgress: (p) => state = PdfDownloading(p),
           );
+      // Jamais une copie invalide (page de connexion Cloudflare, proxy…) : elle
+      // serait « à jour » pour toujours, sans moyen de retélécharger.
+      if (!await store.verifyDownload(part, expectedSize: expectedSize)) {
+        throw const PdfDownloadFailed('fichier reçu invalide');
+      }
       await store.adopt(collegeId: arg, version: version, downloaded: part);
+      // Le statut local est relu partout (vue collège comprise), même écran quitté.
+      ref.invalidate(collegePdfStatusProvider);
       state = const PdfDownloadDone();
     } catch (e) {
       AppLogger.warning('téléchargement du PDF échoué : $e', tag: 'PdfDownloadNotifier');
@@ -74,8 +87,8 @@ class PdfDownloadNotifier extends FamilyNotifier<PdfDownloadState, String> {
 final pdfDownloadProvider =
     NotifierProvider.family<PdfDownloadNotifier, PdfDownloadState, String>(PdfDownloadNotifier.new);
 
-/// Statut de la copie locale face à la version serveur ; se relit après un
-/// téléchargement (invalidé par l'écran).
+/// Statut de la copie locale face à la version serveur ; relu après chaque
+/// téléchargement (invalidé par `PdfDownloadNotifier`).
 final collegePdfStatusProvider =
     FutureProvider.autoDispose.family<LocalPdfStatus, ({String collegeId, String? version})>((ref, key) async {
   final store = await ref.watch(localPdfStoreProvider.future);

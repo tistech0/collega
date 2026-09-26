@@ -8,8 +8,9 @@ import 'package:collega_app/features/pdf/data/pdf_downloader.dart';
 import 'package:collega_app/features/pdf/pdf_providers.dart';
 
 class _FakeDownloader implements PdfDownloader {
-  _FakeDownloader({this.fail = false});
+  _FakeDownloader({this.fail = false, this.content = '%PDF-1.7'});
   final bool fail;
+  final String content;
   @override
   Future<File> download({
     required String collegeId,
@@ -21,7 +22,7 @@ class _FakeDownloader implements PdfDownloader {
     if (fail) throw const PdfDownloadFailed('réseau');
     await into.create(recursive: true);
     onProgress(1);
-    return File('${into.path}/${collegeId}_$version.pdf.part')..writeAsStringSync('%PDF-1.7');
+    return File('${into.path}/${collegeId}_$version.pdf.part')..writeAsStringSync(content);
   }
 }
 
@@ -61,6 +62,36 @@ void main() {
     await c.read(pdfDownloadProvider('c26').notifier).start('j1');
     expect(c.read(pdfDownloadProvider('c26')), isA<PdfDownloadFailedState>());
     expect(await store.status('c26', 'j1'), LocalPdfStatus.absent);
+  });
+
+  test('revue finale 1 : le statut local est relu après le téléchargement (écran quitté)', () async {
+    final c = make(_FakeDownloader());
+    const key = (collegeId: 'c26', version: 'j1');
+    c.listen(collegePdfStatusProvider(key), (_, __) {});
+    expect(await c.read(collegePdfStatusProvider(key).future), LocalPdfStatus.absent);
+    await c.read(pdfDownloadProvider('c26').notifier).start('j1');
+    expect(await c.read(collegePdfStatusProvider(key).future), LocalPdfStatus.upToDate);
+  });
+
+  test('revue finale 2 : une réponse qui n’est pas un PDF n’est jamais gardée', () async {
+    final c = make(_FakeDownloader(content: '<html>Cloudflare Access</html>'));
+    await c.read(pdfDownloadProvider('c26').notifier).start('j1');
+    expect(c.read(pdfDownloadProvider('c26')), isA<PdfDownloadFailedState>());
+    expect(await store.status('c26', 'j1'), LocalPdfStatus.absent);
+    expect(store.root.listSync().whereType<File>(), isEmpty);
+  });
+
+  test('revue finale 2 : taille différente de celle annoncée → échec, rien de gardé', () async {
+    final c = make(_FakeDownloader());
+    await c.read(pdfDownloadProvider('c26').notifier).start('j1', expectedSize: 999999);
+    expect(c.read(pdfDownloadProvider('c26')), isA<PdfDownloadFailedState>());
+    expect(await store.status('c26', 'j1'), LocalPdfStatus.absent);
+  });
+
+  test('revue finale 2 : taille annoncée exacte → gardé', () async {
+    final c = make(_FakeDownloader());
+    await c.read(pdfDownloadProvider('c26').notifier).start('j1', expectedSize: '%PDF-1.7'.length);
+    expect(await store.status('c26', 'j1'), LocalPdfStatus.upToDate);
   });
 
   test('deux appuis : un seul téléchargement', () async {

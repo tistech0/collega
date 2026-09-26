@@ -318,6 +318,24 @@ void main() {
       expect(store.fileFor('cGone', 'j1').existsSync(), isFalse);
     });
 
+    test('revue finale 4 : copie d’un réimport jamais publié supprimée, version servie gardée', () async {
+      await store.keepCopy(collegeId: 'c1', version: 'j2', source: File('${tmp.path}/new.src')..writeAsStringSync('%PDF'));
+      const served = UserCollegeStatus(
+        refId: 3, collegeId: 'c1', status: 'generation_complete', cardCountA: 1, cardCountB: 0, cardCountC: 0,
+        pdfVersion: 'j1',
+      );
+      await container(_FakeCollegesRepository(result: [served])).read(collegesProvider.future);
+      expect(store.fileFor('c1', 'j1').existsSync(), isTrue);
+      expect(store.fileFor('c1', 'j2').existsSync(), isFalse);
+    });
+
+    test('revue finale 4 : ancien backend (prêt, sans version) → copies gardées', () async {
+      await store.keepCopy(collegeId: 'c1', version: 'j2', source: File('${tmp.path}/new.src')..writeAsStringSync('%PDF'));
+      await container(_FakeCollegesRepository(result: [c1])).read(collegesProvider.future);
+      expect(store.fileFor('c1', 'j1').existsSync(), isTrue);
+      expect(store.fileFor('c1', 'j2').existsSync(), isTrue);
+    });
+
     test('échec réseau : aucun PDF supprimé', () async {
       final c = container(_FakeCollegesRepository(offline: true));
       await expectLater(c.read(collegesProvider.future), throwsA(isA<DioException>()));
