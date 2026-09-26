@@ -82,13 +82,22 @@ sans authentification supplémentaire.
 Le `docker-compose.yml` (dev) expose `5432` et `6379` sur `127.0.0.1` seulement,
 pour les outils dev locaux (TablePlus, RedisInsight).
 
+## Domaine public
+
+Le backend est servi sur `collega.matthislesur.com` (tunnel Cloudflare → NPM proxy host 53 →
+`collega-api-1:8000`). L'ancien nom `collegatest.matthislesur.com` reste servi en parallèle
+tant que des builds de l'app qui l'utilisent sont installés (il est écrit en dur dans
+`collega_app/lib/env.dart`) : chaque hostname doit figurer dans le tunnel, le proxy host NPM,
+l'override DNS du LAN et les trois applications Cloudflare Access (service token de l'app,
+`collega-admin`, `collega-webhook-revenuecat`).
+
 ## Console admin : Cloudflare Access
 
 Depuis le chantier 2 (sécurité), la console admin (`/admin` et `/v1/admin`) est protégée
 **depuis l'extérieur** par Cloudflare Access (code par e-mail à usage unique), en plus du
 Basic Auth applicatif existant. Sur le LAN, seul le Basic Auth s'applique (avec sa limite
 d'essais, 10/min par IP). L'application `collega-admin` est **distincte** de l'application
-Access existante pour le service token de l'app (`collegatest`), qui reste inchangée — l'app
+Access existante pour le service token de l'app, qui reste inchangée — l'app
 mobile n'appelle jamais `/v1/admin`.
 
 ### Configuration (à faire une fois, dans le dashboard Cloudflare Zero Trust)
@@ -97,14 +106,14 @@ mobile n'appelle jamais `/v1/admin`.
 2. **Add an application** → **Self-hosted**.
 3. Nommer l'application `collega-admin`.
 4. Renseigner les **destinations** (« Public hostname ») :
-   - `collegatest.matthislesur.com/admin`
-   - `collegatest.matthislesur.com/v1/admin`
+   - `collega.matthislesur.com/admin`
+   - `collega.matthislesur.com/v1/admin`
 5. Créer une policy nommée par ex. « Admin » avec l'action **Allow**, règle **Include** →
    **Emails** → `contact@matthislesur.com`.
 6. Méthode de connexion (« Login method ») : **One-time PIN** (code envoyé par e-mail).
 7. Enregistrer. Ne pas modifier l'application Access existante qui protège le chemin utilisé
-   par le service token de l'app mobile (`collegatest`) : elle continue de couvrir le reste de
-   `collegatest.matthislesur.com` sans exiger de PIN pour les appels authentifiés par service
+   par le service token de l'app mobile : elle continue de couvrir le reste de
+   `collega.matthislesur.com` sans exiger de PIN pour les appels authentifiés par service
    token.
 
 ### Vérification
@@ -113,16 +122,16 @@ Depuis l'extérieur du LAN (4G, ou en forçant la résolution DNS pour simuler l
 
 ```sh
 # IP publique actuelle de Cloudflare pour le sous-domaine (résolution DNS externe) :
-dig +short @1.1.1.1 collegatest.matthislesur.com
+dig +short @1.1.1.1 collega.matthislesur.com
 
 # /admin doit rediriger (302) vers la page de connexion Access :
-curl -i --resolve collegatest.matthislesur.com:443:<IP Cloudflare> \
-  https://collegatest.matthislesur.com/admin
+curl -i --resolve collega.matthislesur.com:443:<IP Cloudflare> \
+  https://collega.matthislesur.com/admin
 
 # /v1/colleges avec le service token de l'app doit rester inchangé (pas de PIN demandé) :
-curl -i --resolve collegatest.matthislesur.com:443:<IP Cloudflare> \
+curl -i --resolve collega.matthislesur.com:443:<IP Cloudflare> \
   -H "CF-Access-Client-Id: <client id>" -H "CF-Access-Client-Secret: <client secret>" \
-  https://collegatest.matthislesur.com/v1/colleges
+  https://collega.matthislesur.com/v1/colleges
 ```
 
 `/admin` doit répondre `302` vers la page de connexion Cloudflare Access ; `/v1/colleges`
