@@ -115,6 +115,7 @@ async def create_user(
         email=body.email.strip().lower(),
         hashed_password=hash_password(body.password),
         is_beta=body.is_beta,
+        first_name=(body.first_name or "").strip() or None,
     )
     db.add(user)
     try:

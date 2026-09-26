@@ -136,11 +136,15 @@ class BetaUpdateResponseWrapped(BaseModel):
 class ConfigData(BaseModel):
     reload_count_max: int
     monthly_reloads_max: int
+    inactivity_days: int
+    testflight_url: str
 
 
 class ConfigUpdateRequest(BaseModel):
     reload_count_max: int | None = Field(default=None, ge=0)
     monthly_reloads_max: int | None = Field(default=None, ge=0)
+    inactivity_days: int | None = Field(default=None, ge=1, le=60)
+    testflight_url: str | None = Field(default=None, max_length=300, pattern=r"^(|https://\S+)$")
 
 
 class ConfigResponseWrapped(BaseModel):
@@ -154,6 +158,7 @@ class CreateUserRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)
     is_beta: bool = False
+    first_name: str | None = Field(default=None, max_length=100)
 
 
 class CreateUserResponseWrapped(BaseModel):
@@ -297,6 +302,7 @@ class AdminFlashCardData(BaseModel):
     verso: str
     ocr_confidence_score: float
     low_confidence: bool
+    user_feedback: str | None = None
 
 
 class AdminCardsResponseWrapped(BaseModel):

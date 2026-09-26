@@ -6,7 +6,7 @@ d'inclusion n'influe pas sur le routage."""
 
 from fastapi import APIRouter
 
-from app.api.v1.admin import colleges, config, jobs, usage, users
+from app.api.v1.admin import colleges, config, jobs, pilot, usage, users
 
 router = APIRouter(tags=["admin"])
 router.include_router(colleges.router)
@@ -14,3 +14,4 @@ router.include_router(jobs.router)
 router.include_router(users.router)
 router.include_router(usage.router)
 router.include_router(config.router)
+router.include_router(pilot.router)

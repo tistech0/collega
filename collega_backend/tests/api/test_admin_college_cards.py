@@ -15,7 +15,7 @@ def make_college(college_id=None):
     return types.SimpleNamespace(id=college_id or uuid.uuid4())
 
 
-def make_card(card_type="classique", rang="A", recto="Q?", verso="R", score=0.9, low=False):
+def make_card(card_type="classique", rang="A", recto="Q?", verso="R", score=0.9, low=False, user_feedback=None):
     return types.SimpleNamespace(
         id=uuid.uuid4(),
         card_type=card_type,
@@ -24,6 +24,7 @@ def make_card(card_type="classique", rang="A", recto="Q?", verso="R", score=0.9,
         verso=verso,
         ocr_confidence_score=score,
         low_confidence=low,
+        user_feedback=user_feedback,
     )
 
 
@@ -46,7 +47,12 @@ class TestGetCollegeCards:
         college = make_college()
         mock_db.get = AsyncMock(return_value=college)
         rows = [
-            (make_card(card_type="classique", rang="A", recto="Q1", verso="R1", score=0.92), 1),
+            (
+                make_card(
+                    card_type="classique", rang="A", recto="Q1", verso="R1", score=0.92, user_feedback="positive"
+                ),
+                1,
+            ),
             (make_card(card_type="definition", rang="B", recto="Terme", verso="Def", score=0.4, low=True), 2),
         ]
         mock_db.execute = AsyncMock(return_value=_rows_result(rows))
@@ -60,9 +66,11 @@ class TestGetCollegeCards:
         assert data[0]["card_type"] == "classique"
         assert data[0]["recto"] == "Q1"
         assert data[0]["verso"] == "R1"
+        assert data[0]["user_feedback"] == "positive"
         assert data[1]["item_number"] == 2
         assert data[1]["rang"] == "B"
         assert data[1]["low_confidence"] is True
+        assert data[1]["user_feedback"] is None
 
     async def test_empty_college_returns_empty_list(self, client: AsyncClient, mock_db):
         college = make_college()

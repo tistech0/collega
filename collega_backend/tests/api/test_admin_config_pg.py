@@ -19,25 +19,39 @@ async def test_401_sans_identifiants(pg_client: AsyncClient):
     assert (await pg_client.patch("/v1/admin/config", json={"reload_count_max": 5})).status_code == 401
 
 
+_ANTI_SPAM_KEYS = ("reload_count_max", "monthly_reloads_max")
+
+
 async def test_get_sans_ligne_renvoie_les_defauts_env(pg_client: AsyncClient):
     resp = await pg_client.get("/v1/admin/config", auth=ADMIN_AUTH)
     assert resp.status_code == 200
-    assert resp.json() == {
-        "data": {"reload_count_max": settings.reload_count_max, "monthly_reloads_max": settings.monthly_reloads_max}
+    data = resp.json()["data"]
+    assert {k: data[k] for k in _ANTI_SPAM_KEYS} == {
+        "reload_count_max": settings.reload_count_max,
+        "monthly_reloads_max": settings.monthly_reloads_max,
     }
+    # Réglages de pilotage (chantier console) : défauts sans ligne en base.
+    assert data["inactivity_days"] == 5
+    assert data["testflight_url"] == ""
 
 
 async def test_patch_puis_get(pg_client: AsyncClient, pg_factory):
     resp = await pg_client.patch("/v1/admin/config", json={"reload_count_max": 7}, auth=ADMIN_AUTH)
     assert resp.status_code == 200
-    assert resp.json()["data"] == {"reload_count_max": 7, "monthly_reloads_max": settings.monthly_reloads_max}
+    data = resp.json()["data"]
+    assert {k: data[k] for k in _ANTI_SPAM_KEYS} == {
+        "reload_count_max": 7,
+        "monthly_reloads_max": settings.monthly_reloads_max,
+    }
 
     resp = await pg_client.patch("/v1/admin/config", json={"monthly_reloads_max": 0}, auth=ADMIN_AUTH)
-    assert resp.json()["data"] == {"reload_count_max": 7, "monthly_reloads_max": 0}
+    data = resp.json()["data"]
+    assert {k: data[k] for k in _ANTI_SPAM_KEYS} == {"reload_count_max": 7, "monthly_reloads_max": 0}
 
     app_settings.clear_cache()  # relu depuis la base, pas depuis le cache
     resp = await pg_client.get("/v1/admin/config", auth=ADMIN_AUTH)
-    assert resp.json()["data"] == {"reload_count_max": 7, "monthly_reloads_max": 0}
+    data = resp.json()["data"]
+    assert {k: data[k] for k in _ANTI_SPAM_KEYS} == {"reload_count_max": 7, "monthly_reloads_max": 0}
     # Le .env n'est pas modifié : il reste la valeur par défaut.
     assert settings.reload_count_max == 2
 
