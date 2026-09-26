@@ -124,8 +124,8 @@ pre.invite { background: var(--ground); border: 1px solid var(--line); border-ra
   .topbar { display: flex; align-items: center; gap: var(--s2); padding: var(--s3) var(--s4); background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 30; font-weight: 700; }
   .main { padding: var(--s5) var(--s4) 48px; }
   h1 { font-size: 24px; }
-  .kpis, .cols, .cols-even { grid-template-columns: 1fr 1fr; }
-  .cols, .cols-even { grid-template-columns: 1fr; }
+  .kpis, .cols, .cols-even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .cols, .cols-even { grid-template-columns: minmax(0, 1fr); }
   .table thead { display: none; }
   .table tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .table td { display: block; border: 0; padding: 2px 0; }

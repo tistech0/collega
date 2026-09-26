@@ -18,7 +18,7 @@ export async function render(root, { id } = {}) {
   if (!colleges.length) { root.append(empty('Aucun collège importé pour l\'instant.')); return; }
 
   const current = colleges.find((c) => c.college_id === id) ?? colleges.find((c) => c.negative_count > 0) ?? colleges[0];
-  const select = h('select', { class: 'input', style: 'width:auto', onchange: (e) => go(`/qualite/${e.target.value}`) },
+  const select = h('select', { class: 'input', style: 'width:auto;max-width:100%', onchange: (e) => go(`/qualite/${e.target.value}`) },
     ...colleges.map((c) => h('option', { value: c.college_id, selected: c.college_id === current.college_id }, `${c.college_name} — ${c.user_email ?? 'compte supprimé'}${c.negative_count ? ` (${c.negative_count} négatifs)` : ''}`)));
   let filter = current.negative_count ? 'negative' : 'all';
   const stats = h('div', { class: 'stats' });
