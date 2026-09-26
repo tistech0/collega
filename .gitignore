@@ -14,3 +14,4 @@ collega_app/.env.local
 
 # Exports de données de prod (contiennent du texte de fiches) — jamais committés
 _bmad-output/implementation-artifacts/exports/
+.superpowers/
