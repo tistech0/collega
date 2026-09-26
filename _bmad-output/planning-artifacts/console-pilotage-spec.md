@@ -250,3 +250,27 @@ Branche `feat/console-pilotage`, commits par étape :
 Puis CI verte, merge, déploiement par `scripts/deploy.sh` (dump avant migration),
 copie du script de santé à jour sur le NAS, essai Telegram, et un build TestFlight
 qui embarque à la fois le nouveau domaine et l'envoi d'activité.
+
+## 7. Amendements après lecture du code (2026-09-26, avant le plan)
+
+1. **Point de reprise des alertes d'import** : stocké dans `app_settings`
+   (clé `import_alerts_since`, ISO 8601) plutôt que dans Redis. La commande n'a
+   alors besoin que de la base, qui est déjà sa dépendance, et le point de reprise
+   survit à un redémarrage de Redis. Remplace la mention Redis du § 2.6.
+2. **Noms de collèges** : le backend ne connaît que `college_ref_id`, les noms sont
+   dans l'app (`collega_app/lib/features/colleges/domain/college_catalog.dart`).
+   Un script `scripts/gen_admin_assets.py` génère `app/core/college_catalog.py`
+   (et `icons.js`), avec un test qui vérifie qu'ils sont à jour. Les réponses admin
+   portent `college_name`.
+3. **Liste des collèges pour l'écran Qualité** : nouvelle route
+   `GET /v1/admin/colleges` (id, nom, e-mail, statut, fiches, avis négatifs) ;
+   `GET /v1/admin/colleges/{id}/cards` ajoute `user_feedback` à chaque fiche.
+4. **« Nom » d'une testeuse** = `users.first_name` (seul champ de nom existant).
+   `POST /v1/admin/users` accepte `first_name` en option ; le mot de passe
+   provisoire est tiré côté console (16 caractères, `crypto.getRandomValues`).
+5. **« Actives sur 7 j »** = testeuses ayant au moins un jour d'activité avec
+   `cards_reviewed > 0` sur la période (comparable d'une semaine à l'autre, ce que
+   `last_seen_at` ne permet pas).
+6. **« Fiches révisées »** côté app = fiches distinctes révisées dans la journée
+   (`weekCounts`, la même mesure que l'écran Progression), pas seulement celles de
+   la session du jour.
