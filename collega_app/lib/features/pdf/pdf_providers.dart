@@ -73,3 +73,11 @@ class PdfDownloadNotifier extends FamilyNotifier<PdfDownloadState, String> {
 
 final pdfDownloadProvider =
     NotifierProvider.family<PdfDownloadNotifier, PdfDownloadState, String>(PdfDownloadNotifier.new);
+
+/// Statut de la copie locale face à la version serveur ; se relit après un
+/// téléchargement (invalidé par l'écran).
+final collegePdfStatusProvider =
+    FutureProvider.autoDispose.family<LocalPdfStatus, ({String collegeId, String? version})>((ref, key) async {
+  final store = await ref.watch(localPdfStoreProvider.future);
+  return store.status(key.collegeId, key.version);
+});

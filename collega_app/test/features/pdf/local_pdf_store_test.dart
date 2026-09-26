@@ -81,7 +81,8 @@ void main() {
     expect(await store.status('c1', 'j1'), LocalPdfStatus.absent);
   });
 
-  test('réimport d’un PDF à date de modification ancienne : la nouvelle copie n’est pas prise pour une version dépassée',
+  test(
+      'réimport d’un PDF à date de modification ancienne : la nouvelle copie n’est pas prise pour une version dépassée',
       () async {
     await store.keepCopy(collegeId: 'c1', version: 'j1', source: await source('a.pdf'));
     final old = await source('b.pdf');

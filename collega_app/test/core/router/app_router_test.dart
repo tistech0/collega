@@ -22,6 +22,7 @@ import 'package:collega_app/features/planning/presentation/planning_screen.dart'
 import 'package:flutter/cupertino.dart' show CupertinoPageTransition;
 import 'package:collega_app/features/colleges/presentation/colleges_screen.dart';
 import 'package:collega_app/features/today/today_providers.dart';
+import 'package:collega_app/features/pdf/presentation/pdf_reader_screen.dart';
 
 class _FakeAuthNotifier extends AuthNotifier {
   _FakeAuthNotifier(this._authState);
@@ -203,6 +204,19 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.byType(WelcomeScreen), findsOneWidget);
       expect(find.text('Progression'), findsNothing);
+    });
+
+    testWidgets('partie B : /colleges/26/pdf?page=112&item=i340 ouvre le lecteur plein écran', (tester) async {
+      await signedIn(tester);
+      final container = ProviderScope.containerOf(tester.element(find.byType(CgTabBar)));
+      container.read(routerProvider).push('/colleges/26/pdf?page=112&item=i340');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      final reader = tester.widget<PdfReaderScreen>(find.byType(PdfReaderScreen));
+      expect(reader.refId, 26);
+      expect(reader.page, 112);
+      expect(reader.itemId, 'i340');
+      expect(find.byType(CgTabBar), findsNothing);
     });
   });
 
