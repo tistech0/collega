@@ -11,6 +11,7 @@ import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
 import 'package:collega_app/features/colleges/domain/drill_stats.dart';
 import 'package:collega_app/features/colleges/domain/item_title.dart';
+import 'package:collega_app/features/colleges/presentation/card_report.dart';
 import 'package:collega_app/features/colleges/presentation/college_detail_screen.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
@@ -279,34 +280,17 @@ class _ItemBodyState extends ConsumerState<_ItemBody> {
     CgHaptics.selection();
     // Envoyé tout de suite ; le résultat n'est dit qu'une fois connu.
     final sent = _notifier.submitNegativeFeedback(card.id).then((_) => true, onError: (Object _) => false);
-    var note = '';
-    final choice = await showCgSheet<String>(
+    final result = await showCardReportSheet(
       context,
-      title: 'Signaler cette fiche',
-      builder: (_) => _NoteBody(
-        message: 'Dis ce qui ne va pas : la fiche peut être régénérée en tenant compte de ta remarque.',
-        onNote: (v) => note = v,
-      ),
-      primary: Builder(
-        builder: (s) => CgButton(
-          label: 'Régénérer la fiche',
-          onPressed: () => Navigator.of(s, rootNavigator: true).pop('regenerate'),
-        ),
-      ),
-      secondary: Builder(
-        builder: (s) => CgButton(
-          label: 'Plus tard',
-          variant: CgButtonVariant.quiet,
-          onPressed: () => Navigator.of(s, rootNavigator: true).pop('later'),
-        ),
-      ),
+      message: 'Dis ce qui ne va pas : la fiche peut être régénérée en tenant compte de ta remarque.',
+      regenerateLabel: 'Régénérer la fiche',
+      laterLabel: 'Plus tard',
     );
-    final text = note.trim();
     final ok = await sent;
     if (!mounted) return;
     if (!ok) showCgToast(context, 'Le signalement n’a pas pu s’enregistrer. Réessaie.');
-    if (choice == 'regenerate') {
-      await _regenerate(card, text.isEmpty ? null : text);
+    if (result.choice == CardReportChoice.regenerate) {
+      await _regenerate(card, result.note);
     } else if (ok) {
       showCgToast(context, 'Fiche signalée');
     }
@@ -325,7 +309,7 @@ class _ItemBodyState extends ConsumerState<_ItemBody> {
     final go = await showCgSheet<bool>(
       context,
       title: 'Régénérer la fiche',
-      builder: (_) => _NoteBody(
+      builder: (_) => CardNoteBody(
         message: 'Une nouvelle fiche remplacera celle-ci. Précise ce qui ne va pas : elle en tiendra compte.',
         onNote: (v) => note = v,
       ),
@@ -378,7 +362,7 @@ class _ItemBodyState extends ConsumerState<_ItemBody> {
   Future<void> _explainOcr() => showCgSheet<void>(
         context,
         title: 'Source à vérifier',
-        builder: (_) => const _NoteBody(
+        builder: (_) => const CardNoteBody(
           message: 'Ce passage du PDF était difficile à lire : la fiche peut contenir une erreur. '
               'Vérifie-la avec ton cours, et signale-la si besoin.',
         ),
@@ -386,34 +370,6 @@ class _ItemBodyState extends ConsumerState<_ItemBody> {
           builder: (s) => CgButton(label: 'Compris', onPressed: () => Navigator.of(s, rootNavigator: true).pop()),
         ),
       );
-}
-
-/// Texte d'une sheet, avec une note facultative (le champ gère son texte : rien
-/// à libérer pendant l'animation de fermeture).
-class _NoteBody extends StatelessWidget {
-  const _NoteBody({required this.message, this.onNote});
-
-  final String message;
-  final ValueChanged<String>? onNote;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = CgTheme.of(context).colors;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(bottom: CgSpace.s4),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(message, style: CgType.body.copyWith(color: c.ink2)),
-        if (onNote != null) ...[
-          const SizedBox(height: CgSpace.s4),
-          CgField(
-            label: 'Qu’est-ce qui ne va pas ? (facultatif)',
-            kind: CgFieldKind.multiline,
-            onChanged: onNote,
-          ),
-        ],
-      ]),
-    );
-  }
 }
 
 /// Fiche dépliable : la question, puis la réponse et les retours.

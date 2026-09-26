@@ -148,6 +148,16 @@ class DrillSessionNotifier
     state = AsyncValue.data(s.copyWith(semanticFeedback: feedback));
   }
 
+  /// Avis donné pendant le drill (spec « avis pendant le drill ») : noté sur la
+  /// fiche, qu'elle revienne ou non dans la file.
+  void setCardFeedback(String cardId, String? feedback) {
+    final s = state.value;
+    if (s == null || !s.cards.any((c) => c.id == cardId)) return;
+    state = AsyncValue.data(s.copyWith(
+      cards: [for (final c in s.cards) c.id == cardId ? c.copyWith(userFeedback: feedback) : c],
+    ));
+  }
+
 
   /// Retourne `true` si la carte a été réinsérée plus loin dans la file.
   Future<bool> evaluate(DrillEvaluationResult result) async {
