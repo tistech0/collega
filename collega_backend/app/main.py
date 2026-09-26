@@ -16,6 +16,7 @@ from app.api.v1.colleges import router as colleges_router
 from app.api.v1.drill import router as drill_router
 from app.api.v1.flash_cards import router as flash_cards_router
 from app.api.v1.health import router as health_router
+from app.api.v1.legal import router as legal_router
 from app.api.v1.notifications import router as notifications_router
 from app.api.v1.search import router as search_router
 from app.core import token_store
@@ -134,6 +135,7 @@ app.state.limiter = limiter
 install_error_handlers(app)
 
 app.include_router(health_router)
+app.include_router(legal_router)
 app.include_router(auth_router, prefix="/v1/auth")
 app.include_router(colleges_router, prefix="/v1")
 app.include_router(flash_cards_router, prefix="/v1")

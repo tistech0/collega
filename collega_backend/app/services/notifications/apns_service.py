@@ -80,18 +80,16 @@ class NullNotificationService(NotificationService):
 
 
 class APNsNotificationService(NotificationService):
-    def __init__(self) -> None:
-        from aioapns import APNs
+    """Envoie sur l'environnement configuré, puis sur l'autre si APNs répond
+    `BadDeviceToken` : un build TestFlight donne un jeton de production, un build
+    installé depuis Xcode un jeton sandbox, et le backend ne sait pas lequel il a."""
 
-        from app.core.config import settings
+    def __init__(self, clients: tuple[Any, Any] | None = None) -> None:
+        if clients is None:
+            from app.core.config import settings
 
-        self._apns = APNs(
-            key=settings.apns_key_path,
-            key_id=settings.apns_key_id,
-            team_id=settings.apns_team_id,
-            topic=settings.apns_bundle_id,
-            use_sandbox=settings.apns_use_sandbox,
-        )
+            clients = (_client(settings.apns_use_sandbox), _client(not settings.apns_use_sandbox))
+        self._apns, self._fallback = clients
 
     async def _send_alert(
         self, apns_token: str | None, title: str, body: str, *, extra: dict | None = None, badge: bool = False
@@ -104,12 +102,14 @@ class APNsNotificationService(NotificationService):
         aps: dict[str, Any] = {"alert": {"title": title, "body": body}, "sound": "default"}
         if badge:
             aps["badge"] = 1
-        request = NotificationRequest(
-            device_token=apns_token,
-            message={"aps": aps, **(extra or {})},
-            push_type=PushType.ALERT,
-        )
-        result = await self._apns.send_notification(request)
+        message = {"aps": aps, **(extra or {})}
+
+        def request() -> NotificationRequest:
+            return NotificationRequest(device_token=apns_token, message=message, push_type=PushType.ALERT)
+
+        result = await self._apns.send_notification(request())
+        if not result.is_successful and result.description == "BadDeviceToken":
+            result = await self._fallback.send_notification(request())
         if result.is_successful:
             logger.info("Push APNs envoyé : %s", title)
         else:
@@ -137,19 +137,34 @@ class APNsNotificationService(NotificationService):
         non bloquant et déterministe, plutôt que de dépendre d'attributs privés
         (`_connection_pool`) qui peuvent être renommés à chaque version mineure.
         """
-        close_attr = getattr(self._apns, "close", None)
-        if close_attr is None or not callable(close_attr):
-            logger.info(
-                "APNs client (%s) n'expose pas close() public — release HTTP/2 délégué au GC",
-                type(self._apns).__name__,
-            )
-            return
-        try:
-            result = close_attr()
-            if hasattr(result, "__await__"):
-                await result  # type: ignore[func-returns-value]
-        except Exception as exc:  # pragma: no cover - cleanup non bloquant
-            logger.warning("APNs close() failed (non-bloquant) : %s", exc)
+        for client in (self._apns, self._fallback):
+            close_attr = getattr(client, "close", None)
+            if close_attr is None or not callable(close_attr):
+                logger.info(
+                    "APNs client (%s) n'expose pas close() public — release HTTP/2 délégué au GC",
+                    type(client).__name__,
+                )
+                continue
+            try:
+                result = close_attr()
+                if hasattr(result, "__await__"):
+                    await result
+            except Exception as exc:  # pragma: no cover - cleanup non bloquant
+                logger.warning("APNs close() failed (non-bloquant) : %s", exc)
+
+
+def _client(use_sandbox: bool) -> Any:
+    from aioapns import APNs
+
+    from app.core.config import settings
+
+    return APNs(
+        key=settings.apns_key_path,
+        key_id=settings.apns_key_id,
+        team_id=settings.apns_team_id,
+        topic=settings.apns_bundle_id,
+        use_sandbox=use_sandbox,
+    )
 
 
 def create_notification_service() -> NotificationService:

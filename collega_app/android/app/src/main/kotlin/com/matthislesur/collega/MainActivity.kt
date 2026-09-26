@@ -1,4 +1,4 @@
-package com.lesurmatthis.collega_app
+package com.matthislesur.collega
 
 import io.flutter.embedding.android.FlutterActivity
 

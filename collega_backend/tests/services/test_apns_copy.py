@@ -29,9 +29,7 @@ def _fake_aioapns(monkeypatch):
 
 
 def _service():
-    svc = object.__new__(APNsNotificationService)
-    svc._apns = _FakeApns()
-    return svc
+    return APNsNotificationService(clients=(_FakeApns(), _FakeApns()))
 
 
 async def test_fiches_pretes_parle_de_collega():

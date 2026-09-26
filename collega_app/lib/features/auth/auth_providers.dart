@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'package:collega_app/core/database/app_database.dart';
 import 'package:collega_app/core/network/api_providers.dart';
@@ -162,7 +161,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   /// Supprime le compte (backend) puis exécute le wipe local **dans l'ordre** :
-  ///   1. `Purchases.logOut()` — RevenueCat (best-effort, try/catch + timeout)
+  ///   1. `RevenueCatService.logOut()` — RevenueCat (best-effort, try/catch + timeout)
   ///   2. `AppDatabase.deleteEverything()` — Drift (best-effort, try/catch + timeout)
   ///   3. `AuthRepository.logout()` — vide `flutter_secure_storage` (best-effort, try/catch)
   ///   4. `state = AsyncData(AuthState())` — TOUJOURS exécuté en dernier
@@ -208,7 +207,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     // RC d'abord car le SDK peut lire le user_id Apple persisté avant qu'on
     // vide le storage.
     try {
-      await Purchases.logOut().timeout(_kLocalWipeStepTimeout);
+      await ref.read(revenueCatServiceProvider).logOut().timeout(_kLocalWipeStepTimeout);
     } on TimeoutException catch (e) {
       AppLogger.warning('RevenueCat logOut timed out during deleteAccount',
           tag: 'AuthNotifier', error: e);
@@ -262,9 +261,10 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   // Fire-and-forget — non-bloquant par design (achat possible même si logIn échoue)
   void _rcLogIn(String userId) {
+    final revenueCat = ref.read(revenueCatServiceProvider);
     () async {
       try {
-        await Purchases.logIn(userId);
+        await revenueCat.logIn(userId);
       } catch (e) {
         AppLogger.warning('RevenueCat logIn failed', tag: 'AuthNotifier', error: e);
       }
@@ -272,9 +272,10 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   void _rcLogOut() {
+    final revenueCat = ref.read(revenueCatServiceProvider);
     () async {
       try {
-        await Purchases.logOut();
+        await revenueCat.logOut();
       } catch (e) {
         AppLogger.warning('RevenueCat logOut failed', tag: 'AuthNotifier', error: e);
       }
