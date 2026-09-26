@@ -9,6 +9,7 @@ from arq.connections import ArqRedis
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app.api.v1.activity import router as activity_router
 from app.api.v1.admin import router as admin_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.billing import router as billing_router
@@ -142,6 +143,7 @@ app.include_router(flash_cards_router, prefix="/v1")
 app.include_router(drill_router, prefix="/v1")
 app.include_router(notifications_router, prefix="/v1")
 app.include_router(search_router, prefix="/v1")
+app.include_router(activity_router, prefix="/v1")
 app.include_router(admin_router, prefix="/v1/admin")
 app.include_router(billing_router, prefix="/v1/webhooks")
 # StaticFiles doit être monté EN DERNIER pour ne pas masquer les routes API

@@ -35,7 +35,7 @@ from app.schemas.auth import (
     RegisterRequest,
     TokenResponse,
 )
-from app.services import app_settings
+from app.services import activity, app_settings
 from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
 
 logger = logging.getLogger(__name__)
@@ -94,6 +94,10 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
     if not verify_password(body.password, user.hashed_password):
         raise unauthorized("INVALID_CREDENTIALS", "Identifiants incorrects")
 
+    if activity.touch_last_seen(user, datetime.now(UTC)):
+        await db.merge(user)
+        await db.commit()
+
     return {"data": _token_pair(user).model_dump()}
 
 
@@ -135,6 +139,9 @@ async def refresh(request: Request, body: RefreshRequest, db: AsyncSession = Dep
     # "active" : révoqué par cette requête ; "grace" : révoqué il y a moins de
     # `GRACE_S` secondes par une requête parallèle → accepté sans toucher à l'état existant.
 
+    if activity.touch_last_seen(user, datetime.now(UTC)):
+        await db.merge(user)
+        await db.commit()
     logger.debug("refresh : jeton renouvelé (user %s)", user.id)
     return {"data": _token_pair(user).model_dump()}
 
@@ -166,6 +173,9 @@ async def get_me(current_user: User = Depends(get_current_user), db: AsyncSessio
     # Quota du mois en cours : le compteur stocké n'est remis à zéro qu'au
     # prochain réimport ; passé la date, il n'est plus le bon (Profil, story 8.14).
     now = datetime.now(UTC)
+    if activity.touch_last_seen(current_user, now):
+        await db.merge(current_user)
+        await db.commit()
     reset_at = current_user.monthly_reloads_reset_at
     if reset_at is None or now >= reset_at:
         monthly_reloads, reset_at = 0, next_month_reset(now)

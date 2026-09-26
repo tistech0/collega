@@ -27,6 +27,7 @@ def make_user(
     monthly_reloads_reset_at=None,
     reminder_hour_utc=None,
     token_version=0,
+    last_seen_at=None,
 ):
     uid = user_id or uuid.uuid4()
     hashed = hash_password("password123") if with_password else "not-used"
@@ -43,6 +44,7 @@ def make_user(
         monthly_reloads_reset_at=monthly_reloads_reset_at,
         reminder_hour_utc=reminder_hour_utc,
         token_version=token_version,
+        last_seen_at=last_seen_at,
     )
 
 
