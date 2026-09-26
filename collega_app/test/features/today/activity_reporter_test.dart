@@ -107,9 +107,16 @@ void main() {
   test('schedule : un seul envoi après l\'anti-rebond', () async {
     reporter.schedule(day);
     reporter.schedule(day);
+    // Rien avant l'anti-rebond (50 ms) : vérifié tôt (30 ms), marge large sous CI.
     await Future<void>.delayed(const Duration(milliseconds: 30));
     expect(http.requests, isEmpty);
-    await Future<void>.delayed(const Duration(milliseconds: 60));
+    // Puis on attend la requête par sondage plutôt qu'un délai fixe après le
+    // debounce (40 ms de marge) : sous charge CI, le Timer peut se déclencher
+    // en retard et rendre le test flaky. On sonde jusqu'à 2 s.
+    final deadline = DateTime.now().add(const Duration(seconds: 2));
+    while (http.requests.isEmpty && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
     expect(http.requests, hasLength(1));
   });
 

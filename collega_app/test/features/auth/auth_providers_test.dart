@@ -13,6 +13,8 @@ import 'package:collega_app/features/auth/paywall_providers.dart';
 import 'package:collega_app/features/auth/data/auth_repository.dart';
 import 'package:collega_app/features/auth/data/revenuecat_service.dart';
 import 'package:collega_app/features/auth/domain/auth_state.dart';
+import 'package:collega_app/features/today/data/activity_reporter.dart';
+import 'package:collega_app/features/today/data/daily_session_repository.dart';
 
 class _FakeAuthRepository extends AuthRepository {
   _FakeAuthRepository({
@@ -284,6 +286,39 @@ void main() {
       await container.read(paywallProvider.future);
 
       expect(_CountingPaywall.builds, 1);
+    });
+
+    test('logout : dispose activityReporterProvider avant les jetons (timer en cours annulé)', () async {
+      var disposed = false;
+      final reporterDb = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(reporterDb.close);
+      final container = ProviderContainer(overrides: [
+        authRepositoryProvider.overrideWithValue(_FakeAuthRepository(loadResult: const AuthState(user: _testUser))),
+        secureStorageProvider.overrideWithValue(const FlutterSecureStorage()),
+        activityReporterProvider.overrideWith((ref) {
+          final reporter = ActivityReporter(
+            dio: Dio(),
+            repo: DailySessionRepository(reporterDb),
+            postponedDays: () async => <int>{},
+          );
+          ref.onDispose(() {
+            disposed = true;
+            reporter.dispose();
+          });
+          return reporter;
+        }),
+      ]);
+      addTearDown(container.dispose);
+      await container.read(authProvider.future);
+      // Instancie le provider (comme le ferait un écran de drill ouvert) avant le logout.
+      container.read(activityReporterProvider).schedule(20722);
+      expect(disposed, isFalse);
+
+      await container.read(authProvider.notifier).logout();
+
+      // Le provider est disposé (donc son Timer annulé) avant que repo.logout()
+      // n'efface les jetons — plus de PUT /v1/activity possible après coup.
+      expect(disposed, isTrue);
     });
 
     test('logout → état non authentifié', () async {
