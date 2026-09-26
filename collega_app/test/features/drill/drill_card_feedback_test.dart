@@ -24,6 +24,8 @@ import 'package:collega_app/features/drill/drill_providers.dart';
 import 'package:collega_app/features/drill/presentation/drill_screen.dart';
 import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
+import 'package:collega_app/features/today/data/activity_reporter.dart';
+import 'package:collega_app/features/today/data/daily_session_repository.dart';
 import 'package:collega_app/features/today/today_providers.dart';
 
 class _DrillRepo extends DrillRepository {
@@ -36,6 +38,17 @@ class _DrillRepo extends DrillRepository {
   }) async => List.of(cards);
   @override
   Future<void> updateCardDrillLevel(String cardId, DrillEvaluationResult result) async => updated[cardId] = result;
+}
+
+/// Pas d'envoi réseau ni de minuteur d'anti-rebond dans ces tests de widget :
+/// un `Timer` réel encore en attente ferait échouer l'invariant de fin de test
+/// de `flutter_test` (« A Timer is still pending »).
+class _NoOpActivityReporter extends ActivityReporter {
+  _NoOpActivityReporter(AppDatabase db)
+      : super(dio: Dio(), repo: DailySessionRepository(db), postponedDays: () async => <int>{});
+
+  @override
+  void schedule(int day) {}
 }
 
 class _CardsRepo extends CollegeDetailRepository {
@@ -111,6 +124,7 @@ Widget _app(_DrillRepo drill, _CardsRepo cards, {List<String>? visited}) {
     collegeDetailRepositoryProvider.overrideWithValue(cards),
     revisionPrefsProvider.overrideWith(_Prefs.new),
     collegesProvider.overrideWith(_Colleges.new),
+    activityReporterProvider.overrideWithValue(_NoOpActivityReporter(AppDatabase.forTesting(NativeDatabase.memory()))),
   ]);
   addTearDown(_container.dispose);
   return UncontrolledProviderScope(

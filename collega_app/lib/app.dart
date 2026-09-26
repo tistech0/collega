@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collega_app/core/notifications/notifications_service.dart';
 import 'package:collega_app/core/router/app_router.dart';
 import 'package:collega_app/core/ui/collega_ui.dart';
+import 'package:collega_app/core/utils/epoch_day.dart';
 import 'package:collega_app/features/auth/auth_providers.dart';
 import 'package:collega_app/features/profile/domain/reminder_sync.dart';
+import 'package:collega_app/features/today/data/activity_reporter.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -28,6 +32,9 @@ class App extends ConsumerWidget {
           auth: ref.read(authProvider.notifier),
           now: DateTime.now(),
         );
+        // Pilotage beta (Task 10) : renvoie les compteurs des 7 derniers jours
+        // avec de l'activité locale (relance app, reconnexion).
+        unawaited(ref.read(activityReporterProvider).reportRecent(today: epochDayOf(DateTime.now())));
       } else if (wasAuth && !isAuth) {
         // P10: reset du connecteur APNs au logout pour que le prochain user puisse s'enregistrer
         ref.read(notificationsServiceProvider).reset();
