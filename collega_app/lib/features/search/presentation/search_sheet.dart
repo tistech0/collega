@@ -4,12 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:collega_app/core/ui/collega_ui.dart';
+import 'package:collega_app/features/colleges/colleges_import_providers.dart';
+import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
+import 'package:collega_app/features/colleges/domain/college_models.dart';
+import 'package:collega_app/features/colleges/domain/import_models.dart';
 import 'package:collega_app/features/colleges/domain/item_title.dart';
 import 'package:collega_app/features/colleges/presentation/college_detail_screen.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
+import 'package:collega_app/features/search/domain/college_match.dart';
 import 'package:collega_app/features/search/domain/search_result.dart';
+import 'package:collega_app/features/search/presentation/college_search_row.dart';
 import 'package:collega_app/features/search/search_providers.dart';
 
 /// Recherche (story 8.10, spec v2 § Parcours 2) : sheet plein écran, clavier
@@ -82,14 +88,95 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
     );
   }
 
+  /// Collège importé : s'ouvre dans l'onglet d'origine, la sheet se ferme.
+  void _openCollege(CollegeListEntry e) {
+    final router = GoRouter.of(context);
+    ref.read(searchRecentsProvider.notifier).add(ref.read(searchNotifierProvider).query);
+    _close();
+    router.push('${widget.origin.base}/${e.catalog.refId}');
+  }
+
+  /// À importer (ou envoi en cours) : l'écran d'import dit où on en est.
+  void _importCollege(CollegeListEntry e) {
+    final router = GoRouter.of(context);
+    _close();
+    router.push('/colleges/${e.catalog.refId}/import');
+  }
+
+  /// Section Items quand des collèges sont affichés au-dessus : les états
+  /// réseau ne concernent qu'elle.
+  List<Widget> _itemsSection(SearchState state) {
+    if (state.isTooShort) return const [];
+    if ((state.isLoading || state.isPending) && !state.hasResults) {
+      return const [CgSectionTitle('Items'), CgSkeletonList(rows: 2)];
+    }
+    if (state.isOffline) {
+      return const [
+        CgSectionTitle('Items'),
+        CgState.offline(title: 'Les items ont besoin d’une connexion', message: 'Les collèges restent accessibles.'),
+      ];
+    }
+    if (state.hasError) {
+      return [
+        const CgSectionTitle('Items'),
+        CgState.error(
+          title: 'La recherche n’a pas abouti',
+          message: 'Rien n’est perdu. Réessaie dans un instant.',
+          actionLabel: 'Réessayer',
+          onAction: () => ref.read(searchNotifierProvider.notifier).retry(),
+        ),
+      ];
+    }
+    final c = CgTheme.of(context).colors;
+    if (state.results.isEmpty) {
+      return [
+        const CgSectionTitle('Items'),
+        Text('Aucun item pour « ${state.query} »', style: CgType.bodyS.copyWith(color: c.ink2)),
+      ];
+    }
+    return [
+      Semantics(liveRegion: true, child: CgSectionTitle('Items · ${state.results.length}')),
+      CgListGroup(children: [
+        for (final r in state.results) _ResultRow(result: r, onOpen: () => _open(r), onRevise: () => _revise(r)),
+      ]),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final c = CgTheme.of(context).colors;
     final state = ref.watch(searchNotifierProvider);
 
+    final query = state.query;
+    // Liste pas encore là (ou en erreur) : pas de section Collèges plutôt
+    // qu'un « Importer » sur un collège peut-être déjà importé.
+    // Surveillée dès l'ouverture : la liste est prête au premier caractère.
+    final entries = ref.watch(collegesProvider).valueOrNull ?? const <CollegeListEntry>[];
+    final colleges = query.isEmpty ? const <CollegeListEntry>[] : matchColleges(query, entries);
+    final upload = ref.watch(collegeImportProvider).valueOrNull;
+    final uploadingRef = upload is ImportUploading ? upload.refId : null;
+    final uploadProgress = upload is ImportUploading ? upload.progress : null;
+
     final Widget body;
-    if (state.isTooShort) {
+    if (query.isEmpty || (state.isTooShort && colleges.isEmpty)) {
       body = _Home(onPick: _search);
+    } else if (colleges.isNotEmpty) {
+      body = ListView(
+        padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + CgSpace.s4),
+        children: [
+          const CgSectionTitle('Collèges'),
+          CgListGroup(children: [
+            for (final e in colleges)
+              CollegeSearchRow(
+                entry: e,
+                uploading: !e.isImported && e.catalog.refId == uploadingRef,
+                progress: uploadProgress,
+                onOpen: () => _openCollege(e),
+                onImport: () => _importCollege(e),
+              ),
+          ]),
+          ..._itemsSection(state),
+        ],
+      );
     } else if ((state.isLoading || state.isPending) && !state.hasResults) {
       body = const Padding(padding: EdgeInsets.only(top: CgSpace.s4), child: CgSkeletonList(rows: 4));
     } else if (state.isOffline) {
@@ -118,19 +205,8 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
       ));
     } else {
       body = ListView(
-        padding: EdgeInsets.only(top: CgSpace.s3, bottom: MediaQuery.paddingOf(context).bottom + CgSpace.s4),
-        children: [
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              '${state.results.length} ${state.results.length > 1 ? 'résultats' : 'résultat'}',
-              style: CgType.bodyS.copyWith(color: c.ink2),
-            ),
-          ),
-          CgListGroup(children: [
-            for (final r in state.results) _ResultRow(result: r, onOpen: () => _open(r), onRevise: () => _revise(r)),
-          ]),
-        ],
+        padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + CgSpace.s4),
+        children: _itemsSection(state),
       );
     }
 
@@ -142,7 +218,7 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
             label: 'Rechercher',
             child: CgField(
               kind: CgFieldKind.search,
-              placeholder: 'Un item, un signe, une dose…',
+              placeholder: 'Un collège, un item, un signe…',
               controller: _controller,
               focusNode: _focus,
               autofocus: true,
@@ -203,7 +279,7 @@ class _Home extends ConsumerWidget {
           ),
         ],
         const SizedBox(height: CgSpace.section),
-        Text('Cherche un item, un signe, une dose', style: CgType.head.copyWith(color: c.ink)),
+        Text('Cherche un collège, un item, un signe', style: CgType.head.copyWith(color: c.ink)),
         const SizedBox(height: CgSpace.s1),
         Text('Par exemple :', style: CgType.bodyS.copyWith(color: c.ink2)),
         const SizedBox(height: CgSpace.s2),

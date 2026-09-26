@@ -7,6 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:collega_app/core/ui/collega_ui.dart';
+import 'package:collega_app/features/colleges/colleges_import_providers.dart';
+import 'package:collega_app/features/colleges/colleges_providers.dart';
+import 'package:collega_app/features/colleges/domain/college_catalog.dart';
+import 'package:collega_app/features/colleges/domain/college_models.dart';
+import 'package:collega_app/features/colleges/domain/import_models.dart';
 import 'package:collega_app/features/colleges/presentation/college_detail_screen.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
 import 'package:collega_app/features/profile/domain/revision_prefs.dart';
@@ -55,6 +60,33 @@ class _Prefs extends RevisionPrefsNotifier {
   Future<RevisionPrefs> build() async => const RevisionPrefs();
 }
 
+/// Neurologie (26) importée ; le reste du catalogue à importer.
+class _Colleges extends CollegesNotifier {
+  static bool fails = false;
+  @override
+  Future<List<CollegeListEntry>> build() async {
+    if (fails) throw StateError('liste indisponible');
+    return [
+      for (final c in kCollegeCatalog)
+        CollegeListEntry(
+          catalog: c,
+          userStatus: c.refId == 26
+              ? const UserCollegeStatus(
+                  refId: 26, collegeId: 'c26', status: 'generation_complete', cardCountA: 412, cardCountB: 0, cardCountC: 0)
+              : null,
+        ),
+    ];
+  }
+}
+
+class _Import extends CollegeImportNotifier {
+  static CollegeImportState value = const ImportIdle();
+  @override
+  Future<CollegeImportState> build() async => value;
+  @override
+  Future<void> resumePendingUpload() async {}
+}
+
 class _Visit {
   final paths = <String>[];
   final extras = <Object?>[];
@@ -83,7 +115,15 @@ Widget _app({_Visit? visit, double textScale = 1, String initial = '/'}) {
         ),
       ),
     ),
-    for (final path in ['/colleges', '/colleges/:ref/items/:item', '/home/colleges/:ref/items/:item', '/drill'])
+    for (final path in [
+      '/colleges',
+      '/colleges/:ref',
+      '/home/colleges/:ref',
+      '/colleges/:ref/import',
+      '/colleges/:ref/items/:item',
+      '/home/colleges/:ref/items/:item',
+      '/drill',
+    ])
       GoRoute(path: path, builder: (_, s) {
         visit?.paths.add(s.uri.path);
         visit?.extras.add(s.extra);
@@ -95,6 +135,8 @@ Widget _app({_Visit? visit, double textScale = 1, String initial = '/'}) {
       searchRepositoryProvider.overrideWithValue(_repo),
       searchRecentsStoreProvider.overrideWithValue(_recents),
       revisionPrefsProvider.overrideWith(_Prefs.new),
+      collegesProvider.overrideWith(_Colleges.new),
+      collegeImportProvider.overrideWith(_Import.new),
     ],
     child: CgTheme(
       data: CgThemeData.light,
@@ -133,6 +175,8 @@ void main() {
   setUp(() {
     _repo = _Repo();
     _recents = _Recents();
+    _Colleges.fails = false;
+    _Import.value = const ImportIdle();
   });
 
   group('accueil de la recherche', () {
@@ -145,7 +189,7 @@ void main() {
       expect(field.focusNode.hasFocus, isTrue);
       expect(find.text('Récentes'), findsOneWidget);
       expect(find.text('alcool'), findsOneWidget);
-      expect(find.text('Cherche un item, un signe, une dose'), findsOneWidget);
+      expect(find.text('Cherche un collège, un item, un signe'), findsOneWidget);
       for (final e in ['BNP', 'Gardasil', 'dyspnée']) {
         expect(find.text(e), findsOneWidget);
       }
@@ -158,7 +202,7 @@ void main() {
       await tester.tap(find.text('BNP'));
       await tester.pump(kSearchDebounce);
       await tester.pumpAndSettle();
-      expect(find.text('2 résultats'), findsOneWidget);
+      expect(find.text('Items · 2'), findsOneWidget);
     });
 
     testWidgets('« Effacer » vide les récentes', (tester) async {
@@ -182,7 +226,7 @@ void main() {
       expect(find.byType(EditableText), findsNothing);
       await _open(tester);
       expect(tester.widget<EditableText>(find.byType(EditableText)).controller.text, 'BNP');
-      expect(find.text('2 résultats'), findsOneWidget);
+      expect(find.text('Items · 2'), findsOneWidget);
     });
   });
 
@@ -192,7 +236,7 @@ void main() {
       await tester.pumpWidget(_app());
       await _open(tester);
       await _type(tester, 'BNP');
-      expect(find.text('2 résultats'), findsOneWidget);
+      expect(find.text('Items · 2'), findsOneWidget);
       expect(find.text('Insuffisance cardiaque'), findsOneWidget);
       expect(find.text('Item 232 · Cancérologie'), findsOneWidget);
       expect(find.text('Item 203'), findsOneWidget, reason: 'repli sans titre');
@@ -264,7 +308,7 @@ void main() {
       await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
       await tester.pumpAndSettle();
-      expect(find.text('2 résultats'), findsOneWidget);
+      expect(find.text('Items · 2'), findsOneWidget);
       expect(_recents.saved, ['BNP']);
     });
 
@@ -318,7 +362,7 @@ void main() {
       _repo.error = null;
       await tester.tap(find.text('Réessayer'));
       await tester.pumpAndSettle();
-      expect(find.text('2 résultats'), findsOneWidget);
+      expect(find.text('Items · 2'), findsOneWidget);
     });
   });
 
@@ -349,8 +393,143 @@ void main() {
     });
   });
 
+  group('collèges', () {
+    testWidgets('« neuro » : section Collèges puis Items', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app());
+      await _open(tester);
+      await _type(tester, 'neuro');
+      expect(find.text('Collèges'), findsOneWidget);
+      expect(find.text('Neurochirurgie'), findsOneWidget);
+      expect(find.text('CN · pas encore importé'), findsOneWidget);
+      expect(find.text('Neurologie'), findsOneWidget);
+      expect(find.text('CEN · 412 fiches'), findsOneWidget);
+      expect(find.text('Items · 2'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('Collèges')).dy,
+        lessThan(tester.getTopLeft(find.text('Items · 2')).dy),
+      );
+    });
+
+    testWidgets('dès 1 caractère, sans attendre ni appeler le serveur', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app());
+      await _open(tester);
+      await tester.enterText(find.byType(EditableText), 'u');
+      await tester.pump();
+      expect(find.text('Urologie'), findsOneWidget);
+      expect(find.textContaining('Items'), findsNothing, reason: 'moins de 2 caractères : pas de recherche d’items');
+    });
+
+    testWidgets('1 caractère sans collège : l’accueil reste', (tester) async {
+      _phone(tester);
+      await tester.pumpWidget(_app());
+      await _open(tester);
+      await tester.enterText(find.byType(EditableText), 'w');
+      await tester.pump();
+      expect(find.text('Cherche un collège, un item, un signe'), findsOneWidget);
+      expect(find.textContaining('Aucun résultat'), findsNothing);
+    });
+
+    testWidgets('collège importé : la sheet se ferme et le collège s’ouvre dans l’onglet d’origine, récente ajoutée',
+        (tester) async {
+      _phone(tester);
+      final visit = _Visit();
+      await tester.pumpWidget(_app(visit: visit, initial: '/today'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ouvrir depuis Aujourd’hui'));
+      await tester.pumpAndSettle();
+      await _type(tester, 'neurologie');
+      await tester.tap(find.text('Neurologie'));
+      await tester.pumpAndSettle();
+      expect(visit.paths, ['/home/colleges/26']);
+      expect(find.byType(EditableText), findsNothing);
+      expect(_recents.saved, ['neurologie']);
+    });
+
+    testWidgets('« Importer » : la sheet se ferme sur l’écran d’import', (tester) async {
+      _phone(tester);
+      final visit = _Visit();
+      await tester.pumpWidget(_app(visit: visit));
+      await _open(tester);
+      await _type(tester, 'neurochir');
+      await tester.tap(find.text('Importer'));
+      await tester.pumpAndSettle();
+      expect(visit.paths, ['/colleges/25/import']);
+      expect(find.byType(EditableText), findsNothing);
+    });
+
+    testWidgets('envoi en cours : « envoi du PDF », mène à l’import', (tester) async {
+      _phone(tester);
+      _Import.value = const ImportUploading(refId: 25, progress: 0.5);
+      final visit = _Visit();
+      await tester.pumpWidget(_app(visit: visit));
+      await _open(tester);
+      await _type(tester, 'neurochir');
+      expect(find.text('CN · envoi du PDF : 50 %'), findsOneWidget);
+      expect(find.text('Importer'), findsNothing);
+      await tester.tap(find.text('Neurochirurgie'));
+      await tester.pumpAndSettle();
+      expect(visit.paths, ['/colleges/25/import']);
+    });
+
+    testWidgets('hors ligne : les collèges restent, l’état hors ligne est sous « Items »', (tester) async {
+      _phone(tester);
+      _repo.error = DioException(requestOptions: RequestOptions(path: '/s'), type: DioExceptionType.connectionError);
+      await tester.pumpWidget(_app());
+      await _open(tester);
+      await _type(tester, 'neuro');
+      expect(find.text('Neurologie'), findsOneWidget);
+      expect(find.text('Les items ont besoin d’une connexion'), findsOneWidget);
+      expect(find.text('La recherche a besoin d’une connexion'), findsNothing);
+    });
+
+    testWidgets('erreur serveur avec collèges : « Réessayer » sous Items relance', (tester) async {
+      _phone(tester);
+      _repo.error = DioException(requestOptions: RequestOptions(path: '/s'), type: DioExceptionType.badResponse);
+      await tester.pumpWidget(_app());
+      await _open(tester);
+      await _type(tester, 'neuro');
+      expect(find.text('Neurologie'), findsOneWidget);
+      _repo.error = null;
+      await tester.tap(find.text('Réessayer'));
+      await tester.pumpAndSettle();
+      expect(find.text('Items · 2'), findsOneWidget);
+    });
+
+    testWidgets('collèges trouvés, aucun item : pas de « Aucun résultat » pleine page', (tester) async {
+      _phone(tester);
+      _repo.results = const [];
+      await tester.pumpWidget(_app());
+      await _open(tester);
+      await _type(tester, 'neuro');
+      expect(find.text('Neurologie'), findsOneWidget);
+      expect(find.text('Aucun item pour « neuro »'), findsOneWidget);
+      expect(find.text('Aucun résultat pour « neuro »'), findsNothing);
+    });
+
+    testWidgets('liste des collèges indisponible : pas de section Collèges, les items marchent', (tester) async {
+      _phone(tester);
+      _Colleges.fails = true;
+      await tester.pumpWidget(_app());
+      await _open(tester);
+      await _type(tester, 'neuro');
+      expect(find.text('Collèges'), findsNothing);
+      expect(find.text('Importer'), findsNothing);
+      expect(find.text('Items · 2'), findsOneWidget);
+    });
+
+    testWidgets('Dynamic Type 1,6 sur 375 avec les deux sections : aucun débordement', (tester) async {
+      _phone(tester, width: 375, height: 812);
+      await tester.pumpWidget(_app(textScale: 1.6));
+      await _open(tester);
+      await _type(tester, 'neuro');
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('goldens', () {
-    for (final (name, query) in [('home', null), ('results', 'BNP')]) {
+    for (final (name, query) in [('home', null), ('results', 'BNP'), ('colleges', 'neuro')]) {
       for (final width in cgGoldenWidths) {
         for (final scale in cgGoldenScales) {
           final tag = '${width.toInt()}_${scale.toString().replaceAll('.', '')}';
