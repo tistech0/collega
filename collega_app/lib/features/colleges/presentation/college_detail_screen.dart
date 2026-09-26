@@ -18,6 +18,9 @@ import 'package:collega_app/features/colleges/domain/import_models.dart';
 import 'package:collega_app/features/colleges/domain/item_title.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
+import 'package:collega_app/features/pdf/data/local_pdf_store.dart';
+import 'package:collega_app/features/pdf/domain/pdf_labels.dart';
+import 'package:collega_app/features/pdf/pdf_providers.dart';
 import 'package:collega_app/features/today/domain/daily_session_builder.dart';
 
 /// D'où le détail a été ouvert : fixe le retour, l'onglet actif et les routes
@@ -305,6 +308,7 @@ class _LoadedDetailState extends ConsumerState<_LoadedDetail> {
           legend: true,
         ),
         const SizedBox(height: CgSpace.s4),
+        _PdfRow(status: widget.entry.userStatus!, onOpen: () => context.push(pdfReaderPath(_refId))),
         CgSegmented<String?>(
           values: const [null, 'A', 'B', 'C'],
           labelOf: (r) => r == null ? 'Tous' : 'Rang $r',
@@ -496,6 +500,44 @@ class _DetailSkeleton extends StatelessWidget {
         CgSkeleton.block(height: _segmentedHeight, radius: CgRadius.s),
         SizedBox(height: CgSpace.section),
         CgSkeletonList(rows: 6),
+      ]),
+    );
+  }
+}
+
+/// « Mon PDF du collège » (partie B) : sur ce téléphone, à télécharger, ou
+/// indisponible (le serveur n'annonce aucun PDF : backend ancien, fichier absent).
+class _PdfRow extends ConsumerWidget {
+  const _PdfRow({required this.status, required this.onOpen});
+
+  final UserCollegeStatus status;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final local = ref
+        .watch(collegePdfStatusProvider((collegeId: status.collegeId, version: status.pdfVersion)))
+        .valueOrNull;
+    if (local == null) return const SizedBox.shrink();
+    final String subtitle;
+    if (local == LocalPdfStatus.upToDate) {
+      subtitle = 'sur ce téléphone';
+    } else if (status.pdfVersion != null) {
+      subtitle = status.pdfSize == null ? 'à télécharger' : 'à télécharger · ${megabytesLabel(status.pdfSize!)}';
+    } else {
+      subtitle = 'indisponible pour l’instant';
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: CgSpace.s4),
+      child: CgListGroup(children: [
+        CgListRow(
+          key: const Key('college-pdf-row'),
+          title: 'Mon PDF du collège',
+          subtitle: subtitle,
+          leading: const CgRowIcon(CgIcons.document),
+          trailing: CgRowTrailing.chevron,
+          onTap: onOpen,
+        ),
       ]),
     );
   }

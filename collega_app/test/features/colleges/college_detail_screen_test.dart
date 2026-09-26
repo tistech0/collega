@@ -19,6 +19,8 @@ import 'package:collega_app/features/colleges/domain/drill_stats.dart';
 import 'package:collega_app/features/colleges/domain/import_models.dart';
 import 'package:collega_app/features/colleges/presentation/college_detail_screen.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
+import 'package:collega_app/features/pdf/data/local_pdf_store.dart';
+import 'package:collega_app/features/pdf/pdf_providers.dart';
 import 'package:collega_app/features/profile/domain/revision_prefs.dart';
 import 'package:collega_app/features/profile/profile_providers.dart';
 
@@ -26,6 +28,7 @@ import '../../support/cg_golden.dart';
 
 UserCollegeStatus _status(String status) => UserCollegeStatus(
       refId: 3, collegeId: 'c3', status: status, cardCountA: 25, cardCountB: 5, cardCountC: 3,
+      pdfVersion: 'j1', pdfSize: 398458880,
     );
 
 ItemModel _item(String id, int number, String rang, int cards, {String? title, bool lowConfidence = false}) =>
@@ -140,6 +143,7 @@ Widget _app({
   double textScale = 1,
   CollegesNotifier Function()? colleges,
   bool autoPush = true,
+  LocalPdfStatus pdf = LocalPdfStatus.upToDate,
 }) {
   var pushed = !autoPush;
   Widget detailPage(GoRouterState s) => CollegeDetailScreen(
@@ -182,6 +186,10 @@ Widget _app({
         visit?.paths.add('/colleges/${s.pathParameters['ref']}/items/${s.pathParameters['item']}');
         return const SizedBox();
       }),
+      GoRoute(path: '/colleges/:ref/pdf', builder: (_, s) {
+        visit?.paths.add(s.uri.toString());
+        return const SizedBox();
+      }),
       GoRoute(path: '/drill', builder: (_, s) {
         visit?.paths.add('/drill');
         visit?.drillExtra = s.extra;
@@ -198,6 +206,7 @@ Widget _app({
           (ref, arg) => Stream.value((statsByRang ?? _byRang(stats ?? _stats))[arg.$2] ?? const {})),
       collegeImportRepositoryProvider.overrideWithValue(_ImportRepo(limits)),
       revisionPrefsProvider.overrideWith(_Prefs.new),
+      collegePdfStatusProvider.overrideWith((ref, key) async => pdf),
     ],
     child: CgTheme(
       data: CgThemeData.light,
@@ -571,6 +580,40 @@ void main() {
       final src = File('lib/features/colleges/presentation/college_detail_screen.dart').readAsStringSync();
       expect(src, isNot(contains('material.dart')));
       expect(src, isNot(contains('shadcn_ui')));
+    });
+  });
+
+  group('PDF du collège (partie B)', () {
+    testWidgets('ligne « Mon PDF du collège » : sur ce téléphone → ouvre le lecteur', (tester) async {
+      final visit = _Visit();
+      await tester.pumpWidget(_app(visit: visit));
+      await tester.pumpAndSettle();
+      expect(find.text('Mon PDF du collège'), findsOneWidget);
+      expect(find.textContaining('sur ce téléphone'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('college-pdf-row')));
+      await tester.pumpAndSettle();
+      expect(visit.paths.last, '/colleges/3/pdf');
+    });
+
+    testWidgets('PDF absent : « à télécharger · 380 Mo »', (tester) async {
+      await tester.pumpWidget(_app(pdf: LocalPdfStatus.absent));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('à télécharger · 380 Mo'), findsOneWidget);
+    });
+
+    testWidgets('aucun PDF annoncé par le serveur ni en local : « indisponible pour l’instant »', (tester) async {
+      final visit = _Visit();
+      await tester.pumpWidget(_app(
+        status: const UserCollegeStatus(refId: 3, collegeId: 'c3', status: 'generation_complete',
+            cardCountA: 25, cardCountB: 5, cardCountC: 3),
+        pdf: LocalPdfStatus.absent,
+        visit: visit,
+      ));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('indisponible pour l’instant'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('college-pdf-row')));
+      await tester.pumpAndSettle();
+      expect(visit.paths.last, '/colleges/3/pdf');
     });
   });
 

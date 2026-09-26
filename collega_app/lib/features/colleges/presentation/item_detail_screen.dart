@@ -15,6 +15,7 @@ import 'package:collega_app/features/colleges/presentation/card_report.dart';
 import 'package:collega_app/features/colleges/presentation/college_detail_screen.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/drill_launcher.dart';
+import 'package:collega_app/features/pdf/domain/pdf_labels.dart';
 import 'package:collega_app/features/search/presentation/search_sheet.dart';
 
 /// Détail d'un item (story 8.11) : les fiches à relire (question → réponse),
@@ -92,6 +93,7 @@ class ItemDetailScreen extends ConsumerWidget {
       ]);
     }
     return _ItemBody(
+      refId: refId,
       collegeId: collegeId,
       collegeName: collegeName,
       itemId: itemId,
@@ -144,8 +146,15 @@ Widget _errorFor(Object error, VoidCallback retry) => _centered(isNetworkUnreach
 String _count(int n, String noun) => '$n ${n > 1 ? '${noun}s' : noun}';
 
 class _ItemBody extends ConsumerStatefulWidget {
-  const _ItemBody({required this.collegeId, required this.collegeName, required this.itemId, required this.page});
+  const _ItemBody({
+    required this.refId,
+    required this.collegeId,
+    required this.collegeName,
+    required this.itemId,
+    required this.page,
+  });
 
+  final int refId;
   final String collegeId;
   final String collegeName;
   final String itemId;
@@ -216,6 +225,18 @@ class _ItemBodyState extends ConsumerState<_ItemBody> {
         ),
       ),
       [
+        if (item?.startPage != null)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: CgButton(
+              key: const Key('item-pdf-link'),
+              label: 'Lire dans le PDF · ${pageRangeLabel(item!.startPage!, item.endPage)}',
+              variant: CgButtonVariant.quiet,
+              size: CgButtonSize.compact,
+              expand: false,
+              onPressed: () => _openPdf(item),
+            ),
+          ),
         const SizedBox(height: CgSpace.s4),
         CgRankBar(
           mastered: stats.maitrise,
@@ -359,17 +380,36 @@ class _ItemBodyState extends ConsumerState<_ItemBody> {
     }
   }
 
-  Future<void> _explainOcr() => showCgSheet<void>(
-        context,
-        title: 'Source à vérifier',
-        builder: (_) => const CardNoteBody(
-          message: 'Ce passage du PDF était difficile à lire : la fiche peut contenir une erreur. '
-              'Vérifie-la avec ton cours, et signale-la si besoin.',
-        ),
-        primary: Builder(
-          builder: (s) => CgButton(label: 'Compris', onPressed: () => Navigator.of(s, rootNavigator: true).pop()),
-        ),
-      );
+  /// Lecteur à la première page de l'item (pages en base 0 en base, 1 à l'écran).
+  void _openPdf(ItemModel item) =>
+      context.push(pdfReaderPath(widget.refId, page: item.startPage! + 1, itemId: item.id));
+
+  Future<void> _explainOcr() {
+    final item = ref.read(itemInfoProvider(widget.itemId)).valueOrNull;
+    return showCgSheet<void>(
+      context,
+      title: 'Source à vérifier',
+      builder: (_) => const CardNoteBody(
+        message: 'Ce passage du PDF était difficile à lire : la fiche peut contenir une erreur. '
+            'Vérifie-la avec ton cours, et signale-la si besoin.',
+      ),
+      primary: Builder(
+        builder: (s) => CgButton(label: 'Compris', onPressed: () => Navigator.of(s, rootNavigator: true).pop()),
+      ),
+      secondary: item?.startPage == null
+          ? null
+          : Builder(
+              builder: (s) => CgButton(
+                label: 'Vérifier dans le PDF',
+                variant: CgButtonVariant.quiet,
+                onPressed: () {
+                  Navigator.of(s, rootNavigator: true).pop();
+                  _openPdf(item!);
+                },
+              ),
+            ),
+    );
+  }
 }
 
 /// Fiche dépliable : la question, puis la réponse et les retours.
