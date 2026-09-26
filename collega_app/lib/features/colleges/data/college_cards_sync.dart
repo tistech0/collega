@@ -58,6 +58,8 @@ Future<void> syncItemsToDrift(AppDatabase db, String collegeId, List<ItemModel> 
             chapterTitle: Value(item.chapterTitle),
             ocrConfidenceScore: Value(item.ocrConfidenceScore),
             lowConfidence: Value(item.lowConfidence),
+            startPage: Value(item.startPage),
+            endPage: Value(item.endPage),
           ),
       ],
     );

@@ -11,6 +11,10 @@ class UserColleges extends Table {
   IntColumn get cardCountB => integer()();
   IntColumn get cardCountC => integer()();
 
+  /// PDF en service côté serveur (id du dernier job publié) et sa taille (partie B).
+  TextColumn get pdfVersion => text().nullable()();
+  IntColumn get pdfSize => integer().nullable()();
+
   @override
   Set<Column> get primaryKey => {refId};
 }

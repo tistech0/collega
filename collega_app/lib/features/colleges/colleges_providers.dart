@@ -56,6 +56,8 @@ extension on CollegesNotifier {
                   cardCountA: s.cardCountA,
                   cardCountB: s.cardCountB,
                   cardCountC: s.cardCountC,
+                  pdfVersion: Value(s.pdfVersion),
+                  pdfSize: Value(s.pdfSize),
                 ),
             ]));
         // Liste fraîche du serveur : le contenu local des collèges disparus
@@ -75,6 +77,8 @@ extension on CollegesNotifier {
             cardCountA: r.cardCountA,
             cardCountB: r.cardCountB,
             cardCountC: r.cardCountC,
+            pdfVersion: r.pdfVersion,
+            pdfSize: r.pdfSize,
           ),
       ], isNetworkUnreachable(e));
     }

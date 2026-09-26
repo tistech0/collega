@@ -29,7 +29,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -76,6 +76,16 @@ class AppDatabase extends _$AppDatabase {
           if (from < 9) {
             // Partie D : jours « rien à réviser » (série de l'Accueil).
             await m.createTable(quietDays);
+          }
+          // Partie B : pages des items et version du PDF. `items` existe depuis la
+          // v2 et `user_colleges` depuis la v7 : avant, createTable a déjà les colonnes.
+          if (from >= 2 && from < 10) {
+            await m.addColumn(items, items.startPage);
+            await m.addColumn(items, items.endPage);
+          }
+          if (from >= 7 && from < 10) {
+            await m.addColumn(userColleges, userColleges.pdfVersion);
+            await m.addColumn(userColleges, userColleges.pdfSize);
           }
         },
       );

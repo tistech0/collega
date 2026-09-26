@@ -8,6 +8,8 @@ class UserCollegeStatus {
     required this.cardCountA,
     required this.cardCountB,
     required this.cardCountC,
+    this.pdfVersion,
+    this.pdfSize,
   });
   final int refId;
   final String collegeId;
@@ -15,6 +17,10 @@ class UserCollegeStatus {
   final int cardCountA;
   final int cardCountB;
   final int cardCountC;
+
+  /// PDF en service côté serveur (id du dernier import publié) et sa taille (partie B).
+  final String? pdfVersion;
+  final int? pdfSize;
 
   int get totalCards => cardCountA + cardCountB + cardCountC;
 
@@ -26,6 +32,8 @@ class UserCollegeStatus {
         cardCountA: json['card_count_a'] as int? ?? 0,
         cardCountB: json['card_count_b'] as int? ?? 0,
         cardCountC: json['card_count_c'] as int? ?? 0,
+        pdfVersion: json['pdf_version'] as String?,
+        pdfSize: json['pdf_size'] as int?,
       );
 }
 

@@ -58,6 +58,8 @@ class CollegeDetailRepository {
             cardCountA: counts[r.id]?['A'] ?? 0,
             cardCountB: counts[r.id]?['B'] ?? 0,
             cardCountC: counts[r.id]?['C'] ?? 0,
+            startPage: r.startPage,
+            endPage: r.endPage,
           ),
         )
         .toList();
