@@ -491,7 +491,7 @@ void main() {
     for (final (name, state) in <(String, TodayState)>[
       ('ready', _ready()),
       ('started', _ready(position: 12)),
-      ('done', _ready(completed: true, verdicts: {'maitrise': 18, 'bien': 4, 'a_revoir': 2})),
+      ('done', _ready(completed: true, verdicts: {'maitrise': 18, 'bien': 4, 'a_revoir': 2}, streak: 5)),
       ('empty', const TodayNoCollege()),
     ]) {
       for (final width in cgGoldenWidths) {
