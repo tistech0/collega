@@ -1,6 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfrx/pdfrx.dart';
+
+/// iOS : les pods sont liés en statique, PDFium est donc dans l'exécutable de
+/// l'app et non dans `pdfrx.framework/pdfrx` que pdfrx cherche par défaut.
+/// Exige STRIP_STYLE = non-global (Runner) pour garder ses symboles exportés.
+void configurePdfium() {
+  if (Platform.isIOS) Pdfrx.pdfiumModulePath = Platform.resolvedExecutable;
+}
 
 /// Rendu du PDF ; remplacé en test (pdfium ne tourne pas sous `flutter test`).
 typedef PdfDocumentBuilder = Widget Function({
