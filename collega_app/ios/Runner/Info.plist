@@ -28,6 +28,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Collega n’accède à tes photos que si tu choisis d’importer un document depuis ta photothèque.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Collega n’enregistre une image dans ta photothèque que si tu le demandes.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIBackgroundModes</key>

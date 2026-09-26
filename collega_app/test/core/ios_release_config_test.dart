@@ -31,6 +31,15 @@ void main() {
     );
   });
 
+  // ITMS-90683 (build 386538) : file_picker embarque DKImagePickerController, qui
+  // référence PHPhotoLibrary ; App Store Connect refuse le binaire sans ces phrases.
+  test('Info.plist : phrases d’usage de la photothèque', () {
+    final plist = read('ios/Runner/Info.plist');
+    for (final key in ['NSPhotoLibraryUsageDescription', 'NSPhotoLibraryAddUsageDescription']) {
+      expect(plist, matches(RegExp('<key>$key</key>\\s*<string>[^<]{20,}</string>')), reason: key);
+    }
+  });
+
   test('ExportOptions.plist : envoi App Store Connect, signature automatique', () {
     final options = read('ios/ExportOptions.plist');
     expect(options, matches(RegExp(r'<key>method</key>\s*<string>app-store-connect</string>')));
