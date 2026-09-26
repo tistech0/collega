@@ -189,9 +189,12 @@ class ResetPasswordResponseWrapped(BaseModel):
 class UserCollegeSummary(BaseModel):
     college_id: str
     college_ref_id: int
+    college_name: str
     status: str
     reload_count: int
     reload_count_max: int
+    card_count: int
+    progress: float
 
 
 class UserJobSummary(BaseModel):
@@ -203,17 +206,40 @@ class UserJobSummary(BaseModel):
     created_at: str | None
 
 
+class DailyActivityData(BaseModel):
+    day: str
+    cards_reviewed: int
+    session_completed: bool
+
+
+class UserFeedbackData(BaseModel):
+    card_id: str
+    college_name: str
+    item_number: int | None
+    recto: str
+    feedback: str
+    at: str
+
+
 class UserDetailData(BaseModel):
     user_id: str
     email: str
+    first_name: str | None
     is_beta: bool
     is_subscribed: bool
     monthly_reloads: int
     monthly_reloads_max: int
     monthly_reloads_reset_at: str | None
     created_at: str | None
+    last_seen_at: str | None
+    status: str
+    streak: int
+    cards_30d: int
+    sessions_30d: int
+    daily: list[DailyActivityData]
     colleges: list[UserCollegeSummary]
     jobs: list[UserJobSummary]
+    feedback: list[UserFeedbackData]
 
 
 class UserDetailResponseWrapped(BaseModel):

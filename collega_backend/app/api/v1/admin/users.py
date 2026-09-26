@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import secrets
 import uuid
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy import select
@@ -18,8 +19,6 @@ from app.core.database import get_db
 from app.core.errors import conflict, not_found
 from app.core.security import hash_password
 from app.deps import get_admin_user
-from app.models.college import College
-from app.models.generation_job import GenerationJob
 from app.models.user import User
 from app.schemas.admin import (
     BetaUpdateRequest,
@@ -30,13 +29,10 @@ from app.schemas.admin import (
     ResetPasswordResponseWrapped,
     ResetQuotaResponseWrapped,
     UserBetaData,
-    UserCollegeSummary,
-    UserDetailData,
     UserDetailResponseWrapped,
-    UserJobSummary,
     UsersListResponseWrapped,
 )
-from app.services import app_settings
+from app.services import admin_pilot, app_settings
 
 router = APIRouter()
 
@@ -210,54 +206,5 @@ async def get_user_detail(
     _: bool = Depends(get_admin_user),
     db: AsyncSession = Depends(get_db),
 ) -> UserDetailResponseWrapped:
-    """Détail d'un utilisateur : champs + ses collèges + ses generation_jobs."""
-    user = await db.get(User, user_id)
-    if user is None:
-        raise not_found("USER_NOT_FOUND", f"User {user_id} not found")
-
-    colleges_result = await db.execute(
-        select(College).where(College.user_id == user_id).order_by(College.created_at.desc())
-    )
-    colleges = colleges_result.scalars().all()
-
-    jobs_result = await db.execute(
-        select(GenerationJob).where(GenerationJob.user_id == user_id).order_by(GenerationJob.created_at.desc())
-    )
-    jobs = jobs_result.scalars().all()
-    reload_count_max, monthly_reloads_max = await app_settings.anti_spam_limits(db)
-
-    return UserDetailResponseWrapped(
-        data=UserDetailData(
-            user_id=str(user.id),
-            email=user.email,
-            is_beta=user.is_beta,
-            is_subscribed=user.is_subscribed,
-            monthly_reloads=user.monthly_reloads,
-            monthly_reloads_max=monthly_reloads_max,
-            monthly_reloads_reset_at=(
-                user.monthly_reloads_reset_at.isoformat() if user.monthly_reloads_reset_at else None
-            ),
-            created_at=user.created_at.isoformat() if user.created_at else None,
-            colleges=[
-                UserCollegeSummary(
-                    college_id=str(c.id),
-                    college_ref_id=c.college_ref_id,
-                    status=c.status,
-                    reload_count=c.reload_count,
-                    reload_count_max=reload_count_max,
-                )
-                for c in colleges
-            ],
-            jobs=[
-                UserJobSummary(
-                    job_id=str(j.id),
-                    college_id=str(j.college_id),
-                    status=j.status,
-                    card_count=j.card_count,
-                    error_message=j.error_message,
-                    created_at=j.created_at.isoformat() if j.created_at else None,
-                )
-                for j in jobs
-            ],
-        )
-    )
+    """Détail d'un utilisateur : profil, activité 30 j, collèges, jobs, avis."""
+    return UserDetailResponseWrapped(data=await admin_pilot.user_detail(db, user_id, datetime.now(UTC)))

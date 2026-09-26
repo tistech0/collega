@@ -13,13 +13,22 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.college_catalog import college_name
+from app.core.errors import not_found
 from app.models.activity_day import ActivityDay
 from app.models.claude_usage import ClaudeUsage
 from app.models.college import College
 from app.models.flash_card import FlashCard
 from app.models.generation_job import GenerationJob
 from app.models.generation_job_event import GenerationJobEvent
+from app.models.item import Item
 from app.models.user import User
+from app.schemas.admin import (
+    DailyActivityData,
+    UserCollegeSummary,
+    UserDetailData,
+    UserFeedbackData,
+    UserJobSummary,
+)
 from app.schemas.admin_pilot import (
     AdminCollegeRow,
     BadgesData,
@@ -41,6 +50,8 @@ ACTIVE_JOB_STATUSES = ("pending", "processing", "ocr_complete")
 STALL_AFTER = timedelta(minutes=15)
 FAILED_WINDOW = timedelta(days=7)
 QUALITY_DEFAULT_WINDOW = timedelta(days=7)
+DAILY_WINDOW = 30
+FEEDBACK_LIMIT = 10
 
 
 def tester_status(last_seen_at: datetime | None, now: datetime, inactivity_days: int) -> str:
@@ -273,3 +284,119 @@ async def list_colleges(db: AsyncSession) -> list[AdminCollegeRow]:
         )
         for c, email, n_cards, n_negative in result.all()
     ]
+
+
+async def user_detail(db: AsyncSession, user_id: uuid.UUID, now: datetime) -> UserDetailData:
+    """Fiche testeuse : profil, activité des 30 derniers jours, collèges, avis."""
+    user = await db.get(User, user_id)
+    if user is None:
+        raise not_found("USER_NOT_FOUND", f"User {user_id} not found")
+    today = now.date()
+    start = today - timedelta(days=DAILY_WINDOW - 1)
+    inactivity_days, _ = await pilot_settings(db)
+    reload_count_max, monthly_reloads_max = await app_settings.anti_spam_limits(db)
+
+    all_days = (
+        (await db.execute(select(ActivityDay).where(ActivityDay.user_id == user_id).order_by(ActivityDay.day)))
+        .scalars()
+        .all()
+    )
+    by_day = {d.day: d for d in all_days if d.day >= start}
+    daily = []
+    for i in range(DAILY_WINDOW):
+        d = start + timedelta(days=i)
+        row = by_day.get(d)
+        daily.append(
+            DailyActivityData(
+                day=d.isoformat(),
+                cards_reviewed=row.cards_reviewed if row else 0,
+                session_completed=bool(row and row.session_completed),
+            )
+        )
+
+    card_counts: dict[uuid.UUID, int] = dict(
+        (
+            await db.execute(
+                select(FlashCard.college_id, func.count())
+                .where(FlashCard.user_id == user_id)
+                .group_by(FlashCard.college_id)
+            )
+        ).all()  # type: ignore[arg-type]
+    )
+    colleges = (
+        (await db.execute(select(College).where(College.user_id == user_id).order_by(College.created_at.desc())))
+        .scalars()
+        .all()
+    )
+    jobs = (
+        (
+            await db.execute(
+                select(GenerationJob).where(GenerationJob.user_id == user_id).order_by(GenerationJob.created_at.desc())
+            )
+        )
+        .scalars()
+        .all()
+    )
+    feedback_rows = (
+        await db.execute(
+            select(FlashCard, Item.item_number, College.college_ref_id)
+            .join(Item, Item.id == FlashCard.item_id)
+            .join(College, College.id == FlashCard.college_id)
+            .where(FlashCard.user_id == user_id, FlashCard.user_feedback.is_not(None))
+            .order_by(FlashCard.updated_at.desc())
+            .limit(FEEDBACK_LIMIT)
+        )
+    ).all()
+
+    return UserDetailData(
+        user_id=str(user.id),
+        email=user.email,
+        first_name=user.first_name,
+        is_beta=user.is_beta,
+        is_subscribed=user.is_subscribed,
+        monthly_reloads=user.monthly_reloads,
+        monthly_reloads_max=monthly_reloads_max,
+        monthly_reloads_reset_at=user.monthly_reloads_reset_at.isoformat() if user.monthly_reloads_reset_at else None,
+        created_at=user.created_at.isoformat() if user.created_at else None,
+        last_seen_at=user.last_seen_at.isoformat() if user.last_seen_at else None,
+        status=tester_status(user.last_seen_at, now, inactivity_days),
+        streak=all_days[-1].streak if all_days else 0,
+        cards_30d=sum(d.cards_reviewed for d in by_day.values()),
+        sessions_30d=sum(1 for d in by_day.values() if d.session_completed),
+        daily=daily,
+        colleges=[
+            UserCollegeSummary(
+                college_id=str(c.id),
+                college_ref_id=c.college_ref_id,
+                college_name=college_name(c.college_ref_id),
+                status=c.status,
+                reload_count=c.reload_count,
+                reload_count_max=reload_count_max,
+                card_count=card_counts.get(c.id, 0),
+                progress=_progress(c),
+            )
+            for c in colleges
+        ],
+        jobs=[
+            UserJobSummary(
+                job_id=str(j.id),
+                college_id=str(j.college_id),
+                status=j.status,
+                card_count=j.card_count,
+                error_message=j.error_message,
+                created_at=j.created_at.isoformat() if j.created_at else None,
+            )
+            for j in jobs
+        ],
+        feedback=[
+            UserFeedbackData(
+                card_id=str(card.id),
+                college_name=college_name(ref),
+                item_number=item_number,
+                recto=card.recto,
+                feedback=card.user_feedback or "",
+                at=card.updated_at.isoformat(),
+            )
+            for card, item_number, ref in feedback_rows
+        ],
+    )
