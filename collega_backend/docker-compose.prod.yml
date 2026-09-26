@@ -19,6 +19,8 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
     volumes:
       - pdf_storage:/tmp/collega_pdfs
+      # Clé APNs (.p8, uid 1000, mode 400) : APNS_KEY_PATH=/run/secrets/collega/AuthKey_<id>.p8.
+      - /mnt/user/appdata/collega/secrets:/run/secrets/collega:ro
     # Pas de "ports:" : NPM joint l'API par le réseau collega_net (port 430 retiré le 2026-08-14).
     env_file: .env
     environment:
@@ -54,6 +56,8 @@ services:
     command: arq app.workers.settings.WORKER_SETTINGS
     volumes:
       - pdf_storage:/tmp/collega_pdfs
+      # Clé APNs (.p8, uid 1000, mode 400) : APNS_KEY_PATH=/run/secrets/collega/AuthKey_<id>.p8.
+      - /mnt/user/appdata/collega/secrets:/run/secrets/collega:ro
     env_file: .env
     environment:
       # Redis protégé par mot de passe (chantier 3) : REDIS_PASSWORD vient du .env du NAS,
