@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import uuid
 from collections import defaultdict
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,7 +23,9 @@ from app.models.generation_job_event import GenerationJobEvent
 from app.models.item import Item
 from app.models.user import User
 from app.schemas.admin import (
+    CollegeCostData,
     DailyActivityData,
+    DailyCostData,
     UserCollegeSummary,
     UserDetailData,
     UserFeedbackData,
@@ -400,3 +402,66 @@ async def user_detail(db: AsyncSession, user_id: uuid.UUID, now: datetime) -> Us
             for card, item_number, ref in feedback_rows
         ],
     )
+
+
+# ── Console de pilotage, task 9 — Coûts : ventilation par jour / par collège ──
+
+COST_WINDOW_DAYS = 30
+
+
+async def usage_breakdown(db: AsyncSession, now: datetime) -> tuple[list[DailyCostData], list[CollegeCostData], float]:
+    """Coût par jour et par collège sur 30 jours ; coût moyen de génération d'un import terminé."""
+    first_day = now.date() - timedelta(days=COST_WINDOW_DAYS - 1)
+    start = datetime.combine(first_day, time.min, tzinfo=UTC)
+    sums = (func.sum(ClaudeUsage.input_tokens), func.sum(ClaudeUsage.output_tokens))
+
+    day_col = func.date(ClaudeUsage.created_at)
+    per_day: dict[date, UsageTotals] = defaultdict(UsageTotals)
+    for day, model, u_in, u_out in (
+        await db.execute(
+            select(day_col, ClaudeUsage.model, *sums)
+            .where(ClaudeUsage.created_at >= start)
+            .group_by(day_col, ClaudeUsage.model)
+        )
+    ).all():
+        per_day[day].add(model, u_in or 0, u_out or 0)
+    daily = []
+    for i in range(COST_WINDOW_DAYS):
+        day = first_day + timedelta(days=i)
+        daily.append(DailyCostData(day=day.isoformat(), cost_eur=per_day[day].cost_eur if day in per_day else 0.0))
+
+    per_college: dict[tuple[uuid.UUID | None, int | None], UsageTotals] = defaultdict(UsageTotals)
+    for college_id, ref_id, model, u_in, u_out in (
+        await db.execute(
+            select(ClaudeUsage.college_id, College.college_ref_id, ClaudeUsage.model, *sums)
+            .outerjoin(College, College.id == ClaudeUsage.college_id)
+            .where(ClaudeUsage.created_at >= now - timedelta(days=COST_WINDOW_DAYS))
+            .group_by(ClaudeUsage.college_id, College.college_ref_id, ClaudeUsage.model)
+        )
+    ).all():
+        per_college[(college_id, ref_id)].add(model, u_in or 0, u_out or 0)
+    by_college = sorted(
+        (
+            CollegeCostData(
+                college_id=str(cid) if cid else None,
+                college_name=college_name(ref) if ref is not None else "Collège supprimé",
+                cost_eur=t.cost_eur,
+            )
+            for (cid, ref), t in per_college.items()
+        ),
+        key=lambda c: c.cost_eur,
+        reverse=True,
+    )
+
+    per_job: dict[uuid.UUID, UsageTotals] = defaultdict(UsageTotals)
+    for job_id, model, u_in, u_out in (
+        await db.execute(
+            select(ClaudeUsage.job_id, ClaudeUsage.model, *sums)
+            .join(GenerationJob, GenerationJob.id == ClaudeUsage.job_id)
+            .where(ClaudeUsage.kind == "generation", GenerationJob.status == "generation_complete")
+            .group_by(ClaudeUsage.job_id, ClaudeUsage.model)
+        )
+    ).all():
+        per_job[job_id].add(model, u_in or 0, u_out or 0)
+    avg = round(sum(t.cost_eur for t in per_job.values()) / len(per_job), 4) if per_job else 0.0
+    return daily, by_college, avg

@@ -372,11 +372,26 @@ class UsageByUserData(UsageTotalsData):
     last_30_days: UsageTotalsData
 
 
+class DailyCostData(BaseModel):
+    day: str
+    cost_eur: float
+
+
+class CollegeCostData(BaseModel):
+    college_id: str | None
+    college_name: str
+    cost_eur: float
+
+
 class UsageData(UsageTotalsData):
     last_30_days: UsageTotalsData
     by_kind: dict[str, UsageTotalsData]
     by_model: dict[str, UsageTotalsData]
     by_user: list[UsageByUserData]
+    # Console de pilotage, task 9 — ventilation par jour / par collège, coût moyen d'un import.
+    daily: list[DailyCostData] = []
+    by_college: list[CollegeCostData] = []
+    avg_import_cost_eur: float = 0.0
 
 
 class UsageResponseWrapped(BaseModel):

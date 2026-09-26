@@ -1,5 +1,93 @@
-import { h } from '../ui.js';
+import { api } from '../api.js';
+import { go } from '../router.js';
+import { JOB_STATUS_LABEL, banner, block, empty, fmtDateTime, fmtEuro, fmtInt, h, icon, row, tag, toast } from '../ui.js';
 
-export async function render(root) {
-  root.append(h('h1', {}, 'En construction'));
+const RUNNING = new Set(['pending', 'processing', 'ocr_complete']);
+
+export async function render(root, { id }) {
+  const content = h('div');
+  root.append(h('a', { class: 'crumb', href: '#/imports' }, icon('chevronLeft', 14), 'Imports'), content);
+
+  async function load() {
+    let d;
+    let college;
+    try {
+      ({ data: d } = await api(`/jobs/${id}`));
+      college = (await api('/colleges')).data.find((c) => c.college_id === d.college_id);
+    } catch (err) {
+      content.replaceChildren(banner(err, load));
+      return;
+    }
+    const actions = h('div', { class: 'actions' },
+      RUNNING.has(d.status) ? h('button', { class: 'btn', onclick: async () => {
+        if (!confirm('Arrêter cet import ?')) return;
+        try { await api(`/jobs/${id}/stop`, { method: 'POST' }); toast('Import arrêté'); load(); } catch (err) { toast(err.message); }
+      } }, 'Arrêter') : null,
+      h('button', { class: 'btn danger', onclick: async () => {
+        if (!confirm('Supprimer ce collège, ses fiches et ses fichiers ? Action définitive.')) return;
+        try { await api(`/colleges/${d.college_id}`, { method: 'DELETE' }); toast('Collège supprimé'); go('/imports'); } catch (err) { toast(err.message); }
+      } }, icon('trash', 16), 'Supprimer le collège'));
+    const pages = d.total_pages ? `${d.ocr_page_progress}/${d.total_pages} pages` : 'pages inconnues';
+    // replaceChildren() est natif : contrairement à h(), il ne filtre pas les
+    // enfants null (il les convertirait en texte "null") — filtrer explicitement.
+    content.replaceChildren(...[
+      h('div', { class: 'page-head' }, h('div', {}, h('h1', {}, `Import ${college?.college_name ?? ''}`.trim()),
+        h('div', { class: 'sub' }, `${college?.user_email ?? 'compte supprimé'} · lancé ${fmtDateTime(d.created_at)} `, tag(...(JOB_STATUS_LABEL[d.status] ?? [d.status, ''])))), actions),
+      d.error_message ? h('div', { class: 'banner' }, icon('warning', 18), h('span', {}, d.error_message)) : null,
+      h('div', { class: 'grid kpis' },
+        h('div', { class: 'kpi' }, h('div', { class: 'value' }, pages), h('div', { class: 'label' }, 'OCR')),
+        h('div', { class: 'kpi' }, h('div', { class: 'value' }, fmtInt(d.card_count)), h('div', { class: 'label' }, 'fiches générées')),
+        h('div', { class: 'kpi' }, h('div', { class: 'value' }, String(d.items.length)), h('div', { class: 'label' }, 'items détectés')),
+        h('div', { class: 'kpi' }, h('div', { class: 'value' }, d.hash_shared ? 'oui' : 'non'), h('div', { class: 'label' }, 'PDF déjà connu (cache)')),
+        h('div', { class: 'kpi' }, h('div', { class: 'value' }, fmtEuro(d.cost_eur)), h('div', { class: 'label' }, 'coût Claude'))),
+      h('div', { class: 'grid cols' },
+        block('Déroulé', `${d.timeline.length} événements`, d.timeline.length
+          ? h('ul', { class: 'timeline' }, ...dedupTimeline(d.timeline).map((e) => h('li', {}, h('span', { class: 'muted' }, fmtDateTime(e.created_at)),
+            h('span', {}, h('b', {}, e.event_type), e.page != null ? ` · page ${e.page}/${e.total ?? '?'}` : '', e.message ? h('div', { class: 'muted' }, e.message) : null))))
+          : empty('Aucun événement.')),
+        block('Confiance OCR par item', null, d.items.length ? d.items.map((it) => row(h('span', {}, `Item ${it.item_number}`),
+          tag(`${Math.round(it.ocr_confidence_score * 100)} %`, it.low_confidence ? 'warn' : 'ok'))) : empty('Aucun item.')),
+        block('Détails techniques', null,
+          row(h('span', {}, 'Job'), h('span', { class: 'muted' }, d.job_id)),
+          row(h('span', {}, 'arq_job_id'), h('span', { class: 'muted' }, d.arq_job_id ?? '—')),
+          row(h('span', {}, 'PDF hash'), h('span', { class: 'muted' }, d.pdf_hash ?? '—')),
+          row(h('span', {}, 'Appels Claude'), fmtInt(d.claude_calls)),
+          row(h('span', {}, 'Tokens'), `${fmtInt(d.input_tokens)} entrée / ${fmtInt(d.output_tokens)} sortie`),
+          row(h('span', {}, 'Mis à jour le'), fmtDateTime(d.updated_at)))),
+      segmentation(d),
+    ].filter(Boolean));
+    if (RUNNING.has(d.status)) timer = setTimeout(load, 5000);
+  }
+
+  let timer = null;
+  await load();
+  return () => clearTimeout(timer);
+}
+
+// Chantier 1 : un « generation_progress » par item — n'afficher que le dernier
+// d'une série (même comportement que l'ancienne console, cf. task-9-brief).
+function dedupTimeline(events) {
+  return events.filter((e, i) => !(e.event_type === 'generation_progress'
+    && events[i + 1] && events[i + 1].event_type === 'generation_progress'));
+}
+
+// Rapport de découpage (JobDetailData.segmentation = segmentation_overview(...)) :
+// items → pages, sections hors item, pages blanches, avertissements. Même contenu
+// que l'ancienne console (renderSegmentation), replié dans un <details>.
+function segmentation(d) {
+  const seg = d.segmentation;
+  if (!seg) return null;
+  const items = seg.items || [];
+  const sections = seg.sections || [];
+  const warnings = seg.warnings || [];
+  const cell = (v) => h('td', {}, v === null || v === undefined ? '—' : String(v));
+  const rows = [
+    ...items.map((it) => h('tr', {}, cell(`Item ${it.item_number}`), cell(it.pages), cell(it.rang || '—'), cell(`${it.objectives_a ?? '—'} / ${it.objectives_b ?? '—'}`))),
+    ...sections.map((sct) => h('tr', {}, h('td', { class: 'muted' }, String(sct.label)), cell(sct.pages), cell('—'), cell('—'))),
+    seg.blank_pages ? h('tr', {}, h('td', { class: 'muted' }, 'pages blanches'), cell(seg.blank_pages), cell('—'), cell('—')) : null,
+  ];
+  return h('details', { class: 'block' },
+    h('summary', {}, h('b', {}, `Découpage : ${items.length} items, ${sections.length} sections, ${warnings.length} avertissements`)),
+    h('table', { class: 'table' }, h('thead', {}, h('tr', {}, ...['Item / section', 'Pages', 'Rang', 'Objectifs A / B'].map((c) => h('th', {}, c)))), h('tbody', {}, ...rows)),
+    warnings.length ? h('ul', { class: 'muted' }, ...warnings.map((w) => h('li', {}, String(w)))) : null);
 }
