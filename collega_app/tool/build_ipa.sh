@@ -2,7 +2,8 @@
 # Construit l'IPA de publication (TestFlight) avec le service token Cloudflare
 # Access lu depuis collega_app/.env.local (jamais committé), puis l'envoie à
 # App Store Connect si une clé API est configurée. Usage :
-#   tool/build_ipa.sh
+#   tool/build_ipa.sh               # construit, signe et envoie
+#   tool/build_ipa.sh --no-upload   # construit et signe seulement (clé API)
 # Envoi automatique : ASC_KEY_ID / ASC_ISSUER_ID dans .env.local et la clé
 # ~/.appstoreconnect/private_keys/AuthKey_<ASC_KEY_ID>.p8 ; sinon, via Xcode.
 set -euo pipefail
@@ -22,27 +23,38 @@ source "$ENV_FILE"; set +a
 BUILD_NUMBER=$(( ($(date -u +%s) - 1767225600) / 60 ))
 echo "▶ Build n° $BUILD_NUMBER"
 
-flutter build ipa --release \
-  --build-number="$BUILD_NUMBER" \
-  --export-options-plist=ios/ExportOptions.plist \
-  --dart-define="CF_ACCESS_CLIENT_ID=${CF_ACCESS_CLIENT_ID}" \
-  --dart-define="CF_ACCESS_CLIENT_SECRET=${CF_ACCESS_CLIENT_SECRET}"
-
-shopt -s nullglob
-IPAS=(build/ios/ipa/*.ipa)
-shopt -u nullglob
-if [[ ${#IPAS[@]} -eq 0 ]]; then
-  echo "❌ aucune IPA dans build/ios/ipa (export échoué ?)" >&2
-  exit 1
-fi
-
 ASC_KEY_FILE="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID:-}.p8"
+DEFINES=(
+  --dart-define="CF_ACCESS_CLIENT_ID=${CF_ACCESS_CLIENT_ID}"
+  --dart-define="CF_ACCESS_CLIENT_SECRET=${CF_ACCESS_CLIENT_SECRET}"
+)
+
 if [[ -n "${ASC_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" && -f "$ASC_KEY_FILE" ]]; then
-  echo "▶ Envoi à App Store Connect : ${IPAS[0]}"
-  xcrun altool --upload-app --type ios -f "${IPAS[0]}" \
-    --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
-  echo "✅ Envoyée — la build apparaît dans TestFlight après traitement (quelques minutes)."
+  # Signature par la clé API (aucun compte Apple requis dans Xcode) : Flutter
+  # prépare la configuration, xcodebuild archive, exporte et envoie.
+  AUTH=(-allowProvisioningUpdates
+    -authenticationKeyPath "$ASC_KEY_FILE"
+    -authenticationKeyID "$ASC_KEY_ID"
+    -authenticationKeyIssuerID "$ASC_ISSUER_ID")
+  flutter build ios --release --config-only --build-number="$BUILD_NUMBER" "${DEFINES[@]}"
+  rm -rf build/ios/archive build/ios/ipa
+  xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release \
+    -destination 'generic/platform=iOS' -archivePath build/ios/archive/Runner.xcarchive \
+    "${AUTH[@]}" -quiet archive
+  xcodebuild -exportArchive -archivePath build/ios/archive/Runner.xcarchive \
+    -exportOptionsPlist ios/ExportOptions.plist -exportPath build/ios/ipa "${AUTH[@]}" -quiet
+  IPA=$(ls build/ios/ipa/*.ipa)
+  if [[ "${1:-}" == "--no-upload" ]]; then
+    echo "✅ IPA prête (non envoyée) : $IPA"
+    exit 0
+  fi
+  echo "▶ Envoi à App Store Connect : $IPA"
+  xcrun altool --upload-app --type ios -f "$IPA" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+  echo "✅ Build $BUILD_NUMBER envoyée : elle apparaît dans TestFlight après traitement (5 à 30 min)."
 else
+  # Sans clé API : signature par le compte connecté dans Xcode, envoi via l'Organizer.
+  flutter build ipa --release --build-number="$BUILD_NUMBER" \
+    --export-options-plist=ios/ExportOptions.plist "${DEFINES[@]}"
   echo "ℹ️  Pas de clé App Store Connect (ASC_KEY_ID / ASC_ISSUER_ID dans $ENV_FILE + $ASC_KEY_FILE)."
   echo "   Envoi manuel : dans l'Organizer Xcode qui s'ouvre, choisir l'archive puis"
   echo "   « Distribute App » → « App Store Connect » → « Upload »."
