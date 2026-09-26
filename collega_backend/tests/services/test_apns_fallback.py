@@ -51,5 +51,5 @@ async def test_autre_echec_pas_de_repli():
 
 def test_defauts_bundle_de_l_app_et_production():
     fields = Settings.model_fields
-    assert fields["apns_bundle_id"].default == "com.lesurmatthis.collegaApp"
+    assert fields["apns_bundle_id"].default == "com.matthislesur.collega"
     assert fields["apns_use_sandbox"].default is False
