@@ -55,3 +55,10 @@ def test_aucun_emoji():
 @pytest.mark.parametrize("path", ["/admin/", "/admin/js/main.js", "/admin/css/ui.css"])
 async def test_servi_par_fastapi(client: AsyncClient, path: str):
     assert (await client.get(path)).status_code == 200
+
+
+@pytest.mark.parametrize("path", ["/admin/", "/admin/js/main.js", "/admin/js/views/testeuse.js"])
+async def test_jamais_servi_depuis_un_cache_perime(client: AsyncClient, path: str):
+    # Modules ES sans numéro de version : après un déploiement, le navigateur (ou
+    # Cloudflare) doit revalider chaque fichier au lieu de garder l'ancien écran.
+    assert (await client.get(path)).headers["cache-control"] == "no-cache"
