@@ -24,7 +24,8 @@ export async function render(root, { id }) {
     h('button', { class: `btn ${d.is_beta ? 'danger' : ''}`, onclick: async () => {
       if (d.is_beta && !confirm('Retirer l\'accès beta à ce compte ?')) return;
       await run(() => api(`/users/${id}/beta`, { method: 'PATCH', body: { is_beta: !d.is_beta } }), d.is_beta ? 'Accès beta retiré' : 'Accès beta donné', reload);
-    } }, d.is_beta ? 'Retirer la beta' : 'Donner la beta'));
+    } }, d.is_beta ? 'Retirer la beta' : 'Donner la beta'),
+    h('button', { class: 'btn danger', onclick: () => deleteAccount(d) }, icon('trash', 16), 'Supprimer le compte'));
 
   const labels = d.daily.map((x) => new Date(`${x.day}T12:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }));
   root.append(
@@ -74,6 +75,24 @@ async function run(action, message, after) {
     toast(message);
     window.dispatchEvent(new Event('admin:badges'));
     after();
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+// Suppression définitive : l'e-mail doit être retapé pour éviter une erreur de fiche.
+async function deleteAccount(d) {
+  const typed = prompt(`Supprimer définitivement ce compte, ses collèges, ses fiches et son activité ?\n\nPour confirmer, tape l'e-mail du compte : ${d.email}`);
+  if (typed === null) return;
+  if (typed.trim().toLowerCase() !== d.email.toLowerCase()) {
+    toast('E-mail différent : compte non supprimé.');
+    return;
+  }
+  try {
+    await api(`/users/${d.user_id}`, { method: 'DELETE' });
+    toast('Compte supprimé');
+    window.dispatchEvent(new Event('admin:badges'));
+    go('/testeuses');
   } catch (err) {
     toast(err.message);
   }

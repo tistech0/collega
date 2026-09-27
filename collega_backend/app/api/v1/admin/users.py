@@ -1,4 +1,4 @@
-"""Routes admin — utilisateurs : liste, création, bêta, reset du quota, mot de passe, détail.
+"""Routes admin — utilisateurs : liste, création, bêta, reset du quota, mot de passe, détail, suppression.
 
 Toutes les routes sont protégées par HTTP Basic Auth.
 """
@@ -32,7 +32,7 @@ from app.schemas.admin import (
     UserDetailResponseWrapped,
     UsersListResponseWrapped,
 )
-from app.services import admin_pilot, app_settings
+from app.services import accounts, admin_pilot, app_settings
 
 router = APIRouter()
 
@@ -208,3 +208,21 @@ async def get_user_detail(
 ) -> UserDetailResponseWrapped:
     """Détail d'un utilisateur : profil, activité 30 j, collèges, jobs, avis."""
     return UserDetailResponseWrapped(data=await admin_pilot.user_detail(db, user_id, datetime.now(UTC)))
+
+
+@router.delete("/users/{user_id}", status_code=204)
+async def delete_user(
+    user_id: uuid.UUID,
+    _: bool = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+) -> Response:
+    """Supprime le compte et toutes ses données (même effet que la suppression depuis l'app).
+
+    Refusé si un import du compte tourne encore : l'arrêter d'abord (POST /jobs/{id}/stop)."""
+    user = await db.get(User, user_id)
+    if user is None:
+        raise not_found("USER_NOT_FOUND", f"User {user_id} not found")
+    if await accounts.has_active_job(db, user_id):
+        raise conflict("JOB_ACTIVE", "An import is still running for this account — stop it before deleting")
+    await accounts.delete_account(db, user)
+    return Response(status_code=204)

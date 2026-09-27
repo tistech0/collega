@@ -9,6 +9,7 @@ const MESSAGES = {
   EMAIL_ALREADY_EXISTS: 'Un compte existe déjà avec cet e-mail.',
   COLLEGE_NOT_FOUND: 'Collège introuvable.',
   JOB_NOT_FOUND: 'Import introuvable.',
+  JOB_ACTIVE: 'Un import est en cours : arrête-le avant de supprimer.',
   VALIDATION_ERROR: 'Valeur refusée par le serveur.',
 };
 
