@@ -18,6 +18,7 @@ Prod : image `273c24d` déployée par `deploy.sh` (précédente : `18624c0`).
 | 9. Console : le reste | `6974aa5`, `a843bbb` | Imports (rafraîchis toutes les 5 s), détail d'import (tout ce que montrait l'ancienne console), Qualité, Coûts (par jour, par collège, coût moyen d'un import), Réglages |
 | 10. App | `a46d5aa` | `ActivityReporter` : envoi après verdict ou fin de séance (anti-rebond 30 s) et renvoi des 7 derniers jours à la connexion ; une phrase ajoutée dans les deux `privacy.md` |
 | 11. Vérification, docs | `49634b7`, `f95a55d`, `9a34d4f` | Deux débordements à 390 px corrigés, guide de déploiement mis à jour, captures |
+| Ajout 27/09 | `b260e30` | Bouton « Supprimer le compte » sur la fiche testeuse (confirmation par saisie de l'e-mail) : `DELETE /v1/admin/users/{id}`, refusé si un import tourne, même logique que la suppression depuis l'app ; déployé en prod |
 | Revue finale | `2398025`, `3aec4fa`, `273c24d` | 13 correctifs (voir plus bas) |
 
 Méthode : un sous-agent par tâche, puis une relecture « conformité à la spec et qualité » ; enfin une
