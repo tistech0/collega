@@ -114,6 +114,31 @@ async def test_generate_sends_p2_parameters():
     ]
 
 
+SHARED_CHAPTER = (
+    "CHAPITRE\n34\nItems, hiérarchisation des connaissances\n"
+    "Item 348 – Insuffisance rénale aiguë\nA Définition Définir\n"
+    "Item 258 – Élévation de la créatininémie\nA Diagnostic positif Interpréter\n"
+    "Introduction\nCours."
+)
+
+
+async def test_generate_shared_chapter_limits_cards_to_the_item():
+    client = _client(_response({"flashcards": [], "insufficient_text": False}))
+    await client.generate_cards(348, "IRA", [SHARED_CHAPTER])
+    content = _kwargs(client)["messages"][0]["content"]
+    assert content.endswith(
+        "Ce texte traite aussi de l'item 258, qui a ses propres fiches. Ne fais des fiches que sur les "
+        "objectifs de l'item 348 (son tableau « Item 348 – … ») et sur le cours qui s'y rapporte, jamais "
+        "sur les objectifs propres aux autres items."
+    )
+
+
+def test_shared_chapter_note_lists_other_items():
+    text = SHARED_CHAPTER.replace("Introduction", "Item 97 – Polyradiculonévrite\nIntroduction")
+    assert "des items 97 et 258, qui ont leurs propres fiches" in cc._shared_chapter_note(348, [text])
+    assert cc._shared_chapter_note(348, ["Item 348\nCours sans autre item."]) == ""
+
+
 async def test_generate_effort_is_configurable():
     client = _client(_response({"flashcards": [], "insufficient_text": False}))
     await client.generate_cards(1, "T", ["x y z"], effort="low")
