@@ -28,6 +28,11 @@ Règles (détail et cas réels : analyse du chantier 4, § 4) :
   R9  pages blanches neutres : un item finit à sa dernière page de contenu, une page
       blanche interne y reste.
   R10 rapport : chaque page → item | section | blanche, avec ses signaux, et les warnings.
+  R11 chapitre thématique (collège MIR) : « CHAPITRE » sans item en tête, mais un bloc
+      « Item, hiérarchisation des connaissances » qui liste ses items (« Item 348 – … »,
+      tableau d'objectifs de chacun). Tout le chapitre va à chacun de ses items ; un item
+      traité dans plusieurs chapitres les réunit. Seul un nouveau chapitre ou une section
+      de fin (dossiers, index, corrigés) le ferme ; les signaux d'item y sont ignorés.
 
 Rang (analyse § 3) : par objectif, dans le tableau « Rang Rubrique » de la page d'ouverture
 et des 2 suivantes. Les pictogrammes des scans sont lus comme des lettres rondes : noirs
@@ -116,6 +121,19 @@ _FRONT_MATTER = frozenset(
 _CHAPTER_WITHOUT_ITEM = "chapitre sans item"
 _DOSSIERS = "dossiers progressifs"
 _FRONT_LABEL = "liminaire"
+
+# ── R11 : chapitre thématique à plusieurs items ───────────────────────────────
+# « Items, hiérarchisation des connaissances » (parfois après le numéro de page imprimé) ou
+# « Hiérarchisation des connaissances » d'un chapitre hors items qui en cite (« On trouve également : »)
+_CHAPTER_ITEMS_MARKER = re.compile(
+    r"^(?:\d{1,4}\s+)?(?:items?\s*,?\s*)?hi[ée]rarchisation des connaissances", re.IGNORECASE
+)
+# « Item 348 – Insuffisance rénale aiguë », parfois précédé du numéro de page imprimé (« 230 Item 339 – … »)
+_CHAPTER_ITEM_LINE = re.compile(r"^(?:\d{1,4}\s+)?Items?\s+(\d{1,3})\s*[–-]\s*(.*)$")
+# Fin du bloc des objectifs : début du cours
+_CHAPTER_COURSE_START = re.compile(r"^(?:Introduction|I\.\s.*)$")
+_CHAPTER_OBJECTIVES_PAGES = 5
+_MAX_ITEM_NUMBER = 367
 
 # ── Rang (§ 3) ────────────────────────────────────────────────────────────────
 # En-tête du tableau d'objectifs : « Rubrique » en début de ligne, précédé de « Rang » ou suivi
@@ -371,6 +389,89 @@ def _parse_page(idx: int, text: str, tables: PageTables) -> _Page:
     return p
 
 
+@dataclass
+class ChapterItem:
+    """Item listé par le bloc « Item, hiérarchisation des connaissances » d'un chapitre (R11)."""
+
+    number: int
+    title: str
+    objectives_a: int = 0
+    objectives_b: int = 0
+
+
+def chapter_items(lines: list[str]) -> list[ChapterItem]:
+    """R11 : items des blocs « Item, hiérarchisation des connaissances » de ces lignes (une par
+    numéro, dans l'ordre), avec le titre de leur ligne « Item N – … » et leurs objectifs A/B.
+    Un bloc court du repère au début du cours (« Introduction », « I. … »)."""
+    items: dict[int, ChapterItem] = {}
+    current: ChapterItem | None = None
+    inside = False
+    for i, line in enumerate(lines):
+        if _CHAPTER_ITEMS_MARKER.match(line):
+            inside, current = True, None
+            continue
+        if not inside:
+            continue
+        if _CHAPTER_COURSE_START.match(line) or _CHAPITRE.match(line):
+            inside, current = False, None
+            continue
+        m = _CHAPTER_ITEM_LINE.match(line)
+        if m and 1 <= int(m.group(1)) <= _MAX_ITEM_NUMBER:
+            number = int(m.group(1))
+            title = _join_title_lines(m.group(2).strip(), lines[i + 1 :]) if m.group(2).strip() else ""
+            current = items.setdefault(number, ChapterItem(number, title if is_valid_title(title) else ""))
+            continue
+        row = _OBJECTIVE_ROW.match(line)
+        if current is not None and row:
+            a, b = _glyph_counts([row.group(1)])
+            current.objectives_a += a
+            current.objectives_b += b
+    return list(items.values())
+
+
+def _closes_chapter(p: _Page) -> bool:
+    """R11 : un nouveau chapitre ou une section de fin (pas une liminaire) ferme le chapitre."""
+    return _CHAPITRE.match(p.lines[0]) is not None or (p.section is not None and p.section not in _FRONT_MATTER)
+
+
+def _chapter_groups(parsed: list[_Page], chapters: dict[int, list[ChapterItem]]) -> dict[int, list[int]]:
+    """R11 : page d'un chapitre thématique → numéros de ses items. Le chapitre court de son
+    ouverture au prochain chapitre ou à la prochaine section de fin (pages blanches exclues)."""
+    groups: dict[int, list[int]] = {}
+    group: list[int] | None = None
+    for i, p in enumerate(parsed):
+        if i in chapters:
+            group = [c.number for c in chapters[i]]
+            p.signals.append("chapitre:" + "/".join(map(str, group)))
+        elif p.blank:
+            continue
+        elif group is not None and _closes_chapter(p):
+            group = None
+        if group is not None:
+            groups[i] = group
+    return groups
+
+
+def _chapters(parsed: list[_Page], known_titles: dict[int, str] | None) -> dict[int, list[ChapterItem]]:
+    """R11 : page d'ouverture d'un chapitre sans item en tête → items de son bloc
+    « hiérarchisation des connaissances » (cherché sur ses premières pages)."""
+    chapters: dict[int, list[ChapterItem]] = {}
+    for i, p in enumerate(parsed):
+        if p.section != _CHAPTER_WITHOUT_ITEM:
+            continue
+        lines = list(p.lines)
+        for q in parsed[i + 1 : i + _CHAPTER_OBJECTIVES_PAGES]:
+            if q.lines and _CHAPITRE.match(q.lines[0]):
+                break
+            lines += q.lines
+        found = chapter_items(lines)
+        if _complete(known_titles):
+            found = [c for c in found if c.number in known_titles]  # type: ignore[operator]
+        if found:
+            chapters[i] = found
+    return chapters
+
+
 def _r6_toc_titles(pages: list[_Page]) -> dict[int, str]:
     """Titres du sommaire pour R6 (formats Elsevier « 7 Item 296 - Titre … 135 » et CNEC)."""
     titles: dict[int, str] = {}
@@ -534,6 +635,16 @@ def _item_objectives(pages: list[int], parsed: list[_Page], tables: list[PageTab
     return a, b, found
 
 
+def _objectives(
+    info: ChapterItem | None, pages: list[int], parsed: list[_Page], tables: list[PageTables]
+) -> tuple[int, int, bool]:
+    """R11 : le tableau de l'item dans le bloc de son chapitre (pas celui du 1er item listé) ;
+    sinon le tableau des premières pages de l'item."""
+    if info is not None and (info.objectives_a or info.objectives_b):
+        return info.objectives_a, info.objectives_b, True
+    return _item_objectives(pages, parsed, tables)
+
+
 # ── Titres (story 8.0) ────────────────────────────────────────────────────────
 
 
@@ -663,11 +774,15 @@ def _assign_stats(parsed: list[_Page], assign: list[int | str | None]) -> _Assig
 
 
 def _safety_warnings(
-    parsed: list[_Page], assign: list[int | str | None], sure: dict[int, str], report: SegmentationReport
+    parsed: list[_Page],
+    assign: list[int | str | None],
+    sure: dict[int, str],
+    report: SegmentationReport,
+    groups: dict[int, list[int]],
 ) -> None:
     """Warnings du rapport pour un livre d'un format inattendu (sans texte de page)."""
     warnings = report.warnings
-    opened = {a for a in assign if isinstance(a, int)}
+    opened = {a for a in assign if isinstance(a, int)} | {n for group in groups.values() for n in group}
     # Numéro sûr jamais ouvert
     for number in sorted(n for n in sure if n not in opened):
         warnings.append(f"numéro {number} {sure[number]} sans item")
@@ -701,6 +816,31 @@ def _safety_warnings(
         warnings.append(f"p{page_ranges(pages)} : contenu hors item (section « {label} »)")
     if not opened:
         warnings.append("découpage suspect : aucun item détecté")
+
+
+def _pages_by_number(assign: list[int | str | None], groups: dict[int, list[int]]) -> dict[int, list[int]]:
+    """Plages de pages contiguës d'un même numéro (les blanches internes restent, R9), puis un
+    item par numéro (R8 : une réouverture concatène les plages) ; R11 : les pages d'un chapitre
+    thématique vont aussi à ses autres items."""
+    pages_by_number: dict[int, list[int]] = {}
+    run: tuple[int, int, int] | None = None  # (numéro, début, fin)
+    runs: list[tuple[int, int, int]] = []
+    for i, a in enumerate(assign):
+        if isinstance(a, int):
+            if run is not None and run[0] == a and all(assign[j] in (a, None) for j in range(run[2] + 1, i)):
+                run = (a, run[1], i)
+            else:
+                if run is not None:
+                    runs.append(run)
+                run = (a, i, i)
+    if run is not None:
+        runs.append(run)
+    for number, start, end in runs:
+        pages_by_number.setdefault(number, []).extend(range(start, end + 1))
+    for page, group in groups.items():
+        for number in group[1:]:
+            pages_by_number.setdefault(number, []).append(page)
+    return pages_by_number
 
 
 class ItemDetector:
@@ -739,14 +879,26 @@ class ItemDetector:
 
         report = SegmentationReport()
         ignored: set[int] = set()
-        assign = self._assign(parsed, known, norm_titles, report, ignored)
-        assign = self._check_suspect(parsed, assign, report, ignored)
+        chapters = _chapters(parsed, known_titles)
+        groups = _chapter_groups(parsed, chapters)
+        assign = self._assign(parsed, known, norm_titles, report, ignored, groups)
+        checked = self._check_suspect(parsed, assign, report, ignored)
+        if checked is not assign:  # repli : les chapitres R11 sont abandonnés avec le reste
+            chapters, groups = {}, {}
+        assign = checked
         sure = _sure_numbers(parsed)
         if _complete(known_titles):
             sure = {n: src for n, src in sure.items() if n in known_titles}  # type: ignore[operator]
-        _safety_warnings(parsed, assign, sure, report)
+        _safety_warnings(parsed, assign, sure, report, groups)
 
-        items = self._build_items(page_texts, scores, tables, parsed, assign, report)
+        chapter_info: dict[int, ChapterItem] = {}
+        for found in chapters.values():
+            for c in found:
+                # Tableau le plus complet : ailleurs, « Voir … au chapitre 10 » ou un extrait
+                kept = chapter_info.get(c.number)
+                if kept is None or c.objectives_a + c.objectives_b > kept.objectives_a + kept.objectives_b:
+                    chapter_info[c.number] = c
+        items = self._build_items(page_texts, scores, tables, parsed, assign, report, groups, chapter_info)
         logger.debug("Découpage : %s", report.summary())
         return SegmentationResult(items=items, report=report)
 
@@ -757,9 +909,11 @@ class ItemDetector:
         norm_titles: dict[int, str],
         report: SegmentationReport,
         ignored: set[int],
+        groups: dict[int, list[int]],
     ) -> list[int | str | None]:
         """Machine à états : numéro d'item, libellé de section, ou None (page blanche).
-        `ignored` reçoit les numéros d'en-têtes ignorés (critère de découpage suspect)."""
+        `ignored` reçoit les numéros d'en-têtes ignorés (critère de découpage suspect).
+        R11 : une page d'un chapitre thématique (`groups`) est assignée au 1er de ses items."""
         assign: list[int | str | None] = [None] * len(parsed)
         warnings = report.warnings
         current: int | None = None
@@ -767,6 +921,11 @@ class ItemDetector:
         section: str | None = _FRONT_LABEL
         for i, p in enumerate(parsed):
             if p.blank:  # R9
+                continue
+            if i in groups:  # R11 : ses signaux d'item sont ignorés
+                assign[i] = groups[i][0]
+                opened.update(groups[i])
+                current, section = None, None
                 continue
             # R7 (R7 bis : les liminaires ne valent qu'avant le 1er item)
             if p.section and p.strong is None and not (opened and p.section in _FRONT_MATTER):
@@ -877,24 +1036,10 @@ class ItemDetector:
         parsed: list[_Page],
         assign: list[int | str | None],
         report: SegmentationReport,
+        groups: dict[int, list[int]],
+        chapter_info: dict[int, ChapterItem],
     ) -> list[DetectedItem]:
-        # Plages de pages contiguës d'un même numéro (les blanches internes restent, R9),
-        # puis un item par numéro (R8 : une réouverture concatène les plages).
-        pages_by_number: dict[int, list[int]] = {}
-        run: tuple[int, int, int] | None = None  # (numéro, début, fin)
-        runs: list[tuple[int, int, int]] = []
-        for i, a in enumerate(assign):
-            if isinstance(a, int):
-                if run is not None and run[0] == a and all(assign[j] in (a, None) for j in range(run[2] + 1, i)):
-                    run = (a, run[1], i)
-                else:
-                    if run is not None:
-                        runs.append(run)
-                    run = (a, i, i)
-        if run is not None:
-            runs.append(run)
-        for number, start, end in runs:
-            pages_by_number.setdefault(number, []).extend(range(start, end + 1))
+        pages_by_number = _pages_by_number(assign, groups)
 
         for i, p in enumerate(parsed):
             a = assign[i]
@@ -911,7 +1056,8 @@ class ItemDetector:
         for number, pages in pages_by_number.items():
             pages = sorted(set(pages))
             first = pages[0]
-            objectives_a, objectives_b, table_found = _item_objectives(pages, parsed, tables)
+            info = chapter_info.get(number)
+            objectives_a, objectives_b, table_found = _objectives(info, pages, parsed, tables)
             rang: RangType
             if objectives_a:
                 rang = "A"
@@ -925,7 +1071,8 @@ class ItemDetector:
             if len(content) < _MIN_ITEM_PAGES:
                 report.warnings.append(f"item {number} : moins de 2 pages")
             title = (
-                objectifs_titles.get(number)
+                (info.title if info is not None else "")
+                or objectifs_titles.get(number)
                 or toc_titles.get(number)
                 or _item_header_title(number, pages, parsed, page_texts)
             )

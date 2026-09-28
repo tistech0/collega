@@ -307,6 +307,7 @@ async def get_college_cards(
             verso=card.verso,
             ocr_confidence_score=card.ocr_confidence_score,
             low_confidence=card.low_confidence,
+            user_feedback=card.user_feedback,
         )
         for card, item_number in result.all()
     ]

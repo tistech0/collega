@@ -24,13 +24,15 @@ from anthropic.types import OutputConfigParam
 
 from app.core.config import settings
 from app.services.generation.prompt_text import clean_for_prompt
+from app.services.ocr.item_detector import chapter_items, page_lines
 
 logger = logging.getLogger(__name__)
 
 GENERATION_MODEL = "claude-sonnet-5"
 # Incrémenter à chaque changement du prompt ou de `clean_for_prompt` : les items
 # déjà vus seront régénérés (clé des item_generations = empreinte + version), sans
-# effacer les anciennes.
+# effacer les anciennes. (La consigne des chapitres à plusieurs items, `_shared_chapter_note`,
+# n'a pas demandé d'incrément : elle n'existe que pour des textes jamais générés avant R11.)
 PROMPT_VERSION = "p2"
 GENERATION_VERSION = f"{GENERATION_MODEL}:{PROMPT_VERSION}"
 
@@ -245,6 +247,26 @@ def _item_message(item_number: int, title: str, text: str) -> str:
     return f"Item {item_number} — {title}\n<texte_item>\n{text}\n</texte_item>"
 
 
+def _shared_chapter_note(item_number: int, pages: list[str]) -> str:
+    """Chapitre thématique à plusieurs items (découpage R11) : le même texte est envoyé pour
+    chacun de ses items. Pour éviter des fiches en double d'un item à l'autre, Claude ne
+    traite que les objectifs de cet item. Vide si le texte ne cite pas d'autre item."""
+    lines = [line for page in pages for line in page_lines(page)]
+    others = sorted({c.number for c in chapter_items(lines)} - {item_number})
+    if not others:
+        return ""
+    if len(others) == 1:
+        shared = f"de l'item {others[0]}, qui a ses propres fiches"
+    else:
+        listed = ", ".join(str(n) for n in others[:-1])
+        shared = f"des items {listed} et {others[-1]}, qui ont leurs propres fiches"
+    return (
+        f"\n\nCe texte traite aussi {shared}. Ne fais des fiches que sur les objectifs de "
+        f"l'item {item_number} (son tableau « Item {item_number} – … ») et sur le cours qui s'y "
+        "rapporte, jamais sur les objectifs propres aux autres items."
+    )
+
+
 class ClaudeClient:
     def __init__(self) -> None:
         self._client = anthropic.AsyncAnthropic(
@@ -292,7 +314,12 @@ class ClaudeClient:
             model=GENERATION_MODEL,
             max_tokens=GENERATION_MAX_TOKENS,
             system=GENERATION_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": _item_message(item_number, title, text)}],
+            messages=[
+                {
+                    "role": "user",
+                    "content": _item_message(item_number, title, text) + _shared_chapter_note(item_number, pages),
+                }
+            ],
             thinking={"type": "adaptive"},
             output_config=_output_config(GENERATION_SCHEMA, effort),
         )

@@ -351,6 +351,30 @@ async def test_segmentation_report_is_stored_and_official_titles_passed(pg_facto
     assert "texte A" not in stored
 
 
+def test_with_pages_distinguishes_items_with_the_same_pages():
+    """R11 : deux items d'un même chapitre ont les mêmes pages ; leur texte (donc leur empreinte)
+    doit différer, sinon la génération du premier serait réutilisée pour le second."""
+
+    def item(number: int, pages: list[int]) -> DetectedItem:
+        return DetectedItem(
+            item_number=number,
+            rang="A",
+            chapter_title="",
+            ocr_text="",
+            start_page=pages[0],
+            end_page=pages[-1],
+            ocr_confidence_score=0.9,
+            pages=pages,
+        )
+
+    a, b, c = item(97, [0, 1]), item(98, [0, 1]), item(99, [0, 1, 2])
+    assert with_pages([a, b, c], ["p0", "p1", "p2"]) == [
+        (a, ["Item 97", "p0", "p1"]),
+        (b, ["Item 98", "p0", "p1"]),
+        (c, ["p0", "p1", "p2"]),
+    ]
+
+
 def test_with_pages_rejects_item_without_pages():
     item = DetectedItem(
         item_number=1, rang="A", chapter_title="", ocr_text="", start_page=0, end_page=0, ocr_confidence_score=0.9

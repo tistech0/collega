@@ -8,7 +8,10 @@ from arq import create_pool
 from arq.connections import ArqRedis
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from starlette.responses import Response
+from starlette.types import Scope
 
+from app.api.v1.activity import router as activity_router
 from app.api.v1.admin import router as admin_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.billing import router as billing_router
@@ -142,9 +145,25 @@ app.include_router(flash_cards_router, prefix="/v1")
 app.include_router(drill_router, prefix="/v1")
 app.include_router(notifications_router, prefix="/v1")
 app.include_router(search_router, prefix="/v1")
+app.include_router(activity_router, prefix="/v1")
 app.include_router(admin_router, prefix="/v1/admin")
 app.include_router(billing_router, prefix="/v1/webhooks")
 # StaticFiles doit être monté EN DERNIER pour ne pas masquer les routes API
+
+
+class AdminStaticFiles(StaticFiles):
+    """Console admin : modules ES sans numéro de version, donc revalidés à chaque
+    chargement (ETag, 304 si inchangés) pour ne jamais garder un écran d'avant le
+    dernier déploiement dans le cache du navigateur ou de Cloudflare."""
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        response = await super().get_response(path, scope)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
+
 app.mount(
-    "/admin", StaticFiles(directory=str(Path(__file__).parent / "static" / "admin"), html=True), name="admin-static"
+    "/admin",
+    AdminStaticFiles(directory=str(Path(__file__).parent / "static" / "admin"), html=True),
+    name="admin-static",
 )

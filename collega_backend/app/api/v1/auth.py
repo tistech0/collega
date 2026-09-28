@@ -25,7 +25,6 @@ from app.core.security import (
 )
 from app.core.time_utils import next_month_reset
 from app.deps import get_current_user, get_db
-from app.models.college import College
 from app.models.user import User
 from app.schemas.auth import (
     LoginRequest,
@@ -35,8 +34,7 @@ from app.schemas.auth import (
     RegisterRequest,
     TokenResponse,
 )
-from app.services import app_settings
-from app.services.content.purge import delete_college_pdfs, purge_unreferenced_content
+from app.services import accounts, activity, app_settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["auth"])
@@ -94,6 +92,10 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
     if not verify_password(body.password, user.hashed_password):
         raise unauthorized("INVALID_CREDENTIALS", "Identifiants incorrects")
 
+    if activity.touch_last_seen(user, datetime.now(UTC)):
+        await db.merge(user)
+        await db.commit()
+
     return {"data": _token_pair(user).model_dump()}
 
 
@@ -135,6 +137,9 @@ async def refresh(request: Request, body: RefreshRequest, db: AsyncSession = Dep
     # "active" : révoqué par cette requête ; "grace" : révoqué il y a moins de
     # `GRACE_S` secondes par une requête parallèle → accepté sans toucher à l'état existant.
 
+    if activity.touch_last_seen(user, datetime.now(UTC)):
+        await db.merge(user)
+        await db.commit()
     logger.debug("refresh : jeton renouvelé (user %s)", user.id)
     return {"data": _token_pair(user).model_dump()}
 
@@ -166,6 +171,9 @@ async def get_me(current_user: User = Depends(get_current_user), db: AsyncSessio
     # Quota du mois en cours : le compteur stocké n'est remis à zéro qu'au
     # prochain réimport ; passé la date, il n'est plus le bon (Profil, story 8.14).
     now = datetime.now(UTC)
+    if activity.touch_last_seen(current_user, now):
+        await db.merge(current_user)
+        await db.commit()
     reset_at = current_user.monthly_reloads_reset_at
     if reset_at is None or now >= reset_at:
         monthly_reloads, reset_at = 0, next_month_reset(now)
@@ -219,19 +227,7 @@ async def delete_account(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    college_ids = list((await db.execute(select(College.id).where(College.user_id == current_user.id))).scalars())
-    await db.delete(current_user)
-    await db.commit()
-    # Suppression « immédiate et complète » (politique de confidentialité) : PDF des
-    # collèges et contenu qui n'appartenait qu'à ce compte. Best-effort : la
-    # suppression du compte est déjà faite, le cron de nuit rattrape un échec.
-    for college_id in college_ids:
-        delete_college_pdfs(college_id)
-    try:
-        await purge_unreferenced_content(db)
-        await db.commit()
-    except Exception:  # noqa: BLE001
-        logger.warning("Purge du contenu après suppression de compte reportée au cron", exc_info=True)
+    await accounts.delete_account(db, current_user)
     return {"data": {"message": "Account deleted"}}
 
 

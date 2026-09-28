@@ -1,0 +1,39 @@
+---
+type: "Decision"
+title: "Activité des testeuses : activity_days alimentée par l'app, idempotente"
+description: "Le backend ne connaissait pas les révisions base locale drift . Depuis la console de pilotage : table activity days PK user id+day, jour LOCAL de l'app, cascade à la suppression du compte alimentée par PUT /v1/activity/{"
+resource: "collega_backend/app/services/activity.py"
+tags: ["session-learning", "activity", "beta", "console", "app"]
+timestamp: "2026-09-26T18:11:04.157Z"
+x-kage-id: "repo:git-github-com-tistech0-collega:decision:activit-des-testeuses-activity-days-aliment-e-par-lapp-idempotente-1790446264157"
+x-kage-type: "decision"
+x-kage-status: "approved"
+x-kage-scope: "repo"
+x-kage-visibility: "team"
+x-kage-verified: "unverified"
+x-kage-paths: ["collega_backend/app/services/activity.py", "collega_backend/app/models/activity_day.py", "collega_app/lib/features/today/data/activity_reporter.dart", "collega_backend/app/services/admin_pilot.py"]
+---
+
+# Activité des testeuses : activity_days alimentée par l'app, idempotente
+
+> Le backend ne connaissait pas les révisions base locale drift . Depuis la console de pilotage : table activity days P…
+
+Le backend ne connaissait pas les révisions (base locale drift). Depuis la console de pilotage : table activity_days (PK user_id+day, jour LOCAL de l'app, cascade à la suppression du compte) alimentée par PUT /v1/activity/{YYYY-MM-DD} {cards_reviewed, session_completed, streak} en remplacement idempotent (jamais d'addition) ; jour accepté dans [aujourd'hui UTC -30, +1] sinon 422 ACTIVITY_DAY_OUT_OF_RANGE. Côté app, ActivityReporter (lib/features/today/data/activity_reporter.dart) : cards_reviewed = fiches distinctes du jour (weekCounts, même mesure que Progression), streak = mêmes entrées que l'accueil (completedDays, quietDays + postponedDays) ; envoi après verdict/complétion avec anti-rebond 30 s, et au passage en authentifié renvoi des 7 derniers jours ; hors ligne = échec silencieux ; logout invalide le provider (annule les minuteurs). users.last_seen_at est écrit au login/refresh//me/PUT activité au plus toutes les 10 min. Les calculs de la console (admin_pilot.py) utilisent la date UTC du serveur : entre 0 h et 2 h (Paris) le jour courant peut manquer aux chiffres 7 j (suivi à faire). Streak affichée = dernière connue seulement si son jour >= hier.
+Evidence: Tests test_activity_pg.py, test_admin_pilot_pg.py, activity_reporter_test.dart verts ; revue finale de branche.
+
+## Verification
+
+Tests test_activity_pg.py, test_admin_pilot_pg.py, activity_reporter_test.dart verts ; revue finale de branche.
+
+# Citations
+
+[1] explicit_capture (2026-09-26T18:11:04.157Z)
+
+## Kage state
+
+Machine state for lossless round-trip; OKF consumers can ignore it.
+
+```json kage-state
+{"schema_version":2,"id":"repo:git-github-com-tistech0-collega:decision:activit-des-testeuses-activity-days-aliment-e-par-lapp-idempotente-1790446264157","title":"Activité des testeuses : activity_days alimentée par l'app, idempotente","summary":"Le backend ne connaissait pas les révisions base locale drift . Depuis la console de pilotage : table activity days PK user id+day, jour LOCAL de l'app, cascade à la suppression du compte alimentée par PUT /v1/activity/{","body":"Le backend ne connaissait pas les révisions (base locale drift). Depuis la console de pilotage : table activity_days (PK user_id+day, jour LOCAL de l'app, cascade à la suppression du compte) alimentée par PUT /v1/activity/{YYYY-MM-DD} {cards_reviewed, session_completed, streak} en remplacement idempotent (jamais d'addition) ; jour accepté dans [aujourd'hui UTC -30, +1] sinon 422 ACTIVITY_DAY_OUT_OF_RANGE. Côté app, ActivityReporter (lib/features/today/data/activity_reporter.dart) : cards_reviewed = fiches distinctes du jour (weekCounts, même mesure que Progression), streak = mêmes entrées que l'accueil (completedDays, quietDays + postponedDays) ; envoi après verdict/complétion avec anti-rebond 30 s, et au passage en authentifié renvoi des 7 derniers jours ; hors ligne = échec silencieux ; logout invalide le provider (annule les minuteurs). users.last_seen_at est écrit au login/refresh//me/PUT activité au plus toutes les 10 min. Les calculs de la console (admin_pilot.py) utilisent la date UTC du serveur : entre 0 h et 2 h (Paris) le jour courant peut manquer aux chiffres 7 j (suivi à faire). Streak affichée = dernière connue seulement si son jour >= hier.\nEvidence: Tests test_activity_pg.py, test_admin_pilot_pg.py, activity_reporter_test.dart verts ; revue finale de branche.","type":"decision","scope":"repo","visibility":"team","sensitivity":"internal","status":"approved","confidence":0.7,"tags":["session-learning","activity","beta","console","app"],"paths":["collega_backend/app/services/activity.py","collega_backend/app/models/activity_day.py","collega_app/lib/features/today/data/activity_reporter.dart","collega_backend/app/services/admin_pilot.py"],"stack":[],"source_refs":[{"kind":"explicit_capture","captured_at":"2026-09-26T18:11:04.157Z"}],"context":{"fact":"Le backend ne connaissait pas les révisions (base locale drift). Depuis la console de pilotage : table activity_days (PK user_id+day, jour LOCAL de l'app, cascade à la suppression du compte) alimentée par PUT /v1/activity/{YYYY-MM-DD} {cards_reviewed, session_completed, streak} en remplacement idempotent (jamais d'addition) ; jour accepté dans [aujourd'hui UTC -30, +1] sinon 422 ACTIVITY_DAY_OUT_OF_RANGE. Côté app, ActivityReporter (lib/features/today/data/activity_reporter.dart) : cards_reviewed = fiches distinctes du jour (weekCounts, même mesure que Progression), streak = mêmes entrées que l'accueil (completedDays, quietDays + postponedDays) ; envoi après verdict/complétion avec anti-rebond 30 s, et au passage en authentifié renvoi des 7 derniers jours ; hors ligne = échec silencieux ; logout invalide le provider (annule les minuteurs). users.last_seen_at est écrit au login/refresh//me/PUT activité au plus toutes les 10 min. Les calculs de la console (admin_pilot.py) utilisent la date UTC du serveur : entre 0 h et 2 h (Paris) le jour courant peut manquer aux chiffres 7 j (suivi à faire). Streak affichée = dernière connue seulement si son jour >= hier.\nEvidence: Tests test_activity_pg.py, test_admin_pilot_pg.py, activity_reporter_test.dart verts ; revue finale de branche.","verification":"Tests test_activity_pg.py, test_admin_pilot_pg.py, activity_reporter_test.dart verts ; revue finale de branche."},"freshness":{"ttl_days":365,"last_verified_at":"2026-09-26T18:11:04.157Z","path_fingerprints":[{"path":"collega_backend/app/services/activity.py","sha256":"544b2243472b3b812b817839b0343d60a5ddcdf7763d71d08958e01e8b7cf877","size":1785},{"path":"collega_backend/app/models/activity_day.py","sha256":"ca88b09688b90477895700a9afe0aac1a9115584c6e80c8e10ce15e7497b683b","size":1421},{"path":"collega_app/lib/features/today/data/activity_reporter.dart","sha256":"bd217e1fcb6bb20c8df2c34dfe361a6a02c48a4b2245f172fd0fe543f264fea4","size":4370},{"path":"collega_backend/app/services/admin_pilot.py","sha256":"62674c19b78ae6475ceeff716093c7f931b00bcd19e596f0d57a109ad4621fe4","size":20165}],"path_fingerprint_policy":"source_hash_staleness","verification":"repo_local_agent_capture"},"edges":[],"quality":{"reviewer":"repo-local-agent","votes_up":0,"votes_down":0,"uses_30d":0,"reports_stale":0,"review_boundary":"git_or_pr","promotion_requires_review":true,"discovery_tokens":4000,"discovery_tokens_estimated":true,"score":100,"reasons":["high-value memory type","has source evidence","grounded to repo paths","tagged","concise but substantive","actionable rationale or verification"],"risks":[],"duplicate_candidates":[],"stale_reasons":[],"estimated_tokens_saved":324},"created_at":"2026-09-26T18:11:04.157Z","updated_at":"2026-09-26T18:11:04.157Z","author_branch":"feat/console-pilotage"}
+```
+

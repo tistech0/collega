@@ -37,6 +37,9 @@ class User(Base):
     token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     # Horodatage du dernier événement RevenueCat appliqué : un événement plus ancien est ignoré.
     subscription_event_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Dernière ouverture de l'app (login, refresh, /me, envoi d'activité), écrite au plus
+    # toutes les 10 min (services/activity.py). NULL : jamais connectée depuis la création.
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

@@ -28,6 +28,7 @@ from app.schemas.admin import (
     UsageResponseWrapped,
     UsageTotalsData,
 )
+from app.services import admin_pilot
 from app.services.generation.token_cost import UsageTotals
 
 router = APIRouter()
@@ -123,6 +124,7 @@ async def get_usage(
             t.add(model, u_input, u_output)
 
     users = sorted(by_user.items(), key=lambda kv: (kv[1][0] is None, kv[1][0] or ""))
+    daily, by_college, avg_import_cost_eur = await admin_pilot.usage_breakdown(db, datetime.now(UTC))
     return UsageResponseWrapped(
         data=UsageData(
             **_totals(total).model_dump(),
@@ -138,5 +140,8 @@ async def get_usage(
                 )
                 for user_id, (email, user_total, user_recent) in users
             ],
+            daily=daily,
+            by_college=by_college,
+            avg_import_cost_eur=avg_import_cost_eur,
         )
     )

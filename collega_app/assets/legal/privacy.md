@@ -37,6 +37,7 @@ L'éditeur agit seul comme responsable du traitement au sens du RGPD.
 
 - Logs serveur (date, IP partielle, route appelée, code de réponse) — usage : sécurité, debug.
 - Métriques d'usage anonymisées (nombre de sessions, durée moyenne) — usage : amélioration produit.
+- **Suivi de la révision (pendant la beta)** : chaque jour où l'Application est utilisée, elle transmet trois compteurs — le nombre de fiches révisées, si la séance du jour a été terminée, et la série de jours consécutifs. Aucun contenu de fiche n'est transmis. Ces compteurs servent à suivre la beta et à améliorer le service ; ils sont supprimés avec le compte.
 
 ### 2.3. Données de paiement
 

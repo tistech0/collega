@@ -14,6 +14,7 @@ import hashlib
 import json
 import logging
 import uuid
+from collections import Counter
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -312,11 +313,19 @@ async def official_titles(db: AsyncSession) -> dict[int, str] | None:
 
 
 def with_pages(items: list[DetectedItem], texts: list[str]) -> list[tuple[DetectedItem, list[str]]]:
-    """Le texte d'un item est la concaténation de ses pages (`DetectedItem.pages`)."""
+    """Le texte d'un item est la concaténation de ses pages (`DetectedItem.pages`).
+
+    Chapitre thématique (R11) dont les items ont exactement les mêmes pages : une 1re page
+    « Item N » distingue leur texte. Sans elle, ils auraient la même empreinte et la
+    génération du premier serait réutilisée telle quelle pour les autres (fiches en double)."""
     for d in items:
         if not d.pages:
             raise ValueError(f"Item {d.item_number} sans pages : découpage incohérent")
-    return [(d, [texts[p] for p in d.pages]) for d in items]
+    same_pages = Counter(tuple(d.pages) for d in items)
+    return [
+        (d, ([f"Item {d.item_number}"] if same_pages[tuple(d.pages)] > 1 else []) + [texts[p] for p in d.pages])
+        for d in items
+    ]
 
 
 def _items_message(count: int, report: SegmentationReport) -> str:

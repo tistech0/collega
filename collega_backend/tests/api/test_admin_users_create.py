@@ -49,7 +49,21 @@ class TestCreateUser:
         added = mock_db.add.call_args.args[0]
         assert added.email == "testeuse@example.com"
         assert added.is_beta is False
+        assert added.first_name is None
         mock_db.commit.assert_awaited()
+
+    async def test_first_name_trimmed_and_optional(self, client: AsyncClient, mock_db):
+        mock_db.add = MagicMock()
+        mock_db.commit = AsyncMock()
+
+        resp = await client.post(
+            "/v1/admin/users",
+            json={"email": "camille@test.com", "password": "password123", "first_name": "  Camille  "},
+            auth=ADMIN_AUTH,
+        )
+        assert resp.status_code == 201
+        added = mock_db.add.call_args.args[0]
+        assert added.first_name == "Camille"
 
     async def test_is_beta_true_honored(self, client: AsyncClient, mock_db):
         mock_db.add = MagicMock()

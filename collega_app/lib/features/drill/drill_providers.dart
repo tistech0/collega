@@ -9,6 +9,7 @@ import 'package:collega_app/core/utils/logger.dart';
 import 'package:collega_app/features/drill/data/drill_repository.dart';
 import 'package:collega_app/features/drill/domain/drill_session_state.dart';
 import 'package:collega_app/features/drill/domain/drill_state.dart';
+import 'package:collega_app/features/today/data/activity_reporter.dart';
 import 'package:collega_app/features/today/data/daily_session_repository.dart';
 
 final drillRepositoryProvider = Provider<DrillRepository>(
@@ -109,6 +110,7 @@ class DrillSessionNotifier
       );
       // Aujourd'hui se recalcule au retour du drill (TodayScreen), pas d'ici.
       if (s.isComplete) await _daily.complete(day);
+      if (s.isComplete) ref.read(activityReporterProvider).schedule(day);
     } catch (e) {
       AppLogger.error('session du jour : enregistrement impossible', tag: 'Drill', error: e);
     }
@@ -206,6 +208,9 @@ class DrillSessionNotifier
           daily: arg.isDailySession && !_replayingErrors,
         )
         .catchError((Object e) => AppLogger.error('recordVerdict failed', error: e)));
+    // Pilotage beta (Task 10) : fiches distinctes revues = même mesure que Progression,
+    // toute révision compte (pas seulement la session du jour).
+    ref.read(activityReporterProvider).schedule(arg.dailySessionDay ?? epochDayOf(DateTime.now()));
 
     state = AsyncValue.data(s.copyWith(
       queue: newQueue,

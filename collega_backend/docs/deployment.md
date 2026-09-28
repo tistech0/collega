@@ -85,11 +85,11 @@ pour les outils dev locaux (TablePlus, RedisInsight).
 ## Domaine public
 
 Le backend est servi sur `collega.matthislesur.com` (tunnel Cloudflare → NPM proxy host 53 →
-`collega-api-1:8000`). L'ancien nom `collegatest.matthislesur.com` reste servi en parallèle
-tant que des builds de l'app qui l'utilisent sont installés (il est écrit en dur dans
-`collega_app/lib/env.dart`) : chaque hostname doit figurer dans le tunnel, le proxy host NPM,
-l'override DNS du LAN et les trois applications Cloudflare Access (service token de l'app,
-`collega-admin`, `collega-webhook-revenuecat`).
+`collega-api-1:8000`). Le nom doit figurer dans le tunnel, le proxy host NPM, l'override DNS du
+LAN (Pi-hole, puis `gen-dns-tailnet.sh` pour le tailnet) et les trois applications Cloudflare
+Access (service token de l'app, `collega-admin`, `collega-webhook-revenuecat`). L'ancien nom
+`collegatest.matthislesur.com` a été retiré de NPM et du DNS local le 2026-09-28 (plus aucun
+build installé ne l'appelait).
 
 ## Console admin : Cloudflare Access
 
@@ -137,6 +137,42 @@ curl -i --resolve collega.matthislesur.com:443:<IP Cloudflare> \
 `/admin` doit répondre `302` vers la page de connexion Cloudflare Access ; `/v1/colleges`
 avec le service token doit répondre comme avant (pas de redirection Access).
 
+### Console de pilotage — organisation du front
+
+Le front admin (`app/static/admin/`) est découpé en modules ES chargés par le routeur
+(`js/main.js`, routes en hash) sans étape de build : un écran = un fichier sous
+`app/static/admin/js/views/` (`pilotage.js`, `testeuses.js`, `testeuse.js`, `imports.js`,
+`import.js`, `qualite.js`, `couts.js`, `reglages.js`, plus `login.js`). Les briques
+communes (`h`, `icon`, `banner`, `block`, `row`, `tag`, `toast`, formatteurs…) vivent dans
+`js/ui.js` ; le client HTTP (Basic Auth gardée en mémoire du module, doublée dans
+`sessionStorage` pour survivre à un rechargement de page) dans `js/api.js`.
+
+Deux fichiers sont **générés**, pas écrits à la main, depuis l'app Flutter (source de
+vérité) :
+
+- `app/core/college_catalog.py` (noms des collèges par `college_ref_id`) ;
+- `app/static/admin/js/icons.js` (icônes, tracé `currentColor`).
+
+Régénération : `.venv/bin/python -m scripts.gen_admin_assets` (`--check` renvoie un
+code non nul et n'écrit rien si les fichiers générés sont différents de ce que produirait
+une régénération — utilisé en CI). Un test de fraîcheur
+(`tests/scripts/test_gen_admin_assets.py::test_fichiers_generes_a_jour`) échoue si le code
+Flutter a changé sans régénération committée.
+
+Réglages exposés dans l'écran **Réglages** (`GET`/`PATCH /v1/admin/config`,
+`ConfigData`/`ConfigUpdateRequest` dans `app/schemas/admin.py`, clés `app_settings` dans
+`app/services/admin_pilot.py`) :
+
+- `inactivity_days` (1 à 60, défaut 5) : au-delà de ce nombre de jours sans
+  `last_seen_at`, une testeuse passe « inactive » (pastille Pilotage/Testeuses/fiche
+  testeuse) ;
+- `testflight_url` (vide, ou une URL `https://…`) : insérée dans le message d'invitation
+  généré par l'écran Testeuses ; laissée vide, l'invitation renvoie vers l'App Store.
+
+L'alerte Telegram sur un import passé en échec (`scripts.import_alerts`, appelée par la
+sonde `collega-health.sh`) est documentée dans [§ Supervision (NAS)](#supervision-nas)
+ci-dessous — pas dupliquée ici.
+
 ### Adresse IP cliente et proxys de confiance
 
 `get_client_ip()` (`app/core/limiter.py`) ne fait confiance à `CF-Connecting-IP` (ou au
@@ -178,6 +214,28 @@ journal d'accès de ce proxy host) et à garder en tête pour la durée de conse
 Le reverse proxy est Nginx Proxy Manager (proxy host 53) sur le NAS, joint par le
 réseau `collega_net` ; le chemin public passe par le tunnel Cloudflare + Access. Il
 n'est pas dans le `docker-compose.prod.yml`.
+
+## Supervision (NAS)
+
+Le User Script Unraid `collega-health` (source versionnée : `ops/nas/collega-health.sh`,
+copiée sur le NAS par l'utilisateur — jamais par un agent) tourne chaque minute et
+sonde `GET /health` par les chemins LAN et public ; une panne déclenche une alerte
+Telegram (niveau `alert`) et un retour un message de rétablissement.
+
+Depuis le chantier console de pilotage, la même sonde lance aussi, juste avant de
+sortir, `docker exec collega-api-1 python -m scripts.import_alerts` : cette commande
+imprime une ligne par import de collège passé en `failed` depuis le dernier passage
+(« collège — e-mail : message »). Si la sortie n'est pas vide, `collega-health.sh`
+envoie « Collega : import en échec » en niveau `alert`. Une panne de la commande
+(image pas à jour, base injoignable…) n'interrompt jamais la sonde de santé : sa
+sortie d'erreur est ignorée et l'absence d'alerte n'est pas elle-même une alerte.
+
+Le point de reprise (dernier `updated_at` de job déjà signalé) est stocké dans
+`app_settings`, clé `import_alerts_since` (ISO 8601) ; au tout premier passage il est
+juste initialisé à « maintenant », sans rafale sur l'historique. Pour rejouer les
+alertes depuis un moment donné : supprimer la ligne `import_alerts_since` de
+`app_settings` (ou la réécrire à la date voulue) — le passage suivant repart de
+« maintenant » (ou de la date fixée).
 
 ## CGU + Politique de confidentialité (Story 7.4 — FR40)
 

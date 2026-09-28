@@ -11,6 +11,7 @@ import pytest
 from app.services.ocr.item_detector import (
     ItemDetector,
     SegmentationResult,
+    chapter_items,
     header_candidates,
     page_lines,
     segmentation_overview,
@@ -378,6 +379,85 @@ class TestR10Report:
     def test_short_item_warning(self):
         result = seg([page("Item 75", "Rang Rubrique Intitulé", "A Définition Connaître")])
         assert any("item 75" in w and "moins de 2 pages" in w for w in result.report.warnings)
+
+
+# ── R11 : chapitre thématique à plusieurs items ───────────────────────────────
+
+
+def chapter(number: int, *item_blocks: str) -> str:
+    """Ouverture d'un chapitre thématique : sommaire du chapitre, puis bloc des items."""
+    return "\n".join(
+        [
+            "CHAPITRE",
+            str(number),
+            "Titre du chapitre",
+            "I. Première partie",
+            "II. Deuxième partie",
+            "Situations de départ",
+            "28 Coma et troubles de conscience.",
+            "Items, hiérarchisation des connaissances",
+            *item_blocks,
+            "Introduction",
+            BODY,
+        ]
+    )
+
+
+IRA = "Item 348 – Insuffisance rénale aiguë\nRang Rubrique Intitulé\nA Définition Définir l'IRA\nB Étiologie Causes"
+CREAT = "230 Item 258 – Élévation de la créatininémie\nRang Rubrique Intitulé\nA Diagnostic positif Interpréter"
+
+
+class TestR11ThematicChapters:
+    def test_chapter_items_reads_numbers_titles_and_objectives(self):
+        found = chapter_items(chapter(34, IRA, CREAT).splitlines())
+        assert [(c.number, c.title, c.objectives_a, c.objectives_b) for c in found] == [
+            (348, "Insuffisance rénale aiguë", 1, 1),
+            (258, "Élévation de la créatininémie", 1, 0),
+        ]
+
+    def test_chapter_items_needs_the_marker(self):
+        assert chapter_items(["Item 348 – Insuffisance rénale aiguë", "A Définition Définir"]) == []
+
+    def test_chapter_goes_to_each_of_its_items(self):
+        pages = [chapter(34, IRA, CREAT), page("Suite du cours"), page("Fin du cours")]
+        result = seg(pages)
+        assert {i.item_number: i.pages for i in result.items} == {348: [0, 1, 2], 258: [0, 1, 2]}
+        assert {i.item_number: i.rang for i in result.items} == {348: "A", 258: "A"}
+        assert "chapitre:348/258" in result.report.pages[0].signals
+
+    def test_item_signals_inside_the_chapter_are_ignored(self):
+        # Suite du tableau d'objectifs en haut de page, avec son en-tête « Item N – … »
+        pages = [chapter(34, IRA), page("Item 258 – Élévation", "Rang Rubrique Intitulé", "A Définition X"), page("x")]
+        result = seg(pages)
+        assert spans(result) == [(348, 0, 2)]
+
+    def test_item_in_several_chapters_gathers_them(self):
+        pages = [chapter(10, IRA), page("cours"), chapter(11, IRA, CREAT), page("cours")]
+        result = seg(pages)
+        assert {i.item_number: i.pages for i in result.items} == {348: [0, 1, 2, 3], 258: [2, 3]}
+        assert not any("réouverture" in w for w in result.report.warnings)
+
+    def test_end_section_closes_the_chapter(self):
+        pages = [chapter(34, IRA), page("cours"), page("Index"), page("entrée d'index")]
+        result = seg(pages)
+        assert spans(result) == [(348, 0, 1)]
+        assert kinds(result)[2:] == [("section", "index"), ("section", "index")]
+
+    def test_front_matter_like_page_does_not_close_the_chapter(self):
+        pages = [chapter(34, IRA), page("Introduction"), page("cours")]
+        assert spans(seg(pages)) == [(348, 0, 2)]
+
+    def test_chapter_without_items_stays_outside(self):
+        text = chapter(6).replace("Items, hiérarchisation des connaissances\n", "")
+        result = seg([text, page("cours")])
+        assert result.items == []
+        assert kinds(result)[0] == ("section", "chapitre sans item")
+
+    def test_fullest_objectives_table_wins(self):
+        see = "Item 348 – Insuffisance rénale aiguë\nVoir la hiérarchisation des connaissances au chapitre 34."
+        result = seg([chapter(18, see), page("cours"), chapter(34, IRA), page("cours")])
+        item = result.items[0]
+        assert (item.objectives_a, item.objectives_b) == (1, 1)
 
 
 # ── Rang par objectif (§ 3) ───────────────────────────────────────────────────

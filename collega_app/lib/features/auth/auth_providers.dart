@@ -12,6 +12,7 @@ import 'package:collega_app/features/auth/domain/auth_state.dart';
 import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/pdf/pdf_providers.dart';
 import 'package:collega_app/features/search/search_providers.dart';
+import 'package:collega_app/features/today/data/activity_reporter.dart';
 import 'package:collega_app/features/today/today_providers.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
@@ -85,6 +86,12 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   Future<void> logout() async {
     state = const AsyncLoading();
+    // Avant tout : dispose le reporter et annule sa minuterie anti-rebond en cours,
+    // AVANT que les jetons soient effacés — sinon un debounce déjà lancé peut
+    // envoyer son PUT /v1/activity après le logout (401 -> tokens du prochain
+    // compte reconnecté effacés par erreur, ou compteurs de l'ancien compte
+    // envoyés sous le nouveau).
+    ref.invalidate(activityReporterProvider);
     await ref.read(authRepositoryProvider).logout();
     _rcLogOut();
     // Données en mémoire oubliées (le compte suivant ne les voit jamais) ; la base

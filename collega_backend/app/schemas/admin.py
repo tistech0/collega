@@ -136,11 +136,15 @@ class BetaUpdateResponseWrapped(BaseModel):
 class ConfigData(BaseModel):
     reload_count_max: int
     monthly_reloads_max: int
+    inactivity_days: int
+    testflight_url: str
 
 
 class ConfigUpdateRequest(BaseModel):
     reload_count_max: int | None = Field(default=None, ge=0)
     monthly_reloads_max: int | None = Field(default=None, ge=0)
+    inactivity_days: int | None = Field(default=None, ge=1, le=60)
+    testflight_url: str | None = Field(default=None, max_length=300, pattern=r"^(|https://\S+)$")
 
 
 class ConfigResponseWrapped(BaseModel):
@@ -154,6 +158,7 @@ class CreateUserRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)
     is_beta: bool = False
+    first_name: str | None = Field(default=None, max_length=100)
 
 
 class CreateUserResponseWrapped(BaseModel):
@@ -184,9 +189,12 @@ class ResetPasswordResponseWrapped(BaseModel):
 class UserCollegeSummary(BaseModel):
     college_id: str
     college_ref_id: int
+    college_name: str
     status: str
     reload_count: int
     reload_count_max: int
+    card_count: int
+    progress: float
 
 
 class UserJobSummary(BaseModel):
@@ -198,17 +206,40 @@ class UserJobSummary(BaseModel):
     created_at: str | None
 
 
+class DailyActivityData(BaseModel):
+    day: str
+    cards_reviewed: int
+    session_completed: bool
+
+
+class UserFeedbackData(BaseModel):
+    card_id: str
+    college_name: str
+    item_number: int | None
+    recto: str
+    feedback: str
+    at: str
+
+
 class UserDetailData(BaseModel):
     user_id: str
     email: str
+    first_name: str | None
     is_beta: bool
     is_subscribed: bool
     monthly_reloads: int
     monthly_reloads_max: int
     monthly_reloads_reset_at: str | None
     created_at: str | None
+    last_seen_at: str | None
+    status: str
+    streak: int
+    cards_30d: int
+    sessions_30d: int
+    daily: list[DailyActivityData]
     colleges: list[UserCollegeSummary]
     jobs: list[UserJobSummary]
+    feedback: list[UserFeedbackData]
 
 
 class UserDetailResponseWrapped(BaseModel):
@@ -297,6 +328,7 @@ class AdminFlashCardData(BaseModel):
     verso: str
     ocr_confidence_score: float
     low_confidence: bool
+    user_feedback: str | None = None
 
 
 class AdminCardsResponseWrapped(BaseModel):
@@ -340,11 +372,26 @@ class UsageByUserData(UsageTotalsData):
     last_30_days: UsageTotalsData
 
 
+class DailyCostData(BaseModel):
+    day: str
+    cost_eur: float
+
+
+class CollegeCostData(BaseModel):
+    college_id: str | None
+    college_name: str
+    cost_eur: float
+
+
 class UsageData(UsageTotalsData):
     last_30_days: UsageTotalsData
     by_kind: dict[str, UsageTotalsData]
     by_model: dict[str, UsageTotalsData]
     by_user: list[UsageByUserData]
+    # Console de pilotage, task 9 — ventilation par jour / par collège, coût moyen d'un import.
+    daily: list[DailyCostData] = []
+    by_college: list[CollegeCostData] = []
+    avg_import_cost_eur: float = 0.0
 
 
 class UsageResponseWrapped(BaseModel):
