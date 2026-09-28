@@ -3,6 +3,7 @@ import { go } from '../router.js';
 import { banner, empty, fmtInt, h, icon, tag } from '../ui.js';
 
 const FILTERS = [['all', 'Toutes'], ['negative', 'Avis négatifs'], ['low', 'Confiance OCR faible']];
+const TYPES = [['all', 'Tous types'], ['classique', 'Classique'], ['definition', 'Définition'], ['cas_clinique', 'Cas clinique']];
 
 export async function render(root, { id } = {}) {
   let colleges;
@@ -25,16 +26,23 @@ export async function render(root, { id } = {}) {
   const select = h('select', { class: 'input', style: 'width:auto;max-width:100%', onchange: (e) => go(`/qualite/${e.target.value}`) },
     ...colleges.map((c) => h('option', { value: c.college_id, selected: c.college_id === current.college_id }, `${c.college_name} — ${c.user_email ?? 'compte supprimé'}${c.negative_count ? ` (${c.negative_count} négatif${c.negative_count > 1 ? 's' : ''})` : ''}`)));
   let filter = current.negative_count ? 'negative' : 'all';
+  let type = 'all';
   const stats = h('div', { class: 'stats' });
   const grid = h('div', { class: 'cards' });
   const seg = h('div', { class: 'seg' }, ...FILTERS.map(([key, label]) =>
     h('button', { class: key === filter ? 'on' : '', onclick: (e) => { filter = key; for (const b of seg.children) b.classList.toggle('on', b === e.currentTarget); draw(); } }, label)));
-  root.append(h('div', { class: 'toolbar' }, select, seg, stats), grid);
+  const typeSeg = h('div', { class: 'seg' });
+  root.append(h('div', { class: 'toolbar' }, select, seg, typeSeg, stats), grid);
 
   let cards;
   try {
     const [{ data: s }, { data: c }] = await Promise.all([api(`/colleges/${current.college_id}/stats`), api(`/colleges/${current.college_id}/cards`)]);
     cards = c;
+    // Nombre de fiches par type, sur tout le collège (indépendant du 1er filtre).
+    typeSeg.replaceChildren(...TYPES.map(([key, label]) => {
+      const n = key === 'all' ? cards.length : cards.filter((x) => x.card_type === key).length;
+      return h('button', { class: key === type ? 'on' : '', onclick: (e) => { type = key; for (const b of typeSeg.children) b.classList.toggle('on', b === e.currentTarget); draw(); } }, `${label} (${fmtInt(n)})`);
+    }));
     const rated = cards.filter((x) => x.user_feedback);
     const positive = rated.filter((x) => x.user_feedback === 'positive').length;
     stats.replaceChildren(
@@ -48,7 +56,8 @@ export async function render(root, { id } = {}) {
   }
 
   function draw() {
-    const shown = cards.filter((c) => filter === 'all' || (filter === 'negative' && c.user_feedback === 'negative') || (filter === 'low' && c.low_confidence));
+    const shown = cards.filter((c) => (filter === 'all' || (filter === 'negative' && c.user_feedback === 'negative') || (filter === 'low' && c.low_confidence))
+      && (type === 'all' || c.card_type === type));
     // Auteur de l'avis (spec § 3.2 écran 6) : seule la propriétaire du collège
     // note ses fiches, donc l'auteur = l'e-mail du compte du collège affiché.
     grid.replaceChildren(...(shown.length ? shown.map((c) => card(c, current.user_email)) : [empty('Aucune fiche dans ce filtre.')]));
