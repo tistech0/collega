@@ -85,11 +85,11 @@ pour les outils dev locaux (TablePlus, RedisInsight).
 ## Domaine public
 
 Le backend est servi sur `collega.matthislesur.com` (tunnel Cloudflare → NPM proxy host 53 →
-`collega-api-1:8000`). L'ancien nom `collegatest.matthislesur.com` reste servi en parallèle
-tant que des builds de l'app qui l'utilisent sont installés (il est écrit en dur dans
-`collega_app/lib/env.dart`) : chaque hostname doit figurer dans le tunnel, le proxy host NPM,
-l'override DNS du LAN et les trois applications Cloudflare Access (service token de l'app,
-`collega-admin`, `collega-webhook-revenuecat`).
+`collega-api-1:8000`). Le nom doit figurer dans le tunnel, le proxy host NPM, l'override DNS du
+LAN (Pi-hole, puis `gen-dns-tailnet.sh` pour le tailnet) et les trois applications Cloudflare
+Access (service token de l'app, `collega-admin`, `collega-webhook-revenuecat`). L'ancien nom
+`collegatest.matthislesur.com` a été retiré de NPM et du DNS local le 2026-09-28 (plus aucun
+build installé ne l'appelait).
 
 ## Console admin : Cloudflare Access
 
