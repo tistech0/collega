@@ -12,6 +12,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import anthropic
+import httpx
 import pytest
 
 from app.api.v1.drill import EVAL_SCHEMA
@@ -269,6 +270,53 @@ async def test_generate_propagates_api_error():
     client = _client(side_effect=anthropic.APIError("rate limit", request=MagicMock(), body=None))
     with pytest.raises(anthropic.APIError):
         await client.generate_cards(1, "T", ["texte"])
+
+
+def _status_error(cls, status: int):
+    response = httpx.Response(status, request=httpx.Request("POST", "https://api.anthropic.com/v1/messages"))
+    return cls("indisponible", response=response, body=None)
+
+
+@pytest.fixture
+def sleeps(monkeypatch):
+    waited: list[float] = []
+
+    async def fake_sleep(delay):
+        waited.append(delay)
+
+    monkeypatch.setattr(cc, "_sleep", fake_sleep)
+    return waited
+
+
+async def test_generate_retries_patiently_when_api_unavailable(sleeps):
+    """Panne passagère (503 « overloaded » du 2026-09-29, ~80 s) : l'item est
+    retenté après 30 s puis 60 s au lieu de faire échouer tout l'import."""
+    ok = _response({"insufficient_text": False, "flashcards": [_card()]})
+    client = _client(
+        side_effect=[
+            _status_error(anthropic.InternalServerError, 503),
+            _status_error(anthropic.OverloadedError, 529),
+            ok,
+        ]
+    )
+    result = await client.generate_cards(1, "T", ["texte"])
+    assert len(result.cards) == 1
+    assert sleeps == [30, 60]
+
+
+async def test_generate_gives_up_after_last_retry(sleeps):
+    client = _client(side_effect=anthropic.APIConnectionError(request=MagicMock()))
+    with pytest.raises(anthropic.APIConnectionError):
+        await client.generate_cards(1, "T", ["texte"])
+    assert sleeps == [30, 60, 120]
+    assert client._client.messages.create.await_count == 4  # type: ignore[attr-defined]
+
+
+async def test_generate_does_not_retry_client_errors(sleeps):
+    client = _client(side_effect=_status_error(anthropic.BadRequestError, 400))
+    with pytest.raises(anthropic.BadRequestError):
+        await client.generate_cards(1, "T", ["texte"])
+    assert sleeps == []
 
 
 # --- Régénération -----------------------------------------------------------

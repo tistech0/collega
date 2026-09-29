@@ -14,6 +14,7 @@ Aucun texte d'item ni de fiche dans les logs (numéros et compteurs seulement).
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from dataclasses import dataclass
@@ -45,6 +46,13 @@ EVALUATION_MAX_TOKENS = 512
 Effort = Literal["low", "medium", "high", "xhigh", "max"]
 DEFAULT_EFFORT: Effort = "medium"
 MAX_CARDS = 40
+
+# Panne passagère de l'API (5xx, 529 « overloaded », réseau) : le SDK retente déjà
+# 3 fois en quelques secondes ; au-delà, l'item est retenté après ces délais (s)
+# avant de faire échouer l'import (panne de ~80 s le 2026-09-29).
+UNAVAILABLE_RETRY_DELAYS = (30, 60, 120)
+_UNAVAILABLE_ERRORS = (anthropic.InternalServerError, anthropic.OverloadedError, anthropic.APIConnectionError)
+_sleep = asyncio.sleep
 
 CARD_TYPES = ("classique", "definition", "cas_clinique")
 CARD_RANGS = ("A", "B")
@@ -308,21 +316,35 @@ class ClaudeClient:
                 stop_reason=None,
             )
 
-        # anthropic.APIError se propage (pas de réponse → aucun usage à compter,
-        # le worker marquera le job 'failed').
-        response = await self._client.messages.create(
-            model=GENERATION_MODEL,
-            max_tokens=GENERATION_MAX_TOKENS,
-            system=GENERATION_SYSTEM_PROMPT,
-            messages=[
-                {
-                    "role": "user",
-                    "content": _item_message(item_number, title, text) + _shared_chapter_note(item_number, pages),
-                }
-            ],
-            thinking={"type": "adaptive"},
-            output_config=_output_config(GENERATION_SCHEMA, effort),
-        )
+        # anthropic.APIError se propage après les nouveaux essais (pas de réponse →
+        # aucun usage à compter, le worker marquera le job 'failed').
+        for delay in (*UNAVAILABLE_RETRY_DELAYS, None):
+            try:
+                response = await self._client.messages.create(
+                    model=GENERATION_MODEL,
+                    max_tokens=GENERATION_MAX_TOKENS,
+                    system=GENERATION_SYSTEM_PROMPT,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": _item_message(item_number, title, text)
+                            + _shared_chapter_note(item_number, pages),
+                        }
+                    ],
+                    thinking={"type": "adaptive"},
+                    output_config=_output_config(GENERATION_SCHEMA, effort),
+                )
+                break
+            except _UNAVAILABLE_ERRORS as exc:
+                if delay is None:
+                    raise
+                logger.warning(
+                    "Item %s : API Claude indisponible (%s), nouvel essai dans %d s",
+                    item_number,
+                    type(exc).__name__,
+                    delay,
+                )
+                await _sleep(delay)
         # Usage capturé AVANT le parsing : facturé même si la réponse est inexploitable.
         usage = _usage(response, GENERATION_MODEL)
         result = CardGenResult(
