@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -158,8 +159,9 @@ def _client(use_sandbox: bool) -> Any:
 
     from app.core.config import settings
 
+    # aioapns 4 attend le contenu de la clé .p8 (passé tel quel à PyJWT), pas son chemin.
     return APNs(
-        key=settings.apns_key_path,
+        key=Path(settings.apns_key_path).read_text(),
         key_id=settings.apns_key_id,
         team_id=settings.apns_team_id,
         topic=settings.apns_bundle_id,

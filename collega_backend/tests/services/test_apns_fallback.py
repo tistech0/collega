@@ -53,3 +53,21 @@ def test_defauts_bundle_de_l_app_et_production():
     fields = Settings.model_fields
     assert fields["apns_bundle_id"].default == "com.matthislesur.collega"
     assert fields["apns_use_sandbox"].default is False
+
+
+def test_client_recoit_le_contenu_de_la_cle_pas_son_chemin(monkeypatch, tmp_path):
+    """aioapns 4 passe `key` tel quel à PyJWT : lui donner le chemin du .p8 fait
+    échouer chaque envoi (« Unable to load PEM file »)."""
+    from app.core.config import settings
+    from app.services.notifications import apns_service
+
+    pem = "-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----\n"
+    key_file = tmp_path / "AuthKey_TEST.p8"
+    key_file.write_text(pem)
+    monkeypatch.setattr(settings, "apns_key_path", str(key_file))
+    captured = {}
+    sys.modules["aioapns"].APNs = lambda **kw: captured.update(kw)
+
+    apns_service._client(use_sandbox=False)
+
+    assert captured["key"] == pem
