@@ -1,8 +1,9 @@
 import { api } from '../api.js';
 import { go } from '../router.js';
-import { banner, empty, fmtInt, h, icon, tag } from '../ui.js';
+import { banner, empty, fmtAgo, fmtInt, h, icon, tag } from '../ui.js';
 
 const FILTERS = [['all', 'Toutes'], ['negative', 'Avis négatifs'], ['low', 'Confiance OCR faible']];
+const RATED = [['all', 'Toutes notées'], ['positive', 'Validées'], ['negative', 'Avis négatifs']];
 const TYPES = [['all', 'Tous types'], ['classique', 'Classique'], ['definition', 'Définition'], ['cas_clinique', 'Cas clinique']];
 
 export async function render(root, { id } = {}) {
@@ -22,9 +23,11 @@ export async function render(root, { id } = {}) {
   root.append(h('div', { class: 'page-head' }, h('div', {}, h('h1', {}, 'Qualité des fiches'))));
   if (!colleges.length) { root.append(empty('Aucun collège importé pour l\'instant.')); return; }
 
-  const current = colleges.find((c) => c.college_id === id) ?? colleges.find((c) => c.negative_count > 0) ?? colleges[0];
-  const select = h('select', { class: 'input', style: 'width:auto;max-width:100%', onchange: (e) => go(`/qualite/${e.target.value}`) },
-    ...colleges.map((c) => h('option', { value: c.college_id, selected: c.college_id === current.college_id }, `${c.college_name} — ${c.user_email ?? 'compte supprimé'}${c.negative_count ? ` (${c.negative_count} négatif${c.negative_count > 1 ? 's' : ''})` : ''}`)));
+  const current = colleges.find((c) => c.college_id === id);
+  const select = h('select', { class: 'input', style: 'width:auto;max-width:100%', onchange: (e) => go(e.target.value ? `/qualite/${e.target.value}` : '/qualite') },
+    h('option', { value: '', selected: !current }, 'Tous les collèges — fiches notées'),
+    ...colleges.map((c) => h('option', { value: c.college_id, selected: c.college_id === current?.college_id }, `${c.college_name} — ${c.user_email ?? 'compte supprimé'}${c.negative_count ? ` (${c.negative_count} négatif${c.negative_count > 1 ? 's' : ''})` : ''}`)));
+  if (!current) { renderRated(root, select); return; }
   let filter = current.negative_count ? 'negative' : 'all';
   let type = 'all';
   const stats = h('div', { class: 'stats' });
@@ -65,12 +68,52 @@ export async function render(root, { id } = {}) {
   draw();
 }
 
-function card(c, authorEmail) {
+// Vue globale : toutes les fiches notées (pouces du drill), tous collèges, les plus récentes d'abord.
+async function renderRated(root, select) {
+  let filter = 'all';
+  let type = 'all';
+  const stats = h('div', { class: 'stats' });
+  const grid = h('div', { class: 'cards' });
+  const seg = h('div', { class: 'seg' });
+  const typeSeg = h('div', { class: 'seg' });
+  root.append(h('div', { class: 'toolbar' }, select, seg, typeSeg, stats), grid);
+
+  let data;
+  try {
+    ({ data } = await api('/rated-cards?limit=1000'));
+  } catch (err) {
+    grid.replaceChildren(banner(err));
+    return;
+  }
+  const total = data.positive + data.negative;
+  const counts = { all: total, positive: data.positive, negative: data.negative };
+  seg.replaceChildren(...RATED.map(([key, label]) =>
+    h('button', { class: key === filter ? 'on' : '', onclick: (e) => { filter = key; for (const b of seg.children) b.classList.toggle('on', b === e.currentTarget); draw(); } }, `${label} (${fmtInt(counts[key])})`)));
+  typeSeg.replaceChildren(...TYPES.map(([key, label]) =>
+    h('button', { class: key === type ? 'on' : '', onclick: (e) => { type = key; for (const b of typeSeg.children) b.classList.toggle('on', b === e.currentTarget); draw(); } }, label)));
+  stats.replaceChildren(
+    h('span', {}, h('b', {}, fmtInt(total)), ' fiches notées'),
+    h('span', {}, h('b', {}, total ? `${Math.round((data.positive / total) * 100)} %` : '—'), ' validées'));
+
+  function draw() {
+    const shown = data.cards.filter((c) => (filter === 'all' || c.feedback === filter) && (type === 'all' || c.card_type === type));
+    grid.replaceChildren(...(shown.length ? shown.map(ratedCard) : [empty(total ? 'Aucune fiche dans ce filtre.' : 'Aucune fiche notée pour l\'instant.')]));
+  }
+  draw();
+}
+
+function ratedCard(c) {
+  return card({ ...c, user_feedback: c.feedback, low_confidence: false }, null,
+    h('span', { class: 'muted' }, h('a', { href: `#/qualite/${c.college_id}`, class: 'muted' }, c.college_name),
+      ` · ${c.user_email ?? 'compte supprimé'} · ${fmtAgo(c.rated_at)}`));
+}
+
+function card(c, authorEmail, meta) {
   const fb = c.user_feedback === 'negative' ? icon('thumbDown', 16, 'fb-neg') : c.user_feedback === 'positive' ? icon('thumbUp', 16, 'fb-pos') : null;
   return h('article', { class: `fc${c.user_feedback === 'negative' ? ' neg' : ''}` },
     h('div', { class: 'top' }, h('span', { class: `rank ${c.rang}` }, c.rang), h('span', { class: 'item' }, `Item ${c.item_number ?? '?'}`), h('span', { class: 'fb' }, fb)),
     h('div', { class: 'recto' }, c.recto),
     h('div', { class: 'verso' }, c.verso),
     h('div', { class: 'foot' }, tag(c.card_type.replace('_', ' ')), c.low_confidence ? tag(`OCR ${c.ocr_confidence_score.toFixed(2)}`, 'warn') : null,
-      c.user_feedback ? h('span', { class: 'muted' }, `avis de ${authorEmail ?? 'compte supprimé'}`) : null));
+      meta ?? (c.user_feedback ? h('span', { class: 'muted' }, `avis de ${authorEmail ?? 'compte supprimé'}`) : null)));
 }

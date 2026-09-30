@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -87,3 +89,28 @@ class AdminCollegeRow(BaseModel):
 
 class AdminCollegesResponseWrapped(BaseModel):
     data: list[AdminCollegeRow]
+
+
+class RatedCard(BaseModel):
+    card_id: str
+    college_id: str
+    college_name: str
+    user_email: str | None
+    item_number: int | None
+    card_type: str
+    rang: str
+    recto: str
+    verso: str
+    feedback: Literal["positive", "negative"]
+    # Dernière mise à jour de la fiche : l'avis est la seule modification courante.
+    rated_at: str
+
+
+class RatedCardsData(BaseModel):
+    positive: int
+    negative: int
+    cards: list[RatedCard]
+
+
+class RatedCardsResponseWrapped(BaseModel):
+    data: RatedCardsData

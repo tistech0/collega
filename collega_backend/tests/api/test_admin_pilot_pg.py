@@ -35,7 +35,7 @@ def test_tester_status():
 
 
 async def test_401_sans_identifiants(pg_client: AsyncClient):
-    for path in ("/v1/admin/pilot", "/v1/admin/badges", "/v1/admin/colleges"):
+    for path in ("/v1/admin/pilot", "/v1/admin/badges", "/v1/admin/colleges", "/v1/admin/rated-cards"):
         assert (await pg_client.get(path)).status_code == 401
 
 
@@ -265,3 +265,33 @@ async def test_reglages_pilotage(pg_client: AsyncClient):
         await pg_client.patch("/v1/admin/config", json={"testflight_url": "javascript:alert(1)"}, auth=ADMIN_AUTH)
     ).status_code == 422
     assert (await pg_client.patch("/v1/admin/config", json={"inactivity_days": 0}, auth=ADMIN_AUTH)).status_code == 422
+
+
+async def test_fiches_notees_tous_colleges(pg_client: AsyncClient, pg_factory):
+    async with pg_factory() as db:
+        user = await make_user(db)
+        first = await make_college(db, user)
+        second = await make_college(db, await make_user(db), ref_id=35)
+        ok = await make_card(db, await make_item(db, first, 3), recto="Bonne ?")
+        ko = await make_card(db, await make_item(db, second, 7), recto="Floue ?")
+        await make_card(db, await make_item(db, first, 4))  # sans avis : exclue
+        await db.commit()
+        # Un trigger Postgres pose updated_at = NOW() à chaque UPDATE : deux transactions
+        # successives donnent l'ordre de notation.
+        ok.user_feedback = "positive"
+        await db.commit()
+        ko.user_feedback = "negative"
+        await db.commit()
+
+    data = (await pg_client.get("/v1/admin/rated-cards", auth=ADMIN_AUTH)).json()["data"]
+    assert (data["positive"], data["negative"]) == (1, 1)
+    assert [c["card_id"] for c in data["cards"]] == [str(ko.id), str(ok.id)]  # plus récente d'abord
+    assert data["cards"][1]["user_email"] == user.email
+    assert data["cards"][1]["item_number"] == 3 and data["cards"][1]["feedback"] == "positive"
+
+    only_ok = (await pg_client.get("/v1/admin/rated-cards?feedback=positive", auth=ADMIN_AUTH)).json()["data"]
+    assert [c["card_id"] for c in only_ok["cards"]] == [str(ok.id)]
+    assert only_ok["negative"] == 1  # compteurs globaux, indépendants du filtre
+    limited = (await pg_client.get("/v1/admin/rated-cards?limit=1", auth=ADMIN_AUTH)).json()["data"]
+    assert len(limited["cards"]) == 1
+    assert (await pg_client.get("/v1/admin/rated-cards?feedback=bof", auth=ADMIN_AUTH)).status_code == 422

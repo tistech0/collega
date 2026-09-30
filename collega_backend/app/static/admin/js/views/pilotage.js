@@ -3,9 +3,9 @@ import { go } from '../router.js';
 import { JOB_STATUS_LABEL, STATUS_LABEL, banner, block, displayName, empty, fmtAgo, fmtEuro, h, icon, kpi, row, tag } from '../ui.js';
 
 export async function render(root) {
-  let data;
+  let data, rated;
   try {
-    ({ data } = await api('/pilot'));
+    [{ data }, { data: rated }] = await Promise.all([api('/pilot'), api('/rated-cards?limit=8')]);
   } catch (err) {
     root.append(banner(err, () => { root.replaceChildren(); render(root); }));
     return;
@@ -20,6 +20,7 @@ export async function render(root) {
       kpi({ label: 'imports en échec sur 7 jours', value: data.failed_imports_7d.value, previous: data.failed_imports_7d.previous, invert: true }),
       kpi({ label: 'coût Claude sur 30 jours', value: data.cost_30d_eur.value, previous: data.cost_30d_eur.previous, format: fmtEuro, invert: true })),
     h('div', { class: 'grid cols' }, testersBlock(data.testers), watchBlock(data)),
+    ratedBlock(rated),
   );
 }
 
@@ -58,4 +59,17 @@ function watchBlock(data) {
       () => go(`/imports/${j.job_id}`))),
   ];
   return block('À surveiller', null, rows.length ? rows : empty('Rien à signaler.'));
+}
+
+function ratedBlock(rated) {
+  const total = rated.positive + rated.negative;
+  const aside = total ? h('a', { href: '#/qualite', class: 'muted' }, `${Math.round((rated.positive / total) * 100)} % validées sur ${total} · Tout voir`) : null;
+  const rows = rated.cards.map((c) => row(
+    [icon(c.feedback === 'negative' ? 'thumbDown' : 'thumbUp', 16, c.feedback === 'negative' ? 'fb-neg' : 'fb-pos'),
+      h('div', {},
+        h('div', { class: 't' }, truncate(c.recto)),
+        h('div', { class: 'muted' }, `${c.college_name} · item ${c.item_number ?? '?'} · ${c.user_email ?? 'compte supprimé'}`))],
+    h('span', { class: 'muted' }, fmtAgo(c.rated_at)),
+    () => go('/qualite')));
+  return block('Dernières fiches notées', aside, rows.length ? rows : empty('Aucune fiche notée pour l\'instant.'));
 }

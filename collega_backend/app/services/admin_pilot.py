@@ -38,6 +38,8 @@ from app.schemas.admin_pilot import (
     BadgesData,
     Kpi,
     PilotData,
+    RatedCard,
+    RatedCardsData,
     RunningJob,
     TesterRow,
     WatchFeedback,
@@ -497,3 +499,44 @@ async def usage_breakdown(db: AsyncSession, now: datetime) -> tuple[list[DailyCo
         per_job[job_id].add(model, u_in or 0, u_out or 0)
     avg = round(sum(t.cost_eur for t in per_job.values()) / len(per_job), 4) if per_job else 0.0
     return daily, by_college, avg
+
+
+async def rated_cards(db: AsyncSession, feedback: str | None, limit: int) -> RatedCardsData:
+    """Fiches notées (pouces du drill) tous collèges confondus, les plus récentes d'abord.
+
+    Les compteurs portent sur toutes les fiches notées, pas seulement la page renvoyée."""
+    result = await db.execute(
+        select(FlashCard.user_feedback, func.count())
+        .where(FlashCard.user_feedback.is_not(None))
+        .group_by(FlashCard.user_feedback)
+    )
+    counts: dict[str | None, int] = {fb: n for fb, n in result.all()}
+    query = (
+        select(FlashCard, Item.item_number, College.college_ref_id, User.email)
+        .join(Item, FlashCard.item_id == Item.id)
+        .join(College, FlashCard.college_id == College.id)
+        .outerjoin(User, User.id == College.user_id)
+        .where(FlashCard.user_feedback == feedback if feedback else FlashCard.user_feedback.is_not(None))
+        .order_by(FlashCard.updated_at.desc(), FlashCard.id)
+        .limit(limit)
+    )
+    return RatedCardsData(
+        positive=counts.get("positive", 0),
+        negative=counts.get("negative", 0),
+        cards=[
+            RatedCard(
+                card_id=str(card.id),
+                college_id=str(card.college_id),
+                college_name=college_name(ref),
+                user_email=email,
+                item_number=item_number,
+                card_type=card.card_type,
+                rang=card.rang,
+                recto=card.recto,
+                verso=card.verso,
+                feedback=card.user_feedback,
+                rated_at=card.updated_at.isoformat(),
+            )
+            for card, item_number, ref, email in (await db.execute(query)).all()
+        ],
+    )
