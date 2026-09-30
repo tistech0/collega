@@ -112,30 +112,45 @@ export function panel(title, content) {
 }
 
 // Barres en SVG : une valeur par jour, jours à 0 en trait gris.
+// Survol : colonne entière sensible, infobulle immédiate avec la valeur exacte.
 export function bars(values, { labels = [], format = fmtInt } = {}) {
   const ns = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(ns, 'svg');
   const w = 600, hgt = 120, gap = 3, n = Math.max(values.length, 1);
   const bw = (w - gap * (n - 1)) / n;
   const max = Math.max(1, ...values);
+  const tip = h('div', { class: 'chart-tip', hidden: true });
   svg.setAttribute('viewBox', `0 0 ${w} ${hgt}`);
   svg.setAttribute('preserveAspectRatio', 'none');
   values.forEach((v, i) => {
+    const x = i * (bw + gap);
     const rect = document.createElementNS(ns, 'rect');
     const bh = v > 0 ? Math.max(3, (v / max) * (hgt - 4)) : 3;
-    rect.setAttribute('x', i * (bw + gap));
+    rect.setAttribute('x', x);
     rect.setAttribute('y', hgt - bh);
     rect.setAttribute('width', bw);
     rect.setAttribute('height', bh);
     rect.setAttribute('rx', 2);
     rect.setAttribute('fill', v > 0 ? 'var(--accent)' : 'var(--soft)');
-    const title = document.createElementNS(ns, 'title');
-    title.textContent = `${labels[i] ?? ''} : ${format(v)}`;
-    rect.append(title);
-    svg.append(rect);
+    const hit = document.createElementNS(ns, 'rect');
+    hit.setAttribute('x', x - gap / 2);
+    hit.setAttribute('y', 0);
+    hit.setAttribute('width', bw + gap);
+    hit.setAttribute('height', hgt);
+    hit.setAttribute('fill', 'transparent');
+    hit.addEventListener('mouseenter', () => {
+      const pct = ((x + bw / 2) / w) * 100;
+      tip.replaceChildren(h('b', {}, format(v)), labels[i] ? h('span', {}, labels[i]) : null);
+      tip.style.left = `${pct}%`;
+      tip.style.transform = `translate(${pct < 12 ? '-10%' : pct > 88 ? '-90%' : '-50%'}, -100%)`;
+      tip.hidden = false;
+      rect.classList.add('on');
+    });
+    hit.addEventListener('mouseleave', () => { tip.hidden = true; rect.classList.remove('on'); });
+    svg.append(rect, hit);
   });
   const axis = labels.length ? h('div', { class: 'axis' }, h('span', {}, labels[0]), h('span', {}, labels[Math.floor(labels.length / 2)]), h('span', {}, labels[labels.length - 1])) : null;
-  return h('div', { class: 'chart' }, svg, axis);
+  return h('div', { class: 'chart' }, tip, svg, axis);
 }
 
 export function initials(nameOrEmail) {

@@ -76,7 +76,12 @@ table.table { width: 100%; border-collapse: collapse; }
 .table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 .table tr.link { cursor: pointer; } .table tr.link:hover td { background: var(--ground); }
 
+.chart { position: relative; }
 .chart svg { display: block; width: 100%; height: 120px; }
+.chart rect.on { opacity: .7; }
+.chart-tip { position: absolute; top: -6px; pointer-events: none; z-index: 5; background: var(--ink); color: var(--accent-ink); border-radius: var(--r-badge); padding: 4px 8px; font-size: 12px; white-space: nowrap; display: flex; gap: 6px; align-items: baseline; }
+.chart-tip[hidden] { display: none; }
+.chart-tip span { opacity: .75; font-size: 11px; }
 .chart .axis { display: flex; justify-content: space-between; color: var(--ink3); font-size: 11px; margin-top: var(--s1); }
 .progress { width: 96px; height: 6px; background: var(--soft); border-radius: var(--r-pill); overflow: hidden; }
 .progress i { display: block; height: 100%; background: var(--good); }
