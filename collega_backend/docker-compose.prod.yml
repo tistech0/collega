@@ -21,7 +21,9 @@ services:
       - pdf_storage:/tmp/collega_pdfs
       # Clé APNs (.p8, uid 1000, mode 400) : APNS_KEY_PATH=/run/secrets/collega/AuthKey_<id>.p8.
       - /mnt/user/appdata/collega/secrets:/run/secrets/collega:ro
-    # Pas de "ports:" : NPM joint l'API par le réseau collega_net (port 430 retiré le 2026-08-14).
+    # Pas de "ports:" : NPM joint l'API par son nom (collega-api-1) sur net-edge, le réseau
+    # de NPM et cloudflared (port 430 retiré le 2026-08-14). Un `docker network connect` de
+    # NPM sur collega_net sautait à chaque recréation de NPM par Unraid (502, 2026-10-02).
     env_file: .env
     environment:
       # Redis protégé par mot de passe (chantier 3) : REDIS_PASSWORD vient du .env du NAS,
@@ -49,6 +51,7 @@ services:
         condition: service_healthy
     networks:
       - collega_net
+      - net-edge
     restart: unless-stopped
 
   worker:
@@ -134,3 +137,6 @@ volumes:
 networks:
   collega_net:
     driver: bridge
+  # Réseau d'Unraid (NPM, cloudflared), créé hors de ce stack.
+  net-edge:
+    external: true
