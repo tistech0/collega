@@ -109,3 +109,78 @@ class TestCollegePdf:
 
         assert resp.status_code == 404
         assert resp.json()["detail"]["code"] == "PDF_NOT_FOUND"
+
+    async def test_fichier_plus_sur_le_serveur_404_pdf_not_found(
+        self, client: AsyncClient, mock_db, monkeypatch, tmp_path
+    ):
+        from app.main import app
+
+        user = _make_user()
+        college = _make_college(college_ref_id=26, user_id=user.id)
+        gone = CurrentPdf(job_id=uuid.uuid4(), path=tmp_path / "absent.pdf", size=None, sha256="ab12")
+        _install(monkeypatch, {college.id: gone})
+        app.dependency_overrides[get_current_user] = lambda: user
+        mock_db.get = AsyncMock(return_value=college)
+        try:
+            resp = await client.get(f"/v1/colleges/{college.id}/pdf")
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        assert resp.status_code == 404
+        assert resp.json()["detail"]["code"] == "PDF_NOT_FOUND"
+
+
+class TestCollegePdfFingerprint:
+    async def test_sans_jeton_401(self, client: AsyncClient):
+        resp = await client.get(f"/v1/colleges/{uuid.uuid4()}/pdf/fingerprint")
+        assert resp.status_code == 401
+
+    async def test_version_et_empreinte_meme_sans_fichier(self, client: AsyncClient, mock_db, monkeypatch, tmp_path):
+        from app.main import app
+
+        user = _make_user()
+        college = _make_college(college_ref_id=26, user_id=user.id)
+        job_id = uuid.uuid4()
+        _install(
+            monkeypatch, {college.id: CurrentPdf(job_id=job_id, path=tmp_path / "x.pdf", size=None, sha256="ab12")}
+        )
+        app.dependency_overrides[get_current_user] = lambda: user
+        mock_db.get = AsyncMock(return_value=college)
+        try:
+            resp = await client.get(f"/v1/colleges/{college.id}/pdf/fingerprint")
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        assert resp.status_code == 200
+        assert resp.json() == {"data": {"pdf_version": str(job_id), "pdf_sha256": "ab12"}}
+
+    async def test_college_d_un_autre_compte_404(self, client: AsyncClient, mock_db, monkeypatch):
+        from app.main import app
+
+        user = _make_user()
+        other = _make_college(college_ref_id=26)
+        _install(monkeypatch, {})
+        app.dependency_overrides[get_current_user] = lambda: user
+        mock_db.get = AsyncMock(return_value=other)
+        try:
+            resp = await client.get(f"/v1/colleges/{other.id}/pdf/fingerprint")
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        assert resp.status_code == 404
+        assert resp.json()["detail"]["code"] == "COLLEGE_NOT_FOUND"
+
+    async def test_aucun_import_publie_404(self, client: AsyncClient, mock_db, monkeypatch):
+        from app.main import app
+
+        user = _make_user()
+        college = _make_college(college_ref_id=26, user_id=user.id)
+        _install(monkeypatch, {})
+        app.dependency_overrides[get_current_user] = lambda: user
+        mock_db.get = AsyncMock(return_value=college)
+        try:
+            resp = await client.get(f"/v1/colleges/{college.id}/pdf/fingerprint")
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+        assert resp.json()["detail"]["code"] == "PDF_NOT_FOUND"

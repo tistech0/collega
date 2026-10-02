@@ -16,6 +16,7 @@ from app.models.user import User
 from app.services.generation.claude_client import ClaudeClient
 from app.services.generation.pipeline import generate_job_items, report_generation_progress
 from app.services.generation.publish import ImportRejected, publish_job, stale_pdfs
+from app.services.imports import pdf_path_for
 from app.services.jobs.job_events import record_job_event
 from app.services.jobs.job_failure import fail_job
 from app.services.notifications.apns_service import get_notification_service
@@ -84,11 +85,13 @@ async def run_generation(
         token, ref_id = (user.apns_token if user else None), college.college_ref_id
         await db.commit()
 
-    for path in stale_pdfs(college_id, job_id):
+    # Fiches publiées : le serveur ne garde aucun PDF du collège (droits des éditeurs).
+    # La copie lue dans l'app est celle du téléphone.
+    for path in [*stale_pdfs(college_id, job_id), pdf_path_for(college_id, job_id)]:
         try:
             path.unlink(missing_ok=True)
         except OSError:
-            logger.warning("Ancien PDF non supprimé : %s", path, exc_info=True)
+            logger.warning("PDF non supprimé après publication : %s", path, exc_info=True)
 
     try:
         await get_notification_service(ctx=ctx).send_generation_complete(

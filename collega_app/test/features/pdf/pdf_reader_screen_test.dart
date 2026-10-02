@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/features/colleges/colleges_detail_providers.dart';
+import 'package:collega_app/features/colleges/colleges_import_providers.dart' show pdfPickerProvider;
 import 'package:collega_app/features/colleges/colleges_providers.dart';
 import 'package:collega_app/features/colleges/domain/college_catalog.dart';
 import 'package:collega_app/features/colleges/domain/college_detail_models.dart';
@@ -157,7 +158,14 @@ void main() {
     );
   }
 
-  Widget app(String location, {bool failDownload = false, UserCollegeStatus status = _status}) {
+  Widget app(
+    String location, {
+    bool failDownload = false,
+    UserCollegeStatus status = _status,
+    String? serverSha = 'abc',
+    String pickedSha = 'abc',
+    bool failFingerprint = false,
+  }) {
     final router = GoRouter(initialLocation: location, routes: [
       GoRoute(
         path: '/colleges/:ref_id/pdf',
@@ -175,6 +183,12 @@ void main() {
         itemInfoProvider.overrideWith((ref, id) async => _item),
         pdfDocumentBuilderProvider.overrideWithValue(fakeBuilder),
         pdfDownloaderProvider.overrideWithValue(_FakeDownloader(fail: failDownload)),
+        pdfPickerProvider.overrideWithValue(() async => (file: pdfSource, size: 8)),
+        fileSha256Provider.overrideWithValue((_) async => pickedSha),
+        pdfFingerprintFetcherProvider.overrideWithValue((_) async {
+          if (failFingerprint) throw Exception('réseau');
+          return serverSha;
+        }),
       ],
       child: CgTheme(
         data: CgThemeData.light,
@@ -261,5 +275,55 @@ void main() {
     await tester.pumpWidget(app('/colleges/26/pdf?page=3', status: legacy));
     await tester.pumpAndSettle();
     expect(find.textContaining('@ 3'), findsOneWidget);
+  });
+
+  group('PDF plus gardé par le serveur (pas de taille) : à choisir sur le téléphone', () {
+    const kept = UserCollegeStatus(
+      refId: 26,
+      collegeId: 'c26',
+      status: 'generation_complete',
+      cardCountA: 1,
+      cardCountB: 0,
+      cardCountC: 0,
+      pdfVersion: 'j1',
+    );
+
+    testWidgets('aucun bouton de téléchargement ; le bon fichier s’ouvre', (tester) async {
+      await tester.pumpWidget(app('/colleges/26/pdf?page=112&item=i340', status: kept));
+      await tester.pumpAndSettle();
+      expect(find.text('Ton PDF n’est pas sur ce téléphone'), findsOneWidget);
+      expect(find.textContaining('ne garde pas tes PDF'), findsOneWidget);
+      expect(find.textContaining('Télécharger'), findsNothing);
+      await tester.tap(find.text('Choisir mon PDF'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('@ 112'), findsOneWidget);
+    });
+
+    testWidgets('fichier différent de celui importé : refusé, rien n’est gardé', (tester) async {
+      await tester.pumpWidget(app('/colleges/26/pdf', status: kept, pickedSha: 'autre'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Choisir mon PDF'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('n’est pas le PDF importé'), findsOneWidget);
+      expect(find.text('Choisir un autre fichier'), findsOneWidget);
+      expect(await store.status('c26', 'j1'), LocalPdfStatus.absent);
+    });
+
+    testWidgets('import sans empreinte côté serveur : fichier accepté', (tester) async {
+      await tester.pumpWidget(app('/colleges/26/pdf?page=3', status: kept, serverSha: null, pickedSha: 'x'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Choisir mon PDF'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('@ 3'), findsOneWidget);
+    });
+
+    testWidgets('vérification impossible (réseau) : message et nouvel essai', (tester) async {
+      await tester.pumpWidget(app('/colleges/26/pdf', status: kept, failFingerprint: true));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Choisir mon PDF'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('La vérification n’a pas abouti'), findsOneWidget);
+      expect(find.text('Choisir un autre fichier'), findsOneWidget);
+    });
   });
 }

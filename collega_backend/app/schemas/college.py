@@ -10,9 +10,19 @@ class UserCollegeData(BaseModel):
     card_count_a: int = 0
     card_count_b: int = 0
     card_count_c: int = 0
-    # Partie B : PDF en service (id du dernier job publié) et sa taille ; null si aucun.
+    # Partie B : PDF en service (id du dernier job publié) ; null si aucun. Taille
+    # null quand le serveur n'a plus le fichier (supprimé après la génération).
     pdf_version: str | None = None
     pdf_size: int | None = None
+
+
+class PdfFingerprintData(BaseModel):
+    pdf_version: str
+    pdf_sha256: str | None
+
+
+class PdfFingerprintResponseWrapped(BaseModel):
+    data: PdfFingerprintData
 
 
 class CollegesListResponseWrapped(BaseModel):

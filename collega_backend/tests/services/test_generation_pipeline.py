@@ -302,8 +302,9 @@ async def test_same_pdf_reimport_end_to_end(pg_factory, notifications, storage):
         assert (await s.get(College, college.id)).reload_count == 0
         assert (await s.get(User, user.id)).monthly_reloads == 0
     assert notifications.sent[-1][0] == "complete" and notifications.sent[-1][2]["quota_refunded"] is True
-    # Ancien PDF supprimé, PDF courant conservé.
-    assert [p.name for p in storage.glob("*.pdf")] == [pdf2.name]
+    # Fiches publiées : aucun PDF du collège ne reste sur le serveur.
+    assert not pdf2.exists()
+    assert list(storage.glob("*.pdf")) == []
 
 
 async def test_progress_reported_per_item(pg_factory, notifications, sequential):

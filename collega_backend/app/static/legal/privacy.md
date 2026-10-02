@@ -1,6 +1,6 @@
 # Politique de Confidentialité
 
-**Version : 2026-09-24**
+**Version : 2026-10-02**
 
 La présente politique décrit comment **Collega** (« l'Application ») collecte, traite et
 protège tes données personnelles conformément au Règlement Général sur la Protection des Données
@@ -26,8 +26,9 @@ L'éditeur agit seul comme responsable du traitement au sens du RGPD.
 | Prénom (facultatif) | Profil | Personnalisation de l'interface |
 | Année d'études (facultatif) | Profil | Statistiques d'usage agrégées |
 | Faculté (facultatif) | Profil | Statistiques d'usage agrégées |
-| PDF de collèges importés | Import utilisateur | Génération de fiches de révision |
+| PDF de collèges importés | Import utilisateur | Génération de fiches de révision (supprimé du serveur une fois les fiches générées) |
 | Texte extrait des PDF | Traitement de l’import | Génération et régénération des fiches |
+| Empreinte du PDF (SHA-256) | Traitement de l’import | Vérifier que le PDF que tu rattaches sur un téléphone est bien celui importé |
 | Texte de fiches généré | Pipeline IA | Affichage et révision dans l'Application |
 | Évaluations de drill (à revoir / bien / maîtrisé) | Usage | Planning adaptatif, statistiques de progression |
 | Token APNs (notifications push) | iOS, sur autorisation explicite | Rappels quotidiens et notifications de fin de génération |
@@ -63,7 +64,10 @@ pour vérifier l'état actif/inactif.
 
 - **Données du compte (email, profil, fiches, drills)** : conservées tant que ton compte est actif.
   Supprimées **définitivement et immédiatement** à la suppression du compte (cf. § 7).
-- **PDF importés** : conservés tant que le collège associé est dans ton compte.
+- **PDF importés** : conservés sur le serveur **uniquement le temps de la génération des fiches**,
+  puis supprimés (au plus tard sous 24 h en cas d'import interrompu). La copie que tu relis dans
+  l'Application reste **seulement sur ton téléphone** : elle n'est ni renvoyée au serveur ni incluse
+  dans ta sauvegarde iCloud.
 - **Texte extrait des PDF** : conservé tant que le collège associé est dans ton compte, supprimé avec lui.
 - **Logs serveur** : rotation automatique des conteneurs applicatifs (3 fichiers de 50 Mo maximum
   chacun par service), soit une rétention réelle de quelques jours à quelques semaines selon le trafic.
@@ -78,7 +82,7 @@ Tes données sont accessibles aux personnes suivantes, dans les limites strictes
 | Destinataire | Rôle | Localisation | Garanties |
 |---|---|---|---|
 | Éditeur (Matthis Lesur) | Responsable du traitement | France | — |
-| **Anthropic** (Claude API) | Génération des fiches à partir des PDF | États-Unis | Clauses contractuelles types UE (DPA Anthropic). Les PDF transmis sont traités pour la génération puis conservés selon la politique de rétention de l'API Anthropic (30 jours par défaut, prolongation possible en cas d'enquête liée aux conditions d'utilisation Anthropic). |
+| **Anthropic** (Claude API) | Génération des fiches à partir des PDF | États-Unis | Clauses contractuelles types UE (DPA Anthropic). Seul le texte extrait des PDF est transmis (jamais le fichier PDF) ; il est traité pour la génération puis conservé selon la politique de rétention de l'API Anthropic (30 jours par défaut, prolongation possible en cas d'enquête liée aux conditions d'utilisation Anthropic). |
 | **Apple** (APNs + IAP) | Notifications push et paiements | États-Unis | Sous-traitant standard iOS. |
 | **RevenueCat** | Gestion des abonnements IAP | États-Unis | DPA RevenueCat ; aucune donnée médicale transmise. |
 | Hébergeur (NAS auto-hébergé Unraid + Caddy + PostgreSQL) | Stockage et exécution serveur | France | Infrastructure auto-hébergée par l'éditeur. |

@@ -1,6 +1,6 @@
 # Conditions Générales d'Utilisation
 
-**Version : 2026-05-22**
+**Version : 2026-10-02**
 
 Bienvenue sur **Collega** (« l'Application »), service de révision personnalisée à destination
 des étudiantes et étudiants en médecine. En téléchargeant et en utilisant l'Application, tu acceptes
@@ -36,9 +36,8 @@ Tu déclares avoir au moins 18 ans, ou utiliser l'Application avec l'accord d'un
 Tu t'engages à utiliser l'Application :
 
 - à des fins **personnelles, pédagogiques et non-commerciales** ;
-- dans le respect des droits d'auteur des supports importés — tu garantis disposer du droit
-  d'usage des PDF que tu importes pour ton usage personnel ;
-- sans tenter de contourner les mesures techniques de protection (limites de reload mensuel, par exemple).
+- dans le respect des droits d'auteur des supports importés (voir l'article 7) ;
+- sans tenter de contourner les limites du service (nombre de réimports par mois, par exemple).
 
 Toute utilisation détournée (revente, scraping massif, automatisation abusive) entraîne la suspension
 immédiate du compte.
@@ -63,6 +62,8 @@ Tu peux :
 L'accès aux fonctionnalités complètes (génération illimitée, drill, planning) est soumis à un
 abonnement payant mensuel, géré via les services d'achat in-app d'Apple et de RevenueCat.
 
+- L'abonnement rémunère l'outil (génération des fiches, drill, planning, suivi de progression).
+  Collega ne fournit et ne vend **aucun contenu de collège** : les supports viennent uniquement de toi.
 - Le prix et les conditions de renouvellement sont affichés dans l'Application avant tout achat.
 - Le renouvellement est automatique sauf résiliation au moins 24 heures avant la fin de la période
   en cours, depuis les **Réglages iOS → Apple ID → Abonnements**.
@@ -89,11 +90,45 @@ générées.
 
 ---
 
-## 7. Propriété intellectuelle
+## 7. Propriété intellectuelle et contenus importés
 
-- Les supports importés (PDF de collèges) restent la propriété de leurs auteurs / éditeurs.
-- Les fiches générées à partir de ces supports te sont accessibles dans le cadre de ton abonnement
-  pour ton usage personnel uniquement.
+### 7.1. Les supports que tu importes
+
+- Les supports importés (PDF de collèges) restent la propriété de leurs auteurs et éditeurs.
+  Les acheter ou y avoir accès ne transfère pas leurs droits d'auteur : cela autorise seulement
+  un usage personnel.
+- Tu garantis que chaque PDF importé a été **obtenu de façon licite** (achat, accès fourni par ta
+  faculté ou par l'éditeur…) et que tu l'importes pour **ton seul usage personnel de révision**.
+- Il est interdit d'importer un document obtenu illicitement (copie piratée, fichier transmis par
+  un tiers sans droit) ou dont tu aurais contourné une protection technique (DRM).
+- Tu es seul·e responsable des documents que tu importes. Collega ne contrôle pas leur provenance
+  avant le traitement.
+
+### 7.2. Les fiches générées
+
+- Les fiches générées à partir de tes supports sont **privées** : elles ne sont visibles que depuis
+  ton compte et ne sont jamais partagées avec d'autres utilisatrices ou utilisateurs.
+- Elles te sont destinées pour ton usage personnel uniquement : il est interdit de les diffuser,
+  de les publier, de les partager ou de les vendre.
+
+### 7.3. Signalement par un titulaire de droits
+
+Tout titulaire de droits qui estime qu'un contenu traité par Collega porte atteinte à ses droits
+peut le signaler à **contact@matthislesur.com** en indiquant :
+
+- son identité et sa qualité (auteur, éditeur, mandataire) ;
+- l'œuvre concernée et, si possible, le compte ou le contenu en cause ;
+- les raisons pour lesquelles le contenu porte atteinte à ses droits.
+
+L'éditeur examine chaque signalement sans délai et retire ou rend inaccessible le contenu
+manifestement illicite. Le compte d'une personne qui importe de manière répétée des contenus
+illicites peut être suspendu ou résilié.
+
+### 7.4. Noms des collèges et de l'Application
+
+- Les noms des collèges et des spécialités sont cités uniquement pour que tu puisses classer
+  tes supports. Collega n'est affiliée à aucun éditeur, collège d'enseignants ou faculté, et
+  n'est ni approuvée ni sponsorisée par eux.
 - Le code de l'Application, son design, ses marques et son logo restent la propriété exclusive de
   l'éditeur.
 
@@ -107,7 +142,8 @@ Tu peux résilier ton accès à tout moment :
 - en résiliant ton abonnement IAP depuis les Réglages iOS.
 
 L'éditeur se réserve le droit de suspendre ou de résilier un compte en cas de violation des CGU,
-après mise en demeure restée sans effet sous 7 jours.
+après mise en demeure restée sans effet sous 7 jours. En cas d'atteinte manifeste aux droits d'un
+tiers (article 7), le contenu en cause peut être retiré sans attendre ce délai.
 
 ---
 

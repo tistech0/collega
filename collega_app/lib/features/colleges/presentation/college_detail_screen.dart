@@ -505,8 +505,9 @@ class _DetailSkeleton extends StatelessWidget {
   }
 }
 
-/// « Mon PDF du collège » (partie B) : sur ce téléphone, à télécharger, ou
-/// indisponible (le serveur n'annonce aucun PDF : backend ancien, fichier absent).
+/// « Mon PDF du collège » (partie B) : sur ce téléphone, à télécharger (import
+/// d'avant la suppression côté serveur), à choisir sur le téléphone, ou
+/// indisponible (le serveur n'annonce aucun PDF).
 class _PdfRow extends ConsumerWidget {
   const _PdfRow({required this.status, required this.onOpen});
 
@@ -523,7 +524,7 @@ class _PdfRow extends ConsumerWidget {
     if (local == LocalPdfStatus.upToDate) {
       subtitle = 'sur ce téléphone';
     } else if (status.pdfVersion != null) {
-      subtitle = status.pdfSize == null ? 'à télécharger' : 'à télécharger · ${megabytesLabel(status.pdfSize!)}';
+      subtitle = status.pdfSize == null ? 'pas sur ce téléphone' : 'à télécharger · ${megabytesLabel(status.pdfSize!)}';
     } else {
       subtitle = 'indisponible pour l’instant';
     }

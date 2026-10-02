@@ -1,5 +1,6 @@
-"""Partie B — PDF en service d'un collège : dernier import publié dont le fichier existe."""
+"""Partie B — PDF en service d'un collège : dernier import publié, fichier présent ou non."""
 
+import hashlib
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
@@ -21,18 +22,30 @@ async def test_retourne_le_pdf_du_dernier_job_publie(tmp_path, monkeypatch):
     monkeypatch.setattr(settings, "pdf_storage_path", str(tmp_path))
     college_id, job_id = uuid.uuid4(), uuid.uuid4()
     (tmp_path / f"{college_id}_{job_id}.pdf").write_bytes(b"%PDF-1.7 abc")
-    db = MagicMock(execute=AsyncMock(return_value=_rows([(college_id, job_id)])))
+    db = MagicMock(execute=AsyncMock(return_value=_rows([(college_id, job_id, "ab12")])))
 
     found = await import_service.current_pdfs(db, [college_id])
 
     assert found[college_id].job_id == job_id
     assert found[college_id].size == len(b"%PDF-1.7 abc")
+    assert found[college_id].sha256 == "ab12"
     assert found[college_id].path == tmp_path / f"{college_id}_{job_id}.pdf"
 
 
-async def test_fichier_absent_collège_ignore(tmp_path, monkeypatch):
+async def test_fichier_supprime_apres_generation_version_sans_taille(tmp_path, monkeypatch):
+    """Le serveur ne garde pas le PDF : la version reste (copie du téléphone), sans taille."""
     monkeypatch.setattr(settings, "pdf_storage_path", str(tmp_path))
     college_id, job_id = uuid.uuid4(), uuid.uuid4()
-    db = MagicMock(execute=AsyncMock(return_value=_rows([(college_id, job_id)])))
+    db = MagicMock(execute=AsyncMock(return_value=_rows([(college_id, job_id, "ab12")])))
 
-    assert await import_service.current_pdfs(db, [college_id]) == {}
+    found = await import_service.current_pdfs(db, [college_id])
+
+    assert found[college_id].job_id == job_id
+    assert found[college_id].size is None
+    assert found[college_id].sha256 == "ab12"
+
+
+def test_file_sha256(tmp_path):
+    path = tmp_path / "c.pdf"
+    path.write_bytes(b"%PDF-1.7 abc")
+    assert import_service.file_sha256(path) == hashlib.sha256(b"%PDF-1.7 abc").hexdigest()

@@ -10,7 +10,6 @@ la bascule, après la génération. Un réimport laisse donc le collège consult
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import json
 import logging
 import uuid
@@ -26,6 +25,7 @@ from app.models.content import JobItem, JobPage
 from app.models.generation_job import GenerationJob
 from app.models.item_title import ItemTitle
 from app.services.content import store
+from app.services.imports import file_sha256
 from app.services.jobs.job_events import record_job_event
 from app.services.jobs.job_failure import fail_job
 from app.services.ocr.confidence_scorer import ConfidenceScorer
@@ -54,15 +54,6 @@ async def process_college_ocr(ctx: dict, college_id: str, job_id: str, pdf_path:
         logger.exception("OCR failed for college %s: %r", college_id, exc)
         await fail_job(async_session_factory, job_uuid, f"OCR : {exc!r}"[:500])
         raise
-
-
-def file_sha256(path: str) -> str:
-    """Empreinte du PDF (affichée par la console admin), lue par blocs."""
-    digest = hashlib.sha256()
-    with open(path, "rb") as f:
-        for block in iter(lambda: f.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 async def _job_status(db: AsyncSession, job_id: uuid.UUID) -> str | None:

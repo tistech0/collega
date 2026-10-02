@@ -1,5 +1,6 @@
 """Purges du contenu partagé et des PDF (chantier 1), Postgres réel."""
 
+import hashlib
 import os
 import time
 import uuid
@@ -13,7 +14,12 @@ from app.models.college import College
 from app.models.content import CollegePage, ItemGeneration, ItemText, OcrPage
 from app.models.user import User
 from app.services.content import store
-from app.services.content.purge import active_pdf_names, purge_orphan_pdfs, purge_unreferenced_content
+from app.services.content.purge import (
+    active_pdf_names,
+    backfill_pdf_hashes,
+    purge_orphan_pdfs,
+    purge_unreferenced_content,
+)
 from tests.api_pg import login_as
 from tests.factories import cards, make_card, make_college, make_draft, make_item, make_job, make_user, write_pdf
 
@@ -106,17 +112,37 @@ async def test_orphan_pdfs(pg_session, tmp_path, monkeypatch):
     running = await make_job(pg_session, await make_college(pg_session, user, ref_id=3), status="processing")
     await pg_session.commit()
     keep = await active_pdf_names(pg_session)
-    assert keep == {f"{college.id}_{current.id}.pdf", f"{running.college_id}_{running.id}.pdf"}
+    # Le PDF du dernier import publié n'est plus gardé : seule la copie du téléphone reste.
+    assert keep == {f"{running.college_id}_{running.id}.pdf"}
 
-    for name in keep | {f"{college.id}_{old.id}.pdf", f"{uuid.uuid4()}_{uuid.uuid4()}.pdf"}:
+    published = {f"{college.id}_{old.id}.pdf", f"{college.id}_{current.id}.pdf"}
+    for name in keep | published | {f"{uuid.uuid4()}_{uuid.uuid4()}.pdf"}:
         _touch(tmp_path / name, age_hours=30)
     being_written = f"{uuid.uuid4()}_{uuid.uuid4()}.pdf"  # import pas encore en base
     _touch(tmp_path / being_written)
     _touch(tmp_path / "incoming_recent.pdf")
     _touch(tmp_path / "incoming_old.pdf", age_hours=25)
 
-    assert purge_orphan_pdfs(keep, datetime.now(UTC)) == 3
+    assert purge_orphan_pdfs(keep, datetime.now(UTC)) == 4
     assert {p.name for p in tmp_path.glob("*.pdf")} == keep | {"incoming_recent.pdf", being_written}
+
+
+async def test_backfill_pdf_hashes_avant_purge(pg_session, tmp_path, monkeypatch):
+    """Imports publiés sans empreinte : calculée tant que le PDF est là (rattachement côté app)."""
+    monkeypatch.setattr(settings, "pdf_storage_path", str(tmp_path))
+    user = await make_user(pg_session)
+    college = await make_college(pg_session, user, status="generation_complete")
+    with_file = await make_job(pg_session, college, status="generation_complete")
+    without_file = await make_job(pg_session, college, status="generation_complete")
+    running = await make_job(pg_session, college, status="processing")
+    pdf = write_pdf(tmp_path, college, with_file)
+    write_pdf(tmp_path, college, running)
+    await pg_session.commit()
+
+    assert await backfill_pdf_hashes(pg_session) == 1
+    assert with_file.pdf_hash == hashlib.sha256(pdf.read_bytes()).hexdigest()
+    assert without_file.pdf_hash is None
+    assert running.pdf_hash is None
 
 
 async def test_purge_waits_for_imports_writing_content(pg_factory):

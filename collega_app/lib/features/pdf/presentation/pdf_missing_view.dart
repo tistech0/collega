@@ -4,7 +4,9 @@ import 'package:collega_app/core/ui/collega_ui.dart';
 import 'package:collega_app/features/pdf/domain/pdf_labels.dart';
 import 'package:collega_app/features/pdf/pdf_providers.dart';
 
-/// Copie absente ou périmée : proposer le téléchargement (maquette validée).
+/// Copie absente ou périmée : choisir sur le téléphone le PDF importé (le
+/// serveur ne le garde pas après la génération), ou le télécharger pour les
+/// imports d'avant ce changement, tant que le serveur l'a encore.
 class PdfMissingView extends StatelessWidget {
   const PdfMissingView({
     super.key,
@@ -14,6 +16,8 @@ class PdfMissingView extends StatelessWidget {
     this.available = true,
     required this.download,
     required this.onDownload,
+    this.attach = const PdfAttachIdle(),
+    this.onAttach,
   });
 
   final String collegeName;
@@ -25,6 +29,12 @@ class PdfMissingView extends StatelessWidget {
   final bool available;
   final PdfDownloadState download;
   final VoidCallback onDownload;
+  final PdfAttachState attach;
+  final VoidCallback? onAttach;
+
+  /// Le serveur a encore le fichier (taille annoncée) : téléchargement ; sinon
+  /// le fichier se choisit sur le téléphone.
+  bool get _canDownload => sizeBytes != null;
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +59,18 @@ class PdfMissingView extends StatelessWidget {
                 child: Text(title, textAlign: TextAlign.center, style: CgType.head.copyWith(color: c.ink))),
             const SizedBox(height: CgSpace.s2),
             Text(
-              available
-                  ? '${[collegeName, if (size != null) size].join(' · ')}. '
-                      'Une fois téléchargé, il reste disponible hors connexion.'
-                  : '$collegeName. Réessaie plus tard : il sera téléchargeable depuis cet écran.',
+              !available
+                  ? '$collegeName. Réessaie plus tard : il sera téléchargeable depuis cet écran.'
+                  : _canDownload
+                      ? '${[collegeName, if (size != null) size].join(' · ')}. '
+                          'Une fois téléchargé, il reste disponible hors connexion.'
+                      : '$collegeName. Collega ne garde pas tes PDF sur ses serveurs : '
+                          'choisis le fichier que tu as importé pour le relire ici.',
               textAlign: TextAlign.center,
               style: CgType.bodyS.copyWith(color: c.ink2),
             ),
-            if (available) ...[
+            if (available && !_canDownload) ..._attachControls(c),
+            if (available && _canDownload) ...[
               const SizedBox(height: CgSpace.s4),
               switch (d) {
                 PdfDownloading(:final progress) => Semantics(
@@ -77,6 +91,29 @@ class PdfMissingView extends StatelessWidget {
             ],
           ]),
     );
+  }
+
+  List<Widget> _attachControls(CgColors c) {
+    final message = switch (attach) {
+      PdfAttachChecking() => 'Vérification du fichier…',
+      PdfAttachMismatch() => 'Ce fichier n’est pas le PDF importé pour ce collège. '
+          'Choisis le même fichier, ou réimporte ce PDF depuis la page du collège.',
+      PdfAttachFailed() => 'La vérification n’a pas abouti. Vérifie ta connexion et réessaie.',
+      _ => null,
+    };
+    final again = attach is PdfAttachMismatch || attach is PdfAttachFailed;
+    return [
+      const SizedBox(height: CgSpace.s4),
+      if (message != null) ...[
+        Text(message, textAlign: TextAlign.center, style: CgType.bodyS.copyWith(color: c.ink2)),
+        const SizedBox(height: CgSpace.s2),
+      ],
+      CgButton(
+        label: again ? 'Choisir un autre fichier' : 'Choisir mon PDF',
+        variant: again ? CgButtonVariant.secondary : CgButtonVariant.primary,
+        onPressed: attach is PdfAttachChecking ? null : onAttach,
+      ),
+    ];
   }
 }
 

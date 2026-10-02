@@ -11,7 +11,12 @@ from sqlalchemy import func, select
 from app.core.database import async_session_factory
 from app.models.generation_job import GenerationJob
 from app.models.generation_job_event import GenerationJobEvent
-from app.services.content.purge import active_pdf_names, purge_orphan_pdfs, purge_unreferenced_content
+from app.services.content.purge import (
+    active_pdf_names,
+    backfill_pdf_hashes,
+    purge_orphan_pdfs,
+    purge_unreferenced_content,
+)
 from app.services.jobs.job_failure import ACTIVE_JOB_STATUSES, fail_job
 
 logger = logging.getLogger(__name__)
@@ -60,6 +65,8 @@ async def purge_content(ctx: dict, *, session_factory=None) -> None:
     session_factory = session_factory or async_session_factory
     async with session_factory() as db:
         await purge_unreferenced_content(db)
+        await db.commit()
+        await backfill_pdf_hashes(db)
         await db.commit()
         keep = await active_pdf_names(db)
     purge_orphan_pdfs(keep)

@@ -52,11 +52,15 @@ class _PdfReaderScreenState extends ConsumerState<PdfReaderScreen> {
     } else {
       final key = (collegeId: status.collegeId, version: status.pdfVersion);
       final download = ref.watch(pdfDownloadProvider(status.collegeId));
+      final attach = ref.watch(pdfAttachProvider(status.collegeId));
       ref.listen(pdfDownloadProvider(status.collegeId), (_, next) {
         if (next is PdfDownloadDone) {
           _open = null;
           ref.invalidate(collegePdfStatusProvider(key));
         }
+      });
+      ref.listen(pdfAttachProvider(status.collegeId), (_, next) {
+        if (next is PdfAttachDone) _open = null;
       });
       final local = ref.watch(collegePdfStatusProvider(key)).valueOrNull;
       body = switch (local) {
@@ -71,6 +75,11 @@ class _PdfReaderScreenState extends ConsumerState<PdfReaderScreen> {
             onDownload: () {
               final version = status.pdfVersion;
               if (version != null) ref.read(pdfDownloadProvider(status.collegeId).notifier).start(version, expectedSize: status.pdfSize);
+            },
+            attach: attach,
+            onAttach: () {
+              final version = status.pdfVersion;
+              if (version != null) ref.read(pdfAttachProvider(status.collegeId).notifier).start(version);
             },
           ),
       };

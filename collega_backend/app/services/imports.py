@@ -7,6 +7,7 @@ Les routes ne gardent que la lecture de la requête et la réponse HTTP.
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
 import uuid
@@ -194,17 +195,31 @@ def pdf_path_for(college_id: uuid.UUID, job_id: uuid.UUID) -> Path:
     return storage_path / f"{college_id}_{job_id}.pdf"
 
 
+def file_sha256(path: str | Path) -> str:
+    """Empreinte du PDF (console admin, rattachement de la copie du téléphone), lue par blocs."""
+    digest = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
 @dataclass(frozen=True)
 class CurrentPdf:
-    """PDF en service d'un collège (partie B) : celui du dernier import publié."""
+    """PDF en service d'un collège (partie B) : celui du dernier import publié.
+
+    Le serveur ne garde pas le fichier après la génération (droits des éditeurs) :
+    `size` est None quand il n'est plus sur le disque. La copie lue est celle du
+    téléphone ; `sha256` permet d'y rattacher le bon fichier."""
 
     job_id: uuid.UUID
     path: Path
-    size: int
+    size: int | None
+    sha256: str | None = None
 
 
 async def current_pdfs(db: AsyncSession, college_ids: Sequence[uuid.UUID]) -> dict[uuid.UUID, CurrentPdf]:
-    """Dernier job `generation_complete` de chaque collège dont le fichier existe encore.
+    """Dernier job `generation_complete` de chaque collège, que son fichier soit encore là ou non.
 
     Pendant un réimport, le nouveau PDF est déjà sur le disque mais son job n'est pas publié :
     c'est l'ancien qui reste en service (ses numéros de page sont ceux des items en base)."""
@@ -212,7 +227,7 @@ async def current_pdfs(db: AsyncSession, college_ids: Sequence[uuid.UUID]) -> di
         return {}
     rows = (
         await db.execute(
-            select(GenerationJob.college_id, GenerationJob.id)
+            select(GenerationJob.college_id, GenerationJob.id, GenerationJob.pdf_hash)
             .where(
                 GenerationJob.college_id.in_(list(college_ids)),
                 GenerationJob.status == "generation_complete",
@@ -222,13 +237,13 @@ async def current_pdfs(db: AsyncSession, college_ids: Sequence[uuid.UUID]) -> di
         )
     ).all()
     found: dict[uuid.UUID, CurrentPdf] = {}
-    for college_id, job_id in rows:
+    for college_id, job_id, sha256 in rows:
         path = pdf_path_for(college_id, job_id)
         try:
-            size = path.stat().st_size
+            size: int | None = path.stat().st_size
         except OSError:
-            continue
-        found[college_id] = CurrentPdf(job_id=job_id, path=path, size=size)
+            size = None
+        found[college_id] = CurrentPdf(job_id=job_id, path=path, size=size, sha256=sha256)
     return found
 
 

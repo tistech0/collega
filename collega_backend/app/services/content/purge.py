@@ -3,9 +3,9 @@
 - Contenu partagé (pages OCR, textes d'items, générations) : supprimé quand plus
   aucun collège ni import en cours ne le référence. Ce qui sert encore à une
   autre utilisatrice (même PDF) est conservé : c'est aussi son contenu.
-- PDF : on garde celui de chaque import actif et celui du dernier import réussi
-  de chaque collège (politique : « conservés tant que le collège est dans ton
-  compte ») ; le reste est orphelin.
+- PDF : on ne garde que celui de chaque import actif (le temps de l'OCR et de la
+  génération) ; le reste est orphelin. La copie relue dans l'app est celle du
+  téléphone : le serveur ne conserve pas les œuvres (droits des éditeurs).
 - Exception : les générations « texte insuffisant » (0 fiche, minuscules) et leurs
   textes d'items ne sont jamais purgées — un item modifié devenu insuffisant garde
   son ancien contenu, sa nouvelle génération n'est référencée par rien, et la purger
@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -26,6 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.models.generation_job import GenerationJob
 from app.services.content.store import hold_content_lock_exclusive
+from app.services.imports import file_sha256, pdf_path_for
 
 logger = logging.getLogger(__name__)
 
@@ -81,23 +83,41 @@ def delete_college_pdfs(college_id: uuid.UUID) -> int:
 
 
 async def active_pdf_names(db: AsyncSession) -> set[str]:
-    """PDF à conserver : imports actifs + dernier import réussi de chaque collège."""
+    """PDF à conserver : ceux des imports actifs."""
     rows = (
         await db.execute(
-            select(GenerationJob.college_id, GenerationJob.id, GenerationJob.status, GenerationJob.created_at).order_by(
-                GenerationJob.created_at
-            )
+            select(GenerationJob.college_id, GenerationJob.id).where(GenerationJob.status.in_(ACTIVE_STATUSES))
         )
     ).all()
-    keep: set[str] = set()
-    last_success: dict[uuid.UUID, uuid.UUID] = {}
-    for college_id, job_id, status, _ in rows:
-        if status in ACTIVE_STATUSES:
-            keep.add(f"{college_id}_{job_id}.pdf")
-        elif status == "generation_complete":
-            last_success[college_id] = job_id  # trié par date : le dernier gagne
-    keep.update(f"{college_id}_{job_id}.pdf" for college_id, job_id in last_success.items())
-    return keep
+    return {f"{college_id}_{job_id}.pdf" for college_id, job_id in rows}
+
+
+async def backfill_pdf_hashes(db: AsyncSession) -> int:
+    """Empreinte des imports publiés qui n'en ont pas, tant que leur PDF est encore
+    là (imports d'avant le calcul à l'OCR) : sans elle, l'app ne pourrait pas
+    vérifier le fichier rattaché. À appeler avant la purge des PDF. Ne commit pas."""
+    jobs = (
+        (
+            await db.execute(
+                select(GenerationJob).where(
+                    GenerationJob.status == "generation_complete", GenerationJob.pdf_hash.is_(None)
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    filled = 0
+    for job in jobs:
+        path = pdf_path_for(job.college_id, job.id)
+        if not path.exists():
+            continue
+        try:
+            job.pdf_hash = await asyncio.to_thread(file_sha256, path)
+            filled += 1
+        except OSError:
+            logger.warning("Empreinte du PDF %s non calculée", path, exc_info=True)
+    return filled
 
 
 def purge_orphan_pdfs(keep: set[str], now: datetime | None = None) -> int:
