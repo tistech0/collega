@@ -1,6 +1,6 @@
 import { api } from '../api.js';
 import { go } from '../router.js';
-import { JOB_STATUS_LABEL, banner, block, empty, fmtDateTime, fmtEuro, fmtInt, h, icon, row, tag, toast } from '../ui.js';
+import { JOB_STATUS_LABEL, banner, block, empty, fmtDateTime, fmtEuro, fmtInt, h, icon, labelCells, row, tag, toast } from '../ui.js';
 
 const RUNNING = new Set(['pending', 'processing', 'ocr_complete']);
 // Événements qui marquent l'échec/l'arrêt d'un import (même liste que l'ancienne
@@ -69,9 +69,9 @@ export async function render(root, { id }) {
         block('Confiance OCR par item', null, d.items.length ? d.items.map((it) => row(h('span', {}, `Item ${it.item_number}`),
           tag(`${Math.round(it.ocr_confidence_score * 100)} %`, it.low_confidence ? 'warn' : 'ok'))) : empty('Aucun item.')),
         block('Détails techniques', null,
-          row(h('span', {}, 'Job'), h('span', { class: 'muted' }, d.job_id)),
-          row(h('span', {}, 'arq_job_id'), h('span', { class: 'muted' }, d.arq_job_id ?? '—')),
-          row(h('span', {}, 'PDF hash'), h('span', { class: 'muted' }, d.pdf_hash ?? '—')),
+          row(h('span', {}, 'Job'), h('span', { class: 'muted wrap' }, d.job_id)),
+          row(h('span', {}, 'arq_job_id'), h('span', { class: 'muted wrap' }, d.arq_job_id ?? '—')),
+          row(h('span', {}, 'PDF hash'), h('span', { class: 'muted wrap' }, d.pdf_hash ?? '—')),
           row(h('span', {}, 'Appels Claude'), fmtInt(d.claude_calls)),
           row(h('span', {}, 'Tokens'), `${fmtInt(d.input_tokens)} entrée / ${fmtInt(d.output_tokens)} sortie`),
           row(h('span', {}, 'Mis à jour le'), fmtDateTime(d.updated_at)))),
@@ -106,8 +106,8 @@ function segmentation(d, open = false) {
     ...sections.map((sct) => h('tr', {}, h('td', { class: 'muted' }, String(sct.label)), cell(sct.pages), cell('—'), cell('—'))),
     seg.blank_pages ? h('tr', {}, h('td', { class: 'muted' }, 'pages blanches'), cell(seg.blank_pages), cell('—'), cell('—')) : null,
   ];
-  return h('details', { class: 'block seg', open },
+  return h('details', { class: 'block seg-report', open },
     h('summary', {}, h('b', {}, `Découpage : ${items.length} items, ${sections.length} sections, ${warnings.length} avertissements`)),
-    h('table', { class: 'table' }, h('thead', {}, h('tr', {}, ...['Item / section', 'Pages', 'Rang', 'Objectifs A / B'].map((c) => h('th', {}, c)))), h('tbody', {}, ...rows)),
+    labelCells(h('table', { class: 'table' }, h('thead', {}, h('tr', {}, ...['Item / section', 'Pages', 'Rang', 'Objectifs A / B'].map((c) => h('th', {}, c)))), h('tbody', {}, ...rows))),
     warnings.length ? h('ul', { class: 'muted' }, ...warnings.map((w) => h('li', {}, String(w)))) : null);
 }

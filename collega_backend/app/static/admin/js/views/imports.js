@@ -1,6 +1,6 @@
 import { api } from '../api.js';
 import { go } from '../router.js';
-import { JOB_STATUS_LABEL, banner, empty, fmtInt, h, tag } from '../ui.js';
+import { JOB_STATUS_LABEL, banner, empty, fmtInt, h, labelCells, tag } from '../ui.js';
 
 const FILTERS = [['all', 'Tous'], ['running', 'En cours'], ['failed', 'En échec'], ['done', 'Terminés']];
 const RUNNING = new Set(['pending', 'processing', 'ocr_complete']);
@@ -42,7 +42,7 @@ export async function render(root) {
   function draw() {
     const rows = jobs.filter((j) => filter === 'all' || (filter === 'running' && RUNNING.has(j.status)) || (filter === 'failed' && j.status === 'failed') || (filter === 'done' && j.status === 'generation_complete'));
     if (!rows.length) { list.replaceChildren(empty('Aucun import dans ce filtre.')); return; }
-    list.replaceChildren(h('table', { class: 'table' },
+    list.replaceChildren(labelCells(h('table', { class: 'table' },
       h('thead', {}, h('tr', {}, ...['Collège', 'Testeuse', 'Statut', 'OCR', 'Fiches', 'Durée'].map((c) => h('th', {}, c)))),
       h('tbody', {}, ...rows.map((j) => {
         const c = names[j.college_id];
@@ -53,7 +53,7 @@ export async function render(root) {
           h('td', {}, j.college_total_pages ? `${j.college_ocr_page_progress}/${j.college_total_pages}` : '—'),
           h('td', {}, fmtInt(j.card_count)),
           h('td', {}, `${Math.round(j.elapsed_seconds / 60)} min`));
-      }))));
+      })))));
   }
 
   root.append(h('div', { class: 'page-head' }, h('div', {}, h('h1', {}, 'Imports'), h('div', { class: 'sub' }, '50 derniers imports, rafraîchis toutes les 5 secondes.'))),

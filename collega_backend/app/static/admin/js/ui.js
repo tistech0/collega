@@ -72,6 +72,16 @@ export function row(left, right, onClick) {
   return h('div', { class: `row${onClick ? ' link' : ''}`, onclick: onClick }, h('div', { class: 'left' }, left), right);
 }
 
+// Sur mobile, les lignes de tableau s'empilent : chaque cellule reprend l'intitulé
+// de sa colonne (data-label, affiché en CSS), sauf la première qui sert de titre.
+export function labelCells(table) {
+  const heads = [...table.querySelectorAll('thead th')].map((th) => th.textContent);
+  for (const tr of table.querySelectorAll('tbody tr')) {
+    [...tr.children].forEach((td, i) => { if (i > 0 && heads[i]) td.dataset.label = heads[i]; });
+  }
+  return table;
+}
+
 export function empty(text) {
   return h('div', { class: 'empty' }, text);
 }

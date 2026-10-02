@@ -35,7 +35,7 @@ h1 { font-size: 28px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
 .kpi .delta { font-size: 12px; font-weight: 600; margin-top: var(--s1); color: var(--ink3); }
 .kpi .delta.up { color: var(--accent); } .kpi .delta.down { color: var(--review-ink); }
 .block { padding: var(--s4) var(--s5); margin-bottom: var(--s3); }
-.block-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--s2); }
+.block-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s1) var(--s3); margin-bottom: var(--s2); }
 .block-head h2 { font-size: 16px; font-weight: 600; margin: 0; }
 .block-head .aside { color: var(--ink3); font-size: 13px; display: inline-flex; align-items: center; gap: var(--s1); }
 .row { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: 10px 0; border-top: 1px solid var(--line); }
@@ -44,6 +44,12 @@ h1 { font-size: 28px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
 .row .left { display: flex; align-items: center; gap: var(--s2); min-width: 0; }
 .row .left .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row .left .muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+/* Contenus à deux lignes (titre + détail) : autoriser l'ellipse. La valeur de droite
+   garde sa largeur, sauf `.wrap` (hash, identifiant) qui se coupe plutôt que déborder. */
+.row .left > div { min-width: 0; }
+.row > :last-child { flex-shrink: 0; }
+.row > .wrap:last-child { flex-shrink: 1; min-width: 0; overflow-wrap: anywhere; text-align: right; }
+.row:has(> .wrap) .left { flex-shrink: 0; }
 .muted { color: var(--ink3); }
 .empty { color: var(--ink3); padding: var(--s4) 0; text-align: center; }
 
@@ -62,6 +68,9 @@ h1 { font-size: 28px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
 .seg { display: inline-flex; background: var(--soft); border-radius: var(--r-pill); padding: 3px; }
 .seg button { border: 0; background: transparent; padding: 6px 14px; border-radius: var(--r-pill); color: var(--ink2); cursor: pointer; }
 .seg button.on { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.seg-report summary { cursor: pointer; }
+.seg-report .table { margin-top: var(--s3); }
+.seg-report ul { padding-left: var(--s5); overflow-wrap: anywhere; }
 .field { display: flex; flex-direction: column; gap: var(--s1); margin-bottom: var(--s4); }
 .field label { font-weight: 600; font-size: 13px; }
 .field .help { color: var(--ink3); font-size: 12.5px; }
@@ -73,7 +82,7 @@ h1 { font-size: 28px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
 
 table.table { width: 100%; border-collapse: collapse; }
 .table th { text-align: left; font-size: 12px; font-weight: 600; color: var(--ink3); padding: 8px 10px; border-bottom: 1px solid var(--line); }
-.table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: middle; overflow-wrap: anywhere; }
 .table tr.link { cursor: pointer; } .table tr.link:hover td { background: var(--ground); }
 
 .chart { position: relative; }
@@ -134,5 +143,10 @@ pre.invite { background: var(--ground); border: 1px solid var(--line); border-ra
   .table thead { display: none; }
   .table tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .table td { display: block; border: 0; padding: 2px 0; }
+  .table td:first-child { font-weight: 600; }
+  .table td:first-child .muted { font-weight: 400; }
+  .table td[data-label]::before { content: attr(data-label) " : "; color: var(--ink3); font-size: 12px; font-weight: 400; }
+  .seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .seg button { white-space: nowrap; flex-shrink: 0; }
   .timeline li { grid-template-columns: 1fr; }
 }

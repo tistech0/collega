@@ -1,6 +1,6 @@
 import { api } from '../api.js';
 import { go } from '../router.js';
-import { STATUS_LABEL, banner, copyText, displayName, empty, fmtAgo, fmtDate, h, icon, panel, tag } from '../ui.js';
+import { STATUS_LABEL, banner, copyText, displayName, empty, fmtAgo, fmtDate, h, icon, labelCells, panel, tag } from '../ui.js';
 
 const FILTERS = [['all', 'Toutes'], ['active', 'Actives'], ['inactive', 'Inactives'], ['never_seen', 'Jamais connectées']];
 
@@ -21,7 +21,7 @@ export async function render(root) {
   function draw() {
     const rows = pilot.testers.filter((t) => filter === 'all' || t.status === filter);
     if (!rows.length) { list.replaceChildren(empty('Aucune testeuse dans ce filtre.')); return; }
-    list.replaceChildren(h('table', { class: 'table' },
+    list.replaceChildren(labelCells(h('table', { class: 'table' },
       h('thead', {}, h('tr', {}, ...['Testeuse', 'Créée le', 'Dernière activité', 'Série', 'Fiches 7 j', 'Collèges'].map((c) => h('th', {}, c)))),
       h('tbody', {}, ...rows.map((t) => {
         const [label, tone] = STATUS_LABEL[t.status];
@@ -32,7 +32,7 @@ export async function render(root) {
           h('td', {}, t.streak ? `${t.streak} j` : '—'),
           h('td', {}, String(t.cards_7d)),
           h('td', {}, String(t.college_count)));
-      }))));
+      })))));
   }
 
   root.append(
