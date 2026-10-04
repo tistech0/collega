@@ -288,4 +288,68 @@ void main() {
       expect(adapter.callCount, 1);
     });
   });
+
+  group('ApiClient — retry après 401 d\'un envoi multipart', () {
+    test('POST FormData : 401 → refresh → rejeu avec le corps complet', () async {
+      final storage = _FakeSecureStorage(initial: {
+        'access_token': 'expired-access',
+        'refresh_token': 'old-refresh',
+      });
+      final mainAdapter = _ConsumingAdapter();
+      final refreshAdapter = _ScriptedAdapter([
+        {
+          'data': {'access_token': 'new-access', 'refresh_token': 'new-refresh'},
+        },
+      ]);
+      final client = ApiClient(
+        storage,
+        dio: _scriptedDio(mainAdapter),
+        refreshDio: _scriptedDio(refreshAdapter),
+      );
+      final formData = FormData.fromMap({
+        'pdf': MultipartFile.fromBytes(utf8.encode('%PDF-contenu'), filename: 'c.pdf'),
+      });
+
+      final response = await client.dio.post<Map<String, dynamic>>('/v1/colleges/24/import', data: formData);
+
+      expect(response.statusCode, 200);
+      expect(mainAdapter.authorizations, ['Bearer expired-access', 'Bearer new-access']);
+      expect(mainAdapter.bodies, hasLength(2));
+      expect(mainAdapter.bodies[1], contains('%PDF-contenu'));
+    });
+  });
+}
+
+/// Adapter qui consomme le corps comme le ferait le vrai client HTTP :
+/// 1er appel → 401, appels suivants → 200.
+class _ConsumingAdapter implements HttpClientAdapter {
+  final List<String> bodies = [];
+  final List<String?> authorizations = [];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<List<int>>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final bytes = <int>[];
+    if (requestStream != null) {
+      await for (final chunk in requestStream) {
+        bytes.addAll(chunk);
+      }
+    }
+    bodies.add(utf8.decode(bytes, allowMalformed: true));
+    authorizations.add(options.headers['Authorization'] as String?);
+    final status = bodies.length == 1 ? 401 : 200;
+    return ResponseBody.fromBytes(
+      utf8.encode(jsonEncode({'data': <String, dynamic>{}})),
+      status,
+      headers: {
+        Headers.contentTypeHeader: ['application/json'],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
 }

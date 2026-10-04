@@ -73,6 +73,9 @@ class ApiClient {
               final token = await _storage.read(key: _kAccessToken);
               final opts = error.requestOptions;
               opts.headers['Authorization'] = 'Bearer $token';
+              // Un FormData ne s'envoie qu'une fois : sans clone, le rejeu d'un
+              // import PDF échoue (« already been finalized ») → « erreur réseau ».
+              if (opts.data is FormData) opts.data = (opts.data as FormData).clone();
               try {
                 final response = await _dio.fetch(opts);
                 handler.resolve(response);
