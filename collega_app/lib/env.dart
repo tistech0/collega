@@ -4,7 +4,7 @@
 
 const String backendBaseUrl = 'https://collega.matthislesur.com';
 
-const String revenueCatApiKey = '0f4aaa288ed5cc241dee937ffacd8bdd6605680e9a4a87c4e9ae5ae30f6dbe3c';
+const String revenueCatApiKey = 'REPLACE_WITH_REVENUECAT_APPLE_API_KEY';
 
 // RevenueCat n'est configuré qu'avec une vraie clé iOS (`appl_…`). Sinon (beta
 // TestFlight sans abonnement) il reste inerte : aucun appel au SDK natif.
